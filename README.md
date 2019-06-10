@@ -1,6 +1,6 @@
 # OpenAPI extension for Visual Studio Code
 
-A [Visual Studio Code](https://code.visualstudio.com/) extension with rich support for the OpenAPI (aka Swagger) language (v2 and v3 in JSON format), including features such as IntelliSense, linting, schema enforcement, code navigation, definition links, snippets, and more!
+A [Visual Studio Code](https://code.visualstudio.com/) [extension](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) with rich support for the OpenAPI (aka Swagger) language (v2 and v3 in JSON format), including features such as IntelliSense, linting, schema enforcement, code navigation, definition links, snippets, and more!
 
 ## Quick Start
 
