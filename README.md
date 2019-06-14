@@ -26,6 +26,14 @@ As you start typing OpenAPI elements and their values, context-relevant options 
 
 ![Intellisense for OpenAPI editing](https://github.com/42Crunch/vscode-openapi/blob/master/images/Intellisense.gif?raw=true)
 
+## Go to definition
+
+* Ctrl-click a reference
+OR
+* Right-click a reference and click "Go to Definition" on the shortcut menu
+
+![Go to Definition](https://github.com/42Crunch/vscode-openapi/blob/master/images/Go%20to%20Definition.gif?raw=true)
+
 ## Create new OpenAPI files
 
 1.  Press Ctrl-Shift-P on Windows or Cmd-Shift-P on a Mac.   
