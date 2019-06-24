@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.7.1 (June 24, 2019)
+* Basic YAML support
+
 ## Version 1.6.6 (June 12, 2019)
 * Fixed ([#1](https://github.com/42Crunch/vscode-openapi/issues/1))
 
