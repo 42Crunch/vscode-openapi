@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.7.2 (June 26, 2019)
+* Go to Definition support in YAML
+
 ## Version 1.7.1 (June 24, 2019)
 * Basic YAML support
 
