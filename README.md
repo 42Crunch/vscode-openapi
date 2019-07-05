@@ -10,6 +10,14 @@ After installing the plugin, open any JSON or YAML file that contains an API def
 
 <img src="https://github.com/42Crunch/vscode-openapi/blob/master/images/OpenAPI%20Explorer.PNG?raw=true" width=400 height=389>
 
+## Create new OpenAPI files
+
+1. Press **Ctrl+Shift+P** on Windows or Linux, or **Cmd+Shift+P** on a Mac.   
+2. In the command prompt, start typing `new openapi`, and click the corresponding command to create either an OAS v2 or v3 template file.
+3. Use the OpenAPI explorer to populate the template with new paths and other elements as needed.
+
+![Create new OpenAPI file from a template](https://github.com/42Crunch/vscode-openapi/blob/master/images/New%20OpenAPI%20file.gif?raw=true)
+
 ## OpenAPI navigation
 1. Open an OpenAPI file.
 2. Click the OpenAPI button to switch to the OpenAPI explorer view.
@@ -34,14 +42,6 @@ As you start typing OpenAPI elements or their values, the context-sensitive list
 To jump to view the definition from a reference in your API, either **Ctrl+click** a reference, or right-click a reference and click **Go to Definition** in the shortcut menu.
 
 ![Go to definition](https://github.com/42Crunch/vscode-openapi/blob/master/images/Go%20to%20Definition.gif?raw=true)
-
-## Create new OpenAPI files
-
-1. Press **Ctrl+Shift+P** on Windows or Linux, or **Cmd+Shift+P** on a Mac.   
-2. In the command prompt, start typing `new openapi`, and click the corresponding command to create either an OAS v2 or v3 template file.
-3. Use the OpenAPI explorer to populate the template with new paths and other elements as needed.
-
-![Create new OpenAPI file from a template](https://github.com/42Crunch/vscode-openapi/blob/master/images/New%20OpenAPI%20file.gif?raw=true)
 
 ## Known issues
 
