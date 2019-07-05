@@ -34,7 +34,9 @@ After installing the plugin, open any JSON or YAML file that contains an API def
 
 ## IntelliSense
 
-As you start typing OpenAPI elements or their values, the context-sensitive list of available options is displayed in the IntelliSense menu. Just type double-quote (`"`) to show the menu, and type further to filter the list.
+As you start typing OpenAPI elements or their values, the context-sensitive list of available options is displayed in the IntelliSense menu. In JSON OpenAPI files, just type double-quote (`"`) to show the menu, and type further to filter the list. In YAML OpenAPI files, start typing the property name.
+
+You can also use the corresponding VS Code hotkey (**Ctrl+Space** on Windows, **Cmd+Space** on Mac) to forse-open the IntelliSense menu.
 
 ![IntelliSense for OpenAPI editing](https://github.com/42Crunch/vscode-openapi/blob/master/images/Intellisense.gif?raw=true)
 
