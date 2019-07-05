@@ -45,7 +45,6 @@ To jump to view the definition from a reference in your API, either **Ctrl+click
 
 ## Known issues
 
-- Commands have not yet been implemented for YAML files. When editing a YAML file, you cannot add new elements directly in the OpenAPI explorer, or go to the definition from a reference.
 - When you expand the sections and elements in the OpenAPI explorer, if the the left-hand panel gets very long, VS Code may push the last sections out of the UI. To view the sections that got pushed out, minimize the sections and elements you do not need. There is no scroll bar (yet) for the explorer section.
 
 ## Feedback

@@ -1,7 +1,10 @@
 # Changelog
 
+## Version 1.8.3 (July 5, 2019)
+* Implemented modifying YAML files with outline commands
+
 ## Version 1.7.2 (June 26, 2019)
-* Go to Definition support in YAML
+* Implemented Go to definition for $ref in YAML
 
 ## Version 1.7.1 (June 24, 2019)
 * Basic YAML support
