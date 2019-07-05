@@ -15,6 +15,7 @@ After installing the plugin, open any JSON or YAML file that contains an API def
 1. Press **Ctrl+Shift+P** on Windows or Linux, or **Cmd+Shift+P** on a Mac.   
 2. In the command prompt, start typing `new openapi`, and click the corresponding command to create either an OAS v2 or v3 template file.
 3. Use the OpenAPI explorer to populate the template with new paths and other elements as needed.
+4. Save the file to your disk to fully enable intellisense.
 
 ![Create new OpenAPI file from a template](https://github.com/42Crunch/vscode-openapi/blob/master/images/New%20OpenAPI%20file.gif?raw=true)
 
