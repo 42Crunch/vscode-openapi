@@ -52,4 +52,8 @@ To jump to view the definition from a reference in your API, either **Ctrl+click
 
 ## Feedback
 
-If you have any questions or feature requests, or you have issues using the plugin, submit your input to the [GitHub project Issues](https://github.com/42Crunch/vscode-openapi/issues).
+When you have a minute **PLEASE** submit your feedback and feature requests at [this superquick survey](https://www.surveymonkey.com/r/H3C8VC6).
+
+Submit your bug reports at [GitHub project Issues](https://github.com/42Crunch/vscode-openapi/issues).
+
+Add needless to say that your reviews at [VS Code marketplace](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi&ssr=false#review-details) mean the world to us.
