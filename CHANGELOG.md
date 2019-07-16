@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.8.6 (July 16, 2019)
+* Check values of "openapi"/"swagger" attributes before activating plugin and applying schemas, so that the extension does not get activated by opening non-OpenAPI files.
+
 ## Version 1.8.3 (July 5, 2019)
 * Implemented modifying YAML files with outline commands
 
