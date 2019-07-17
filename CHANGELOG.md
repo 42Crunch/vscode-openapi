@@ -4,7 +4,7 @@
 * Fix JSON schema to avoid picking up non-OpenAPI JSON files.
 
 ## Version 1.8.6 (July 16, 2019)
-* Check values of "openapi"/"swagger" attributes before activating plugin and applying schemas, so that the extension does not get activated by opening non-OpenAPI files.
+* Fixed ([#7](https://github.com/42Crunch/vscode-openapi/issues/7)): check values of "openapi"/"swagger" attributes before activating plugin and applying schemas, so that the extension does not get activated by opening non-OpenAPI files.
 
 ## Version 1.8.3 (July 5, 2019)
 * Implemented modifying YAML files with outline commands
