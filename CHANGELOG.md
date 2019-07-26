@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.8.8 (July 25, 2019)
+* Fixed ([#10](https://github.com/42Crunch/vscode-openapi/issues/10)): Go to Definition doesn't work on YAML flow style mapping
+
 ## Version 1.8.7 (July 16, 2019)
 * Fixed ([#9](https://github.com/42Crunch/vscode-openapi/issues/9)): JSON schema to avoid picking up non-OpenAPI JSON files.
 
