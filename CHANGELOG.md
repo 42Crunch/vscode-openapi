@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 1.8.10 (August 27, 2019)
+* Extension has been updated to require newer version of VS Code (1.37.1)
+* Fixed ([#11](https://github.com/42Crunch/vscode-openapi/issues/11)): Takes keybindings.json as OAS file
+* Fixed ([#13](https://github.com/42Crunch/vscode-openapi/issues/13)): External file $refs not supported by jump to definition
+
 ## Version 1.8.8 (July 25, 2019)
 * Fixed ([#10](https://github.com/42Crunch/vscode-openapi/issues/10)): Go to Definition doesn't work on YAML flow style mapping
 

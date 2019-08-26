@@ -48,7 +48,7 @@ To jump to view the definition from a reference in your API, either **Ctrl+click
 
 ## Known issues
 
-
+- Versions of 0.5.0 and 0.5.1 of RedHat YAML extension introduced a ![regression](https://github.com/redhat-developer/vscode-yaml/issues/216) which breaks autocompletion and schema checks for YAML files. Until this is resolved the workaround is to downgrade the YAML extension to 0.4.1. To do this, open the command palette (using `Ctrl+Shift+P` or `F1` depending on your OS), choose `Install Specific Version of Extension...` and choose the `YAML` extension version `0.4.1`.
 - For new files, IntelliSense does not work until you save the file. File extension needs to be .json or .yaml.
 - When you expand the sections and elements in the OpenAPI explorer, if the the left-hand panel gets very long, VS Code may push the last sections out of the UI. To view the sections that got pushed out, minimize the sections and elements you do not need. There is no scroll bar (yet) for the explorer section.
 
