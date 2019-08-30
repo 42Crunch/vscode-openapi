@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.8.11 (August 30, 2019)
+* Increase activity bar icon size
+* Remove warning for YAML 0.5.1 extension
+
 ## Version 1.8.10 (August 26, 2019)
 * Extension has been updated to require newer version of VS Code (1.37.1)
 * Fixed ([#11](https://github.com/42Crunch/vscode-openapi/issues/11)): Takes keybindings.json as OAS file
