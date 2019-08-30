@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.8.12 (August 30, 2019)
+* Relax OpenAPIv3 schema definition of $ref to workaround errorneous problem reported for $ref by YAML extension 0.5.2
+
 ## Version 1.8.11 (August 30, 2019)
 * Increase activity bar icon size
 * Remove warning for YAML 0.5.1 extension
