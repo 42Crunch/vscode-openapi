@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 1.8.13 (September 24, 2019)
+* Fixed ([#17](https://github.com/42Crunch/vscode-openapi/issues/17)): Provide workaround for validation of remaining relative URLs
+
 ## Version 1.8.12 (August 30, 2019)
 * Relax OpenAPIv3 schema definition of $ref to workaround errorneous problem reported for $ref by YAML extension 0.5.2
 
