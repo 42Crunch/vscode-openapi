@@ -57,4 +57,4 @@ When you have a minute **PLEASE** submit your feedback and feature requests at [
 
 Submit your bug reports at [GitHub project Issues](https://github.com/42Crunch/vscode-openapi/issues).
 
-Add needless to say that your reviews at [VS Code marketplace](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi&ssr=false#review-details) mean the world to us.
+And, needless to say, your reviews at [VS Code marketplace](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi&ssr=false#review-details) mean the world to us!
