@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 1.8.17 (October 33, 2019)
+## Version 1.8.17 (October 3, 2019)
 * Added integration with 42Crunch API Contract Security Audit
 
 ## Version 1.8.13 (September 24, 2019)
