@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.8.18 (October 8, 2019)
+* Fixed ([#18](https://github.com/42Crunch/vscode-openapi/issues/18)): Duplicate paths cause API viewer to go blank
+* Fixed ([#21](https://github.com/42Crunch/vscode-openapi/issues/21)): Support for splitted files definitions
+
 ## Version 1.8.17 (October 3, 2019)
 * Added integration with 42Crunch API Contract Security Audit
 
