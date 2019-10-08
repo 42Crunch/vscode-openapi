@@ -81,18 +81,18 @@ After the audit finishes, you get the audit report directly in the VS Code view,
 
 1. To scroll through all issues and their details, use the text panel on the right.
 
-![Perform REST API Security Audit](https://github.com/42Crunch/vscode-openapi-internal/blob/master/images/Perform%20REST%20API%20Security%20Audit.gif?raw=true)
+![Perform REST API Security Audit](https://github.com/42Crunch/vscode-openapi/blob/master/images/Perform%20REST%20API%20Security%20Audit.gif?raw=true)
 
 2. Hover on an element that is underlined or marked with three dots (recommendations) in your code to see what the issues in that spot are. If you click on view the descriptions of only these issues, the rest of details are filtered out from the text panel, so you have less to scroll through.
 
-![Details for specific issues](https://github.com/42Crunch/vscode-openapi-internal/blob/master/images/Details%20for%20specific%20issues.gif?raw=true)
+![Details for specific issues](https://github.com/42Crunch/vscode-openapi/blob/master/images/Details%20for%20specific%20issues.gif?raw=true)
 
 3. For a quick overall look, check the counts in the Status Bar. The different icons match the severity of the issue:
   - Error: critical or high 
   - Warning: medium
   - Info: low
   
-![List of API Sec Issues](https://github.com/42Crunch/vscode-openapi-internal/blob/master/images/List%20of%20API%20Sec%20Issues.gif?raw=true)
+![List of API Sec Issues](https://github.com/42Crunch/vscode-openapi/blob/master/images/List%20of%20API%20Sec%20Issues.gif?raw=true)
 
 4. Click the icons in the Status Bar to open the PROBLEMS panel and scroll through the issue titles. The issues are ordered from most to least severe, so it is easy for fix the worst offenders first. Note that recommendations are not listed in the PROBLEMS panel.
 5. Click on an issue in the PROBLEMS panel to jump to view it inline in your API definition.
