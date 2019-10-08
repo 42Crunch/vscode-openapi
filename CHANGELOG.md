@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 1.8.19 (October 8, 2019)
+* Fixed ([#22](https://github.com/42Crunch/vscode-openapi/issues/22)): API Viewer goes blank after git add
+* Fixed ([#6](https://github.com/42Crunch/vscode-openapi/issues/6)): API icon disappears on Color Theme change and zoom in/out
+
 ## Version 1.8.18 (October 8, 2019)
 * Fixed ([#18](https://github.com/42Crunch/vscode-openapi/issues/18)): Duplicate paths cause API viewer to go blank
 * Fixed ([#21](https://github.com/42Crunch/vscode-openapi/issues/21)): Support for splitted files definitions
