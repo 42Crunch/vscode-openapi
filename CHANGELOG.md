@@ -1,5 +1,10 @@
 # Changelog
 
+
+## Version 1.8.20 (October 23, 2019)
+* Fix issue with assessment report where some low priority issues were shown as a high priority ones
+* Reverse sort order for issues in assessment report
+
 ## Version 1.8.19 (October 8, 2019)
 * Fixed ([#22](https://github.com/42Crunch/vscode-openapi/issues/22)): API Viewer goes blank after git add
 * Fixed ([#6](https://github.com/42Crunch/vscode-openapi/issues/6)): API icon disappears on Color Theme change and zoom in/out
