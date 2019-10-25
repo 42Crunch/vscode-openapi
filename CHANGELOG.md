@@ -1,5 +1,7 @@
 # Changelog
 
+## Version 1.8.21 (October 25, 2019)
+* Remove 'OpenAPI file is invalid' message displayed in assessment report in case of structual errors in OpenAPI file
 
 ## Version 1.8.20 (October 23, 2019)
 * Fix issue with assessment report where some low priority issues were shown as a high priority ones
