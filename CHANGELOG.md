@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 2.0.1 (November 13, 2019)
+* Misc improvements for assessment report
+* Display responses and parameters in for operations
+* Do not blank contents of OpenAPI expolrer on syntax errors
+
 ## Version 1.8.21 (October 25, 2019)
 * Remove 'OpenAPI file is invalid' message displayed in assessment report in case of structual errors in OpenAPI file
 
