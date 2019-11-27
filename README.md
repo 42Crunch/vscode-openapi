@@ -1,4 +1,4 @@
-# OpenAPI extension for Visual Studio Code
+# OpenAPI extension for Visual Studio Code CLA TEST
 
 This [Visual Studio Code](https://code.visualstudio.com/) (VS Code) [extension](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) adds rich support for the [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification) (OAS) (formerly known as Swagger Specification) in JSON or YAML format. The features include, for example, IntelliSense, linting, schema enforcement, code navigation, definition links, snippets, static security analysis, and more! 
 
