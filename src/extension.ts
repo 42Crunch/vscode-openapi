@@ -111,6 +111,7 @@ async function onActiveEditorChanged(
     }
     didChangeEditor.fire([editor, version]);
   } else {
+    didChangeTree.fire([null, null]);
     didChangeEditor.fire([null, OpenApiVersion.Unknown]);
   }
 }
