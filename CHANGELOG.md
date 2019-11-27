@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 2.0.2 (November 27, 2019)
+* Display relevant assessment report (if assessment result is known for a file) when switching between editors
+* Alphabetically sort entries in OpenAPI Explorer (sorting can be disabled in Settings)
+* Fixed issue where OpenAPI Explorer will not update when switching to an invalid .json or .yaml file
+* Fixed ([#34](https://github.com/42Crunch/vscode-openapi/issues/34)): Go to definition wouldn't work for paths containging curly braces
+
 ## Version 2.0.1 (November 13, 2019)
 * Misc improvements for assessment report
 * Display responses and parameters in for operations
