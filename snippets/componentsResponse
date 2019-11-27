@@ -1,0 +1,9 @@
+	"${1:name}": {
+		"description": "${2}",
+		"content": {
+			"application/json": {
+				"schema": {
+				}
+			}
+		}
+	}

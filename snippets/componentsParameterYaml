@@ -1,0 +1,7 @@
+${1:name}:
+	name: ${1}
+	in: ${2|query,header,path,cookie|}
+	required: ${3|true,false|}
+	description: ${4}
+	schema:
+		type: ${5|string,number,integer,boolean,array|}

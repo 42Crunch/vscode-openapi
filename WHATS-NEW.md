@@ -1,0 +1,82 @@
+# What's new in VS Code OpenAPI extension version 2.0
+
+We have updated our OpenAPI extension to version 2.0. This is a major release with the Security Audit getting to where we wanted it to be for its initial scope and a few other improvements.
+
+- [API Security Audit](#api-security-audit)
+  * [Navigate the issues in the audit report](#navigate-the-issues-in-the-audit-report)
+  * [Jump to the line in the code](#jump-to-the-line-in-the-code)
+  * [Navigate back to full report](#navigate-back-to-full-report)
+  * [Submit feedback](#submit-feedback)
+- [Other improvements](#other-improvements)
+  * [API navigation extended to parameters and responses](#api-navigation-extended-to-parameters-and-responses)
+  * [API navigation no longer disappearing while API is being edited](#api-navigation-no-longer-disappearing-while-api-is-being-edited)
+
+## API Security Audit
+
+OpenAPI Security Audit is a static analysis of OpenAPI files. The service *does not* call the actual API endpoint. It simply looks at the OpenAPI file itself and checks if it is following industry security best practices.
+
+The checks that are run are derived from the [API Security Encyclopedia at APISecurity.io](https://apisecurity.io/encyclopedia/content/api-security-encyclopedia.htm).
+
+**To run Security Audit for the currently opened OpenAPI file:**
+- Click the **42c** button at the upper right of the OpenAPI file you are editing.
+
+![](images/Perform%20REST%20API%20Security%20Audit.gif)
+
+Note:
+- To run Security Audit from VS Code, you need a token. On the first time, you are asked to provide your email address. When you supply the address, the extension requests the token to be sent to your mailbox. Once you get the token, paste it in the prompt in VS Code, and you are all set. From now on, all you need to do is to click the button to run the audit.
+
+### Navigate the issues in the audit report
+
+After the audit finishes, you get the audit report directly in the VS Code view, side by side with your code. Depending on your API definition, the report might be long, so here are some handy ways to navigate the found issues.
+
+1. To scroll through all issues and their details, use the text panel on the right.
+
+![](images/Perform%20REST%20API%20Security%20Audit.gif)
+
+2. Hover on an element that is underlined or marked with three dots (recommendations) in your code to see what the issues in that spot are. If you click on view the descriptions of only these issues, the rest of details are filtered out from the text panel, so you have less to scroll through.
+
+![](images/Details%20for%20specific%20issues.gif)
+
+3. For a quick overall look, check the counts in the Status Bar. The different icons match the severity of the issue:
+  - Error: critical or high 
+  - Warning: medium
+  - Info: low
+
+![](images/List%20of%20API%20Sec%20Issues.gif)
+
+4. Click the icons in the Status Bar to open the PROBLEMS panel and scroll through the issue titles. The issues are ordered from most to least severe, so it is easy for fix the worst offenders first. Note that recommendations are not listed in the PROBLEMS panel.
+5. Click on an issue in the PROBLEMS panel to jump to view it inline in your API definition.
+
+### Jump to the line in the code
+
+We have added the ability to jump to the specific place in the API definition for each error. To do this, simply click the hyperlink in the report.
+
+![](images/Jump%20to%20line.gif)
+
+### Navigate back to full report
+
+When you are reading Security Audit information for a particular issue, you can now jump back to the full security audit report by clicking the **Go back to full report** link at the bottom of the article.
+
+![](images/Navigate%20back%20to%20full%20report.gif)
+
+### Submit feedback
+
+Security Audits can be tricky. If you believe that the static analysis misinterpreted your API definition, missed something, or provided a description or mitigation advice that can be improved, click the **Please submit your feedback for the security audit [here](https://github.com/42Crunch/vscode-openapi/issues)** link at the top of the full report and submit a GitHub ticket.
+
+## Other improvements
+
+### API navigation extended to parameters and responses
+
+API navigation tree used to only go 2 levels deep: to paths and operations. You can now go down two levels more: to specific parameters and responses.
+
+![](images/Parameters%20and%20responses.gif)
+
+### API navigation no longer disappearing while API is being edited
+
+As you edit OpenAPI files they temporarily become invalid from OpenAPI schema requirements perspective. In the past, this temporarily removed the API navigation tree entirely.
+
+We have now improved the usability and keep the current tree even when the schema is temporarily wrong. This means that you still see which elements your API has.
+
+![](images/Cached%20navigation.gif)
+
+Note: we still remove the ability to add new elements from the API navigation pane menu until your OpenAPI file becomes a proper JSON/YAML file again and we can build the live navigation model.

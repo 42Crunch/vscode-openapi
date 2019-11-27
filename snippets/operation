@@ -1,0 +1,9 @@
+	"${1|get,put,post,delete,options,head,patch|}": {
+		"description":"${2}",
+		"parameters": [],
+		"responses": {
+			"200": {
+				"description": "OK"
+			}
+		}
+	}

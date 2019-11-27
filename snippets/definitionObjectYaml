@@ -1,0 +1,5 @@
+${1:name}:
+	type: object
+	properties:
+		${2:property}:
+			type: ${3|integer,number,string,boolean|}

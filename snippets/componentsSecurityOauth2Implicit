@@ -1,0 +1,12 @@
+	"${1:name}": {
+		"type":"oauth2",
+		"flows": {
+			"implicit": {
+				"authorizationUrl": "${2:https://domain.test/api/oauth/dialog}",
+				"scopes": {
+					"read": "example read scope",
+					"write": "example write scope"
+				}
+			}
+		}
+	}

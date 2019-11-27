@@ -1,0 +1,4 @@
+${1:name}:
+	type: apiKey
+	name: ${2:api_key}
+	in: ${3|query,header|}

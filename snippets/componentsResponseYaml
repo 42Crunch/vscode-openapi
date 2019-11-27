@@ -1,0 +1,6 @@
+${1:name}:
+	description: ${2}
+	content:
+		application/json:
+			schema:
+				type: ${3|string,number,integer,boolean,array,object|}

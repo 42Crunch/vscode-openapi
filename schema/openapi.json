@@ -1,0 +1,17 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+  "dependencies": {
+    "swagger": {
+      "if": {
+         "properties": { "swagger": { "const": "2.0" } }
+      },
+      "then":  {"$ref": "openapi-schemas:openapi-2.0.json" }
+    },
+    "openapi": {
+      "if": {
+         "properties": { "openapi": { "pattern": "^3\\.0\\.\\d(-.+)?$" } }
+      },
+      "then":  {"$ref": "openapi-3.0-2019-04-02-relaxed-ref.json" }
+    }
+  }
+}
