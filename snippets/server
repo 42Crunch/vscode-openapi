@@ -1,0 +1,4 @@
+	{
+		"url":"${1:https://api.server.test/v1}",
+		"description":"${2:Server description}"
+	}

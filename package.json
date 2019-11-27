@@ -1,0 +1,400 @@
+{
+  "name": "vscode-openapi",
+  "author": "42Crunch",
+  "displayName": "OpenAPI (Swagger) Editor",
+  "description": "OpenAPI extension for Visual Studio Code",
+  "license": "AGPL-3.0-only",
+  "version": "2.0.2",
+  "publisher": "42Crunch",
+  "repository": "https://github.com/42Crunch/vscode-openapi",
+  "icon": "resources/icons/extension.png",
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Linters",
+    "Language Packs"
+  ],
+  "keywords": [
+    "openapi",
+    "swagger",
+    "json",
+    "yaml",
+    "api"
+  ],
+  "engines": {
+    "vscode": "^1.39.0"
+  },
+  "extensionDependencies": [
+    "redhat.vscode-yaml"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/extension",
+  "scripts": {
+    "vscode:prepublish": "npm run build-whatsnew && npm run build-snippets && npm run compile",
+    "build-snippets": "scripts/build-snippets.js",
+    "build-whatsnew": "scripts/build-whatsnew.js",
+    "test": "ava",
+    "compile": "tsc -b",
+    "watch": "tsc -b -w"
+  },
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "openapi-explorer",
+          "title": "OpenAPI",
+          "icon": "resources/icons/icon_api.svg"
+        }
+      ]
+    },
+    "views": {
+      "openapi-explorer": [
+        {
+          "id": "openapiTwoSpecOutline",
+          "name": "General",
+          "when": "openapiTwoEnabled"
+        },
+        {
+          "id": "openapiTwoPathOutline",
+          "name": "Paths",
+          "when": "openapiTwoEnabled"
+        },
+        {
+          "id": "openapiTwoParametersOutline",
+          "name": "Parameters",
+          "when": "openapiTwoEnabled"
+        },
+        {
+          "id": "openapiTwoResponsesOutline",
+          "name": "Responses",
+          "when": "openapiTwoEnabled"
+        },
+        {
+          "id": "openapiTwoDefinitionOutline",
+          "name": "Definitions",
+          "when": "openapiTwoEnabled"
+        },
+        {
+          "id": "openapiTwoSecurityOutline",
+          "name": "Security",
+          "when": "openapiTwoEnabled"
+        },
+        {
+          "id": "openapiTwoSecurityDefinitionOutline",
+          "name": "Security Definitions",
+          "when": "openapiTwoEnabled"
+        },
+        {
+          "id": "openapiThreeSpecOutline",
+          "name": "General",
+          "when": "openapiThreeEnabled"
+        },
+        {
+          "id": "openapiThreePathOutline",
+          "name": "Paths",
+          "when": "openapiThreeEnabled"
+        },
+        {
+          "id": "openapiThreeServersOutline",
+          "name": "Servers",
+          "when": "openapiThreeEnabled"
+        },
+        {
+          "id": "openapiThreeComponentsOutline",
+          "name": "Components",
+          "when": "openapiThreeEnabled"
+        },
+        {
+          "id": "openapiThreeSecurityOutline",
+          "name": "Security",
+          "when": "openapiThreeEnabled"
+        }
+      ]
+    },
+    "menus": {
+      "editor/title": [
+        {
+          "when": "openapiTwoEnabled || openapiThreeEnabled",
+          "command": "openapi.securityAudit",
+          "group": "navigation"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "openapi.addHost",
+          "when": "!openapiErrors && view == openapiTwoSpecOutline && openapiMissingHost"
+        },
+        {
+          "command": "openapi.addBasePath",
+          "when": "!openapiErrors && view == openapiTwoSpecOutline && openapiMissingBasePath"
+        },
+        {
+          "command": "openapi.addInfo",
+          "when": "!openapiErrors && view == openapiTwoSpecOutline && openapiMissingInfo"
+        },
+        {
+          "command": "openapi.addSecurity",
+          "when": "!openapiErrors && view == openapiTwoSecurityOutline"
+        },
+        {
+          "command": "openapi.addSecurity",
+          "when": "!openapiErrors && view == openapiThreeSecurityOutline"
+        },
+        {
+          "command": "openapi.addPath",
+          "when": "!openapiErrors && view == openapiTwoPathOutline"
+        },
+        {
+          "command": "openapi.addPath",
+          "when": "!openapiErrors && view == openapiThreePathOutline"
+        },
+        {
+          "command": "openapi.addParameterPath",
+          "when": "!openapiErrors && view == openapiTwoParametersOutline"
+        },
+        {
+          "command": "openapi.addParameterBody",
+          "when": "!openapiErrors && view == openapiTwoParametersOutline"
+        },
+        {
+          "command": "openapi.addParameterOther",
+          "when": "!openapiErrors && view == openapiTwoParametersOutline"
+        },
+        {
+          "command": "openapi.addResponse",
+          "when": "!openapiErrors && view == openapiTwoResponsesOutline"
+        },
+        {
+          "command": "openapi.addDefinitionObject",
+          "when": "!openapiErrors && view == openapiTwoDefinitionOutline"
+        },
+        {
+          "command": "openapi.addSecurityDefinitionBasic",
+          "when": "!openapiErrors && view == openapiTwoSecurityDefinitionOutline"
+        },
+        {
+          "command": "openapi.addSecurityDefinitionOauth2Implicit",
+          "when": "!openapiErrors && view == openapiTwoSecurityDefinitionOutline"
+        },
+        {
+          "command": "openapi.addSecurityDefinitionApiKey",
+          "when": "!openapiErrors && view == openapiTwoSecurityDefinitionOutline"
+        },
+        {
+          "command": "openapi.v3addInfo",
+          "when": "!openapiErrors && view == openapiThreeSpecOutline && openapiMissingInfo"
+        },
+        {
+          "command": "openapi.v3addServer",
+          "when": "!openapiErrors && view == openapiThreeServersOutline"
+        },
+        {
+          "command": "openapi.v3addComponentsParameter",
+          "when": "!openapiErrors && view == openapiThreeComponentsOutline"
+        },
+        {
+          "command": "openapi.v3addComponentsResponse",
+          "when": "!openapiErrors && view == openapiThreeComponentsOutline"
+        },
+        {
+          "command": "openapi.v3addComponentsSchema",
+          "when": "!openapiErrors && view == openapiThreeComponentsOutline"
+        },
+        {
+          "command": "openapi.v3addSecuritySchemeBasic",
+          "when": "!openapiErrors && view == openapiThreeComponentsOutline"
+        },
+        {
+          "command": "openapi.v3addSecuritySchemeApiKey",
+          "when": "!openapiErrors && view == openapiThreeComponentsOutline"
+        },
+        {
+          "command": "openapi.v3addSecuritySchemeJWT",
+          "when": "!openapiErrors && view == openapiThreeComponentsOutline"
+        },
+        {
+          "command": "openapi.v3addSecuritySchemeOauth2Implicit",
+          "when": "!openapiErrors && view == openapiThreeComponentsOutline"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "openapi.addOperation",
+          "group": "inline",
+          "when": "!openapiErrors && view == openapiTwoPathOutline && viewItem == path"
+        },
+        {
+          "command": "openapi.addOperation",
+          "group": "inline",
+          "when": "!openapiErrors && view == openapiThreePathOutline && viewItem == path"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "openapi.v3addServer",
+        "title": "OpenAPI: add server"
+      },
+      {
+        "command": "openapi.v3addComponentsParameter",
+        "title": "OpenAPI: add parameter"
+      },
+      {
+        "command": "openapi.v3addComponentsResponse",
+        "title": "OpenAPI: add response"
+      },
+      {
+        "command": "openapi.v3addComponentsSchema",
+        "title": "OpenAPI: add 'object' scheme"
+      },
+      {
+        "command": "openapi.v3addSecuritySchemeBasic",
+        "title": "OpenAPI: add security scheme 'basic'"
+      },
+      {
+        "command": "openapi.v3addSecuritySchemeApiKey",
+        "title": "OpenAPI: add security scheme 'API Key'"
+      },
+      {
+        "command": "openapi.v3addSecuritySchemeJWT",
+        "title": "OpenAPI: add security scheme 'JWT Bearer'"
+      },
+      {
+        "command": "openapi.v3addSecuritySchemeOauth2Implicit",
+        "title": "OpenAPI: add security scheme 'Oauth2 Implicit flow'"
+      },
+      {
+        "command": "openapi.securityAudit",
+        "title": "OpenAPI: perform security audit",
+        "icon": {
+          "light": "./resources/42crunch_icon.png",
+          "dark": "./resources/42crunch_icon.png"
+        }
+      },
+      {
+        "command": "openapi.addHost",
+        "title": "OpenAPI: add 'host' entry"
+      },
+      {
+        "command": "openapi.addBasePath",
+        "title": "OpenAPI: add 'basePath' entry"
+      },
+      {
+        "command": "openapi.addInfo",
+        "title": "OpenAPI: add 'info' entry"
+      },
+      {
+        "command": "openapi.v3addInfo",
+        "title": "OpenAPI: add 'info' entry"
+      },
+      {
+        "command": "openapi.addSecurityDefinitionBasic",
+        "title": "OpenAPI: add 'basic' auth entry"
+      },
+      {
+        "command": "openapi.addSecurityDefinitionOauth2Implicit",
+        "title": "OpenAPI: add 'oauth2' implicit flow entry"
+      },
+      {
+        "command": "openapi.addSecurityDefinitionApiKey",
+        "title": "OpenAPI: add 'apiKey' auth entry"
+      },
+      {
+        "command": "openapi.addDefinitionObject",
+        "title": "OpenAPI: add 'object' definition"
+      },
+      {
+        "command": "openapi.addParameterPath",
+        "title": "OpenAPI: add 'path' parameter"
+      },
+      {
+        "command": "openapi.addParameterBody",
+        "title": "OpenAPI: add 'body' parameter"
+      },
+      {
+        "command": "openapi.addParameterOther",
+        "title": "OpenAPI: add 'query', 'header' or 'formData' parameter"
+      },
+      {
+        "command": "openapi.addResponse",
+        "title": "OpenAPI: add response definition"
+      },
+      {
+        "command": "openapi.addPath",
+        "title": "OpenAPI: add new path"
+      },
+      {
+        "command": "openapi.addOperation",
+        "title": "OpenAPI: add operation",
+        "icon": {
+          "light": "resources/icons/icon_plus_black.svg",
+          "dark": "resources/icons/icon_plus_white.svg"
+        }
+      },
+      {
+        "command": "openapi.createNewTwo",
+        "title": "OpenAPI: Create new OpenAPI v2.0 file"
+      },
+      {
+        "command": "openapi.createNewThree",
+        "title": "OpenAPI: Create new OpenAPI v3.0 file"
+      },
+      {
+        "command": "openapi.createNewTwoYaml",
+        "title": "OpenAPI: Create new OpenAPI v2.0 file (YAML)"
+      },
+      {
+        "command": "openapi.createNewThreeYaml",
+        "title": "OpenAPI: Create new OpenAPI v3.0 file (YAML)"
+      },
+      {
+        "command": "openapi.addSecurity",
+        "title": "OpenAPI: add new security entry"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "OpenAPI",
+      "properties": {
+        "openapi.securityAuditToken": {
+          "scope": "workbench",
+          "type": "string",
+          "default": null,
+          "description": "Authentication token for Security Audit"
+        },
+        "openapi.sortOutlines": {
+          "scope": "workbench",
+          "type": "boolean",
+          "default": true,
+          "description": "Alphabetically sort contents of OpenAPI explorer outlines"
+        }
+      }
+    },
+    "jsonValidation": [
+      {
+        "fileMatch": "*.json",
+        "url": "./schema/openapi.json"
+      }
+    ]
+  },
+  "dependencies": {
+    "form-data": "^2.3.3",
+    "got": "^9.6.0",
+    "js-yaml": "^3.13.1",
+    "jsonc-parser": "^2.1.0",
+    "semver": "^6.3.0",
+    "yaml-ast-parser": "0.0.43"
+  },
+  "devDependencies": {
+    "@types/got": "^9.6.9",
+    "@types/node": "^8.0.0",
+    "@types/semver": "^6.2.0",
+    "@types/vscode": "1.39.0",
+    "ava": "^2.2.0",
+    "marked": "^0.7.0",
+    "tslint": "^5.18.0",
+    "typescript": "^3.7"
+  }
+}

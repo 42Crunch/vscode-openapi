@@ -1,0 +1,2 @@
+'${1:code}':
+	description: ${2}

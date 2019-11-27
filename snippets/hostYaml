@@ -1,0 +1,1 @@
+host: ${1:api.domain.test}

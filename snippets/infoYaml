@@ -1,0 +1,3 @@
+info:
+	title: ${1:API Title}
+	version: '${2:1.0}'

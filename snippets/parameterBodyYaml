@@ -1,0 +1,6 @@
+${1:name}:
+	name: ${1}
+	in: body
+	description: ${2}
+	schema:
+		${3}
