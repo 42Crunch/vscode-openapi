@@ -24,7 +24,7 @@ Both OAS v2 and v3 are supported.
 
 After installing the plugin, open any JSON or YAML file that contains an OpenAPI definition in VS Code. The plugin automatically detects that this is an OpenAPI file, and the OpenAPI button <img src="https://raw.githubusercontent.com/42Crunch/vscode-openapi/master/images/OpenAPI%20button.PNG" width=20 height=19> is shown in the left-hand panel.
 
-![OpenAPI Explorer](images/images/OpenAPI%20Explorer.PNG)
+![OpenAPI Explorer](images/OpenAPI%20Explorer.PNG)
 
 ## Use the extension while editing your API
 
