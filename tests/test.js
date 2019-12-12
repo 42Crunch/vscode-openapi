@@ -260,3 +260,29 @@ test('yaml top level list', t => {
   t.is(one.getValue(), '1');
   t.is(two.getValue(), '2');
 });
+
+test('json getNodeAtOffset()', t => {
+  const root = parseJson(`{"foo": [1,2], "bar": {"baz": true}}`);
+
+  t.is(root.findNodeAtOffset(1).getKey(), 'foo');
+  t.is(root.findNodeAtOffset(3).getKey(), 'foo');
+  t.is(root.findNodeAtOffset(9).getKey(), '0');
+  t.is(root.findNodeAtOffset(10).getKey(), 'foo');
+  t.is(root.findNodeAtOffset(11).getKey(), '1');
+  t.is(root.findNodeAtOffset(16).getKey(), 'bar');
+});
+
+test('yaml getNodeAtOffset()', t => {
+  const root = parseYaml(`
+foo:
+  - 1
+  - 2
+bar:
+  baz: true`);
+
+  t.is(root.findNodeAtOffset(1).getKey(), 'foo');
+  t.is(root.findNodeAtOffset(3).getKey(), 'foo');
+  t.is(root.findNodeAtOffset(10).getKey(), '0');
+  t.is(root.findNodeAtOffset(16).getKey(), '1');
+  t.is(root.findNodeAtOffset(20).getKey(), 'bar');
+});
