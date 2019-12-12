@@ -103,4 +103,12 @@ export class JsonNode implements Node {
     }
     return depth;
   }
+
+  findNodeAtOffset(offset: number) {
+    const node = json.findNodeAtOffset(this.node, offset);
+    if (node) {
+      return new JsonNode(node);
+    }
+    return null;
+  }
 }

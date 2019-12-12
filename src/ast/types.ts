@@ -17,4 +17,5 @@ export interface Node {
   getParent(): Node;
   find(pointer: string): Node;
   getRange(): [number, number];
+  findNodeAtOffset(offset: number): Node;
 }

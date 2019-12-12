@@ -88,7 +88,7 @@ export class YamlNode implements Node {
     return [this.node.startPosition, this.node.endPosition];
   }
 
-  getChildren(): Node[] {
+  getChildren(): YamlNode[] {
     const result = [];
     if (this.node.kind === yaml.Kind.MAPPING) {
       const value = this.node.value;
@@ -123,5 +123,18 @@ export class YamlNode implements Node {
       parent = parent.parent;
     }
     return depth;
+  }
+
+  findNodeAtOffset(offset: number): YamlNode {
+    if (offset >= this.node.startPosition && offset < this.node.endPosition) {
+      for (const child of this.getChildren()) {
+        const node = child.findNodeAtOffset(offset);
+        if (node) {
+          return node;
+        }
+      }
+      return this;
+    }
+    return null;
   }
 }
