@@ -4,12 +4,11 @@
 */
 
 import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
 import * as semver from 'semver';
-import { parse, Node } from './ast';
 import { Configuration } from './configuration';
 import { OpenApiVersion, extensionQualifiedId } from './constants';
+import { Node } from './ast';
+import { parseDocument, provideYamlSchemas } from './util';
 
 import {
   PathOutlineProvider,
@@ -25,57 +24,13 @@ import {
 } from './outline';
 
 import { JsonSchemaDefinitionProvider, YamlSchemaDefinitionProvider } from './reference';
+import { YamlCompletionItemProvider } from './completion';
 import { OpenapiSchemaContentProvider } from './schema';
 import { updateContext } from './context';
 import { registerCommands } from './commands';
 import { create as createWhatsNewPanel } from './whatsnew';
 
 import * as audit from './audit/activate';
-
-function getOpenApiVersion(root: Node): OpenApiVersion {
-  const swaggerVersionValue = root.find('/swagger') ? root.find('/swagger').getValue() : null;
-  const openApiVersionValue = root.find('/openapi') ? root.find('/openapi').getValue() : null;
-
-  if (swaggerVersionValue === '2.0') {
-    return OpenApiVersion.V2;
-  } else if (
-    openApiVersionValue &&
-    typeof openApiVersionValue === 'string' &&
-    openApiVersionValue.match(/^3\.0\.\d(-.+)?$/)
-  ) {
-    return OpenApiVersion.V3;
-  }
-
-  return OpenApiVersion.Unknown;
-}
-
-function parseDocument(document: vscode.TextDocument): [OpenApiVersion, Node, vscode.Diagnostic[]] {
-  const scheme = document.uri.scheme;
-  const languageId = document.languageId;
-  const supported = (scheme === 'file' || scheme === 'untitled') && (languageId === 'json' || languageId == 'yaml');
-  if (!supported) {
-    return [OpenApiVersion.Unknown, null, null];
-  }
-
-  const [node, errors] = parse(document.getText(), document.languageId);
-  if (errors.length > 0) {
-    const messages = errors.map(error => {
-      const position = document.positionAt(error.offset);
-      const line = document.lineAt(position);
-      return {
-        code: '',
-        severity: vscode.DiagnosticSeverity.Error,
-        message: error.message,
-        range: line.range,
-      };
-    });
-    return [OpenApiVersion.Unknown, null, messages];
-  }
-
-  const version = getOpenApiVersion(node);
-
-  return [version, node, null];
-}
 
 function updateVersionContext(version: OpenApiVersion) {
   if (version === OpenApiVersion.V2) {
@@ -93,6 +48,7 @@ function updateVersionContext(version: OpenApiVersion) {
 async function onActiveEditorChanged(
   editor: vscode.TextEditor,
   didChangeTree: vscode.EventEmitter<[Node, vscode.TextDocumentChangeEvent]>,
+  didChangeTreeIncludingErrors: vscode.EventEmitter<[Node, vscode.TextDocumentChangeEvent]>,
   didChangeEditor: vscode.EventEmitter<[vscode.TextEditor, OpenApiVersion]>,
   diagnostics: vscode.DiagnosticCollection,
 ): Promise<void> {
@@ -109,9 +65,11 @@ async function onActiveEditorChanged(
       vscode.commands.executeCommand('setContext', 'openapiErrors', false);
       didChangeTree.fire([node, null]);
     }
+    didChangeTreeIncludingErrors.fire([node, null]);
     didChangeEditor.fire([editor, version]);
   } else {
     didChangeTree.fire([null, null]);
+    didChangeTreeIncludingErrors.fire([null, null]);
     didChangeEditor.fire([null, OpenApiVersion.Unknown]);
   }
 }
@@ -119,12 +77,14 @@ async function onActiveEditorChanged(
 function onDocumentChanged(
   event: vscode.TextDocumentChangeEvent,
   didChangeTree: vscode.EventEmitter<[Node, vscode.TextDocumentChangeEvent]>,
+  didChangeTreeIncludingErrors: vscode.EventEmitter<[Node, vscode.TextDocumentChangeEvent]>,
   diagnostics: vscode.DiagnosticCollection,
 ): void {
   // check change events for the active editor only
   const activeEditor = vscode.window.activeTextEditor;
   if (activeEditor && activeEditor.document.uri.toString() === event.document.uri.toString()) {
     const [version, node, errors] = parseDocument(event.document);
+    didChangeTreeIncludingErrors.fire([node, event]);
     if (errors) {
       diagnostics.set(event.document.uri, errors);
       vscode.commands.executeCommand('setContext', 'openapiErrors', true);
@@ -139,44 +99,9 @@ function onDocumentChanged(
   }
 }
 
-async function provideYamlSchemas(context: vscode.ExtensionContext, yamlExtension: vscode.Extension<any>) {
-  if (!yamlExtension.isActive) {
-    await yamlExtension.activate();
-  }
-
-  function requestSchema(uri: string) {
-    for (const document of vscode.workspace.textDocuments) {
-      if (document.uri.toString() === uri) {
-        const [node] = parse(document.getText(), 'yaml');
-        const version = getOpenApiVersion(node);
-        if (version === OpenApiVersion.V2) {
-          return 'openapi:v2';
-        } else if (version === OpenApiVersion.V3) {
-          return 'openapi:v3';
-        }
-        break;
-      }
-    }
-    return null;
-  }
-
-  function requestSchemaContent(uri: string) {
-    if (uri === 'openapi:v2') {
-      const filename = path.join(context.extensionPath, 'schema', 'openapi-2.0.json');
-      return fs.readFileSync(filename, { encoding: 'utf8' });
-    } else if (uri === 'openapi:v3') {
-      const filename = path.join(context.extensionPath, 'schema', 'openapi-3.0-2019-04-02-relaxed-ref.json');
-      return fs.readFileSync(filename, { encoding: 'utf8' });
-    }
-    return null;
-  }
-
-  const schemaContributor = yamlExtension.exports;
-  schemaContributor.registerContributor('openapi', requestSchema, requestSchemaContent);
-}
-
 export function activate(context: vscode.ExtensionContext) {
-  const didChangeTree = new vscode.EventEmitter<[Node, vscode.TextDocumentChangeEvent]>();
+  const didChangeTreeValid = new vscode.EventEmitter<[Node, vscode.TextDocumentChangeEvent]>();
+  const didChangeTreeIncludingErrors = new vscode.EventEmitter<[Node, vscode.TextDocumentChangeEvent]>();
   const didChangeEditor = new vscode.EventEmitter<[vscode.TextEditor, OpenApiVersion]>();
   const versionProperty = 'openapiVersion';
   const openapiExtension = vscode.extensions.getExtension(extensionQualifiedId);
@@ -189,78 +114,88 @@ export function activate(context: vscode.ExtensionContext) {
   // OpenAPI v2 outlines
   vscode.window.registerTreeDataProvider(
     'openapiTwoSpecOutline',
-    new GeneralTwoOutlineProvider(context, didChangeTree.event),
+    new GeneralTwoOutlineProvider(context, didChangeTreeValid.event),
   );
 
   vscode.window.registerTreeDataProvider(
     'openapiTwoPathOutline',
-    new PathOutlineProvider(context, didChangeTree.event),
+    new PathOutlineProvider(context, didChangeTreeValid.event),
   );
 
   vscode.window.registerTreeDataProvider(
     'openapiTwoDefinitionOutline',
-    new DefinitionOutlineProvider(context, didChangeTree.event),
+    new DefinitionOutlineProvider(context, didChangeTreeValid.event),
   );
 
   vscode.window.registerTreeDataProvider(
     'openapiTwoSecurityOutline',
-    new SecurityOutlineProvider(context, didChangeTree.event),
+    new SecurityOutlineProvider(context, didChangeTreeValid.event),
   );
 
   vscode.window.registerTreeDataProvider(
     'openapiTwoSecurityDefinitionOutline',
-    new SecurityDefinitionOutlineProvider(context, didChangeTree.event),
+    new SecurityDefinitionOutlineProvider(context, didChangeTreeValid.event),
   );
 
   vscode.window.registerTreeDataProvider(
     'openapiTwoParametersOutline',
-    new ParametersOutlineProvider(context, didChangeTree.event),
+    new ParametersOutlineProvider(context, didChangeTreeValid.event),
   );
 
   vscode.window.registerTreeDataProvider(
     'openapiTwoResponsesOutline',
-    new ResponsesOutlineProvider(context, didChangeTree.event),
+    new ResponsesOutlineProvider(context, didChangeTreeValid.event),
   );
 
   // OpenAPI v3 outlines
   vscode.window.registerTreeDataProvider(
     'openapiThreePathOutline',
-    new PathOutlineProvider(context, didChangeTree.event),
+    new PathOutlineProvider(context, didChangeTreeValid.event),
   );
 
   vscode.window.registerTreeDataProvider(
     'openapiThreeSpecOutline',
-    new GeneralThreeOutlineProvider(context, didChangeTree.event),
+    new GeneralThreeOutlineProvider(context, didChangeTreeValid.event),
   );
 
   vscode.window.registerTreeDataProvider(
     'openapiThreeComponentsOutline',
-    new ComponentsOutlineProvider(context, didChangeTree.event),
+    new ComponentsOutlineProvider(context, didChangeTreeValid.event),
   );
 
   vscode.window.registerTreeDataProvider(
     'openapiThreeSecurityOutline',
-    new SecurityOutlineProvider(context, didChangeTree.event),
+    new SecurityOutlineProvider(context, didChangeTreeValid.event),
   );
 
   vscode.window.registerTreeDataProvider(
     'openapiThreeServersOutline',
-    new ServersOutlineProvider(context, didChangeTree.event),
+    new ServersOutlineProvider(context, didChangeTreeValid.event),
   );
 
   vscode.workspace.registerTextDocumentContentProvider('openapi-schemas', new OpenapiSchemaContentProvider(context));
 
-  updateContext(didChangeTree.event);
+  updateContext(didChangeTreeValid.event);
   registerCommands();
+
+  const jsonFile: vscode.DocumentSelector = { language: 'json', scheme: 'file' };
+  const jsonUnsaved: vscode.DocumentSelector = { language: 'json', scheme: 'untitled' };
+  const yamlFile: vscode.DocumentSelector = { language: 'yaml', scheme: 'file' };
+  const yamlUnsaved: vscode.DocumentSelector = { language: 'yaml', scheme: 'untitled' };
+
+  const yamlCompletionProvider = new YamlCompletionItemProvider(context, didChangeTreeIncludingErrors.event);
+
+  vscode.languages.registerCompletionItemProvider(yamlFile, yamlCompletionProvider, '"', "'");
+  vscode.languages.registerCompletionItemProvider(yamlUnsaved, yamlCompletionProvider, '"', "'");
 
   const jsonSchemaDefinitionProvider = new JsonSchemaDefinitionProvider();
   const yamlSchemaDefinitionProvider = new YamlSchemaDefinitionProvider();
 
-  vscode.languages.registerDefinitionProvider({ language: 'json', scheme: 'file' }, jsonSchemaDefinitionProvider);
-  vscode.languages.registerDefinitionProvider({ language: 'json', scheme: 'untitled' }, jsonSchemaDefinitionProvider);
+  vscode.languages.registerDefinitionProvider(jsonFile, jsonSchemaDefinitionProvider);
+  vscode.languages.registerDefinitionProvider(jsonUnsaved, jsonSchemaDefinitionProvider);
 
-  vscode.languages.registerDefinitionProvider({ language: 'yaml', scheme: 'file' }, yamlSchemaDefinitionProvider);
-  vscode.languages.registerDefinitionProvider({ language: 'yaml', scheme: 'untitled' }, yamlSchemaDefinitionProvider);
+  vscode.languages.registerDefinitionProvider(yamlFile, yamlSchemaDefinitionProvider);
+  vscode.languages.registerDefinitionProvider(yamlUnsaved, yamlSchemaDefinitionProvider);
 
   const diagnostics = vscode.languages.createDiagnosticCollection('openapi');
 
@@ -269,10 +204,20 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   // trigger refresh on activation
-  onActiveEditorChanged(vscode.window.activeTextEditor, didChangeTree, didChangeEditor, diagnostics);
+  onActiveEditorChanged(
+    vscode.window.activeTextEditor,
+    didChangeTreeValid,
+    didChangeTreeIncludingErrors,
+    didChangeEditor,
+    diagnostics,
+  );
 
-  vscode.window.onDidChangeActiveTextEditor(e => onActiveEditorChanged(e, didChangeTree, didChangeEditor, diagnostics));
-  vscode.workspace.onDidChangeTextDocument(e => onDocumentChanged(e, didChangeTree, diagnostics));
+  vscode.window.onDidChangeActiveTextEditor(e =>
+    onActiveEditorChanged(e, didChangeTreeValid, didChangeTreeIncludingErrors, didChangeEditor, diagnostics),
+  );
+  vscode.workspace.onDidChangeTextDocument(e =>
+    onDocumentChanged(e, didChangeTreeValid, didChangeTreeIncludingErrors, diagnostics),
+  );
 
   const yamlExtension = vscode.extensions.getExtension('redhat.vscode-yaml');
   provideYamlSchemas(context, yamlExtension);
