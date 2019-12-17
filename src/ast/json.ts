@@ -7,6 +7,17 @@ import * as json from 'jsonc-parser';
 import { Node, Kind } from './types';
 import { parseJsonPointer } from './pointer';
 
+export function parseJson(text: string): [JsonNode, any[]] {
+  const parseErrors = [];
+  const node = new JsonNode(json.parseTree(text, parseErrors));
+  const normalizedErrors = parseErrors.map(error => ({
+    message: json.printParseErrorCode(error.error),
+    offset: error.offset,
+  }));
+
+  return [node, normalizedErrors];
+}
+
 export class JsonNode implements Node {
   node: json.Node;
 

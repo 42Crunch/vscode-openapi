@@ -7,7 +7,7 @@ import test from 'ava';
 import { readFileSync } from 'fs';
 import * as yaml from 'yaml-ast-parser';
 import * as json from 'jsonc-parser';
-import { JsonNode, YamlNode, parseJsonPointer } from '../out/ast';
+import { JsonNode, YamlNode, parseJsonPointer, findYamlNodeAtOffset } from '../out/ast';
 
 function parseJson(text) {
   const jsonTree = json.parseTree(text);
@@ -261,28 +261,40 @@ test('yaml top level list', t => {
   t.is(two.getValue(), '2');
 });
 
-test('json getNodeAtOffset()', t => {
-  const root = parseJson(`{"foo": [1,2], "bar": {"baz": true}}`);
+test('yaml findNodeAtOffset() top level array', t => {
+  const text = '- a: b\n- c: d';
+  const root = parseYaml(text);
 
-  t.is(root.findNodeAtOffset(1).getKey(), 'foo');
-  t.is(root.findNodeAtOffset(3).getKey(), 'foo');
-  t.is(root.findNodeAtOffset(9).getKey(), '0');
-  t.is(root.findNodeAtOffset(10).getKey(), 'foo');
-  t.is(root.findNodeAtOffset(11).getKey(), '1');
-  t.is(root.findNodeAtOffset(16).getKey(), 'bar');
+  t.is(text.length, 13);
+  t.is(root.findNodeAtOffset(12).getKey(), 'c');
+  t.is(root.findNodeAtOffset(11).getKey(), 'c');
+  t.is(root.findNodeAtOffset(10).getKey(), 'c');
+  t.is(root.findNodeAtOffset(9).getKey(), 'c');
+  t.is(root.findNodeAtOffset(8).getKey(), undefined);
+  t.is(root.findNodeAtOffset(7).getKey(), undefined);
+  t.is(root.findNodeAtOffset(6).getKey(), undefined);
+  t.is(root.findNodeAtOffset(5).getKey(), 'a');
+  t.is(root.findNodeAtOffset(4).getKey(), 'a');
+  t.is(root.findNodeAtOffset(3).getKey(), 'a');
+  t.is(root.findNodeAtOffset(2).getKey(), 'a');
+  t.is(root.findNodeAtOffset(1).getKey(), undefined);
+  t.is(root.findNodeAtOffset(0).getKey(), undefined);
 });
 
-test('yaml getNodeAtOffset()', t => {
-  const root = parseYaml(`
-foo:
-  - 1
-  - 2
-bar:
-  baz: true`);
+test('yaml findNodeAtOffset() top level object', t => {
+  const text = 'a:\n - b: c';
+  const root = parseYaml(text);
 
-  t.is(root.findNodeAtOffset(1).getKey(), 'foo');
-  t.is(root.findNodeAtOffset(3).getKey(), 'foo');
-  t.is(root.findNodeAtOffset(10).getKey(), '0');
-  t.is(root.findNodeAtOffset(16).getKey(), '1');
-  t.is(root.findNodeAtOffset(20).getKey(), 'bar');
+  t.is(text.length, 10);
+  t.is(root.findNodeAtOffset(9).getKey(), 'b');
+  t.is(root.findNodeAtOffset(9).getValue(), 'c');
+  t.is(root.findNodeAtOffset(8).getKey(), 'b');
+  t.is(root.findNodeAtOffset(7).getKey(), 'b');
+  t.is(root.findNodeAtOffset(6).getKey(), 'b');
+  t.is(root.findNodeAtOffset(5).getKey(), 'a');
+  t.is(root.findNodeAtOffset(4).getKey(), 'a');
+  t.is(root.findNodeAtOffset(3).getKey(), 'a');
+  t.is(root.findNodeAtOffset(2).getKey(), 'a');
+  t.is(root.findNodeAtOffset(1).getKey(), 'a');
+  t.is(root.findNodeAtOffset(0).getKey(), 'a');
 });
