@@ -7,36 +7,16 @@ import * as yaml from 'yaml-ast-parser';
 import { Kind, Node } from './types';
 import { parseJsonPointer } from './pointer';
 
-export function findNodeAtLocation(root: yaml.YAMLNode, path: string[]): yaml.YAMLNode {
-  if (path.length === 0) {
-    return root;
-  }
+export function parseYaml(text: string): [YamlNode, any[]] {
+  const tree = yaml.load(text);
+  const node = new YamlNode(tree);
 
-  if (root && root.kind === yaml.Kind.MAP) {
-    const head = path[0];
-    const tree = <yaml.YamlMap>root;
-    for (const mapping of tree.mappings) {
-      if (mapping.key && mapping.key.kind === yaml.Kind.SCALAR && mapping.key.value === head) {
-        if (path.length === 1) {
-          // this is the last entry in path, return found node
-          return mapping;
-        } else {
-          return findNodeAtLocation(mapping.value, path.slice(1));
-        }
-      }
-    }
-  } else if (root && root.kind === yaml.Kind.SEQ) {
-    const tree = <yaml.YAMLSequence>root;
-    const index = parseInt(path[0] as string, 10);
-    const mapping = tree.items[index];
-    if (path.length === 1) {
-      // this is the last entry in path, return found node
-      return mapping;
-    } else {
-      return findNodeAtLocation(mapping, path.slice(1));
-    }
-  }
-  return null;
+  const normalizedErrors = tree.errors.map(error => ({
+    message: error.message,
+    offset: error.mark ? error.mark.position : 0,
+  }));
+
+  return [node, normalizedErrors];
 }
 
 export class YamlNode implements Node {
@@ -70,6 +50,8 @@ export class YamlNode implements Node {
     } else if (this.node.parent && this.node.parent.kind === yaml.Kind.SEQ) {
       const seq = <yaml.YAMLSequence>this.node.parent;
       return String(seq.items.indexOf(this.node));
+    } else if (this.node.parent && this.node.parent.kind === yaml.Kind.MAPPING) {
+      return this.node.parent.key.value;
     }
   }
 
@@ -80,6 +62,7 @@ export class YamlNode implements Node {
         return mapping.value.value;
       }
     } else if (this.node.kind === yaml.Kind.SCALAR) {
+      // fixme should not happen
       return (<yaml.YAMLScalar>this.node).value;
     }
   }
@@ -125,16 +108,86 @@ export class YamlNode implements Node {
     return depth;
   }
 
-  findNodeAtOffset(offset: number): YamlNode {
-    if (offset >= this.node.startPosition && offset < this.node.endPosition) {
-      for (const child of this.getChildren()) {
-        const node = child.findNodeAtOffset(offset);
-        if (node) {
-          return node;
+  findNodeAtOffset(offset: number): YamlNode | undefined {
+    const found = findYamlNodeAtOffset(this.node, offset);
+    if (found) {
+      if (found.kind === yaml.Kind.SCALAR) {
+        return new YamlNode(found.parent);
+      } else if (found.kind === yaml.Kind.MAPPING) {
+        return new YamlNode(found);
+      } else if (found.kind === yaml.Kind.SEQ) {
+        return new YamlNode(found);
+      }
+    }
+  }
+}
+
+function findNodeAtLocation(root: yaml.YAMLNode, path: string[]): yaml.YAMLNode {
+  if (path.length === 0) {
+    return root;
+  }
+
+  if (root && root.kind === yaml.Kind.MAP) {
+    const head = path[0];
+    const tree = <yaml.YamlMap>root;
+    for (const mapping of tree.mappings) {
+      if (mapping.key && mapping.key.kind === yaml.Kind.SCALAR && mapping.key.value === head) {
+        if (path.length === 1) {
+          // this is the last entry in path, return found node
+          return mapping;
+        } else {
+          return findNodeAtLocation(mapping.value, path.slice(1));
         }
       }
-      return this;
     }
-    return null;
+  } else if (root && root.kind === yaml.Kind.SEQ) {
+    const tree = <yaml.YAMLSequence>root;
+    const index = parseInt(path[0] as string, 10);
+    const mapping = tree.items[index];
+    if (path.length === 1) {
+      // this is the last entry in path, return found node
+      return mapping;
+    } else {
+      return findNodeAtLocation(mapping, path.slice(1));
+    }
   }
+  return null;
+}
+
+function contains(node: yaml.YAMLNode, offset: number) {
+  return offset >= node.startPosition && offset < node.endPosition;
+}
+
+export function findYamlNodeAtOffset(node: yaml.YAMLNode, offset: number): yaml.YAMLNode {
+  if (contains(node, offset)) {
+    if (node.kind === yaml.Kind.MAPPING) {
+      const yamlMapping = <yaml.YAMLMapping>node;
+      const found = findYamlNodeAtOffset(yamlMapping.key, offset);
+      if (found) {
+        return found;
+      }
+      const found2 = findYamlNodeAtOffset(yamlMapping.value, offset);
+      if (found2) {
+        return found2;
+      }
+    } else if (node.kind === yaml.Kind.MAP) {
+      const yamlMap = <yaml.YamlMap>node;
+      for (const mapping of yamlMap.mappings) {
+        const found = findYamlNodeAtOffset(mapping, offset);
+        if (found) {
+          return found;
+        }
+      }
+    } else if (node.kind === yaml.Kind.SEQ) {
+      const yamlSeq = <yaml.YAMLSequence>node;
+      for (const item of yamlSeq.items) {
+        const found = findYamlNodeAtOffset(item, offset);
+        if (found) {
+          return found;
+        }
+      }
+    }
+    return node;
+  }
+  return null;
 }
