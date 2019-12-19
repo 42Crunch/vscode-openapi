@@ -37,6 +37,8 @@ export function activate(
       if (audit && !audit.pending) {
         editor.setDecorations(decorationType, audit.decorationOptions);
         ReportWebView.updateIfVisible(audit.issues, audit.summary, uri);
+      } else {
+        ReportWebView.displayNoReport(context);
       }
     }
   });
