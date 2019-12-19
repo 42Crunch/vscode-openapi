@@ -107,7 +107,7 @@ function getNonce() {
 export class ReportWebView {
   public static currentPanel: ReportWebView | undefined;
 
-  private readonly _panel: vscode.WebviewPanel;
+  readonly _panel: vscode.WebviewPanel;
   private readonly _extensionPath: string;
   private _disposables: vscode.Disposable[] = [];
   private documentUri: any;
@@ -131,6 +131,30 @@ export class ReportWebView {
     }
   }
 
+  public static displayNoReport(context: vscode.ExtensionContext) {
+    if (ReportWebView.currentPanel && ReportWebView.currentPanel._panel.visible) {
+      const webview = ReportWebView.currentPanel._panel.webview;
+
+      const image = webview.asWebviewUri(
+        vscode.Uri.file(path.join(context.extensionPath, 'resources', '42crunch_icon.png')),
+      );
+
+      webview.html = `<!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; style-src 'unsafe-inline';">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>API Contract Security Audit Report</title>
+  </head>
+  <body>
+    <h1>No security audit report available for this file</h1>
+    <p>Please click <img src="${image}" style="width: 16px; height: 16px;"/>  button to run OpenAPI Security Audit</p>
+  </body>
+  </html>`;
+    }
+  }
+
   private constructor(extensionPath: string, issues: any, summary: any, documentUri: string) {
     this._extensionPath = extensionPath;
 
@@ -145,7 +169,10 @@ export class ReportWebView {
         // Enable javascript in the webview
         enableScripts: true,
         // And restrict the webview to only loading content from our extension's `media` directory.
-        localResourceRoots: [vscode.Uri.file(path.join(extensionPath, 'webview'))],
+        localResourceRoots: [
+          vscode.Uri.file(path.join(extensionPath, 'webview')),
+          vscode.Uri.file(path.join(extensionPath, 'resources')),
+        ],
       },
     );
 
