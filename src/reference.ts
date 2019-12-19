@@ -20,30 +20,40 @@ function refToUri(ref: string, currentDocumentUri: vscode.Uri): vscode.Uri {
     return vscode.Uri.parse(ref, true);
   } catch {
     // assume a local file reference
-    const [filename] = ref.split('#', 2);
     const currentDir = path.dirname(currentDocumentUri.fsPath);
-    return vscode.Uri.file(path.join(currentDir, filename));
+    if (ref.includes('#')) {
+      const [filename] = ref.split('#', 2);
+      return vscode.Uri.file(path.join(currentDir, filename));
+    } else {
+      return vscode.Uri.file(path.join(currentDir, ref));
+    }
   }
 }
 
-async function refToLocation(ref: string, currentDocumentUri: vscode.Uri): Promise<vscode.Location> {
-  const [, pointer] = ref.split('#', 2);
-  const refUri = refToUri(ref, currentDocumentUri);
-  const refDocument = await vscode.workspace.openTextDocument(refUri);
-  const [root, errors] = parse(refDocument.getText(), refDocument.languageId);
+async function refToLocation(ref: string, currentDocumentUri: vscode.Uri): Promise<vscode.Location> | undefined {
+  if (ref.includes('#')) {
+    // reference to a file and an JSON pointer
+    const [, pointer] = ref.split('#', 2);
+    const refUri = refToUri(ref, currentDocumentUri);
+    const refDocument = await vscode.workspace.openTextDocument(refUri);
+    const [root, errors] = parse(refDocument.getText(), refDocument.languageId);
 
-  if (errors.length === 0) {
-    const target = root.find(pointer);
-    if (target) {
-      const [start, end] = target.getRange();
-      return new vscode.Location(
-        refDocument.uri,
-        new vscode.Range(refDocument.positionAt(start), refDocument.positionAt(end)),
-      );
+    if (errors.length === 0) {
+      const target = root.find(pointer);
+      if (target) {
+        const [start, end] = target.getRange();
+        return new vscode.Location(
+          refDocument.uri,
+          new vscode.Range(refDocument.positionAt(start), refDocument.positionAt(end)),
+        );
+      }
     }
+  } else {
+    // the entire file is referenced
+    const refUri = refToUri(ref, currentDocumentUri);
+    const refDocument = await vscode.workspace.openTextDocument(refUri);
+    return new vscode.Location(refDocument.uri, new vscode.Range(0, 0, 0, 0));
   }
-
-  return null;
 }
 
 export class JsonSchemaDefinitionProvider implements vscode.DefinitionProvider {
