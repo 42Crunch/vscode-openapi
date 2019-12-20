@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 2.1.0 (December 20, 2019)
+* Provide autocompletion for $ref's in YAML files.
+* Fix issue where Go To Definition would not work, if the reference is made to the entire file (i.e., without '#' in ref)
+* Display 'no assessment report' in the assessment report pane if the currently active editor has no report available
+
 ## Version 2.0.2 (November 27, 2019)
 * Display relevant assessment report (if assessment result is known for a file) when switching between editors
 * Alphabetically sort entries in OpenAPI Explorer (sorting can be disabled in Settings)
