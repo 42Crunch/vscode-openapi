@@ -118,7 +118,7 @@ async function securityAudit(context, textEditor: vscode.TextEditor, auditContex
           );
         } else if (e.statusCode && e.statusCode === 403) {
           vscode.window.showErrorMessage(
-            'Authentication failed. Please check if you have correct token in Settings > Extensions > OpenAPI. If necessary, remove existing token and request an new one.',
+            'Authentication failed. Please paste the token that you received in email to Preferences > Settings > Extensions > OpenAPI > Security Audit Token. If you want to receive a new token instead, clear that setting altogether and initiate a new security audit for one of your OpenAPI files.',
           );
         } else {
           vscode.window.showErrorMessage('Unexpected error when trying to audit API: ' + e);
