@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import { parse, Node, JsonNode, YamlNode } from './ast';
+import { parserOptions } from './parser-options';
 import * as snippets from './snippets.json';
 
 const commands = {
@@ -424,7 +425,7 @@ function findComponentsInsertionPosition(root: Node, element: string) {
 }
 
 function safeParse(text: string, languageId: string): Node {
-  const [root, errors] = parse(text, languageId);
+  const [root, errors] = parse(text, languageId, parserOptions);
   if (errors.length) {
     throw new Error("Can't parse OpenAPI file");
   }

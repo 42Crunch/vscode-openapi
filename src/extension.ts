@@ -5,10 +5,11 @@
 
 import * as vscode from 'vscode';
 import * as semver from 'semver';
-import { Configuration } from './configuration';
+import { configuration, Configuration } from './configuration';
 import { OpenApiVersion, extensionQualifiedId } from './constants';
 import { Node } from './ast';
 import { parseDocument, provideYamlSchemas } from './util';
+import { parserOptions } from './parser-options';
 
 import {
   PathOutlineProvider,
@@ -110,6 +111,7 @@ export function activate(context: vscode.ExtensionContext) {
     ? semver.parse(context.globalState.get<string>(versionProperty))
     : semver.parse('0.0.1');
   context.globalState.update(versionProperty, currentVersion.toString());
+  parserOptions.configure(new Configuration('yaml'));
 
   // OpenAPI v2 outlines
   vscode.window.registerTreeDataProvider(
@@ -215,6 +217,7 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.window.onDidChangeActiveTextEditor(e =>
     onActiveEditorChanged(e, didChangeTreeValid, didChangeTreeIncludingErrors, didChangeEditor, diagnostics),
   );
+
   vscode.workspace.onDidChangeTextDocument(e =>
     onDocumentChanged(e, didChangeTreeValid, didChangeTreeIncludingErrors, diagnostics),
   );
@@ -228,7 +231,7 @@ export function activate(context: vscode.ExtensionContext) {
     createWhatsNewPanel(context);
   }
 
-  Configuration.configure(context);
+  configuration.configure(context);
 }
 
 export function deactivate(): Thenable<void> | undefined {

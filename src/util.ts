@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { OpenApiVersion } from './constants';
 import { parse, Node } from './ast';
+import { parserOptions } from './parser-options';
 
 export function parseDocument(document: vscode.TextDocument): [OpenApiVersion, Node, vscode.Diagnostic[]] {
   const scheme = document.uri.scheme;
@@ -12,7 +13,7 @@ export function parseDocument(document: vscode.TextDocument): [OpenApiVersion, N
     return [OpenApiVersion.Unknown, null, null];
   }
 
-  const [node, errors] = parse(document.getText(), document.languageId);
+  const [node, errors] = parse(document.getText(), document.languageId, parserOptions);
   const version = getOpenApiVersion(node);
   const messages = errors.map(error => {
     const position = document.positionAt(error.offset);
@@ -53,7 +54,7 @@ export async function provideYamlSchemas(context: vscode.ExtensionContext, yamlE
   function requestSchema(uri: string) {
     for (const document of vscode.workspace.textDocuments) {
       if (document.uri.toString() === uri) {
-        const [node] = parse(document.getText(), 'yaml');
+        const [node] = parse(document.getText(), 'yaml', parserOptions);
         const version = getOpenApiVersion(node);
         if (version === OpenApiVersion.V2) {
           return 'openapi:v2';

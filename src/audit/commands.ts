@@ -9,8 +9,10 @@ import { audit, requestToken } from './client';
 import { decorationType, createDecoration } from './decoration';
 import { ReportWebView } from './report';
 import { DiagnosticCollection, TextDocument } from 'vscode';
+import { parserOptions } from '../parser-options';
 
 import { parseJson, parseYaml } from '../ast';
+
 import * as yaml from 'js-yaml';
 
 export function registerSecurityAudit(context, auditContext, diagnostics: DiagnosticCollection) {
@@ -171,13 +173,16 @@ async function auditJson(document: TextDocument, apiToken, progress, cancellatio
 
 async function auditYaml(document: TextDocument, apiToken, progress, cancellationToken) {
   const text = document.getText();
+  const {
+    yaml: { schema },
+  } = parserOptions.get();
 
-  const [root, errors] = parseYaml(text);
+  const [root, errors] = parseYaml(text, schema);
   if (errors.length > 0) {
     throw new Error('Unable to parse YAML');
   }
 
-  const parsed = yaml.safeLoad(text);
+  const parsed = yaml.safeLoad(text, { schema });
   const [summary, issues] = await audit(JSON.stringify(parsed), apiToken.trim(), progress, cancellationToken);
 
   const openApiMarkerNode = root.find('/openapi');
