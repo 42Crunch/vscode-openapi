@@ -8,6 +8,7 @@ import * as vscode from 'vscode';
 import * as json from 'jsonc-parser';
 import * as yaml from 'js-yaml';
 import { parse } from './ast';
+import { parserOptions } from './parser-options';
 
 function refToUri(ref: string, currentDocumentUri: vscode.Uri): vscode.Uri {
   if (ref.startsWith('#')) {
@@ -36,7 +37,7 @@ async function refToLocation(ref: string, currentDocumentUri: vscode.Uri): Promi
     const [, pointer] = ref.split('#', 2);
     const refUri = refToUri(ref, currentDocumentUri);
     const refDocument = await vscode.workspace.openTextDocument(refUri);
-    const [root, errors] = parse(refDocument.getText(), refDocument.languageId);
+    const [root, errors] = parse(refDocument.getText(), refDocument.languageId, parserOptions);
 
     if (errors.length === 0) {
       const target = root.find(pointer);

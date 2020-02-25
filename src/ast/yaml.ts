@@ -3,12 +3,16 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import * as yaml from 'yaml-ast-parser';
+import * as yaml from 'yaml-ast-parser-custom-tags';
+import { Schema } from 'js-yaml';
 import { Kind, Node } from './types';
 import { parseJsonPointer } from './pointer';
 
-export function parseYaml(text: string): [YamlNode, any[]] {
-  const tree = yaml.load(text);
+export function parseYaml(text: string, schema: Schema): [YamlNode, any[]] {
+  const tree = yaml.load(text, {
+    schema,
+  });
+
   const node = new YamlNode(tree);
 
   const normalizedErrors = tree.errors.map(error => ({
