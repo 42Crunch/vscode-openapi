@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 2.1.1 (Feburary 27, 2020)
+## Version 2.1.1 (February 27, 2020)
 * Fixed ([#41](https://github.com/42Crunch/vscode-openapi/issues/41)): Honor 'yaml.customTags' setting
 
 ## Version 2.1.0 (December 20, 2019)
