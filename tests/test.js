@@ -5,9 +5,9 @@
 
 import test from 'ava';
 import { readFileSync } from 'fs';
-import * as yaml from 'yaml-ast-parser';
+import * as yaml from 'yaml-ast-parser-custom-tags';
 import * as json from 'jsonc-parser';
-import { JsonNode, YamlNode, parseJsonPointer, findYamlNodeAtOffset } from '../out/ast';
+import { JsonNode, YamlNode, findYamlNodeAtOffset } from '../out/ast';
 
 function parseJson(text) {
   const jsonTree = json.parseTree(text);

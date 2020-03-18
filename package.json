@@ -378,6 +378,14 @@
       }
     ]
   },
+  "ava": {
+    "nodeArguments": [
+      "--experimental-modules"
+    ],
+    "require": [
+      "esm"
+    ]
+  },
   "dependencies": {
     "form-data": "^2.3.3",
     "got": "^9.6.0",
@@ -391,9 +399,9 @@
     "@types/node": "^8.0.0",
     "@types/semver": "^6.2.0",
     "@types/vscode": "1.39.0",
-    "ava": "^2.2.0",
+    "ava": "^3.5.0",
+    "esm": "^3.2.25",
     "marked": "^0.7.0",
-    "tslint": "^5.18.0",
-    "typescript": "^3.7"
+    "typescript": "^3.8"
   }
 }
