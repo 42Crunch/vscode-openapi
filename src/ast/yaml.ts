@@ -9,13 +9,22 @@ import { Kind, Node } from './types';
 import { parseJsonPointer } from './pointer';
 
 export function parseYaml(text: string, schema: Schema): [YamlNode, any[]] {
-  const tree = yaml.load(text, {
-    schema,
-  });
+  const documents = [];
+  yaml.loadAll(
+    text,
+    document => {
+      documents.push(document);
+    },
+    { schema },
+  );
 
-  const node = new YamlNode(tree);
+  if (documents.length !== 1) {
+    return [null, []];
+  }
 
-  const normalizedErrors = tree.errors.map(error => ({
+  const node = new YamlNode(documents[0]);
+
+  const normalizedErrors = documents[0].errors.map(error => ({
     message: error.message,
     offset: error.mark ? error.mark.position : 0,
   }));
