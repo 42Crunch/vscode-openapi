@@ -110,8 +110,9 @@ export function activate(context: vscode.ExtensionContext) {
   const previousVersion = context.globalState.get<string>(versionProperty)
     ? semver.parse(context.globalState.get<string>(versionProperty))
     : semver.parse('0.0.1');
+  const yamlConfiguration = new Configuration('yaml');
   context.globalState.update(versionProperty, currentVersion.toString());
-  parserOptions.configure(new Configuration('yaml'));
+  parserOptions.configure(yamlConfiguration);
 
   // OpenAPI v2 outlines
   vscode.window.registerTreeDataProvider(
@@ -232,6 +233,7 @@ export function activate(context: vscode.ExtensionContext) {
   }
 
   configuration.configure(context);
+  yamlConfiguration.configure(context);
 }
 
 export function deactivate(): Thenable<void> | undefined {
