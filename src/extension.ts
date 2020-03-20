@@ -26,7 +26,6 @@ import {
 
 import { JsonSchemaDefinitionProvider, YamlSchemaDefinitionProvider } from './reference';
 import { YamlCompletionItemProvider } from './completion';
-import { OpenapiSchemaContentProvider } from './schema';
 import { updateContext } from './context';
 import { registerCommands } from './commands';
 import { create as createWhatsNewPanel } from './whatsnew';
@@ -175,8 +174,6 @@ export function activate(context: vscode.ExtensionContext) {
     'openapiThreeServersOutline',
     new ServersOutlineProvider(context, didChangeTreeValid.event),
   );
-
-  vscode.workspace.registerTextDocumentContentProvider('openapi-schemas', new OpenapiSchemaContentProvider(context));
 
   updateContext(didChangeTreeValid.event);
   registerCommands();
