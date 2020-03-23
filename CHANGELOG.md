@@ -1,6 +1,6 @@
 # Changelog
 
-## Version
+## Version 2.1.2 (March 23, 2020)
 * Fixed ([#46](https://github.com/42Crunch/vscode-openapi/issues/46)): Bug: Problems loading reference 'openapi-schemas:openapi-2.0.json'
 * Fixed ([#45](https://github.com/42Crunch/vscode-openapi/issues/45)): "JS-YAML: expected a single document in the stream, but found more" on non-OpenAPI YAML files
 * Fixed ([#38](https://github.com/42Crunch/vscode-openapi/issues/38)): Remove category "Language Packs" from extension package.json
