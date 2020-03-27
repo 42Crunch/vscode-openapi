@@ -2,47 +2,65 @@
  Copyright (c) 42Crunch Ltd. All rights reserved.
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
-
+import { basename } from 'path';
 import * as vscode from 'vscode';
 
 import { audit, requestToken } from './client';
-import { decorationType, createDecoration } from './decoration';
+import { decorationType, createDecorations } from './decoration';
 import { ReportWebView } from './report';
 import { DiagnosticCollection, TextDocument } from 'vscode';
 import { parserOptions } from '../parser-options';
+import { bundle, findMapping } from './bundler';
+import { parse, Node } from '../ast';
+import { AuditContext, Audit, Grades } from './types';
 
-import { parseJson, parseYaml } from '../ast';
+export function registerSecurityAudit(context, auditContext: AuditContext, pendingAudits, dirtyDocuments) {
+  return vscode.commands.registerTextEditorCommand('openapi.securityAudit', async (textEditor, edit) => {
+    const uri = textEditor.document.uri.toString();
 
-import * as yaml from 'js-yaml';
+    if (pendingAudits[uri]) {
+      vscode.window.showErrorMessage(`Audit for "${uri}" is already in progress`);
+      return;
+    }
 
-export function registerSecurityAudit(context, auditContext, diagnostics: DiagnosticCollection) {
-  return vscode.commands.registerTextEditorCommand('openapi.securityAudit', (textEditor, edit) =>
-    securityAudit(context, textEditor, auditContext, diagnostics),
-  );
+    const existingAudit = auditContext[uri];
+    if (existingAudit) {
+      existingAudit.diagnostics.dispose();
+    }
+    delete auditContext[uri];
+    pendingAudits[uri] = true;
+
+    try {
+      auditContext[uri] = await securityAudit(context, textEditor, dirtyDocuments);
+      delete pendingAudits[uri];
+    } catch (e) {
+      delete pendingAudits[uri];
+      vscode.window.showErrorMessage(`Failed to audit: ${e}`);
+    }
+  });
 }
 
 export function registerFocusSecurityAudit(context, auditContext) {
   return vscode.commands.registerCommand('openapi.focusSecurityAudit', documentUri => {
-    const report = auditContext[documentUri];
-    if (report) {
-      ReportWebView.createOrShow(context.extensionPath, report.issues, report.summary, documentUri);
+    const audit = auditContext[documentUri];
+    if (audit) {
+      ReportWebView.show(context.extensiontPath, audit);
     }
   });
 }
 
 export function registerFocusSecurityAuditById(context, auditContext) {
-  return vscode.commands.registerTextEditorCommand('openapi.focusSecurityAuditById', (textEditor, edit, ...ids) => {
+  return vscode.commands.registerTextEditorCommand('openapi.focusSecurityAuditById', (textEditor, edit, params) => {
     const documentUri = textEditor.document.uri.toString();
-    if (auditContext[documentUri]) {
-      const issues = ids.map(id => auditContext[documentUri].issues[id]);
-      ReportWebView.createOrShow(context.extensionPath, issues, null, documentUri);
+    const uri = Buffer.from(params.uri, 'base64').toString('utf8');
+    const audit = auditContext[uri];
+    if (audit && audit.issues[documentUri]) {
+      ReportWebView.showIds(context.extensionPath, audit, documentUri, params.ids);
     }
   });
 }
 
-async function securityAudit(context, textEditor: vscode.TextEditor, auditContext, diagnostics: DiagnosticCollection) {
-  let text = textEditor.document.getText();
-  const documentUri = textEditor.document.uri.toString();
+async function securityAudit(context, textEditor: vscode.TextEditor, dirtyDocuments): Promise<Audit | undefined> {
   const configuration = vscode.workspace.getConfiguration('openapi');
   let apiToken = <string>configuration.get('securityAuditToken');
 
@@ -87,129 +105,180 @@ async function securityAudit(context, textEditor: vscode.TextEditor, auditContex
 
     const configuration = vscode.workspace.getConfiguration();
     configuration.update('openapi.securityAuditToken', token, vscode.ConfigurationTarget.Global);
-
     apiToken = token;
   }
 
-  if (auditContext[documentUri] && auditContext[documentUri].pending) {
-    vscode.window.showErrorMessage(`Audit for "${documentUri}" is already in progress`);
-    return;
-  }
-
-  vscode.window.withProgress(
+  return vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
       title: 'Running API Contract Security Audit...',
       cancellable: false,
     },
-    async (progress, cancellationToken) => {
-      diagnostics.delete(textEditor.document.uri);
-      auditContext[documentUri] = { pending: true };
-      try {
-        const [summary, issues] = await auditDocument(textEditor.document, apiToken, progress, cancellationToken);
-        updateDiagnostics(diagnostics, textEditor.document, issues);
-        const decorationOptions = createDecoration(issues);
-        auditContext[documentUri] = { summary, issues, decorationOptions };
-        textEditor.setDecorations(decorationType, decorationOptions);
-        ReportWebView.createOrShow(context.extensionPath, issues, summary, documentUri);
-      } catch (e) {
-        delete auditContext[documentUri];
-        if (e.statusCode && e.statusCode === 429) {
-          vscode.window.showErrorMessage(
-            'Too many requests. You can run up to 3 security audits per minute, please try again later.',
-          );
-        } else if (e.statusCode && e.statusCode === 403) {
-          vscode.window.showErrorMessage(
-            'Authentication failed. Please paste the token that you received in email to Preferences > Settings > Extensions > OpenAPI > Security Audit Token. If you want to receive a new token instead, clear that setting altogether and initiate a new security audit for one of your OpenAPI files.',
-          );
-        } else {
-          vscode.window.showErrorMessage('Unexpected error when trying to audit API: ' + e);
-        }
-      }
+    async (progress, cancellationToken): Promise<Audit | undefined> => {
+      return performAudit(context, textEditor, dirtyDocuments, apiToken, progress);
     },
   );
 }
 
-async function auditDocument(document: TextDocument, apiToken, progress, cancellationToken) {
-  if (document.languageId === 'json') {
-    return await auditJson(document, apiToken, progress, cancellationToken);
-  } else if (document.languageId === 'yaml') {
-    return await auditYaml(document, apiToken, progress, cancellationToken);
+async function performAudit(
+  context,
+  textEditor: vscode.TextEditor,
+  dirtyDocuments,
+  apiToken,
+  progress,
+): Promise<Audit | undefined> {
+  const [json, mapping] = await bundle(textEditor.document, dirtyDocuments, parserOptions);
+
+  try {
+    const documentUri = textEditor.document.uri.toString();
+    const [grades, issues, documents] = await auditDocument(textEditor.document, json, mapping, apiToken, progress);
+    const diagnostics = createDiagnostics(basename(textEditor.document.fileName), documents, issues);
+    const decorations = createDecorations(documentUri, issues);
+
+    // set decorations for the current document
+    if (decorations[documentUri]) {
+      textEditor.setDecorations(decorationType, decorations[documentUri]);
+    }
+
+    const audit = {
+      summary: {
+        ...grades,
+        documentUri,
+        subdocumentUris: Object.keys(documents).filter(uri => uri != documentUri),
+      },
+      issues,
+      diagnostics,
+      decorations,
+    };
+
+    ReportWebView.show(context.extensionPath, audit);
+
+    return audit;
+  } catch (e) {
+    if (e.statusCode && e.statusCode === 429) {
+      vscode.window.showErrorMessage(
+        'Too many requests. You can run up to 3 security audits per minute, please try again later.',
+      );
+    } else if (e.statusCode && e.statusCode === 403) {
+      vscode.window.showErrorMessage(
+        'Authentication failed. Please paste the token that you received in email to Preferences > Settings > Extensions > OpenAPI > Security Audit Token. If you want to receive a new token instead, clear that setting altogether and initiate a new security audit for one of your OpenAPI files.',
+      );
+    } else {
+      vscode.window.showErrorMessage('Unexpected error when trying to audit API: ' + e);
+    }
   }
 }
 
-async function auditJson(document: TextDocument, apiToken, progress, cancellationToken) {
-  const text = document.getText();
-  const [root, errors] = parseJson(text);
-  if (errors.length > 0) {
-    throw new Error('Unable to parse JSON');
+function parseDocument(document) {
+  const [root, errors] = parse(document.getText(), document.languageId, parserOptions);
+  // FIXME ignore errors for now, the file has been bundled so
+  // errors here are mostly warnings
+
+  //if (errors.length > 0) {
+  //  throw new Error(`Unable to parse document: ${document.uri}`);
+  //}
+
+  return root;
+}
+
+function findIssueLocation(mainUri, root: Node, mappings, pointer) {
+  const node = root.find(pointer);
+  if (node) {
+    return [mainUri, pointer];
+  } else {
+    const mapping = findMapping(mappings, pointer);
+    if (mapping) {
+      const uri = vscode.Uri.file(mapping.file).toString();
+      return [uri, mapping.hash];
+    }
   }
+  throw new Error(`Cannot find entry for pointer: ${pointer}`);
+}
 
-  const [summary, issues] = await audit(text, apiToken.trim(), progress, cancellationToken);
+async function processIssues(document, mappings, issues): Promise<[Node, string[], { [uri: string]: any[] }]> {
+  const mainUri = document.uri.toString();
+  const documentUris: { [uri: string]: boolean } = { [mainUri]: true };
+  const issuesPerDocument: { [uri: string]: any[] } = {};
 
-  const openApiMarkerNode = root.find('/openapi');
-  const swaggerMarkerNode = root.find('/swagger');
-  const markerNode = openApiMarkerNode || swaggerMarkerNode;
+  const root = parseDocument(document);
 
   for (const issue of issues) {
-    const node = issue.pointer === '' ? markerNode : root.find(issue.pointer);
-    if (node) {
-      const [start, end] = node.getRange();
-      const position = document.positionAt(start);
-      const line = document.lineAt(position.line);
-      issue.lineNo = position.line;
-      issue.loc = `Line ${position.line + 1}`;
-      issue.range = new vscode.Range(
-        new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
-        new vscode.Position(position.line, line.range.end.character),
-      );
-    } else {
-      throw new Error(`Unable to locate node: ${issue.pointer}`);
+    const [uri, pointer] = findIssueLocation(mainUri, root, mappings, issue.pointer);
+
+    if (!issuesPerDocument[uri]) {
+      issuesPerDocument[uri] = [];
+    }
+
+    if (!documentUris[uri]) {
+      documentUris[uri] = true;
+    }
+
+    issuesPerDocument[uri].push({
+      ...issue,
+      pointer: pointer,
+    });
+  }
+
+  return [root, Object.keys(documentUris), issuesPerDocument];
+}
+
+async function auditDocument(
+  mainDocument: TextDocument,
+  json,
+  mappings,
+  apiToken,
+  progress,
+): Promise<[Grades, { [uri: string]: any[] }, { [uri: string]: TextDocument }]> {
+  const [grades, issues] = await audit(json, apiToken.trim(), progress);
+  const [mainRoot, documentUris, issuesPerDocument] = await processIssues(mainDocument, mappings, issues);
+
+  const files: { [uri: string]: [TextDocument, Node] } = {
+    [mainDocument.uri.toString()]: [mainDocument, mainRoot],
+  };
+
+  const markerNode = mainRoot.find('/openapi') || mainRoot.find('/swagger');
+
+  // load and parse all documents
+  for (const uri of documentUris) {
+    if (!files[uri]) {
+      const document = await vscode.workspace.openTextDocument(vscode.Uri.parse(uri));
+      const root = parseDocument(document);
+      files[uri] = [document, root];
     }
   }
 
-  return [summary, issues];
-}
+  for (const [uri, issues] of Object.entries(issuesPerDocument)) {
+    const [document, root] = files[uri];
 
-async function auditYaml(document: TextDocument, apiToken, progress, cancellationToken) {
-  const text = document.getText();
-  const {
-    yaml: { schema },
-  } = parserOptions.get();
-
-  const [root, errors] = parseYaml(text, schema);
-  if (errors.length > 0) {
-    throw new Error('Unable to parse YAML');
-  }
-
-  const parsed = yaml.safeLoad(text, { schema });
-  const [summary, issues] = await audit(JSON.stringify(parsed), apiToken.trim(), progress, cancellationToken);
-
-  const openApiMarkerNode = root.find('/openapi');
-  const swaggerMarkerNode = root.find('/swagger');
-  const markerNode = openApiMarkerNode || swaggerMarkerNode;
-
-  for (const issue of issues) {
-    const node = issue.pointer === '' ? markerNode : root.find(issue.pointer);
-    if (node) {
-      const [start, end] = node.getRange();
-      const position = document.positionAt(start);
-      const line = document.lineAt(position.line);
-      issue.lineNo = position.line;
-      issue.loc = `Line ${position.line + 1}`;
-      issue.range = new vscode.Range(
-        new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
-        new vscode.Position(position.line, line.range.end.character),
-      );
-    } else {
-      throw new Error(`Unable to locate node: ${issue.pointer}`);
+    for (const issue of issues) {
+      // '' applies only to main document
+      const node = issue.pointer === '' ? markerNode : root.find(issue.pointer);
+      if (node) {
+        const [start, end] = node.getRange();
+        const position = document.positionAt(start);
+        const line = document.lineAt(position.line);
+        issue.lineNo = position.line;
+        issue.range = new vscode.Range(
+          new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
+          new vscode.Position(position.line, line.range.end.character),
+        );
+      } else {
+        throw new Error(`Unable to locate node: ${issue.pointer}`);
+      }
     }
   }
 
-  return [summary, issues];
+  const documents = {};
+  for (const [uri, [document, root]] of Object.entries(files)) {
+    documents[uri] = document;
+  }
+
+  return [grades, issuesPerDocument, documents];
 }
 
-function updateDiagnostics(diagnostics: DiagnosticCollection, document: TextDocument, issues) {
+function createDiagnostics(filename, documents, issues): DiagnosticCollection {
+  const diagnostics = vscode.languages.createDiagnosticCollection();
+
   const criticalityToSeverity = {
     1: vscode.DiagnosticSeverity.Hint,
     2: vscode.DiagnosticSeverity.Information,
@@ -218,12 +287,17 @@ function updateDiagnostics(diagnostics: DiagnosticCollection, document: TextDocu
     5: vscode.DiagnosticSeverity.Error,
   };
 
-  const messages = issues.map(issue => ({
-    code: '',
-    message: `${issue.description} ${issue.displayScore !== '0' ? `(score impact ${issue.displayScore})` : ''}`,
-    severity: criticalityToSeverity[issue.criticality],
-    range: issue.range,
-  }));
-
-  diagnostics.set(document.uri, messages);
+  for (const [uri, document] of Object.entries(documents)) {
+    if (issues[uri]) {
+      const messages = issues[uri].map(issue => ({
+        source: `audit of ${filename}`,
+        code: '',
+        message: `${issue.description} ${issue.displayScore !== '0' ? `(score impact ${issue.displayScore})` : ''}`,
+        severity: criticalityToSeverity[issue.criticality],
+        range: issue.range,
+      }));
+      diagnostics.set((<vscode.TextDocument>document).uri, messages);
+    }
+  }
+  return diagnostics;
 }

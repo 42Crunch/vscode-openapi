@@ -5,6 +5,8 @@
 
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { Audit, Summary } from './types';
+
 import articles from './articles.json';
 
 const fallbackArticle = {
@@ -32,8 +34,18 @@ function articleById(id: string) {
   ].join('');
 }
 
-function getHtml(nonce: string, styleUrl: vscode.Uri, scriptUrl: vscode.Uri, summary: string, issues: string): string {
-  const backToReport = summary ? '' : `<h4><a class="go-full-report" href="#">Go back to full report</a></h4>`;
+function getHtml(
+  nonce: string,
+  styleUrl: vscode.Uri,
+  scriptUrl: vscode.Uri,
+  summary: string,
+  issues: string,
+  uri: string,
+): string {
+  const base64Uri = Buffer.from(uri).toString('base64');
+  const backToReport = summary
+    ? ''
+    : `<h4><a class="go-full-report" data-uri="${base64Uri}" href="#">Go back to full report</a></h4>`;
 
   return `<!DOCTYPE html>
   <html lang="en">
@@ -53,7 +65,7 @@ function getHtml(nonce: string, styleUrl: vscode.Uri, scriptUrl: vscode.Uri, sum
   </html>`;
 }
 
-function getIssueHtml(issue) {
+function getIssueHtml(uri: string, filename: string, issue) {
   const criticalityNames = {
     5: 'Critical',
     4: 'High',
@@ -65,27 +77,24 @@ function getIssueHtml(issue) {
   const criticality = criticalityNames[issue.criticality];
   const scoreImpact = issue.displayScore !== '0' ? `Score impact ${issue.displayScore}` : '';
   const article = articleById(issue.id);
+  const lineNo = issue.lineNo + 1;
+  const base64Uri = Buffer.from(uri).toString('base64');
 
   return `
     <h1>${issue.description}</h1>
     <small>
-      <a class="focus-line" data-line-no="${issue.lineNo}" href="#">${issue.loc}</a>.
+      <a class="focus-line" data-line-no="${issue.lineNo}" data-uri="${base64Uri}" href="#">${filename}:${lineNo}</a>.
       Severity: ${criticality}.
       ${scoreImpact}
     </small>
     ${article}`;
 }
 
-function getSummaryHtml(summary) {
-  if (!summary) {
-    return '';
-  }
-
+function getSummary(summary: Summary) {
   return `
     <h1>Security audit score: ${summary.all}</h1>
     <h3>Security (${summary.security.value}/${summary.security.max})</h3>
     <h3>Data validation (${summary.datavalidation.value}/${summary.datavalidation.max})</h3>
-
     <div>
     <small>
       Please submit your feedback for the security audit <a href="https://github.com/42Crunch/vscode-openapi/issues">here</a>
@@ -110,29 +119,49 @@ export class ReportWebView {
   readonly _panel: vscode.WebviewPanel;
   private readonly _extensionPath: string;
   private _disposables: vscode.Disposable[] = [];
-  private documentUri: any;
+  private currentAuditUri: string;
 
   public static readonly viewType = 'apisecurityReport';
 
-  public static createOrShow(extensionPath: string, issues: any, summary: any, documentUri: string) {
-    if (ReportWebView.currentPanel) {
-      ReportWebView.currentPanel._update(issues, summary, documentUri);
-      if (!ReportWebView.currentPanel._panel.visible) {
-        ReportWebView.currentPanel._panel.reveal();
-      }
-    } else {
-      ReportWebView.currentPanel = new ReportWebView(extensionPath, issues, summary, documentUri);
+  public static show(extensionPath: string, audit: Audit) {
+    if (!ReportWebView.currentPanel) {
+      ReportWebView.currentPanel = new ReportWebView(extensionPath);
+    }
+
+    ReportWebView.currentPanel.currentAuditUri = audit.summary.documentUri;
+    ReportWebView.currentPanel._update(audit);
+
+    if (!ReportWebView.currentPanel._panel.visible) {
+      ReportWebView.currentPanel._panel.reveal();
     }
   }
 
-  public static updateIfVisible(issues: any, summary: any, documentUri: string) {
-    if (ReportWebView.currentPanel && ReportWebView.currentPanel._panel.visible) {
-      ReportWebView.currentPanel._update(issues, summary, documentUri);
+  public static showIds(extensionPath: string, audit: Audit, uri: string, ids: any[]) {
+    if (!ReportWebView.currentPanel) {
+      ReportWebView.currentPanel = new ReportWebView(extensionPath);
+    }
+    ReportWebView.currentPanel._updateIds(audit, uri, ids);
+    ReportWebView.currentPanel.currentAuditUri = null;
+    if (!ReportWebView.currentPanel._panel.visible) {
+      ReportWebView.currentPanel._panel.reveal();
     }
   }
 
-  public static displayNoReport(context: vscode.ExtensionContext) {
+  public static showIfVisible(audit: Audit) {
+    if (
+      ReportWebView.currentPanel &&
+      ReportWebView.currentPanel._panel.visible &&
+      ReportWebView.currentPanel.currentAuditUri != audit.summary.documentUri
+    ) {
+      // update only if showing different report to the current one
+      ReportWebView.currentPanel.currentAuditUri = audit.summary.documentUri;
+      ReportWebView.currentPanel._update(audit);
+    }
+  }
+
+  static showNoReport(context: vscode.ExtensionContext) {
     if (ReportWebView.currentPanel && ReportWebView.currentPanel._panel.visible) {
+      ReportWebView.currentPanel.currentAuditUri = null;
       const webview = ReportWebView.currentPanel._panel.webview;
 
       const image = webview.asWebviewUri(
@@ -149,13 +178,13 @@ export class ReportWebView {
   </head>
   <body>
     <h1>No security audit report available for this file</h1>
-    <p>Please click <img src="${image}" style="width: 16px; height: 16px;"/>  button to run OpenAPI Security Audit</p>
+    <p>Please click the <img src="${image}" style="width: 16px; height: 16px;"/>  button to run OpenAPI Security Audit</p>
   </body>
   </html>`;
     }
   }
 
-  private constructor(extensionPath: string, issues: any, summary: any, documentUri: string) {
+  private constructor(extensionPath: string) {
     this._extensionPath = extensionPath;
 
     this._panel = vscode.window.createWebviewPanel(
@@ -180,10 +209,13 @@ export class ReportWebView {
       message => {
         switch (message.command) {
           case 'goToLine':
-            this.focusLine(message.line);
+            this.focusLine(Buffer.from(message.uri, 'base64').toString('utf8'), message.line);
             return;
           case 'goFullReport':
-            vscode.commands.executeCommand('openapi.focusSecurityAudit', documentUri);
+            vscode.commands.executeCommand(
+              'openapi.focusSecurityAudit',
+              Buffer.from(message.uri, 'base64').toString('utf8'),
+            );
             return;
         }
       },
@@ -192,10 +224,9 @@ export class ReportWebView {
     );
 
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
-    this._update(issues, summary, documentUri);
   }
 
-  private async focusLine(line: string) {
+  private async focusLine(uri: string, line: string) {
     function focus(editor: vscode.TextEditor, lineNo: number) {
       const textLine = editor.document.lineAt(lineNo);
       editor.selection = new vscode.Selection(lineNo, 0, lineNo, 0);
@@ -206,7 +237,7 @@ export class ReportWebView {
 
     // check if document is already open
     for (const editor of vscode.window.visibleTextEditors) {
-      if (editor.document.uri.toString() == this.documentUri) {
+      if (editor.document.uri.toString() == uri) {
         // document is already open
         focus(editor, lineNo);
         return;
@@ -214,7 +245,7 @@ export class ReportWebView {
     }
 
     // if not already open, load and show it
-    const document = await vscode.workspace.openTextDocument(vscode.Uri.parse(this.documentUri));
+    const document = await vscode.workspace.openTextDocument(vscode.Uri.parse(uri));
     const editor = await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
     focus(editor, lineNo);
   }
@@ -230,20 +261,45 @@ export class ReportWebView {
     }
   }
 
-  private _update(issues, summary, documentUri: string) {
-    this.documentUri = documentUri;
-    this._panel.webview.html = this.getWebviewContent(issues, summary);
-  }
-
-  private getWebviewContent(issues, summary) {
+  private _update(audit: Audit) {
     const scriptPathOnDisk = vscode.Uri.file(path.join(this._extensionPath, 'webview', 'main.js'));
     const stylePathOnDisk = vscode.Uri.file(path.join(this._extensionPath, 'webview', 'style.css'));
     const scriptUrl = scriptPathOnDisk.with({ scheme: 'vscode-resource' });
     const styleUrl = stylePathOnDisk.with({ scheme: 'vscode-resource' });
     const nonce = getNonce();
-    const summaryHtml = getSummaryHtml(summary);
-    const issuesHtml = issues.map(issue => getIssueHtml(issue)).join('');
 
-    return getHtml(nonce, styleUrl, scriptUrl, summaryHtml, issuesHtml);
+    const mainPath = vscode.Uri.parse(audit.summary.documentUri).fsPath;
+    const mainDir = path.dirname(mainPath);
+
+    const summaryHtml = getSummary(audit.summary);
+    const issuesHtmlList = Object.entries(audit.issues)
+      .map(([uri, issues]) => {
+        const fsPath = vscode.Uri.parse(uri).fsPath;
+        const filename = path.relative(mainDir, fsPath);
+        return issues.map(issue => getIssueHtml(uri, filename, issue));
+      })
+      .reduce((acc, val) => acc.concat(val), []);
+
+    const issuesHtml = issuesHtmlList.length > 0 ? issuesHtmlList.join('\n') : `<h3>No issues found in this file</h3>`;
+
+    this._panel.webview.html = getHtml(nonce, styleUrl, scriptUrl, summaryHtml, issuesHtml, audit.summary.documentUri);
+  }
+
+  private _updateIds(audit: Audit, uri: string, ids: any[]) {
+    const scriptPathOnDisk = vscode.Uri.file(path.join(this._extensionPath, 'webview', 'main.js'));
+    const stylePathOnDisk = vscode.Uri.file(path.join(this._extensionPath, 'webview', 'style.css'));
+    const scriptUrl = scriptPathOnDisk.with({ scheme: 'vscode-resource' });
+    const styleUrl = stylePathOnDisk.with({ scheme: 'vscode-resource' });
+    const nonce = getNonce();
+
+    const mainPath = vscode.Uri.parse(audit.summary.documentUri).fsPath;
+    const mainDir = path.dirname(mainPath);
+    const filename = path.relative(mainDir, vscode.Uri.parse(uri).fsPath);
+
+    const issues = ids.map(id => audit.issues[uri][id]);
+
+    const issuesHtml = issues.map(issue => getIssueHtml(uri, filename, issue)).join('\n');
+
+    this._panel.webview.html = getHtml(nonce, styleUrl, scriptUrl, null, issuesHtml, audit.summary.documentUri);
   }
 }
