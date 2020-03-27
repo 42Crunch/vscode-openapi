@@ -4,6 +4,7 @@
   const focusLine = function(event) {
     vscode.postMessage({
       command: 'goToLine',
+      uri: event.target.dataset.uri,
       line: event.target.dataset.lineNo,
     });
     event.preventDefault();
@@ -13,9 +14,11 @@
   const goFullReport = function(event) {
     vscode.postMessage({
       command: 'goFullReport',
+      uri: event.target.dataset.uri,
     });
     event.preventDefault();
     event.stopPropagation();
+
   };
 
   setTimeout(() => {

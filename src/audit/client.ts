@@ -6,6 +6,7 @@
 import * as vscode from 'vscode';
 import got from 'got';
 import FormData from 'form-data';
+import { Grades } from './types';
 
 const ASSESS_URL = 'https://stateless.apisecurity.io/api/v1/anon/assess/vscode';
 const TOKEN_URL = 'https://stateless.apisecurity.io/api/v1/anon/token';
@@ -54,12 +55,7 @@ async function retryAudit(token: string, apiToken: string) {
   return JSON.parse(response.body);
 }
 
-export async function audit(
-  text: string,
-  apiToken: string,
-  progress: vscode.Progress<any>,
-  cancellationToken: vscode.CancellationToken,
-): Promise<[any, any[]]> {
+export async function audit(text: string, apiToken: string, progress: vscode.Progress<any>): Promise<[Grades, any[]]> {
   let result = await submitAudit(text, apiToken);
 
   if (result.status === 'IN_PROGRESS') {
@@ -82,12 +78,12 @@ export async function audit(
 
   if (result.status === 'PROCESSED') {
     return [readSummary(result.report), readAssessment(result.report)];
-  } else {
-    // fail with message
   }
+
+  throw new Error('Failed to retrieve audit result');
 }
 
-function readSummary(assessment) {
+function readSummary(assessment): Grades {
   const grades = {
     datavalidation: {
       value: Math.round(assessment.data ? assessment.data.score : 0),
@@ -125,25 +121,26 @@ function readAssessment(assessment): any[] {
       .toLowerCase();
   }
 
-  function transformScore(score: number, maxFractionDigits: number) {
-    let fractionDigits = 0;
-    let step = 1;
-    while (score < step && fractionDigits <= maxFractionDigits) {
-      step = step / 10;
-      fractionDigits++;
-    }
-
-    if (fractionDigits > maxFractionDigits) {
+  function transformScore(score: number): string {
+    const rounded = Math.abs(Math.round(score));
+    if (score === 0) {
       return '0';
+    } else if (rounded >= 1) {
+      return rounded.toString();
     }
-
-    const scoreAsString = score.toFixed(fractionDigits);
-    const result = scoreAsString.replace(/[0]+$/, '');
-
-    return result;
+    return 'less than 1';
   }
 
-  function transformIssues(issues, defaultCriticality: number = 5) {
+  interface Issue {
+    id: string;
+    description: string;
+    pointer: string;
+    score: number;
+    displayScore: string;
+    criticality: number;
+  }
+
+  function transformIssues(issues, defaultCriticality: number = 5): Issue[] {
     const result = [];
     for (const id of Object.keys(issues)) {
       const issue = issues[id];
@@ -153,7 +150,7 @@ function readAssessment(assessment): any[] {
           description: subIssue.specificDescription ? subIssue.specificDescription : issue.description,
           pointer: jsonPointerIndex[subIssue.pointer],
           score: subIssue.score ? Math.abs(subIssue.score) : 0,
-          displayScore: transformScore(subIssue.score ? Math.abs(subIssue.score) : 0, 5),
+          displayScore: transformScore(subIssue.score ? subIssue.score : 0),
           criticality: issue.criticality ? issue.criticality : defaultCriticality,
         });
       }
