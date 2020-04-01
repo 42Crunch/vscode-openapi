@@ -1,3 +1,15 @@
+# What's new in VS Code OpenAPI extension version 3.0
+
+OpenAPI security audit now support composite OpenAPI files.
+
+42Crunch Security Audit is a static application security testing (SAST) service that the extension invokes for the OpenAPI file currently opened in VS Code when you click the **42c** button at the top right.
+
+The extension sends the file to the remote service, the service performs 200+ security checks and sends back the report that gets rendered in VS Code.
+
+OpenAPI files can be composite. In that case parts of the API definitions (for example, schemas for shared payloads types) are stored in external files and referenced in the main file using the $ref notation.
+
+Starting with VS Code OpenAPI extension version 3.0 such composite OpenAPI files are fully supported, including security audit. Simply open the main OpenAPI file (JSON or YAML) and click the **42c** button at the top right. The extension will automatically find and parse all $ref references, locate the files that they include, create the aggregated API contract, and run and display the security report for it.
+
 # What's new in VS Code OpenAPI extension version 2.0
 
 We have updated our OpenAPI extension to version 2.0. This is a major release with the Security Audit getting to where we wanted it to be for its initial scope and a few other improvements.
