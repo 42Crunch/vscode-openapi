@@ -1,20 +1,18 @@
-# What's new in VS Code OpenAPI extension version 3.0
+# What's new in OpenAPI (Swagger) Editor version 3.0
 
-OpenAPI security audit now support composite OpenAPI files.
+Security Audit now supports composite OpenAPI files.
 
-42Crunch Security Audit is a static application security testing (SAST) service that the extension invokes for the OpenAPI file currently opened in VS Code when you click the **42c** button at the top right.
+42Crunch API Contract Security Audit is a static application security testing (SAST) service that OpenAPI (Swagger) Editor invokes for the OpenAPI file currently opened in VS Code when you click the **42c** button at the top right. The extension sends the file to the remote service that performs 200+ security checks, and sends back a report that is rendered in VS Code.
 
-The extension sends the file to the remote service, the service performs 200+ security checks and sends back the report that gets rendered in VS Code.
+However, OpenAPI definiton files can be composite. In that case, parts of the API definition (for example, schemas for shared payloads types) can be stored in external files and referenced in the main file using the `$ref` notation.
 
-OpenAPI files can be composite. In that case parts of the API definitions (for example, schemas for shared payloads types) are stored in external files and referenced in the main file using the $ref notation.
-
-Starting with VS Code OpenAPI extension version 3.0 such composite OpenAPI files are fully supported, including security audit. Simply open the main OpenAPI file (JSON or YAML) and click the **42c** button at the top right. The extension will automatically find and parse all $ref references, locate the files that they include, create the aggregated API contract, and run and display the security report for it.
+Starting with OpenAPI (Swagger) Editor v3.0, such composite OpenAPI files are fully supported, including auditing. Simply open the main OpenAPI file (JSON or YAML), and click the **42c** button at the top right. The extension  automatically finds and parses all `$ref` references, locates the possible references in other files, aggregates the referenced information in the API contract, and runs the audit for it.
 
 ![](images/composite_openapi_file_security_audit_960.gif)
 
-**Note**: When dealing with composite API definitions, you should invoke 42Crunch Security Audit function on the main (parent) file that has the actual API definition. The shared component (child) files might not follow full OpenAPI standard requirements and thus might not be detected as OpenAPI files by the extension. In that case, the OpenAPI-specific functionality (such as security audit, schema checks, outline and code completion) will not be available for them.
+**Note**: When dealing with composite API definitions, you should invoke Security Audit from the main (parent) file that contains the actual API definition. The shared component files (children) might not follow the requirements of the OpenAPI Specification (OAS) to the full, and thus the extension might not detect them as OpenAPI files. The OpenAPI-specific functions (such as audit, schema checks, outline, and code completion) would not be available for such files.
 
-# What's new in VS Code OpenAPI extension version 2.0
+# What's new in OpenAPI (Swagger) Editor version 2.0
 
 We have updated our OpenAPI extension to version 2.0. This is a major release with the Security Audit getting to where we wanted it to be for its initial scope and a few other improvements.
 
