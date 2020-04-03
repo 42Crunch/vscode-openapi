@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 3.0.0 (April 3, 2020)
+* Support files with external $refs in 42Crunch API Contract Security Audit
+
 ## Version 2.1.2 (March 23, 2020)
 * Fixed ([#46](https://github.com/42Crunch/vscode-openapi/issues/46)): Bug: Problems loading reference 'openapi-schemas:openapi-2.0.json'
 * Fixed ([#45](https://github.com/42Crunch/vscode-openapi/issues/45)): "JS-YAML: expected a single document in the stream, but found more" on non-OpenAPI YAML files
