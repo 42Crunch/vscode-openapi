@@ -10,6 +10,8 @@ OpenAPI files can be composite. In that case parts of the API definitions (for e
 
 Starting with VS Code OpenAPI extension version 3.0 such composite OpenAPI files are fully supported, including security audit. Simply open the main OpenAPI file (JSON or YAML) and click the **42c** button at the top right. The extension will automatically find and parse all $ref references, locate the files that they include, create the aggregated API contract, and run and display the security report for it.
 
+![](images/composite_openapi_file_security_audit.gif)
+
 **Note**: When dealing with composite API definitions, you should invoke 42Crunch Security Audit function on the main (parent) file that has the actual API definition. The shared component (child) files might not follow full OpenAPI standard requirements and thus might not be detected as OpenAPI files by the extension. In that case, the OpenAPI-specific functionality (such as security audit, schema checks, outline and code completion) will not be available for them.
 
 # What's new in VS Code OpenAPI extension version 2.0
