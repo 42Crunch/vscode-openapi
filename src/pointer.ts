@@ -3,6 +3,12 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
+export function joinJsonPointer(path: string[]): string {
+  const slashes = /\//g;
+  const tildes = /~/g;
+  return '/' + path.map(segment => encodeURIComponent(segment.replace(tildes, '~0').replace(slashes, '~1'))).join('/');
+}
+
 export function parseJsonPointer(pointer: string): string[] {
   const hasExcape = /~/;
   const escapeMatcher = /~[01]/g;
