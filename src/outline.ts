@@ -92,7 +92,7 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
   }
 
   getLabel(node: Node): string {
-    return node.getKey();
+    return node ? node.getKey() : '<unknown>';
   }
 
   getCommand(node: Node): vscode.Command {
@@ -178,7 +178,10 @@ export class SecurityOutlineProvider extends OutlineProvider {
 
   getLabel(node: Node): string {
     const children = node.getChildren();
-    return children[0].getKey();
+    if (children[0]) {
+      return children[0].getKey();
+    }
+    return '<unknown>';
   }
 }
 

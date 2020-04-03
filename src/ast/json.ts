@@ -5,7 +5,7 @@
 
 import * as json from 'jsonc-parser';
 import { Node, Kind } from './types';
-import { parseJsonPointer } from './pointer';
+import { parseJsonPointer } from '../pointer';
 
 export function parseJson(text: string): [JsonNode, any[]] {
   const parseErrors = [];

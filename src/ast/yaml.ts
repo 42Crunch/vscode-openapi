@@ -6,7 +6,7 @@
 import * as yaml from 'yaml-ast-parser-custom-tags';
 import { Schema } from 'js-yaml';
 import { Kind, Node } from './types';
-import { parseJsonPointer } from './pointer';
+import { parseJsonPointer } from '../pointer';
 
 export function parseYaml(text: string, schema: Schema): [YamlNode, any[]] {
   const documents = [];
