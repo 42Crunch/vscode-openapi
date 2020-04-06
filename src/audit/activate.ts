@@ -28,13 +28,6 @@ export function activate(
   vscode.workspace.onDidCloseTextDocument(document => {
     const uri = document.uri.toString();
     delete dirtyDocuments[uri];
-    for (const [auditUri, audit] of Object.entries(auditContext)) {
-      // remove audit if the main document of the audit was closed
-      if (uri == auditUri) {
-        delete auditContext[auditUri];
-        audit.diagnostics.dispose();
-      }
-    }
   });
 
   didChangeEditor(([editor, version]) => {
