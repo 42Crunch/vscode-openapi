@@ -166,7 +166,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>First, define the <code>securityDefinitions</code> or <code>securitySchemes</code> field on the global level, and list the authentication methods that you plan to use. For example:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" xml:space=\"preserve\"><code class=\"language-json\">securityDefinitions\": {\n    \"petstore_auth\": {\n      \"type\": \"oauth2\",\n      \"authorizationUrl\": \"https://petstore.swagger.io/oauth/dialog\",\n      \"flow\": \"implicit\",\n      \"scopes\": {\n        \"write:pets\": \"Modify pets in your account.\",\n        \"read:pets\": \"Read your pets list.\"\n      }\n    },\n    \"api_key\": {\n      \"type\": \"apiKey\",\n      \"name\": \"api_key\",\n      \"in\": \"header\"\n    }\n  },</code></pre>"
+          "code": "<pre class=\"line-numbers\" xml:space=\"preserve\"><code class=\"language-json\">\"securityDefinitions\": {\n    \"petstore_auth\": {\n      \"type\": \"oauth2\",\n      \"authorizationUrl\": \"https://petstore.swagger.io/oauth/dialog\",\n      \"flow\": \"implicit\",\n      \"scopes\": {\n        \"write:pets\": \"Modify pets in your account.\",\n        \"read:pets\": \"Read your pets list.\"\n      }\n    },\n    \"api_key\": {\n      \"type\": \"apiKey\",\n      \"name\": \"api_key\",\n      \"in\": \"header\"\n    }\n  },</code></pre>"
         },
         {
           "text": "\n                    <p>Then, use the <code>security</code> field on the global level to set the default authentication requirements for the whole API.</p>\n                    <p>If you have more than one definition in <code>securityDefinitions</code> and you want to apply all of them for each API call, use the following syntax (semantically AND):</p>\n                "
@@ -869,7 +869,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>First, define the <code>securityDefinitions</code> or <code>securitySchemes</code> field on the global level, and list the authentication methods that you plan to use. For example:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" xml:space=\"preserve\"><code class=\"language-json\">securityDefinitions\": {\n    \"petstore_auth\": {\n      \"type\": \"oauth2\",\n      \"authorizationUrl\": \"https://petstore.swagger.io/oauth/dialog\",\n      \"flow\": \"implicit\",\n      \"scopes\": {\n        \"write:pets\": \"Modify pets in your account.\",\n        \"read:pets\": \"Read your pets list.\"\n      }\n    },\n    \"api_key\": {\n      \"type\": \"apiKey\",\n      \"name\": \"api_key\",\n      \"in\": \"header\"\n    }\n  },</code></pre>"
+          "code": "<pre class=\"line-numbers\" xml:space=\"preserve\"><code class=\"language-json\">\"securityDefinitions\": {\n    \"petstore_auth\": {\n      \"type\": \"oauth2\",\n      \"authorizationUrl\": \"https://petstore.swagger.io/oauth/dialog\",\n      \"flow\": \"implicit\",\n      \"scopes\": {\n        \"write:pets\": \"Modify pets in your account.\",\n        \"read:pets\": \"Read your pets list.\"\n      }\n    },\n    \"api_key\": {\n      \"type\": \"apiKey\",\n      \"name\": \"api_key\",\n      \"in\": \"header\"\n    }\n  },</code></pre>"
         },
         {
           "text": "\n                    <p>Then, use the <code>security</code> field on the global level to set the default authentication requirements for the whole API.</p>\n                    <p>If you have more than one definition in <code>securityDefinitions</code> and you want to apply all of them for each API call, use the following syntax (semantically AND):</p>\n                "
@@ -896,9 +896,9 @@
       "text": "<h1>Operation accepts credentials transported over the network</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The API operation accepts credentials (basic authentication credentials or API keys)  transported over the network. The credentials are sent over the network  on each API call, over and over again, and are exposed to attack attempts to retrieve them.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#operationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The API operation accepts credentials (basic authentication credentials or API keys)  transported over the network instead of the more secure tokens. The credentials are sent over the network  on each API call, over and over again, and are exposed to attack attempts to retrieve them.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#operationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "The API operation accepts credentials (basic authentication credentials or API keys)  transported over the network. The credentials are sent over the network  on each API call, over and over again, and are exposed to attack attempts to retrieve them.",
+    "shortDescription": "The API operation accepts credentials (basic authentication credentials or API keys)  transported over the network instead of the more secure tokens. The credentials are sent over the network  on each API call, over and over again, and are exposed to attack attempts to retrieve them.",
     "exploit": {
       "sections": [
         {
@@ -1075,7 +1075,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure your array definitions include the <code>type</code> property in the <code>items</code> field describing accepted items for the array:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" xml:space=\"preserve\"><code class=\"language-json\">\"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n      \"type\": \"integer\",\n      \"description\": \"ID of a specific user\"\n    }\n  }\n...\n]</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"9\" xml:space=\"preserve\"><code class=\"language-json\">\"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n      \"type\": \"integer\",\n      \"description\": \"ID of a specific user\"\n    }\n  }\n...\n]</code></pre>"
         }
       ]
     }
@@ -1096,7 +1096,7 @@
           "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"name\": \"someArray\",\n  \"in\": \"header\",\n  \"type\": \"array\",\n  \"items\": {\n    \"type\": \"string\",\n    \"pattern\": ^((4\\d{3})|(5[1-5]\\d{2})|(6011))-?\\d{4}-?\\d{4}-?\\d{4}|3[4,7]\\d{13}$\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"name\": \"someArray\",\n  \"in\": \"header\",\n  \"type\": \"array\",\n  \"items\": {\n    \"type\": \"string\",\n    \"pattern\": ^((4\\d{3})|(5[1-5]\\d{2})|(6011))-?\\d{4}-?\\d{4}-?\\d{4}|3[4,7]\\d{13}$\n  }\n}</code></pre>"
         }
       ]
     },
@@ -1113,7 +1113,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Set the <code>maxItems</code> parameter to ensure that you only allow calls of reasonable size:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" xml:space=\"preserve\"><code class=\"language-json\">{\n \"name\": \"someArray\",\n  \"in\": \"header\",\n  \"type\": \"array\",\n  \"maxItems\": 3,\n  \"items\": {\n    \"type\": \"string\",\n    \"pattern\": ^((4\\d{3})|(5[1-5]\\d{2})|(6011))-?\\d{4}-?\\d{4}-?\\d{4}|3[4,7]\\d{13}$\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"5\" xml:space=\"preserve\"><code class=\"language-json\">{\n \"name\": \"someArray\",\n  \"in\": \"header\",\n  \"type\": \"array\",\n  \"maxItems\": 3,\n  \"items\": {\n    \"type\": \"string\",\n    \"pattern\": ^((4\\d{3})|(5[1-5]\\d{2})|(6011))-?\\d{4}-?\\d{4}-?\\d{4}|3[4,7]\\d{13}$\n  }\n}</code></pre>"
         }
       ]
     }
@@ -1151,7 +1151,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Define the <code>format</code> parameter for the numeric array items. This ensures that only parameters of the expected format get passed to the backend.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"1\" data-start=\"10\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"integer\",\n       \"format\": \"int32\"\n     }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"11\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"integer\",\n       \"format\": \"int32\"\n     }\n  }\n}</code></pre>"
         }
       ]
     }
@@ -1172,7 +1172,7 @@
           "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array accepts items of the type <code>integer</code> but does not specify the maximum value for them:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"10\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"integer\",\n       \"minimum\":0,\n       \"maximum\":100\n     }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"10-11\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"integer\",\n       \"minimum\": 0\n     }\n  }\n}</code></pre>"
         }
       ]
     },
@@ -1189,7 +1189,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Set both the <code>minimum</code> and <code>maximum</code> parameter values for numeric array items to limit the accepted values to the range that works for your application:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"10\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"integer\",\n       \"minimum\":0,\n       \"maximum\":100\n     }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"10-12\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"integer\",\n       \"minimum\":0,\n       \"maximum\":100\n     }\n  }\n}</code></pre>"
         }
       ]
     }
@@ -1210,7 +1210,7 @@
           "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array accepts items of the type <code>integer</code> but does not specify the minimum value for them:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"10\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"integer\",\n       \"minimum\":0,\n       \"maximum\":100\n     }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"10-11\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"integer\",\n       \"maximum\": 100\n     }\n  }\n}</code></pre>"
         }
       ]
     },
@@ -1227,7 +1227,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Set both the <code>minimum</code> and <code>maximum</code> parameter values for numeric array items to limit the accepted values to the range that works for your application:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"10\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"integer\",\n       \"minimum\":0,\n       \"maximum\":100\n     }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"10-12\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"integer\",\n       \"minimum\":0,\n       \"maximum\":100\n     }\n  }\n}</code></pre>"
         }
       ]
     }
@@ -1248,7 +1248,7 @@
           "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array accepts items of the type <code>string</code> but the pattern of the items is not precise enough:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"string\",\n       \"pattern\": \".*\"\n     }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"11\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"string\",\n       \"pattern\": \".*\"\n     }\n  }\n}</code></pre>"
         }
       ]
     },
@@ -1265,7 +1265,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Set a well-defined regular expression in the <code>pattern</code> field of string array items. This ensures that only arrays of strings matching the set pattern get passed to your API.</p>\n                    <p>For example, the API below only accepts UUIDs that are compliant with <a href=\"https://www.ietf.org/rfc/rfc4122.txt\" target=\"_blank\" rel=\"noopener\">RFC 4122</a>:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"1\" data-start=\"10\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"string\",\n       \"pattern\": \"/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$/i\" \n    } \n  } \n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"11\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"string\",\n       \"pattern\": \"/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$/i\" \n    } \n  } \n}</code></pre>"
         }
       ]
     }
@@ -1286,7 +1286,7 @@
           "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array accepts items of the type <code>string</code> of unlimited length:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"string\"\n     }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"9-10\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"string\"\n     }\n  }\n}</code></pre>"
         }
       ]
     },
@@ -1303,7 +1303,7 @@
           "text": "\n                        <h2>Remediation</h2>\n                        <p>Set the <code>maxLength</code> parameter to ensure that only strings of the expected size get passed to your API:</p>\n                    "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"1\" data-start=\"10\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"string\",\n       \"maxLength\": \"8\"\n     }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"11\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"string\",\n       \"maxLength\": 8\n     }\n  }\n}</code></pre>"
         },
         {
           "text": "\n                        <p>We also recommend that you specify a regular expression to further lock down the expected string format.</p>\n                    "
@@ -1344,7 +1344,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Set a well-defined regular expression in the <code>pattern</code> field of string array items. This ensures that only arrays of strings matching the set pattern get passed to your API.</p>\n                    <p>For example, the API below only accepts UUIDs that are compliant with <a href=\"https://www.ietf.org/rfc/rfc4122.txt\" target=\"_blank\" rel=\"noopener\">RFC 4122</a>:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"1\" data-start=\"10\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"string\",\n       \"pattern\": \"/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$/i\" \n    } \n  } \n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"11\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"string\",\n       \"pattern\": \"/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$/i\" \n    } \n  } \n}</code></pre>"
         }
       ]
     }
@@ -1382,7 +1382,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Define the <code>format</code> parameter for all numeric parameters. This ensures that only parameters of the expected format get passed to the backend.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"type\": \"integer\",\n     \"name\": \"total\",\n     \"in\": \"query\",\n     \"format\": \"int32\",\n     \"description\": \"Number of the objects in&#160;the&#160;array.\"\n   }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"type\": \"integer\",\n     \"name\": \"total\",\n     \"in\": \"query\",\n     \"format\": \"int32\",\n     \"description\": \"Number of the objects in&#160;the&#160;array.\"\n   }\n}</code></pre>"
         }
       ]
     }
@@ -1403,7 +1403,7 @@
           "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The parameter <code>type</code> is set to <code>integer</code> but the maximum value is not specified:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"type\": \"integer\",\n     \"name\": \"total\",\n     \"in\": \"query\",\n     \"format\": \"int32\",\n     \"description\": \"Number of the objects in the array.\"\n   }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"type\": \"integer\",\n     \"name\": \"total\",\n     \"in\": \"query\",\n     \"format\": \"int32\",\n     \"minimum\": 0,\n     \"description\": \"Number of the objects in the array.\"\n   }\n}</code></pre>"
         }
       ]
     },
@@ -1420,7 +1420,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Set both the <code>minimum</code> and <code>maximum</code> values for numeric parameters to limit the accepted values to the range that works for your application:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"10\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"integer\",\n       \"minimum\":0,\n       \"maximum\":100\n     }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"7-8\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"type\": \"integer\",\n     \"name\": \"total\",\n     \"in\": \"query\",\n     \"format\": \"int32\",\n     \"minimum\": 0,\n     \"maximum\": 100,\n     \"description\": \"Number of the objects in the array.\"\n   }\n}</code></pre>"
         }
       ]
     }
@@ -1441,7 +1441,7 @@
           "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The parameter <code>type</code> is set to <code>integer</code> but the minimum value is not specified:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"type\": \"integer\",\n     \"name\": \"total\",\n     \"in\": \"query\",\n     \"format\": \"int32\",\n     \"description\": \"Number of the objects in the array.\"\n   }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"type\": \"integer\",\n     \"name\": \"total\",\n     \"in\": \"query\",\n     \"format\": \"int32\",\n     \"maximum\": 100,\n     \"description\": \"Number of the objects in the array.\"\n   }\n}</code></pre>"
         }
       ]
     },
@@ -1458,7 +1458,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Set both the <code>minimum</code> and <code>maximum</code> values for numeric parameters to limit the accepted values to the range that works for your application:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"10\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": [\n  {\n    \"name\": \"ids\",\n    \"in\": \"query\",\n    \"description\": \"IDs to filter by\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n       \"type\": \"integer\",\n       \"minimum\":0,\n       \"maximum\":100\n     }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"7-8\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"type\": \"integer\",\n     \"name\": \"total\",\n     \"in\": \"query\",\n     \"format\": \"int32\",\n     \"minimum\": 0,\n     \"maximum\": 100,\n     \"description\": \"Number of the objects in the array.\"\n   }\n}</code></pre>"
         }
       ]
     }
@@ -1479,7 +1479,7 @@
           "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The defined pattern is so loose that the API effectively accepts any string of any size and value:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"in\": \"query\",\n     \"name\": \"id\",\n     \"type\": \"string\",\n     \"pattern\": \".*\",\n     \"description\": \"Identifier of the object to be extracted.\"\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"in\": \"query\",\n     \"name\": \"id\",\n     \"type\": \"string\",\n     \"pattern\": \".*\",\n     \"description\": \"Identifier of the object to be extracted.\"\n  }\n}</code></pre>"
         }
       ]
     },
@@ -1496,7 +1496,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Set a well-defined regular expression in the <code>pattern</code> field of string parameters. This ensures that only strings matching the set pattern get passed to your API.</p>\n                    <p>For example, the API below only accepts UUIDs that are compliant with <a href=\"https://www.ietf.org/rfc/rfc4122.txt\" target=\"_blank\" rel=\"noopener\">RFC 4122</a>:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"in\": \"query\",\n     \"name\": \"id\",\n     \"type\": \"string\",\n     \"pattern\": \"/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$/i\",\n     \"description\": \"Identifier of the object to be extracted.\"\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"in\": \"query\",\n     \"name\": \"id\",\n     \"type\": \"string\",\n     \"pattern\": \"/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$/i\",\n     \"description\": \"Identifier of the object to be extracted.\"\n  }\n}</code></pre>"
         }
       ]
     }
@@ -1534,7 +1534,7 @@
           "text": "\n                        <h2>Remediation</h2>\n                        <p>Set the <code>maxLength</code> parameter to ensure that only strings of the expected size get passed to your API:</p>\n                    "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"in\": \"query\",\n     \"name\": \"id\",\n     \"type\": \"string\",\n     \"maxLength\": \"8\",\n     \"description\": \"Identifier of the object to be extracted.\"\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"in\": \"query\",\n     \"name\": \"id\",\n     \"type\": \"string\",\n     \"maxLength\": 8,\n     \"description\": \"Identifier of the object to be extracted.\"\n  }\n}</code></pre>"
         },
         {
           "text": "\n                        <p>We also recommend that you specify a regular expression to further lock down the expected string format.</p>\n                    "
@@ -1575,7 +1575,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Set a well-defined regular expression in the <code>pattern</code> field of string parameters. This ensures that only strings matching the set pattern get passed to your API.</p>\n                    <p>For example, the API below only accepts UUIDs that are compliant with <a href=\"https://www.ietf.org/rfc/rfc4122.txt\" target=\"_blank\" rel=\"noopener\">RFC 4122</a>:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"in\": \"query\",\n     \"name\": \"id\",\n     \"type\": \"string\",\n     \"pattern\": \"/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$/i\",\n     \"description\": \"Identifier of the object to be extracted.\"\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"in\": \"query\",\n     \"name\": \"id\",\n     \"type\": \"string\",\n     \"pattern\": \"/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$/i\",\n     \"description\": \"Identifier of the object to be extracted.\"\n  }\n}</code></pre>"
         }
       ]
     }
@@ -2259,7 +2259,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Set the <code>maxLength</code> property in array headers with string items. This provides an extra layer of safety ensuring that your API only returns data that you expect it to return.</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n  \"200\": {\n    \"description\": \"OK\",\n    \"headers\": {\n      \"x-ids\": {\n        \"schema\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\",\n            \"maxLength\": \"8\"\n          }\n        }\n      }\n    }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n  \"200\": {\n    \"description\": \"OK\",\n    \"headers\": {\n      \"x-ids\": {\n        \"schema\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\",\n            \"maxLength\": 8\n          }\n        }\n      }\n    }\n  }\n}</code></pre>"
         },
         {
           "text": "\n                    <p>We also recommend that you specify a regular expression to further lock down the expected string format.</p>\n                "
@@ -2490,7 +2490,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Set the <code>maxLength</code> property for string headers. This provides an extra layer of safety ensuring that your API only returns data that you expect it to return.</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n  \"200\": {\n    \"description\": \"OK\",\n    \"headers\": {\n      \"x-ids\": {\n        \"schema\": {\n          \"type\": \"string\",\n          \"maxLength\": \"8\"\n          }\n        }\n      }\n    }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n  \"200\": {\n    \"description\": \"OK\",\n    \"headers\": {\n      \"x-ids\": {\n        \"schema\": {\n          \"type\": \"string\",\n          \"maxLength\": 8\n          }\n        }\n      }\n    }\n  }\n}</code></pre>"
         },
         {
           "text": "\n                    <p>We also recommend that you specify a regular expression to further lock down the expected string format.</p>\n                "
@@ -3872,7 +3872,7 @@
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the <code>consumes</code> property allows using the the <code>file</code> parameter, or remove the parameter.</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the <code>consumes</code> property allows using the <code>file</code> parameter, or remove the parameter.</p>\n                "
         }
       ]
     }
@@ -4750,7 +4750,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a schema for a header, you do not limit what is accepted as the input. This could open your backend server to various attacks, like SQL injections or buffer overflows.</p>\n                    <p>If the header object is a response header, you have to also consider the output of the API. Your API has been designed to return specific data, but without schema, you do not limit what is                             accepted in response headers.</p>\n                    <p>Attackers typically want to make the API to change its behavior and return different data than it is supposed to. A particular API failure might leak some other data, such as records or stack                          trace. Defining a schema for all header objects helps reduce this risk.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>With response headers, you have to consider the output of the API. Your API has been designed to return specific data, but without schema, you do not limit what is                             accepted in response headers.</p>\n                    <p>Attackers typically want to make the API to change its behavior and return different data than it is supposed to. A particular API failure might leak some other data, such as records or stack                          trace. Defining a schema for all header objects helps reduce this risk.</p>\n                "
         }
       ]
     },
@@ -4760,7 +4760,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Define schemas for all header objects to restrict what input or output is allowed. This provides an extra layer of safety ensuring that your API only returns data that you expect it to return.</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"5-6\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"headers\": {\n    \"X-Rate-Limit-Limit\": {\n      \"description\": \"The number of allowed requests in the current period\",\n      \"schema\": {\n        \"type\": \"integer\",\n        \"additionalProperties\": \"false\"\n      }\n   }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"4-9\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"headers\": {\n    \"X-Rate-Limit-Limit\": {\n        \"description\": \"The number of allowed requests in the current period\",\n            \"schema\": {\n                \"type\": \"integer\",\n                \"minimum\": 0,\n                \"maximum\": 100,\n                \"format\": \"int32\",\n                \"additionalProperties\": false\n            }\n        }\n    }\n}</code></pre>"
         }
       ]
     }
@@ -4960,12 +4960,12 @@
     "group": "security",
     "subgroup": "authentication",
     "title": {
-      "text": "<h1>Operation acceps credentials transported over the network</h1>"
+      "text": "<h1>Operation accepts credentials transported over the network</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The API operation accepts credentials (basic authentication credentials or API keys)  transported over the network. The credentials are sent over the network  on each API call, over and over again, and are exposed to attack attempts to retrieve them.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#operation-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The API operation accepts credentials (basic authentication credentials or API keys)  transported over the network instead of the more secure tokens. The credentials are sent over the network  on each API call, over and over again, and are exposed to attack attempts to retrieve them.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#operation-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "The API operation accepts credentials (basic authentication credentials or API keys)  transported over the network. The credentials are sent over the network  on each API call, over and over again, and are exposed to attack attempts to retrieve them.",
+    "shortDescription": "The API operation accepts credentials (basic authentication credentials or API keys)  transported over the network instead of the more secure tokens. The credentials are sent over the network  on each API call, over and over again, and are exposed to attack attempts to retrieve them.",
     "exploit": {
       "sections": [
         {
@@ -5391,7 +5391,7 @@
           "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/Pet\"\n                    }\n                }\n            }\n    }</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\">\n                        <code class=\"language-json\">\"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/Pet\"\n                    }\n                }\n            }\n    }</code>\n                    </pre>"
         }
       ]
     },
@@ -5408,7 +5408,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Define <code>500</code> responses for all operations except <code>HEAD</code> operations.</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-start=\"1\" data-line=\"13-18\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/cpomponents/schemas/Pet\"\n                    }\n                }\n            }\n    },\n    ...\n    \"500\": {\n        \"description\": \"Internal Server Error\"\n        \"content\": {\n            \"application/json\": {\n                \"schema\": {\n                    \"$ref\": \"#/components/responses/500\"\n                }\n            }\n        }           \n    }\n  }</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" data-line=\"13-18\" xml:space=\"preserve\">\n                        <code class=\"language-json\">\"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/Pet\"\n                    }\n                }\n            }\n    },\n    ...\n    \"500\": {\n        \"description\": \"Internal Server Error\"\n        \"content\": {\n            \"application/json\": {\n                \"schema\": {\n                    \"$ref\": \"#/components/responses/500\"\n                }\n            }\n        }           \n    }\n  }</code>\n                    </pre>"
         }
       ]
     }
@@ -5729,7 +5729,7 @@
           "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"5\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"get\": {\n  \"description\": \"Returns all pets from the system that the user has access to\",\n  ...\n  \"responses\": {\n    \"200\": {\n      \"description\": \"OK\"\n    }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"5\" data-start=\"1\" xml:space=\"preserve\">\n                        <code class=\"language-json\">\"get\": {\n  \"description\": \"Returns all pets from the system that the user has access to\",\n  ...\n  \"responses\": {\n    \"200\": {\n      \"description\": \"OK\"\n    }\n  }\n}</code>\n                    </pre>"
         }
       ]
     },
@@ -5746,7 +5746,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Define schemas for all responses that should have a body.</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"7\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"get\": {\n  \"description\": \"Returns all pets from the system that the user has access to\",\n  ...\n  \"responses\": {\n    \"200\": {\n      \"description\": \"pet response\",\n      \"schema\": {\n        \"type\": \"array\",\n        \"additionalProperties\": \"false\",\n        \"items\": {\n          \"$ref\": \"#/componets/schemas/Pet\"\n        }\n      }\n    }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"7\" data-start=\"1\" xml:space=\"preserve\">\n                        <code class=\"language-json\">\"get\": {\n  \"description\": \"Returns all pets from the system that the user has access to\",\n  ...\n  \"responses\": {\n    \"200\": {\n      \"description\": \"pet response\",\n      \"schema\": {\n        \"type\": \"array\",\n        \"additionalProperties\": \"false\",\n        \"items\": {\n          \"$ref\": \"#/components/schemas/Pet\"\n        }\n      }\n    }\n  }\n}</code>\n                    </pre>"
         },
         {
           "text": "\n                    <p>Alternatively, if you do not want to include a body, you can change the HTTP status code in the response to one that should not have a body.</p>\n                "
@@ -6083,9 +6083,19 @@
       "text": "<h1>Schema allows additional properties</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The schema you have defined allows additional properties.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The schema you have defined allows additional properties.</p>\n                    <p>Unlike in the OpenAPI Specification v2, it is not enough to just state the type of the properties in the schema. The schema continues to accept properties of any type unless <code>additionalProperties</code> is set to <code>false</code>. By default, this property is <code>true</code>.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
     "shortDescription": "The schema you have defined allows additional properties.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"18-30\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"post\": {\n  \"description\": \"Creates a new pet in the store\",\n  \"operationId\": \"addPet\",\n  \"parameters\": [\n    {\n      \"name\": \"pet\",\n      \"in\": \"body\",\n      \"description\": \"Pet to add to the system\",\n      \"required\": true,\n      \"schema\": {\n        \"$ref\": \"#components/schemas/NewPet\"\n      }\n    }\n  ]\n}\n...\n{\n  \"NewPet\": {\n    \"type\": \"object\",\n    \"required\": [\n      \"name\"\n    ],\n    \"properties\": {\n      \"name\": {\n        \"type\": \"string\",\n        \"description\": \"Pet name\"\n      },\n      \"tag\": {\n        \"type\": \"string\",\n        \"description\": \"Pet tag\"\n      }\n    }\n  }\n}</code></pre>"
+        }
+      ]
+    },
     "exploit": {
       "sections": [
         {
@@ -6096,7 +6106,10 @@
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Clearly define the properties of both accepted inpust and outputs in your API.</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure you define all properties of the accepted JSON payload and set <code>additionalProperties</code> to <code>false</code> to enforce limitations to what the schema accepts.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"20\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"post\": {\n  \"description\": \"Creates a new pet in the store\",\n  \"operationId\": \"addPet\",\n  \"parameters\": [\n    {\n      \"name\": \"pet\",\n      \"in\": \"body\",\n      \"description\": \"pet to add to the system\",\n      \"required\": true,\n      \"schema\": {\n        \"$ref\": \"#components/schemas/NewPet\"\n      }\n    }\n  ]\n}\n...\n{\n  \"NewPet\": {\n    \"type\": \"object\",\n    \"additionalProperties\": \"false\",\n    \"required\": [\n      \"name\"\n    ],\n    \"properties\": {\n      \"name\": {\n        \"type\": \"string\",\n        \"description\": \"Pet name\"\n      },\n      \"tag\": {\n        \"type\": \"string\",\n        \"description\": \"Pet tag\"\n      }\n    }\n  }\n}</code></pre>"
         }
       ]
     }
@@ -6356,9 +6369,9 @@
       "text": "<h1>Link object has both 'operationId' and 'operationRef' defined</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>You have defined both <code>operationId</code> and <code>operationRef</code> fields for the link object on question. However, these fields are mutuallly exclusive, so only one of them should be defined.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#linkObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>You have defined both <code>operationId</code> and <code>operationRef</code> fields for the link object on question. However, these fields are mutually exclusive, so only one of them should be defined.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#linkObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "You have defined both <code>operationId</code> and <code>operationRef</code> fields for the link object on question. However, these fields are mutuallly exclusive, so only one of them should be defined.",
+    "shortDescription": "You have defined both <code>operationId</code> and <code>operationRef</code> fields for the link object on question. However, these fields are mutually exclusive, so only one of them should be defined.",
     "exploit": {
       "sections": [
         {
@@ -6452,7 +6465,7 @@
     "example": {
       "sections": [
         {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition.The schema of the media type object defines an array of files, but the <code>Content-Type</code> does not allow uploading multiple files:</p>\n                "
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The schema of the media type object defines an array of files, but the <code>Content-Type</code> does not allow uploading multiple files:</p>\n                "
         },
         {
           "code": "<pre class=\"line-numbers\" data-start=\"1\" data-line=\"16-17\" xml:space=\"preserve\"><code class=\"language-json\">{\n   \"requestBody\": {\n      \"content\": {\n         \"application/octet-stream\": {\n            \"schema\": {\n               \"properties\": {\n                  \"file\": {\n                     \"type\": \"array\",\n                     \"additionalProperties\": \"false\",\n                     \"items\": {\n                        \"type\": \"string\",\n                        \"format\": \"binary\"\n                     }\n                  }\n               }\n            }\n         }\n      }\n   }\n}</code></pre>"
@@ -6737,6 +6750,37 @@
         },
         {
           "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"servers\": [\n    {\n      \"url\": \"https://{user-name}.gigantic-server.com:{port}/{basePath}\",\n      \"description\": \"The production API server\",\n      \"variables\": {\n        \"username\": {\n          \"default\": \"demo\",\n          \"description\": \"this value is assigned by the service provider, in this example `gigantic-server.com`\"\n        },\n        \"port\": {\n          \"enum\": [\n            \"8443\",\n            \"443\"\n          ],\n          \"default\": \"8443\"\n        },\n        \"basePath\": {\n          \"default\": \"v2\"\n        }\n      }\n    }\n  ]\n}</code></pre>"
+        }
+      ]
+    }
+  },
+  "v3-semantic-server-url": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Server URL must be an absolute URL</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The property <code>url</code> of the <code>server</code> object must be an absolute URL.</p>\n                    <p>The Open API Specification (OAS) states that a <code>server</code> object <em>may</em> have a relative URL but that this indicates that  the host location is relative to the location where the OpenAPI document is being served. Because API definitions are uploaded to 42Crunch Platform, not retrieved from URLs, Security Audit cannot infer the host location and thus relative URLs are not acceptable.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#serverObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The property <code>url</code> of the <code>server</code> object must be an absolute URL.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The server object has been defined, but as a relative URL:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"5\" xml:space=\"preserve\"><code class=\"language-json\">{\n    \"openapi\": \"3.0.0\",\n    \"servers\": [\n        {\n            \"url\": \"/api\"\n        }\n    ],\n    \"info\": {\n        ...</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Define the URL of the <code>server</code> object as an absolute URL.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"5\" xml:space=\"preserve\"><code class=\"language-json\">{\n    \"openapi\": \"3.0.0\",\n    \"servers\": [\n        {\n            \"url\": \"http://petstore.swagger.io/api\"\n        }\n    ],\n    \"info\": {\n        ...</code></pre>"
         }
       ]
     }
@@ -7929,7 +7973,7 @@
           "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The OAS does not recognize a property called <code>language</code> for strings:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"7\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"in\": \"query\",\n     \"name\": \"id\",\n     \"type\": \"string\",\n     \"maxLength\": \"8\",\n     \"language\": \"en-US\",\n     \"description\": \"Identifier of the object to be extracted.\"\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"7\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"in\": \"query\",\n     \"name\": \"id\",\n     \"type\": \"string\",\n     \"maxLength\": 8,\n     \"language\": \"en-US\",\n     \"description\": \"Identifier of the object to be extracted.\"\n  }\n}</code></pre>"
         }
       ]
     },
@@ -7939,7 +7983,69 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Do not use unknown properties not defined in the OAS.</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"in\": \"query\",\n     \"name\": \"id\",\n     \"type\": \"string\",\n     \"maxLength\": \"8\",\n     \"description\": \"Identifier of the object to be extracted.\"\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"in\": \"query\",\n     \"name\": \"id\",\n     \"type\": \"string\",\n     \"maxLength\": 8,\n     \"description\": \"Identifier of the object to be extracted.\"\n  }\n}</code></pre>"
+        }
+      ]
+    }
+  },
+  "v3-warning-content-type-badformat": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>MIME type has an improper value</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The value you have defined for the MIME type is not a proper value. For example, it might contain characters that are not allowed, or it might not follow the format <code>prefix/subtype[+suffix][;parameters]</code>.</p>\n                    <p>For more details, see <a href=\"https://tools.ietf.org/html/rfc6838\" target=\"_blank\" rel=\"noopener\">RFC 6838</a>.</p>\n                "
+    },
+    "shortDescription": "The value you have defined for the MIME type is not a proper value. For example, it might contain characters that are not allowed, or it might not follow the format <code>prefix/subtype[+suffix][;parameters]</code>.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The prefix, subtype, and suffix are separated by spaces:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" data-line=\"5\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n    \"200\": {\n        \"description\": \"Cute cat picture\",\n        \"content\": {\n            \"image svg xml\": {\n                \"schema\": {\n                    \"$ref\": \"#/components/schemas/Kitty\"\n                }\n            }\n        }\n    },\n...\n\t\t\t\t</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all MIME type definitions follow the format <code>prefix/subtype[+suffix][;parameters]</code> and do not contain restricted characters.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" data-line=\"5\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n    \"200\": {\n        \"description\": \"Cute cat picture\",\n        \"content\": {\n            \"image/svg+xml\": {\n                \"schema\": {\n                    \"$ref\": \"#/components/schemas/Kitty\"\n                }\n            }\n        }\n    },\n...\n\t\t\t\t</code></pre>"
+        }
+      ]
+    }
+  },
+  "v3-warning-content-type-unknownprefix": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>Prefix is not a known prefix</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>You are referencing a media type using an unknown prefix. All media types referenced should be proper MIME types.</p>\n                    <p>Known prefixes for media types are:</p>\n                    <ul>\n                        <li value=\"1\"><code>application</code>\n                        </li>\n                        <li value=\"2\"><code>audio</code>\n                        </li>\n                        <li value=\"3\"><code>font</code>\n                        </li>\n                        <li value=\"4\"><code>example</code>\n                        </li>\n                        <li value=\"5\"><code>image</code>\n                        </li>\n                        <li value=\"6\"><code>message</code>\n                        </li>\n                        <li value=\"7\"><code>model</code>\n                        </li>\n                        <li value=\"8\"><code>multipart</code>\n                        </li>\n                        <li value=\"9\"><code>text</code>\n                        </li>\n                        <li value=\"10\"><code>video</code>\n                        </li>\n                    </ul>\n                    <p>For more details, see <a href=\"https://tools.ietf.org/html/rfc2046\" target=\"_blank\" rel=\"noopener\">RFC 2046</a>.</p>\n                "
+    },
+    "shortDescription": "You are referencing a media type using an unknown prefix. All media types referenced should be proper MIME types.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The media type prefix has been misspelt:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" data-line=\"5\" xml:space=\"preserve\">\n                        <code class=\"language-json\">\"responses\": {\n    \"200\": {\n        \"description\": \"Expected response to a valid request\",\n        \"content\": {\n            \"application/json\": {\n                \"schema\": {\n                    \"$ref\": \"#/components/schemas/Pet\"\n                }\n            }\n        }\n    },\n...\n</code>\n                    </pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you only use known media type prefixes.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" data-line=\"5\" xml:space=\"preserve\">\n                        <code class=\"language-json\">\"responses\": {\n    \"200\": {\n        \"description\": \"Expected response to a valid request\",\n        \"content\": {\n            \"application/json\": {\n                \"schema\": {\n                    \"$ref\": \"#/components/schemas/Pet\"\n                }\n            }\n        }\n    },\n...\n</code>\n                    </pre>"
         }
       ]
     }
@@ -7996,7 +8102,7 @@
           "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n   \"encoding\": {\n      \"historyMetadata\": {\n         \"contentType\": \"application/xml; charset=utf-8\"\n      },\n      \"profileImage\": {         \n         \"headers\": {\n        \"Contet-Type\": {\n        \"contentType\": \"image/png, image/jpeg\"\n        },\n            \"X-Rate-Limit-Limit\": {\n               \"description\": \"The number of allowed requests in the current period\",\n               \"schema\": {\n                  \"type\": \"integer\"\n               }\n            }\n         }\n      }\n   }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n   \"encoding\": {\n      \"historyMetadata\": {\n         \"contentType\": \"application/xml; charset=utf-8\"\n      },\n      \"profileImage\": {         \n         \"headers\": {\n        \"Content-Type\": {\n        \"contentType\": \"image/png, image/jpeg\"\n        },\n            \"X-Rate-Limit-Limit\": {\n               \"description\": \"The number of allowed requests in the current period\",\n               \"schema\": {\n                  \"type\": \"integer\"\n               }\n            }\n         }\n      }\n   }\n}</code></pre>"
         }
       ]
     },
@@ -8310,7 +8416,7 @@
           "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"headers\": {\n    \"Accept\": {\n       \"application/json\": {\n         \"schema\": {\n            \"$ref\": \"#/components/schemas/Pet\"\n            }\n         }\n      }\n   }</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"name\": \"Accept\",\n  \"in\": \"header\",\n  \"description\": \"Supported content types\",\n  \"required\": true,\n  \"schema\": {\n    \"type\": \"string\",\n    \"pattern\": \"^application/json$|^application/xml$\"\n  }\n}</code></pre>"
         }
       ]
     },
@@ -8318,9 +8424,6 @@
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you do not use the restricted values as header parameter names.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"headers\": {\n    \"Pet\": {\n       \"application/json\": {\n         \"schema\": {\n            \"$ref\": \"#/components/schemas/Pet\"\n            }\n         }\n      }\n   }</code></pre>"
         }
       ]
     }
@@ -8341,17 +8444,14 @@
           "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"headers\": {\n    \"Authorization\": {\n       \"application/json\": {\n         \"schema\": {\n            \"$ref\": \"#/components/schemas/Pet\"\n            }\n         }\n      }\n   }</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"name\": \"Authorization\",\n  \"in\": \"header\",\n  \"description\": \"token to be passed as a header\",\n  \"required\": true,\n  \"schema\": {\n    \"type\": \"array\",\n    \"items\": {\n      \"type\": \"string\",\n      \"format\": \"base64\",\n      \"additionalProperties\": false\n    }\n  },\n  \"style\": \"simple\"\n}</code></pre>"
         }
       ]
     },
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you do not use the restricted values as header parameter names.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"headers\": {\n    \"Pet\": {\n       \"application/json\": {\n         \"schema\": {\n            \"$ref\": \"#/components/schemas/Pet\"\n            }\n         }\n      }\n   }</code></pre>"
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you do not use the restricted values as header parameter names.</p>\n                    <p>Make sure that you have properly defined the security section of your OpenAPI definition and are not trying to use a header parameter to define what in fact should be conveyed in the actual <code>Authorization</code> header.</p>\n                "
         }
       ]
     }
@@ -8372,7 +8472,7 @@
           "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"headers\": {\n    \"Content-Type\": {\n       \"application/json\": {\n         \"schema\": {\n            \"$ref\": \"#/components/schemas/Pet\"\n            }\n         }\n      }\n   }</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"name\": \"Content-Type\",\n  \"in\": \"header\",\n  \"description\": \"Supported content types\",\n  \"required\": true,\n  \"schema\": {\n    \"type\": \"string\",\n    \"pattern\": \"^application/json$|^application/xml$\"\n  }\n}</code></pre>"
         }
       ]
     },
@@ -8380,9 +8480,6 @@
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you do not use the restricted values as header parameter names.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"headers\": {\n    \"Pet\": {\n       \"application/json\": {\n         \"schema\": {\n            \"$ref\": \"#/components/schemas/Pet\"\n            }\n         }\n      }\n   }</code></pre>"
         }
       ]
     }
@@ -9481,7 +9578,7 @@
           "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The OAS does not recognize a property called <code>language</code> for strings:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"7\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"in\": \"query\",\n     \"name\": \"id\",\n     \"type\": \"string\",\n     \"maxLength\": \"8\",\n     \"language\": \"en-US\",\n     \"description\": \"Identifier of the object to be extracted.\"\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"7\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"in\": \"query\",\n     \"name\": \"id\",\n     \"type\": \"string\",\n     \"maxLength\": 8,\n     \"language\": \"en-US\",\n     \"description\": \"Identifier of the object to be extracted.\"\n  }\n}</code></pre>"
         }
       ]
     },
@@ -9491,7 +9588,69 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Do not use unknown properties not defined in the OAS.</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"in\": \"query\",\n     \"name\": \"id\",\n     \"type\": \"string\",\n     \"maxLength\": \"8\",\n     \"description\": \"Identifier of the object to be extracted.\"\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"in\": \"query\",\n     \"name\": \"id\",\n     \"type\": \"string\",\n     \"maxLength\": 8,\n     \"description\": \"Identifier of the object to be extracted.\"\n  }\n}</code></pre>"
+        }
+      ]
+    }
+  },
+  "warning-content-type-badformat": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>MIME type has an improper value</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The value you have defined for the MIME type is not a proper value. For example, it might contain characters that are not allowed, or it might not follow the format <code>prefix/subtype[+suffix][;parameters]</code>.</p>\n                    <p>For more details, see <a href=\"https://tools.ietf.org/html/rfc6838\" target=\"_blank\" rel=\"noopener\">RFC 6838</a>.</p>\n                "
+    },
+    "shortDescription": "The value you have defined for the MIME type is not a proper value. For example, it might contain characters that are not allowed, or it might not follow the format <code>prefix/subtype[+suffix][;parameters]</code>.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The prefix, subtype, and suffix are separated by spaces:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" data-line=\"5\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n    \"200\": {\n        \"description\": \"Cute cat picture\",\n        \"content\": {\n            \"image svg xml\": {\n                \"schema\": {\n                    \"$ref\": \"#/definitions/Kitty\"\n                }\n            }\n        }\n    },\n...\n\t\t\t\t</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all MIME type definitions follow the format <code>prefix/subtype[+suffix][;parameters]</code> and do not contain restricted characters.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" data-line=\"5\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n    \"200\": {\n        \"description\": \"Cute cat picture\",\n        \"content\": {\n            \"image/svg+xml\": {\n                \"schema\": {\n                    \"$ref\": \"#/definitions/Kitty\"\n                }\n            }\n        }\n    },\n...\n\t\t\t\t</code></pre>"
+        }
+      ]
+    }
+  },
+  "warning-content-type-unknownprefix": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>Prefix is not a known prefix</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>You are referencing a media type using an unknown prefix. All media types referenced should be proper MIME types.</p>\n                    <p>Known prefixes for media types are:</p>\n                    <ul>\n                        <li value=\"1\"><code>application</code>\n                        </li>\n                        <li value=\"2\"><code>audio</code>\n                        </li>\n                        <li value=\"3\"><code>font</code>\n                        </li>\n                        <li value=\"4\"><code>example</code>\n                        </li>\n                        <li value=\"5\"><code>image</code>\n                        </li>\n                        <li value=\"6\"><code>message</code>\n                        </li>\n                        <li value=\"7\"><code>model</code>\n                        </li>\n                        <li value=\"8\"><code>multipart</code>\n                        </li>\n                        <li value=\"9\"><code>text</code>\n                        </li>\n                        <li value=\"10\"><code>video</code>\n                        </li>\n                    </ul>\n                    <p>For more details, see <a href=\"https://tools.ietf.org/html/rfc2046\" target=\"_blank\" rel=\"noopener\">RFC 2046</a>.</p>\n                "
+    },
+    "shortDescription": "You are referencing a media type using an unknown prefix. All media types referenced should be proper MIME types.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The media type prefix has been misspelt:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" data-line=\"7\" xml:space=\"preserve\">\n                        <code class=\"language-json\">{\n  \"/pets\": {\n    \"put\": {\n      \"summary\": \"Updates a pet in the store with form data\",\n      \"operationId\": \"updatePetWithForm\",\n      \"produces\": [\n        \"application/json\"\n      ],\n      \"parameters\": [\n...\n}</code>\n                    </pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you only use known media type prefixes.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" data-line=\"7\" xml:space=\"preserve\">\n                        <code class=\"language-json\">{\n  \"/pets\": {\n    \"put\": {\n      \"summary\": \"Updates a pet in the store with form data\",\n      \"operationId\": \"updatePetWithForm\",\n      \"produces\": [\n        \"application/json\"\n      ],\n      \"parameters\": [\n...\n}</code>\n                    </pre>"
         }
       ]
     }
@@ -9841,6 +10000,16 @@
       "text": "\n                    <h2>Description</h2>\n                    <p>You have used a restricted value as the name of a header parameter. The values <code>Accept</code>, <code>Content-Type</code>, and <code>Authorization</code> are restricted values and should not be used as the header name. A header with any of these values as the header name is ignored.</p>\n                "
     },
     "shortDescription": "You have used a restricted value as the name of a header parameter. The values <code>Accept</code>, <code>Content-Type</code>, and <code>Authorization</code> are restricted values and should not be used as the header name. A header with any of these values as the header name is ignored.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n    \"name\": \"Accept\",\n    \"in\": \"header\",\n    \"description\": \"Supported content types\",\n    \"required\": true,\n    \"type\": \"string\",\n    \"pattern\": \"^application/json$|^application/xml$\"\n}</code></pre>"
+        }
+      ]
+    },
     "remediation": {
       "sections": [
         {
@@ -9859,10 +10028,20 @@
       "text": "\n                    <h2>Description</h2>\n                    <p>You have used a restricted value as the name of a header parameter. The values <code>Accept</code>, <code>Content-Type</code>, and <code>Authorization</code> are restricted values and should not be used as the header name. A header with any of these values as the header name is ignored.</p>\n                "
     },
     "shortDescription": "You have used a restricted value as the name of a header parameter. The values <code>Accept</code>, <code>Content-Type</code>, and <code>Authorization</code> are restricted values and should not be used as the header name. A header with any of these values as the header name is ignored.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n    \"name\": \"Authorization\",\n    \"in\": \"header\",\n    \"description\": \"token to be passed as a header\",\n    \"required\": true,\n    \"type\": \"array\",\n    \"items\": {\n        \"type\": \"integer\",\n        \"format\": \"int64\"\n    },\n    \"collectionFormat\": \"csv\"\n}</code></pre>"
+        }
+      ]
+    },
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you do not use the restricted values as header parameter names.</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you do not use the restricted values as header parameter names.</p>\n                    <p>Make sure that you have properly defined the security section of your OpenAPI definition and are not trying to use a header parameter to define what in fact should be conveyed in the actual <code>Authorization</code> header.</p>\n                "
         }
       ]
     }
@@ -9877,6 +10056,16 @@
       "text": "\n                    <h2>Description</h2>\n                    <p>You have used a restricted value as the name of a header parameter. The values <code>Accept</code>, <code>Content-Type</code>, and <code>Authorization</code> are restricted values and should not be used as the header name. A header with any of these values as the header name is ignored.</p>\n                "
     },
     "shortDescription": "You have used a restricted value as the name of a header parameter. The values <code>Accept</code>, <code>Content-Type</code>, and <code>Authorization</code> are restricted values and should not be used as the header name. A header with any of these values as the header name is ignored.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n    \"name\": \"Content-Type\",\n    \"in\": \"header\",\n    \"description\": \"Supported content types\",\n    \"required\": true,\n    \"type\": \"string\",\n    \"pattern\": \"^application/json$|^application/xml$\",\n}</code></pre>"
+        }
+      ]
+    },
     "remediation": {
       "sections": [
         {
@@ -9954,9 +10143,9 @@
       "text": "<h1>Value of the 'x-42c-sample' extension is not consistent with the parameter</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The value of the extension <code>x-42c-sample</code> is not consistent with the associated paraneter.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#parameter-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The value of the extension <code>x-42c-sample</code> is not consistent with the associated parameter.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#parameter-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "The value of the extension <code>x-42c-sample</code> is not consistent with the associated paraneter.",
+    "shortDescription": "The value of the extension <code>x-42c-sample</code> is not consistent with the associated parameter.",
     "remediation": {
       "sections": [
         {
