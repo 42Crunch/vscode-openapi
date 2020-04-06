@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 3.0.1 (April 3, 2020)
+## Version 3.0.1 (April 6, 2020)
 * Support files with external $refs in 42Crunch API Contract Security Audit
 
 ## Version 2.1.2 (March 23, 2020)
