@@ -185,8 +185,8 @@ export function activate(context: vscode.ExtensionContext) {
 
   const yamlCompletionProvider = new YamlCompletionItemProvider(context, didChangeTreeIncludingErrors.event);
 
-  vscode.languages.registerCompletionItemProvider(yamlFile, yamlCompletionProvider, '"', "'");
-  vscode.languages.registerCompletionItemProvider(yamlUnsaved, yamlCompletionProvider, '"', "'");
+  vscode.languages.registerCompletionItemProvider(yamlFile, yamlCompletionProvider);
+  vscode.languages.registerCompletionItemProvider(yamlUnsaved, yamlCompletionProvider);
 
   const jsonSchemaDefinitionProvider = new JsonSchemaDefinitionProvider();
   const yamlSchemaDefinitionProvider = new YamlSchemaDefinitionProvider();
@@ -199,7 +199,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   const diagnostics = vscode.languages.createDiagnosticCollection('openapi');
 
-  vscode.workspace.onDidCloseTextDocument(document => {
+  vscode.workspace.onDidCloseTextDocument((document) => {
     diagnostics.delete(document.uri);
   });
 
@@ -212,11 +212,11 @@ export function activate(context: vscode.ExtensionContext) {
     diagnostics,
   );
 
-  vscode.window.onDidChangeActiveTextEditor(e =>
+  vscode.window.onDidChangeActiveTextEditor((e) =>
     onActiveEditorChanged(e, didChangeTreeValid, didChangeTreeIncludingErrors, didChangeEditor, diagnostics),
   );
 
-  vscode.workspace.onDidChangeTextDocument(e =>
+  vscode.workspace.onDidChangeTextDocument((e) =>
     onDocumentChanged(e, didChangeTreeValid, didChangeTreeIncludingErrors, diagnostics),
   );
 

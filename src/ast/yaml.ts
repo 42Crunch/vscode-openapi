@@ -12,7 +12,7 @@ export function parseYaml(text: string, schema: Schema): [YamlNode, any[]] {
   const documents = [];
   yaml.loadAll(
     text,
-    document => {
+    (document) => {
       documents.push(document);
     },
     { schema },
@@ -24,7 +24,7 @@ export function parseYaml(text: string, schema: Schema): [YamlNode, any[]] {
 
   const node = new YamlNode(documents[0]);
 
-  const normalizedErrors = documents[0].errors.map(error => ({
+  const normalizedErrors = documents[0].errors.map((error) => ({
     message: error.message,
     offset: error.mark ? error.mark.position : 0,
   }));
@@ -168,7 +168,7 @@ function findNodeAtLocation(root: yaml.YAMLNode, path: string[]): yaml.YAMLNode 
 }
 
 function contains(node: yaml.YAMLNode, offset: number) {
-  return offset >= node.startPosition && offset < node.endPosition;
+  return offset >= node.startPosition && offset <= node.endPosition;
 }
 
 export function findYamlNodeAtOffset(node: yaml.YAMLNode, offset: number): yaml.YAMLNode {
