@@ -27,7 +27,7 @@ function loadYaml(filename) {
   return parseYaml(readFileSync(filename, { encoding: 'utf8' }));
 }
 
-test('finding nodes, top level, yaml', t => {
+test('finding nodes, top level, yaml', (t) => {
   const root = loadYaml('tests/xkcd.yaml');
 
   const swagger = root.find('/swagger');
@@ -39,7 +39,7 @@ test('finding nodes, top level, yaml', t => {
   t.is(host.getKey(), 'host');
 });
 
-test('finding nodes, top level, json', t => {
+test('finding nodes, top level, json', (t) => {
   const root = loadJson('tests/xkcd.json');
 
   const swagger = root.find('/swagger');
@@ -51,7 +51,7 @@ test('finding nodes, top level, json', t => {
   t.is(host.getKey(), 'host');
 });
 
-test('json children', t => {
+test('json children', (t) => {
   const root = loadJson('tests/xkcd.json');
 
   const paths = root.find('/paths');
@@ -61,7 +61,7 @@ test('json children', t => {
   t.is(children[1].getKey(), '/{comicId}/info.0.json');
 });
 
-test('yaml children', t => {
+test('yaml children', (t) => {
   const root = loadYaml('tests/xkcd.yaml');
 
   const paths = root.find('/paths');
@@ -71,7 +71,7 @@ test('yaml children', t => {
   t.is(children[1].getKey(), '/{comicId}/info.0.json');
 });
 
-test('json children array', t => {
+test('json children array', (t) => {
   const root = loadJson('tests/xkcd.json');
 
   const schemes = root.find('/schemes');
@@ -83,7 +83,7 @@ test('json children array', t => {
   t.is(children[1].getValue(), 'https');
 });
 
-test('yaml children array', t => {
+test('yaml children array', (t) => {
   const root = loadYaml('tests/xkcd.yaml');
 
   const schemes = root.find('/schemes');
@@ -95,7 +95,7 @@ test('yaml children array', t => {
   t.is(children[1].getValue(), 'https');
 });
 
-test('finding nodes, multiple levels, json', t => {
+test('finding nodes, multiple levels, json', (t) => {
   const root = loadJson('tests/xkcd.json');
 
   const title = root.find('/info/title');
@@ -105,7 +105,7 @@ test('finding nodes, multiple levels, json', t => {
   t.is(description.getValue(), 'Fetch current comic and metadata.\n');
 });
 
-test('finding nodes, multiple levels, yaml', t => {
+test('finding nodes, multiple levels, yaml', (t) => {
   const root = loadYaml('tests/xkcd.yaml');
 
   const title = root.find('/info/title');
@@ -115,7 +115,7 @@ test('finding nodes, multiple levels, yaml', t => {
   t.is(description.getValue(), 'Fetch current comic and metadata.\n');
 });
 
-test('json node depth', t => {
+test('json node depth', (t) => {
   const root = loadJson('tests/xkcd.json');
 
   const info = root.find('/info');
@@ -130,7 +130,7 @@ test('json node depth', t => {
   t.is(description.getDepth(), 4);
 });
 
-test('yaml node depth', t => {
+test('yaml node depth', (t) => {
   const root = loadYaml('tests/xkcd.yaml');
 
   const info = root.find('/info');
@@ -145,7 +145,7 @@ test('yaml node depth', t => {
   t.is(description.getDepth(), 4);
 });
 
-test('json path and v3 petstore json', t => {
+test('json path and v3 petstore json', (t) => {
   const root = loadJson('tests/petstore-v3.json');
 
   const schema = root.find('/paths/~1pets/get/parameters/0/schema');
@@ -155,7 +155,7 @@ test('json path and v3 petstore json', t => {
   t.truthy(schema2);
 });
 
-test('json path and v3 petstore yaml', t => {
+test('json path and v3 petstore yaml', (t) => {
   const root = loadYaml('tests/petstore-v3.yaml');
 
   const schema = root.find('/paths/~1pets/get/parameters/0/schema');
@@ -165,21 +165,21 @@ test('json path and v3 petstore yaml', t => {
   t.truthy(schema2);
 });
 
-test('slash escape in json', t => {
+test('slash escape in json', (t) => {
   const root = loadJson('tests/petstore-v3.json');
 
   const schema = root.find('/paths/~1pets/get/responses/200/content/application~1json/schema');
   t.truthy(schema);
 });
 
-test('slash escape in yaml', t => {
+test('slash escape in yaml', (t) => {
   const root = loadYaml('tests/petstore-v3.yaml');
 
   const schema = root.find('/paths/~1pets/get/responses/200/content/application~1json/schema');
   t.truthy(schema);
 });
 
-test('yaml node getKey()', t => {
+test('yaml node getKey()', (t) => {
   const root = loadYaml('tests/xkcd.yaml');
 
   const responses = root.find('/paths/~1{comicId}~1info.0.json/get/parameters');
@@ -188,7 +188,7 @@ test('yaml node getKey()', t => {
   t.is(children[0].getKey(), '0');
 });
 
-test('json node getKey()', t => {
+test('json node getKey()', (t) => {
   const root = loadJson('tests/xkcd.json');
 
   const responses = root.find('/paths/~1{comicId}~1info.0.json/get/parameters');
@@ -197,7 +197,7 @@ test('json node getKey()', t => {
   t.is(children[0].getKey(), '0');
 });
 
-test('json nodes getParent()', t => {
+test('json nodes getParent()', (t) => {
   const root = parseJson(`{"foo": [1,2], "bar": {"baz": true}}`);
 
   const foo = root.find('/foo');
@@ -214,7 +214,7 @@ test('json nodes getParent()', t => {
   t.is(baz.getParent().getKey(), 'bar');
 });
 
-test('yaml nodes getParent()', t => {
+test('yaml nodes getParent()', (t) => {
   const root = parseYaml(`
 foo:
   - 1
@@ -236,7 +236,7 @@ bar:
   t.is(baz.getParent().getKey(), 'bar');
 });
 
-test('json top level list', t => {
+test('json top level list', (t) => {
   const root = parseJson(`[1,2]`);
   const top = root.find('');
   const one = root.find('/0');
@@ -248,7 +248,7 @@ test('json top level list', t => {
   t.is(two.getValue(), 2);
 });
 
-test('yaml top level list', t => {
+test('yaml top level list', (t) => {
   const root = parseYaml(`
 - 1
 - 2`);
@@ -261,7 +261,7 @@ test('yaml top level list', t => {
   t.is(two.getValue(), '2');
 });
 
-test('yaml findNodeAtOffset() top level array', t => {
+test('yaml findNodeAtOffset() top level array', (t) => {
   const text = '- a: b\n- c: d';
   const root = parseYaml(text);
 
@@ -272,7 +272,7 @@ test('yaml findNodeAtOffset() top level array', t => {
   t.is(root.findNodeAtOffset(9).getKey(), 'c');
   t.is(root.findNodeAtOffset(8).getKey(), undefined);
   t.is(root.findNodeAtOffset(7).getKey(), undefined);
-  t.is(root.findNodeAtOffset(6).getKey(), undefined);
+  t.is(root.findNodeAtOffset(6).getKey(), 'a');
   t.is(root.findNodeAtOffset(5).getKey(), 'a');
   t.is(root.findNodeAtOffset(4).getKey(), 'a');
   t.is(root.findNodeAtOffset(3).getKey(), 'a');
@@ -281,7 +281,7 @@ test('yaml findNodeAtOffset() top level array', t => {
   t.is(root.findNodeAtOffset(0).getKey(), undefined);
 });
 
-test('yaml findNodeAtOffset() top level object', t => {
+test('yaml findNodeAtOffset() top level object', (t) => {
   const text = 'a:\n - b: c';
   const root = parseYaml(text);
 

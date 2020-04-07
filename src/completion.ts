@@ -26,15 +26,7 @@ const targetMapping = {
 function findTarget(root: Node, node: Node): string | undefined {
   const mapping = targetMapping[getOpenApiVersion(root)];
   if (mapping) {
-    return (
-      mapping[node.getParent()?.getKey()] ||
-      mapping[
-        node
-          .getParent()
-          ?.getParent()
-          ?.getKey()
-      ]
-    );
+    return mapping[node.getParent()?.getKey()] || mapping[node.getParent()?.getParent()?.getKey()];
   }
 }
 
@@ -66,9 +58,9 @@ export class YamlCompletionItemProvider implements vscode.CompletionItemProvider
     const target = findTarget(this.root, node);
     const targetNode = target && this.root.find(target);
     if (targetNode) {
-      const completions = targetNode.getChildren().map(child => {
+      const completions = targetNode.getChildren().map((child) => {
         const key = child.getKey();
-        return new vscode.CompletionItem(`#${target}/${key}`);
+        return new vscode.CompletionItem(`"#${target}/${key}"`);
       });
       return completions;
     }
