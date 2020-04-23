@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { Node, YamlNode, JsonNode } from './ast';
+import { Node } from './ast';
 import { getOpenApiVersion } from './util';
 import { OpenApiVersion } from './constants';
 
@@ -30,14 +30,14 @@ function findTarget(root: Node, node: Node): string | undefined {
   }
 }
 
-export class YamlCompletionItemProvider implements vscode.CompletionItemProvider {
-  root: YamlNode;
+export class CompletionItemProvider implements vscode.CompletionItemProvider {
+  root: Node;
   constructor(
     private context: vscode.ExtensionContext,
     private didChangeTree: vscode.Event<[Node, vscode.TextDocumentChangeEvent]>,
   ) {
     didChangeTree(([node, changeEvent]) => {
-      this.root = <YamlNode>node;
+      this.root = node;
     });
   }
 
@@ -48,7 +48,7 @@ export class YamlCompletionItemProvider implements vscode.CompletionItemProvider
     context: vscode.CompletionContext,
   ) {
     const line = document.lineAt(position).text;
-    if (!line.includes('$ref: ')) {
+    if (!(line.includes('$ref: ') || line.includes('"$ref"'))) {
       return undefined;
     }
 
