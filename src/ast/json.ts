@@ -10,7 +10,7 @@ import { parseJsonPointer } from '../pointer';
 export function parseJson(text: string): [JsonNode, any[]] {
   const parseErrors = [];
   const node = new JsonNode(json.parseTree(text, parseErrors));
-  const normalizedErrors = parseErrors.map(error => ({
+  const normalizedErrors = parseErrors.map((error) => ({
     message: json.printParseErrorCode(error.error),
     offset: error.offset,
   }));
@@ -69,7 +69,7 @@ export class JsonNode implements Node {
     if (parent) {
       if (parent.type === 'property') {
         return new JsonNode(parent.parent);
-      } else if (parent.type === 'array') {
+      } else if (parent.type === 'array' || parent.type === 'object') {
         return new JsonNode(parent);
       }
     }
@@ -97,9 +97,9 @@ export class JsonNode implements Node {
 
   getChildren(): JsonNode[] {
     if (this.node.type === 'object') {
-      return this.node.children.map(child => new JsonNode(child.children[1]));
+      return this.node.children.map((child) => new JsonNode(child.children[1]));
     } else if (this.node.type === 'array') {
-      return this.node.children.map(child => new JsonNode(child));
+      return this.node.children.map((child) => new JsonNode(child));
     }
   }
 
