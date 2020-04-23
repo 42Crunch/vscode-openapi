@@ -25,7 +25,7 @@ import {
 } from './outline';
 
 import { JsonSchemaDefinitionProvider, YamlSchemaDefinitionProvider } from './reference';
-import { YamlCompletionItemProvider } from './completion';
+import { CompletionItemProvider } from './completion';
 import { updateContext } from './context';
 import { registerCommands } from './commands';
 import { create as createWhatsNewPanel } from './whatsnew';
@@ -183,10 +183,11 @@ export function activate(context: vscode.ExtensionContext) {
   const yamlFile: vscode.DocumentSelector = { language: 'yaml', scheme: 'file' };
   const yamlUnsaved: vscode.DocumentSelector = { language: 'yaml', scheme: 'untitled' };
 
-  const yamlCompletionProvider = new YamlCompletionItemProvider(context, didChangeTreeIncludingErrors.event);
-
-  vscode.languages.registerCompletionItemProvider(yamlFile, yamlCompletionProvider);
-  vscode.languages.registerCompletionItemProvider(yamlUnsaved, yamlCompletionProvider);
+  const completionProvider = new CompletionItemProvider(context, didChangeTreeIncludingErrors.event);
+  vscode.languages.registerCompletionItemProvider(yamlFile, completionProvider);
+  vscode.languages.registerCompletionItemProvider(yamlUnsaved, completionProvider);
+  vscode.languages.registerCompletionItemProvider(jsonFile, completionProvider);
+  vscode.languages.registerCompletionItemProvider(jsonUnsaved, completionProvider);
 
   const jsonSchemaDefinitionProvider = new JsonSchemaDefinitionProvider();
   const yamlSchemaDefinitionProvider = new YamlSchemaDefinitionProvider();
