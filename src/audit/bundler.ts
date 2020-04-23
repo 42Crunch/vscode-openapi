@@ -50,13 +50,13 @@ export function getOpenApiVersion(parsed: any): string {
   return null;
 }
 
-const resolver = openDocuments => {
+const resolver = (openDocuments) => {
   return {
     order: 10,
-    canRead: file => {
+    canRead: (file) => {
       return url.isFileSystemPath(file.url);
     },
-    read: async file => {
+    read: async (file) => {
       const uri = vscode.Uri.file(url.toFileSystemPath(file.url));
       const alreadyOpen = openDocuments[uri.toString()];
       if (alreadyOpen) {
@@ -79,10 +79,7 @@ function parseDocument(document: vscode.TextDocument, options: ParserOptions) {
 }
 
 function mangle(value: string) {
-  return value
-    .replace(/~/g, '-')
-    .replace(/\//g, '-')
-    .replace(/\#/g, '');
+  return value.replace(/~/g, '-').replace(/\//g, '-').replace(/\#/g, '');
 }
 
 function set(target: any, path: string[], value: any) {
@@ -120,19 +117,23 @@ export async function bundle(
     cwd,
     resolve: { http: false, file: resolver(openDocuments) },
     hooks: {
-      onParse: parsed => {
+      onParse: (parsed) => {
         state.parsed = parsed;
         state.version = getOpenApiVersion(parsed);
       },
-      onRemap: entry => {
+      onRemap: (entry) => {
         const filename = url.toFileSystemPath(entry.file);
 
         // FIXME implement remap for openapi v2 and $ref location based remap
         const hashPath = Pointer.parse(entry.hash);
 
-        if (hashPath.length == 3 && hashPath[0] == 'components') {
+        if (hashPath[0] == 'components') {
+          // TODO check that hashPath == 'schemas' or 'parameters', etc.
           const targetFileName = relative(cwd, filename);
-          const path = ['components', hashPath[1], mangle(targetFileName) + '-' + hashPath[2]];
+          let path = ['components', hashPath[1], mangle(targetFileName) + '-' + hashPath[2]];
+          if (hashPath.length > 3) {
+            path = path.concat(hashPath.slice(3));
+          }
           set(state.parsed, path, entry.value);
           insertMapping(state.mapping, path, { file: filename, hash: entry.hash });
           return Pointer.join('#', path);
