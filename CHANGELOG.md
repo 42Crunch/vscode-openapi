@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 3.1.0 (April 23, 2020)
+* Fixed issue with multifile OAS bundling described in ([#54](https://github.com/42Crunch/vscode-openapi/issues/54)): Audit fails with $ref that points to another file and contains ~1
+* Fixes in YAML and JSON $ref completion
+
 ## Version 3.0.1 (April 6, 2020)
 * Support files with external $refs in 42Crunch API Contract Security Audit
 
