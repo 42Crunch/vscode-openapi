@@ -6362,6 +6362,37 @@
       ]
     }
   },
+  "v3-semantic-formdata-schema-required": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Media type object with 'multipart/form-data' has no schema defined</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>One or more media type objects in your API where <code>Content-Type</code> is set to <code>multipart/form-data</code> do not have schemas defined. Schema is required when <code>Content-Type</code> is <code>multipart/form-data</code>.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#mediaTypeObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "One or more media type objects in your API where <code>Content-Type</code> is set to <code>multipart/form-data</code> do not have schemas defined. Schema is required when <code>Content-Type</code> is <code>multipart/form-data</code>.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. This request body would accept anything as input:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"4-5\" xml:space=\"preserve\"><code class=\"language-json\">{\n   \"requestBody\": {\n      \"content\": {\n         \"multipart/form-data\": {\n         }\n      }\n   }\n}</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you have defined schemas for all media type objects in your API.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"4-11\" xml:space=\"preserve\"><code class=\"language-json\">{\n   \"requestBody\": {\n      \"content\": {\n         \"multipart/form-data\": {\n            \"schema\": {\n               \"properties\": {\n                  \"file\": {\n                     \"type\": \"array\",\n                     \"items\": {\n                        \"type\": \"string\",\n                        \"format\": \"binary\"\n                     }\n                  }\n               }\n            }\n         }\n      }\n   }\n}</code></pre>"
+        }
+      ]
+    }
+  },
   "v3-semantic-link-operationid-operationref": {
     "group": "oasconformance",
     "subgroup": "semantics",
