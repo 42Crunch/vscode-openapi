@@ -298,3 +298,36 @@ test('yaml findNodeAtOffset() top level object', (t) => {
   t.is(root.findNodeAtOffset(1).getKey(), 'a');
   t.is(root.findNodeAtOffset(0).getKey(), 'a');
 });
+
+test('yaml findNodeAtOffset() broken yaml', (t) => {
+  const text = 'a:\n - b:';
+  const root = parseYaml(text);
+
+  t.is(text.length, 8);
+  t.is(root.findNodeAtOffset(8).getKey(), 'b');
+  t.is(root.findNodeAtOffset(7).getKey(), 'b');
+  t.is(root.findNodeAtOffset(6).getKey(), 'b');
+  t.is(root.findNodeAtOffset(5).getKey(), 'a');
+  t.is(root.findNodeAtOffset(4).getKey(), 'a');
+  t.is(root.findNodeAtOffset(3).getKey(), 'a');
+  t.is(root.findNodeAtOffset(2).getKey(), 'a');
+  t.is(root.findNodeAtOffset(1).getKey(), 'a');
+  t.is(root.findNodeAtOffset(0).getKey(), 'a');
+});
+
+test('yaml findNodeAtOffset() broken yaml, more spaces', (t) => {
+  const text = 'a:\n  b:   ';
+  const root = parseYaml(text);
+
+  t.is(text.length, 10);
+  t.is(root.findNodeAtOffset(9).getKey(), 'b');
+  t.is(root.findNodeAtOffset(8).getKey(), 'b');
+  t.is(root.findNodeAtOffset(7).getKey(), 'b');
+  t.is(root.findNodeAtOffset(6).getKey(), 'b');
+  t.is(root.findNodeAtOffset(5).getKey(), 'b');
+  t.is(root.findNodeAtOffset(4).getKey(), 'a');
+  t.is(root.findNodeAtOffset(3).getKey(), 'a');
+  t.is(root.findNodeAtOffset(2).getKey(), 'a');
+  t.is(root.findNodeAtOffset(1).getKey(), 'a');
+  t.is(root.findNodeAtOffset(0).getKey(), 'a');
+});
