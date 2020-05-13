@@ -48,19 +48,35 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
     context: vscode.CompletionContext,
   ) {
     const line = document.lineAt(position).text;
-    if (!(line.includes('$ref: ') || line.includes('"$ref"'))) {
+    if (!(line.includes('$ref:') || line.includes('"$ref"'))) {
       return undefined;
     }
 
     const offset = document.offsetAt(position);
-    const node = this.root.findNodeAtOffset(offset);
+    const [start, end] = this.root.getRange();
+    // if offset is beyond the range of the root node
+    // which could happen in case of incomplete yaml node with
+    // bunch of spaces at the end;
+    // look for the node at the end of the root node range
+    const node = this.root.findNodeAtOffset(offset > end ? end : offset);
 
     const target = findTarget(this.root, node);
     const targetNode = target && this.root.find(target);
     if (targetNode) {
+      // don't include trailing quote when completing YAML and
+      // there are already quotes in line
+      let trailingQuote = '"';
+      let leadingSpace = ' ';
+      if (line.charAt(position.character) == '"') {
+        leadingSpace = '';
+        if (document.languageId === 'yaml') {
+          trailingQuote = '';
+        }
+      }
+      line.charAt(position.character);
       const completions = targetNode.getChildren().map((child) => {
         const key = child.getKey();
-        return new vscode.CompletionItem(`"#${target}/${key}"`);
+        return new vscode.CompletionItem(`${leadingSpace}"#${target}/${key}${trailingQuote}`);
       });
       return completions;
     }

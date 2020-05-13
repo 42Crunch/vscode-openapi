@@ -175,22 +175,33 @@ export function findYamlNodeAtOffset(node: yaml.YAMLNode, offset: number): yaml.
   if (contains(node, offset)) {
     if (node.kind === yaml.Kind.MAPPING) {
       const yamlMapping = <yaml.YAMLMapping>node;
-      const found = findYamlNodeAtOffset(yamlMapping.key, offset);
-      if (found) {
-        return found;
+      const foundInKey = findYamlNodeAtOffset(yamlMapping.key, offset);
+      if (foundInKey) {
+        return foundInKey;
       }
-      const found2 = findYamlNodeAtOffset(yamlMapping.value, offset);
-      if (found2) {
-        return found2;
+
+      // in case of partial yaml like "foo:" yamlMapping.value could be null
+      // in this case do not try to descend it and return key instead
+      if (yamlMapping.value === null) {
+        return yamlMapping.key;
+      } else {
+        const foundInValue = findYamlNodeAtOffset(yamlMapping.value, offset);
+        if (foundInValue) {
+          return foundInValue;
+        }
       }
     } else if (node.kind === yaml.Kind.MAP) {
       const yamlMap = <yaml.YamlMap>node;
       for (const mapping of yamlMap.mappings) {
-        const found = findYamlNodeAtOffset(mapping, offset);
-        if (found) {
-          return found;
+        const foundInMapping = findYamlNodeAtOffset(mapping, offset);
+        if (foundInMapping) {
+          return foundInMapping;
         }
       }
+      // this node contains the offset, but we didn't find it in the mappings
+      // lets set the offset to the end of the last mapping and retry
+      const lastMapping = yamlMap.mappings[yamlMap.mappings.length - 1];
+      return findYamlNodeAtOffset(lastMapping, lastMapping.endPosition);
     } else if (node.kind === yaml.Kind.SEQ) {
       const yamlSeq = <yaml.YAMLSequence>node;
       for (const item of yamlSeq.items) {

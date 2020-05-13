@@ -184,10 +184,10 @@ export function activate(context: vscode.ExtensionContext) {
   const yamlUnsaved: vscode.DocumentSelector = { language: 'yaml', scheme: 'untitled' };
 
   const completionProvider = new CompletionItemProvider(context, didChangeTreeIncludingErrors.event);
-  vscode.languages.registerCompletionItemProvider(yamlFile, completionProvider);
-  vscode.languages.registerCompletionItemProvider(yamlUnsaved, completionProvider);
-  vscode.languages.registerCompletionItemProvider(jsonFile, completionProvider);
-  vscode.languages.registerCompletionItemProvider(jsonUnsaved, completionProvider);
+  vscode.languages.registerCompletionItemProvider(yamlFile, completionProvider, '"');
+  vscode.languages.registerCompletionItemProvider(yamlUnsaved, completionProvider, '"');
+  vscode.languages.registerCompletionItemProvider(jsonFile, completionProvider, '"');
+  vscode.languages.registerCompletionItemProvider(jsonUnsaved, completionProvider, '"');
 
   const jsonSchemaDefinitionProvider = new JsonSchemaDefinitionProvider();
   const yamlSchemaDefinitionProvider = new YamlSchemaDefinitionProvider();
