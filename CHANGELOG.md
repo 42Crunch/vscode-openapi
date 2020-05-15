@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 3.1.2 (May 15, 2020)
+* Improve $ref autocompletion
+
 ## Version 3.1.1 (May 11, 2020)
 * Update Security Audit articles to match changes in the backend service
 
