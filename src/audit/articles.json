@@ -1,97 +1,4 @@
 {
-  "contact-email": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>Contact object email is not a proper email address</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The email address defined the <code>email</code> field of the <code>contact</code> object is not a proper email address. The OpenAPI Specification (OAS) requires that email addresses in the contract must be proper email addresses in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#contactObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The email address defined the <code>email</code> field of the <code>contact</code> object is not a proper email address. The OpenAPI Specification (OAS) requires that email addresses in the contract must be proper email addresses in a valid format.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">\"contact\": {\n    \"name\": \"API Team\",\n    \"email\": \"will add later\"\n}</code></pre>"
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all email addresses are proper email addresses and have the valid format.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">\"contact\": {\n    \"name\": \"API Team\",\n    \"email\": \"contact@apisecurity.io\"\n}</code></pre>"
-        }
-      ]
-    }
-  },
-  "contact-url": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>Contact object URL is not a proper URL</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined the <code>url</code> field of the <code>contact</code> object is not a proper URL. The OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#contactObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The URL defined the <code>url</code> field of the <code>contact</code> object is not a proper URL. The OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. In this example, the URL is missing the protocol and has an extra space in the middle:</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"name\": \"API Support\",\n  \"url\": \"www.example.com/ support\",\n  \"email\": \"support@example.com\"\n}</code></pre>"
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"name\": \"API Support\",\n  \"url\": \"http://www.example.com/support\",\n  \"email\": \"support@example.com\"\n}</code></pre>"
-        }
-      ]
-    }
-  },
-  "global-externaldocumentation-url": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>External Documentation object URL is not a proper URL</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined the <code>url</code> field of the top-level <code>External Documentation</code> object is not a proper URL.</p>\n                    <p>You can use the externalDocs field to reference an external resource that offers extended documentation for your API. This is field is optional. However, if you do reference external documentation, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#externalDocumentationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The URL defined the <code>url</code> field of the top-level <code>External Documentation</code> object is not a proper URL.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. Here, the <code>url</code> field has just a placeholder string:</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">   \"externalDocs\" : {\n       \"description\": \"Additional documentation\",\n       \"url\": \"need to add later\"\n  }</code></pre>"
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">  \"externalDocs\" : {\n       \"description\": \"Additional documentation\",\n       \"url\": \"http://my.api.com/docs/\"\n  }</code></pre>"
-        }
-      ]
-    }
-  },
   "global-http-clear": {
     "group": "security",
     "subgroup": "transport",
@@ -657,37 +564,6 @@
       ]
     }
   },
-  "license-url": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>License object URL is not a proper URL</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined in the <code>url</code> field of the <code>license</code> object is not a proper URL.</p>\n                    <p>The <code>license</code> object itself and the <code>url</code> field in it are optional. If you do not defined either, your OpenAPI definition is still a valid contract. However, if you do reference your license location, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>s\n    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#license-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a></p>"
-    },
-    "shortDescription": "The URL defined in the <code>url</code> field of the <code>license</code> object is not a proper URL.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. In this case, the URL is missing the protocol prefix and has an extra space:</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">\"license\" : {\n  \"name\": \"Apache 2.0\",\n  \"url\": \"www.apache.org/licenses/ LICENSE-2.0.html\"\n}</code></pre>"
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">\"license\" : {\n  \"name\": \"Apache 2.0\",\n  \"url\": \"http://www.apache.org/licenses/LICENSE-2.0.html\"\n}</code></pre>"
-        }
-      ]
-    }
-  },
   "operation-consumes": {
     "group": "security",
     "subgroup": "transport",
@@ -722,37 +598,6 @@
         },
         {
           "code": "<pre class=\"line-numbers\" data-line=\"10\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"/pets\": {\n    \"put\": {\n      \"summary\": \"Updates a pet in the store with form data\",\n      \"operationId\": \"updatePetWithForm\",\n      \"produces\": [\n        \"application/json\",\n        \"application/xml\"\n      ],\n      \"consumes\": [\n        \"application/x-www-form-urlencoded\"\n      ],\n      \"parameters\": [\n...\n}</code></pre>"
-        }
-      ]
-    }
-  },
-  "operation-externaldocumentation-url": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>'External Documentation' URL of the operation is not a proper URL</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined in the <code>url</code> field of the <code>External Documentation</code> object for the API operation in question is not a proper URL.</p>\n                    <p>You can use the externalDocs field to reference an external resource that offers extended documentation for your API. This is field is optional. However, if you do reference external documentation, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#externalDocumentationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The URL defined in the <code>url</code> field of the <code>External Documentation</code> object for the API operation in question is not a proper URL.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. In this case, the URL is missing the protocol prefix and has a space in the middle:</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"10\" xml:space=\"preserve\"><code class=\"language-json\">\"get\": {\n      \"description\": \"Returns all pets from the system that the user has access to\",\n      \"produces\": [\n        \"application/json\"\n      ],\n      \"externalDocs\" : { \n          \"description\": \"Find more info here\",\n          \"url\": \"will add later\"\n      },</code></pre>"
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"10\" xml:space=\"preserve\"><code class=\"language-json\">\"get\": {\n      \"description\": \"Returns all pets from the system that the user has access to\",\n      \"produces\": [\n        \"application/json\"\n      ],\n      \"externalDocs\" : { \n          \"description\": \"Find more info here\",\n          \"url\": \"http://petstore.api.com/docs/pets\"\n      },</code></pre>"
         }
       ]
     }
@@ -3147,37 +2992,6 @@
       ]
     }
   },
-  "schema-externaldocumentation-url": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>'External Documentation' URL of the schema is not a proper URL</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined the <code>url</code> field of the <code>External Documentation</code> object for the schema in question is not a proper URL.</p>\n                    <p>You can use the externalDocs field to reference an external resource that offers extended documentation for your API. This is field is optional. However, if you do reference external documentation, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#externalDocumentationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The URL defined the <code>url</code> field of the <code>External Documentation</code> object for the schema in question is not a proper URL.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. Here, the <code>url</code> field has just a placeholder string:</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">\"schema\" : {\n    \"type\": \"string\",\n    \"format\": \"email\",\n    \"externalDocs\" : {\n         \"description\": \"Find more info here\",\n         \"url\": \"need to add later\"\n    }\n}</code></pre>"
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">\"schema\" : {\n    \"type\": \"string\",\n    \"format\": \"email\",\n    \"externalDocs\" : {\n         \"description\": \"Find more info here\",\n         \"url\": \"http://my.api.com/docs/email\"\n    }\n}</code></pre>"
-        }
-      ]
-    }
-  },
   "schema-notype": {
     "group": "datavalidation",
     "subgroup": "schema",
@@ -3658,6 +3472,37 @@
       ]
     }
   },
+  "semantic-host-undefined": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>At least one host must be defined</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>You have not defined any hosts in your API definition.</p>\n                    <p>According to the Open API Specification (OAS), the top-level property <code>host</code> is optional and if not present, the host and the port serving the API documentation are used. However, there is no host serving the documentation for the APIs in 42Crunch Platform, so Security Audit cannot infer the host.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swagger-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "You have not defined any hosts in your API definition.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"swagger\": \"2.0\",\n  \"info\": {\n    \"description\": \"My example API\",\n    \"version\": \"1.0.0\",\n    \"title\": \"My API\",\n  },\n  \"paths\": {\n  ...</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you have defined at least one host for your API.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"8\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"swagger\": \"2.0\",\n  \"info\": {\n    \"description\": \"My example API\",\n    \"version\": \"1.0.0\",\n    \"title\": \"My API\",\n  },\n  \"host\": \"my.api.com:8090\",\n  \"paths\": {\n  ...  </code></pre>"
+        }
+      ]
+    }
+  },
   "semantic-item-default-invalid": {
     "group": "oasconformance",
     "subgroup": "semantics",
@@ -4095,130 +3940,6 @@
         },
         {
           "code": "<pre class=\"line-numbers\" data-line=\"14\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"schemes\": [\n    \"https\"\n  ],\n  ...\n  \"securityDefinitions\": {\n    \"regularSecurity\": {\n      \"type\": \"basic\"\n     }\n   },\n  ...\n  \"security\": [\n    {\n      \"regularSecurity\": []\n    }\n  ],\n  ...\n}</code></pre>"
-        }
-      ]
-    }
-  },
-  "tag-externaldocumentation-url": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>'External Documentation' URL of the tag is not a proper URL</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined the <code>url</code> field of the <code>External Documentation</code> object for a tag is not a proper URL.</p>\n                    <p>You can use the externalDocs field to reference an external resource that offers extended documentation for your API. This is field is optional. However, if you do reference external documentation, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#externalDocumentationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The URL defined the <code>url</code> field of the <code>External Documentation</code> object for a tag is not a proper URL.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. Here, the <code>url</code> field has just a placeholder string:</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">\"tag\" : {\n    \"name\": \"pet\",\n    \"description\": \"Pet operations\",\n        \"externalDocs\" : {\n             \"description\": \"Find more info here\",\n             \"url\": \"need to add later\"\n        }</code></pre>"
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">\"tag\" : {\n    \"name\": \"pet\",\n    \"description\": \"Pet operations\",\n        \"externalDocs\" : {\n             \"description\": \"Find more info here\",\n             \"url\": \"http://petstore.api.com/docs/petsoperations\"\n        }</code></pre>"
-        }
-      ]
-    }
-  },
-  "v3-contact-email": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>Contact object email is not a proper email address</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The email address defined the <code>email</code> field of the <code>contact</code> object is not a proper email address. The OpenAPI Specification (OAS) requires that email addresses in the contract must be proper email addresses in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#contact-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The email address defined the <code>email</code> field of the <code>contact</code> object is not a proper email address. The OpenAPI Specification (OAS) requires that email addresses in the contract must be proper email addresses in a valid format.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">\"contact\": {\n    \"name\": \"API Team\",\n    \"email\": \"will add later\"\n}</code></pre>"
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all email addresses are proper email addresses and have the valid format.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">\"contact\": {\n    \"name\": \"API Team\",\n    \"email\": \"contact@apisecurity.io\"\n}</code></pre>"
-        }
-      ]
-    }
-  },
-  "v3-contact-url": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>Contact object URL is not a proper URL</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined the <code>url</code> field of the <code>contact</code> object is not a proper URL. The OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#contact-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The URL defined the <code>url</code> field of the <code>contact</code> object is not a proper URL. The OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. In this example, the URL is missing the protocol and has an extra space in the middle:</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"name\": \"API Support\",\n  \"url\": \"www.example.com/ support\",\n  \"email\": \"support@example.com\"\n}</code></pre>"
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"name\": \"API Support\",\n  \"url\": \"http://www.example.com/support\",\n  \"email\": \"support@example.com\"\n}</code></pre>"
-        }
-      ]
-    }
-  },
-  "v3-global-externaldocumentation-url": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>External Documentation object URL is not a proper URL</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined the <code>url</code> field of the top-level <code>External Documentation</code> object is not a proper URL.</p>\n                    <p>You can use the externalDocs field to reference an external resource that offers extended documentation for your API. This is field is optional. However, if you do reference external documentation, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#externalDocumentationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The URL defined the <code>url</code> field of the top-level <code>External Documentation</code> object is not a proper URL.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. Here, the <code>url</code> field has just a placeholder string:</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">   \"externalDocs\" : {\n       \"description\": \"Additional documentation\",\n       \"url\": \"need to add later\"\n  }</code></pre>"
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">  \"externalDocs\" : {\n       \"description\": \"Additional documentation\",\n       \"url\": \"http://my.api.com/docs/\"\n  }</code></pre>"
         }
       ]
     }
@@ -4765,37 +4486,6 @@
       ]
     }
   },
-  "v3-license-url": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>License object URL is not a proper URL</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined in the <code>url</code> field of the <code>license</code> object is not a proper URL.</p>\n                    <p>The <code>license</code> object itself and the <code>url</code> field in it are optional. If you do not defined either, your OpenAPI definition is still a valid contract. However, if you do reference your license location, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>s\n    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#license-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a></p>"
-    },
-    "shortDescription": "The URL defined in the <code>url</code> field of the <code>license</code> object is not a proper URL.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. In this case, the URL is missing the protocol prefix and has an extra space:</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">\"license\" : {\n  \"name\": \"Apache 2.0\",\n  \"url\": \"www.apache.org/licenses/ LICENSE-2.0.html\"\n}</code></pre>"
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">\"license\" : {\n  \"name\": \"Apache 2.0\",\n  \"url\": \"http://www.apache.org/licenses/LICENSE-2.0.html\"\n}</code></pre>"
-        }
-      ]
-    }
-  },
   "v3-mediatype-schema-undefined": {
     "group": "datavalidation",
     "subgroup": "schema",
@@ -4830,37 +4520,6 @@
         },
         {
           "code": "<pre class=\"line-numbers\" data-start=\"1\" data-line=\"5-9\" xml:space=\"preserve\"><code class=\"language-json\">{\n   \"requestBody\": {\n      \"content\": {\n         \"application/octet-stream\": {\n            \"schema\": {\n               \"type\": \"string\",\n               \"format\": \"binary\",\n               \"additionalProperties\": \"false\"\n            }\n         }\n      }\n   }\n}</code></pre>"
-        }
-      ]
-    }
-  },
-  "v3-operation-externaldocumentation-url": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>'External Documentation' URL of the operation is not a proper URL</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined in the <code>url</code> field of the <code>External Documentation</code> object for the API operation in question is not a proper URL.</p>\n                    <p>You can use the externalDocs field to reference an external resource that offers extended documentation for your API. This is field is optional. However, if you do reference external documentation, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#externalDocumentationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The URL defined in the <code>url</code> field of the <code>External Documentation</code> object for the API operation in question is not a proper URL.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. In this case, the URL is missing the protocol prefix and has a space in the middle:</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"10\" xml:space=\"preserve\"><code class=\"language-json\">\"get\": {\n      \"description\": \"Returns all pets from the system that the user has access to\",\n      \"produces\": [\n        \"application/json\"\n      ],\n      \"externalDocs\" : { \n          \"description\": \"Find more info here\",\n          \"url\": \"will add later\"\n      },</code></pre>"
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"10\" xml:space=\"preserve\"><code class=\"language-json\">\"get\": {\n      \"description\": \"Returns all pets from the system that the user has access to\",\n      \"produces\": [\n        \"application/json\"\n      ],\n      \"externalDocs\" : { \n          \"description\": \"Find more info here\",\n          \"url\": \"http://petstore.api.com/docs/pets\"\n      },</code></pre>"
         }
       ]
     }
@@ -5893,37 +5552,6 @@
       ]
     }
   },
-  "v3-schema-externaldocumentation-url": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>'External Documentation' URL of the schema is not a proper URL</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined the <code>url</code> field of the <code>External Documentation</code> object for the schema in question is not a proper URL.</p>\n                    <p>You can use the externalDocs field to reference an external resource that offers extended documentation for your API. This is field is optional. However, if you do reference external documentation, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#externalDocumentationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The URL defined the <code>url</code> field of the <code>External Documentation</code> object for the schema in question is not a proper URL.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. Here, the <code>url</code> field has just a placeholder string:</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">\"schema\" : {\n    \"type\": \"string\",\n    \"format\": \"email\",\n    \"externalDocs\" : {\n         \"description\": \"Find more info here\",\n         \"url\": \"need to add later\"\n    }\n}</code></pre>"
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">\"schema\" : {\n    \"type\": \"string\",\n    \"format\": \"email\",\n    \"externalDocs\" : {\n         \"description\": \"Find more info here\",\n         \"url\": \"http://my.api.com/docs/email\"\n    }\n}</code></pre>"
-        }
-      ]
-    }
-  },
   "v3-schema-notype": {
     "group": "datavalidation",
     "subgroup": "schema",
@@ -6847,33 +6475,39 @@
       ]
     }
   },
-  "v3-tag-externaldocumentation-url": {
+  "v3-semantic-servers-required": {
     "group": "oasconformance",
     "subgroup": "semantics",
     "title": {
-      "text": "<h1>'External Documentation' URL of the tag is not a proper URL</h1>"
+      "text": "<h1>At least one server must be defined</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined the <code>url</code> field of the <code>External Documentation</code> object for a tag is not a proper URL.</p>\n                    <p>You can use the externalDocs field to reference an external resource that offers extended documentation for your API. This is field is optional. However, if you do reference external documentation, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#externalDocumentationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>You have not defined any servers for your API. You must define at least one server for your API in the top-level <code>servers</code> field.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#serverObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "The URL defined the <code>url</code> field of the <code>External Documentation</code> object for a tag is not a proper URL.",
+    "shortDescription": "You have not defined any servers for your API. You must define at least one server for your API in the top-level <code>servers</code> field.",
     "example": {
       "sections": [
         {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. Here, the <code>url</code> field has just a placeholder string:</p>\n                "
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">\"tag\" : {\n    \"name\": \"pet\",\n    \"description\": \"Pet operations\",\n        \"externalDocs\" : {\n             \"description\": \"Find more info here\",\n             \"url\": \"need to add later\"\n        }</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"servers\": {\n  \n  }</code></pre>"
         }
       ]
     },
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you have defined at least one server for your API.</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">\"tag\" : {\n    \"name\": \"pet\",\n    \"description\": \"Pet operations\",\n        \"externalDocs\" : {\n             \"description\": \"Find more info here\",\n             \"url\": \"http://petstore.api.com/docs/petsoperations\"\n        }</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"2, 3\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"servers\": {\n   \"url\": \"https://my.api.server.com/\",\n  \"description\": \"My API server\"\n  }</code></pre>"
+        },
+        {
+          "text": "\n                    <p>OAS v3 also supports defining an array of multiple servers for a single API:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"4-5, 8-9\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"servers\": [\n    {\n      \"url\": \"https://my.api.server1.com/\",\n      \"description\": \"API server 1\"\n    },\n   {\n      \"url\": \"https://my.api.server2.com/\",\n      \"description\": \"API server 2\"\n    }\n  ]\n}</code></pre>"
         }
       ]
     }
@@ -7951,43 +7585,6 @@
       ]
     }
   },
-  "v3-validation-servers-required": {
-    "group": "oasconformance",
-    "subgroup": "structure",
-    "title": {
-      "text": "<h1>At least one server must be defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>You have not defined any servers for your API. You must define at least one server for your API in the top-level <code>servers</code> field.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#serverObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "You have not defined any servers for your API. You must define at least one server for your API in the top-level <code>servers</code> field.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"servers\": {\n  \n  }</code></pre>"
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you have defined at least one server for your API.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"2, 3\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"servers\": {\n   \"url\": \"https://my.api.server.com/\",\n  \"description\": \"My API server\"\n  }</code></pre>"
-        },
-        {
-          "text": "\n                    <p>OAS v3 also supports defining an array of multiple servers for a single API:</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"4-5, 8-9\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"servers\": [\n    {\n      \"url\": \"https://my.api.server1.com/\",\n      \"description\": \"API server 1\"\n    },\n   {\n      \"url\": \"https://my.api.server2.com/\",\n      \"description\": \"API server 2\"\n    }\n  ]\n}</code></pre>"
-        }
-      ]
-    }
-  },
   "v3-validation-unknown-property": {
     "group": "oasconformance",
     "subgroup": "structure",
@@ -8015,6 +7612,68 @@
         },
         {
           "code": "<pre class=\"line-numbers\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"parameters\": {\n     \"in\": \"query\",\n     \"name\": \"id\",\n     \"type\": \"string\",\n     \"maxLength\": 8,\n     \"description\": \"Identifier of the object to be extracted.\"\n  }\n}</code></pre>"
+        }
+      ]
+    }
+  },
+  "v3-warning-contact-email": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>Contact object email is not a proper email address</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The email address defined the <code>email</code> field of the <code>contact</code> object is not a proper email address. The OpenAPI Specification (OAS) requires that email addresses in the contract must be proper email addresses in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#contact-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The email address defined the <code>email</code> field of the <code>contact</code> object is not a proper email address. The OpenAPI Specification (OAS) requires that email addresses in the contract must be proper email addresses in a valid format.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">\"contact\": {\n    \"name\": \"API Team\",\n    \"email\": \"will add later\"\n}</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all email addresses are proper email addresses and have the valid format.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">\"contact\": {\n    \"name\": \"API Team\",\n    \"email\": \"contact@apisecurity.io\"\n}</code></pre>"
+        }
+      ]
+    }
+  },
+  "v3-warning-contact-url": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>Contact object URL is not a proper URL</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined the <code>url</code> field of the <code>contact</code> object is not a proper URL. The OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#contact-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The URL defined the <code>url</code> field of the <code>contact</code> object is not a proper URL. The OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. In this example, the URL is missing the protocol and has an extra space in the middle:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"name\": \"API Support\",\n  \"url\": \"www.example.com/ support\",\n  \"email\": \"support@example.com\"\n}</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"name\": \"API Support\",\n  \"url\": \"http://www.example.com/support\",\n  \"email\": \"support@example.com\"\n}</code></pre>"
         }
       ]
     }
@@ -8220,6 +7879,37 @@
       ]
     }
   },
+  "v3-warning-global-externaldocumentation-url": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>External Documentation object URL is not a proper URL</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined the <code>url</code> field of the top-level <code>External Documentation</code> object is not a proper URL.</p>\n                    <p>You can use the externalDocs field to reference an external resource that offers extended documentation for your API. This is field is optional. However, if you do reference external documentation, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#externalDocumentationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The URL defined the <code>url</code> field of the top-level <code>External Documentation</code> object is not a proper URL.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. Here, the <code>url</code> field has just a placeholder string:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">   \"externalDocs\" : {\n       \"description\": \"Additional documentation\",\n       \"url\": \"need to add later\"\n  }</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">  \"externalDocs\" : {\n       \"description\": \"Additional documentation\",\n       \"url\": \"http://my.api.com/docs/\"\n  }</code></pre>"
+        }
+      ]
+    }
+  },
   "v3-warning-global-header-unused": {
     "group": "oasconformance",
     "subgroup": "bestpractices",
@@ -8346,6 +8036,37 @@
       ]
     }
   },
+  "v3-warning-license-url": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>License object URL is not a proper URL</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined in the <code>url</code> field of the <code>license</code> object is not a proper URL.</p>\n                    <p>The <code>license</code> object itself and the <code>url</code> field in it are optional. If you do not defined either, your OpenAPI definition is still a valid contract. However, if you do reference your license location, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#license-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a></p>\n                "
+    },
+    "shortDescription": "The URL defined in the <code>url</code> field of the <code>license</code> object is not a proper URL.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. In this case, the URL is missing the protocol prefix and has an extra space:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">\"license\" : {\n  \"name\": \"Apache 2.0\",\n  \"url\": \"www.apache.org/licenses/ LICENSE-2.0.html\"\n}</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">\"license\" : {\n  \"name\": \"Apache 2.0\",\n  \"url\": \"http://www.apache.org/licenses/LICENSE-2.0.html\"\n}</code></pre>"
+        }
+      ]
+    }
+  },
   "v3-warning-media-type-encoding": {
     "group": "oasconformance",
     "subgroup": "bestpractices",
@@ -8391,6 +8112,37 @@
         },
         {
           "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n   \"requestBody\": {\n      \"content\": {\n         \"application/octet-stream\": {\n            \"schema\": {\n               \"type\": \"string\",\n               \"format\": \"binary\",\n               \"additionalProperties\": \"false\",\n            }\n         }\n      }\n   }\n}</code></pre>"
+        }
+      ]
+    }
+  },
+  "v3-warning-operation-externaldocumentation-url": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>'External Documentation' URL of the operation is not a proper URL</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined in the <code>url</code> field of the <code>External Documentation</code> object for the API operation in question is not a proper URL.</p>\n                    <p>You can use the externalDocs field to reference an external resource that offers extended documentation for your API. This is field is optional. However, if you do reference external documentation, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#externalDocumentationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The URL defined in the <code>url</code> field of the <code>External Documentation</code> object for the API operation in question is not a proper URL.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. In this case, the URL is missing the protocol prefix and has a space in the middle:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"10\" xml:space=\"preserve\"><code class=\"language-json\">\"get\": {\n      \"description\": \"Returns all pets from the system that the user has access to\",\n      \"produces\": [\n        \"application/json\"\n      ],\n      \"externalDocs\" : { \n          \"description\": \"Find more info here\",\n          \"url\": \"will add later\"\n      },</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"10\" xml:space=\"preserve\"><code class=\"language-json\">\"get\": {\n      \"description\": \"Returns all pets from the system that the user has access to\",\n      \"produces\": [\n        \"application/json\"\n      ],\n      \"externalDocs\" : { \n          \"description\": \"Find more info here\",\n          \"url\": \"http://petstore.api.com/docs/pets\"\n      },</code></pre>"
         }
       ]
     }
@@ -8667,6 +8419,37 @@
       ]
     }
   },
+  "v3-warning-schema-externaldocumentation-url": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>'External Documentation' URL of the schema is not a proper URL</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined the <code>url</code> field of the <code>External Documentation</code> object for the schema in question is not a proper URL.</p>\n                    <p>You can use the externalDocs field to reference an external resource that offers extended documentation for your API. This is field is optional. However, if you do reference external documentation, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#externalDocumentationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The URL defined the <code>url</code> field of the <code>External Documentation</code> object for the schema in question is not a proper URL.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. Here, the <code>url</code> field has just a placeholder string:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">\"schema\" : {\n    \"type\": \"string\",\n    \"format\": \"email\",\n    \"externalDocs\" : {\n         \"description\": \"Find more info here\",\n         \"url\": \"need to add later\"\n    }\n}</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">\"schema\" : {\n    \"type\": \"string\",\n    \"format\": \"email\",\n    \"externalDocs\" : {\n         \"description\": \"Find more info here\",\n         \"url\": \"http://my.api.com/docs/email\"\n    }\n}</code></pre>"
+        }
+      ]
+    }
+  },
   "v3-warning-schema-format-improper": {
     "group": "oasconformance",
     "subgroup": "bestpractices",
@@ -8730,6 +8513,37 @@
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the <code>x-42c-sample</code> extension matches the schema of the associated value.</p>\n                "
+        }
+      ]
+    }
+  },
+  "v3-warning-tag-externaldocumentation-url": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>'External Documentation' URL of the tag is not a proper URL</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined the <code>url</code> field of the <code>External Documentation</code> object for a tag is not a proper URL.</p>\n                    <p>You can use the externalDocs field to reference an external resource that offers extended documentation for your API. This is field is optional. However, if you do reference external documentation, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#externalDocumentationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The URL defined the <code>url</code> field of the <code>External Documentation</code> object for a tag is not a proper URL.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. Here, the <code>url</code> field has just a placeholder string:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">\"tag\" : {\n    \"name\": \"pet\",\n    \"description\": \"Pet operations\",\n        \"externalDocs\" : {\n             \"description\": \"Find more info here\",\n             \"url\": \"need to add later\"\n        }</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">\"tag\" : {\n    \"name\": \"pet\",\n    \"description\": \"Pet operations\",\n        \"externalDocs\" : {\n             \"description\": \"Find more info here\",\n             \"url\": \"http://petstore.api.com/docs/petsoperations\"\n        }</code></pre>"
         }
       ]
     }
@@ -9624,6 +9438,68 @@
       ]
     }
   },
+  "warning-contact-email": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>Contact object email is not a proper email address</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The email address defined the <code>email</code> field of the <code>contact</code> object is not a proper email address. The OpenAPI Specification (OAS) requires that email addresses in the contract must be proper email addresses in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#contactObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The email address defined the <code>email</code> field of the <code>contact</code> object is not a proper email address. The OpenAPI Specification (OAS) requires that email addresses in the contract must be proper email addresses in a valid format.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">\"contact\": {\n    \"name\": \"API Team\",\n    \"email\": \"will add later\"\n}</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all email addresses are proper email addresses and have the valid format.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">\"contact\": {\n    \"name\": \"API Team\",\n    \"email\": \"contact@apisecurity.io\"\n}</code></pre>"
+        }
+      ]
+    }
+  },
+  "warning-contact-url": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>Contact object URL is not a proper URL</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined the <code>url</code> field of the <code>contact</code> object is not a proper URL. The OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#contactObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The URL defined the <code>url</code> field of the <code>contact</code> object is not a proper URL. The OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. In this example, the URL is missing the protocol and has an extra space in the middle:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"name\": \"API Support\",\n  \"url\": \"www.example.com/ support\",\n  \"email\": \"support@example.com\"\n}</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">{\n  \"name\": \"API Support\",\n  \"url\": \"http://www.example.com/support\",\n  \"email\": \"support@example.com\"\n}</code></pre>"
+        }
+      ]
+    }
+  },
   "warning-content-type-badformat": {
     "group": "oasconformance",
     "subgroup": "bestpractices",
@@ -9682,6 +9558,37 @@
         },
         {
           "code": "<pre class=\"line-numbers\" data-start=\"1\" data-line=\"7\" xml:space=\"preserve\">\n                        <code class=\"language-json\">{\n  \"/pets\": {\n    \"put\": {\n      \"summary\": \"Updates a pet in the store with form data\",\n      \"operationId\": \"updatePetWithForm\",\n      \"produces\": [\n        \"application/json\"\n      ],\n      \"parameters\": [\n...\n}</code>\n                    </pre>"
+        }
+      ]
+    }
+  },
+  "warning-global-externaldocumentation-url": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>External Documentation object URL is not a proper URL</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined the <code>url</code> field of the top-level <code>External Documentation</code> object is not a proper URL.</p>\n                    <p>You can use the externalDocs field to reference an external resource that offers extended documentation for your API. This is field is optional. However, if you do reference external documentation, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#externalDocumentationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The URL defined the <code>url</code> field of the top-level <code>External Documentation</code> object is not a proper URL.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. Here, the <code>url</code> field has just a placeholder string:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">   \"externalDocs\" : {\n       \"description\": \"Additional documentation\",\n       \"url\": \"need to add later\"\n  }</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">  \"externalDocs\" : {\n       \"description\": \"Additional documentation\",\n       \"url\": \"http://my.api.com/docs/\"\n  }</code></pre>"
         }
       ]
     }
@@ -9950,6 +9857,68 @@
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the <code>x-42c-sample</code> extension matches the associated array items.</p>\n                "
+        }
+      ]
+    }
+  },
+  "warning-license-url": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>License object URL is not a proper URL</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined in the <code>url</code> field of the <code>license</code> object is not a proper URL.</p>\n                    <p>The <code>license</code> object itself and the <code>url</code> field in it are optional. If you do not defined either, your OpenAPI definition is still a valid contract. However, if you do reference your license location, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#license-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a></p>\n                "
+    },
+    "shortDescription": "The URL defined in the <code>url</code> field of the <code>license</code> object is not a proper URL.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. In this case, the URL is missing the protocol prefix and has an extra space:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">\"license\" : {\n  \"name\": \"Apache 2.0\",\n  \"url\": \"www.apache.org/licenses/ LICENSE-2.0.html\"\n}</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3\" xml:space=\"preserve\"><code class=\"language-json\">\"license\" : {\n  \"name\": \"Apache 2.0\",\n  \"url\": \"http://www.apache.org/licenses/LICENSE-2.0.html\"\n}</code></pre>"
+        }
+      ]
+    }
+  },
+  "warning-operation-externaldocumentation-url": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>'External Documentation' URL of the operation is not a proper URL</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined in the <code>url</code> field of the <code>External Documentation</code> object for the API operation in question is not a proper URL.</p>\n                    <p>You can use the externalDocs field to reference an external resource that offers extended documentation for your API. This is field is optional. However, if you do reference external documentation, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#externalDocumentationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The URL defined in the <code>url</code> field of the <code>External Documentation</code> object for the API operation in question is not a proper URL.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. In this case, the URL is missing the protocol prefix and has a space in the middle:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"10\" xml:space=\"preserve\"><code class=\"language-json\">\"get\": {\n      \"description\": \"Returns all pets from the system that the user has access to\",\n      \"produces\": [\n        \"application/json\"\n      ],\n      \"externalDocs\" : { \n          \"description\": \"Find more info here\",\n          \"url\": \"will add later\"\n      },</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"10\" xml:space=\"preserve\"><code class=\"language-json\">\"get\": {\n      \"description\": \"Returns all pets from the system that the user has access to\",\n      \"produces\": [\n        \"application/json\"\n      ],\n      \"externalDocs\" : { \n          \"description\": \"Find more info here\",\n          \"url\": \"http://petstore.api.com/docs/pets\"\n      },</code></pre>"
         }
       ]
     }
@@ -10293,6 +10262,37 @@
       ]
     }
   },
+  "warning-schema-externaldocumentation-url": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>'External Documentation' URL of the schema is not a proper URL</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined the <code>url</code> field of the <code>External Documentation</code> object for the schema in question is not a proper URL.</p>\n                    <p>You can use the externalDocs field to reference an external resource that offers extended documentation for your API. This is field is optional. However, if you do reference external documentation, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#externalDocumentationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The URL defined the <code>url</code> field of the <code>External Documentation</code> object for the schema in question is not a proper URL.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. Here, the <code>url</code> field has just a placeholder string:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">\"schema\" : {\n    \"type\": \"string\",\n    \"format\": \"email\",\n    \"externalDocs\" : {\n         \"description\": \"Find more info here\",\n         \"url\": \"need to add later\"\n    }\n}</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">\"schema\" : {\n    \"type\": \"string\",\n    \"format\": \"email\",\n    \"externalDocs\" : {\n         \"description\": \"Find more info here\",\n         \"url\": \"http://my.api.com/docs/email\"\n    }\n}</code></pre>"
+        }
+      ]
+    }
+  },
   "warning-schema-format-improper": {
     "group": "oasconformance",
     "subgroup": "bestpractices",
@@ -10356,6 +10356,37 @@
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the <code>x-42c-sample</code> extension matches the schema of the associated value.</p>\n                "
+        }
+      ]
+    }
+  },
+  "warning-tag-externaldocumentation-url": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>'External Documentation' URL of the tag is not a proper URL</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The URL defined the <code>url</code> field of the <code>External Documentation</code> object for a tag is not a proper URL.</p>\n                    <p>You can use the externalDocs field to reference an external resource that offers extended documentation for your API. This is field is optional. However, if you do reference external documentation, the OpenAPI Specification (OAS) requires that all URLs in the API contract must be proper URLs in a valid format.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#externalDocumentationObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The URL defined the <code>url</code> field of the <code>External Documentation</code> object for a tag is not a proper URL.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. Here, the <code>url</code> field has just a placeholder string:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">\"tag\" : {\n    \"name\": \"pet\",\n    \"description\": \"Pet operations\",\n        \"externalDocs\" : {\n             \"description\": \"Find more info here\",\n             \"url\": \"need to add later\"\n        }</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all URLs in your API are proper URLs and have a valid format.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"6\" xml:space=\"preserve\"><code class=\"language-json\">\"tag\" : {\n    \"name\": \"pet\",\n    \"description\": \"Pet operations\",\n        \"externalDocs\" : {\n             \"description\": \"Find more info here\",\n             \"url\": \"http://petstore.api.com/docs/petsoperations\"\n        }</code></pre>"
         }
       ]
     }
