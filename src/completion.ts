@@ -9,6 +9,7 @@ const targetMapping = {
     items: '/definitions',
     parameters: '/parameters',
     responses: '/responses',
+    properties: '/definitions'
   },
   [OpenApiVersion.V3]: {
     schema: '/components/schemas',
@@ -20,6 +21,7 @@ const targetMapping = {
     headers: '/components/headers',
     links: '/components/links',
     items: '/components/schemas', // for completion inside JSON Schema objects
+    properties: '/components/schemas'
   },
 };
 
