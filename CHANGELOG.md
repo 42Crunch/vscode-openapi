@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 3.3.0 (June 16, 2020)
+* Update Security Audit articles to match changes in the backend service
+* Changes from @gayanper to improve completions
+
 ## Version 3.2.0 (May 20, 2020)
 * Update Security Audit articles to match changes in the backend service
 
