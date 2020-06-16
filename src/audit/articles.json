@@ -3729,13 +3729,44 @@
       "text": "<h1>Parameters have the same name + in combination</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>One or more parameters have the same <code>nameIn</code> combination (parameter <code>name</code> + <code>in</code>). The <code>nameIn</code> combinations must be unique.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#parameter-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>Two or more parameters have the same <code>nameIn</code> combination (parameter <code>name</code> + <code>in</code>). The <code>nameIn</code> combinations must be unique.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#parameter-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "One or more parameters have the same <code>nameIn</code> combination (parameter <code>name</code> + <code>in</code>). The <code>nameIn</code> combinations must be unique.",
+    "shortDescription": "Two or more parameters have the same <code>nameIn</code> combination (parameter <code>name</code> + <code>in</code>). The <code>nameIn</code> combinations must be unique.",
     "remediation": {
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all parameters have unique <code>nameIn</code> combinations.</p>\n                "
+        }
+      ]
+    }
+  },
+  "semantic-parameter-namein-multiple-header": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Header parameters have the same name</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>Two or more header parameters have properties <code>name</code> that are considered equal. </p>\n                    <p>While parameter names normally are case-sensitive, <a href=\"https://tools.ietf.org/html/rfc7230\" target=\"_blank\">RFC 7230</a> states that HTTP header names are not. The OpenAPI Specification (OAS) does therefore not consider header parameters names as case-sensitive, so names like <code>content-type</code> and <code>Content-Type</code> are considered equal. You should not have equal header parameters in your OpenAPI definition.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#parameter-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "Two or more header parameters have properties <code>name</code> that are considered equal. ",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"2, 10\" xml:space=\"preserve\"><code class=\"language-json\">{\n    \"name\": \"Auth-Token\",\n    \"in\": \"header\",\n    \"description\": \"Auth-Token\",\n    \"required\": true,\n    \"type\": \"string\"\n},\n...\n{\n    \"name\": \"auth-token\",\n    \"in\": \"header\",\n    \"description\": \"Authorization token for user\",\n    \"required\": true,\n    \"type\": \"string\"\n},</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all header parameters have unique <code>name</code>.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"2, 10\" xml:space=\"preserve\"><code class=\"language-json\">{\n    \"name\": \"Auth-Token\",\n    \"in\": \"header\",\n    \"description\": \"Auth-Token\",\n    \"required\": true,\n    \"type\": \"string\"\n},\n...\n{\n    \"name\": \"auth-token-user\",\n    \"in\": \"header\",\n    \"description\": \"Authorization token for user\",\n    \"required\": true,\n    \"type\": \"string\"\n},</code></pre>"
         }
       ]
     }
@@ -6167,13 +6198,44 @@
       "text": "<h1>Parameters have the same name + in combination</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>One or more parameters have the same <code>nameIn</code> combination (parameter <code>name</code> + <code>in</code>). The <code>nameIn</code> combinations must be unique.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#parameterObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>Two or more parameters have the same <code>nameIn</code> combination (parameter <code>name</code> + <code>in</code>). The <code>nameIn</code> combinations must be unique.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#parameterObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "One or more parameters have the same <code>nameIn</code> combination (parameter <code>name</code> + <code>in</code>). The <code>nameIn</code> combinations must be unique.",
+    "shortDescription": "Two or more parameters have the same <code>nameIn</code> combination (parameter <code>name</code> + <code>in</code>). The <code>nameIn</code> combinations must be unique.",
     "remediation": {
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all parameters have unique <code>nameIn</code> combinations.</p>\n                "
+        }
+      ]
+    }
+  },
+  "v3-semantic-parameter-namein-multiple-header": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Header parameters have the same name</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>Two or more header parameters have properties <code>name</code> that are considered equal. </p>\n                    <p>While parameter names normally are case-sensitive, <a href=\"https://tools.ietf.org/html/rfc7230\" target=\"_blank\">RFC 7230</a> states that HTTP header names are not. The OpenAPI Specification (OAS) does therefore not consider header parameters names as case-sensitive, so names like <code>content-type</code> and <code>Content-Type</code> are considered equal. You should not have equal header parameters in your OpenAPI definition.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#parameterObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "Two or more header parameters have properties <code>name</code> that are considered equal. ",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"2, 10\" xml:space=\"preserve\"><code class=\"language-json\">{\n    \"name\": \"Auth-Token\",\n    \"in\": \"header\",\n    \"description\": \"Auth-Token\",\n    \"required\": true,\n    \"type\": \"string\"\n},\n...\n{\n    \"name\": \"auth-token\",\n    \"in\": \"header\",\n    \"description\": \"Authorization token for user\",\n    \"required\": true,\n    \"type\": \"string\"\n},</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all header parameters have unique <code>name</code>.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"2, 10\" xml:space=\"preserve\"><code class=\"language-json\">{\n    \"name\": \"Auth-Token\",\n    \"in\": \"header\",\n    \"description\": \"Auth-Token\",\n    \"required\": true,\n    \"type\": \"string\"\n},\n...\n{\n    \"name\": \"auth-token-user\",\n    \"in\": \"header\",\n    \"description\": \"Authorization token for user\",\n    \"required\": true,\n    \"type\": \"string\"\n},</code></pre>"
         }
       ]
     }
