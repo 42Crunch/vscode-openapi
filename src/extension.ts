@@ -180,6 +180,8 @@ export function activate(context: vscode.ExtensionContext) {
 
   const jsonFile: vscode.DocumentSelector = { language: 'json', scheme: 'file' };
   const jsonUnsaved: vscode.DocumentSelector = { language: 'json', scheme: 'untitled' };
+  const jsoncFile: vscode.DocumentSelector = { language: 'jsonc', scheme: 'file' };
+  const jsoncUnsaved: vscode.DocumentSelector = { language: 'jsonc', scheme: 'untitled' };
   const yamlFile: vscode.DocumentSelector = { language: 'yaml', scheme: 'file' };
   const yamlUnsaved: vscode.DocumentSelector = { language: 'yaml', scheme: 'untitled' };
 
@@ -188,12 +190,16 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.languages.registerCompletionItemProvider(yamlUnsaved, completionProvider, '"');
   vscode.languages.registerCompletionItemProvider(jsonFile, completionProvider, '"');
   vscode.languages.registerCompletionItemProvider(jsonUnsaved, completionProvider, '"');
+  vscode.languages.registerCompletionItemProvider(jsoncFile, completionProvider, '"');
+  vscode.languages.registerCompletionItemProvider(jsoncUnsaved, completionProvider, '"');
 
   const jsonSchemaDefinitionProvider = new JsonSchemaDefinitionProvider();
   const yamlSchemaDefinitionProvider = new YamlSchemaDefinitionProvider();
 
   vscode.languages.registerDefinitionProvider(jsonFile, jsonSchemaDefinitionProvider);
   vscode.languages.registerDefinitionProvider(jsonUnsaved, jsonSchemaDefinitionProvider);
+  vscode.languages.registerDefinitionProvider(jsoncFile, jsonSchemaDefinitionProvider);
+  vscode.languages.registerDefinitionProvider(jsoncUnsaved, jsonSchemaDefinitionProvider);
 
   vscode.languages.registerDefinitionProvider(yamlFile, yamlSchemaDefinitionProvider);
   vscode.languages.registerDefinitionProvider(yamlUnsaved, yamlSchemaDefinitionProvider);

@@ -2,10 +2,8 @@
  Copyright (c) 42Crunch Ltd. All rights reserved.
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
-import * as fs from 'fs';
 import { relative } from 'path';
 import * as vscode from 'vscode';
-import * as yaml from 'js-yaml';
 import { dirname } from 'path';
 import { ParserOptions } from '../parser-options';
 import parser from 'json-schema-ref-parser';
@@ -13,6 +11,7 @@ import url from 'json-schema-ref-parser/lib/util/url';
 import Pointer from 'json-schema-ref-parser/lib/pointer';
 import $Ref from 'json-schema-ref-parser/lib/ref';
 import { parseJsonPointer, joinJsonPointer } from '../pointer';
+import { parseDocument, bundlerJsonParser, bundlerYamlParserWithOptions } from './bundler-parsers';
 
 const destinationMap = {
   v2: {
@@ -68,16 +67,6 @@ const resolver = (openDocuments) => {
   };
 };
 
-function parseDocument(document: vscode.TextDocument, options: ParserOptions) {
-  if (document.languageId === 'yaml') {
-    const {
-      yaml: { schema },
-    } = options.get();
-    return yaml.safeLoad(document.getText(), { schema });
-  }
-  return JSON.parse(document.getText());
-}
-
 function mangle(value: string) {
   return value.replace(/~/g, '-').replace(/\//g, '-').replace(/\#/g, '');
 }
@@ -116,6 +105,10 @@ export async function bundle(
   const bundled = await parser.bundle(parsed, {
     cwd,
     resolve: { http: false, file: resolver(openDocuments) },
+    parse: {
+      json: bundlerJsonParser,
+      yaml: bundlerYamlParserWithOptions(options),
+    },
     hooks: {
       onParse: (parsed) => {
         state.parsed = parsed;
