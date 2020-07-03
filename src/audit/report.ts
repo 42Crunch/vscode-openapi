@@ -21,7 +21,7 @@ function articleById(id: string) {
     if (!part || !part.sections) {
       return '';
     }
-    return part.sections.map(section => `${section.text || ''}${section.code || ''}`).join('');
+    return part.sections.map((section) => `${section.text || ''}${section.code || ''}`).join('');
   }
 
   const article = articles[id] || fallbackArticle;
@@ -36,6 +36,7 @@ function articleById(id: string) {
 
 function getHtml(
   nonce: string,
+  webview: vscode.Webview,
   styleUrl: vscode.Uri,
   scriptUrl: vscode.Uri,
   summary: string,
@@ -51,7 +52,9 @@ function getHtml(
   <html lang="en">
   <head>
       <meta charset="UTF-8">
-      <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src vscode-resource: https:; style-src vscode-resource: https:; script-src 'nonce-${nonce}';">
+      <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; style-src ${
+    webview.cspSource
+  }; script-src 'nonce-${nonce}';">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>API Contract Security Audit Report</title>
       <link rel="stylesheet" href="${styleUrl}">
@@ -129,7 +132,7 @@ export class ReportWebView {
     }
 
     ReportWebView.currentPanel.currentAuditUri = audit.summary.documentUri;
-    ReportWebView.currentPanel._update(audit);
+    ReportWebView.currentPanel._update(audit, ReportWebView.currentPanel._panel.webview);
 
     if (!ReportWebView.currentPanel._panel.visible) {
       ReportWebView.currentPanel._panel.reveal();
@@ -140,7 +143,7 @@ export class ReportWebView {
     if (!ReportWebView.currentPanel) {
       ReportWebView.currentPanel = new ReportWebView(extensionPath);
     }
-    ReportWebView.currentPanel._updateIds(audit, uri, ids);
+    ReportWebView.currentPanel._updateIds(audit, ReportWebView.currentPanel._panel.webview, uri, ids);
     ReportWebView.currentPanel.currentAuditUri = null;
     if (!ReportWebView.currentPanel._panel.visible) {
       ReportWebView.currentPanel._panel.reveal();
@@ -155,7 +158,7 @@ export class ReportWebView {
     ) {
       // update only if showing different report to the current one
       ReportWebView.currentPanel.currentAuditUri = audit.summary.documentUri;
-      ReportWebView.currentPanel._update(audit);
+      ReportWebView.currentPanel._update(audit, ReportWebView.currentPanel._panel.webview);
     }
   }
 
@@ -206,7 +209,7 @@ export class ReportWebView {
     );
 
     this._panel.webview.onDidReceiveMessage(
-      message => {
+      (message) => {
         switch (message.command) {
           case 'goToLine':
             this.focusLine(Buffer.from(message.uri, 'base64').toString('utf8'), message.line);
@@ -261,11 +264,9 @@ export class ReportWebView {
     }
   }
 
-  private _update(audit: Audit) {
-    const scriptPathOnDisk = vscode.Uri.file(path.join(this._extensionPath, 'webview', 'main.js'));
-    const stylePathOnDisk = vscode.Uri.file(path.join(this._extensionPath, 'webview', 'style.css'));
-    const scriptUrl = scriptPathOnDisk.with({ scheme: 'vscode-resource' });
-    const styleUrl = stylePathOnDisk.with({ scheme: 'vscode-resource' });
+  private _update(audit: Audit, webview: vscode.Webview) {
+    const scriptUrl = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionPath, 'webview', 'main.js')));
+    const styleUrl = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionPath, 'webview', 'style.css')));
     const nonce = getNonce();
 
     const mainPath = vscode.Uri.parse(audit.summary.documentUri).fsPath;
@@ -276,30 +277,44 @@ export class ReportWebView {
       .map(([uri, issues]) => {
         const fsPath = vscode.Uri.parse(uri).fsPath;
         const filename = path.relative(mainDir, fsPath);
-        return issues.map(issue => getIssueHtml(uri, filename, issue));
+        return issues.map((issue) => getIssueHtml(uri, filename, issue));
       })
       .reduce((acc, val) => acc.concat(val), []);
 
     const issuesHtml = issuesHtmlList.length > 0 ? issuesHtmlList.join('\n') : `<h3>No issues found in this file</h3>`;
 
-    this._panel.webview.html = getHtml(nonce, styleUrl, scriptUrl, summaryHtml, issuesHtml, audit.summary.documentUri);
+    this._panel.webview.html = getHtml(
+      nonce,
+      webview,
+      styleUrl,
+      scriptUrl,
+      summaryHtml,
+      issuesHtml,
+      audit.summary.documentUri,
+    );
   }
 
-  private _updateIds(audit: Audit, uri: string, ids: any[]) {
-    const scriptPathOnDisk = vscode.Uri.file(path.join(this._extensionPath, 'webview', 'main.js'));
-    const stylePathOnDisk = vscode.Uri.file(path.join(this._extensionPath, 'webview', 'style.css'));
-    const scriptUrl = scriptPathOnDisk.with({ scheme: 'vscode-resource' });
-    const styleUrl = stylePathOnDisk.with({ scheme: 'vscode-resource' });
+  private _updateIds(audit: Audit, webview: vscode.Webview, uri: string, ids: any[]) {
+    const scriptUrl = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionPath, 'webview', 'main.js')));
+    const styleUrl = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionPath, 'webview', 'style.css')));
     const nonce = getNonce();
 
     const mainPath = vscode.Uri.parse(audit.summary.documentUri).fsPath;
     const mainDir = path.dirname(mainPath);
     const filename = path.relative(mainDir, vscode.Uri.parse(uri).fsPath);
 
-    const issues = ids.map(id => audit.issues[uri][id]);
+    const issues = ids.map((id) => audit.issues[uri][id]);
 
-    const issuesHtml = issues.map(issue => getIssueHtml(uri, filename, issue)).join('\n');
+    const issuesHtml = issues.map((issue) => getIssueHtml(uri, filename, issue)).join('\n');
 
-    this._panel.webview.html = getHtml(nonce, styleUrl, scriptUrl, null, issuesHtml, audit.summary.documentUri);
+    this._panel.webview.html = getHtml(
+      nonce,
+      webview,
+      styleUrl,
+      scriptUrl,
+      null,
+      issuesHtml,
+      audit.summary.documentUri,
+    );
   }
 }
