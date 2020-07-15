@@ -49,14 +49,14 @@ export function getOpenApiVersion(parsed: any): string {
   return null;
 }
 
-const resolver = (openDocuments) => {
+const resolver = (openDocuments, documentUri: vscode.Uri) => {
   return {
     order: 10,
     canRead: (file) => {
-      return url.isFileSystemPath(file.url);
+      return true;
     },
     read: async (file) => {
-      const uri = vscode.Uri.file(url.toFileSystemPath(file.url));
+      const uri = documentUri.with({ path: file.url });
       const alreadyOpen = openDocuments[uri.toString()];
       if (alreadyOpen) {
         return alreadyOpen.getText();
@@ -104,7 +104,7 @@ export async function bundle(
 
   const bundled = await parser.bundle(parsed, {
     cwd,
-    resolve: { http: false, file: resolver(openDocuments) },
+    resolve: { http: false, file: resolver(openDocuments, document.uri) },
     parse: {
       json: bundlerJsonParser,
       yaml: bundlerYamlParserWithOptions(options),
