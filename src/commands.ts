@@ -10,6 +10,7 @@ import * as snippets from './snippets.json';
 
 const commands = {
   goToLine,
+  copyJsonPointer,
   createNewTwo,
   createNewThree,
   createNewTwoYaml,
@@ -77,11 +78,11 @@ const componentsTags: string[] = [
 ];
 
 export function registerCommands(): vscode.Disposable[] {
-  return Object.keys(commands).map(name => registerCommand(name, commands[name]));
+  return Object.keys(commands).map((name) => registerCommand(name, commands[name]));
 }
 
 function registerCommand(name: string, handler: Function): vscode.Disposable {
-  const wrapped = async function(...args: any[]) {
+  const wrapped = async function (...args: any[]) {
     try {
       await handler(...args);
     } catch (e) {
@@ -96,6 +97,17 @@ function goToLine(range: vscode.Range) {
   const editor = vscode.window.activeTextEditor;
   editor.selection = new vscode.Selection(range.start, range.start);
   editor.revealRange(editor.selection, vscode.TextEditorRevealType.AtTop);
+}
+
+function copyJsonPointer(range: vscode.Range) {
+  const editor = vscode.window.activeTextEditor;
+  const text = editor.document.getText();
+  const languageId = editor.document.languageId;
+  const root = safeParse(text, languageId);
+  const node = root.findNodeAtOffset(editor.document.offsetAt(editor.selection.active));
+  if (node) {
+    vscode.env.clipboard.writeText(node.getJsonPonter());
+  }
 }
 
 async function createNew(snippet: string, language: string) {
@@ -219,7 +231,7 @@ async function addOperation(node: any) {
     let snippet = snippets.operationYaml;
 
     const eol = editor.document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n';
-    await editor.edit(builder => {
+    await editor.edit((builder) => {
       builder.insert(editor.document.positionAt(target.endPosition), eol);
     });
 
@@ -260,7 +272,7 @@ async function insertYamlSnippetAfter(root: YamlNode, snippet: string, pointer: 
   const node = root.find(pointer);
 
   const eol = editor.document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n';
-  await editor.edit(builder => {
+  await editor.edit((builder) => {
     builder.insert(editor.document.positionAt(node.node.endPosition), eol);
   });
 
@@ -409,7 +421,7 @@ function findInsertionAnchor(root: Node, element: string): string {
 function increaseIndent(snippet: string, level = 1) {
   return snippet
     .split('\n')
-    .map(line => '\t'.repeat(level) + line)
+    .map((line) => '\t'.repeat(level) + line)
     .join('\n');
 }
 
