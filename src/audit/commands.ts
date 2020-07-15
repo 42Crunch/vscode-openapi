@@ -41,7 +41,7 @@ export function registerSecurityAudit(context, auditContext: AuditContext, pendi
 }
 
 export function registerFocusSecurityAudit(context, auditContext) {
-  return vscode.commands.registerCommand('openapi.focusSecurityAudit', documentUri => {
+  return vscode.commands.registerCommand('openapi.focusSecurityAudit', (documentUri) => {
     const audit = auditContext[documentUri];
     if (audit) {
       ReportWebView.show(context.extensiontPath, audit);
@@ -69,7 +69,7 @@ async function securityAudit(context, textEditor: vscode.TextEditor, dirtyDocume
       prompt:
         'Security Audit from 42Crunch runs ~200 checks for security best practices in your API. VS Code needs an API key to use the service. Enter your email to receive the token.',
       placeHolder: 'email address',
-      validateInput: value =>
+      validateInput: (value) =>
         value.indexOf('@') > 0 && value.indexOf('@') < value.length - 1 ? null : 'Please enter valid email address',
     });
 
@@ -144,7 +144,7 @@ async function performAudit(
       summary: {
         ...grades,
         documentUri,
-        subdocumentUris: Object.keys(documents).filter(uri => uri != documentUri),
+        subdocumentUris: Object.keys(documents).filter((uri) => uri != documentUri),
       },
       issues,
       diagnostics,
@@ -181,23 +181,23 @@ function parseDocument(document) {
   return root;
 }
 
-function findIssueLocation(mainUri, root: Node, mappings, pointer) {
+function findIssueLocation(mainUri: vscode.Uri, root: Node, mappings, pointer): [string, string] {
   const node = root.find(pointer);
   if (node) {
-    return [mainUri, pointer];
+    return [mainUri.toString(), pointer];
   } else {
     const mapping = findMapping(mappings, pointer);
     if (mapping) {
-      const uri = vscode.Uri.file(mapping.file).toString();
-      return [uri, mapping.hash];
+      const uri = mainUri.with({ path: mapping.file });
+      return [uri.toString(), mapping.hash];
     }
   }
   throw new Error(`Cannot find entry for pointer: ${pointer}`);
 }
 
 async function processIssues(document, mappings, issues): Promise<[Node, string[], { [uri: string]: any[] }]> {
-  const mainUri = document.uri.toString();
-  const documentUris: { [uri: string]: boolean } = { [mainUri]: true };
+  const mainUri = document.uri;
+  const documentUris: { [uri: string]: boolean } = { [mainUri.toString()]: true };
   const issuesPerDocument: { [uri: string]: any[] } = {};
 
   const root = parseDocument(document);
@@ -289,7 +289,7 @@ function createDiagnostics(filename, documents, issues): DiagnosticCollection {
 
   for (const [uri, document] of Object.entries(documents)) {
     if (issues[uri]) {
-      const messages = issues[uri].map(issue => ({
+      const messages = issues[uri].map((issue) => ({
         source: `audit of ${filename}`,
         code: '',
         message: `${issue.description} ${issue.displayScore !== '0' ? `(score impact ${issue.displayScore})` : ''}`,

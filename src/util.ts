@@ -6,12 +6,7 @@ import { parse, Node } from './ast';
 import { parserOptions } from './parser-options';
 
 export function parseDocument(document: vscode.TextDocument): [OpenApiVersion, Node, vscode.Diagnostic[]] {
-  const scheme = document.uri.scheme;
-  const languageId = document.languageId;
-  const supported =
-    (scheme === 'file' || scheme === 'untitled') &&
-    (languageId === 'json' || languageId === 'jsonc' || languageId == 'yaml');
-  if (!supported) {
+  if (!(document.languageId === 'json' || document.languageId === 'jsonc' || document.languageId == 'yaml')) {
     return [OpenApiVersion.Unknown, null, null];
   }
 

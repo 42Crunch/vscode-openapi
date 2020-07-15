@@ -21,12 +21,12 @@ function refToUri(ref: string, currentDocumentUri: vscode.Uri): vscode.Uri {
     return vscode.Uri.parse(ref, true);
   } catch {
     // assume a local file reference
-    const currentDir = path.dirname(currentDocumentUri.fsPath);
+    const baseDir = path.dirname(currentDocumentUri.fsPath);
     if (ref.includes('#')) {
       const [filename] = ref.split('#', 2);
-      return vscode.Uri.file(path.join(currentDir, filename));
+      return currentDocumentUri.with({ path: path.join(baseDir, filename) });
     } else {
-      return vscode.Uri.file(path.join(currentDir, ref));
+      return currentDocumentUri.with({ path: path.join(baseDir, ref) });
     }
   }
 }
