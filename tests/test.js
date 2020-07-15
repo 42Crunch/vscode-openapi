@@ -331,3 +331,30 @@ test('yaml findNodeAtOffset() broken yaml, more spaces', (t) => {
   t.is(root.findNodeAtOffset(1).getKey(), 'a');
   t.is(root.findNodeAtOffset(0).getKey(), 'a');
 });
+
+test('json getJsonPointer()', (t) => {
+  const root = parseJson(`{"foo": [1,2], "bar": {"baz": true}, "ra/ro": true}`);
+  t.is(root.find('').getJsonPonter(), '');
+  t.is(root.find('/foo').getJsonPonter(), '/foo');
+  t.is(root.find('/foo/0').getJsonPonter(), '/foo/0');
+  t.is(root.find('/foo/1').getJsonPonter(), '/foo/1');
+  t.is(root.find('/bar/baz').getJsonPonter(), '/bar/baz');
+  t.is(root.find('/ra~1ro').getJsonPonter(), '/ra~1ro');
+});
+
+test('yaml getJsonPointer()', (t) => {
+  const root = parseYaml(`
+foo:
+  - 1
+  - 2
+bar:
+  baz: true
+ra/ro: true`);
+
+  t.is(root.find('').getJsonPonter(), '');
+  t.is(root.find('/foo').getJsonPonter(), '/foo');
+  t.is(root.find('/foo/0').getJsonPonter(), '/foo/0');
+  t.is(root.find('/foo/1').getJsonPonter(), '/foo/1');
+  t.is(root.find('/bar/baz').getJsonPonter(), '/bar/baz');
+  t.is(root.find('/ra~1ro').getJsonPonter(), '/ra~1ro');
+});

@@ -4,8 +4,8 @@
 */
 
 import * as json from 'jsonc-parser';
-import { Node, Kind } from './types';
-import { parseJsonPointer } from '../pointer';
+import { Node } from './types';
+import { parseJsonPointer, joinJsonPointer } from '../pointer';
 
 export function parseJson(text: string): [JsonNode, any[]] {
   const parseErrors = [];
@@ -25,10 +25,6 @@ export class JsonNode implements Node {
     this.node = node;
   }
 
-  getKind() {
-    return Kind.Json;
-  }
-
   find(rawpointer: string) {
     const pointer = parseJsonPointer(rawpointer);
 
@@ -39,6 +35,7 @@ export class JsonNode implements Node {
     }
 
     for (let segment of pointer) {
+      // each object we traverse must be either object or array
       if (node.type === 'object' && Array.isArray(node.children)) {
         let found = false;
         for (let propertyNode of node.children) {
@@ -65,6 +62,8 @@ export class JsonNode implements Node {
   }
 
   getParent(): JsonNode {
+    // each value node must have either property or array as it's parent
+    // but check for type=object parent just in case
     const parent = this.node.parent;
     if (parent) {
       if (parent.type === 'property') {
@@ -121,5 +120,9 @@ export class JsonNode implements Node {
       return new JsonNode(node);
     }
     return null;
+  }
+
+  getJsonPonter(): string {
+    return joinJsonPointer(json.getNodePath(this.node));
   }
 }
