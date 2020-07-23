@@ -3,10 +3,22 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-export function joinJsonPointer(path: string[]): string {
-  const slashes = /\//g;
-  const tildes = /~/g;
-  return '/' + path.map(segment => encodeURIComponent(segment.replace(tildes, '~0').replace(slashes, '~1'))).join('/');
+const SLASHES = /\//g;
+const TILDES = /~/g;
+
+function encodeJsonPointerSegment(segment: string | number) {
+  if (typeof segment === 'number') {
+    return String(segment);
+  }
+  return encodeURIComponent(segment.replace(TILDES, '~0').replace(SLASHES, '~1'));
+}
+
+export function joinJsonPointer(path: (string | number)[]): string {
+  if (path.length == 0) {
+    return '';
+  }
+
+  return '/' + path.map((segment) => encodeJsonPointerSegment(segment)).join('/');
 }
 
 export function parseJsonPointer(pointer: string): string[] {
@@ -29,9 +41,5 @@ export function parseJsonPointer(pointer: string): string[] {
     return str.replace(escapeMatcher, escapeReplacer);
   }
 
-  return pointer
-    .split('/')
-    .slice(1)
-    .map(untilde)
-    .map(decodeURIComponent);
+  return pointer.split('/').slice(1).map(untilde).map(decodeURIComponent);
 }

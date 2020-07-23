@@ -1584,7 +1584,7 @@
       "text": "<h1>415 response should be defined for operations receiving a body (POST, PUT, PATCH)</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>One or more <code>POST</code>, <code>PUT</code>, or <code>PATCH</code> operations are missing <code>415</code> responses. All operations that receive a body should have <code>415</code> responses defined.</p>\n                    <p>For more details, see <a href=\"https://tools.ietf.org/html/rfc7231#section-6.5.13\" target=\"_blank\" rel=\"noopener\">RFC 7231</a>.</p>\n                    <p>For more details, see <a href=\"https://tools.ietf.org/html/rfc7231#section-6.5.13\" target=\"_blank\" rel=\"noopener\">RFC 7231</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>One or more <code>POST</code>, <code>PUT</code>, or <code>PATCH</code> operations are missing <code>415</code> responses. All operations that receive a body should have <code>415</code> responses defined.</p>\n                    <p>For more details, see <a href=\"https://tools.ietf.org/html/rfc7231#section-6.5.13\" target=\"_blank\" rel=\"noopener\">RFC 7231</a>.</p>\n                "
     },
     "shortDescription": "One or more <code>POST</code>, <code>PUT</code>, or <code>PATCH</code> operations are missing <code>415</code> responses. All operations that receive a body should have <code>415</code> responses defined.",
     "example": {
@@ -2977,7 +2977,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If do not clearly define the schema and properties of a JSON payload empty, you effectively allow attackers to pass in any data. This means that you are opening your backend to various attacks, such as SQL injection.</p>\n                    <p>This also lets attackers to try various unexpected inputs. Unexpected inputs may cause the backend server to crash or behave in an unexpected way. This in turn may cause the server to potentially leak stack trace that can be used for further attacks, or even data.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not clearly define the schema and you leave properties of a JSON payload empty, you effectively allow attackers to pass in any data. This means that you are opening your backend to various attacks, such as SQL injection.</p>\n                    <p>This also lets attackers to try various unexpected inputs. Unexpected inputs may cause the backend server to crash or behave in an unexpected way. This in turn may cause the server to potentially leak stack trace that can be used for further attacks, or even data.</p>\n                    <p>If no restrictions to the set of properties in the JSON payload are enforced, the API might also accept more fields than expected. The received payloads could be blindly transformed into an object and stored, overwriting sensitive internal data.</p>\n                "
         }
       ]
     },
@@ -2999,33 +2999,33 @@
       "text": "<h1>Schema does not define the type of JSON values</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The API defines a schema for a JSON payload. However, the schema does not define the types of the values in it. </p>\n                    <p>If you define a set of properties in a schema but do not define the type of the properties, the schema does not enforce any limits to what is accepted. It is not enough to define the type of properties in the properties themselves, if the type  for the schema is not defined, it still accepts anything.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The API defines a schema for a JSON payload, but the schema does not actually limit what is accepted. This can happen for two reasons:</p>\n                    <ul>\n                        <li value=\"1\">The schema is for an object (a set of properties) but it does not have <code>type</code> set to <code>object</code>. The properties are matched to the ones defined in the schema, but no limit to their types is enforced. </li>\n                        <li value=\"2\">Some of the properties themselves do not have <code>type</code> defined so any type is accepted for them.</li>\n                    </ul>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "The API defines a schema for a JSON payload. However, the schema does not define the types of the values in it. ",
+    "shortDescription": "The API defines a schema for a JSON payload, but the schema does not actually limit what is accepted. This can happen for two reasons:",
     "example": {
       "sections": [
         {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The object <code>NewPet</code> is defined in <code>#/definitions</code> and referenced as the <code>schema</code> for the API method. However, the types of the properties in the object (<code>name</code> and <code>tag</code>) are not defined:</p>\n                "
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The schema <code>NewPet</code> is defined in <code>#/definitions</code> and referenced as the <code>schema</code> for the API method. However, the type of the schema is not set to <code>object</code> and the type is missing from the property <code>tag</code>:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"24-28\" xml:space=\"preserve\"><code class=\"language-json\">\"post\": {\n  \"description\": \"Creates a new pet in the store\",\n  \"operationId\": \"addPet\",\n  \"parameters\": [\n    {\n      \"name\": \"pet\",\n      \"in\": \"body\",\n      \"description\": \"pet to add to the system\",\n      \"required\": true,\n      \"schema\": {\n        \"$ref\": \"#/definitions/NewPet\"\n      }\n    }\n  ]\n}\n...\n{\n  \"NewPet\": {\n    \"type\": \"object\",\n    \"required\": [\n      \"name\"\n    ],\n    \"properties\": {\n      \"name\": {\n        \"description\": \"Pet name\"\n      },\n      \"tag\": {\n        \"description\": \"Pet tag\"\n      }\n    }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"18-28\" xml:space=\"preserve\"><code class=\"language-json\">\"post\": {\n  \"description\": \"Creates a new pet in the store\",\n  \"operationId\": \"addPet\",\n  \"parameters\": [\n    {\n      \"name\": \"pet\",\n      \"in\": \"body\",\n      \"description\": \"pet to add to the system\",\n      \"required\": true,\n      \"schema\": {\n        \"$ref\": \"#/definitions/NewPet\"\n      }\n    }\n  ]\n}\n...\n{\n  \"NewPet\": {\n    \"required\": [\n      \"name\"\n    ],\n    \"properties\": {\n      \"name\": {\n        \"description\": \"Pet name\",\n        \"type\": \"string\"\n      },\n      \"tag\": {\n        \"description\": \"Pet tag\"\n      }\n    }\n  }\n}</code></pre>"
         }
       ]
     },
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If do not clearly define the schema and properties of a JSON payload empty, you effectively allow attackers to pass in any data. This means that you are opening your backend to various attacks, such as SQL injection.</p>\n                    <p>This also lets attackers to try various unexpected inputs. Unexpected inputs may cause the backend server to crash or behave in an unexpected way. This in turn may cause the server to potentially leak stack trace that can be used for further attacks, or even data.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not clearly define the schema and you leave properties of a JSON payload empty, you effectively allow attackers to pass in any data. This means that you are opening your backend to various attacks, such as SQL injection.</p>\n                    <p>This also lets attackers to try various unexpected inputs. Unexpected inputs may cause the backend server to crash or behave in an unexpected way. This in turn may cause the server to potentially leak stack trace that can be used for further attacks, or even data.</p>\n                    <p>If no restrictions to the set of properties in the JSON payload are enforced, the API might also accept more fields than expected. The received payloads could be blindly transformed into an object and stored, overwriting sensitive internal data.</p>\n                "
         }
       ]
     },
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure you define all properties of the accepted JSON payload and set <code>additionalProperties</code> to <code>false</code> to enforce limitations to what the schema accepts.</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure you define the types of all properties in the JSON payload and correctly set the type for objects to enforce limitations to what the schema accepts.</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"24-31\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"post\": {\n  \"description\": \"Creates a new pet in the store\",\n  \"operationId\": \"addPet\",\n  \"parameters\": [\n    {\n      \"name\": \"pet\",\n      \"in\": \"body\",\n      \"description\": \"pet to add to the system\",\n      \"required\": true,\n      \"schema\": {\n        \"$ref\": \"#/definitions/NewPet\"\n      }\n    }\n  ]\n}\n...\n{\n  \"NewPet\": {\n    \"type\": \"object\",\n    \"required\": [\n      \"name\"\n    ],\n    \"properties\": {\n      \"name\": {\n        \"type\": \"string\",\n        \"description\": \"Pet name\"\n      },\n      \"tag\": {\n        \"type\": \"string\",\n        \"description\": \"Pet tag\"\n      }\n    }\n  }\n</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"18-30\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"post\": {\n  \"description\": \"Creates a new pet in the store\",\n  \"operationId\": \"addPet\",\n  \"parameters\": [\n    {\n      \"name\": \"pet\",\n      \"in\": \"body\",\n      \"description\": \"pet to add to the system\",\n      \"required\": true,\n      \"schema\": {\n        \"$ref\": \"#/definitions/NewPet\"\n      }\n    }\n  ]\n}\n...\n{\n  \"NewPet\": {\n    \"type\": \"object\",\n    \"required\": [\n      \"name\"\n    ],\n    \"properties\": {\n      \"name\": {\n        \"type\": \"string\",\n        \"description\": \"Pet name\"\n      },\n      \"tag\": {\n        \"type\": \"string\",\n        \"description\": \"Pet tag\"\n      }\n    }\n  }\n</code></pre>"
         }
       ]
     }
@@ -3167,7 +3167,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If do not clearly define the schema and properties of a JSON payload empty, you effectively allow attackers to pass in any data. This means that you are opening your backend to various attacks, such as SQL injection.</p>\n                    <p>This also lets attackers to try various unexpected inputs. Unexpected inputs may cause the backend server to crash or behave in an unexpected way. This in turn may cause the server to potentially leak stack trace that can be used for further attacks, or even data.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not clearly define the schema and you leave properties of a JSON payload empty, you effectively allow attackers to pass in any data. This means that you are opening your backend to various attacks, such as SQL injection.</p>\n                    <p>This also lets attackers to try various unexpected inputs. Unexpected inputs may cause the backend server to crash or behave in an unexpected way. This in turn may cause the server to potentially leak stack trace that can be used for further attacks, or even data.</p>\n                    <p>If no restrictions to the set of properties in the JSON payload are enforced, the API might also accept more fields than expected. The received payloads could be blindly transformed into an object and stored, overwriting sensitive internal data.</p>\n                "
         }
       ]
     },
@@ -3177,7 +3177,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure you define all properties of the accepted JSON payload and set <code>additionalProperties</code> to <code>false</code> to enforce limitations to what the schema accepts.</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"24-31\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"post\": {\n  \"description\": \"Creates a new pet in the store\",\n  \"operationId\": \"addPet\",\n  \"parameters\": [\n    {\n      \"name\": \"pet\",\n      \"in\": \"body\",\n      \"description\": \"pet to add to the system\",\n      \"required\": true,\n      \"schema\": {\n        \"$ref\": \"#/definitions/NewPet\"\n      }\n    }\n  ]\n}\n...\n{\n  \"NewPet\": {\n    \"type\": \"object\",\n    \"required\": [\n      \"name\"\n    ],\n    \"properties\": {\n      \"name\": {\n        \"type\": \"string\",\n        \"description\": \"Pet name\"\n      },\n      \"tag\": {\n        \"type\": \"string\",\n        \"description\": \"Pet tag\"\n      }\n    }\n  }\n</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"18-30\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"post\": {\n  \"description\": \"Creates a new pet in the store\",\n  \"operationId\": \"addPet\",\n  \"parameters\": [\n    {\n      \"name\": \"pet\",\n      \"in\": \"body\",\n      \"description\": \"pet to add to the system\",\n      \"required\": true,\n      \"schema\": {\n        \"$ref\": \"#/definitions/NewPet\"\n      }\n    }\n  ]\n}\n...\n{\n  \"NewPet\": {\n    \"type\": \"object\",\n    \"required\": [\n      \"name\"\n    ],\n    \"properties\": {\n      \"name\": {\n        \"type\": \"string\",\n        \"description\": \"Pet name\"\n      },\n      \"tag\": {\n        \"type\": \"string\",\n        \"description\": \"Pet tag\"\n      }\n    }\n  }\n</code></pre>"
         }
       ]
     }
@@ -3655,6 +3655,37 @@
       ]
     }
   },
+  "semantic-parameter-allowemptyvalue": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Property 'allowEmptyValue' is only allowed for query parameters</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The parameter in question has the <code>allowEmptyValue</code> property defined, but it is not a query or a <code>formData</code> parameter. Only query and <code>formData</code> parameters can have the <code>allowEmptyValue</code> property defined.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#parameter-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The parameter in question has the <code>allowEmptyValue</code> property defined, but it is not a query or a <code>formData</code> parameter. Only query and <code>formData</code> parameters can have the <code>allowEmptyValue</code> property defined.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The parameter has <code>allowEmptyValue</code> set to <code>true</code>, but <code>in</code> is set to <code>header</code>:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"5, 9\" xml:space=\"preserve\"><code class=\"language-json\">\"parameters\":[\n    {\n        \"name\": \"myAPIparameter\",\n        \"type\": \"string\",\n        \"in\": \"header\",\n        \"required\": true,\n        \"pattern\": \"^([a-zA-Z0-9_=]{4,})\\\\.([a-zA-Z0-9_=]{4,})\\\\.([a-zA-Z0-9_\\\\-\\\\+\\\\/=]{4,})\",\n        \"maxLength\": 700,\n        \"allowEmptyValue\": true\n    },\n    ...</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that only query and <code>formData</code> parameters have the <code>allowEmptyValue</code> property.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"5, 9\" xml:space=\"preserve\"><code class=\"language-json\">\"parameters\":[\n    {\n        \"name\": \"myAPIparameter\",\n        \"type\": \"string\",\n        \"in\": \"query\",\n        \"required\": true,\n        \"pattern\": \"^([a-zA-Z0-9_=]{4,})\\\\.([a-zA-Z0-9_=]{4,})\\\\.([a-zA-Z0-9_\\\\-\\\\+\\\\/=]{4,})\",\n        \"maxLength\": 700,\n        \"allowEmptyValue\": true\n    },\n   ...</code></pre>"
+        }
+      ]
+    }
+  },
   "semantic-parameter-default-invalid": {
     "group": "oasconformance",
     "subgroup": "semantics",
@@ -3729,13 +3760,44 @@
       "text": "<h1>Parameters have the same name + in combination</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>One or more parameters have the same <code>nameIn</code> combination (parameter <code>name</code> + <code>in</code>). The <code>nameIn</code> combinations must be unique.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#parameter-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>Two or more parameters have the same <code>nameIn</code> combination (parameter <code>name</code> + <code>in</code>). The <code>nameIn</code> combinations must be unique.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#parameter-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "One or more parameters have the same <code>nameIn</code> combination (parameter <code>name</code> + <code>in</code>). The <code>nameIn</code> combinations must be unique.",
+    "shortDescription": "Two or more parameters have the same <code>nameIn</code> combination (parameter <code>name</code> + <code>in</code>). The <code>nameIn</code> combinations must be unique.",
     "remediation": {
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all parameters have unique <code>nameIn</code> combinations.</p>\n                "
+        }
+      ]
+    }
+  },
+  "semantic-parameter-namein-multiple-header": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Header parameters have the same name</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>Two or more header parameters have properties <code>name</code> that are considered equal. </p>\n                    <p>While parameter names normally are case-sensitive, <a href=\"https://tools.ietf.org/html/rfc7230\" target=\"_blank\">RFC 7230</a> states that HTTP header names are not. The OpenAPI Specification (OAS) does therefore not consider header parameters names as case-sensitive, so names like <code>content-type</code> and <code>Content-Type</code> are considered equal. You should not have equal header parameters in your OpenAPI definition.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#parameter-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "Two or more header parameters have properties <code>name</code> that are considered equal. ",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"2, 10\" xml:space=\"preserve\"><code class=\"language-json\">{\n    \"name\": \"Auth-Token\",\n    \"in\": \"header\",\n    \"description\": \"Auth-Token\",\n    \"required\": true,\n    \"type\": \"string\"\n},\n...\n{\n    \"name\": \"auth-token\",\n    \"in\": \"header\",\n    \"description\": \"Authorization token for user\",\n    \"required\": true,\n    \"type\": \"string\"\n},</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all header parameters have unique <code>name</code>.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"2, 10\" xml:space=\"preserve\"><code class=\"language-json\">{\n    \"name\": \"Auth-Token\",\n    \"in\": \"header\",\n    \"description\": \"Auth-Token\",\n    \"required\": true,\n    \"type\": \"string\"\n},\n...\n{\n    \"name\": \"auth-token-user\",\n    \"in\": \"header\",\n    \"description\": \"Authorization token for user\",\n    \"required\": true,\n    \"type\": \"string\"\n},</code></pre>"
         }
       ]
     }
@@ -3873,6 +3935,43 @@
         },
         {
           "code": "<pre class=\"line-numbers\" data-line=\"9, 12-13\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n      \"name\": \"pet\",\n      \"in\": \"body\",\n      \"description\": \"pet to add to the system\",\n      \"required\": true,\n      \"schema\": {  \n        \"type\": \"object\",\n        \"additionalProperties\": \"false\",\n        \"required\": [\n          \"name\"\n          ],\n        \"properties\": {\n          \"name\": {\n             \"type\": \"string\"\n           },\n          \"breed\": {\n            \"type\": \"string\"\n           },\n          \"age\": {\n            \"type\": \"integer\"\n          }\n         }\n       }\n     }</code></pre>"
+        }
+      ]
+    }
+  },
+  "semantic-response-httpstatus": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>HTTP status codes in responses must be between 100 and 599</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>One or more <code>responses</code> objects in your API have non-standard HTTP response code keys. The HTTP response code keys must be between <code>100</code> and <code>599</code>.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#http-status-codes\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "One or more <code>responses</code> objects in your API have non-standard HTTP response code keys. The HTTP response code keys must be between <code>100</code> and <code>599</code>.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. Here, the response code has a typo and is missing one number:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"2\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n    \"20\": {\n        \"description\": \"Expected response to a valid request\",\n        \"schema\": {\n            \"$ref\": \"#/definitions/Pets\"\n        }\n    }\n}</code></pre>"
+        },
+        {
+          "text": "\n                    <p>Or your response code might be bigger than the maximum defined in the <a href=\"https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml\">Hypertext Transfer Protocol (HTTP) Status Code Registry</a>:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"2\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n    \"659\": {\n        \"description\": \"Response to the error XYZ\",\n        \"schema\": {\n            \"$ref\": \"#/definitions/Pets\"\n        }\n    }\n}</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all <code>responses</code> objects have HTTP response code keys between <code>100</code> and <code>599</code>.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"2\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n    \"200\": {\n        \"description\": \"Expected response to a valid request\",\n        \"schema\": {\n            \"$ref\": \"#/definitions/Pets\"\n        }\n    }\n}</code></pre>"
         }
       ]
     }
@@ -5537,7 +5636,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If do not clearly define the schema and properties of a JSON payload empty, you effectively allow attackers to pass in any data. This means that you are opening your backend to various attacks, such as SQL injection.</p>\n                    <p>This also lets attackers to try various unexpected inputs. Unexpected inputs may cause the backend server to crash or behave in an unexpected way. This in turn may cause the server to potentially leak stack trace that can be used for further attacks, or even data.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not clearly define the schema and you leave properties of a JSON payload empty, you effectively allow attackers to pass in any data. This means that you are opening your backend to various attacks, such as SQL injection.</p>\n                    <p>This also lets attackers to try various unexpected inputs. Unexpected inputs may cause the backend server to crash or behave in an unexpected way. This in turn may cause the server to potentially leak stack trace that can be used for further attacks, or even data.</p>\n                    <p>If no restrictions to the set of properties in the JSON payload are enforced, the API might also accept more fields than expected. The received payloads could be blindly transformed into an object and stored, overwriting sensitive internal data.</p>\n                "
         }
       ]
     },
@@ -5559,33 +5658,33 @@
       "text": "<h1>Schema does not define the type of JSON values</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The API defines a schema for a JSON payload. However, the schema does not define the types of the values in it. </p>\n                    <p>If you define a set of properties in a schema but do not define the type of the properties, the schema does not enforce any limits to what is accepted. It is not enough to define the type of properties in the properties themselves, if the type  for the schema is not defined, it still accepts anything.</p>\n                    <p>Unlike in the OpenAPI Specification v2, it is not enough to just state the type of the properties in the schema. The schema continues to accept properties of any type unless <code>additionalProperties</code> is set to <code>false</code>. By default, this property is <code>true</code>.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The API defines a schema for a JSON payload, but the schema does not actually limit what is accepted. This can happen for two reasons:</p>\n                    <ul>\n                        <li value=\"1\">The schema is for an object (a set of properties) but it does not have <code>type</code> set to <code>object</code>. The properties are matched to the ones defined in the schema, but no limit to their types is enforced. </li>\n                        <li value=\"2\">Some of the properties themselves do not have <code>type</code> defined so any type is accepted for them.</li>\n                    </ul>\n                    <p>Unlike in the OpenAPI Specification v2, it is not enough to just state the type of the properties in the schema. The schema continues to accept properties of any type unless <code>additionalProperties</code> is set to <code>false</code>. By default, this property is <code>true</code>.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "The API defines a schema for a JSON payload. However, the schema does not define the types of the values in it. ",
+    "shortDescription": "The API defines a schema for a JSON payload, but the schema does not actually limit what is accepted. This can happen for two reasons:",
     "example": {
       "sections": [
         {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The object <code>NewPet</code> is defined in <code>#/components/schemas</code> and referenced as the <code>schema</code> for the API method. However, the types of the properties in the object (<code>name</code> and <code>tag</code>) are not defined:</p>\n                "
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The schema <code>NewPet</code> is defined in <code>#/components/schemas</code> and referenced as the <code>schema</code> for the API method. However, the type of the schema is not set to <code>object</code> and the type is missing from the property <code>tag</code>:</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"24-29\" xml:space=\"preserve\"><code class=\"language-json\">\"post\": {\n  \"description\": \"Creates a new pet in the store\",\n  \"operationId\": \"addPet\",\n  \"parameters\": [\n    {\n      \"name\": \"pet\",\n      \"in\": \"body\",\n      \"description\": \"pet to add to the system\",\n      \"required\": true,\n      \"schema\": {\n        \"$ref\": \"#/components/schemas/NewPet\"\n      }\n    }\n  ]\n}\n...\n{\n  \"NewPet\": {\n    \"type\": \"object\",\n    \"required\": [\n      \"name\"\n    ],\n    \"properties\": {\n      \"name\": {\n        \"description\": \"Pet name\"\n      },\n      \"tag\": {\n        \"description\": \"Pet tag\"\n      }\n    }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"18-28\" xml:space=\"preserve\"><code class=\"language-json\">\"post\": {\n  \"description\": \"Creates a new pet in the store\",\n  \"operationId\": \"addPet\",\n  \"parameters\": [\n    {\n      \"name\": \"pet\",\n      \"in\": \"body\",\n      \"description\": \"pet to add to the system\",\n      \"required\": true,\n      \"schema\": {\n        \"$ref\": \"#/components/schemas/NewPet\"\n      }\n    }\n  ]\n}\n...\n{\n  \"NewPet\": {\n    \"required\": [\n      \"name\"\n    ],\n    \"properties\": {\n      \"name\": {\n        \"description\": \"Pet name\",\n        \"type\": \"string\"\n      },\n      \"tag\": {\n        \"description\": \"Pet tag\"\n      }\n    }\n  }\n}</code></pre>"
         }
       ]
     },
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If do not clearly define the schema and properties of a JSON payload empty, you effectively allow attackers to pass in any data. This means that you are opening your backend to various attacks, such as SQL injection.</p>\n                    <p>This also lets attackers to try various unexpected inputs. Unexpected inputs may cause the backend server to crash or behave in an unexpected way. This in turn may cause the server to potentially leak stack trace that can be used for further attacks, or even data.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not clearly define the schema and you leave properties of a JSON payload empty, you effectively allow attackers to pass in any data. This means that you are opening your backend to various attacks, such as SQL injection.</p>\n                    <p>This also lets attackers to try various unexpected inputs. Unexpected inputs may cause the backend server to crash or behave in an unexpected way. This in turn may cause the server to potentially leak stack trace that can be used for further attacks, or even data.</p>\n                    <p>If no restrictions to the set of properties in the JSON payload are enforced, the API might also accept more fields than expected. The received payloads could be blindly transformed into an object and stored, overwriting sensitive internal data.</p>\n                "
         }
       ]
     },
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure you define all properties of the accepted JSON payload and set <code>additionalProperties</code> to <code>false</code> to enforce limitations to what the schema accepts.</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure you define the types of all properties in the JSON payload, correctly set the type for objects, and set <code>additionalProperties</code> to <code>false</code> to enforce limitations to what the schema accepts.</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"24-31\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"post\": {\n  \"description\": \"Creates a new pet in the store\",\n  \"operationId\": \"addPet\",\n  \"parameters\": [\n    {\n      \"name\": \"pet\",\n      \"in\": \"body\",\n      \"description\": \"pet to add to the system\",\n      \"required\": true,\n      \"schema\": {\n        \"$ref\": \"#components/schemas/NewPet\"\n      }\n    }\n  ]\n}\n...\n{\n  \"NewPet\": {\n    \"type\": \"object\",\n    \"additionalProperties\": \"false\",\n    \"required\": [\n      \"name\"\n    ],\n    \"properties\": {\n      \"name\": {\n        \"type\": \"string\",\n        \"description\": \"Pet name\"\n      },\n      \"tag\": {\n        \"type\": \"string\",\n        \"description\": \"Pet tag\"\n      }\n    }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"18-31\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"post\": {\n  \"description\": \"Creates a new pet in the store\",\n  \"operationId\": \"addPet\",\n  \"parameters\": [\n    {\n      \"name\": \"pet\",\n      \"in\": \"body\",\n      \"description\": \"pet to add to the system\",\n      \"required\": true,\n      \"schema\": {\n        \"$ref\": \"#components/schemas/NewPet\"\n      }\n    }\n  ]\n}\n...\n{\n  \"NewPet\": {\n    \"type\": \"object\",\n    \"additionalProperties\": \"false\",\n    \"required\": [\n      \"name\"\n    ],\n    \"properties\": {\n      \"name\": {\n        \"type\": \"string\",\n        \"description\": \"Pet name\"\n      },\n      \"tag\": {\n        \"type\": \"string\",\n        \"description\": \"Pet tag\"\n      }\n    }\n  }\n}</code></pre>"
         }
       ]
     }
@@ -5727,7 +5826,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If do not clearly define the schema and properties of a JSON payload empty, you effectively allow attackers to pass in any data. This means that you are opening your backend to various attacks, such as SQL injection.</p>\n                    <p>This also lets attackers to try various unexpected inputs. Unexpected inputs may cause the backend server to crash or behave in an unexpected way. This in turn may cause the server to potentially leak stack trace that can be used for further attacks, or even data.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not clearly define the schema and you leave properties of a JSON payload empty, you effectively allow attackers to pass in any data. This means that you are opening your backend to various attacks, such as SQL injection.</p>\n                    <p>This also lets attackers to try various unexpected inputs. Unexpected inputs may cause the backend server to crash or behave in an unexpected way. This in turn may cause the server to potentially leak stack trace that can be used for further attacks, or even data.</p>\n                    <p>If no restrictions to the set of properties in the JSON payload are enforced, the API might also accept more fields than expected. The received payloads could be blindly transformed into an object and stored, overwriting sensitive internal data.</p>\n                "
         }
       ]
     },
@@ -5765,7 +5864,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If do not clearly define the schema and properties of a JSON payload empty, you effectively allow attackers to pass in any data. This means that you are opening your backend to various attacks, such as SQL injection.</p>\n                    <p>This also lets attackers to try various unexpected inputs. Unexpected inputs may cause the backend server to crash or behave in an unexpected way. This in turn may cause the server to potentially leak stack trace that can be used for further attacks, or even data.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not clearly define the schema and you leave properties of a JSON payload empty, you effectively allow attackers to pass in any data. This means that you are opening your backend to various attacks, such as SQL injection.</p>\n                    <p>This also lets attackers to try various unexpected inputs. Unexpected inputs may cause the backend server to crash or behave in an unexpected way. This in turn may cause the server to potentially leak stack trace that can be used for further attacks, or even data.</p>\n                    <p>If no restrictions to the set of properties in the JSON payload are enforced, the API might also accept more fields than expected. The received payloads could be blindly transformed into an object and stored, overwriting sensitive internal data.</p>\n                "
         }
       ]
     },
@@ -5775,7 +5874,7 @@
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure you define all properties of the accepted JSON payload and set <code>additionalProperties</code> to <code>false</code> to enforce limitations to what the schema accepts.</p>\n                "
         },
         {
-          "code": "<pre class=\"line-numbers\" data-line=\"24-31\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"post\": {\n  \"description\": \"Creates a new pet in the store\",\n  \"operationId\": \"addPet\",\n  \"parameters\": [\n    {\n      \"name\": \"pet\",\n      \"in\": \"body\",\n      \"description\": \"pet to add to the system\",\n      \"required\": true,\n      \"schema\": {\n        \"$ref\": \"#components/schemas/NewPet\"\n      }\n    }\n  ]\n}\n...\n{\n  \"NewPet\": {\n    \"type\": \"object\",\n    \"additionalProperties\": \"false\",\n    \"required\": [\n      \"name\"\n    ],\n    \"properties\": {\n      \"name\": {\n        \"type\": \"string\",\n        \"description\": \"Pet name\"\n      },\n      \"tag\": {\n        \"type\": \"string\",\n        \"description\": \"Pet tag\"\n      }\n    }\n  }\n}</code></pre>"
+          "code": "<pre class=\"line-numbers\" data-line=\"18-31\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"post\": {\n  \"description\": \"Creates a new pet in the store\",\n  \"operationId\": \"addPet\",\n  \"parameters\": [\n    {\n      \"name\": \"pet\",\n      \"in\": \"body\",\n      \"description\": \"pet to add to the system\",\n      \"required\": true,\n      \"schema\": {\n        \"$ref\": \"#components/schemas/NewPet\"\n      }\n    }\n  ]\n}\n...\n{\n  \"NewPet\": {\n    \"type\": \"object\",\n    \"additionalProperties\": \"false\",\n    \"required\": [\n      \"name\"\n    ],\n    \"properties\": {\n      \"name\": {\n        \"type\": \"string\",\n        \"description\": \"Pet name\"\n      },\n      \"tag\": {\n        \"type\": \"string\",\n        \"description\": \"Pet tag\"\n      }\n    }\n  }\n}</code></pre>"
         }
       ]
     }
@@ -6160,6 +6259,68 @@
       ]
     }
   },
+  "v3-semantic-parameter-allowemptyvalue": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Property 'allowEmptyValue' is only allowed for query parameters</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The parameter in question has the <code>allowEmptyValue</code> property defined, but it is not a query or a <code>formData</code> parameter. Only query and <code>formData</code> parameters can have the <code>allowEmptyValue</code> property defined.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#parameterObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The parameter in question has the <code>allowEmptyValue</code> property defined, but it is not a query or a <code>formData</code> parameter. Only query and <code>formData</code> parameters can have the <code>allowEmptyValue</code> property defined.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The parameter has <code>allowEmptyValue</code> set to <code>true</code>, but <code>in</code> is set to <code>path</code>:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3, 5\" xml:space=\"preserve\"><code class=\"language-json\">\"myAPIparameter\":{\n    \"name\": \"id\",\n    \"in\": \"path\",\n    \"required\": true,\n    \"allowEmptyValue\": true,\n    \"schema\":{\n        \"$ref\":\"#/components/schemas/id\"\n    }\n},</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that only query and <code>formData</code> parameters have the <code>allowEmptyValue</code> property.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3, 5\" xml:space=\"preserve\"><code class=\"language-json\">\"myAPIparameter\":{\n    \"name\": \"id\",\n    \"in\": \"query\",\n    \"required\": true,\n    \"allowEmptyValue\": true,\n    \"schema\":{\n        \"$ref\":\"#/components/schemas/id\"\n    }\n},</code></pre>"
+        }
+      ]
+    }
+  },
+  "v3-semantic-parameter-allowreserved": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Property 'allowReserved' is only allowed for query parameters</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>You have defined the property <code>allowReserved</code> for a parameter where it is not allowed. The property is only allowed for query parameters.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#parameterObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "You have defined the property <code>allowReserved</code> for a parameter where it is not allowed. The property is only allowed for query parameters.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The parameter has <code>allowReserved</code> set to <code>true</code>, but <code>in</code> is set to <code>path</code>:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3, 5\" xml:space=\"preserve\"><code class=\"language-json\">\"myAPIparameter\":{\n    \"name\": \"string\",\n    \"in\": \"path\",\n    \"required\": true,\n    \"allowReserved\" : true,\n    \"schema\":{\n        \"$ref\":\"#/components/schemas/string\"\n    }\n},</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure you only define <code>allowReserved</code> for query parameters.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"3, 5\" xml:space=\"preserve\"><code class=\"language-json\">\"myAPIparameter\":{\n    \"name\": \"string\",\n    \"in\": \"query\",\n    \"required\": true,\n    \"allowReserved\" : true,\n    \"schema\":{\n        \"$ref\":\"#/components/schemas/string\"\n    }\n},</code></pre>"
+        }
+      ]
+    }
+  },
   "v3-semantic-parameter-namein-multiple": {
     "group": "oasconformance",
     "subgroup": "semantics",
@@ -6167,13 +6328,44 @@
       "text": "<h1>Parameters have the same name + in combination</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>One or more parameters have the same <code>nameIn</code> combination (parameter <code>name</code> + <code>in</code>). The <code>nameIn</code> combinations must be unique.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#parameterObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>Two or more parameters have the same <code>nameIn</code> combination (parameter <code>name</code> + <code>in</code>). The <code>nameIn</code> combinations must be unique.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#parameterObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "One or more parameters have the same <code>nameIn</code> combination (parameter <code>name</code> + <code>in</code>). The <code>nameIn</code> combinations must be unique.",
+    "shortDescription": "Two or more parameters have the same <code>nameIn</code> combination (parameter <code>name</code> + <code>in</code>). The <code>nameIn</code> combinations must be unique.",
     "remediation": {
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all parameters have unique <code>nameIn</code> combinations.</p>\n                "
+        }
+      ]
+    }
+  },
+  "v3-semantic-parameter-namein-multiple-header": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Header parameters have the same name</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>Two or more header parameters have properties <code>name</code> that are considered equal. </p>\n                    <p>While parameter names normally are case-sensitive, <a href=\"https://tools.ietf.org/html/rfc7230\" target=\"_blank\">RFC 7230</a> states that HTTP header names are not. The OpenAPI Specification (OAS) does therefore not consider header parameters names as case-sensitive, so names like <code>content-type</code> and <code>Content-Type</code> are considered equal. You should not have equal header parameters in your OpenAPI definition.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#parameterObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "Two or more header parameters have properties <code>name</code> that are considered equal. ",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"2, 10\" xml:space=\"preserve\"><code class=\"language-json\">{\n    \"name\": \"Auth-Token\",\n    \"in\": \"header\",\n    \"description\": \"Auth-Token\",\n    \"required\": true,\n    \"type\": \"string\"\n},\n...\n{\n    \"name\": \"auth-token\",\n    \"in\": \"header\",\n    \"description\": \"Authorization token for user\",\n    \"required\": true,\n    \"type\": \"string\"\n},</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all header parameters have unique <code>name</code>.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"2, 10\" xml:space=\"preserve\"><code class=\"language-json\">{\n    \"name\": \"Auth-Token\",\n    \"in\": \"header\",\n    \"description\": \"Auth-Token\",\n    \"required\": true,\n    \"type\": \"string\"\n},\n...\n{\n    \"name\": \"auth-token-user\",\n    \"in\": \"header\",\n    \"description\": \"Authorization token for user\",\n    \"required\": true,\n    \"type\": \"string\"\n},</code></pre>"
         }
       ]
     }
@@ -6311,6 +6503,43 @@
         },
         {
           "code": "<pre class=\"line-numbers\" data-line=\"9, 12-13\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">{\n      \"name\": \"pet\",\n      \"in\": \"body\",\n      \"description\": \"pet to add to the system\",\n      \"required\": true,\n      \"schema\": {  \n        \"type\": \"object\",\n        \"additionalProperties\": \"false\",\n        \"required\": [\n          \"name\"\n          ],\n        \"properties\": {\n          \"name\": {\n             \"type\": \"string\"\n           },\n          \"breed\": {\n            \"type\": \"string\"\n           },\n          \"age\": {\n            \"type\": \"integer\"\n          }\n         }\n       }\n     }</code></pre>"
+        }
+      ]
+    }
+  },
+  "v3-semantic-response-httpstatus": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>HTTP status codes in responses must be between 100 and 599</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>One or more <code>responses</code> objects in your API have non-standard HTTP response code keys. The HTTP response code keys must be between <code>100</code> and <code>599</code>.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#httpCodes\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "One or more <code>responses</code> objects in your API have non-standard HTTP response code keys. The HTTP response code keys must be between <code>100</code> and <code>599</code>.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. Here, the response code has a typo and is missing one number:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"2\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n    \"20\": {\n        \"description\": \"Expected response to a valid request\",\n        \"schema\": {\n            \"$ref\": \"#/components/schemas/Pets\"\n        }\n    }\n}</code></pre>"
+        },
+        {
+          "text": "\n                    <p>Or your response code might be bigger than the maximum defined in the <a href=\"https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml\">Hypertext Transfer Protocol (HTTP) Status Code Registry</a>:</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"2\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n    \"659\": {\n        \"description\": \"Response to the error XYZ\",\n        \"schema\": {\n            \"$ref\": \"#/components/schemas/Pets\"\n        }\n    }\n}</code></pre>"
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all <code>responses</code> objects have HTTP response code keys between <code>100</code> and <code>599</code>.</p>\n                "
+        },
+        {
+          "code": "<pre class=\"line-numbers\" data-line=\"2\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n    \"200\": {\n        \"description\": \"Expected response to a valid request\",\n        \"schema\": {\n            \"$ref\": \"#/components/schemas/Pets\"\n        }\n    }\n}</code></pre>"
         }
       ]
     }
@@ -6704,42 +6933,6 @@
         },
         {
           "code": "<pre class=\"line-numbers\" data-start=\"1\" data-line=\"6, 27\" xml:space=\"preserve\"><code class=\"language-json\">...\n{\n    \"security\": [\n        {\n            \"regularSecurity\": [],\n            \"OAuth2\": [ \"readOnly\" ]\n        }\n    ]\n}\n...\n{\n    \"servers\": [\n        {\n            \"url\": \"http://my.api.server.com/\",\n            \"description\": \"API server\"\n        }\n    ]\n}\n...  \n{\n    \"components\": {\n        \"securitySchemes\": {\n            \"regularSecurity\": {\n                \"type\": \"http\",\n                \"scheme\": \"basic\"\n            },\n            \"OAuth2\": {\n                \"type\": \"oauth2\",\n                \"flows\": {\n                    \"authorizationCode\": {\n                        \"scopes\": {\n                            \"readOnly\": \"read objects in your account\"\n                        },\n                        \"authorizationUrl\": \"https://example.com/oauth/authorize\",\n                        \"tokenUrl\": \"https://example.com/oauth/token\", \n                    }\n                }\n            }\n        }\n    }\n}</code></pre>"
-        }
-      ]
-    }
-  },
-  "v3-validation-parameter-allowemptyvalue": {
-    "group": "oasconformance",
-    "subgroup": "structure",
-    "title": {
-      "text": "<h1>Property 'allowEmptyValue' is only allowed for query parameters</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The parameter in question has the <code>allowEmptyValue</code> property defined, but it is not a query or a <code>formData</code> parameter. Only query and <code>formData</code> parameters can have the <code>allowEmptyValue</code> property defined.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#parameterObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The parameter in question has the <code>allowEmptyValue</code> property defined, but it is not a query or a <code>formData</code> parameter. Only query and <code>formData</code> parameters can have the <code>allowEmptyValue</code> property defined.",
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that only query and <code>formData</code> parameters have the <code>allowEmptyValue</code> property.</p>\n                "
-        }
-      ]
-    }
-  },
-  "v3-validation-parameter-allowreserved": {
-    "group": "oasconformance",
-    "subgroup": "structure",
-    "title": {
-      "text": "<h1>Property 'allowReserved' is only allowed for query parameters</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>You have defined the property <code>allowReserved</code> for a parameter where it is not allowed. The property is only allowed for query parameters.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#parameterObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "You have defined the property <code>allowReserved</code> for a parameter where it is not allowed. The property is only allowed for query parameters.",
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure you only define <code>allowReserved</code> for query parameters.</p>\n                "
         }
       ]
     }
@@ -7385,37 +7578,6 @@
         },
         {
           "code": "<pre class=\"line-numbers\" data-line=\"6\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"post\": {\n  \"description\": \"Creates a new pet in the store\",\n  \"operationId\": \"addPet\",\n  ...\n  \"responses\": {\n    \"200\": {\n    \"description\": \"Expected response to a valid request\",\n    \"schema\": {\n      \"$ref\": \"#/components/responses/Pet\"\n      }\n    }\n  ...\n  }\n}</code></pre>"
-        }
-      ]
-    }
-  },
-  "v3-validation-response-httpstatus": {
-    "group": "oasconformance",
-    "subgroup": "structure",
-    "title": {
-      "text": "<h1>HTTP status codes in responses must be between 100 and 999</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>One or more <code>responses</code> objects in your API have non-standard HTTP response code keys. The HTTP response code keys must be between <code>100</code> and <code>999</code>.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#httpCodes\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "One or more <code>responses</code> objects in your API have non-standard HTTP response code keys. The HTTP response code keys must be between <code>100</code> and <code>999</code>.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. Here, the response code has a typo and is missing one number:</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n    \"20\": {\n    \"description\": \"Expected response to a valid request\",\n    \"schema\": {\n      \"$ref\": \"#/definitions/Pets\"\n    }\n  }\n}</code></pre>"
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all <code>responses</code> objects have HTTP response code keys between <code>100</code> and <code>999</code>.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n    \"200\": {\n    \"description\": \"Expected response to a valid request\",\n    \"schema\": {\n      \"$ref\": \"#/definitions/Pets\"\n    }\n  }\n}</code></pre>"
         }
       ]
     }
@@ -8165,24 +8327,6 @@
       ]
     }
   },
-  "v3-warning-parameter-allowemptyvalue": {
-    "group": "oasconformance",
-    "subgroup": "bestpractices",
-    "title": {
-      "text": "<h1>Property 'allowEmptyValue' is only allowed for query parameters</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The parameter in question has the <code>allowEmptyValue</code> property defined, but it is not a query or a <code>formData</code> parameter. Only query and <code>formData</code> parameters can have the <code>allowEmptyValue</code> property defined.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#parameterObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The parameter in question has the <code>allowEmptyValue</code> property defined, but it is not a query or a <code>formData</code> parameter. Only query and <code>formData</code> parameters can have the <code>allowEmptyValue</code> property defined.",
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that only query and <code>formData</code> parameters have the <code>allowEmptyValue</code> property.</p>\n                "
-        }
-      ]
-    }
-  },
   "v3-warning-parameter-header-accept": {
     "group": "oasconformance",
     "subgroup": "bestpractices",
@@ -8488,7 +8632,7 @@
       "text": "<h1>Schema keyword is not applicable to the defined data type</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The schema keyword you have defined is not applicable to the data type you have defined.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The schema keyword you have defined is not applicable to the data type you have defined.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
     "shortDescription": "The schema keyword you have defined is not applicable to the data type you have defined.",
     "remediation": {
@@ -8642,24 +8786,6 @@
         },
         {
           "code": "<pre class=\"line-numbers\" data-line=\"5\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">...\n  \"headers\": {\n    \"x-ids\": {\n      \"schema\": {\n        \"type\": \"integer\"\n      }\n    }\n  }\n...\n}</code></pre>"
-        }
-      ]
-    }
-  },
-  "validation-parameter-allowemptyvalue": {
-    "group": "oasconformance",
-    "subgroup": "structure",
-    "title": {
-      "text": "<h1>Property 'allowEmptyValue' is only allowed for query parameters</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The parameter in question has the <code>allowEmptyValue</code> property defined, but it is not a query or a <code>formData</code> parameter. Only query and <code>formData</code> parameters can have the <code>allowEmptyValue</code> property defined.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#parameter-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The parameter in question has the <code>allowEmptyValue</code> property defined, but it is not a query or a <code>formData</code> parameter. Only query and <code>formData</code> parameters can have the <code>allowEmptyValue</code> property defined.",
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that only query and <code>formData</code> parameters have the <code>allowEmptyValue</code> property.</p>\n                "
         }
       ]
     }
@@ -9238,37 +9364,6 @@
         },
         {
           "code": "<pre class=\"line-numbers\" data-line=\"6\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"post\": {\n  \"description\": \"Creates a new pet in the store\",\n  \"operationId\": \"addPet\",\n  ...\n  \"responses\": {\n    \"200\": {\n    \"description\": \"Expected response to a valid request\",\n    \"schema\": {\n      \"$ref\": \"#/definitions/Pets\"\n      }\n    }\n  ...\n  }\n}</code></pre>"
-        }
-      ]
-    }
-  },
-  "validation-response-httpstatus": {
-    "group": "oasconformance",
-    "subgroup": "structure",
-    "title": {
-      "text": "<h1>HTTP status codes in responses must be between 100 and 999</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>One or more <code>responses</code> objects in your API have non-standard HTTP response code keys. The HTTP response code keys must be between <code>100</code> and <code>999</code>.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#http-status-codes\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "One or more <code>responses</code> objects in your API have non-standard HTTP response code keys. The HTTP response code keys must be between <code>100</code> and <code>999</code>.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. Here, the response code has a typo and is missing one number:</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n    \"20\": {\n    \"description\": \"Expected response to a valid request\",\n    \"schema\": {\n      \"$ref\": \"#/definitions/Pets\"\n    }\n  }\n}</code></pre>"
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all <code>responses</code> objects have HTTP response code keys between <code>100</code> and <code>999</code>.</p>\n                "
-        },
-        {
-          "code": "<pre class=\"line-numbers\" data-line=\"2\" data-start=\"1\" xml:space=\"preserve\"><code class=\"language-json\">\"responses\": {\n    \"200\": {\n    \"description\": \"Expected response to a valid request\",\n    \"schema\": {\n      \"$ref\": \"#/definitions/Pets\"\n    }\n  }\n}</code></pre>"
         }
       ]
     }
