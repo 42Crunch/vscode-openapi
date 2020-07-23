@@ -12,7 +12,7 @@ const ASSESS_URL = 'https://stateless.apisecurity.io/api/v1/anon/assess/vscode';
 const TOKEN_URL = 'https://stateless.apisecurity.io/api/v1/anon/token';
 
 async function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export async function requestToken(email: string) {
@@ -114,13 +114,6 @@ function readAssessment(assessment): any[] {
   let issues = [];
   const jsonPointerIndex = assessment.index;
 
-  function transformId(id: string) {
-    return id
-      .split('.')
-      .join('-')
-      .toLowerCase();
-  }
-
   function transformScore(score: number): string {
     const rounded = Math.abs(Math.round(score));
     if (score === 0) {
@@ -146,7 +139,7 @@ function readAssessment(assessment): any[] {
       const issue = issues[id];
       for (const subIssue of issue.issues) {
         result.push({
-          id: transformId(id),
+          id,
           description: subIssue.specificDescription ? subIssue.specificDescription : issue.description,
           pointer: jsonPointerIndex[subIssue.pointer],
           score: subIssue.score ? Math.abs(subIssue.score) : 0,

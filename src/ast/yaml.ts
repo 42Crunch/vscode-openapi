@@ -5,8 +5,8 @@
 
 import * as yaml from 'yaml-ast-parser-custom-tags';
 import { Schema } from 'js-yaml';
-import { Kind, Node } from './types';
-import { parseJsonPointer } from '../pointer';
+import { Node } from './types';
+import { parseJsonPointer, joinJsonPointer } from '../pointer';
 
 export function parseYaml(text: string, schema: Schema): [YamlNode, any[]] {
   const documents = [];
@@ -37,10 +37,6 @@ export class YamlNode implements Node {
 
   constructor(node: yaml.YAMLNode) {
     this.node = node;
-  }
-
-  getKind() {
-    return Kind.Yaml;
   }
 
   find(rawpointer: string) {
@@ -132,6 +128,23 @@ export class YamlNode implements Node {
         return new YamlNode(found);
       }
     }
+  }
+
+  getJsonPonter(): string {
+    const path = [];
+    let node = this.node;
+    while (node) {
+      if (node.kind === yaml.Kind.MAPPING) {
+        const mapping = <yaml.YAMLMapping>node;
+        path.push(mapping.key.value);
+      } else if (node.parent && node.parent.kind === yaml.Kind.SEQ) {
+        const seq = <yaml.YAMLSequence>node.parent;
+        path.push(seq.items.indexOf(node));
+      }
+      node = node.parent;
+    }
+
+    return joinJsonPointer(path.reverse());
   }
 }
 

@@ -3,13 +3,7 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-export enum Kind {
-  Json,
-  Yaml,
-}
-
 export interface Node {
-  getKind(): Kind;
   getChildren(): Node[];
   getDepth(): number;
   getKey(): string;
@@ -18,4 +12,5 @@ export interface Node {
   find(pointer: string): Node;
   getRange(): [number, number];
   findNodeAtOffset(offset: number): Node | undefined;
+  getJsonPonter(): string;
 }

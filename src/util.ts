@@ -6,16 +6,13 @@ import { parse, Node } from './ast';
 import { parserOptions } from './parser-options';
 
 export function parseDocument(document: vscode.TextDocument): [OpenApiVersion, Node, vscode.Diagnostic[]] {
-  const scheme = document.uri.scheme;
-  const languageId = document.languageId;
-  const supported = (scheme === 'file' || scheme === 'untitled') && (languageId === 'json' || languageId == 'yaml');
-  if (!supported) {
+  if (!(document.languageId === 'json' || document.languageId === 'jsonc' || document.languageId == 'yaml')) {
     return [OpenApiVersion.Unknown, null, null];
   }
 
   const [node, errors] = parse(document.getText(), document.languageId, parserOptions);
   const version = getOpenApiVersion(node);
-  const messages = errors.map(error => {
+  const messages = errors.map((error) => {
     const position = document.positionAt(error.offset);
     const line = document.lineAt(position);
     return {
