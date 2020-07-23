@@ -66,7 +66,6 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
     const node = this.root.findNodeAtOffset(offset > end ? end : offset);
 
     let searchRoot = this.root;
-    let searchingInRemote = false;
     let fileRef = ''
     // check if we are looking for remote references
     // we are looking for reference if the line ends with # and
@@ -79,19 +78,19 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
         const [root, errors] = parse(remoteDocument.toString(), document.languageId, parserOptions);
         if(!errors.length) {
           searchRoot = root;
-          searchingInRemote = true;
         }
       }
     }
 
     const target = findTarget(this.root, node);
     const targetNode = target && searchRoot.find(target);
+    const qouteChar = line.charAt(position.character) == '"' || line.charAt(position.character) == '\'' ? line.charAt(position.character) : '"';
     if (targetNode) {
       // don't include trailing quote when completing YAML and
       // there are already quotes in line
-      let trailingQuote = '"';
+      let trailingQuote = qouteChar;
       let leadingSpace = ' ';
-      if (line.charAt(position.character) == '"') {
+      if (line.charAt(position.character) == qouteChar) {
         leadingSpace = '';
         if (document.languageId === 'yaml') {
           trailingQuote = '';
@@ -100,7 +99,7 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
       line.charAt(position.character);
       const completions = targetNode.getChildren().map((child) => {
         const key = child.getKey();
-        return new vscode.CompletionItem(`${leadingSpace}"${fileRef}#${target}/${key}${trailingQuote}`);
+        return new vscode.CompletionItem(`${leadingSpace}${qouteChar}${fileRef}#${target}/${key}${trailingQuote}`);
       });
       return completions;
     }
