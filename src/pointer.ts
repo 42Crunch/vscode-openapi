@@ -10,7 +10,7 @@ function encodeJsonPointerSegment(segment: string | number) {
   if (typeof segment === 'number') {
     return String(segment);
   }
-  return encodeURIComponent(segment.replace(TILDES, '~0').replace(SLASHES, '~1'));
+  return segment.replace(TILDES, '~0').replace(SLASHES, '~1');
 }
 
 export function joinJsonPointer(path: (string | number)[]): string {
