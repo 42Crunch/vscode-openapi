@@ -10,7 +10,7 @@ import * as snippets from './snippets.json';
 
 const commands = {
   goToLine,
-  copyJsonPointer,
+  copyJsonReference,
   createNewTwo,
   createNewThree,
   createNewTwoYaml,
@@ -99,14 +99,23 @@ function goToLine(range: vscode.Range) {
   editor.revealRange(editor.selection, vscode.TextEditorRevealType.AtTop);
 }
 
-function copyJsonPointer(range: vscode.Range) {
+function copyJsonReference(range: vscode.Range) {
   const editor = vscode.window.activeTextEditor;
   const text = editor.document.getText();
   const languageId = editor.document.languageId;
   const root = safeParse(text, languageId);
   const node = root.findNodeAtOffset(editor.document.offsetAt(editor.selection.active));
   if (node) {
-    vscode.env.clipboard.writeText(node.getJsonPonter());
+    const pointer = node.getJsonPonter();
+    // JSON Pointer is allowed to have special chars, but JSON Reference
+    // requires these to be encoded
+    const encoded = pointer
+      .split('/')
+      .map((segment) => encodeURIComponent(segment))
+      .join('/');
+    vscode.env.clipboard.writeText(`#${encoded}`);
+    const disposable = vscode.window.setStatusBarMessage(`Copied Reference: #${encoded}`);
+    setTimeout(() => disposable.dispose(), 1000);
   }
 }
 

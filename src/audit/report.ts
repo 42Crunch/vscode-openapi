@@ -78,18 +78,21 @@ function getIssueHtml(uri: string, filename: string, issue) {
   };
 
   const criticality = criticalityNames[issue.criticality];
-  const scoreImpact = issue.displayScore !== '0' ? `Score impact ${issue.displayScore}` : '';
+  const scoreImpact = issue.displayScore !== '0' ? `Score impact: ${issue.displayScore}` : '';
   const article = articleById(issue.id);
   const lineNo = issue.lineNo + 1;
   const base64Uri = Buffer.from(uri).toString('base64');
 
   return `
     <h1>${issue.description}</h1>
+
     <small>
       <a class="focus-line" data-line-no="${issue.lineNo}" data-uri="${base64Uri}" href="#">${filename}:${lineNo}</a>.
       Severity: ${criticality}.
-      ${scoreImpact}
-    </small>
+	  ${scoreImpact}
+	  ID: <span class="issue-id" data-issue-id="${issue.id}">${issue.id}</span>
+	</small>
+
     ${article}`;
 }
 
@@ -211,6 +214,11 @@ export class ReportWebView {
     this._panel.webview.onDidReceiveMessage(
       (message) => {
         switch (message.command) {
+          case 'copyIssueId':
+            vscode.env.clipboard.writeText(message.id);
+            const disposable = vscode.window.setStatusBarMessage(`Copied ID: ${message.id}`);
+            setTimeout(() => disposable.dispose(), 1000);
+            return;
           case 'goToLine':
             this.focusLine(Buffer.from(message.uri, 'base64').toString('utf8'), message.line);
             return;
