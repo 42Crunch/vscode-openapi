@@ -404,7 +404,7 @@
     "@types/node": "^8.0.0",
     "@types/semver": "^6.2.0",
     "@types/vscode": "1.39.0",
-    "ava": "^3.9.0",
+    "ava": "^3.11.0",
     "esm": "^3.2.25",
     "json-schema": "^0.2.5",
     "marked": "^0.7.0",
