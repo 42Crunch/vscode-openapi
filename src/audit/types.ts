@@ -11,6 +11,7 @@ export interface Grades {
   oasconformance: Grade;
   all: number;
   errors: boolean;
+  invalid: boolean;
 }
 
 export interface Summary extends Grades {

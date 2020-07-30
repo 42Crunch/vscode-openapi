@@ -97,6 +97,16 @@ function getIssueHtml(uri: string, filename: string, issue) {
 }
 
 function getSummary(summary: Summary) {
+  if (summary.all === 0 && summary.invalid) {
+    return `
+    <h1>Failed to perform security audit, the OpenAPI file is invalid or too large.</h1>
+    <div>
+    <small>
+      Please submit your feedback for the security audit <a href="https://github.com/42Crunch/vscode-openapi/issues">here</a>
+    </small>
+    </div>
+    <hr>`;
+  }
   return `
     <h1>Security audit score: ${summary.all}</h1>
     <h3>Security (${summary.security.value}/${summary.security.max})</h3>

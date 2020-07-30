@@ -99,10 +99,15 @@ function readSummary(assessment): Grades {
     },
     all: 0,
     errors: false,
+    invalid: false,
   };
 
   if (assessment.semanticErrors || assessment.validationErrors) {
     grades.errors = true;
+  }
+
+  if (assessment.openapiState === 'fileInvalid') {
+    grades.invalid = true;
   }
 
   grades.all = grades.datavalidation.value + grades.security.value + grades.oasconformance.value;
