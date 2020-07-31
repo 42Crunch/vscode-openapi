@@ -1,5 +1,15 @@
 # Changelog
 
+## Version 3.5.0 (July 31, 2020)
+* Fixed ([#72](https://github.com/42Crunch/vscode-openapi/issues/72)): API tab not showing with SSH FS
+* Add new command: Copy JSON Reference for the element under the cursor
+* Show issue IDs in security audit reports
+
+## Version 3.4.0 (July 9, 2020)
+* Add JSONC support, including support for multi-file OpenAPI files
+* Update Security Audit articles to match changes in the backend service
+* Remove use of deprecated vscode-resource scheme
+
 ## Version 3.3.0 (June 16, 2020)
 * Update Security Audit articles to match changes in the backend service
 * Changes from @gayanper to improve completions
