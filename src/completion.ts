@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { Node, parse } from './ast';
 import { getOpenApiVersion } from './util';
 import { OpenApiVersion } from './constants';
-import * as fs from 'fs';
 import { parserOptions } from './parser-options';
 import path from 'path';
 
@@ -12,7 +11,7 @@ const targetMapping = {
     items: '/definitions',
     parameters: '/parameters',
     responses: '/responses',
-    properties: '/definitions'
+    properties: '/definitions',
   },
   [OpenApiVersion.V3]: {
     schema: '/components/schemas',
@@ -24,7 +23,7 @@ const targetMapping = {
     headers: '/components/headers',
     links: '/components/links',
     items: '/components/schemas', // for completion inside JSON Schema objects
-    properties: '/components/schemas'
+    properties: '/components/schemas',
   },
 };
 
@@ -46,7 +45,7 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
     });
   }
 
-  provideCompletionItems(
+  async provideCompletionItems(
     document: vscode.TextDocument,
     position: vscode.Position,
     token: vscode.CancellationToken,
@@ -66,25 +65,37 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
     const node = this.root.findNodeAtOffset(offset > end ? end : offset);
 
     let searchRoot = this.root;
-    let fileRef = ''
+    let fileRef = '';
     // check if we are looking for remote references
     // we are looking for reference if the line ends with # and
     // the prefix part refers to a file existing file path
-    if(line.trimRight().match('.*#("|\')?$')) {
-      fileRef = line.substring(line.lastIndexOf(':') + 1, line.lastIndexOf('#')).replace('"', '').replace('\'', '').trim();
-      const filePath = path.normalize(path.join(path.dirname(document.uri.fsPath), fileRef));
-      if (filePath.length > 0 && fs.existsSync(filePath)) {
-        const remoteDocument = fs.readFileSync(filePath);
-        const [root, errors] = parse(remoteDocument.toString(), document.languageId, parserOptions);
-        if(!errors.length) {
+    if (line.trimRight().match('.*#("|\')?$')) {
+      fileRef = line
+        .substring(line.lastIndexOf(':') + 1, line.lastIndexOf('#'))
+        .replace('"', '')
+        .replace("'", '')
+        .trim();
+      try {
+        const otherPath = path.normalize(path.join(path.dirname(document.uri.fsPath), fileRef));
+        const otherUri = document.uri.with({ path: otherPath });
+        // stat fileUri, if it does not exists an exception is thrown
+        await vscode.workspace.fs.stat(otherUri);
+        const otherDocument = await vscode.workspace.openTextDocument(otherUri);
+        const [root, errors] = parse(otherDocument.getText(), otherDocument.languageId, parserOptions);
+        if (!errors.length) {
           searchRoot = root;
         }
+      } catch (ex) {
+        // file does not exists, ignore the exception
       }
     }
 
     const target = findTarget(this.root, node);
     const targetNode = target && searchRoot.find(target);
-    const qouteChar = line.charAt(position.character) == '"' || line.charAt(position.character) == '\'' ? line.charAt(position.character) : '"';
+    const qouteChar =
+      line.charAt(position.character) == '"' || line.charAt(position.character) == "'"
+        ? line.charAt(position.character)
+        : '"';
     if (targetNode) {
       // don't include trailing quote when completing YAML and
       // there are already quotes in line
@@ -96,7 +107,6 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
           trailingQuote = '';
         }
       }
-      line.charAt(position.character);
       const completions = targetNode.getChildren().map((child) => {
         const key = child.getKey();
         return new vscode.CompletionItem(`${leadingSpace}${qouteChar}${fileRef}#${target}/${key}${trailingQuote}`);
