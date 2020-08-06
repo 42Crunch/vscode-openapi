@@ -1,7 +1,10 @@
 import * as vscode from 'vscode';
-import { Node } from './ast';
+import { Node, parse } from './ast';
 import { getOpenApiVersion } from './util';
 import { OpenApiVersion } from './constants';
+import * as fs from 'fs';
+import { parserOptions } from './parser-options';
+import path from 'path';
 
 const targetMapping = {
   [OpenApiVersion.V2]: {
@@ -62,14 +65,32 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
     // look for the node at the end of the root node range
     const node = this.root.findNodeAtOffset(offset > end ? end : offset);
 
+    let searchRoot = this.root;
+    let fileRef = ''
+    // check if we are looking for remote references
+    // we are looking for reference if the line ends with # and
+    // the prefix part refers to a file existing file path
+    if(line.trimRight().match('.*#("|\')?$')) {
+      fileRef = line.substring(line.lastIndexOf(':') + 1, line.lastIndexOf('#')).replace('"', '').replace('\'', '').trim();
+      const filePath = path.normalize(path.join(path.dirname(document.uri.fsPath), fileRef));
+      if (filePath.length > 0 && fs.existsSync(filePath)) {
+        const remoteDocument = fs.readFileSync(filePath);
+        const [root, errors] = parse(remoteDocument.toString(), document.languageId, parserOptions);
+        if(!errors.length) {
+          searchRoot = root;
+        }
+      }
+    }
+
     const target = findTarget(this.root, node);
-    const targetNode = target && this.root.find(target);
+    const targetNode = target && searchRoot.find(target);
+    const qouteChar = line.charAt(position.character) == '"' || line.charAt(position.character) == '\'' ? line.charAt(position.character) : '"';
     if (targetNode) {
       // don't include trailing quote when completing YAML and
       // there are already quotes in line
-      let trailingQuote = '"';
+      let trailingQuote = qouteChar;
       let leadingSpace = ' ';
-      if (line.charAt(position.character) == '"') {
+      if (line.charAt(position.character) == qouteChar) {
         leadingSpace = '';
         if (document.languageId === 'yaml') {
           trailingQuote = '';
@@ -78,7 +99,7 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
       line.charAt(position.character);
       const completions = targetNode.getChildren().map((child) => {
         const key = child.getKey();
-        return new vscode.CompletionItem(`${leadingSpace}"#${target}/${key}${trailingQuote}`);
+        return new vscode.CompletionItem(`${leadingSpace}${qouteChar}${fileRef}#${target}/${key}${trailingQuote}`);
       });
       return completions;
     }
