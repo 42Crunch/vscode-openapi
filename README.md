@@ -15,6 +15,7 @@ Both OAS v2 and v3 are supported.
   * [Add new elements in the OpenAPI explorer](#add-new-elements-in-the-openapi-explorer)
   * [Use IntelliSense](#use-intellisense)
   * [Jump to a reference](#jump-to-a-reference)
+  * [Sort entries in the navigation pane](#sort-entries-in-the-navigation-pane)
 - [Use the extension to audit your API](#use-the-extension-to-audit-your-API)
   * [Navigate the issues in the audit report](#navigate-the-issues-in-the-audit-report)
 - [Known issues](#known-issues)
@@ -68,6 +69,12 @@ Use Go to Definition to locate the targets of references easily. To jump to view
 
 ![Go to definition](https://github.com/42Crunch/vscode-openapi/blob/master/images/Go%20to%20Definition.gif?raw=true)
 
+### Sort entries in the navigation pane
+
+By default, entries in the OpenAPI Explorer pane are sorted alphabetically. If you want to instead have them sorted in the order they are in the OpenAPI file, change the corresponding setting:
+1. On the **File** menu, click **Preferences** / **Settings**
+2. Expand the **Extensions** section and click **OpenAPI**
+3. Clear the checkbox **Alphabetically sort contents of OpenAPI explorer outlines**
 
 ## Use the extension to audit security of your API
 
