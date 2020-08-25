@@ -72,11 +72,11 @@ Use Go to Definition to locate the targets of references easily. To jump to view
 ### Sort entries in the navigation pane
 
 By default, entries in the OpenAPI Explorer pane are sorted alphabetically. If you want to instead have them sorted in the order they are in the OpenAPI file, change the corresponding setting:
-1. On the **File** menu, click **Preferences** / **Settings**
-2. Expand the **Extensions** section and click **OpenAPI**
-3. Clear the checkbox **Alphabetically sort contents of OpenAPI explorer outlines**
+1. On the **File** menu, click **Preferences > Settings**.
+2. Expand the **Extensions** section and click **OpenAPI**.
+3. Clear the checkbox **Alphabetically sort contents of OpenAPI explorer outlines**.
 
-## Use the extension to audit security of your API
+## Use the extension to audit the security of your API
 
 You can use OpenAPI extension to check the quality of your API as you work on it. You can run the audit directly from VS Code by clicking the **42C** button in the upper right corner.
 
@@ -106,7 +106,7 @@ After the audit finishes, you get the audit report directly in the VS Code view,
 
 ## Known issues
 
-- For new files, IntelliSense does not work until you save the file. File extension must be .json or .yaml.
+- For new files, IntelliSense does not work until you save the file. File extension must be `.json` or `.yaml`.
 - When you expand the sections and elements in the OpenAPI explorer, if the the left-hand panel gets very long, VS Code may push the last sections out of the UI. To view the sections that got pushed out, minimize the sections and elements you do not need. There is no scroll bar (yet) for the explorer section.
 
 ## Feedback
