@@ -10,11 +10,11 @@ import { decorationType, createDecorations } from './decoration';
 import { ReportWebView } from './report';
 import { DiagnosticCollection, TextDocument } from 'vscode';
 import { parserOptions } from '../parser-options';
-import { bundle, findMapping } from './bundler';
+import { bundle, findMapping } from '../bundler';
 import { parse, Node } from '../ast';
 import { AuditContext, Audit, Grades } from './types';
 
-export function registerSecurityAudit(context, auditContext: AuditContext, pendingAudits, dirtyDocuments) {
+export function registerSecurityAudit(context, auditContext: AuditContext, pendingAudits) {
   return vscode.commands.registerTextEditorCommand('openapi.securityAudit', async (textEditor, edit) => {
     const uri = textEditor.document.uri.toString();
 
@@ -31,7 +31,7 @@ export function registerSecurityAudit(context, auditContext: AuditContext, pendi
     pendingAudits[uri] = true;
 
     try {
-      auditContext[uri] = await securityAudit(context, textEditor, dirtyDocuments);
+      auditContext[uri] = await securityAudit(context, textEditor);
       delete pendingAudits[uri];
     } catch (e) {
       delete pendingAudits[uri];
@@ -60,7 +60,7 @@ export function registerFocusSecurityAuditById(context, auditContext) {
   });
 }
 
-async function securityAudit(context, textEditor: vscode.TextEditor, dirtyDocuments): Promise<Audit | undefined> {
+async function securityAudit(context, textEditor: vscode.TextEditor): Promise<Audit | undefined> {
   const configuration = vscode.workspace.getConfiguration('openapi');
   let apiToken = <string>configuration.get('securityAuditToken');
 
@@ -115,19 +115,13 @@ async function securityAudit(context, textEditor: vscode.TextEditor, dirtyDocume
       cancellable: false,
     },
     async (progress, cancellationToken): Promise<Audit | undefined> => {
-      return performAudit(context, textEditor, dirtyDocuments, apiToken, progress);
+      return performAudit(context, textEditor, apiToken, progress);
     },
   );
 }
 
-async function performAudit(
-  context,
-  textEditor: vscode.TextEditor,
-  dirtyDocuments,
-  apiToken,
-  progress,
-): Promise<Audit | undefined> {
-  const [json, mapping] = await bundle(textEditor.document, dirtyDocuments, parserOptions);
+async function performAudit(context, textEditor: vscode.TextEditor, apiToken, progress): Promise<Audit | undefined> {
+  const [json, mapping] = await bundle(textEditor.document, parserOptions);
 
   try {
     const documentUri = textEditor.document.uri.toString();

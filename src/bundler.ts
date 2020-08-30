@@ -5,12 +5,12 @@
 import { relative } from 'path';
 import * as vscode from 'vscode';
 import { dirname } from 'path';
-import { ParserOptions } from '../parser-options';
+import { ParserOptions } from './parser-options';
 import parser from 'json-schema-ref-parser';
 import url from 'json-schema-ref-parser/lib/util/url';
 import Pointer from 'json-schema-ref-parser/lib/pointer';
 import $Ref from 'json-schema-ref-parser/lib/ref';
-import { parseJsonPointer, joinJsonPointer } from '../pointer';
+import { parseJsonPointer, joinJsonPointer } from './pointer';
 import { parseDocument, bundlerJsonParser, bundlerYamlParserWithOptions } from './bundler-parsers';
 
 const destinationMap = {
@@ -49,18 +49,14 @@ export function getOpenApiVersion(parsed: any): string {
   return null;
 }
 
-const resolver = (openDocuments, documentUri: vscode.Uri) => {
+const resolver = (documentUri: vscode.Uri) => {
   return {
     order: 10,
     canRead: (file) => {
       return true;
     },
     read: async (file) => {
-      const uri = documentUri.with({ path: file.url });
-      const alreadyOpen = openDocuments[uri.toString()];
-      if (alreadyOpen) {
-        return alreadyOpen.getText();
-      }
+      const uri = documentUri.with({ path: decodeURIComponent(file.url) });
       const document = await vscode.workspace.openTextDocument(uri);
       return document.getText();
     },
@@ -89,22 +85,19 @@ function set(target: any, path: string[], value: any) {
   current[last] = value;
 }
 
-export async function bundle(
-  document: vscode.TextDocument,
-  openDocuments,
-  options: ParserOptions,
-): Promise<[string, Node]> {
+export async function bundle(document: vscode.TextDocument, options: ParserOptions): Promise<[string, Node, any]> {
   const parsed = parseDocument(document, options);
   const cwd = dirname(document.uri.fsPath) + '/';
   const state = {
     version: null,
     parsed: null,
     mapping: { value: null, children: {} },
+    uris: { [document.uri.toString()]: true },
   };
 
   const bundled = await parser.bundle(parsed, {
     cwd,
-    resolve: { http: false, file: resolver(openDocuments, document.uri) },
+    resolve: { http: false, file: resolver(document.uri) },
     parse: {
       json: bundlerJsonParser,
       yaml: bundlerYamlParserWithOptions(options),
@@ -116,6 +109,11 @@ export async function bundle(
       },
       onRemap: (entry) => {
         const filename = url.toFileSystemPath(entry.file);
+        const uri = document.uri.with({ path: decodeURIComponent(entry.file) }).toString();
+
+        if (!state.uris[uri]) {
+          state.uris[uri] = true;
+        }
 
         // FIXME implement remap for openapi v2 and $ref location based remap
         const hashPath = Pointer.parse(entry.hash);
@@ -159,7 +157,7 @@ export async function bundle(
 
   const result = JSON.stringify(bundled);
 
-  return [result, state.mapping];
+  return [result, state.mapping, state.uris];
 }
 
 interface Mapping {
