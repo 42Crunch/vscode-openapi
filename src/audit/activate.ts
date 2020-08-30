@@ -17,19 +17,6 @@ export function activate(
   const auditContext: AuditContext = {};
   const pendingAudits: { [uri: string]: boolean } = {};
 
-  const dirtyDocuments: {
-    [uri: string]: vscode.TextDocument;
-  } = {};
-
-  vscode.workspace.onDidChangeTextDocument(e => {
-    dirtyDocuments[e.document.uri.toString()] = e.document;
-  });
-
-  vscode.workspace.onDidCloseTextDocument(document => {
-    const uri = document.uri.toString();
-    delete dirtyDocuments[uri];
-  });
-
   didChangeEditor(([editor, version]) => {
     if (editor) {
       const uri = editor.document.uri.toString();
@@ -61,7 +48,7 @@ export function activate(
     }
   });
 
-  registerSecurityAudit(context, auditContext, pendingAudits, dirtyDocuments);
+  registerSecurityAudit(context, auditContext, pendingAudits);
   registerFocusSecurityAudit(context, auditContext);
   registerFocusSecurityAuditById(context, auditContext);
 }
