@@ -31,9 +31,11 @@
   ],
   "main": "./out/extension",
   "scripts": {
-    "vscode:prepublish": "npm run build-whatsnew && npm run build-snippets && npm run compile",
+    "vscode:prepublish": "npm run build-whatsnew && npm run build-preview-redoc && npm run build-preview-swaggerui && npm run build-snippets && npm run compile",
     "build-snippets": "scripts/build-snippets.js",
     "build-whatsnew": "scripts/build-whatsnew.js",
+    "build-preview-redoc": "webpack --config src-webviews/preview-redoc/webpack.config.js",
+    "build-preview-swaggerui": "webpack --config src-webviews/preview-swaggerui/webpack.config.js",
     "test": "ava",
     "compile": "tsc -b",
     "watch": "tsc -b -w"
@@ -355,6 +357,14 @@
       {
         "command": "openapi.copyJsonReference",
         "title": "OpenAPI: Copy JSON Reference for the element under the cursor"
+      },
+      {
+        "command": "openapi.previewRedoc",
+        "title": "OpenAPI: Preview with ReDoc"
+      },
+      {
+        "command": "openapi.previewSwaggerUI",
+        "title": "OpenAPI: Preview with Swagger UI"
       }
     ],
     "configuration": {
@@ -394,20 +404,32 @@
     "form-data": "^2.3.3",
     "got": "^9.6.0",
     "js-yaml": "^3.13.1",
+    "json-schema-ref-parser": "git+ssh://git@github.com:42Crunch/json-schema-ref-parser.git#openapi",
     "jsonc-parser": "^2.2.1",
     "semver": "^6.3.0",
-    "yaml-ast-parser-custom-tags": "0.0.43",
-    "json-schema-ref-parser": "git+ssh://git@github.com:42Crunch/json-schema-ref-parser.git#openapi"
+    "yaml-ast-parser-custom-tags": "0.0.43"
   },
   "devDependencies": {
     "@types/got": "^9.6.9",
     "@types/node": "^8.0.0",
+    "@types/react": "^16.9.48",
     "@types/semver": "^6.2.0",
     "@types/vscode": "1.39.0",
-    "ava": "^3.11.0",
+    "ava": "^3.12.1",
+    "css-loader": "^4.2.2",
     "esm": "^3.2.25",
     "json-schema": "^0.2.5",
     "marked": "^0.7.0",
-    "typescript": "^3.8"
+    "mobx": "^4.15.6",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "redoc": "^2.0.0-rc.40",
+    "style-loader": "^1.2.1",
+    "styled-components": "^5.1.1",
+    "swagger-ui-react": "^3.32.4",
+    "ts-loader": "^8.0.3",
+    "typescript": "^4.0.2",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
   }
 }

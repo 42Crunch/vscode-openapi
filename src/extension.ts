@@ -31,6 +31,7 @@ import { registerCommands } from './commands';
 import { create as createWhatsNewPanel } from './whatsnew';
 
 import * as audit from './audit/activate';
+import * as preview from './preview';
 
 function updateVersionContext(version: OpenApiVersion) {
   if (version === OpenApiVersion.V2) {
@@ -221,6 +222,7 @@ export function activate(context: vscode.ExtensionContext) {
   provideYamlSchemas(context, yamlExtension);
 
   audit.activate(context, didChangeEditor.event);
+  preview.activate(context);
 
   if (previousVersion.major < currentVersion.major) {
     createWhatsNewPanel(context);
