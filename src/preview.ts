@@ -12,12 +12,15 @@ type Preview = {
   panel: vscode.WebviewPanel;
   documentUri: vscode.Uri;
   uris: { [key: string]: string };
+  timeout: NodeJS.Timer;
 };
 
 type Previews = {
   redoc?: Preview;
   swaggerui?: Preview;
 };
+
+const ON_CHANGE_TIMEOUT = 1000; // 1 sec timeout for onDidChange
 
 export function activate(context: vscode.ExtensionContext) {
   const previews: Previews = {};
@@ -27,8 +30,14 @@ export function activate(context: vscode.ExtensionContext) {
     for (const name of Object.keys(previews)) {
       const preview: Preview = previews[name];
       if (preview && preview.uris[uri]) {
-        const document = await vscode.workspace.openTextDocument(preview.documentUri);
-        showPreview(context, previews, name, document);
+        if (preview.timeout) {
+          clearTimeout(preview.timeout);
+        }
+        setTimeout(async () => {
+          const document = await vscode.workspace.openTextDocument(preview.documentUri);
+          const [json, mapping, uris] = await bundle(document, parserOptions);
+          showPreview(context, previews, name, document, json, uris);
+        }, ON_CHANGE_TIMEOUT);
       }
     }
   });
@@ -36,14 +45,24 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.commands.registerTextEditorCommand(
     'openapi.previewRedoc',
     async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit) => {
-      await showPreview(context, previews, 'redoc', textEditor.document);
+      try {
+        const [json, mapping, uris] = await bundle(textEditor.document, parserOptions);
+        await showPreview(context, previews, 'redoc', textEditor.document, json, uris);
+      } catch (e) {
+        vscode.window.showErrorMessage(`Failed to preview OpenAPI: ${e.message}}`);
+      }
     },
   );
 
   vscode.commands.registerTextEditorCommand(
     'openapi.previewSwaggerUI',
     async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit) => {
-      showPreview(context, previews, 'swaggerui', textEditor.document);
+      try {
+        const [json, mapping, uris] = await bundle(textEditor.document, parserOptions);
+        showPreview(context, previews, 'swaggerui', textEditor.document, json, uris);
+      } catch (e) {
+        vscode.window.showErrorMessage(`Failed to preview OpenAPI: ${e.message}}`);
+      }
     },
   );
 }
@@ -53,32 +72,39 @@ async function showPreview(
   previews: Previews,
   name: string,
   document: vscode.TextDocument,
+  json: string,
+  uris: any,
 ) {
   if (previews[name]) {
     const panel = previews[name].panel;
-    const [json, mapping, uris] = await bundle(document, parserOptions);
     panel.webview.postMessage({ command: 'preview', text: json });
     previews[name] = { panel, uris, documentUri: document.uri };
     return;
   }
 
-  const panel = await buildWebviewPanel(context, name);
+  const title = name === 'redoc' ? 'OpenAPI ReDoc preview' : 'OpenAPI SwaggerUI preview';
+
+  const panel = await buildWebviewPanel(context, name, title);
 
   panel.onDidDispose(
     () => {
+      clearTimeout(previews[name].timeout);
       previews[name] = null;
     },
     undefined,
     context.subscriptions,
   );
 
-  const [json, mapping, uris] = await bundle(document, parserOptions);
   panel.webview.postMessage({ command: 'preview', text: json });
   previews[name] = { panel, uris, documentUri: document.uri };
 }
 
-function buildWebviewPanel(context: vscode.ExtensionContext, name: string): Promise<vscode.WebviewPanel> {
-  const panel = vscode.window.createWebviewPanel(`openapiPreview-${name}`, 'Preview', vscode.ViewColumn.Two, {
+function buildWebviewPanel(
+  context: vscode.ExtensionContext,
+  name: string,
+  title: string,
+): Promise<vscode.WebviewPanel> {
+  const panel = vscode.window.createWebviewPanel(`openapiPreview-${name}`, title, vscode.ViewColumn.Two, {
     enableScripts: true,
     retainContextWhenHidden: true,
   });
@@ -109,6 +135,11 @@ function getWebviewContent(webview: vscode.Webview, index: vscode.Uri) {
 	  <meta charset="UTF-8">
 	  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https: data:; script-src ${webview.cspSource}; style-src 'unsafe-inline';">
 	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	  <style>
+	    body {
+		  background-color: #FEFEFE;
+	    }
+	  </style>
   </head>
   <body>
 	<div id="root"></div>
