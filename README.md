@@ -16,6 +16,7 @@ Both OAS v2 and v3 are supported.
   * [Use IntelliSense](#use-intellisense)
   * [Jump to a reference](#jump-to-a-reference)
   * [Sort entries in the navigation pane](#sort-entries-in-the-navigation-pane)
+  * [Preview OpenAPI documentation](#preview-openapi-documentation)
 - [Use the extension to audit your API](#use-the-extension-to-audit-your-API)
   * [Navigate the issues in the audit report](#navigate-the-issues-in-the-audit-report)
 - [Known issues](#known-issues)
@@ -75,6 +76,18 @@ By default, entries in the OpenAPI Explorer pane are sorted alphabetically. If y
 1. On the **File** menu, click **Preferences > Settings**.
 2. Expand the **Extensions** section and click **OpenAPI**.
 3. Clear the checkbox **Alphabetically sort contents of OpenAPI explorer outlines**.
+
+
+### Preview OpenAPI documentation
+
+OpenAPI files can be easily converted to a human readable HTML documentation describing how to use your API. Our extension supports
+two popular libraries that perform such conversion: [SwaggerUI](https://swagger.io/tools/swagger-ui/) and [ReDoc](https://github.com/Redocly/redoc).
+
+To open the preview of API documentation execute relevant command from the Command Pallette (use Cmd-Shift-P or Ctrl-Shift-P to open):
+
+* OpenAPI: Preview with Swagger UI
+* OpenAPI: Preview with ReDoc
+
 
 ## Use the extension to audit the security of your API
 
