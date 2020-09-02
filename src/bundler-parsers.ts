@@ -2,7 +2,7 @@ import * as yaml from 'js-yaml';
 import * as json from 'jsonc-parser';
 import * as vscode from 'vscode';
 
-import { ParserOptions } from '../parser-options';
+import { ParserOptions } from './parser-options';
 
 const parseJson = (text: string) => {
   const errors = [];
