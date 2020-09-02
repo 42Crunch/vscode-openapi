@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 3.6.0 (September 1, 2020)
+## Version 3.6.0 (September 2, 2020)
 
 * Merged ([PR #775](https://github.com/42Crunch/vscode-openapi/pull/75)) by @gayanper: Add autocompletion support for remote references and support for both single and double qoutes
 * Added support for generating preview of OpenAPI documentation with (Swagger UI)[https://swagger.io/tools/swagger-ui/] and (ReDoc)[https://github.com/Redocly/redoc]
