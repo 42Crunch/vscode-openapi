@@ -3,7 +3,7 @@
 ## Version 3.6.0 (September 2, 2020)
 
 * Merged ([PR #775](https://github.com/42Crunch/vscode-openapi/pull/75)) by @gayanper: Add autocompletion support for remote references and support for both single and double qoutes
-* Added support for generating preview of OpenAPI documentation with (Swagger UI)[https://swagger.io/tools/swagger-ui/] and (ReDoc)[https://github.com/Redocly/redoc]
+* Added support for generating preview of OpenAPI documentation with [Swagger UI](https://swagger.io/tools/swagger-ui/) and [ReDoc](https://github.com/Redocly/redoc)
 
 ## Version 3.5.0 (July 31, 2020)
 * Fixed ([#72](https://github.com/42Crunch/vscode-openapi/issues/72)): API tab not showing with SSH FS
