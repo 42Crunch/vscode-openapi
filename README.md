@@ -80,10 +80,10 @@ By default, entries in the OpenAPI Explorer pane are sorted alphabetically. If y
 
 ### Preview OpenAPI documentation
 
-OpenAPI files can be easily converted to a human readable HTML documentation describing how to use your API. Our extension supports
-two popular libraries that perform such conversion: [SwaggerUI](https://swagger.io/tools/swagger-ui/) and [ReDoc](https://github.com/Redocly/redoc).
+You can easily convert your OpenAPI files to human-readable HTML documentation that describes how to use your API.
+Our extension supports two popular libraries that perform such conversion: [SwaggerUI](https://swagger.io/tools/swagger-ui/) and [ReDoc](https://github.com/Redocly/redoc).
 
-To open the preview of API documentation execute relevant command from the Command Pallette (use Cmd-Shift-P or Ctrl-Shift-P to open):
+To open the preview of the API documentation, execute the relevant command from the Command Palette (use Cmd+Shift+P or Ctrl+Shift+P to open the palette):
 
 * OpenAPI: Preview with Swagger UI
 * OpenAPI: Preview with ReDoc
