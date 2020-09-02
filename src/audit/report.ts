@@ -86,12 +86,18 @@ function getIssueHtml(uri: string, filename: string, issue) {
   return `
     <h1>${issue.description}</h1>
 
-    <small>
-      <a class="focus-line" data-line-no="${issue.lineNo}" data-uri="${base64Uri}" href="#">${filename}:${lineNo}</a>.
-      Severity: ${criticality}.
-	  ${scoreImpact}
-	  ID: <span class="issue-id" data-issue-id="${issue.id}">${issue.id}</span>
-	</small>
+	<p>
+	  <small>
+	  Issue ID: <span class="issue-id" data-issue-id="${issue.id}">${issue.id}</span>
+	  </small>
+	</p>
+	<p>
+      <small>
+        <a class="focus-line" data-line-no="${issue.lineNo}" data-uri="${base64Uri}" href="#">${filename}:${lineNo}</a>.
+        Severity: ${criticality}.
+	    ${scoreImpact}
+	  </small>
+    </p>
 
     ${article}`;
 }
