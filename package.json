@@ -120,6 +120,11 @@
           "when": "openapiTwoEnabled || openapiThreeEnabled",
           "command": "openapi.securityAudit",
           "group": "navigation"
+        },
+        {
+          "when": "openapiTwoEnabled || openapiThreeEnabled",
+          "command": "openapi.preview",
+          "group": "navigation"
         }
       ],
       "view/title": [
@@ -360,11 +365,19 @@
       },
       {
         "command": "openapi.previewRedoc",
-        "title": "OpenAPI: Preview with ReDoc"
+        "title": "OpenAPI: show preview using ReDoc"
       },
       {
         "command": "openapi.previewSwaggerUI",
-        "title": "OpenAPI: Preview with Swagger UI"
+        "title": "OpenAPI: show preview using Swagger UI"
+      },
+      {
+        "command": "openapi.preview",
+        "title": "OpenAPI: show preview using the default renderer",
+        "icon": {
+          "light": "resources/icons/open-preview_black.svg",
+          "dark": "resources/icons/open-preview_white.svg"
+        }
       }
     ],
     "configuration": {
@@ -382,6 +395,19 @@
           "type": "boolean",
           "default": true,
           "description": "Alphabetically sort contents of OpenAPI explorer outlines"
+        },
+        "openapi.defaultPreviewRenderer": {
+          "scope": "workbench",
+          "type": "string",
+          "default": "swaggerui",
+          "enum": [
+            "swaggerui",
+            "redoc"
+          ],
+          "enumDescriptions": [
+            "Use Swagger UI as a default renderer to preview OpenAPI files",
+            "Use ReDoc as a default renderer to preview OpenAPI files"
+          ]
         }
       }
     },

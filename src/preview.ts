@@ -7,6 +7,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { parserOptions } from './parser-options';
 import { bundle } from './bundler';
+import { configuration } from './configuration';
 
 type Preview = {
   panel: vscode.WebviewPanel;
@@ -60,6 +61,19 @@ export function activate(context: vscode.ExtensionContext) {
       try {
         const [json, mapping, uris] = await bundle(textEditor.document, parserOptions);
         showPreview(context, previews, 'swaggerui', textEditor.document, json, uris);
+      } catch (e) {
+        vscode.window.showErrorMessage(`Failed to preview OpenAPI: ${e.message}}`);
+      }
+    },
+  );
+
+  vscode.commands.registerTextEditorCommand(
+    'openapi.preview',
+    async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit) => {
+      try {
+        const renderer = configuration.get<string>('defaultPreviewRenderer');
+        const [json, mapping, uris] = await bundle(textEditor.document, parserOptions);
+        showPreview(context, previews, renderer, textEditor.document, json, uris);
       } catch (e) {
         vscode.window.showErrorMessage(`Failed to preview OpenAPI: ${e.message}}`);
       }
