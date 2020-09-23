@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 3.7.0 (September 24, 2020)
+
+* Added 'preview' button to the toolbar do display preview using the default renderer (configurable in the settings)
+* Update Security Audit articles
+
 ## Version 3.6.0 (September 2, 2020)
 
 * Merged ([PR #775](https://github.com/42Crunch/vscode-openapi/pull/75)) by @gayanper: Add autocompletion support for remote references and support for both single and double qoutes
