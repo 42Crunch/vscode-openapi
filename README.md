@@ -1,6 +1,6 @@
 # OpenAPI extension for Visual Studio Code
 
-This [Visual Studio Code](https://code.visualstudio.com/) (VS Code) [extension](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) adds rich support for the [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification) (OAS) (formerly known as Swagger Specification) in JSON or YAML format. The features include, for example, IntelliSense, linting, schema enforcement, code navigation, definition links, snippets, static security analysis, and more! 
+This [Visual Studio Code](https://code.visualstudio.com/) (VS Code) [extension](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) adds rich support for the [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification) (OAS) (formerly known as Swagger Specification) in JSON or YAML format. The features include, for example, SwaggerUI and ReDoc preview,IntelliSense, linting, schema enforcement, code navigation, definition links, snippets, static security analysis, and more! 
 
 The extension also integrates with [API Contract Security Audit](https://docs.42crunch.com/latest/content/concepts/api_contract_security_audit.htm) by 42Crunch, so that you can check the quality of your API definition directly in VS Code.
 
@@ -80,14 +80,17 @@ By default, entries in the OpenAPI Explorer pane are sorted alphabetically. If y
 
 ### Preview OpenAPI documentation
 
-You can easily convert your OpenAPI files to human-readable HTML documentation that describes how to use your API.
-Our extension supports two popular libraries that perform such conversion: [SwaggerUI](https://swagger.io/tools/swagger-ui/) and [ReDoc](https://github.com/Redocly/redoc).
+You can get a documentation-style preview of the API you are editing by clicking the Preview button <img src="images/Preview_button.png" width=19 /> at the top right:
+![IntelliSense for OpenAPI editing](images/OpenAPI_preview_pane.gif)
 
-To open the preview of the API documentation, execute the relevant command from the Command Palette (use Cmd+Shift+P or Ctrl+Shift+P to open the palette):
+Our extension supports two popular OpenAPI documentation generators: [SwaggerUI](https://swagger.io/tools/swagger-ui/) and [ReDoc](https://github.com/Redocly/redoc).
 
-* OpenAPI: Preview with Swagger UI
-* OpenAPI: Preview with ReDoc
+To change the default OpenAPI Preview rendering engine:
+1. On the **File** menu, click **Preferences > Settings**.
+2. Expand the **Extensions** section and click **OpenAPI**.
+3. Pick the option of your choice from the **Default Preview Rendered** dropdown list.
 
+<img src="images/Change_OpenAPI_Preview_engine.jpg" width=600 />
 
 ## Use the extension to audit the security of your API
 
