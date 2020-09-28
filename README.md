@@ -81,7 +81,8 @@ By default, entries in the OpenAPI Explorer pane are sorted alphabetically. If y
 ### Preview OpenAPI documentation
 
 You can get a documentation-style preview of the API you are editing by clicking the Preview button <img src="images/Preview_button.png" width=19 /> at the top right:
-![IntelliSense for OpenAPI editing](images/OpenAPI_preview_pane.gif)
+
+![OpenAPI Preview Pane](images/OpenAPI_preview_pane.gif)
 
 Our extension supports two popular OpenAPI documentation generators: [SwaggerUI](https://swagger.io/tools/swagger-ui/) and [ReDoc](https://github.com/Redocly/redoc).
 
@@ -90,7 +91,7 @@ To change the default OpenAPI Preview rendering engine:
 2. Expand the **Extensions** section and click **OpenAPI**.
 3. Pick the option of your choice from the **Default Preview Rendered** dropdown list.
 
-<img src="images/Change_OpenAPI_Preview_engine.jpg" width=600 />
+![OpenAPI Preview Pane](images/Change_OpenAPI_Preview_engine.jpg)
 
 ## Use the extension to audit the security of your API
 
