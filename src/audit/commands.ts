@@ -163,7 +163,7 @@ async function performAudit(context, textEditor: vscode.TextEditor, apiToken, pr
   }
 }
 
-function parseDocument(document) {
+function parseDocument(document: vscode.TextDocument) {
   const [root, errors] = parse(document.getText(), document.languageId, parserOptions);
   // FIXME ignore errors for now, the file has been bundled so
   // errors here are mostly warnings
