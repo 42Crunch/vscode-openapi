@@ -8,7 +8,7 @@ import { parseJson, JsonNode } from './json';
 import { parseYaml, findYamlNodeAtOffset, YamlNode } from './yaml';
 import { ParserOptions } from '../parser-options';
 
-function parse(text: string, languageId: string, options: ParserOptions): [Node, any[]] {
+function parse(text: string, languageId: string, options: ParserOptions): [Node, {message: string, offset: number}[]] {
   return languageId === 'yaml' ? parseYaml(text, options.get().yaml.schema) : parseJson(text);
 }
 
