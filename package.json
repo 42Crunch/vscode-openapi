@@ -285,6 +285,7 @@
       {
         "command": "openapi.securityAudit",
         "title": "OpenAPI: perform security audit",
+        "enablement": "!openapiErrors",
         "icon": {
           "light": "./resources/42crunch_icon.png",
           "dark": "./resources/42crunch_icon.png"
@@ -385,6 +386,7 @@
       {
         "command": "openapi.preview",
         "title": "OpenAPI: show preview using the default renderer",
+        "enablement": "!openapiErrors",
         "icon": {
           "light": "resources/icons/open-preview_black.svg",
           "dark": "resources/icons/open-preview_white.svg"
