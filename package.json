@@ -449,7 +449,7 @@
     "mobx": "^4.15.6",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "redoc": "^2.0.0-rc.40",
+    "redoc": "2.0.0-rc.40",
     "style-loader": "^1.2.1",
     "styled-components": "^5.1.1",
     "swagger-ui-react": "^3.32.4",
