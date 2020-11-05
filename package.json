@@ -430,7 +430,7 @@
     "form-data": "^2.3.3",
     "got": "^9.6.0",
     "js-yaml": "^3.13.1",
-    "json-schema-ref-parser": "git+ssh://git@github.com:42Crunch/json-schema-ref-parser.git#openapi",
+    "@xliic/json-schema-ref-parser": "^8.0.0",
     "jsonc-parser": "^2.2.1",
     "semver": "^6.3.0",
     "yaml-ast-parser-custom-tags": "0.0.43"
