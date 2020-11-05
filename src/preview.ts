@@ -142,12 +142,13 @@ function buildWebviewPanel(
   });
 }
 
+// Directive connect-src must be set to allow XHR
 function getWebviewContent(webview: vscode.Webview, index: vscode.Uri) {
   return `<!DOCTYPE html>
   <html lang="en">
   <head>
 	  <meta charset="UTF-8">
-	  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https: data:; script-src ${webview.cspSource}; style-src 'unsafe-inline';">
+	  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https: data:; script-src ${webview.cspSource}; style-src 'unsafe-inline'; connect-src http: https:;">
 	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	  <style>
 	    body {
