@@ -111,9 +111,20 @@
           "id": "openapiThreeSecurityOutline",
           "name": "Security",
           "when": "openapiThreeEnabled"
+        },
+        {
+          "id": "openapiNotSelectedOutline",
+          "name": "",
+          "when": "!openapiTwoEnabled && !openapiThreeEnabled"
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "openapiNotSelectedOutline",
+        "contents": "No OpenAPI file selected."
+      }
+    ],
     "menus": {
       "editor/title": [
         {
