@@ -9,7 +9,7 @@ import { parseJsonPointer, joinJsonPointer } from '../pointer';
 
 export function parseJson(text: string): [JsonNode, any[]] {
   const parseErrors = [];
-  const node = new JsonNode(json.parseTree(text, parseErrors));
+  const node = new JsonNode(json.parseTree(text, parseErrors, {allowTrailingComma: true}));
   const normalizedErrors = parseErrors.map((error) => ({
     message: json.printParseErrorCode(error.error),
     offset: error.offset,
