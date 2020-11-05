@@ -6,10 +6,10 @@ import { relative } from 'path';
 import * as vscode from 'vscode';
 import { dirname } from 'path';
 import { ParserOptions } from './parser-options';
-import parser from 'json-schema-ref-parser';
-import url from 'json-schema-ref-parser/lib/util/url';
-import Pointer from 'json-schema-ref-parser/lib/pointer';
-import $Ref from 'json-schema-ref-parser/lib/ref';
+import parser from '@xliic/json-schema-ref-parser';
+import url from '@xliic/json-schema-ref-parser/lib/util/url';
+import Pointer from '@xliic/json-schema-ref-parser/lib/pointer';
+import $Ref from '@xliic/json-schema-ref-parser/lib/ref';
 import { parseJsonPointer, joinJsonPointer } from './pointer';
 import { parseDocument, bundlerJsonParser, bundlerYamlParserWithOptions } from './bundler-parsers';
 
