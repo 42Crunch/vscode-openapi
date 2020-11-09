@@ -5,6 +5,7 @@
 
 import * as vscode from 'vscode';
 import { parse, Node, JsonNode, YamlNode } from './ast';
+import { outlines } from './extension';
 import { parserOptions } from './parser-options';
 import * as snippets from './snippets.json';
 
@@ -40,6 +41,17 @@ const commands = {
   v3addSecuritySchemeApiKey,
   v3addSecuritySchemeJWT,
   v3addSecuritySchemeOauth2Implicit,
+
+  copySelectedTwoPathOutlineJsonReference,
+  copySelectedTwoParametersOutlineJsonReference,
+  copySelectedTwoResponsesOutlineJsonReference,
+  copySelectedTwoDefinitionOutlineJsonReference,
+  copySelectedTwoSecurityOutlineJsonReference,
+  copySelectedTwoSecurityDefinitionOutlineJsonReference,
+  copySelectedThreePathOutlineJsonReference,
+  copySelectedThreeServersOutlineJsonReference,
+  copySelectedThreeComponentsOutlineJsonReference,
+  copySelectedThreeSecurityOutlineJsonReference
 };
 
 // preferred order of the tags, mixed v2 and v3 tags
@@ -105,6 +117,10 @@ function copyJsonReference(range: vscode.Range) {
   const languageId = editor.document.languageId;
   const root = safeParse(text, languageId);
   const node = root.findNodeAtOffset(editor.document.offsetAt(editor.selection.active));
+  copyNodeJsonReference(node);
+}
+
+function copyNodeJsonReference(node: Node) {
   if (node) {
     const pointer = node.getJsonPonter();
     // JSON Pointer is allowed to have special chars, but JSON Reference
@@ -117,6 +133,50 @@ function copyJsonReference(range: vscode.Range) {
     const disposable = vscode.window.setStatusBarMessage(`Copied Reference: #${encoded}`);
     setTimeout(() => disposable.dispose(), 1000);
   }
+}
+
+function copySelectedTwoPathOutlineJsonReference() {
+  copySelectedJsonReference('openapiTwoPathOutline');
+}
+
+function copySelectedTwoParametersOutlineJsonReference() {
+  copySelectedJsonReference('openapiTwoParametersOutline');
+}
+
+function copySelectedTwoResponsesOutlineJsonReference() {
+  copySelectedJsonReference('openapiTwoResponsesOutline');
+}
+
+function copySelectedTwoDefinitionOutlineJsonReference() {
+  copySelectedJsonReference('openapiTwoDefinitionOutline');
+}
+
+function copySelectedTwoSecurityOutlineJsonReference() {
+  copySelectedJsonReference('openapiTwoSecurityOutline');
+}
+
+function copySelectedTwoSecurityDefinitionOutlineJsonReference() {
+  copySelectedJsonReference('openapiTwoSecurityDefinitionOutline');
+}
+
+function copySelectedThreePathOutlineJsonReference() {
+  copySelectedJsonReference('openapiThreePathOutline');
+}
+
+function copySelectedThreeServersOutlineJsonReference() {
+  copySelectedJsonReference('openapiThreeServersOutline');
+}
+
+function copySelectedThreeComponentsOutlineJsonReference() {
+  copySelectedJsonReference('openapiThreeComponentsOutline');
+}
+
+function copySelectedThreeSecurityOutlineJsonReference() {
+  copySelectedJsonReference('openapiThreeSecurityOutline');
+}
+
+function copySelectedJsonReference(viewId: string) {
+  copyNodeJsonReference(outlines[viewId].selection[0]);
 }
 
 async function createNew(snippet: string, language: string) {
