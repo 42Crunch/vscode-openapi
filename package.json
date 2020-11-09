@@ -393,6 +393,14 @@
         }
       }
     ],
+    "keybindings": [
+      {
+        "command": "openapi.preview",
+        "key": "shift+alt+p",
+        "mac": "shift+alt+p",
+        "when": "editorTextFocus"
+      }
+    ],
     "configuration": {
       "type": "object",
       "title": "OpenAPI",
