@@ -33,6 +33,8 @@ import { create as createWhatsNewPanel } from './whatsnew';
 import * as audit from './audit/activate';
 import * as preview from './preview';
 
+export const outlines: { [id: string]: vscode.TreeView<Node> } = {};
+
 function updateVersionContext(version: OpenApiVersion) {
   if (version === OpenApiVersion.V2) {
     vscode.commands.executeCommand('setContext', 'openapiTwoEnabled', true);
@@ -115,66 +117,20 @@ export function activate(context: vscode.ExtensionContext) {
   parserOptions.configure(yamlConfiguration);
 
   // OpenAPI v2 outlines
-  vscode.window.registerTreeDataProvider(
-    'openapiTwoSpecOutline',
-    new GeneralTwoOutlineProvider(context, didChangeTreeValid.event),
-  );
-
-  vscode.window.registerTreeDataProvider(
-    'openapiTwoPathOutline',
-    new PathOutlineProvider(context, didChangeTreeValid.event),
-  );
-
-  vscode.window.registerTreeDataProvider(
-    'openapiTwoDefinitionOutline',
-    new DefinitionOutlineProvider(context, didChangeTreeValid.event),
-  );
-
-  vscode.window.registerTreeDataProvider(
-    'openapiTwoSecurityOutline',
-    new SecurityOutlineProvider(context, didChangeTreeValid.event),
-  );
-
-  vscode.window.registerTreeDataProvider(
-    'openapiTwoSecurityDefinitionOutline',
-    new SecurityDefinitionOutlineProvider(context, didChangeTreeValid.event),
-  );
-
-  vscode.window.registerTreeDataProvider(
-    'openapiTwoParametersOutline',
-    new ParametersOutlineProvider(context, didChangeTreeValid.event),
-  );
-
-  vscode.window.registerTreeDataProvider(
-    'openapiTwoResponsesOutline',
-    new ResponsesOutlineProvider(context, didChangeTreeValid.event),
-  );
+  registerOutlineTreeView('openapiTwoSpecOutline', new GeneralTwoOutlineProvider(context, didChangeTreeValid.event));
+  registerOutlineTreeView('openapiTwoPathOutline', new PathOutlineProvider(context, didChangeTreeValid.event));
+  registerOutlineTreeView('openapiTwoDefinitionOutline', new DefinitionOutlineProvider(context, didChangeTreeValid.event));
+  registerOutlineTreeView('openapiTwoSecurityOutline', new SecurityOutlineProvider(context, didChangeTreeValid.event));
+  registerOutlineTreeView('openapiTwoSecurityDefinitionOutline', new SecurityDefinitionOutlineProvider(context, didChangeTreeValid.event));
+  registerOutlineTreeView('openapiTwoParametersOutline', new ParametersOutlineProvider(context, didChangeTreeValid.event));
+  registerOutlineTreeView('openapiTwoResponsesOutline', new ResponsesOutlineProvider(context, didChangeTreeValid.event));
 
   // OpenAPI v3 outlines
-  vscode.window.registerTreeDataProvider(
-    'openapiThreePathOutline',
-    new PathOutlineProvider(context, didChangeTreeValid.event),
-  );
-
-  vscode.window.registerTreeDataProvider(
-    'openapiThreeSpecOutline',
-    new GeneralThreeOutlineProvider(context, didChangeTreeValid.event),
-  );
-
-  vscode.window.registerTreeDataProvider(
-    'openapiThreeComponentsOutline',
-    new ComponentsOutlineProvider(context, didChangeTreeValid.event),
-  );
-
-  vscode.window.registerTreeDataProvider(
-    'openapiThreeSecurityOutline',
-    new SecurityOutlineProvider(context, didChangeTreeValid.event),
-  );
-
-  vscode.window.registerTreeDataProvider(
-    'openapiThreeServersOutline',
-    new ServersOutlineProvider(context, didChangeTreeValid.event),
-  );
+  registerOutlineTreeView('openapiThreePathOutline', new PathOutlineProvider(context, didChangeTreeValid.event));
+  registerOutlineTreeView('openapiThreeSpecOutline', new GeneralThreeOutlineProvider(context, didChangeTreeValid.event));
+  registerOutlineTreeView('openapiThreeComponentsOutline', new ComponentsOutlineProvider(context, didChangeTreeValid.event));
+  registerOutlineTreeView('openapiThreeSecurityOutline', new SecurityOutlineProvider(context, didChangeTreeValid.event));
+  registerOutlineTreeView('openapiThreeServersOutline', new ServersOutlineProvider(context, didChangeTreeValid.event));
 
   updateContext(didChangeTreeValid.event);
   registerCommands();
@@ -233,5 +189,19 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate(): Thenable<void> | undefined {
+  for (let viewId in outlines) {
+    outlines[viewId].dispose();
+    delete outlines[viewId];
+  }
   return undefined;
+}
+
+function registerOutlineTreeView(id: string, provider: vscode.TreeDataProvider<Node>): void {
+  outlines[id] = vscode.window.createTreeView(id, {
+    treeDataProvider: provider
+  });
+  // Length is 0 if deselected
+  outlines[id].onDidChangeSelection(event => {
+    vscode.commands.executeCommand('setContext', id + 'Selected', event.selection.length > 0);
+  });
 }
