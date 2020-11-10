@@ -7,9 +7,11 @@ import * as json from 'jsonc-parser';
 import { Node } from './types';
 import { parseJsonPointer, joinJsonPointer } from '../pointer';
 
-export function parseJson(text: string): [JsonNode, any[]] {
-  const parseErrors = [];
-  const node = new JsonNode(json.parseTree(text, parseErrors));
+export function parseJson(text: string): [JsonNode, {message: string, offset: number}[]] {
+  const parseErrors: json.ParseError[] = [];
+  const node = new JsonNode(
+    json.parseTree(text, parseErrors, {allowTrailingComma: true})
+  )
   const normalizedErrors = parseErrors.map((error) => ({
     message: json.printParseErrorCode(error.error),
     offset: error.offset,

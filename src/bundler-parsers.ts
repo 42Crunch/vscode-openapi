@@ -5,11 +5,11 @@ import * as vscode from 'vscode';
 import { ParserOptions } from './parser-options';
 
 const parseJson = (text: string) => {
-  const errors = [];
-  const parsed = json.parse(text, errors);
+  const errors: json.ParseError[] = [];
+  const parsed = json.parse(text, errors, {allowTrailingComma: true});
   if (errors.length > 0) {
     const message = errors
-      .map((error: json.ParseError) => `${json.printParseErrorCode(error.error)} at offset ${error.offset}`)
+      .map((error) => `${json.printParseErrorCode(error.error)} at offset ${error.offset}`)
       .join(', ');
     throw new Error(`Failed to parse JSON: ${message}`);
   }
