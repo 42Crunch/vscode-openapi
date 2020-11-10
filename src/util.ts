@@ -12,17 +12,19 @@ export function parseDocument(document: vscode.TextDocument): [OpenApiVersion, N
 
   const [node, errors] = parse(document.getText(), document.languageId, parserOptions);
   const version = getOpenApiVersion(node);
-  const messages = errors.map((error): vscode.Diagnostic => {
-    const position = document.positionAt(error.offset);
-    const line = document.lineAt(position);
-    return {
-      source: 'vscode-openapi',
-      code: '',
-      severity: vscode.DiagnosticSeverity.Error,
-      message: error.message,
-      range: line.range,
-    };
-  });
+  const messages = errors.map(
+    (error): vscode.Diagnostic => {
+      const position = document.positionAt(error.offset);
+      const line = document.lineAt(position);
+      return {
+        source: 'vscode-openapi',
+        code: '',
+        severity: vscode.DiagnosticSeverity.Error,
+        message: error.message,
+        range: line.range,
+      };
+    },
+  );
 
   return [version, node, messages.length > 0 ? messages : null];
 }
@@ -33,11 +35,9 @@ export function getOpenApiVersion(root: Node): OpenApiVersion {
 
   if (swaggerVersionValue === '2.0') {
     return OpenApiVersion.V2;
-  } else if (
-    openApiVersionValue &&
-    typeof openApiVersionValue === 'string' &&
-    openApiVersionValue.match(/^3\.0\.\d(-.+)?$/)
-  ) {
+  }
+
+  if (openApiVersionValue && typeof openApiVersionValue === 'string' && openApiVersionValue.match(/^3\.0\.\d(-.+)?$/)) {
     return OpenApiVersion.V3;
   }
 
