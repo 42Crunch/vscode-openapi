@@ -434,52 +434,52 @@
       },
       {
         "command": "openapi.copySelectedTwoPathOutlineJsonReference",
-        "title": "OpenAPI: copy JSON reference",
+        "title": "OpenAPI: copy JSON Pointer",
         "enablement": "openapiTwoPathOutlineSelected"
       },
       {
         "command": "openapi.copySelectedTwoParametersOutlineJsonReference",
-        "title": "OpenAPI: copy JSON reference",
+        "title": "OpenAPI: copy JSON Pointer",
         "enablement": "openapiTwoParametersOutlineSelected"
       },
       {
         "command": "openapi.copySelectedTwoResponsesOutlineJsonReference",
-        "title": "OpenAPI: copy JSON reference",
+        "title": "OpenAPI: copy JSON Pointer",
         "enablement": "openapiTwoResponsesOutlineSelected"
       },
       {
         "command": "openapi.copySelectedTwoDefinitionOutlineJsonReference",
-        "title": "OpenAPI: copy JSON reference",
+        "title": "OpenAPI: copy JSON Pointer",
         "enablement": "openapiTwoDefinitionOutlineSelected"
       },
       {
         "command": "openapi.copySelectedTwoSecurityOutlineJsonReference",
-        "title": "OpenAPI: copy JSON reference",
+        "title": "OpenAPI: copy JSON Pointer",
         "enablement": "openapiTwoSecurityOutlineSelected"
       },
       {
         "command": "openapi.copySelectedTwoSecurityDefinitionOutlineJsonReference",
-        "title": "OpenAPI: copy JSON reference",
+        "title": "OpenAPI: copy JSON Pointer",
         "enablement": "openapiTwoSecurityDefinitionOutlineSelected"
       },
       {
         "command": "openapi.copySelectedThreePathOutlineJsonReference",
-        "title": "OpenAPI: copy JSON reference",
+        "title": "OpenAPI: copy JSON Pointer",
         "enablement": "openapiThreePathOutlineSelected"
       },
       {
         "command": "openapi.copySelectedThreeServersOutlineJsonReference",
-        "title": "OpenAPI: copy JSON reference",
+        "title": "OpenAPI: copy JSON Pointer",
         "enablement": "openapiThreeServersOutlineSelected"
       },
       {
         "command": "openapi.copySelectedThreeComponentsOutlineJsonReference",
-        "title": "OpenAPI: copy JSON reference",
+        "title": "OpenAPI: copy JSON Pointer",
         "enablement": "openapiThreeComponentsOutlineSelected"
       },
       {
         "command": "openapi.copySelectedThreeSecurityOutlineJsonReference",
-        "title": "OpenAPI: copy JSON reference",
+        "title": "OpenAPI: copy JSON Pointer",
         "enablement": "openapiThreeSecurityOutlineSelected"
       }
     ],
