@@ -12,10 +12,11 @@ export function parseDocument(document: vscode.TextDocument): [OpenApiVersion, N
 
   const [node, errors] = parse(document.getText(), document.languageId, parserOptions);
   const version = getOpenApiVersion(node);
-  const messages = errors.map((error) => {
+  const messages = errors.map((error): vscode.Diagnostic => {
     const position = document.positionAt(error.offset);
     const line = document.lineAt(position);
     return {
+      source: 'vscode-openapi',
       code: '',
       severity: vscode.DiagnosticSeverity.Error,
       message: error.message,

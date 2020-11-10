@@ -8,7 +8,7 @@ import { Schema } from 'js-yaml';
 import { Node } from './types';
 import { parseJsonPointer, joinJsonPointer } from '../pointer';
 
-export function parseYaml(text: string, schema: Schema): [YamlNode, any[]] {
+export function parseYaml(text: string, schema: Schema): [YamlNode, {message: string, offset: number}[]] {
   const documents = [];
   yaml.loadAll(
     text,
