@@ -234,6 +234,46 @@
         {
           "command": "openapi.v3addSecuritySchemeOauth2Implicit",
           "when": "!openapiErrors && view == openapiThreeComponentsOutline"
+        },
+        {
+          "command": "openapi.copySelectedTwoPathOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiTwoPathOutline"
+        },
+        {
+          "command": "openapi.copySelectedTwoParametersOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiTwoParametersOutline"
+        },
+        {
+          "command": "openapi.copySelectedTwoResponsesOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiTwoResponsesOutline"
+        },
+        {
+          "command": "openapi.copySelectedTwoDefinitionOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiTwoDefinitionOutline"
+        },
+        {
+          "command": "openapi.copySelectedTwoSecurityOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiTwoSecurityOutline"
+        },
+        {
+          "command": "openapi.copySelectedTwoSecurityDefinitionOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiTwoSecurityDefinitionOutline"
+        },
+        {
+          "command": "openapi.copySelectedThreePathOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiThreePathOutline"
+        },
+        {
+          "command": "openapi.copySelectedThreeServersOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiThreeServersOutline"
+        },
+        {
+          "command": "openapi.copySelectedThreeComponentsOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiThreeComponentsOutline"
+        },
+        {
+          "command": "openapi.copySelectedThreeSecurityOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiThreeSecurityOutline"
         }
       ],
       "view/item/context": [
@@ -391,6 +431,56 @@
           "light": "resources/icons/open-preview_black.svg",
           "dark": "resources/icons/open-preview_white.svg"
         }
+      },
+      {
+        "command": "openapi.copySelectedTwoPathOutlineJsonReference",
+        "title": "OpenAPI: copy JSON Pointer",
+        "enablement": "openapiTwoPathOutlineSelected"
+      },
+      {
+        "command": "openapi.copySelectedTwoParametersOutlineJsonReference",
+        "title": "OpenAPI: copy JSON Pointer",
+        "enablement": "openapiTwoParametersOutlineSelected"
+      },
+      {
+        "command": "openapi.copySelectedTwoResponsesOutlineJsonReference",
+        "title": "OpenAPI: copy JSON Pointer",
+        "enablement": "openapiTwoResponsesOutlineSelected"
+      },
+      {
+        "command": "openapi.copySelectedTwoDefinitionOutlineJsonReference",
+        "title": "OpenAPI: copy JSON Pointer",
+        "enablement": "openapiTwoDefinitionOutlineSelected"
+      },
+      {
+        "command": "openapi.copySelectedTwoSecurityOutlineJsonReference",
+        "title": "OpenAPI: copy JSON Pointer",
+        "enablement": "openapiTwoSecurityOutlineSelected"
+      },
+      {
+        "command": "openapi.copySelectedTwoSecurityDefinitionOutlineJsonReference",
+        "title": "OpenAPI: copy JSON Pointer",
+        "enablement": "openapiTwoSecurityDefinitionOutlineSelected"
+      },
+      {
+        "command": "openapi.copySelectedThreePathOutlineJsonReference",
+        "title": "OpenAPI: copy JSON Pointer",
+        "enablement": "openapiThreePathOutlineSelected"
+      },
+      {
+        "command": "openapi.copySelectedThreeServersOutlineJsonReference",
+        "title": "OpenAPI: copy JSON Pointer",
+        "enablement": "openapiThreeServersOutlineSelected"
+      },
+      {
+        "command": "openapi.copySelectedThreeComponentsOutlineJsonReference",
+        "title": "OpenAPI: copy JSON Pointer",
+        "enablement": "openapiThreeComponentsOutlineSelected"
+      },
+      {
+        "command": "openapi.copySelectedThreeSecurityOutlineJsonReference",
+        "title": "OpenAPI: copy JSON Pointer",
+        "enablement": "openapiThreeSecurityOutlineSelected"
       }
     ],
     "keybindings": [
