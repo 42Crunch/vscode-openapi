@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 3.8.0 (November 12, 2020)
+
+* Added new command to copy JSON Pointer of the selected item in the outline. See [Issue #37](https://github.com/42Crunch/vscode-openapi/issues/37)
+* Made OpenAPI icon and the outline visible at all times. See [Issue #78](https://github.com/42Crunch/vscode-openapi/issues/78)
+* Fixed not working SwaggerUI Try Out feature [Issue #80](https://github.com/42Crunch/vscode-openapi/issues/80)
+* Fixed errors being shown for VS Code json files [Issue #81](https://github.com/42Crunch/vscode-openapi/issues/81)
+* Added keyboard shortcut for OpenAPI preview [Issue #83](https://github.com/42Crunch/vscode-openapi/issues/83)
+* Fixed confusing error message for invalid OpenAPI files [Issue #84](https://github.com/42Crunch/vscode-openapi/issues/84)
+
 ## Version 3.7.0 (September 24, 2020)
 
 * Added 'preview' button to the toolbar do display preview using the default renderer (configurable in the settings)
