@@ -122,7 +122,7 @@
     "viewsWelcome": [
       {
         "view": "openapiNotSelectedOutline",
-        "contents": "No OpenAPI file selected."
+        "contents": "No OpenAPI file selected.\n[New OpenAPI file](command:openapi.createNewThreeYaml)"
       }
     ],
     "menus": {
