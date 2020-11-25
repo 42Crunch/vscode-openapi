@@ -1,0 +1,43 @@
+{
+  "fixes": [
+    {
+      "problem": "p1",
+      "title": "insert map (into array)",
+      "type": "insert",
+      "fix": {
+        "a": {
+          "b": "b property"
+        }
+      }
+    },
+    {
+      "problem": "p2",
+      "title": "insert list (into array)",
+      "type": "insert",
+      "fix": [
+        "a",
+        "b"
+      ]
+    },
+    {
+      "problem": "p3",
+      "title": "insert key-value pair(s) (into map)",
+      "type": "insert",
+      "fix": {
+        "a": "a property",
+        "b": "b property"
+      }
+    },
+    {
+      "problem": "p4",
+      "title": "insert primitive (into array)",
+      "type": "insert",
+      "fix": 2
+    },
+	{
+      "problem": "p5",
+      "title": "delete",
+      "type": "delete"
+    }
+  ]
+}

@@ -2,13 +2,25 @@
  Copyright (c) 42Crunch Ltd. All rights reserved.
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
+
 import { basename } from 'path';
 import * as vscode from 'vscode';
+import { AuditContext, DocumentDecorations } from './types';
 
 export const decorationType = vscode.window.createTextEditorDecorationType({});
 
-interface DocumentDecorations {
-  [key: string]: vscode.DecorationOptions[];
+export function setDecorations(editor: vscode.TextEditor, auditContext: AuditContext) {
+  const uri = editor.document.uri.toString();
+
+  let combinedDecorations: vscode.DecorationOptions[] = [];
+  for (const audit of Object.values(auditContext)) {
+    for (const [decorationsUri, decoration] of Object.entries(audit.decorations)) {
+      if (uri == decorationsUri) {
+        combinedDecorations = combinedDecorations.concat(decoration);
+      }
+    }
+  }
+  editor.setDecorations(decorationType, combinedDecorations);
 }
 
 export function createDecorations(mainUri: string, issues): DocumentDecorations {

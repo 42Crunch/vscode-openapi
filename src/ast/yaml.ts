@@ -49,7 +49,8 @@ export class YamlNode implements Node {
   }
 
   getParent(): YamlNode {
-    return new YamlNode(this.node.parent.parent);
+    return (this.node.parent.kind === yaml.Kind.MAP) ? 
+      new YamlNode(this.node.parent) : new YamlNode(this.node.parent.parent);
   }
 
   getKey() {
@@ -80,6 +81,49 @@ export class YamlNode implements Node {
     return [this.node.startPosition, this.node.endPosition];
   }
 
+  getKeyRange(): [number, number] | undefined {
+    if (this.node.key) {
+      return [this.node.key.startPosition, this.node.key.endPosition];
+    }
+  }
+
+  getValueRange(): [number, number] | undefined {
+    if (this.node) {
+      if (this.node.kind === yaml.Kind.MAPPING) {
+        return [this.node.value.startPosition, this.node.value.endPosition];
+      }
+      return [this.node.startPosition, this.node.endPosition];
+    }
+  }
+
+  isArray(): boolean {
+    return (this.node.kind === yaml.Kind.SEQ) || ((this.node.kind === yaml.Kind.MAPPING) && (this.node.value.kind === yaml.Kind.SEQ));
+  }
+
+  isObject(): boolean {
+    return (this.node.kind === yaml.Kind.MAP) || ((this.node.kind === yaml.Kind.MAPPING) && (this.node.value.kind === yaml.Kind.MAP));
+  }
+
+  next(): YamlNode | undefined {
+    const children = ((this.node.parent.kind === yaml.Kind.MAP) ? 
+      new YamlNode(this.node.parent) : this.getParent()).getChildren();
+    for (let i = 1 ; i < children.length ; i++) {
+      if (this.node === children[i - 1].node) {
+        return children[i];
+      }
+    }
+  }
+
+  prev(): YamlNode | undefined {
+    const children = ((this.node.parent.kind === yaml.Kind.MAP) ? 
+      new YamlNode(this.node.parent) : this.getParent()).getChildren();
+    for (let i = 0 ; i < (children.length - 1) ; i++) {
+      if (this.node === children[i + 1].node) {
+        return children[i];
+      }
+    }
+  }
+
   getChildren(): YamlNode[] {
     const result = [];
     if (this.node.kind === yaml.Kind.MAPPING) {
@@ -100,6 +144,12 @@ export class YamlNode implements Node {
     } else if (this.node.kind === yaml.Kind.MAP) {
       for (const mapping of this.node.mappings) {
         result.push(new YamlNode(mapping));
+      }
+    } else if (this.node.kind === yaml.Kind.SEQ) {
+      for (const item of this.node.value.items) {
+        if (item) {
+          result.push(new YamlNode(item));
+        }
       }
     }
     return result;
