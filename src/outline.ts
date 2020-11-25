@@ -8,8 +8,8 @@ import { Node } from './ast';
 import { configuration } from './configuration';
 
 abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
-  private _onDidChangeTreeData: vscode.EventEmitter<Node> = new vscode.EventEmitter<Node>();
-  readonly onDidChangeTreeData: vscode.Event<Node> = this._onDidChangeTreeData.event;
+  private _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
+  readonly onDidChangeTreeData: vscode.Event<void> = this._onDidChangeTreeData.event;
 
   root: Node;
   maxDepth: number = 1;
@@ -121,13 +121,13 @@ export class PathOutlineProvider extends OutlineProvider {
     const depth = node.getDepth();
     const key = node.getKey();
     if (depth === 2) {
-      return children.filter(child => {
+      return children.filter((child) => {
         return ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace', 'parameters'].includes(
           child.getKey(),
         );
       });
     } else if (depth === 3 && key !== 'parameters') {
-      return children.filter(child => {
+      return children.filter((child) => {
         const key = child.getKey();
         return key === 'responses' || key === 'parameters';
       });
