@@ -358,3 +358,139 @@ ra/ro: true`);
   t.is(root.find('/bar/baz').getJsonPonter(), '/bar/baz');
   t.is(root.find('/ra~1ro').getJsonPonter(), '/ra~1ro');
 });
+
+test('json prev()', (t) => {
+
+  const root = loadJson('tests/xkcd.json');
+
+  const target = root.find('/swagger');
+  t.is(target.prev(), undefined);
+  t.is(target.next().getJsonPonter(), '/schemes');
+  t.is(target.next().prev().getJsonPonter(), '/swagger');
+
+  const target2 = root.find('/schemes/0');
+  t.is(target2.prev(), undefined);
+  t.is(target2.next().getJsonPonter(), '/schemes/1');
+});
+
+test('json next()', (t) => {
+
+  const root = loadJson('tests/xkcd.json');
+
+  const target = root.find('/definitions');
+  t.is(target.next(), undefined);
+  t.is(target.prev().getJsonPonter(), '/paths');
+  t.is(target.prev().next().getJsonPonter(), '/definitions');
+
+  const target2 = root.find('/schemes/1');
+  t.is(target2.next(), undefined);
+  t.is(target2.prev().getJsonPonter(), '/schemes/0');
+});
+
+test('json isArray()', (t) => {
+
+  const root = loadJson('tests/xkcd.json');
+
+  t.is(root.find('/schemes').isArray(), true);
+  t.is(root.find('/schemes/0').isArray(), false);
+  t.is(root.find('/host').isArray(), false);
+  t.is(root.find('/info').isArray(), false);
+});
+
+test('json isObject()', (t) => {
+
+  const root = loadJson('tests/xkcd.json');
+
+  t.is(root.find('/schemes').isObject(), false);
+  t.is(root.find('/schemes/0').isObject(), false);
+  t.is(root.find('/host').isObject(), false);
+  t.is(root.find('/info').isObject(), true);
+});
+
+test('json getKeyRange()', (t) => {
+
+  const root = loadJson('tests/xhr.json');
+
+  t.deepEqual(root.find('/info/license/name').getKeyRange(), [123, 127]);
+  t.deepEqual(root.find('/servers/1/url').getKeyRange(), [247, 250]);
+  t.deepEqual(root.find('/paths/~1posts/get/responses/200').getKeyRange(), [443, 446]);
+  t.is(root.find('/servers/1').getKeyRange(), undefined);
+});
+
+test('json getValueRange()', (t) => {
+
+  const root = loadJson('tests/xhr.json');
+
+  t.deepEqual(root.find('/info/license/name').getValueRange(), [130, 135]);
+  t.deepEqual(root.find('/servers/1/url').getValueRange(), [253, 291]);
+  t.deepEqual(root.find('/paths/~1posts/get/responses/200').getValueRange(), [449, 496]);
+  t.deepEqual(root.find('/servers/1').getValueRange(), [237, 298]);
+});
+
+test('yaml prev()', (t) => {
+
+  const root = loadYaml('tests/xkcd.yaml');
+
+  const target = root.find('/swagger');
+  t.is(target.prev(), undefined);
+  t.is(target.next().getJsonPonter(), '/schemes');
+  t.is(target.next().prev().getJsonPonter(), '/swagger');
+
+  const target2 = root.find('/schemes/0');
+  t.is(target2.prev(), undefined);
+  t.is(target2.next().getJsonPonter(), '/schemes/1');
+});
+
+test('yaml next()', (t) => {
+
+  const root = loadYaml('tests/xkcd.yaml');
+
+  const target = root.find('/definitions');
+  t.is(target.next(), undefined);
+  t.is(target.prev().getJsonPonter(), '/paths');
+  t.is(target.prev().next().getJsonPonter(), '/definitions');
+
+  const target2 = root.find('/schemes/1');
+  t.is(target2.next(), undefined);
+  t.is(target2.prev().getJsonPonter(), '/schemes/0');
+});
+
+test('yaml isArray()', (t) => {
+
+  const root = loadYaml('tests/xkcd.yaml');
+
+  t.is(root.find('/schemes').isArray(), true);
+  t.is(root.find('/schemes/0').isArray(), false);
+  t.is(root.find('/host').isArray(), false);
+  t.is(root.find('/info').isArray(), false);
+});
+
+test('yaml isObject()', (t) => {
+
+  const root = loadYaml('tests/xkcd.yaml');
+
+  t.is(root.find('/schemes').isObject(), false);
+  t.is(root.find('/schemes/0').isObject(), false);
+  t.is(root.find('/host').isObject(), false);
+  t.is(root.find('/info').isObject(), true);
+});
+
+test('yaml getKeyRange()', (t) => {
+
+  const root = loadYaml('tests/xkcd.yaml');
+
+  t.deepEqual(root.find('/paths/~1%7BcomicId%7D~1info.0.json/get/responses/200').getKeyRange(), [1179, 1184]);
+  t.deepEqual(root.find('/info/x-tags').getKeyRange(), [569, 575]);
+  t.deepEqual(root.find('/paths/~1%7BcomicId%7D~1info.0.json/get/parameters/0/required').getKeyRange(), [1113, 1121]);
+  t.is(root.find('/paths/~1%7BcomicId%7D~1info.0.json/get/parameters/0').getKeyRange(), undefined);
+});
+
+test('yaml getValueRange()', (t) => {
+
+  const root = loadYaml('tests/xkcd.yaml');
+
+  t.deepEqual(root.find('/paths/~1%7BcomicId%7D~1info.0.json/get/responses/200').getValueRange(), [1197, 1272]);
+  t.deepEqual(root.find('/info/x-tags').getValueRange(), [582, 607]);
+  t.deepEqual(root.find('/paths/~1%7BcomicId%7D~1info.0.json/get/parameters/0/required').getValueRange(), [1123, 1127]);
+  t.deepEqual(root.find('/paths/~1%7BcomicId%7D~1info.0.json/get/parameters/0').getValueRange(), [1068, 1151]);
+});

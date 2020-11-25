@@ -11,6 +11,12 @@ export interface Node {
   getParent(): Node;
   find(pointer: string): Node;
   getRange(): [number, number];
+  getKeyRange(): [number, number] | undefined;
+  getValueRange(): [number, number] | undefined;
   findNodeAtOffset(offset: number): Node | undefined;
   getJsonPonter(): string;
+  next(): Node | undefined;
+  prev(): Node | undefined;
+  isArray(): boolean;
+  isObject(): boolean;
 }

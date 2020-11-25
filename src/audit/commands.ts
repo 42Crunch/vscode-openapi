@@ -6,9 +6,11 @@ import { basename } from 'path';
 import * as vscode from 'vscode';
 
 import { audit, requestToken } from './client';
-import { decorationType, createDecorations } from './decoration';
+import { createDecorations, setDecorations } from './decoration';
+import { createDiagnostics } from './diagnostic';
+
 import { ReportWebView } from './report';
-import { DiagnosticCollection, TextDocument } from 'vscode';
+import { TextDocument } from 'vscode';
 import { parserOptions } from '../parser-options';
 import { bundle, findMapping, displayBundlerErrors } from '../bundler';
 import { parse, Node } from '../ast';
@@ -38,6 +40,7 @@ export function registerSecurityAudit(
 
     try {
       auditContext[uri] = await securityAudit(context, runtimeContext, textEditor);
+      setDecorations(textEditor, auditContext);
       delete pendingAudits[uri];
     } catch (e) {
       delete pendingAudits[uri];
@@ -157,8 +160,6 @@ async function performAudit(
       apiToken,
       progress,
     );
-    const diagnostics = createDiagnostics(basename(textEditor.document.fileName), documents, issuesByDocument);
-    const decorations = createDecorations(documentUri, issuesByDocument);
 
     const issuesByType: IssuesByType = {};
 
@@ -171,10 +172,9 @@ async function performAudit(
       }
     }
 
-    // set decorations for the current document
-    if (decorations[documentUri]) {
-      textEditor.setDecorations(decorationType, decorations[documentUri]);
-    }
+    const filename = basename(textEditor.document.fileName);
+    const diagnostics = createDiagnostics(filename, issuesByDocument, textEditor);
+    const decorations = createDecorations(documentUri, issuesByDocument);
 
     const audit = {
       summary: {
@@ -184,6 +184,7 @@ async function performAudit(
       },
       issues: issuesByDocument,
       issuesByType,
+      filename,
       diagnostics,
       decorations,
     };
@@ -322,30 +323,4 @@ async function auditDocument(
   }
 
   return [grades, issues, documents];
-}
-
-function createDiagnostics(filename, documents, issues): DiagnosticCollection {
-  const diagnostics = vscode.languages.createDiagnosticCollection();
-
-  const criticalityToSeverity = {
-    1: vscode.DiagnosticSeverity.Hint,
-    2: vscode.DiagnosticSeverity.Information,
-    3: vscode.DiagnosticSeverity.Warning,
-    4: vscode.DiagnosticSeverity.Error,
-    5: vscode.DiagnosticSeverity.Error,
-  };
-
-  for (const [uri, document] of Object.entries(documents)) {
-    if (issues[uri]) {
-      const messages = issues[uri].map((issue) => ({
-        source: `audit of ${filename}`,
-        code: '',
-        message: `${issue.description} ${issue.displayScore !== '0' ? `(score impact ${issue.displayScore})` : ''}`,
-        severity: criticalityToSeverity[issue.criticality],
-        range: issue.range,
-      }));
-      diagnostics.set((<vscode.TextDocument>document).uri, messages);
-    }
-  }
-  return diagnostics;
 }

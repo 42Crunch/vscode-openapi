@@ -21,7 +21,7 @@
     "api"
   ],
   "engines": {
-    "vscode": "^1.39.0"
+    "vscode": "^1.46.0"
   },
   "extensionDependencies": [
     "redhat.vscode-yaml"
@@ -551,7 +551,7 @@
     "@types/node": "^8.0.0",
     "@types/react": "^16.9.48",
     "@types/semver": "^6.2.0",
-    "@types/vscode": "1.39.0",
+    "@types/vscode": "1.46.0",
     "ava": "^3.12.1",
     "css-loader": "^4.2.2",
     "esm": "^3.2.25",

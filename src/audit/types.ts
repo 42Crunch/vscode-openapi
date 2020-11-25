@@ -42,14 +42,26 @@ export interface Summary extends Grades {
   subdocumentUris: string[];
 }
 
+export interface DocumentDecorations {
+  [key: string]: vscode.DecorationOptions[];
+}
+
 export interface Audit {
+  filename: string;
   summary: Summary;
   issues: IssuesByDocument;
   issuesByType: IssuesByType;
   diagnostics: vscode.DiagnosticCollection;
-  decorations: { [documentUri: string]: vscode.DecorationOptions[] };
+  decorations: DocumentDecorations;
 }
 
 export interface AuditContext {
   [uri: string]: Audit;
+}
+
+export interface AuditDiagnostic extends vscode.Diagnostic {
+  id: string;
+  pointer: string;
+  issueIndex: number;
+  issueUri: string;
 }
