@@ -94,11 +94,43 @@ export class JsonNode implements Node {
     return [this.node.offset, this.node.offset + this.node.length];
   }
 
+  getKeyRange(): [number, number] | undefined {
+    const parent = this.node.parent;
+    if (parent) {
+      if (parent.type === 'property') {
+        const key = parent.children[0];
+        return [key.offset + 1, key.offset + key.length - 1];
+      } 
+    }
+  }
+
+  getValueRange(): [number, number] | undefined {
+      return this.getRange();
+  }
+
   getChildren(): JsonNode[] {
     if (this.node.type === 'object') {
       return this.node.children.map((child) => new JsonNode(child.children[1]));
     } else if (this.node.type === 'array') {
       return this.node.children.map((child) => new JsonNode(child));
+    }
+  }
+
+  next(): JsonNode | undefined {
+    const children = this.getParent().getChildren();
+    for (let i = 1 ; i < children.length ; i++) {
+      if (this.node === children[i - 1].node) {
+        return children[i];
+      }
+    }
+  }
+
+  prev(): JsonNode | undefined {
+    const children = this.getParent().getChildren();
+    for (let i = 0 ; i < (children.length - 1) ; i++) {
+      if (this.node === children[i + 1].node) {
+        return children[i];
+      }
     }
   }
 
@@ -124,5 +156,13 @@ export class JsonNode implements Node {
 
   getJsonPonter(): string {
     return joinJsonPointer(json.getNodePath(this.node));
+  }
+
+  isArray(): boolean {
+    return this.node.type === 'array';
+  }
+
+  isObject(): boolean {
+    return this.node.type === 'object';
   }
 }
