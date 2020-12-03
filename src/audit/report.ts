@@ -16,12 +16,26 @@ const fallbackArticle = {
   },
 };
 
-function articleById(id: string) {
+function articleById(id: string, filename: string) {
+  const exampleLanguage =
+    filename.toLowerCase().endsWith('.yaml') || filename.toLowerCase().endsWith('yml') ? 'yaml' : 'json';
+
   function partToText(part) {
     if (!part || !part.sections) {
       return '';
     }
-    return part.sections.map((section) => `${section.text || ''}${section.code || ''}`).join('');
+
+    return part.sections
+      .map((section) => {
+        if (section.text) {
+          return section.text;
+        }
+        if (section.code) {
+          const code = section.code[exampleLanguage];
+          return `<pre>${code}</pre>`;
+        }
+      })
+      .join('');
   }
 
   const article = articles[id] || fallbackArticle;
@@ -79,7 +93,7 @@ function getIssueHtml(uri: string, filename: string, issue) {
 
   const criticality = criticalityNames[issue.criticality];
   const scoreImpact = issue.displayScore !== '0' ? `Score impact: ${issue.displayScore}` : '';
-  const article = articleById(issue.id);
+  const article = articleById(issue.id, filename);
   const lineNo = issue.lineNo + 1;
   const base64Uri = Buffer.from(uri).toString('base64');
 
