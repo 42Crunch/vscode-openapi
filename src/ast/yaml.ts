@@ -8,7 +8,7 @@ import { Schema } from 'js-yaml';
 import { Node } from './types';
 import { parseJsonPointer, joinJsonPointer } from '../pointer';
 
-export function parseYaml(text: string, schema: Schema): [YamlNode, {message: string, offset: number}[]] {
+export function parseYaml(text: string, schema: Schema): [YamlNode, { message: string; offset: number }[]] {
   const documents = [];
   yaml.loadAll(
     text,
@@ -156,6 +156,7 @@ function findNodeAtLocation(root: yaml.YAMLNode, path: string[]): yaml.YAMLNode 
   if (root && root.kind === yaml.Kind.MAP) {
     const head = path[0];
     const tree = <yaml.YamlMap>root;
+    let mergeKey: yaml.YAMLAnchorReference = null;
     for (const mapping of tree.mappings) {
       if (mapping.key && mapping.key.kind === yaml.Kind.SCALAR && mapping.key.value === head) {
         if (path.length === 1) {
@@ -164,7 +165,18 @@ function findNodeAtLocation(root: yaml.YAMLNode, path: string[]): yaml.YAMLNode 
         } else {
           return findNodeAtLocation(mapping.value, path.slice(1));
         }
+      } else if (
+        mapping.key &&
+        mapping.key.kind === yaml.Kind.SCALAR &&
+        mapping.key.value === '<<' &&
+        mapping.value.kind === yaml.Kind.ANCHOR_REF
+      ) {
+        mergeKey = <yaml.YAMLAnchorReference>mapping.value;
       }
+    }
+    // if nothing was found, but there is a merge key, check it as well
+    if (mergeKey) {
+      return findNodeAtLocation(mergeKey.value, path);
     }
   } else if (root && root.kind === yaml.Kind.SEQ) {
     const tree = <yaml.YAMLSequence>root;
@@ -176,6 +188,8 @@ function findNodeAtLocation(root: yaml.YAMLNode, path: string[]): yaml.YAMLNode 
     } else {
       return findNodeAtLocation(mapping, path.slice(1));
     }
+  } else if (root && root.kind === yaml.Kind.ANCHOR_REF) {
+    return findNodeAtLocation(root.value, path);
   }
   return null;
 }
