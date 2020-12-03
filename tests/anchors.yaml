@@ -1,0 +1,26 @@
+components:
+  schemas:
+    NewTestObj:
+      type: object
+      properties: &NewTestObjProperties
+        name:
+          type: string
+        size:
+          type: number
+      required:
+        - name
+
+    NewTestObj2:
+      type: object
+      properties: *NewTestObjProperties
+
+    TestObj:
+      type: object
+      properties:
+        <<: *NewTestObjProperties
+        id:
+          type: string
+          format: uuid
+      required:
+        - id
+        - name
