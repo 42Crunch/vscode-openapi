@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 3.9.0 (December 4, 2020)
+
+* Added a button to create new OpenAPI file from the welcome view.
+* Audit report now shows YAML examples in addition to JSON examples.
+* Fixed Audit request fails when using yaml anchors [Issue #100](https://github.com/42Crunch/vscode-openapi/issues/100)
+
 ## Version 3.8.0 (November 12, 2020)
 
 * Added new command to copy JSON Pointer of the selected item in the outline. See [Issue #37](https://github.com/42Crunch/vscode-openapi/issues/37)
