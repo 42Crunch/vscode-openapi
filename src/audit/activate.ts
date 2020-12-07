@@ -4,20 +4,17 @@
 */
 
 import * as vscode from 'vscode';
-import { OpenApiVersion } from '../constants';
+import { RuntimeContext, OpenApiVersion } from '../types';
 import { registerSecurityAudit, registerFocusSecurityAudit, registerFocusSecurityAuditById } from './commands';
 import { ReportWebView } from './report';
 import { decorationType } from './decoration';
 import { AuditContext } from './types';
 
-export function activate(
-  context: vscode.ExtensionContext,
-  didChangeEditor: vscode.Event<[vscode.TextEditor, OpenApiVersion]>,
-) {
+export function activate(context: vscode.ExtensionContext, runtimeContext: RuntimeContext) {
   const auditContext: AuditContext = {};
   const pendingAudits: { [uri: string]: boolean } = {};
 
-  didChangeEditor(([editor, version]) => {
+  runtimeContext.didChangeEditor(([editor, version]) => {
     if (editor) {
       const uri = editor.document.uri.toString();
       let combinedDecorations = [];
@@ -48,7 +45,7 @@ export function activate(
     }
   });
 
-  registerSecurityAudit(context, auditContext, pendingAudits);
+  registerSecurityAudit(context, runtimeContext, auditContext, pendingAudits);
   registerFocusSecurityAudit(context, auditContext);
   registerFocusSecurityAuditById(context, auditContext);
 }

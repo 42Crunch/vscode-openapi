@@ -2,14 +2,17 @@
  Copyright (c) 42Crunch Ltd. All rights reserved.
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
-import { relative } from 'path';
+import { relative, extname } from 'path';
 import * as vscode from 'vscode';
 import { dirname } from 'path';
+import { parse } from './ast';
 import { ParserOptions } from './parser-options';
 import parser from '@xliic/json-schema-ref-parser';
 import url from '@xliic/json-schema-ref-parser/lib/util/url';
 import Pointer from '@xliic/json-schema-ref-parser/lib/pointer';
 import $Ref from '@xliic/json-schema-ref-parser/lib/ref';
+import { ResolverError } from '@xliic/json-schema-ref-parser/lib/util/errors';
+
 import { parseJsonPointer, joinJsonPointer } from './pointer';
 import { parseDocument, bundlerJsonParser, bundlerYamlParserWithOptions } from './bundler-parsers';
 
@@ -57,8 +60,12 @@ const resolver = (documentUri: vscode.Uri) => {
     },
     read: async (file) => {
       const uri = documentUri.with({ path: decodeURIComponent(file.url) });
-      const document = await vscode.workspace.openTextDocument(uri);
-      return document.getText();
+      try {
+        const document = await vscode.workspace.openTextDocument(uri);
+        return document.getText();
+      } catch (err) {
+        throw new ResolverError(`Error opening file "${uri.fsPath}"`, uri.fsPath);
+      }
     },
   };
 };
@@ -102,6 +109,7 @@ export async function bundle(document: vscode.TextDocument, options: ParserOptio
       json: bundlerJsonParser,
       yaml: bundlerYamlParserWithOptions(options),
     },
+    continueOnError: true,
     hooks: {
       onParse: (parsed) => {
         state.parsed = parsed;
@@ -158,6 +166,63 @@ export async function bundle(document: vscode.TextDocument, options: ParserOptio
   const result = JSON.stringify(bundled);
 
   return [result, state.mapping, state.uris];
+}
+
+export async function displayBundlerErrors(
+  documentUri: vscode.Uri,
+  options: ParserOptions,
+  diagnostics: vscode.DiagnosticCollection,
+  errors: any,
+) {
+  if (!errors.errors || errors.errors.length == 0) {
+    vscode.window.showErrorMessage(`Unexpected error when trying to process ${documentUri}: ${errors}`);
+    return;
+  }
+
+  const resolverErrors: { [uri: string]: any[] } = {};
+  for (const error of errors.errors) {
+    const source = error.source;
+
+    // if source has no extension, assume it is the base document
+    const uri = extname(source) === '' ? documentUri : documentUri.with({ path: source });
+    if (!resolverErrors[uri.toString()]) {
+      resolverErrors[uri.toString()] = [];
+    }
+    resolverErrors[uri.toString()].push({
+      message: `Failed to resolve reference: ${error.message}`,
+      path: error.path,
+    });
+  }
+
+  for (const key of Object.keys(resolverErrors)) {
+    const uri = vscode.Uri.parse(key);
+    const document = await vscode.workspace.openTextDocument(uri);
+    const [root] = parse(document.getText(), document.languageId, options);
+    const messages = [];
+    for (const { path, message } of resolverErrors[key]) {
+      // use pointer to $ref
+      const refPointer = joinJsonPointer([...path, '$ref']);
+      let node = root.find(refPointer);
+      if (!node) {
+        // if not found, fall back to the original pointer
+        const origPointer = joinJsonPointer(path);
+        node = root.find(origPointer);
+      }
+      const [start, end] = node.getRange();
+      const position = document.positionAt(start);
+      const line = document.lineAt(position.line);
+      const range = new vscode.Range(
+        new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
+        new vscode.Position(position.line, line.range.end.character),
+      );
+      messages.push({
+        message,
+        range,
+        severity: vscode.DiagnosticSeverity.Error,
+      });
+    }
+    diagnostics.set(uri, messages);
+  }
 }
 
 interface Mapping {

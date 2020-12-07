@@ -6,7 +6,7 @@
 import * as vscode from 'vscode';
 import * as semver from 'semver';
 import { configuration, Configuration } from './configuration';
-import { OpenApiVersion, extensionQualifiedId } from './constants';
+import { RuntimeContext, OpenApiVersion, extensionQualifiedId } from './types';
 import { Node } from './ast';
 import { parseDocument, provideYamlSchemas } from './util';
 import { parserOptions } from './parser-options';
@@ -119,17 +119,38 @@ export function activate(context: vscode.ExtensionContext) {
   // OpenAPI v2 outlines
   registerOutlineTreeView('openapiTwoSpecOutline', new GeneralTwoOutlineProvider(context, didChangeTreeValid.event));
   registerOutlineTreeView('openapiTwoPathOutline', new PathOutlineProvider(context, didChangeTreeValid.event));
-  registerOutlineTreeView('openapiTwoDefinitionOutline', new DefinitionOutlineProvider(context, didChangeTreeValid.event));
+  registerOutlineTreeView(
+    'openapiTwoDefinitionOutline',
+    new DefinitionOutlineProvider(context, didChangeTreeValid.event),
+  );
   registerOutlineTreeView('openapiTwoSecurityOutline', new SecurityOutlineProvider(context, didChangeTreeValid.event));
-  registerOutlineTreeView('openapiTwoSecurityDefinitionOutline', new SecurityDefinitionOutlineProvider(context, didChangeTreeValid.event));
-  registerOutlineTreeView('openapiTwoParametersOutline', new ParametersOutlineProvider(context, didChangeTreeValid.event));
-  registerOutlineTreeView('openapiTwoResponsesOutline', new ResponsesOutlineProvider(context, didChangeTreeValid.event));
+  registerOutlineTreeView(
+    'openapiTwoSecurityDefinitionOutline',
+    new SecurityDefinitionOutlineProvider(context, didChangeTreeValid.event),
+  );
+  registerOutlineTreeView(
+    'openapiTwoParametersOutline',
+    new ParametersOutlineProvider(context, didChangeTreeValid.event),
+  );
+  registerOutlineTreeView(
+    'openapiTwoResponsesOutline',
+    new ResponsesOutlineProvider(context, didChangeTreeValid.event),
+  );
 
   // OpenAPI v3 outlines
   registerOutlineTreeView('openapiThreePathOutline', new PathOutlineProvider(context, didChangeTreeValid.event));
-  registerOutlineTreeView('openapiThreeSpecOutline', new GeneralThreeOutlineProvider(context, didChangeTreeValid.event));
-  registerOutlineTreeView('openapiThreeComponentsOutline', new ComponentsOutlineProvider(context, didChangeTreeValid.event));
-  registerOutlineTreeView('openapiThreeSecurityOutline', new SecurityOutlineProvider(context, didChangeTreeValid.event));
+  registerOutlineTreeView(
+    'openapiThreeSpecOutline',
+    new GeneralThreeOutlineProvider(context, didChangeTreeValid.event),
+  );
+  registerOutlineTreeView(
+    'openapiThreeComponentsOutline',
+    new ComponentsOutlineProvider(context, didChangeTreeValid.event),
+  );
+  registerOutlineTreeView(
+    'openapiThreeSecurityOutline',
+    new SecurityOutlineProvider(context, didChangeTreeValid.event),
+  );
   registerOutlineTreeView('openapiThreeServersOutline', new ServersOutlineProvider(context, didChangeTreeValid.event));
 
   updateContext(didChangeTreeValid.event);
@@ -151,10 +172,14 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.languages.registerDefinitionProvider(jsoncFile, jsonSchemaDefinitionProvider);
   vscode.languages.registerDefinitionProvider(yamlFile, yamlSchemaDefinitionProvider);
 
-  const diagnostics = vscode.languages.createDiagnosticCollection('openapi');
+  const runtimeContext: RuntimeContext = {
+    didChangeEditor: didChangeEditor.event,
+    diagnostics: vscode.languages.createDiagnosticCollection('openapi'),
+    bundlingDiagnostics: vscode.languages.createDiagnosticCollection('openapi-bundling'),
+  };
 
   vscode.workspace.onDidCloseTextDocument((document) => {
-    diagnostics.delete(document.uri);
+    runtimeContext.diagnostics.delete(document.uri);
   });
 
   // trigger refresh on activation
@@ -163,22 +188,28 @@ export function activate(context: vscode.ExtensionContext) {
     didChangeTreeValid,
     didChangeTreeIncludingErrors,
     didChangeEditor,
-    diagnostics,
+    runtimeContext.diagnostics,
   );
 
   vscode.window.onDidChangeActiveTextEditor((e) =>
-    onActiveEditorChanged(e, didChangeTreeValid, didChangeTreeIncludingErrors, didChangeEditor, diagnostics),
+    onActiveEditorChanged(
+      e,
+      didChangeTreeValid,
+      didChangeTreeIncludingErrors,
+      didChangeEditor,
+      runtimeContext.diagnostics,
+    ),
   );
 
   vscode.workspace.onDidChangeTextDocument((e) =>
-    onDocumentChanged(e, didChangeTreeValid, didChangeTreeIncludingErrors, diagnostics),
+    onDocumentChanged(e, didChangeTreeValid, didChangeTreeIncludingErrors, runtimeContext.diagnostics),
   );
 
   const yamlExtension = vscode.extensions.getExtension('redhat.vscode-yaml');
   provideYamlSchemas(context, yamlExtension);
 
-  audit.activate(context, didChangeEditor.event);
-  preview.activate(context);
+  audit.activate(context, runtimeContext);
+  preview.activate(context, runtimeContext);
 
   if (previousVersion.major < currentVersion.major) {
     createWhatsNewPanel(context);
@@ -198,10 +229,10 @@ export function deactivate(): Thenable<void> | undefined {
 
 function registerOutlineTreeView(id: string, provider: vscode.TreeDataProvider<Node>): void {
   outlines[id] = vscode.window.createTreeView(id, {
-    treeDataProvider: provider
+    treeDataProvider: provider,
   });
   // Length is 0 if deselected
-  outlines[id].onDidChangeSelection(event => {
+  outlines[id].onDidChangeSelection((event) => {
     vscode.commands.executeCommand('setContext', id + 'Selected', event.selection.length > 0);
   });
 }
