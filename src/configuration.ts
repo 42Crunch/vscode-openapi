@@ -4,7 +4,7 @@
 */
 
 import { ConfigurationChangeEvent, Event, EventEmitter, ExtensionContext, Uri, workspace, Selection } from 'vscode';
-import { configId } from './constants';
+import { configId } from './types';
 
 export class Configuration {
   private section: string;

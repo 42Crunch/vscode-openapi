@@ -10,11 +10,17 @@ import { decorationType, createDecorations } from './decoration';
 import { ReportWebView } from './report';
 import { DiagnosticCollection, TextDocument } from 'vscode';
 import { parserOptions } from '../parser-options';
-import { bundle, findMapping } from '../bundler';
+import { bundle, findMapping, displayBundlerErrors } from '../bundler';
 import { parse, Node } from '../ast';
+import { RuntimeContext } from '../types';
 import { AuditContext, Audit, Grades } from './types';
 
-export function registerSecurityAudit(context, auditContext: AuditContext, pendingAudits) {
+export function registerSecurityAudit(
+  context: vscode.ExtensionContext,
+  runtimeContext: RuntimeContext,
+  auditContext: AuditContext,
+  pendingAudits,
+) {
   return vscode.commands.registerTextEditorCommand('openapi.securityAudit', async (textEditor, edit) => {
     const uri = textEditor.document.uri.toString();
 
@@ -31,7 +37,7 @@ export function registerSecurityAudit(context, auditContext: AuditContext, pendi
     pendingAudits[uri] = true;
 
     try {
-      auditContext[uri] = await securityAudit(context, textEditor);
+      auditContext[uri] = await securityAudit(context, runtimeContext, textEditor);
       delete pendingAudits[uri];
     } catch (e) {
       delete pendingAudits[uri];
@@ -60,7 +66,11 @@ export function registerFocusSecurityAuditById(context, auditContext) {
   });
 }
 
-async function securityAudit(context, textEditor: vscode.TextEditor): Promise<Audit | undefined> {
+async function securityAudit(
+  context: vscode.ExtensionContext,
+  runtimeContext: RuntimeContext,
+  textEditor: vscode.TextEditor,
+): Promise<Audit | undefined> {
   const configuration = vscode.workspace.getConfiguration('openapi');
   let apiToken = <string>configuration.get('securityAuditToken');
 
@@ -115,13 +125,28 @@ async function securityAudit(context, textEditor: vscode.TextEditor): Promise<Au
       cancellable: false,
     },
     async (progress, cancellationToken): Promise<Audit | undefined> => {
-      return performAudit(context, textEditor, apiToken, progress);
+      return performAudit(context, runtimeContext, textEditor, apiToken, progress);
     },
   );
 }
 
-async function performAudit(context, textEditor: vscode.TextEditor, apiToken, progress): Promise<Audit | undefined> {
-  const [json, mapping] = await bundle(textEditor.document, parserOptions);
+async function performAudit(
+  context: vscode.ExtensionContext,
+  runtimeContext: RuntimeContext,
+  textEditor: vscode.TextEditor,
+  apiToken,
+  progress,
+): Promise<Audit | undefined> {
+  let json, mapping;
+
+  try {
+    runtimeContext.bundlingDiagnostics.clear();
+    [json, mapping] = await bundle(textEditor.document, parserOptions);
+  } catch (err) {
+    displayBundlerErrors(textEditor.document.uri, parserOptions, runtimeContext.bundlingDiagnostics, err);
+    vscode.commands.executeCommand('workbench.action.problems.focus');
+    return;
+  }
 
   try {
     const documentUri = textEditor.document.uri.toString();

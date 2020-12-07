@@ -6,8 +6,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { parserOptions } from './parser-options';
-import { bundle } from './bundler';
+import { bundle, displayBundlerErrors } from './bundler';
 import { configuration } from './configuration';
+import { RuntimeContext } from './types';
 
 type Preview = {
   panel: vscode.WebviewPanel;
@@ -23,7 +24,7 @@ type Previews = {
 
 const ON_CHANGE_TIMEOUT = 1000; // 1 sec timeout for onDidChange
 
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext, runtimeContext: RuntimeContext) {
   const previews: Previews = {};
 
   vscode.workspace.onDidChangeTextDocument(async (e) => {
@@ -36,8 +37,13 @@ export function activate(context: vscode.ExtensionContext) {
         }
         setTimeout(async () => {
           const document = await vscode.workspace.openTextDocument(preview.documentUri);
-          const [json, mapping, uris] = await bundle(document, parserOptions);
-          showPreview(context, previews, name, document, json, uris);
+          try {
+            runtimeContext.bundlingDiagnostics.clear();
+            const [json, mapping, uris] = await bundle(document, parserOptions);
+            showPreview(context, runtimeContext, previews, name, document, json, uris);
+          } catch (err) {
+            displayBundlerErrors(document.uri, parserOptions, runtimeContext.bundlingDiagnostics, err);
+          }
         }, ON_CHANGE_TIMEOUT);
       }
     }
@@ -45,44 +51,49 @@ export function activate(context: vscode.ExtensionContext) {
 
   vscode.commands.registerTextEditorCommand(
     'openapi.previewRedoc',
-    async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit) => {
-      try {
-        const [json, mapping, uris] = await bundle(textEditor.document, parserOptions);
-        await showPreview(context, previews, 'redoc', textEditor.document, json, uris);
-      } catch (e) {
-        vscode.window.showErrorMessage(`Failed to preview OpenAPI: ${e.message}}`);
-      }
-    },
+    async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit) =>
+      startPreview(context, runtimeContext, previews, 'redoc', textEditor.document),
   );
 
   vscode.commands.registerTextEditorCommand(
     'openapi.previewSwaggerUI',
-    async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit) => {
-      try {
-        const [json, mapping, uris] = await bundle(textEditor.document, parserOptions);
-        showPreview(context, previews, 'swaggerui', textEditor.document, json, uris);
-      } catch (e) {
-        vscode.window.showErrorMessage(`Failed to preview OpenAPI: ${e.message}}`);
-      }
-    },
+    async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit) =>
+      startPreview(context, runtimeContext, previews, 'swaggerui', textEditor.document),
   );
 
   vscode.commands.registerTextEditorCommand(
     'openapi.preview',
-    async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit) => {
-      try {
-        const renderer = configuration.get<string>('defaultPreviewRenderer');
-        const [json, mapping, uris] = await bundle(textEditor.document, parserOptions);
-        showPreview(context, previews, renderer, textEditor.document, json, uris);
-      } catch (e) {
-        vscode.window.showErrorMessage(`Failed to preview OpenAPI: ${e.message}}`);
-      }
-    },
+    async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit) =>
+      startPreview(
+        context,
+        runtimeContext,
+        previews,
+        configuration.get<string>('defaultPreviewRenderer'),
+        textEditor.document,
+      ),
   );
+}
+
+async function startPreview(
+  context: vscode.ExtensionContext,
+  runtimeContext: RuntimeContext,
+  previews: Previews,
+  renderer: string,
+  document: vscode.TextDocument,
+) {
+  try {
+    runtimeContext.bundlingDiagnostics.clear();
+    const [json, mapping, uris] = await bundle(document, parserOptions);
+    showPreview(context, runtimeContext, previews, renderer, document, json, uris);
+  } catch (e) {
+    displayBundlerErrors(document.uri, parserOptions, runtimeContext.bundlingDiagnostics, e);
+    vscode.commands.executeCommand('workbench.action.problems.focus');
+  }
 }
 
 async function showPreview(
   context: vscode.ExtensionContext,
+  runtimeContext: RuntimeContext,
   previews: Previews,
   name: string,
   document: vscode.TextDocument,
@@ -102,6 +113,7 @@ async function showPreview(
 
   panel.onDidDispose(
     () => {
+      runtimeContext.bundlingDiagnostics.clear();
       clearTimeout(previews[name].timeout);
       previews[name] = null;
     },

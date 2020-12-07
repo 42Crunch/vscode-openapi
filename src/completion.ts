@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { Node, parse } from './ast';
 import { getOpenApiVersion } from './util';
-import { OpenApiVersion } from './constants';
+import { OpenApiVersion } from './types';
 import { parserOptions } from './parser-options';
 import path from 'path';
 
