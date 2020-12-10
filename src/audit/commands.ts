@@ -13,7 +13,7 @@ import { parserOptions } from '../parser-options';
 import { bundle, findMapping, displayBundlerErrors } from '../bundler';
 import { parse, Node } from '../ast';
 import { RuntimeContext } from '../types';
-import { AuditContext, Audit, Grades } from './types';
+import { AuditContext, Audit, Grades, Issue, ReportedIssue, IssuesByDocument, IssuesByType } from './types';
 
 export function registerSecurityAudit(
   context: vscode.ExtensionContext,
@@ -150,9 +150,26 @@ async function performAudit(
 
   try {
     const documentUri = textEditor.document.uri.toString();
-    const [grades, issues, documents] = await auditDocument(textEditor.document, json, mapping, apiToken, progress);
-    const diagnostics = createDiagnostics(basename(textEditor.document.fileName), documents, issues);
-    const decorations = createDecorations(documentUri, issues);
+    const [grades, issuesByDocument, documents] = await auditDocument(
+      textEditor.document,
+      json,
+      mapping,
+      apiToken,
+      progress,
+    );
+    const diagnostics = createDiagnostics(basename(textEditor.document.fileName), documents, issuesByDocument);
+    const decorations = createDecorations(documentUri, issuesByDocument);
+
+    const issuesByType: IssuesByType = {};
+
+    for (const issues of Object.values(issuesByDocument)) {
+      for (const issue of issues) {
+        if (!issuesByType[issue.id]) {
+          issuesByType[issue.id] = [];
+        }
+        issuesByType[issue.id].push(issue);
+      }
+    }
 
     // set decorations for the current document
     if (decorations[documentUri]) {
@@ -165,7 +182,8 @@ async function performAudit(
         documentUri,
         subdocumentUris: Object.keys(documents).filter((uri) => uri != documentUri),
       },
-      issues,
+      issues: issuesByDocument,
+      issuesByType,
       diagnostics,
       decorations,
     };
@@ -214,10 +232,14 @@ function findIssueLocation(mainUri: vscode.Uri, root: Node, mappings, pointer): 
   throw new Error(`Cannot find entry for pointer: ${pointer}`);
 }
 
-async function processIssues(document, mappings, issues): Promise<[Node, string[], { [uri: string]: any[] }]> {
+async function processIssues(
+  document,
+  mappings,
+  issues: ReportedIssue[],
+): Promise<[Node, string[], { [uri: string]: ReportedIssue[] }]> {
   const mainUri = document.uri;
   const documentUris: { [uri: string]: boolean } = { [mainUri.toString()]: true };
-  const issuesPerDocument: { [uri: string]: any[] } = {};
+  const issuesPerDocument: { [uri: string]: ReportedIssue[] } = {};
 
   const root = parseDocument(document);
 
@@ -247,9 +269,9 @@ async function auditDocument(
   mappings,
   apiToken,
   progress,
-): Promise<[Grades, { [uri: string]: any[] }, { [uri: string]: TextDocument }]> {
-  const [grades, issues] = await audit(json, apiToken.trim(), progress);
-  const [mainRoot, documentUris, issuesPerDocument] = await processIssues(mainDocument, mappings, issues);
+): Promise<[Grades, IssuesByDocument, { [uri: string]: TextDocument }]> {
+  const [grades, reportedIssues] = await audit(json, apiToken.trim(), progress);
+  const [mainRoot, documentUris, issuesPerDocument] = await processIssues(mainDocument, mappings, reportedIssues);
 
   const files: { [uri: string]: [TextDocument, Node] } = {
     [mainDocument.uri.toString()]: [mainDocument, mainRoot],
@@ -266,25 +288,32 @@ async function auditDocument(
     }
   }
 
-  for (const [uri, issues] of Object.entries(issuesPerDocument)) {
-    const [document, root] = files[uri];
+  const issues: IssuesByDocument = {};
 
-    for (const issue of issues) {
-      // '' applies only to main document
-      const node = issue.pointer === '' ? markerNode : root.find(issue.pointer);
-      if (node) {
-        const [start, end] = node.getRange();
-        const position = document.positionAt(start);
-        const line = document.lineAt(position.line);
-        issue.lineNo = position.line;
-        issue.range = new vscode.Range(
-          new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
-          new vscode.Position(position.line, line.range.end.character),
-        );
-      } else {
-        throw new Error(`Unable to locate node: ${issue.pointer}`);
-      }
-    }
+  for (const [uri, reportedIssues] of Object.entries(issuesPerDocument)) {
+    const [document, root] = files[uri];
+    issues[uri] = reportedIssues.map(
+      (issue: ReportedIssue): Issue => {
+        // '' applies only to the main document
+        const node = issue.pointer === '' ? markerNode : root.find(issue.pointer);
+        if (node) {
+          const [start, end] = node.getRange();
+          const position = document.positionAt(start);
+          const line = document.lineAt(position.line);
+          return {
+            ...issue,
+            documentUri: uri,
+            lineNo: position.line,
+            range: new vscode.Range(
+              new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
+              new vscode.Position(position.line, line.range.end.character),
+            ),
+          };
+        } else {
+          throw new Error(`Unable to locate node: ${issue.pointer}`);
+        }
+      },
+    );
   }
 
   const documents = {};
@@ -292,7 +321,7 @@ async function auditDocument(
     documents[uri] = document;
   }
 
-  return [grades, issuesPerDocument, documents];
+  return [grades, issues, documents];
 }
 
 function createDiagnostics(filename, documents, issues): DiagnosticCollection {

@@ -6,7 +6,7 @@
 import * as vscode from 'vscode';
 import got from 'got';
 import FormData from 'form-data';
-import { Grades } from './types';
+import { Grades, ReportedIssue } from './types';
 
 const ASSESS_URL = 'https://stateless.apisecurity.io/api/v1/anon/assess/vscode';
 const TOKEN_URL = 'https://stateless.apisecurity.io/api/v1/anon/token';
@@ -55,7 +55,11 @@ async function retryAudit(token: string, apiToken: string) {
   return JSON.parse(response.body);
 }
 
-export async function audit(text: string, apiToken: string, progress: vscode.Progress<any>): Promise<[Grades, any[]]> {
+export async function audit(
+  text: string,
+  apiToken: string,
+  progress: vscode.Progress<any>,
+): Promise<[Grades, ReportedIssue[]]> {
   let result = await submitAudit(text, apiToken);
 
   if (result.status === 'IN_PROGRESS') {
@@ -115,8 +119,8 @@ function readSummary(assessment): Grades {
   return grades;
 }
 
-function readAssessment(assessment): any[] {
-  let issues = [];
+function readAssessment(assessment): ReportedIssue[] {
+  let issues: ReportedIssue[] = [];
   const jsonPointerIndex = assessment.index;
 
   function transformScore(score: number): string {
@@ -129,16 +133,7 @@ function readAssessment(assessment): any[] {
     return 'less than 1';
   }
 
-  interface Issue {
-    id: string;
-    description: string;
-    pointer: string;
-    score: number;
-    displayScore: string;
-    criticality: number;
-  }
-
-  function transformIssues(issues, defaultCriticality: number = 5): Issue[] {
+  function transformIssues(issues, defaultCriticality: number = 5): ReportedIssue[] {
     const result = [];
     for (const id of Object.keys(issues)) {
       const issue = issues[id];
