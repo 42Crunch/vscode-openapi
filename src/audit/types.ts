@@ -14,6 +14,29 @@ export interface Grades {
   invalid: boolean;
 }
 
+export interface ReportedIssue {
+  id: string;
+  description: string;
+  pointer: string;
+  score: number;
+  displayScore: string;
+  criticality: number;
+}
+
+export interface Issue extends ReportedIssue {
+  lineNo: number;
+  range: vscode.Range;
+  documentUri: string;
+}
+
+export interface IssuesByDocument {
+  [uri: string]: Issue[];
+}
+
+export interface IssuesByType {
+  [id: string]: Issue[];
+}
+
 export interface Summary extends Grades {
   documentUri: string;
   subdocumentUris: string[];
@@ -21,7 +44,8 @@ export interface Summary extends Grades {
 
 export interface Audit {
   summary: Summary;
-  issues: { [uri: string]: any[] };
+  issues: IssuesByDocument;
+  issuesByType: IssuesByType;
   diagnostics: vscode.DiagnosticCollection;
   decorations: { [documentUri: string]: vscode.DecorationOptions[] };
 }
