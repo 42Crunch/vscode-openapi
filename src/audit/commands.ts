@@ -145,7 +145,7 @@ async function performAudit(
   } catch (err) {
     displayBundlerErrors(textEditor.document.uri, parserOptions, runtimeContext.bundlingDiagnostics, err);
     vscode.commands.executeCommand('workbench.action.problems.focus');
-    return;
+    throw new Error('Failed to bundle for audit, check OpenAPI file for errors.');
   }
 
   try {
