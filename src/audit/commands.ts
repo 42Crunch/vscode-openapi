@@ -39,8 +39,11 @@ export function registerSecurityAudit(
     pendingAudits[uri] = true;
 
     try {
-      auditContext[uri] = await securityAudit(context, runtimeContext, textEditor);
-      setDecorations(textEditor, auditContext);
+      const audit = await securityAudit(context, runtimeContext, textEditor);
+      if (audit) {
+        auditContext[uri] = audit;
+        setDecorations(textEditor, auditContext);
+      }
       delete pendingAudits[uri];
     } catch (e) {
       delete pendingAudits[uri];
