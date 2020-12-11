@@ -39,8 +39,11 @@ export function registerSecurityAudit(
     pendingAudits[uri] = true;
 
     try {
-      auditContext[uri] = await securityAudit(context, runtimeContext, textEditor);
-      setDecorations(textEditor, auditContext);
+      const audit = await securityAudit(context, runtimeContext, textEditor);
+      if (audit) {
+        auditContext[uri] = audit;
+        setDecorations(textEditor, auditContext);
+      }
       delete pendingAudits[uri];
     } catch (e) {
       delete pendingAudits[uri];
@@ -148,7 +151,7 @@ async function performAudit(
   } catch (err) {
     displayBundlerErrors(textEditor.document.uri, parserOptions, runtimeContext.bundlingDiagnostics, err);
     vscode.commands.executeCommand('workbench.action.problems.focus');
-    return;
+    throw new Error('Failed to bundle for audit, check OpenAPI file for errors.');
   }
 
   try {

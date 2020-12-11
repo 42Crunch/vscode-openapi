@@ -88,6 +88,7 @@ async function startPreview(
   } catch (e) {
     displayBundlerErrors(document.uri, parserOptions, runtimeContext.bundlingDiagnostics, e);
     vscode.commands.executeCommand('workbench.action.problems.focus');
+    vscode.window.showErrorMessage('Failed to generate preview, check OpenAPI file for errors.');
   }
 }
 
