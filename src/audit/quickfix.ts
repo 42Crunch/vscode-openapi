@@ -18,7 +18,7 @@ async function quickFixCommand(
 ) {
   const handler = getAstEditHandler(editor, false);
   handler.apply(diagnostic.pointer, fix);
-  handler.finish();
+  await handler.finish();
 
   const uri = editor.document.uri.toString();
   const audit = auditContext[uri];
@@ -69,17 +69,16 @@ export function registerQuickfixes(context: vscode.ExtensionContext, auditContex
     problems.add(fix.problem);
     vscode.commands.registerTextEditorCommand(
       `openapi.quickFix-${fix.problem}`,
-      async (editor, edit, diagnostic: AuditDiagnostic) =>
-        quickFixCommand(editor, diagnostic, fix, auditContext)
+      async (editor, edit, diagnostic: AuditDiagnostic) => quickFixCommand(editor, diagnostic, fix, auditContext),
     );
   }
 
   vscode.languages.registerCodeActionsProvider('yaml', new AuditCodeActions(auditContext), {
-    providedCodeActionKinds: AuditCodeActions.providedCodeActionKinds
+    providedCodeActionKinds: AuditCodeActions.providedCodeActionKinds,
   });
 
   vscode.languages.registerCodeActionsProvider('json', new AuditCodeActions(auditContext), {
-    providedCodeActionKinds: AuditCodeActions.providedCodeActionKinds
+    providedCodeActionKinds: AuditCodeActions.providedCodeActionKinds,
   });
 }
 
@@ -146,6 +145,8 @@ function safeParse(text: string, languageId: string): Node {
   return root;
 }
 
-function getAstEditHandler(editor: vscode.TextEditor, bulk: boolean) : AstEditHandler {
-  return (editor.document.languageId === 'json') ? new JsonAstEditHandler(editor, bulk) : new YamlAstEditHandler(editor, bulk);
+function getAstEditHandler(editor: vscode.TextEditor, bulk: boolean): AstEditHandler {
+  return editor.document.languageId === 'json'
+    ? new JsonAstEditHandler(editor, bulk)
+    : new YamlAstEditHandler(editor, bulk);
 }
