@@ -179,8 +179,24 @@ export async function displayBundlerErrors(
     return;
   }
 
-  const resolverErrors: { [uri: string]: any[] } = {};
+  const uniqueErrors = [];
+  const exists = (error) =>
+    uniqueErrors.some(
+      (element) =>
+        element?.message === error?.message &&
+        element?.source === error?.source &&
+        element?.code === error?.code &&
+        element?.path.join() === error?.path.join(),
+    );
+
   for (const error of errors.errors) {
+    if (!exists(error)) {
+      uniqueErrors.push(error);
+    }
+  }
+
+  const resolverErrors: { [uri: string]: any[] } = {};
+  for (const error of uniqueErrors) {
     const source = error.source;
 
     // if source has no extension, assume it is the base document
