@@ -6,9 +6,8 @@ import { parse, Node } from '../ast';
 import { createDiagnostics } from './diagnostic';
 import { createDecorations, setDecorations } from './decoration';
 import { ReportWebView } from './report';
-import { JsonAstEditHandler } from '../edit/json';
-import { YamlAstEditHandler } from '../edit/yaml';
-import { AstEditHandler } from '../edit/types';
+import { deleteJsonNode, deleteYamlNode, getFixAsJsonString, getFixAsYamlString, 
+  insertJsonNode, insertYamlNode, renameKeyNode, replaceJsonNode, replaceYamlNode } from '../util';
 
 async function quickFixCommand(
   editor: vscode.TextEditor,
@@ -16,15 +15,67 @@ async function quickFixCommand(
   fix: any,
   auditContext: AuditContext,
 ) {
-  const handler = getAstEditHandler(editor, false);
-  handler.apply(diagnostic.pointer, fix);
-  await handler.finish();
+  const document = editor.document;
+  const pointer = diagnostic.pointer;
+  const root = safeParse(document.getText(), document.languageId);
 
-  const uri = editor.document.uri.toString();
+  if (fix.type === 'insert') {
+    let value: string, position: vscode.Position;
+    if (document.languageId === 'json') {
+      value = getFixAsJsonString(root, pointer, fix.type, fix.fix, fix.parameters, true);
+      [value, position] = insertJsonNode(document, root, pointer, value);
+    }
+    else {
+      value = getFixAsYamlString(root, pointer, fix.type, fix.fix, fix.parameters, true);
+      [value, position] = insertYamlNode(document, root, pointer, value);
+    }
+    await editor.insertSnippet(new vscode.SnippetString(value), position);
+  }
+  else if (fix.type === 'replace') {
+    let value: string, range: vscode.Range;
+    if (document.languageId === 'json') {
+      value = getFixAsJsonString(root, pointer, fix.type, fix.fix, fix.parameters, false);
+      [value, range] = replaceJsonNode(document, root, pointer, value);
+    }
+    else {
+      value = getFixAsYamlString(root, pointer, fix.type, fix.fix, fix.parameters, false);
+      [value, range] = replaceYamlNode(document, root, pointer, value);
+    }
+    const edit = new vscode.WorkspaceEdit();
+    edit.replace(document.uri, range, value);
+    await vscode.workspace.applyEdit(edit);
+  }
+  else if (fix.type === 'renameKey') {
+    let value: string;
+    if (document.languageId === 'json') {
+      value = getFixAsJsonString(root, pointer, fix.type, fix.fix, fix.parameters, false);
+    }
+    else {
+      value = getFixAsYamlString(root, pointer, fix.type, fix.fix, fix.parameters, false);
+    }
+    const range = renameKeyNode(document, root, pointer);
+    const edit = new vscode.WorkspaceEdit();
+    edit.replace(document.uri, range, value);
+    await vscode.workspace.applyEdit(edit);
+  }
+  else if (fix.type === 'delete') {
+    let range: vscode.Range;
+    if (document.languageId === 'json') {
+      range = deleteJsonNode(document, root, pointer);
+    }
+    else {
+      range = deleteYamlNode(document, root, pointer);
+    }
+    const edit = new vscode.WorkspaceEdit();
+    edit.delete(document.uri, range);
+    await vscode.workspace.applyEdit(edit);
+  }
+
+  const uri = document.uri.toString();
   const audit = auditContext[uri];
   // update audit and refresh diagnostics and decorations
   if (audit) {
-    const root2 = safeParse(editor.document.getText(), editor.document.languageId);
+    const root2 = safeParse(document.getText(), document.languageId);
     // clear current diagnostics
     audit.diagnostics.dispose();
     const issues = audit.issues[uri];
@@ -33,7 +84,7 @@ async function quickFixCommand(
     // update range for all issues (since the fix has potentially changed line numbering in the file)
     audit.issues[uri] = issues.map((issue) => ({
       ...issue,
-      range: range(editor.document, root2, issue.pointer),
+      range: range(document, root2, issue.pointer),
     }));
 
     // rebuild diagnostics and decorations and refresh report
@@ -143,10 +194,4 @@ function safeParse(text: string, languageId: string): Node {
     throw new Error("Can't parse OpenAPI file");
   }
   return root;
-}
-
-function getAstEditHandler(editor: vscode.TextEditor, bulk: boolean): AstEditHandler {
-  return editor.document.languageId === 'json'
-    ? new JsonAstEditHandler(editor, bulk)
-    : new YamlAstEditHandler(editor, bulk);
 }
