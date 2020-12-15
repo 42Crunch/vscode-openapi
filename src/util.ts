@@ -109,25 +109,18 @@ function getLineByOffset(document: vscode.TextDocument, offset: number): vscode.
   return document.lineAt(document.positionAt(offset).line);
 }
 
-function shift(text: string, indent: number, char: string, padding: number, extra: number = 0) : string {
-  text = char.repeat(padding) + text;
+function getTopLineByOffset(document: vscode.TextDocument, offset: number): vscode.TextLine {
+  return document.lineAt(document.positionAt(offset).line - 1);
+}
+
+function shift(text: string, indent: number, char: string, padding: number, extra: number = 0, addFirstPadding: boolean = true) : string {
+  if (addFirstPadding) {
+    text = char.repeat(padding) + text;
+  }
   text = text.replace(new RegExp('\n', 'g'), '\n' + char.repeat(padding + extra));
   text = text.replace(new RegExp('\t', 'g'), char.repeat(indent)); 
   return text;
 }
-
-// todo: replace to ast stuff
-// static isYamlArray(text: string): boolean {
-//   const i1 = text.indexOf(':');
-//   const i2 = text.indexOf('- ');
-//   return (i2 >= 0) && ((i1 < 0) || ((i1 > 0) && (i1 > i2)));
-// }
-
-// static isYamlObject(text: string): boolean {
-//   const i1 = text.indexOf(':');
-//   const i2 = text.indexOf('- ');
-//   return (i1 > 0) && ((i2 < 0) || ((i2 > 0) && (i2 > i1)));
-// }
 
 export function renameKeyNode(document: vscode.TextDocument, root: Node, pointer: string): vscode.Range {
   const [start, end] = root.find(pointer).getKeyRange();
@@ -226,95 +219,66 @@ export function insertYamlNode(document: vscode.TextDocument, root: Node, pointe
   let position = document.positionAt(end);
   position = new vscode.Position(position.line + 1, 0);
   const index = getCurrentIdentation(document, start);
-  let apply = false;
   const [indent, char] = getBasicIndentation(document, root);
 
   if (target.isObject()) {
     value = shift(value, indent, char, index) + '\n';
-    apply = true;
+    return [value, position];
   }
   else if (target.isArray()) {
     value = shift('- ' + value, indent, char, index, '- '.length) + '\n';
-    apply = true;
-  }
-
-  if (apply) {
     return [value, position];
   }
 }
 
 export function replaceJsonNode(document: vscode.TextDocument, root: Node, pointer: string, value: string): [string, vscode.Range] {
 
-  // const target = this.root.find(pointer);
-  // let start: number, end: number;
+  const target = root.find(pointer); 
+  const [start, end] = target.getRange();
 
-  //  [start, end] = target.getRange();
-  //  if (typeof value === 'string') {
-  //   const isObject = value.startsWith('{') && value.endsWith('}');
-  //   const isArray = value.startsWith('[') && value.endsWith(']');
-  //   if (!isObject && !isArray) {
-  //     value = "\"" + value + "\"";
-  //   }
-  //   else {
-  //     const position = this.document.positionAt(start);
-  //     const line = this.document.lineAt(position.line);
-  //     const index = line.firstNonWhitespaceCharacterIndex;
-  //     const depth = target.getDepth();
-  //     const shift = Math.round(index / depth);
-  //     const p0 = new vscode.Position(position.line, index - 1);
-  //     const p1 = new vscode.Position(position.line, index);
-  //     const char = this.document.getText(new vscode.Range(p0, p1));
-  //     value = value.replace(new RegExp('\n', 'g'), '\n' + char.repeat(index));
-  //     value = value.replace(new RegExp('\t', 'g'), char.repeat(shift));
-  //   }
-  //  }
-  //  else {
-  //   value = String(value);
-  //  }
+  const isObject = value.startsWith('{') && value.endsWith('}');
+  const isArray = value.startsWith('[') && value.endsWith(']');
 
-   // todo
-   //this.edit.replace(this.document.uri, new vscode.Range(this.document.positionAt(start), this.document.positionAt(end)), value);
-   return ['', new vscode.Range(new vscode.Position(0, 0), new vscode.Position(0, 0))];
+  if (isObject || isArray) {
+    const index = getCurrentIdentation(document, start);
+    const [indent, char] = getBasicIndentation(document, root);
+    value = shift(value, indent, char, index, 0, false);
+  }
+  return [value, new vscode.Range(document.positionAt(start), document.positionAt(end))];
 }
 
 export function replaceYamlNode(document: vscode.TextDocument, root: Node, pointer: string, value: string): [string, vscode.Range] {
 
-  // const target = this.root.find(pointer);
-  // let start: number, end: number;
+  const target = root.find(pointer);
+  const [start, end] = target.getValueRange();
 
-  // [start, end] = target.getValueRange();
-  // if (typeof value === 'string') {
-  //   if (AstEditHandler.isYamlObject(value) || AstEditHandler.isYamlArray(value)) {
-  //     const position = this.document.positionAt(start);
-  //     const line = this.document.lineAt(position.line);
-  //     const index = line.firstNonWhitespaceCharacterIndex;
-  //     const depth = target.getDepth();
-  //     const shift = Math.round(index / depth);
-  //     const p0 = new vscode.Position(position.line, index - 1);
-  //     const p1 = new vscode.Position(position.line, index);
-  //     const char = this.document.getText(new vscode.Range(p0, p1));
-  //     // insert as value into key-value pair
-  //     if (target.getChildren().length === 0) {
-  //       value = '\n\t' + value;
-  //       value = value.replace(new RegExp('\n', 'g'), '\n' + char.repeat(index));
-  //       value = value.replace(new RegExp('\t', 'g'), char.repeat(shift));  
-  //     } 
-  //     else {
-  //       value = value + (AstEditHandler.isYamlObject(line.text) ? '' : '\n');
-  //       value = value.replace(new RegExp('\n', 'g'), '\n' + char.repeat(index - shift));
-  //       value = value.replace(new RegExp('\t', 'g'), char.repeat(shift));  
-  //     }
-  //     // todo: insert as value into array place
-  //   }
-  // }
-  // else {
-  //   value = String(value);
-  // }
+  const i1 = value.indexOf(':');
+  const i2 = value.indexOf('- ');
+  const isObject = (i1 > 0) && ((i2 < 0) || ((i2 > 0) && (i2 > i1)));
+  const isArray = (i2 >= 0) && ((i1 < 0) || ((i1 > 0) && (i1 > i2)));
 
-  // todo
-  //this.edit.replace(this.document.uri, new vscode.Range(this.document.positionAt(start), this.document.positionAt(end)), value);
-
-  return ['', new vscode.Range(new vscode.Position(0, 0), new vscode.Position(0, 0))];
+  if (isObject || isArray) {
+    const index = getCurrentIdentation(document, start);
+    const [indent, char] = getBasicIndentation(document, root);
+    value = shift(value, indent, char, index, 0, false);
+    // Last array member end offset may be at the beggining of the next key node (next line)
+    // In this case we must keep ident + \n symbols
+    if (target.isArray()) {
+      const line = getLineByOffset(document, end);
+      // But do not handle the case if the last array member = the last item in the doc
+      if (!line.text.trim().startsWith('-')) {
+        const line = getTopLineByOffset(document, end);
+        const endPosition = new vscode.Position(line.lineNumber, line.text.length);
+        return [value, new vscode.Range(document.positionAt(start), endPosition)];  
+      }
+    }
+    return [value, new vscode.Range(document.positionAt(start), document.positionAt(end))];
+  }
+  else {
+    const line = getLineByOffset(document, target.getKeyRange()[1]);
+    const startPosition = new vscode.Position(line.lineNumber, line.text.length);
+    return [' ' + value, new vscode.Range(startPosition, document.positionAt(end))];
+  }
 }
 
 export function getFixAsJsonString(root: Node, pointer: string, type: string, fix: any, parameters: any, snippet: boolean) : string {
