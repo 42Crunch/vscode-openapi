@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as yaml from 'js-yaml';
+import * as jsonpointer from 'jsonpointer';
 import { OpenApiVersion } from './types';
 import { parse, Node } from './ast';
 import { parserOptions } from './parser-options';
@@ -285,7 +286,10 @@ export function getFixAsJsonString(root: Node, pointer: string, type: string, fi
   let text = JSON.stringify(fix, null, '\t').trim();
   // For snippets we must escape $ symbol
   if (snippet && ((type === 'insert') || (type === 'rename'))) {
+    text = text.replace(new RegExp('\\\\\\\\', 'g'), '\\');
     text = text.replace(new RegExp('\\$ref', 'g'), '\\$ref')
+    text = text.replace(new RegExp('"(\\${[0-9]*:.*})"', 'g'), '$1');
+    text = text.replace(new RegExp('\\\\"(\\${[0-9]*:.*})\\\\"', 'g'), '$1');
   }
   const target = root.find(pointer);
   if (target.isObject() && (type === 'insert')) {
@@ -302,7 +306,36 @@ export function getFixAsYamlString(root: Node, pointer: string, type: string, fi
   // For snippets we must escape $ symbol
   if (snippet && ((type === 'insert') || (type === 'rename'))) {
     text = text.replace(new RegExp('\\$ref', 'g'), '\\$ref')
+    text = text.replace(new RegExp('\'(\\${[0-9]*:.*})\'', 'g'), '$1');
+    text = text.replace(new RegExp('\'\'', 'g'), '\'');
   }
   // 2 spaces is always the default ident for the safeDump
   return text.replace(new RegExp('  ', 'g'), '\t');
+}
+
+export function applyPlaceHolders(fix: object, parameters: object, languageId: string) {
+  if (!parameters) {
+    return fix;
+  }
+  let index = 1;
+  for (const [key, value] of Object.entries(parameters)) {
+    const pointer = value.path;
+    let nodeValue = jsonpointer.get(fix, pointer);
+    let escapeChar = '';
+    if (typeof nodeValue === 'string') {
+      if (languageId === 'json') {
+        escapeChar = '"';
+      }
+      else {
+        if (pointer.endsWith('$ref')) {
+          nodeValue = '\'' + nodeValue + '\'';
+        }
+      }     
+      // Escape $ and } inside placeholders
+      nodeValue = nodeValue.replace(new RegExp('\\$', 'g'), '\\$').replace(new RegExp('}', 'g'), '\\}');
+    }
+    jsonpointer.set(fix, pointer, escapeChar + '${' + index + ':' + nodeValue + '}' + escapeChar);
+    index += 1;
+  }
+  return fix;
 }
