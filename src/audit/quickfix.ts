@@ -6,7 +6,7 @@ import { parse, Node } from '../ast';
 import { createDiagnostics } from './diagnostic';
 import { createDecorations, setDecorations } from './decoration';
 import { ReportWebView } from './report';
-import { deleteJsonNode, deleteYamlNode, getFixAsJsonString, getFixAsYamlString, 
+import { applyPlaceHolders, deleteJsonNode, deleteYamlNode, getFixAsJsonString, getFixAsYamlString, 
   insertJsonNode, insertYamlNode, renameKeyNode, replaceJsonNode, replaceYamlNode } from '../util';
 
 async function quickFixCommand(
@@ -15,50 +15,68 @@ async function quickFixCommand(
   fix: any,
   auditContext: AuditContext,
 ) {
+  let pointer = diagnostic.pointer;
+  let fixType = fix.type;
   const document = editor.document;
-  const pointer = diagnostic.pointer;
   const root = safeParse(document.getText(), document.languageId);
+  let fixJson = JSON.parse(JSON.stringify(fix.fix)); // Perform deep copy
+  fixJson = applyPlaceHolders(fixJson, fix.parameters, document.languageId);
 
-  if (fix.type === 'insert') {
+  // Check if one single key already exists and needs to be replaced
+  const keys = Object.keys(fixJson);
+  const target = root.find(pointer);
+  if (target.isObject() && (keys.length === 1)) {   
+    const insertingKey = keys[0];
+    for (let child of target.getChildren()) {
+      if (child.getKey() === insertingKey) {
+        fixType = 'replace';
+        pointer = pointer + '/' + insertingKey;
+        fixJson = fixJson[insertingKey];
+        break;
+      }
+    }
+  }
+
+  if (fixType === 'insert') {
     let value: string, position: vscode.Position;
     if (document.languageId === 'json') {
-      value = getFixAsJsonString(root, pointer, fix.type, fix.fix, fix.parameters, true);
+      value = getFixAsJsonString(root, pointer, fixType, fixJson, fix.parameters, true);
       [value, position] = insertJsonNode(document, root, pointer, value);
     }
     else {
-      value = getFixAsYamlString(root, pointer, fix.type, fix.fix, fix.parameters, true);
+      value = getFixAsYamlString(root, pointer, fixType, fixJson, fix.parameters, true);
       [value, position] = insertYamlNode(document, root, pointer, value);
     }
     await editor.insertSnippet(new vscode.SnippetString(value), position);
   }
-  else if (fix.type === 'replace') {
+  else if (fixType === 'replace') {
     let value: string, range: vscode.Range;
     if (document.languageId === 'json') {
-      value = getFixAsJsonString(root, pointer, fix.type, fix.fix, fix.parameters, false);
+      value = getFixAsJsonString(root, pointer, fixType, fixJson, fix.parameters, false);
       [value, range] = replaceJsonNode(document, root, pointer, value);
     }
     else {
-      value = getFixAsYamlString(root, pointer, fix.type, fix.fix, fix.parameters, false);
+      value = getFixAsYamlString(root, pointer, fixType, fixJson, fix.parameters, false);
       [value, range] = replaceYamlNode(document, root, pointer, value);
     }
     const edit = new vscode.WorkspaceEdit();
     edit.replace(document.uri, range, value);
     await vscode.workspace.applyEdit(edit);
   }
-  else if (fix.type === 'renameKey') {
+  else if (fixType === 'renameKey') {
     let value: string;
     if (document.languageId === 'json') {
-      value = getFixAsJsonString(root, pointer, fix.type, fix.fix, fix.parameters, false);
+      value = getFixAsJsonString(root, pointer, fixType, fixJson, fix.parameters, false);
     }
     else {
-      value = getFixAsYamlString(root, pointer, fix.type, fix.fix, fix.parameters, false);
+      value = getFixAsYamlString(root, pointer, fixType, fixJson, fix.parameters, false);
     }
     const range = renameKeyNode(document, root, pointer);
     const edit = new vscode.WorkspaceEdit();
     edit.replace(document.uri, range, value);
     await vscode.workspace.applyEdit(edit);
   }
-  else if (fix.type === 'delete') {
+  else if (fixType === 'delete') {
     let range: vscode.Range;
     if (document.languageId === 'json') {
       range = deleteJsonNode(document, root, pointer);
