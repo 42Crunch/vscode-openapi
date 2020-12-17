@@ -4,18 +4,18 @@
 */
 
 import * as yaml from 'yaml-ast-parser-custom-tags';
-import { Schema } from 'js-yaml';
+import { Schema, DEFAULT_SAFE_SCHEMA } from 'js-yaml';
 import { Node } from './types';
 import { parseJsonPointer, joinJsonPointer } from '../pointer';
 
-export function parseYaml(text: string, schema: Schema): [YamlNode, { message: string; offset: number }[]] {
+export function parseYaml(text: string, schema?: Schema): [YamlNode, { message: string; offset: number }[]] {
   const documents = [];
   yaml.loadAll(
     text,
     (document) => {
       documents.push(document);
     },
-    { schema },
+    { schema: schema ? schema : DEFAULT_SAFE_SCHEMA },
   );
 
   if (documents.length !== 1) {
@@ -49,8 +49,9 @@ export class YamlNode implements Node {
   }
 
   getParent(): YamlNode {
-    return (this.node.parent.kind === yaml.Kind.MAP) ? 
-      new YamlNode(this.node.parent) : new YamlNode(this.node.parent.parent);
+    return this.node.parent.kind === yaml.Kind.MAP
+      ? new YamlNode(this.node.parent)
+      : new YamlNode(this.node.parent.parent);
   }
 
   getKey() {
@@ -97,17 +98,25 @@ export class YamlNode implements Node {
   }
 
   isArray(): boolean {
-    return (this.node.kind === yaml.Kind.SEQ) || ((this.node.kind === yaml.Kind.MAPPING) && (this.node.value.kind === yaml.Kind.SEQ));
+    return (
+      this.node.kind === yaml.Kind.SEQ ||
+      (this.node.kind === yaml.Kind.MAPPING && this.node.value.kind === yaml.Kind.SEQ)
+    );
   }
 
   isObject(): boolean {
-    return (this.node.kind === yaml.Kind.MAP) || ((this.node.kind === yaml.Kind.MAPPING) && (this.node.value.kind === yaml.Kind.MAP));
+    return (
+      this.node.kind === yaml.Kind.MAP ||
+      (this.node.kind === yaml.Kind.MAPPING && this.node.value.kind === yaml.Kind.MAP)
+    );
   }
 
   next(): YamlNode | undefined {
-    const children = ((this.node.parent.kind === yaml.Kind.MAP) ? 
-      new YamlNode(this.node.parent) : this.getParent()).getChildren();
-    for (let i = 1 ; i < children.length ; i++) {
+    const children = (this.node.parent.kind === yaml.Kind.MAP
+      ? new YamlNode(this.node.parent)
+      : this.getParent()
+    ).getChildren();
+    for (let i = 1; i < children.length; i++) {
       if (this.node === children[i - 1].node) {
         return children[i];
       }
@@ -115,9 +124,11 @@ export class YamlNode implements Node {
   }
 
   prev(): YamlNode | undefined {
-    const children = ((this.node.parent.kind === yaml.Kind.MAP) ? 
-      new YamlNode(this.node.parent) : this.getParent()).getChildren();
-    for (let i = 0 ; i < (children.length - 1) ; i++) {
+    const children = (this.node.parent.kind === yaml.Kind.MAP
+      ? new YamlNode(this.node.parent)
+      : this.getParent()
+    ).getChildren();
+    for (let i = 0; i < children.length - 1; i++) {
       if (this.node === children[i + 1].node) {
         return children[i];
       }
