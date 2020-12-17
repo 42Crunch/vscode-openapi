@@ -35,7 +35,17 @@ function replaceTextRanges(text: string, replacements: TextReplacement[]): strin
   const chunks = substrings(text, ranges);
 
   for (let i = 0; i < sorted.length; i++) {
-    chunks[i * 2 + 1] = sorted[i].value;
+    let replacement = sorted[i].value;
+    const target = i * 2 + 1;
+    const original = chunks[target];
+    let quote = '';
+    if (original.startsWith(`"`) && original.endsWith(`"`)) {
+      quote = `"`;
+    } else if (original.startsWith(`'`) && original.endsWith(`'`)) {
+      quote = `'`;
+    }
+
+    chunks[target] = `${quote}${replacement}${quote}`;
   }
 
   return chunks.join('');
