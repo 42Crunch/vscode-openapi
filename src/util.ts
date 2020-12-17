@@ -6,6 +6,7 @@ import * as jsonpointer from 'jsonpointer';
 import { OpenApiVersion } from './types';
 import { parse, Node } from './ast';
 import { parserOptions } from './parser-options';
+import { replace } from './ast/replace';
 
 export function parseDocument(document: vscode.TextDocument): [OpenApiVersion, Node, vscode.Diagnostic[]] {
   if (!(document.languageId === 'json' || document.languageId === 'jsonc' || document.languageId == 'yaml')) {
@@ -282,14 +283,15 @@ export function replaceYamlNode(document: vscode.TextDocument, root: Node, point
   }
 }
 
-export function getFixAsJsonString(root: Node, pointer: string, type: string, fix: any, parameters: any, snippet: boolean) : string {
+export function getFixAsJsonString(root: Node, pointer: string, type: string, fix: object, parameters: object, snippet: boolean) : string {
+
   let text = JSON.stringify(fix, null, '\t').trim();
+  if (parameters) {
+    text = insertPlaceholders(text, fix, parameters, 'json');
+  }
   // For snippets we must escape $ symbol
   if (snippet && ((type === 'insert') || (type === 'rename'))) {
-    text = text.replace(new RegExp('\\\\\\\\', 'g'), '\\');
     text = text.replace(new RegExp('\\$ref', 'g'), '\\$ref')
-    text = text.replace(new RegExp('"(\\${[0-9]*:.*})"', 'g'), '$1');
-    text = text.replace(new RegExp('\\\\"(\\${[0-9]*:.*})\\\\"', 'g'), '$1');
   }
   const target = root.find(pointer);
   if (target.isObject() && (type === 'insert')) {
@@ -301,41 +303,75 @@ export function getFixAsJsonString(root: Node, pointer: string, type: string, fi
   return text;
 }
 
-export function getFixAsYamlString(root: Node, pointer: string, type: string, fix: any, parameters: any, snippet: boolean) : string {
+export function getFixAsYamlString(root: Node, pointer: string, type: string, fix: object, parameters: object, snippet: boolean) : string {
+
   let text = yaml.safeDump(fix).trim();
+  if (parameters) {
+    text = insertPlaceholders(text, fix, parameters, 'yaml');
+  }
   // For snippets we must escape $ symbol
   if (snippet && ((type === 'insert') || (type === 'rename'))) {
     text = text.replace(new RegExp('\\$ref', 'g'), '\\$ref')
-    text = text.replace(new RegExp('\'(\\${[0-9]*:.*})\'', 'g'), '$1');
-    text = text.replace(new RegExp('\'\'', 'g'), '\'');
+    //text = text.replace(new RegExp('\'(\\${[0-9]*:.*})\'', 'g'), '$1');
+    //text = text.replace(new RegExp('\'\'', 'g'), '\'');
   }
   // 2 spaces is always the default ident for the safeDump
   return text.replace(new RegExp('  ', 'g'), '\t');
 }
 
-export function applyPlaceHolders(fix: object, parameters: object, languageId: string) {
-  if (!parameters) {
-    return fix;
-  }
-  let index = 1;
+// export function applyPlaceHolders(fix: object, parameters: object, languageId: string) {
+//   if (!parameters) {
+//     return fix;
+//   }
+//   let index = 1;
+//   for (const [key, value] of Object.entries(parameters)) {
+//     const pointer = value.path;
+//     let nodeValue = jsonpointer.get(fix, pointer);
+//     let escapeChar = '';
+//     if (typeof nodeValue === 'string') {
+//       if (languageId === 'json') {
+//         escapeChar = '"';
+//       }
+//       else {
+//         if (pointer.endsWith('$ref')) {
+//           nodeValue = '\'' + nodeValue + '\'';
+//         }
+//       }     
+//       // Escape $ and } inside placeholders
+//       nodeValue = nodeValue.replace(new RegExp('\\$', 'g'), '\\$').replace(new RegExp('}', 'g'), '\\}');
+//     }
+//     jsonpointer.set(fix, pointer, escapeChar + '${' + index + ':' + nodeValue + '}' + escapeChar);
+//     index += 1;
+//   }
+//   return fix;
+// }
+
+function insertPlaceholders(text: string, fix: object, parameters: object, languageId: string) : string {
+
+  const replacements = [];
   for (const [key, value] of Object.entries(parameters)) {
+
     const pointer = value.path;
-    let nodeValue = jsonpointer.get(fix, pointer);
-    let escapeChar = '';
+    const nodeValue = jsonpointer.get(fix, pointer);
+    const index = replacements.length + 1;
+    let placeholer = '${' + index + ':' + nodeValue + '}';
+
     if (typeof nodeValue === 'string') {
       if (languageId === 'json') {
-        escapeChar = '"';
+        placeholer = '"' + placeholer + '"';
       }
       else {
         if (pointer.endsWith('$ref')) {
-          nodeValue = '\'' + nodeValue + '\'';
+          placeholer = '${' + index + ':\'' + nodeValue + '\'}';
         }
       }     
       // Escape $ and } inside placeholders
-      nodeValue = nodeValue.replace(new RegExp('\\$', 'g'), '\\$').replace(new RegExp('}', 'g'), '\\}');
+      //nodeValue = nodeValue.replace(new RegExp('\\$', 'g'), '\\$').replace(new RegExp('}', 'g'), '\\}');
     }
-    jsonpointer.set(fix, pointer, escapeChar + '${' + index + ':' + nodeValue + '}' + escapeChar);
-    index += 1;
+    replacements.push({ pointer: pointer, value: placeholer, replaceKey: false }); // TODO: replaceKey
   }
-  return fix;
+
+  text = replace(text, languageId, replacements);
+  console.info(text);
+  return text;
 }
