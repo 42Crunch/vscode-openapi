@@ -6,7 +6,7 @@ import { parse, Node } from '../ast';
 import { createDiagnostics } from './diagnostic';
 import { createDecorations, setDecorations } from './decoration';
 import { ReportWebView } from './report';
-import { applyPlaceHolders, deleteJsonNode, deleteYamlNode, getFixAsJsonString, getFixAsYamlString, 
+import { deleteJsonNode, deleteYamlNode, getFixAsJsonString, getFixAsYamlString, 
   insertJsonNode, insertYamlNode, renameKeyNode, replaceJsonNode, replaceYamlNode } from '../util';
 
 async function quickFixCommand(
@@ -20,7 +20,6 @@ async function quickFixCommand(
   const document = editor.document;
   const root = safeParse(document.getText(), document.languageId);
   let fixJson = JSON.parse(JSON.stringify(fix.fix)); // Perform deep copy
-  fixJson = applyPlaceHolders(fixJson, fix.parameters, document.languageId);
 
   // Check if one single key already exists and needs to be replaced
   const keys = Object.keys(fixJson);
