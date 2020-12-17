@@ -4,39 +4,41 @@
 */
 
 import test from 'ava';
-import { readFileSync } from 'fs';
-import * as yaml from 'yaml-ast-parser-custom-tags';
-import * as json from 'jsonc-parser';
 import { replace } from '../out/ast/replace';
 
-function parseJson(text) {
-  const jsonTree = json.parseTree(text);
-  return new JsonNode(jsonTree);
-}
-
-function loadJson(filename) {
-  return parseJson(readFileSync(filename, { encoding: 'utf8' }));
-}
-
-function parseYaml(text) {
-  const yamlTree = yaml.load(text);
-  return new YamlNode(yamlTree);
-}
-
-function loadYaml(filename) {
-  return parseYaml(readFileSync(filename, { encoding: 'utf8' }));
-}
-
 test('yaml replace value', (t) => {
-  const yaml = `foo: bar`;
-  const replaced = replace(yaml, 'yaml', [{ pointer: '/foo', value: 'baz' }]);
-  t.is(replaced, `foo: baz`);
+  t.is(`foo: baz`, replace('foo: bar', 'yaml', [{ pointer: '/foo', value: 'baz' }]));
+});
+
+test('yaml replace value, multiple replacements', (t) => {
+  t.is(
+    `boom: baz`,
+    replace('foo: bar', 'yaml', [
+      { pointer: '/foo', value: 'baz' },
+      { pointer: '/foo', value: 'boom', replaceKey: true },
+    ]),
+  );
+});
+
+test('yaml replace value, flow', (t) => {
+  const yaml = `foo: {"bar": "baz"}`;
+  t.is(`foo: {"bar": "boom"}`, replace(yaml, 'yaml', [{ pointer: '/foo/bar', value: '"boom"' }]));
+});
+
+test('yaml replace value, flow, array', (t) => {
+  const yaml = `foo: ["bar", "baz"]`;
+  t.is(`foo: ["boom", "baz"]`, replace(yaml, 'yaml', [{ pointer: '/foo/0', value: '"boom"' }]));
+  t.is(`foo: ["bar", "boom"]`, replace(yaml, 'yaml', [{ pointer: '/foo/1', value: '"boom"' }]));
 });
 
 test('yaml replace key', (t) => {
   const yaml = `foo: bar`;
-  const replaced = replace(yaml, 'yaml', [{ pointer: '/foo', value: 'baz', replaceKey: true }]);
-  t.is(replaced, `baz: bar`);
+  t.is(`baz: bar`, replace(yaml, 'yaml', [{ pointer: '/foo', value: 'baz', replaceKey: true }]));
+});
+
+test('yaml replace key, flow', (t) => {
+  const yaml = `foo: {"bar": "baz"}`;
+  t.is(`foo: {"boom": "baz"}`, replace(yaml, 'yaml', [{ pointer: '/foo/bar', value: '"boom"', replaceKey: true }]));
 });
 
 test('yaml replace value in array', (t) => {
@@ -47,32 +49,57 @@ bar:
   - two
 baz: three`;
 
-  const replaced = replace(yaml, 'yaml', [{ pointer: '/bar/1', value: 'baz' }]);
-
-  const expected = `
+  t.is(
+    `
 foo: one
 bar:
   - one
   - baz
-baz: three`;
+baz: three`,
+    replace(yaml, 'yaml', [{ pointer: '/bar/1', value: 'baz' }]),
+  );
 
-  t.is(expected, replaced);
+  t.is(
+    `
+foo: one
+bar:
+  - baz
+  - two
+baz: three`,
+    replace(yaml, 'yaml', [{ pointer: '/bar/0', value: 'baz' }]),
+  );
 });
 
 test('json replace value', (t) => {
-  const yaml = '{"foo": "bar"}';
-  const replaced = replace(yaml, 'json', [{ pointer: '/foo', value: '"baz"' }]);
-  t.is('{"foo": "baz"}', replaced);
+  t.is('{"foo": "baz"}', replace('{"foo": "bar"}', 'json', [{ pointer: '/foo', value: '"baz"' }]));
+});
+
+test('json replace value, multiple replacements', (t) => {
+  t.is(
+    '{"boom": "baz"}',
+    replace('{"foo": "bar"}', 'json', [
+      { pointer: '/foo', value: '"baz"' },
+      { pointer: '/foo', value: 'boom', replaceKey: true },
+    ]),
+  );
 });
 
 test('json replace value in array', (t) => {
-  const yaml = '{"foo": ["bar", "baz"]}';
-  const replaced = replace(yaml, 'json', [{ pointer: '/foo/0', value: '"boom"' }]);
-  t.is('{"foo": ["boom", "baz"]}', replaced);
+  t.is(
+    '{"foo": ["boom", "baz"]}',
+    replace('{"foo": ["bar", "baz"]}', 'json', [{ pointer: '/foo/0', value: '"boom"' }]),
+  );
+
+  t.is(
+    '{"foo": ["bar", "boom"]}',
+    replace('{"foo": ["bar", "baz"]}', 'json', [{ pointer: '/foo/1', value: '"boom"' }]),
+  );
 });
 
-test('jsob replace key', (t) => {
-  const yaml = '{"foo": "bar"}';
-  const replaced = replace(yaml, 'json', [{ pointer: '/foo', value: 'baz', replaceKey: true }]);
-  t.is('{"baz": "bar"}', replaced);
+test('json replace key', (t) => {
+  t.is('{"baz": "bar"}', replace('{"foo": "bar"}', 'json', [{ pointer: '/foo', value: 'baz', replaceKey: true }]));
+  t.is(
+    '{"foo": {"baz": "baz"}}',
+    replace('{"foo": {"bar": "baz"}}', 'json', [{ pointer: '/foo/bar', value: 'baz', replaceKey: true }]),
+  );
 });
