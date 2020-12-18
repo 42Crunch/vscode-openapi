@@ -8,6 +8,13 @@ import { parse, Node } from './ast';
 import { parserOptions } from './parser-options';
 import { replace } from './ast/replace';
 
+type FixParameters = {
+  "name": string;
+  "path": string;
+  "values"?: any [];
+  "type"?: string;
+}
+
 export function parseDocument(document: vscode.TextDocument): [OpenApiVersion, Node, vscode.Diagnostic[]] {
   if (!(document.languageId === 'json' || document.languageId === 'jsonc' || document.languageId == 'yaml')) {
     return [OpenApiVersion.Unknown, null, null];
@@ -283,7 +290,7 @@ export function replaceYamlNode(document: vscode.TextDocument, root: Node, point
   }
 }
 
-export function getFixAsJsonString(root: Node, pointer: string, type: string, fix: object, parameters: object, snippet: boolean) : string {
+export function getFixAsJsonString(root: Node, pointer: string, type: string, fix: object, parameters: FixParameters [], snippet: boolean) : string {
 
   let text = JSON.stringify(fix, null, '\t').trim();
   if (parameters) {
@@ -303,7 +310,7 @@ export function getFixAsJsonString(root: Node, pointer: string, type: string, fi
   return text;
 }
 
-export function getFixAsYamlString(root: Node, pointer: string, type: string, fix: object, parameters: object, snippet: boolean) : string {
+export function getFixAsYamlString(root: Node, pointer: string, type: string, fix: object, parameters: FixParameters [], snippet: boolean) : string {
 
   let text = yaml.safeDump(fix).trim();
   if (parameters) {
@@ -312,66 +319,53 @@ export function getFixAsYamlString(root: Node, pointer: string, type: string, fi
   // For snippets we must escape $ symbol
   if (snippet && ((type === 'insert') || (type === 'rename'))) {
     text = text.replace(new RegExp('\\$ref', 'g'), '\\$ref')
-    //text = text.replace(new RegExp('\'(\\${[0-9]*:.*})\'', 'g'), '$1');
-    //text = text.replace(new RegExp('\'\'', 'g'), '\'');
   }
   // 2 spaces is always the default ident for the safeDump
   return text.replace(new RegExp('  ', 'g'), '\t');
 }
 
-// export function applyPlaceHolders(fix: object, parameters: object, languageId: string) {
-//   if (!parameters) {
-//     return fix;
-//   }
-//   let index = 1;
-//   for (const [key, value] of Object.entries(parameters)) {
-//     const pointer = value.path;
-//     let nodeValue = jsonpointer.get(fix, pointer);
-//     let escapeChar = '';
-//     if (typeof nodeValue === 'string') {
-//       if (languageId === 'json') {
-//         escapeChar = '"';
-//       }
-//       else {
-//         if (pointer.endsWith('$ref')) {
-//           nodeValue = '\'' + nodeValue + '\'';
-//         }
-//       }     
-//       // Escape $ and } inside placeholders
-//       nodeValue = nodeValue.replace(new RegExp('\\$', 'g'), '\\$').replace(new RegExp('}', 'g'), '\\}');
-//     }
-//     jsonpointer.set(fix, pointer, escapeChar + '${' + index + ':' + nodeValue + '}' + escapeChar);
-//     index += 1;
-//   }
-//   return fix;
-// }
-
-function insertPlaceholders(text: string, fix: object, parameters: object, languageId: string) : string {
+function insertPlaceholders(text: string, fix: object, parameters: FixParameters [], languageId: string) : string {
 
   const replacements = [];
-  for (const [key, value] of Object.entries(parameters)) {
+  const root = safeParse(text, languageId);
 
-    const pointer = value.path;
-    const nodeValue = jsonpointer.get(fix, pointer);
+  for (const parameter of parameters) {
+
+    const pointer = parameter.path;
     const index = replacements.length + 1;
-    let placeholer = '${' + index + ':' + nodeValue + '}';
+    const replaceKey = (parameter.type === 'key');
+    let values = parameter.values;
+    const node = root.find(pointer);
+    let placeholderValue = replaceKey ? node.getKey() : node.getValue();
 
-    if (typeof nodeValue === 'string') {
-      if (languageId === 'json') {
-        placeholer = '"' + placeholer + '"';
-      }
-      else {
-        if (pointer.endsWith('$ref')) {
-          placeholer = '${' + index + ':\'' + nodeValue + '\'}';
-        }
-      }     
-      // Escape $ and } inside placeholders
-      //nodeValue = nodeValue.replace(new RegExp('\\$', 'g'), '\\$').replace(new RegExp('}', 'g'), '\\}');
+    if (!values && (typeof placeholderValue === 'string')) {
+      // Escape $ and } inside placeholders (for example in regexp)
+      placeholderValue = placeholderValue.replace(new RegExp('\\$', 'g'), '\\$').replace(new RegExp('}', 'g'), '\\}');
     }
-    replacements.push({ pointer: pointer, value: placeholer, replaceKey: false }); // TODO: replaceKey
+    replacements.push({ pointer: pointer, value: getPlaceholder(index, placeholderValue, false, values), replaceKey: replaceKey });
   }
+  return replace(text, languageId, replacements);
+}
 
-  text = replace(text, languageId, replacements);
-  console.info(text);
-  return text;
+function getPlaceholder(index: number, value: string, quotes: boolean, values: any []) : string {
+  if (values) {
+    values = values.map((value: any) => {
+        if (typeof value === 'string') {
+          return value.replace(new RegExp(',', 'g'), '\\,'); // Escape comma symbols
+        } 
+        else { 
+          return value;
+        }
+      });
+  }
+  const placeholer = '${' + index + (values ? '|' + values.join() + '|' : ':' + value) + '}';
+  return quotes ? '"' + placeholer + '"' : placeholer;
+}
+
+export function safeParse(text: string, languageId: string): Node {
+  const [root, errors] = parse(text, languageId, parserOptions);
+  if (errors.length) {
+    throw new Error("Can't parse OpenAPI file");
+  }
+  return root;
 }
