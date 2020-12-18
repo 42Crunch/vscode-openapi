@@ -6,20 +6,21 @@ import { parse, Node } from '../ast';
 import { createDiagnostics } from './diagnostic';
 import { createDecorations, setDecorations } from './decoration';
 import { ReportWebView } from './report';
-import { deleteJsonNode, deleteYamlNode, getFixAsJsonString, getFixAsYamlString, 
+import { safeParse, deleteJsonNode, deleteYamlNode, getFixAsJsonString, getFixAsYamlString, 
   insertJsonNode, insertYamlNode, renameKeyNode, replaceJsonNode, replaceYamlNode } from '../util';
 
 async function quickFixCommand(
   editor: vscode.TextEditor,
   diagnostic: AuditDiagnostic,
-  fix: any,
+  fix: object,
   auditContext: AuditContext,
 ) {
   let pointer = diagnostic.pointer;
-  let fixType = fix.type;
+  let fixType = fix['type'];
   const document = editor.document;
   const root = safeParse(document.getText(), document.languageId);
-  let fixJson = JSON.parse(JSON.stringify(fix.fix)); // Perform deep copy
+  let fixJson = JSON.parse(JSON.stringify(fix['fix'])); // Perform deep copy
+  const parameters = fix['parameters'];
 
   // Check if one single key already exists and needs to be replaced
   const keys = Object.keys(fixJson);
@@ -39,11 +40,11 @@ async function quickFixCommand(
   if (fixType === 'insert') {
     let value: string, position: vscode.Position;
     if (document.languageId === 'json') {
-      value = getFixAsJsonString(root, pointer, fixType, fixJson, fix.parameters, true);
+      value = getFixAsJsonString(root, pointer, fixType, fixJson, parameters, true);
       [value, position] = insertJsonNode(document, root, pointer, value);
     }
     else {
-      value = getFixAsYamlString(root, pointer, fixType, fixJson, fix.parameters, true);
+      value = getFixAsYamlString(root, pointer, fixType, fixJson, parameters, true);
       [value, position] = insertYamlNode(document, root, pointer, value);
     }
     await editor.insertSnippet(new vscode.SnippetString(value), position);
@@ -51,11 +52,11 @@ async function quickFixCommand(
   else if (fixType === 'replace') {
     let value: string, range: vscode.Range;
     if (document.languageId === 'json') {
-      value = getFixAsJsonString(root, pointer, fixType, fixJson, fix.parameters, false);
+      value = getFixAsJsonString(root, pointer, fixType, fixJson, parameters, false);
       [value, range] = replaceJsonNode(document, root, pointer, value);
     }
     else {
-      value = getFixAsYamlString(root, pointer, fixType, fixJson, fix.parameters, false);
+      value = getFixAsYamlString(root, pointer, fixType, fixJson, parameters, false);
       [value, range] = replaceYamlNode(document, root, pointer, value);
     }
     const edit = new vscode.WorkspaceEdit();
@@ -65,10 +66,10 @@ async function quickFixCommand(
   else if (fixType === 'renameKey') {
     let value: string;
     if (document.languageId === 'json') {
-      value = getFixAsJsonString(root, pointer, fixType, fixJson, fix.parameters, false);
+      value = getFixAsJsonString(root, pointer, fixType, fixJson, parameters, false);
     }
     else {
-      value = getFixAsYamlString(root, pointer, fixType, fixJson, fix.parameters, false);
+      value = getFixAsYamlString(root, pointer, fixType, fixJson, parameters, false);
     }
     const range = renameKeyNode(document, root, pointer);
     const edit = new vscode.WorkspaceEdit();
@@ -130,7 +131,7 @@ function range(document: vscode.TextDocument, root: Node, pointer: string) {
 
 export function registerQuickfixes(context: vscode.ExtensionContext, auditContext: AuditContext) {
   const problems = new Set<string>();
-  for (const fix of quickfixes.fixes) {
+  for (const fix of quickfixes['default']) {
     if (problems.has(fix.problem)) {
       continue; // Otherwise it will cause registration failure
     }
@@ -186,7 +187,7 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
         continue;
       }
       //console.info('pointer = ' + auditDiagnostic.pointer + ', problem = ' + auditDiagnostic.id);
-      for (const fix of quickfixes.fixes) {
+      for (const fix of quickfixes['default']) {
         if (auditDiagnostic.id === fix.problem) {
           //console.info('pointer = ' + auditDiagnostic.pointer + ', problem = ' + fix.problem);
           const action = new vscode.CodeAction(fix.title, vscode.CodeActionKind.QuickFix);
@@ -203,12 +204,4 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
     }
     return result;
   }
-}
-
-function safeParse(text: string, languageId: string): Node {
-  const [root, errors] = parse(text, languageId, parserOptions);
-  if (errors.length) {
-    throw new Error("Can't parse OpenAPI file");
-  }
-  return root;
 }
