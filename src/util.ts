@@ -2,18 +2,17 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as yaml from 'js-yaml';
-import * as jsonpointer from 'jsonpointer';
 import { OpenApiVersion } from './types';
 import { parse, Node } from './ast';
 import { parserOptions } from './parser-options';
 import { replace } from './ast/replace';
 
 type FixParameters = {
-  "name": string;
-  "path": string;
-  "values"?: any [];
-  "type"?: string;
-}
+  name: string;
+  path: string;
+  values?: any[];
+  type?: string;
+};
 
 export function parseDocument(document: vscode.TextDocument): [OpenApiVersion, Node, vscode.Diagnostic[]] {
   if (!(document.languageId === 'json' || document.languageId === 'jsonc' || document.languageId == 'yaml')) {
@@ -104,7 +103,7 @@ function getBasicIndentation(document: vscode.TextDocument, root: Node): [number
   const index = document.lineAt(position.line).firstNonWhitespaceCharacterIndex;
   const p0 = new vscode.Position(position.line, index - 1);
   const p1 = new vscode.Position(position.line, index);
-  const depth = (document.languageId === 'json') ? target.getDepth() : (target.getDepth() - 1);
+  const depth = document.languageId === 'json' ? target.getDepth() : target.getDepth() - 1;
   return [Math.round(index / depth), document.getText(new vscode.Range(p0, p1))];
 }
 
@@ -122,12 +121,19 @@ function getTopLineByOffset(document: vscode.TextDocument, offset: number): vsco
   return document.lineAt(document.positionAt(offset).line - 1);
 }
 
-function shift(text: string, indent: number, char: string, padding: number, extra: number = 0, addFirstPadding: boolean = true) : string {
+function shift(
+  text: string,
+  indent: number,
+  char: string,
+  padding: number,
+  extra: number = 0,
+  addFirstPadding: boolean = true,
+): string {
   if (addFirstPadding) {
     text = char.repeat(padding) + text;
   }
   text = text.replace(new RegExp('\n', 'g'), '\n' + char.repeat(padding + extra));
-  text = text.replace(new RegExp('\t', 'g'), char.repeat(indent)); 
+  text = text.replace(new RegExp('\t', 'g'), char.repeat(indent));
   return text;
 }
 
@@ -137,15 +143,13 @@ export function renameKeyNode(document: vscode.TextDocument, root: Node, pointer
 }
 
 export function deleteJsonNode(document: vscode.TextDocument, root: Node, pointer: string): vscode.Range {
-
   const target = root.find(pointer);
   let startPosition: vscode.Position;
 
   if (target.prev()) {
     const line = getLineByOffset(document, target.prev().getRange()[1]);
     startPosition = new vscode.Position(line.lineNumber, line.text.length + (target.next() ? 0 : -1));
-  }
-  else {
+  } else {
     const line = getLineByOffset(document, target.getParent().getRange()[0]);
     startPosition = new vscode.Position(line.lineNumber, line.text.length);
   }
@@ -157,7 +161,6 @@ export function deleteJsonNode(document: vscode.TextDocument, root: Node, pointe
 }
 
 export function deleteYamlNode(document: vscode.TextDocument, root: Node, pointer: string): vscode.Range {
-
   const target = root.find(pointer);
   const [start, end] = target.getRange();
 
@@ -170,19 +173,16 @@ export function deleteYamlNode(document: vscode.TextDocument, root: Node, pointe
       const line = getLineByOffset(document, target.next().getRange()[0]);
       startPosition = document.positionAt(start - '- '.length);
       endPosition = new vscode.Position(line.lineNumber, line.firstNonWhitespaceCharacterIndex);
-    }
-    else {
+    } else {
       startPosition = new vscode.Position(getLineByOffset(document, start).lineNumber, 0);
       endPosition = new vscode.Position(getLineByOffset(document, end).lineNumber + 1, 0);
     }
     apply = true;
-  }
-  else if (target.getParent().isObject()) {
+  } else if (target.getParent().isObject()) {
     if (target.next()) {
       const line = getLineByOffset(document, target.next().getRange()[0]);
       endPosition = new vscode.Position(line.lineNumber, line.firstNonWhitespaceCharacterIndex);
-    }
-    else {
+    } else {
       startPosition = new vscode.Position(getLineByOffset(document, start).lineNumber, 0);
       endPosition = new vscode.Position(getLineByOffset(document, end).lineNumber + 1, 0);
     }
@@ -194,8 +194,13 @@ export function deleteYamlNode(document: vscode.TextDocument, root: Node, pointe
   }
 }
 
-export function insertJsonNode(document: vscode.TextDocument, root: Node, pointer: string, value: string, snippet: boolean = true): [string, vscode.Position] {
-
+export function insertJsonNode(
+  document: vscode.TextDocument,
+  root: Node,
+  pointer: string,
+  value: string,
+  snippet: boolean = true,
+): [string, vscode.Position] {
   let lastChildTarget: Node;
   const target = root.find(pointer);
   const children = target.getChildren();
@@ -204,17 +209,21 @@ export function insertJsonNode(document: vscode.TextDocument, root: Node, pointe
   if (children && children.length > 0) {
     lastChildTarget = children[children.length - 1];
   }
-  
+
   const [start, end] = lastChildTarget.getRange();
   const index = getCurrentIdentation(document, start);
   const position = document.positionAt(end);
   const [indent, char] = getBasicIndentation(document, root);
-  value = snippet ? ',\n' + value : ',\n' + shift(value, indent, char, index);  
+  value = snippet ? ',\n' + value : ',\n' + shift(value, indent, char, index);
   return [value, position];
 }
 
-export function insertYamlNode(document: vscode.TextDocument, root: Node, pointer: string, value: string): [string, vscode.Position] {
-
+export function insertYamlNode(
+  document: vscode.TextDocument,
+  root: Node,
+  pointer: string,
+  value: string,
+): [string, vscode.Position] {
   let lastChildTarget: Node;
   const target = root.find(pointer);
   const children = target.getChildren();
@@ -233,16 +242,19 @@ export function insertYamlNode(document: vscode.TextDocument, root: Node, pointe
   if (target.isObject()) {
     value = shift(value, indent, char, index) + '\n';
     return [value, position];
-  }
-  else if (target.isArray()) {
+  } else if (target.isArray()) {
     value = shift('- ' + value, indent, char, index, '- '.length) + '\n';
     return [value, position];
   }
 }
 
-export function replaceJsonNode(document: vscode.TextDocument, root: Node, pointer: string, value: string): [string, vscode.Range] {
-
-  const target = root.find(pointer); 
+export function replaceJsonNode(
+  document: vscode.TextDocument,
+  root: Node,
+  pointer: string,
+  value: string,
+): [string, vscode.Range] {
+  const target = root.find(pointer);
   const [start, end] = target.getRange();
 
   const isObject = value.startsWith('{') && value.endsWith('}');
@@ -256,15 +268,19 @@ export function replaceJsonNode(document: vscode.TextDocument, root: Node, point
   return [value, new vscode.Range(document.positionAt(start), document.positionAt(end))];
 }
 
-export function replaceYamlNode(document: vscode.TextDocument, root: Node, pointer: string, value: string): [string, vscode.Range] {
-
+export function replaceYamlNode(
+  document: vscode.TextDocument,
+  root: Node,
+  pointer: string,
+  value: string,
+): [string, vscode.Range] {
   const target = root.find(pointer);
   const [start, end] = target.getValueRange();
 
   const i1 = value.indexOf(':');
   const i2 = value.indexOf('- ');
-  const isObject = (i1 > 0) && ((i2 < 0) || ((i2 > 0) && (i2 > i1)));
-  const isArray = (i2 >= 0) && ((i1 < 0) || ((i1 > 0) && (i1 > i2)));
+  const isObject = i1 > 0 && (i2 < 0 || (i2 > 0 && i2 > i1));
+  const isArray = i2 >= 0 && (i1 < 0 || (i1 > 0 && i1 > i2));
 
   if (isObject || isArray) {
     const index = getCurrentIdentation(document, start);
@@ -278,30 +294,35 @@ export function replaceYamlNode(document: vscode.TextDocument, root: Node, point
       if (!line.text.trim().startsWith('-')) {
         const line = getTopLineByOffset(document, end);
         const endPosition = new vscode.Position(line.lineNumber, line.text.length);
-        return [value, new vscode.Range(document.positionAt(start), endPosition)];  
+        return [value, new vscode.Range(document.positionAt(start), endPosition)];
       }
     }
     return [value, new vscode.Range(document.positionAt(start), document.positionAt(end))];
-  }
-  else {
+  } else {
     const line = getLineByOffset(document, target.getKeyRange()[1]);
     const startPosition = new vscode.Position(line.lineNumber, line.text.length);
     return [' ' + value, new vscode.Range(startPosition, document.positionAt(end))];
   }
 }
 
-export function getFixAsJsonString(root: Node, pointer: string, type: string, fix: object, parameters: FixParameters [], snippet: boolean) : string {
-
+export function getFixAsJsonString(
+  root: Node,
+  pointer: string,
+  type: string,
+  fix: object,
+  parameters: FixParameters[],
+  snippet: boolean,
+): string {
   let text = JSON.stringify(fix, null, '\t').trim();
   if (parameters) {
     text = insertPlaceholders(text, fix, parameters, 'json');
   }
   // For snippets we must escape $ symbol
-  if (snippet && ((type === 'insert') || (type === 'rename'))) {
-    text = text.replace(new RegExp('\\$ref', 'g'), '\\$ref')
+  if (snippet && (type === 'insert' || type === 'rename')) {
+    text = text.replace(new RegExp('\\$ref', 'g'), '\\$ref');
   }
   const target = root.find(pointer);
-  if (target.isObject() && (type === 'insert')) {
+  if (target.isObject() && type === 'insert') {
     text = text.replace('{\n\t', '');
     text = text.replace('\n}', '');
     // Replace only trailing \t, i.e. a\t\t\ta\t\ta\t -> a\t\ta\ta
@@ -310,53 +331,60 @@ export function getFixAsJsonString(root: Node, pointer: string, type: string, fi
   return text;
 }
 
-export function getFixAsYamlString(root: Node, pointer: string, type: string, fix: object, parameters: FixParameters [], snippet: boolean) : string {
-
+export function getFixAsYamlString(
+  root: Node,
+  pointer: string,
+  type: string,
+  fix: object,
+  parameters: FixParameters[],
+  snippet: boolean,
+): string {
   let text = yaml.safeDump(fix).trim();
   if (parameters) {
     text = insertPlaceholders(text, fix, parameters, 'yaml');
   }
   // For snippets we must escape $ symbol
-  if (snippet && ((type === 'insert') || (type === 'rename'))) {
-    text = text.replace(new RegExp('\\$ref', 'g'), '\\$ref')
+  if (snippet && (type === 'insert' || type === 'rename')) {
+    text = text.replace(new RegExp('\\$ref', 'g'), '\\$ref');
   }
   // 2 spaces is always the default ident for the safeDump
   return text.replace(new RegExp('  ', 'g'), '\t');
 }
 
-function insertPlaceholders(text: string, fix: object, parameters: FixParameters [], languageId: string) : string {
-
+function insertPlaceholders(text: string, fix: object, parameters: FixParameters[], languageId: string): string {
   const replacements = [];
   const root = safeParse(text, languageId);
 
   for (const parameter of parameters) {
-
     const pointer = parameter.path;
     const index = replacements.length + 1;
-    const replaceKey = (parameter.type === 'key');
+    const replaceKey = parameter.type === 'key';
     let values = parameter.values;
     const node = root.find(pointer);
     let placeholderValue = replaceKey ? node.getKey() : node.getValue();
 
-    if (!values && (typeof placeholderValue === 'string')) {
+    if (!values && typeof placeholderValue === 'string') {
       // Escape $ and } inside placeholders (for example in regexp)
       placeholderValue = placeholderValue.replace(new RegExp('\\$', 'g'), '\\$').replace(new RegExp('}', 'g'), '\\}');
     }
-    replacements.push({ pointer: pointer, value: getPlaceholder(index, placeholderValue, false, values), replaceKey: replaceKey });
+    replacements.push({
+      pointer: pointer,
+      value: getPlaceholder(index, placeholderValue, false, values),
+      replaceKey: replaceKey,
+    });
   }
   return replace(text, languageId, replacements);
 }
 
-function getPlaceholder(index: number, value: string, quotes: boolean, values: any []) : string {
+function getPlaceholder(index: number, value: string, quotes: boolean, values: any[]): string {
   if (values) {
     values = values.map((value: any) => {
-        if (typeof value === 'string') {
-          return value.replace(new RegExp(',', 'g'), '\\,'); // Escape comma symbols
-        } 
-        else { 
-          return value;
-        }
-      });
+      if (typeof value === 'string') {
+        return value.replace(new RegExp(',', 'g'), '\\,'); // Escape comma symbols
+      } else {
+        return value;
+      }
+    });
   }
   const placeholer = '${' + index + (values ? '|' + values.join() + '|' : ':' + value) + '}';
   return quotes ? '"' + placeholer + '"' : placeholer;
