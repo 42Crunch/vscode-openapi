@@ -28,12 +28,31 @@ async function quickFixCommand(
   let fixType = fix['type'];
   const document = editor.document;
   const root = safeParse(document.getText(), document.languageId);
+  const target = root.find(pointer);
+
+  if (fixType === 'regex-replace') {
+    const currentValue = target.getValue();
+    if (typeof currentValue !== 'string') {
+      return;
+    }
+    const newValue = currentValue.replace(new RegExp(fix['match'], 'g'), fix['replace']);
+    let value: string, range: vscode.Range;
+    if (document.languageId === 'json') {
+      [value, range] = replaceJsonNode(document, root, pointer, '"' + newValue + '"');
+    } else {
+      [value, range] = replaceYamlNode(document, root, pointer, newValue);
+    }
+    const edit = new vscode.WorkspaceEdit();
+    edit.replace(document.uri, range, value);
+    await vscode.workspace.applyEdit(edit);
+    return;
+  }
+
   let fixJson = fix['fix'] ? JSON.parse(JSON.stringify(fix['fix'])) : null; // Perform deep copy
   const parameters = fix['parameters'];
 
   // Check if one single key already exists and needs to be replaced
   const keys = fixJson ? Object.keys(fixJson) : [];
-  const target = root.find(pointer);
   if (target.isObject() && keys.length === 1) {
     const insertingKey = keys[0];
     for (let child of target.getChildren()) {

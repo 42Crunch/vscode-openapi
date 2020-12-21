@@ -297,12 +297,8 @@ export function replaceYamlNode(
         return [value, new vscode.Range(document.positionAt(start), endPosition)];
       }
     }
-    return [value, new vscode.Range(document.positionAt(start), document.positionAt(end))];
-  } else {
-    const line = getLineByOffset(document, target.getKeyRange()[1]);
-    const startPosition = new vscode.Position(line.lineNumber, line.text.length);
-    return [' ' + value, new vscode.Range(startPosition, document.positionAt(end))];
   }
+  return [value, new vscode.Range(document.positionAt(start), document.positionAt(end))];
 }
 
 export function getFixAsJsonString(

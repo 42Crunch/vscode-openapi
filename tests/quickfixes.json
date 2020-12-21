@@ -1,0 +1,96 @@
+{
+  "fixes": [
+	  {
+		"problem": ["v3-semantic-server-url"],
+		"title": "Replace HTTP protocol with HTTPS",
+		"type": "regex-replace",
+		"match": "^petstore(.+)",
+		"replace": "petstores$1"
+	  },
+	  
+	  {
+		"problem": ["v3-schema-numerical-max"],
+		"title": "Add the 200, 201, 202 or 204 response (KEY)",
+		"type": "insert",
+		"fix": {
+		  "200": {
+			"description": "OK"
+		  }
+		},
+		"parameters": [
+		  {
+			"name": "code",
+			"type": "key",
+			"path": "/200",
+			"values": [
+			  "200",
+			  "201",
+			  "202",
+			  "204, 205, 206"
+			]
+		  },
+		  {
+			"name": "description",
+			"path": "/200/description"
+		  }
+		]
+	  },
+	  
+	  {
+		"problem": ["v3-schema-numerical-min"],
+		"title": "Add the 200, 201, 202 or 204 response (VALUE)",
+		"type": "insert",
+		"fix": {
+		  "300": {
+			"description": 2345
+		  }
+		},
+		"parameters": [
+		  {
+			"name": "description",
+			"path": "/300/description",
+			"values": [
+			  900,
+			  901,
+			  902
+			]
+		  }
+		]
+	  },
+	  
+	  {
+		"problem": ["v3-schema-string-pattern"],
+		"title": "Set the 'pattern' property",
+		"type": "replace",
+		"fix": {
+			"pattern": "aaaaaaaaaaaaaaaa"
+		},
+		"parameters": [
+			{
+				"name": "minValue",
+				"path": "/pattern"
+			}
+		]
+	  },
+		{
+		"problem": ["v3-response-schema-undefined"],
+		"title": "Set the response schema",
+		"type": "insert",
+		"fix": {
+		  "content": {
+			"application/json": {
+			  "schema": {
+				"$ref": "#/"
+			  }
+			}
+		  }
+		},
+		"parameters": [
+			{
+				"name": "schema",
+				"path": "/content/application~1json/schema/$ref"
+			}
+		]
+	  }
+  ]
+}
