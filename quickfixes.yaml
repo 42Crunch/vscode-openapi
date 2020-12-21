@@ -1,0 +1,463 @@
+fixes:
+  - problem:
+      - v3-global-securitydefinitions-undefined
+    title: Add 'securitySchemes' element
+    type: insert
+    fix:
+      securitySchemes: {}
+
+  - problem:
+      - v3-global-securityrequirement-average
+    title: Remove the security requirement
+    type: delete
+
+  - problem:
+      - v3-global-securityrequirement-clearcredentials
+    title: Remove the security requirement
+    type: delete
+
+  - problem:
+      - v3-global-securityscheme-average
+    title: Remove the security requirement
+    type: delete
+
+  - problem:
+      - v3-global-securityrequirement-oauth2-scope-unreferenced
+    title: Remove the undefined scope
+    type: delete
+
+  - problem:
+      - v3-global-securityscheme-average
+    title: Remove the security requirement
+    type: delete
+
+  - problem:
+      - v3-global-securityscheme-clearcredentials
+    title: Remove the security requirement
+    type: delete
+
+  - problem:
+      - v3-global-securityscheme-weak
+    title: Remove the security requirement
+    type: delete
+
+  - problem:
+      - v3-header-schema-undefined
+    title: Add 'schema' property
+    type: insert
+    fix:
+      schema:
+        type: integer
+    parameters:
+      - name: type
+        path: /schema/type
+        values:
+          - string
+          - integer
+          - number
+          - boolean
+
+  - problem:
+      - v3-operation-security
+    title: Add 'security' property
+    type: insert
+    fix:
+      security:
+        - foo: []
+    parameters:
+      # if inserting the snippet, focus should be on the key name "foo"
+      # hence the "type: key" marker to indicate that value is the
+      # property name, not the property value
+      - name: name
+        type: key
+        path: /security/foo
+
+  - problem:
+      - v3-operation-securityrequirement-average
+    title: Remove security scheme
+    type: delete
+
+  - problem:
+      - v3-operation-securityrequirement-clearcredentials
+    title: Remove security scheme
+    type: delete
+
+  - problem:
+      - v3-operation-securityrequirement-oauth2-scope-unreferenced
+    title: Remove undefined scope
+    type: delete
+
+  - problem:
+      - v3-parameter-schema-undefined
+    title: Add 'schema' property
+    type: insert
+    fix:
+      schema:
+        type: integer
+    parameters:
+      - name: type
+        path: /schema/type
+        values:
+          - string
+          - integer
+          - number
+          - boolean
+
+  - problem:
+      - v3-response-400
+    title: Add 404 response
+    type: insert
+    fix:
+      '400':
+        description: Bad Request
+
+  - problem:
+      - v3-response-401
+    title: Add 401 response
+    type: insert
+    fix:
+      '401':
+        description: Unauthorized
+
+  - problem:
+      - v3-response-403
+    title: Add 403 response
+    type: insert
+    fix:
+      '403':
+        description: Forbidden
+
+  - problem:
+      - v3-response-404
+    title: Add 404 response
+    type: insert
+    fix:
+      '404':
+        description: Not Found
+
+  - problem:
+      - v3-response-415
+    title: Add 415 response
+    type: insert
+    fix:
+      '415':
+        description: Unsupported Media Type
+
+  - problem:
+      - v3-response-429
+    title: Add 429 response
+    type: insert
+    fix:
+      '429':
+        description: Too Many Requests
+
+  - problem:
+      - v3-response-500
+    title: Add 500 response
+    type: insert
+    fix:
+      '500':
+        description: Internal Server Error
+
+  - problem:
+      - v3-response-default-undefined
+    title: Add default response
+    type: insert
+    fix:
+      default:
+        description: Default Response
+
+  - problem:
+      - v3-response-delete-2xx
+    title: Add 200, 201, 202 or 204 response
+    type: insert
+    fix:
+      '200':
+        description: Deleted
+    parameters:
+      - name: code
+        type: key
+        path: /200
+        values:
+          - '200'
+          - '201'
+          - '202'
+          - '204'
+      - name: description
+        path: /200/description
+
+  - problem:
+      - v3-response-head-2xx
+    title: Add 200 or 202 response
+    type: insert
+    fix:
+      '200':
+        description: OK
+    parameters:
+      - name: code
+        type: key
+        path: /200
+        values:
+          - '200'
+          - '202'
+      - name: description
+        path: /200/description
+        values:
+          - OK
+          - Accepted
+
+  - problem:
+      - v3-response-options-2xx
+    title: Add 200 response
+    type: insert
+    fix:
+      '200':
+        description: OK
+        headers:
+          Allow: GET, HEAD, PUT
+    parameters:
+      - name: description
+        path: /200/description
+      - name: allow
+        path: /200/headers/Allow
+
+  - problem:
+      - v3-response-patch-2xx
+    title: Add 200, 201, 202 or 204 response
+    type: insert
+    fix:
+      '200':
+        description: Updated
+    parameters:
+      - name: code
+        type: key
+        path: /200
+        values:
+          - '200'
+          - '201'
+          - '202'
+          - '204'
+      - name: description
+        path: /200/description
+
+  - problem:
+      - v3-response-post-2xx
+    title: Add 200, 201, 202 or 204 response
+    type: insert
+    fix:
+      '200':
+        description: OK
+    parameters:
+      - name: code
+        type: key
+        path: /200
+        values:
+          - '200'
+          - '201'
+          - '202'
+          - '204'
+      - name: description
+        path: /200/description
+
+  - problem:
+      - v3-response-put-2xx
+    title: Add 200, 201, 202 or 204 response
+    type: insert
+    fix:
+      '200':
+        description: OK
+    parameters:
+      - name: code
+        type: key
+        path: /200
+        values:
+          - '200'
+          - '201'
+          - '202'
+          - '204'
+      - name: description
+        path: /200/description
+
+  - problem:
+      - v3-response-schema-defined
+    title: Remove 'schema' property
+    type: delete
+
+  - problem:
+      - v3-response-schema-undefined
+    title: Set response schema
+    type: insert
+    fix:
+      content:
+        application/json:
+          schema:
+            $ref: '#/'
+    parameters:
+      - name: schema
+        path: /content/application~1json/schema/$ref
+
+  - problem:
+      - v3-response-trace-2xx
+    title: Add 200 response
+    type: insert
+    fix:
+      '200':
+        description: OK
+    parameters:
+      - name: description
+        path: /200/description
+
+  - problem:
+      - v3-schema-array-items-notype
+    title: Add 'type' property
+    type: insert
+    fix:
+      items:
+        type: integer
+    parameters:
+      - name: type
+        path: /items/type
+        values:
+          - string
+          - integer
+          - number
+          - boolean
+
+  - problem:
+      - v3-schema-array-maxitems
+    title: Add 'maxItems' property
+    type: insert
+    fix:
+      maxItems: 100
+    parameters:
+      - name: number
+        path: /maxItems
+
+  - problem:
+      - v3-schema-empty
+    title: Add '$ref' property
+    type: insert
+    fix:
+      $ref: '#/components/schemas/'
+    parameters:
+      - name: ref
+        path: /$ref
+
+  - problem:
+      - v3-schema-notype
+    title: Add 'type' property
+    type: insert
+    fix:
+      type: integer
+    parameters:
+      - name: type
+        path: /type
+        values:
+          - string
+          - integer
+          - number
+          - boolean
+
+  - problem:
+      - v3-schema-numerical-format
+    title: Add 'format' property
+    type: insert
+    fix:
+      format: int32
+    parameters:
+      - name: format
+        path: /format
+        values:
+          - int32
+          - int64
+          - float
+          - double
+
+  - problem:
+      - v3-global-http-clear
+    title: Replace HTTP protocol with HTTPS
+    type: regex-replace
+    match: ^http(.+)
+    replace: https$1
+
+  - problem:
+      - v3-schema-numerical-max
+    title: Set 'maximum' property
+    # 'insert' type, insert value of the 'fix' into a path specified by the issue
+    type: insert
+    fix:
+      maximum: 1024
+    # the parameters property to be used later to allow overriding of
+    # the values in the 'fix'
+    parameters:
+      - name: maxValue
+        path: /maximum
+
+  - problem:
+      - v3-schema-numerical-min
+    title: Set 'minimum' property
+    type: insert
+    fix:
+      minimum: 1024
+    parameters:
+      - name: minValue
+        path: /minimum
+
+  - problem:
+      - v3-validation-schema-write-read-only
+    title: Remove 'writeOnly' property
+    type: delete
+    # 'pointer' property instructs quickfix to use issue pointer + '/writeOnly'
+    pointer: /writeOnly
+
+  - problem:
+      - v3-validation-schema-write-read-only
+    title: Remove 'readOnly' property
+    type: delete
+    pointer: /readOnly
+
+  - problem:
+      - v3-validation-schema-notarray-items
+    title: Remove 'items' property
+    # no 'pointer' property take pointer from issue as is
+    type: delete
+
+  - problem:
+      - v3-schema-object-additionalproperties-true
+    title: Set 'additionalProperties' property to false
+    type: insert
+    fix:
+      additionalProperties: false
+
+  - problem:
+      - v3-schema-string-pattern
+    title: Set 'pattern' property
+    type: insert
+    fix:
+      pattern: ^example[0-9a-f]{8}$
+    parameters:
+      - name: minValue
+        path: /pattern
+
+  - problem:
+      - v3-schema-string-maxlength
+    title: Set 'maxLength' property
+    type: insert
+    fix:
+      maxLength: 10
+    parameters:
+      - name: maxLength
+        path: /maxLength
+
+  - problem:
+      - v3-response-schema-undefined
+    title: Set response schema
+    type: insert
+    fix:
+      content:
+        application/json:
+          schema:
+            $ref: '#/'
+    parameters:
+      - name: schema
+        path: /content/application~1json/schema/$ref
