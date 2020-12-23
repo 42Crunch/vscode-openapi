@@ -285,7 +285,6 @@ export function replaceYamlNode(
   if (isObject || isArray) {
     const index = getCurrentIdentation(document, start);
     const [indent, char] = getBasicIndentation(document, root);
-    value = shift(value, indent, char, index, 0, false);
     // Last array member end offset may be at the beggining of the next key node (next line)
     // In this case we must keep ident + \n symbols
     if (target.isArray()) {
@@ -294,8 +293,13 @@ export function replaceYamlNode(
       if (!line.text.trim().startsWith('-')) {
         const line = getTopLineByOffset(document, end);
         const endPosition = new vscode.Position(line.lineNumber, line.text.length);
+        value = shift(value, indent, char, index, 0, false);
         return [value, new vscode.Range(document.positionAt(start), endPosition)];
       }
+    }
+    // Replace plain value with not plain one (add a new line)
+    if (!(target.isArray() || target.isObject()) && target.getParent().isObject()) {
+      value = shift('\n' + value, indent, char, index, indent, false);
     }
   }
   return [value, new vscode.Range(document.positionAt(start), document.positionAt(end))];
