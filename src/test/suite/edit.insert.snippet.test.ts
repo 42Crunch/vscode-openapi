@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { withRandomFileEditor } from '../utils';
 import { getFixAsJsonString, getFixAsYamlString, insertJsonNode, insertYamlNode, safeParse } from '../../util';
 
-suite('Edit Insert Node Test Suite', () => {
+suite('Edit Insert Node as Snippet Test Suite', () => {
 
 	test('Methos insertJsonNode (key - value) test', async () => {
 
@@ -18,13 +18,10 @@ suite('Edit Insert Node Test Suite', () => {
 
 			let position: vscode.Position;
 			const root = safeParse(editor.document.getText(), editor.document.languageId);
-			let value = getFixAsJsonString(root, pointer, 'insert', fix, undefined, false);
-			[value, position] = insertJsonNode(editor.document, root, pointer, value, false);
+			let value = getFixAsJsonString(root, pointer, 'insert', fix, undefined, true);
+			[value, position] = insertJsonNode(editor.document, root, pointer, value);
 
-			const edit = new vscode.WorkspaceEdit();
-			edit.insert(editor.document.uri, position, value);
-			
-			return vscode.workspace.applyEdit(edit).then(() => {
+			return editor.insertSnippet(new vscode.SnippetString(value), position).then(() => {
 				assert.ok(doc.isDirty);
 				assert.equal(doc.getText(), expected);
 			});
@@ -34,7 +31,7 @@ suite('Edit Insert Node Test Suite', () => {
 	test('Methos insertJsonNode (array member) test', async () => {
 
 		const text = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1\n ],\n}';
-		const expected = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1,\n  {\n    "a2": "baz"\n  }\n ],\n}';
+		const expected = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1,\n  {\n      "a2": "baz"\n  }\n ],\n}';
 		const pointer = '/c';
 		const fix = {
 			"a2": "baz"
@@ -44,13 +41,10 @@ suite('Edit Insert Node Test Suite', () => {
 
 			let position: vscode.Position;
 			const root = safeParse(editor.document.getText(), editor.document.languageId);
-			let value = getFixAsJsonString(root, pointer, 'insert', fix, undefined, false);
-			[value, position] = insertJsonNode(editor.document, root, pointer, value, false);
+			let value = getFixAsJsonString(root, pointer, 'insert', fix, undefined, true);
+			[value, position] = insertJsonNode(editor.document, root, pointer, value);
 
-			const edit = new vscode.WorkspaceEdit();
-			edit.insert(editor.document.uri, position, value);
-			
-			return vscode.workspace.applyEdit(edit).then(() => {
+			return editor.insertSnippet(new vscode.SnippetString(value), position).then(() => {
 				assert.ok(doc.isDirty);
 				assert.equal(doc.getText(), expected);
 			});
@@ -70,15 +64,13 @@ suite('Edit Insert Node Test Suite', () => {
 
 			let position: vscode.Position;
 			const root = safeParse(editor.document.getText(), 'yaml');
-			let value = getFixAsYamlString(root, pointer, 'insert', fix, undefined, false);
+			let value = getFixAsYamlString(root, pointer, 'insert', fix, undefined, true);
 			[value, position] = insertYamlNode(editor.document, root, pointer, value);
 
-			const edit = new vscode.WorkspaceEdit();
-			edit.insert(editor.document.uri, position, value);
-			
-			return vscode.workspace.applyEdit(edit).then(() => {
+			return editor.insertSnippet(new vscode.SnippetString(value), position).then(() => {
 				assert.ok(doc.isDirty);
 				assert.equal(doc.getText(), expected);
+				
 			});
 		});
 	});
@@ -96,13 +88,10 @@ suite('Edit Insert Node Test Suite', () => {
 
 			let position: vscode.Position;
 			const root = safeParse(editor.document.getText(), 'yaml');
-			let value = getFixAsYamlString(root, pointer, 'insert', fix, undefined, false);
+			let value = getFixAsYamlString(root, pointer, 'insert', fix, undefined, true);
 			[value, position] = insertYamlNode(editor.document, root, pointer, value);
 
-			const edit = new vscode.WorkspaceEdit();
-			edit.insert(editor.document.uri, position, value);
-			
-			return vscode.workspace.applyEdit(edit).then(() => {
+			return editor.insertSnippet(new vscode.SnippetString(value), position).then(() => {
 				assert.ok(doc.isDirty);
 				assert.equal(doc.getText(), expected);
 			});
