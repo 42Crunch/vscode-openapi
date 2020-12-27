@@ -1,5 +1,25 @@
 fixes:
   - problem:
+      - v3-global-http-clear
+    title: Replace 'http' scheme with 'https'
+    type: regex-replace
+    match: ^http(.+)
+    replace: https$1
+    pointer: /servers/0/url
+
+  - problem:
+      - v3-global-security
+    title: Create 'security' element
+    type: insert
+    fix:
+      security:
+        - securityRequirement: []
+    parameters:
+      - name: name
+        path: /security/0/securityRequirement
+        type: key
+
+  - problem:
       - v3-global-securitydefinitions-undefined
     title: Add 'securitySchemes' element
     type: insert
@@ -372,13 +392,6 @@ fixes:
           - int64
           - float
           - double
-
-  - problem:
-      - v3-global-http-clear
-    title: Replace HTTP protocol with HTTPS
-    type: regex-replace
-    match: ^http(.+)
-    replace: https$1
 
   - problem:
       - v3-schema-numerical-max
