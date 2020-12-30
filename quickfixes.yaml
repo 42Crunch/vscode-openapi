@@ -107,3 +107,102 @@ fixes:
     parameters:
       - name: pattern
         path: /pattern
+
+  - problem:
+      - v3-response-post-2xx
+      - v3-response-put-2xx
+      - v3-response-get-2xx
+      - v3-response-delete-2xx
+      # TODO our OPTIONS example shows Allows header present, decide if we should include
+      # it in the fix
+      - v3-response-options-2xx
+      - v3-response-patch-2xx
+    title: Add 200 response
+    type: insert
+    fix:
+      '200':
+        description: OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/'
+    parameters:
+      - name: description
+        path: /200/description
+      - name: contentType
+        path: /200/content/application~1json
+        type: key
+      - name: schema
+        path: /200/content/application~1json/schema/$ref
+
+  - problem:
+      - v3-response-delete-2xx
+      - v3-response-patch-2xx
+    title: Add 202 response
+    type: insert
+    fix:
+      '202':
+        description: Accepted
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/'
+    parameters:
+      - name: description
+        path: /202/description
+      - name: contentType
+        path: /202/content/application~1json
+        type: key
+      - name: schema
+        path: /202/content/application~1json/schema/$ref
+
+  - problem:
+      - v3-response-post-2xx
+      - v3-response-put-2xx
+      - v3-response-delete-2xx
+      - v3-response-patch-2xx
+    title: Add 204 response
+    type: insert
+    fix:
+      '204':
+        description: Created
+    parameters:
+      - name: description
+        path: /204/description
+
+  - problem:
+      - v3-response-head-2xx
+    title: Add 200 or 202 response
+    type: insert
+    fix:
+      '200':
+        description: OK
+    parameters:
+      - name: code
+        path: /200
+        values:
+          - '200'
+          - '202'
+        type: key
+      - name: description
+        path: /200/description
+
+  - problem:
+      - v3-response-default-undefined
+    title: Add default response
+    type: insert
+    fix:
+      'default':
+        description: Default
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/'
+    parameters:
+      - name: description
+        path: /default/description
+      - name: contentType
+        path: /default/content/application~1json
+        type: key
+      - name: schema
+        path: /default/content/application~1json/schema/$ref
