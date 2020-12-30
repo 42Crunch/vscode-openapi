@@ -408,3 +408,42 @@ fixes:
         path: /default/description
       - name: schema
         path: /default/schema/$ref
+
+  - problem:
+      - v3-response-schema-defined
+    title: Remove response body definition
+    type: delete
+    pointer: /content
+
+  - problem:
+      - response-schema-defined
+    title: Remove response body definition
+    type: delete
+    pointer: /schema
+
+  - problem:
+      - v3-response-schema-undefined
+    title: Create response schema
+    type: insert
+    fix:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/'
+    parameters:
+      - name: contentType
+        path: /content/application~1json
+        type: key
+      - name: schema
+        path: /content/application~1json/schema/$ref
+
+  - problem:
+      - response-schema-undefined
+    title: Create response schema
+    type: insert
+    fix:
+      schema:
+        $ref: '#/definitions/'
+    parameters:
+      - name: schema
+        path: /schema/$ref
