@@ -447,3 +447,31 @@ fixes:
     parameters:
       - name: schema
         path: /schema/$ref
+
+  - problem:
+      - v3-validation-schema-write-read-only
+    title: Remove 'writeOnly' property
+    type: delete
+    pointer: /writeOnly
+
+  - problem:
+      - v3-validation-schema-write-read-only
+    title: Remove 'readOnly' property
+    type: delete
+    pointer: /readOnly
+
+  - problem:
+      - v3-schema-notype
+      - schema-notype
+    title: Create 'type' property
+    type: insert
+    fix:
+      type: integer
+    parameters:
+      - name: type
+        path: /type
+        values:
+          - string
+          - integer
+          - number
+          - boolean
