@@ -117,6 +117,10 @@ fixes:
       # it in the fix
       - v3-response-options-2xx
       - v3-response-patch-2xx
+      # TODO https://tools.ietf.org/html/rfc7231#page-32 specifies
+      # content type message/http for the TRACE message response
+      # check usage, and implement if required
+      - v3-response-trace-2xx
     title: Create '200' response
     type: insert
     fix:
