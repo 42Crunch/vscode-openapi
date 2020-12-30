@@ -1,10 +1,10 @@
-import * as vscode from 'vscode';
-import * as quickfixes from './quickfixes-latest.json';
-import { AuditContext, AuditDiagnostic } from './types';
-import { parse, Node } from '../ast';
-import { createDiagnostics } from './diagnostic';
-import { createDecorations, setDecorations } from './decoration';
-import { ReportWebView } from './report';
+import * as vscode from "vscode";
+import * as quickfixes from "./quickfixes.json";
+import { AuditContext, AuditDiagnostic } from "./types";
+import { Node } from "../ast";
+import { createDiagnostics } from "./diagnostic";
+import { createDecorations, setDecorations } from "./decoration";
+import { ReportWebView } from "./report";
 import {
   safeParse,
   deleteJsonNode,
@@ -16,14 +16,14 @@ import {
   renameKeyNode,
   replaceJsonNode,
   replaceYamlNode,
-} from '../util';
+} from "../util";
 
 enum FixType {
-  Insert = 'insert',
-  Replace = 'replace',
-  Delete = 'delete',
-  RegexReplace = 'regex-replace',
-  RenameKey = 'renameKey',
+  Insert = "insert",
+  Replace = "replace",
+  Delete = "delete",
+  RegexReplace = "regex-replace",
+  RenameKey = "renameKey",
 }
 
 interface Fix {
@@ -65,15 +65,15 @@ async function fixRegexReplace(
   fix: RegexReplaceFix,
   pointer: string,
   root: Node,
-  target: Node,
+  target: Node
 ) {
   const currentValue = target.getValue();
-  if (typeof currentValue !== 'string') {
+  if (typeof currentValue !== "string") {
     return;
   }
-  const newValue = currentValue.replace(new RegExp(fix.match, 'g'), fix.replace);
+  const newValue = currentValue.replace(new RegExp(fix.match, "g"), fix.replace);
   let value: string, range: vscode.Range;
-  if (document.languageId === 'json') {
+  if (document.languageId === "json") {
     [value, range] = replaceJsonNode(document, root, pointer, '"' + newValue + '"');
   } else {
     [value, range] = replaceYamlNode(document, root, pointer, newValue);
@@ -88,10 +88,10 @@ async function fixInsert(
   document: vscode.TextDocument,
   fix: InsertReplaceRenameFix,
   pointer: string,
-  root: Node,
+  root: Node
 ) {
   let value: string, position: vscode.Position;
-  if (document.languageId === 'json') {
+  if (document.languageId === "json") {
     value = getFixAsJsonString(root, pointer, fix.type, clone(fix.fix), fix.parameters, true);
     [value, position] = insertJsonNode(document, root, pointer, value);
   } else {
@@ -101,9 +101,14 @@ async function fixInsert(
   await editor.insertSnippet(new vscode.SnippetString(value), position);
 }
 
-async function fixReplace(document: vscode.TextDocument, fix: InsertReplaceRenameFix, pointer: string, root: Node) {
+async function fixReplace(
+  document: vscode.TextDocument,
+  fix: InsertReplaceRenameFix,
+  pointer: string,
+  root: Node
+) {
   let value: string, range: vscode.Range;
-  if (document.languageId === 'json') {
+  if (document.languageId === "json") {
     value = getFixAsJsonString(root, pointer, fix.type, clone(fix.fix), fix.parameters, false);
     [value, range] = replaceJsonNode(document, root, pointer, value);
   } else {
@@ -115,9 +120,14 @@ async function fixReplace(document: vscode.TextDocument, fix: InsertReplaceRenam
   await vscode.workspace.applyEdit(edit);
 }
 
-async function fixRenameKey(document: vscode.TextDocument, fix: InsertReplaceRenameFix, pointer: string, root: Node) {
+async function fixRenameKey(
+  document: vscode.TextDocument,
+  fix: InsertReplaceRenameFix,
+  pointer: string,
+  root: Node
+) {
   let value: string;
-  if (document.languageId === 'json') {
+  if (document.languageId === "json") {
     value = getFixAsJsonString(root, pointer, fix.type, clone(fix.fix), fix.parameters, false);
   } else {
     value = getFixAsYamlString(root, pointer, fix.type, clone(fix.fix), fix.parameters, false);
@@ -130,7 +140,7 @@ async function fixRenameKey(document: vscode.TextDocument, fix: InsertReplaceRen
 
 async function fixDelete(document: vscode.TextDocument, pointer: string, root: Node) {
   let range: vscode.Range;
-  if (document.languageId === 'json') {
+  if (document.languageId === "json") {
     range = deleteJsonNode(document, root, pointer);
   } else {
     range = deleteYamlNode(document, root, pointer);
@@ -143,7 +153,7 @@ async function fixDelete(document: vscode.TextDocument, pointer: string, root: N
 function transformInsertToReplaceIfExists(
   target: Node,
   pointer: string,
-  fix: InsertReplaceRenameFix,
+  fix: InsertReplaceRenameFix
 ): [string, InsertReplaceRenameFix] {
   const keys = Object.keys(fix.fix);
   if (target.isObject() && keys.length === 1) {
@@ -169,7 +179,7 @@ async function quickFixCommand(
   editor: vscode.TextEditor,
   diagnostic: AuditDiagnostic,
   fix: InsertReplaceRenameFix | RegexReplaceFix | DeleteFix,
-  auditContext: AuditContext,
+  auditContext: AuditContext
 ) {
   // if fix.pointer exists, append it to diagnostic.pointer
   const pointer = fix.pointer ? `${diagnostic.pointer}${fix.pointer}` : diagnostic.pointer;
@@ -225,15 +235,15 @@ async function quickFixCommand(
 }
 
 function range(document: vscode.TextDocument, root: Node, pointer: string) {
-  const markerNode = root.find('/openapi') || root.find('/swagger');
-  const node = pointer === '' ? markerNode : root.find(pointer);
+  const markerNode = root.find("/openapi") || root.find("/swagger");
+  const node = pointer === "" ? markerNode : root.find(pointer);
   if (node) {
     const [start, end] = node.getRange();
     const position = document.positionAt(start);
     const line = document.lineAt(position.line);
     return new vscode.Range(
       new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
-      new vscode.Position(position.line, line.range.end.character),
+      new vscode.Position(position.line, line.range.end.character)
     );
   } else {
     throw new Error(`Unable to locate node: ${pointer}`);
@@ -242,15 +252,16 @@ function range(document: vscode.TextDocument, root: Node, pointer: string) {
 
 export function registerQuickfixes(context: vscode.ExtensionContext, auditContext: AuditContext) {
   vscode.commands.registerTextEditorCommand(
-    'openapi.simpleQuckFix',
-    async (editor, edit, diagnostic: AuditDiagnostic, fix) => quickFixCommand(editor, diagnostic, fix, auditContext),
+    "openapi.simpleQuckFix",
+    async (editor, edit, diagnostic: AuditDiagnostic, fix) =>
+      quickFixCommand(editor, diagnostic, fix, auditContext)
   );
 
-  vscode.languages.registerCodeActionsProvider('yaml', new AuditCodeActions(auditContext), {
+  vscode.languages.registerCodeActionsProvider("yaml", new AuditCodeActions(auditContext), {
     providedCodeActionKinds: AuditCodeActions.providedCodeActionKinds,
   });
 
-  vscode.languages.registerCodeActionsProvider('json', new AuditCodeActions(auditContext), {
+  vscode.languages.registerCodeActionsProvider("json", new AuditCodeActions(auditContext), {
     providedCodeActionKinds: AuditCodeActions.providedCodeActionKinds,
   });
 }
@@ -267,13 +278,13 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
     document: vscode.TextDocument,
     range: vscode.Range | vscode.Selection,
     context: vscode.CodeActionContext,
-    token: vscode.CancellationToken,
+    token: vscode.CancellationToken
   ): vscode.ProviderResult<(vscode.Command | vscode.CodeAction)[]> {
     const result: vscode.CodeAction[] = [];
 
     for (const diagnostic of context.diagnostics) {
       const auditDiagnostic = <AuditDiagnostic>diagnostic;
-      if (!auditDiagnostic.hasOwnProperty('issueIndex')) {
+      if (!auditDiagnostic.hasOwnProperty("issueIndex")) {
         continue;
       }
 
@@ -284,7 +295,7 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
             const action = new vscode.CodeAction(fix.title, vscode.CodeActionKind.QuickFix);
             action.command = {
               arguments: [diagnostic, fix],
-              command: 'openapi.simpleQuckFix',
+              command: "openapi.simpleQuckFix",
               title: fix.title,
             };
             action.diagnostics = [diagnostic];

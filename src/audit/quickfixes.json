@@ -1,0 +1,725 @@
+{
+  "fixes": [
+    {
+      "problem": [
+        "global-security",
+        "v3-global-security"
+      ],
+      "title": "Create 'security' property",
+      "type": "insert",
+      "fix": {
+        "security": [
+          {
+            "securityRequirement": []
+          }
+        ]
+      },
+      "parameters": [
+        {
+          "name": "name",
+          "path": "/security/0/securityRequirement",
+          "type": "key"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "parameter-array-maxitems",
+        "response-header-array-maxitems",
+        "schema-array-maxitems",
+        "v3-schema-array-maxitems"
+      ],
+      "title": "Create 'maxItems' property",
+      "type": "insert",
+      "fix": {
+        "maxItems": 100
+      },
+      "parameters": [
+        {
+          "name": "items",
+          "path": "/maxItems"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "parameter-numerical-format",
+        "response-header-numerical-format",
+        "schema-numerical-format",
+        "v3-schema-numerical-format"
+      ],
+      "title": "Create 'format' property",
+      "type": "insert",
+      "fix": {
+        "format": "int32"
+      },
+      "parameters": [
+        {
+          "name": "format",
+          "path": "/format",
+          "values": [
+            "int32",
+            "int64",
+            "float",
+            "double"
+          ]
+        }
+      ]
+    },
+    {
+      "problem": [
+        "parameter-numerical-max",
+        "response-header-numerical-max",
+        "schema-numerical-max",
+        "v3-schema-numerical-max"
+      ],
+      "title": "Create 'maximum' property",
+      "type": "insert",
+      "fix": {
+        "maximum": 1024
+      },
+      "parameters": [
+        {
+          "name": "maximum",
+          "path": "/maximum"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "parameter-numerical-min",
+        "response-header-numerical-min",
+        "schema-numerical-min",
+        "v3-schema-numerical-min"
+      ],
+      "title": "Create 'minimum' property",
+      "type": "insert",
+      "fix": {
+        "minimum": 0
+      },
+      "parameters": [
+        {
+          "name": "minimum",
+          "path": "/minimum"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "parameter-string-maxlength",
+        "response-header-string-maxlength",
+        "schema-string-maxlength",
+        "v3-schema-string-maxlength"
+      ],
+      "title": "Create 'maxLength' property",
+      "type": "insert",
+      "fix": {
+        "maxLength": 32
+      },
+      "parameters": [
+        {
+          "name": "maxlen",
+          "path": "/maxLength"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "parameter-string-pattern",
+        "response-header-string-pattern",
+        "schema-string-pattern",
+        "v3-schema-string-pattern"
+      ],
+      "title": "Create 'pattern' property",
+      "type": "insert",
+      "fix": {
+        "pattern": "^example[0-9a-f]{8}$"
+      },
+      "parameters": [
+        {
+          "name": "pattern",
+          "path": "/pattern"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "v3-response-post-2xx",
+        "v3-response-put-2xx",
+        "v3-response-get-2xx",
+        "v3-response-delete-2xx",
+        "v3-response-options-2xx",
+        "v3-response-patch-2xx",
+        "v3-response-trace-2xx"
+      ],
+      "title": "Create '200' response",
+      "type": "insert",
+      "fix": {
+        "200": {
+          "description": "OK",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "description",
+          "path": "/200/description"
+        },
+        {
+          "name": "contentType",
+          "path": "/200/content/application~1json",
+          "type": "key"
+        },
+        {
+          "name": "schema",
+          "path": "/200/content/application~1json/schema/$ref"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "v3-response-delete-2xx",
+        "v3-response-patch-2xx"
+      ],
+      "title": "Create '202' response",
+      "type": "insert",
+      "fix": {
+        "202": {
+          "description": "Accepted",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "description",
+          "path": "/202/description"
+        },
+        {
+          "name": "contentType",
+          "path": "/202/content/application~1json",
+          "type": "key"
+        },
+        {
+          "name": "schema",
+          "path": "/202/content/application~1json/schema/$ref"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "v3-response-post-2xx",
+        "v3-response-put-2xx",
+        "v3-response-delete-2xx",
+        "v3-response-patch-2xx",
+        "response-post-2xx",
+        "response-put-2xx",
+        "response-delete-2xx",
+        "response-patch-2xx"
+      ],
+      "title": "Create '204' response",
+      "type": "insert",
+      "fix": {
+        "204": {
+          "description": "Created"
+        }
+      },
+      "parameters": [
+        {
+          "name": "description",
+          "path": "/204/description"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "v3-response-head-2xx",
+        "response-head-2xx"
+      ],
+      "title": "Create '200' or '202' response",
+      "type": "insert",
+      "fix": {
+        "200": {
+          "description": "OK"
+        }
+      },
+      "parameters": [
+        {
+          "name": "code",
+          "path": "/200",
+          "values": [
+            "200",
+            "202"
+          ],
+          "type": "key"
+        },
+        {
+          "name": "description",
+          "path": "/200/description"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "v3-response-401"
+      ],
+      "title": "Create '401' response",
+      "type": "insert",
+      "fix": {
+        "401": {
+          "description": "Unauthorized",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "description",
+          "path": "/401/description"
+        },
+        {
+          "name": "contentType",
+          "path": "/401/content/application~1json",
+          "type": "key"
+        },
+        {
+          "name": "schema",
+          "path": "/401/content/application~1json/schema/$ref"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "v3-response-403"
+      ],
+      "title": "Create '403' response",
+      "type": "insert",
+      "fix": {
+        "403": {
+          "description": "Forbidden",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "description",
+          "path": "/403/description"
+        },
+        {
+          "name": "contentType",
+          "path": "/403/content/application~1json",
+          "type": "key"
+        },
+        {
+          "name": "schema",
+          "path": "/403/content/application~1json/schema/$ref"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "v3-response-404"
+      ],
+      "title": "Create '404' response",
+      "type": "insert",
+      "fix": {
+        "404": {
+          "description": "Not Found",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "description",
+          "path": "/404/description"
+        },
+        {
+          "name": "contentType",
+          "path": "/404/content/application~1json",
+          "type": "key"
+        },
+        {
+          "name": "schema",
+          "path": "/404/content/application~1json/schema/$ref"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "v3-response-429"
+      ],
+      "title": "Create '429' response",
+      "type": "insert",
+      "fix": {
+        "429": {
+          "description": "Too Many Requests",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "description",
+          "path": "/429/description"
+        },
+        {
+          "name": "contentType",
+          "path": "/429/content/application~1json",
+          "type": "key"
+        },
+        {
+          "name": "schema",
+          "path": "/429/content/application~1json/schema/$ref"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "v3-response-default-undefined"
+      ],
+      "title": "Create 'default' response",
+      "type": "insert",
+      "fix": {
+        "default": {
+          "description": "Default",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/"
+              }
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "description",
+          "path": "/default/description"
+        },
+        {
+          "name": "contentType",
+          "path": "/default/content/application~1json",
+          "type": "key"
+        },
+        {
+          "name": "schema",
+          "path": "/default/content/application~1json/schema/$ref"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "response-post-2xx",
+        "response-put-2xx",
+        "response-get-2xx",
+        "response-delete-2xx",
+        "response-options-2xx",
+        "response-patch-2xx"
+      ],
+      "title": "Create '200' response",
+      "type": "insert",
+      "fix": {
+        "200": {
+          "description": "OK",
+          "schema": {
+            "$ref": "#/definitions/"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "description",
+          "path": "/200/description"
+        },
+        {
+          "name": "schema",
+          "path": "/200/schema/$ref"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "response-delete-2xx",
+        "response-patch-2xx"
+      ],
+      "title": "Create '202' response",
+      "type": "insert",
+      "fix": {
+        "202": {
+          "description": "Accepted",
+          "schema": {
+            "$ref": "#/definitions/"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "description",
+          "path": "/202/description"
+        },
+        {
+          "name": "schema",
+          "path": "/202/schema/$ref"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "response-401"
+      ],
+      "title": "Create '401' response",
+      "type": "insert",
+      "fix": {
+        "401": {
+          "description": "Unauthorized",
+          "schema": {
+            "$ref": "#/definitions/"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "description",
+          "path": "/401/description"
+        },
+        {
+          "name": "schema",
+          "path": "/401/schema/$ref"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "response-403"
+      ],
+      "title": "Create '403' response",
+      "type": "insert",
+      "fix": {
+        "403": {
+          "description": "Forbidden",
+          "schema": {
+            "$ref": "#/definitions/"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "description",
+          "path": "/403/description"
+        },
+        {
+          "name": "schema",
+          "path": "/403/schema/$ref"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "response-404"
+      ],
+      "title": "Create '404' response",
+      "type": "insert",
+      "fix": {
+        "404": {
+          "description": "Not Found",
+          "schema": {
+            "$ref": "#/definitions/"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "description",
+          "path": "/404/description"
+        },
+        {
+          "name": "schema",
+          "path": "/404/schema/$ref"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "response-429"
+      ],
+      "title": "Create '429' response",
+      "type": "insert",
+      "fix": {
+        "429": {
+          "description": "Too Many Requests",
+          "schema": {
+            "$ref": "#/definitions/"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "description",
+          "path": "/429/description"
+        },
+        {
+          "name": "schema",
+          "path": "/429/schema/$ref"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "response-default-undefined"
+      ],
+      "title": "Create 'default' response",
+      "type": "insert",
+      "fix": {
+        "default": {
+          "description": "Default",
+          "schema": {
+            "$ref": "#/definitions/"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "description",
+          "path": "/default/description"
+        },
+        {
+          "name": "schema",
+          "path": "/default/schema/$ref"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "v3-response-schema-defined"
+      ],
+      "title": "Remove response body definition",
+      "type": "delete",
+      "pointer": "/content"
+    },
+    {
+      "problem": [
+        "response-schema-defined"
+      ],
+      "title": "Remove response body definition",
+      "type": "delete",
+      "pointer": "/schema"
+    },
+    {
+      "problem": [
+        "v3-response-schema-undefined"
+      ],
+      "title": "Create response schema",
+      "type": "insert",
+      "fix": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/"
+            }
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "contentType",
+          "path": "/content/application~1json",
+          "type": "key"
+        },
+        {
+          "name": "schema",
+          "path": "/content/application~1json/schema/$ref"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "response-schema-undefined"
+      ],
+      "title": "Create response schema",
+      "type": "insert",
+      "fix": {
+        "schema": {
+          "$ref": "#/definitions/"
+        }
+      },
+      "parameters": [
+        {
+          "name": "schema",
+          "path": "/schema/$ref"
+        }
+      ]
+    },
+    {
+      "problem": [
+        "v3-validation-schema-write-read-only"
+      ],
+      "title": "Remove 'writeOnly' property",
+      "type": "delete",
+      "pointer": "/writeOnly"
+    },
+    {
+      "problem": [
+        "v3-validation-schema-write-read-only"
+      ],
+      "title": "Remove 'readOnly' property",
+      "type": "delete",
+      "pointer": "/readOnly"
+    },
+    {
+      "problem": [
+        "v3-schema-notype",
+        "schema-notype"
+      ],
+      "title": "Create 'type' property",
+      "type": "insert",
+      "fix": {
+        "type": "integer"
+      },
+      "parameters": [
+        {
+          "name": "type",
+          "path": "/type",
+          "values": [
+            "string",
+            "integer",
+            "number",
+            "boolean"
+          ]
+        }
+      ]
+    }
+  ]
+}
