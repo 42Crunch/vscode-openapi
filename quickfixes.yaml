@@ -193,6 +193,86 @@ fixes:
         path: /200/description
 
   - problem:
+      - v3-response-401
+    title: Create '401' response
+    type: insert
+    fix:
+      '401':
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/'
+    parameters:
+      - name: description
+        path: /401/description
+      - name: contentType
+        path: /401/content/application~1json
+        type: key
+      - name: schema
+        path: /401/content/application~1json/schema/$ref
+
+  - problem:
+      - v3-response-403
+    title: Create '403' response
+    type: insert
+    fix:
+      '403':
+        description: Forbidden
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/'
+    parameters:
+      - name: description
+        path: /403/description
+      - name: contentType
+        path: /403/content/application~1json
+        type: key
+      - name: schema
+        path: /403/content/application~1json/schema/$ref
+
+  - problem:
+      - v3-response-404
+    title: Create '404' response
+    type: insert
+    fix:
+      '404':
+        description: Not Found
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/'
+    parameters:
+      - name: description
+        path: /404/description
+      - name: contentType
+        path: /404/content/application~1json
+        type: key
+      - name: schema
+        path: /404/content/application~1json/schema/$ref
+
+  - problem:
+      - v3-response-429
+    title: Create '429' response
+    type: insert
+    fix:
+      '429':
+        description: Too Many Requests
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/'
+    parameters:
+      - name: description
+        path: /429/description
+      - name: contentType
+        path: /429/content/application~1json
+        type: key
+      - name: schema
+        path: /429/content/application~1json/schema/$ref
+
+  - problem:
       - v3-response-default-undefined
     title: Create 'default' response
     type: insert
