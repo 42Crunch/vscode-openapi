@@ -117,7 +117,7 @@ fixes:
       # it in the fix
       - v3-response-options-2xx
       - v3-response-patch-2xx
-    title: Add 200 response
+    title: Create '200' response
     type: insert
     fix:
       '200':
@@ -138,7 +138,7 @@ fixes:
   - problem:
       - v3-response-delete-2xx
       - v3-response-patch-2xx
-    title: Add 202 response
+    title: Create '202' response
     type: insert
     fix:
       '202':
@@ -161,7 +161,11 @@ fixes:
       - v3-response-put-2xx
       - v3-response-delete-2xx
       - v3-response-patch-2xx
-    title: Add 204 response
+      - response-post-2xx
+      - response-put-2xx
+      - response-delete-2xx
+      - response-patch-2xx
+    title: Create '204' response
     type: insert
     fix:
       '204':
@@ -172,7 +176,8 @@ fixes:
 
   - problem:
       - v3-response-head-2xx
-    title: Add 200 or 202 response
+      - response-head-2xx
+    title: Create '200' or '202' response
     type: insert
     fix:
       '200':
@@ -189,7 +194,7 @@ fixes:
 
   - problem:
       - v3-response-default-undefined
-    title: Add default response
+    title: Create 'default' response
     type: insert
     fix:
       'default':
@@ -206,3 +211,56 @@ fixes:
         type: key
       - name: schema
         path: /default/content/application~1json/schema/$ref
+
+  - problem:
+      - response-post-2xx
+      - response-put-2xx
+      - response-get-2xx
+      - response-delete-2xx
+      # TODO our OPTIONS example shows Allows header present, decide if we should include
+      # it in the fix
+      - response-options-2xx
+      - response-patch-2xx
+    title: Create '200' response
+    type: insert
+    fix:
+      '200':
+        description: OK
+        schema:
+          $ref: '#/definitions/'
+    parameters:
+      - name: description
+        path: /200/description
+      - name: schema
+        path: /200/schema/$ref
+
+  - problem:
+      - response-delete-2xx
+      - response-patch-2xx
+    title: Create '202' response
+    type: insert
+    fix:
+      '202':
+        description: Accepted
+        schema:
+          $ref: '#/definitions/'
+    parameters:
+      - name: description
+        path: /202/description
+      - name: schema
+        path: /202/schema/$ref
+
+  - problem:
+      - response-default-undefined
+    title: Create 'default' response
+    type: insert
+    fix:
+      'default':
+        description: Default
+        schema:
+          $ref: '#/definitions/'
+    parameters:
+      - name: description
+        path: /default/description
+      - name: schema
+        path: /default/schema/$ref
