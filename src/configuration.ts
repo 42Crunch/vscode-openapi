@@ -3,8 +3,16 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import { ConfigurationChangeEvent, Event, EventEmitter, ExtensionContext, Uri, workspace, Selection } from 'vscode';
-import { configId } from './types';
+import {
+  ConfigurationChangeEvent,
+  Event,
+  EventEmitter,
+  ExtensionContext,
+  Uri,
+  workspace,
+  Selection,
+} from "vscode";
+import { configId } from "./types";
 
 export class Configuration {
   private section: string;
@@ -14,7 +22,9 @@ export class Configuration {
   }
 
   configure(context: ExtensionContext) {
-    context.subscriptions.push(workspace.onDidChangeConfiguration(this.onConfigurationChanged, this));
+    context.subscriptions.push(
+      workspace.onDidChangeConfiguration(this.onConfigurationChanged, this)
+    );
   }
 
   private _onDidChange = new EventEmitter<ConfigurationChangeEvent>();

@@ -3,14 +3,18 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import * as vscode from 'vscode';
-import { AuditDiagnostic } from './types';
-import { parserOptions } from '../parser-options';
-import { parse, Node } from '../ast';
-import { POINT_CONVERSION_COMPRESSED } from 'constants';
-import { isNull } from 'util';
+import * as vscode from "vscode";
+import { AuditDiagnostic } from "./types";
+import { parserOptions } from "../parser-options";
+import { parse, Node } from "../ast";
+import { POINT_CONVERSION_COMPRESSED } from "constants";
+import { isNull } from "util";
 
-export function createDiagnostics(filename: string, issues, textEditor: vscode.TextEditor): vscode.DiagnosticCollection {
+export function createDiagnostics(
+  filename: string,
+  issues,
+  textEditor: vscode.TextEditor
+): vscode.DiagnosticCollection {
   const diagnostics = vscode.languages.createDiagnosticCollection();
   for (const uri of Object.keys(issues)) {
     diagnostics.set(vscode.Uri.parse(uri), createDiagnosticsForUri(filename, uri, issues[uri]));
@@ -34,7 +38,7 @@ export function createDiagnostics(filename: string, issues, textEditor: vscode.T
 //       const [start, end] = ranges[i];
 //       const position =  textEditor.document.positionAt(start);
 //       const line =  textEditor.document.lineAt(position.line);
-      
+
 //       if (i < tmp.length) {
 
 //         tmp[i].lineNo = position.line;
@@ -54,7 +58,7 @@ export function createDiagnostics(filename: string, issues, textEditor: vscode.T
 //         );
 //         ci.pointer = pointers[i];
 //         ci.message = `ptr ${pointers[i]} line ${position.line} (${start}, ${end})`;
-//         tmp.push(ci);  
+//         tmp.push(ci);
 //       }
 //     }
 
@@ -80,10 +84,12 @@ export function createDiagnosticsForUri(filename: string, uri: string, issues): 
       id: issue.id,
       pointer: issue.pointer,
       //message: issue.message,
-      message: `${issue.description} ${issue.displayScore !== '0' ? `(score impact ${issue.displayScore})` : ''}`,
+      message: `${issue.description} ${
+        issue.displayScore !== "0" ? `(score impact ${issue.displayScore})` : ""
+      }`,
       severity: criticalityToSeverity[issue.criticality],
       range: issue.range,
-    }),
+    })
   );
 }
 
@@ -94,8 +100,7 @@ function getListOfAllJsonPointers(node: Node, pointers, ranges) {
   for (let child of node.getChildren()) {
     if (child.getKeyRange() == null) {
       ranges.push(child.getRange());
-    }
-    else {
+    } else {
       ranges.push(child.getKeyRange());
     }
     pointers.push(child.getJsonPonter());

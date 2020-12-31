@@ -2,58 +2,69 @@
  Copyright (c) 42Crunch Ltd. All rights reserved.
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
-import { basename } from 'path';
-import * as vscode from 'vscode';
+import { basename } from "path";
+import * as vscode from "vscode";
 
-import { audit, requestToken } from './client';
-import { createDecorations, setDecorations } from './decoration';
-import { createDiagnostics } from './diagnostic';
+import { audit, requestToken } from "./client";
+import { createDecorations, setDecorations } from "./decoration";
+import { createDiagnostics } from "./diagnostic";
 
-import { ReportWebView } from './report';
-import { TextDocument } from 'vscode';
-import { parserOptions } from '../parser-options';
-import { bundle, findMapping, displayBundlerErrors } from '../bundler';
-import { parse, Node } from '../ast';
-import { RuntimeContext } from '../types';
-import { AuditContext, Audit, Grades, Issue, ReportedIssue, IssuesByDocument, IssuesByType } from './types';
+import { ReportWebView } from "./report";
+import { TextDocument } from "vscode";
+import { parserOptions } from "../parser-options";
+import { bundle, findMapping, displayBundlerErrors } from "../bundler";
+import { parse, Node } from "../ast";
+import { RuntimeContext } from "../types";
+import {
+  AuditContext,
+  Audit,
+  Grades,
+  Issue,
+  ReportedIssue,
+  IssuesByDocument,
+  IssuesByType,
+} from "./types";
 
 export function registerSecurityAudit(
   context: vscode.ExtensionContext,
   runtimeContext: RuntimeContext,
   auditContext: AuditContext,
-  pendingAudits,
+  pendingAudits
 ) {
-  return vscode.commands.registerTextEditorCommand('openapi.securityAudit', async (textEditor, edit) => {
-    const uri = textEditor.document.uri.toString();
+  return vscode.commands.registerTextEditorCommand(
+    "openapi.securityAudit",
+    async (textEditor, edit) => {
+      const uri = textEditor.document.uri.toString();
 
-    if (pendingAudits[uri]) {
-      vscode.window.showErrorMessage(`Audit for "${uri}" is already in progress`);
-      return;
-    }
-
-    const existingAudit = auditContext[uri];
-    if (existingAudit) {
-      existingAudit.diagnostics.dispose();
-    }
-    delete auditContext[uri];
-    pendingAudits[uri] = true;
-
-    try {
-      const audit = await securityAudit(context, runtimeContext, textEditor);
-      if (audit) {
-        auditContext[uri] = audit;
-        setDecorations(textEditor, auditContext);
+      if (pendingAudits[uri]) {
+        vscode.window.showErrorMessage(`Audit for "${uri}" is already in progress`);
+        return;
       }
-      delete pendingAudits[uri];
-    } catch (e) {
-      delete pendingAudits[uri];
-      vscode.window.showErrorMessage(`Failed to audit: ${e}`);
+
+      const existingAudit = auditContext[uri];
+      if (existingAudit) {
+        existingAudit.diagnostics.dispose();
+      }
+      delete auditContext[uri];
+      pendingAudits[uri] = true;
+
+      try {
+        const audit = await securityAudit(context, runtimeContext, textEditor);
+        if (audit) {
+          auditContext[uri] = audit;
+          setDecorations(textEditor, auditContext);
+        }
+        delete pendingAudits[uri];
+      } catch (e) {
+        delete pendingAudits[uri];
+        vscode.window.showErrorMessage(`Failed to audit: ${e}`);
+      }
     }
-  });
+  );
 }
 
 export function registerFocusSecurityAudit(context, auditContext) {
-  return vscode.commands.registerCommand('openapi.focusSecurityAudit', (documentUri) => {
+  return vscode.commands.registerCommand("openapi.focusSecurityAudit", (documentUri) => {
     const audit = auditContext[documentUri];
     if (audit) {
       ReportWebView.show(context.extensiontPath, audit);
@@ -62,31 +73,36 @@ export function registerFocusSecurityAudit(context, auditContext) {
 }
 
 export function registerFocusSecurityAuditById(context, auditContext) {
-  return vscode.commands.registerTextEditorCommand('openapi.focusSecurityAuditById', (textEditor, edit, params) => {
-    const documentUri = textEditor.document.uri.toString();
-    const uri = Buffer.from(params.uri, 'base64').toString('utf8');
-    const audit = auditContext[uri];
-    if (audit && audit.issues[documentUri]) {
-      ReportWebView.showIds(context.extensionPath, audit, documentUri, params.ids);
+  return vscode.commands.registerTextEditorCommand(
+    "openapi.focusSecurityAuditById",
+    (textEditor, edit, params) => {
+      const documentUri = textEditor.document.uri.toString();
+      const uri = Buffer.from(params.uri, "base64").toString("utf8");
+      const audit = auditContext[uri];
+      if (audit && audit.issues[documentUri]) {
+        ReportWebView.showIds(context.extensionPath, audit, documentUri, params.ids);
+      }
     }
-  });
+  );
 }
 
 async function securityAudit(
   context: vscode.ExtensionContext,
   runtimeContext: RuntimeContext,
-  textEditor: vscode.TextEditor,
+  textEditor: vscode.TextEditor
 ): Promise<Audit | undefined> {
-  const configuration = vscode.workspace.getConfiguration('openapi');
-  let apiToken = <string>configuration.get('securityAuditToken');
+  const configuration = vscode.workspace.getConfiguration("openapi");
+  let apiToken = <string>configuration.get("securityAuditToken");
 
   if (!apiToken) {
     const email = await vscode.window.showInputBox({
       prompt:
-        'Security Audit from 42Crunch runs ~200 checks for security best practices in your API. VS Code needs an API key to use the service. Enter your email to receive the token.',
-      placeHolder: 'email address',
+        "Security Audit from 42Crunch runs ~200 checks for security best practices in your API. VS Code needs an API key to use the service. Enter your email to receive the token.",
+      placeHolder: "email address",
       validateInput: (value) =>
-        value.indexOf('@') > 0 && value.indexOf('@') < value.length - 1 ? null : 'Please enter valid email address',
+        value.indexOf("@") > 0 && value.indexOf("@") < value.length - 1
+          ? null
+          : "Please enter valid email address",
     });
 
     if (!email) {
@@ -94,17 +110,17 @@ async function securityAudit(
     }
 
     const tokenRequestResult = await vscode.window.withProgress(
-      { location: vscode.ProgressLocation.Notification, title: 'Requesting token' },
+      { location: vscode.ProgressLocation.Notification, title: "Requesting token" },
       async (progress, token) => {
         try {
           return await requestToken(email);
         } catch (e) {
-          vscode.window.showErrorMessage('Unexpected error when trying to request token: ' + e);
+          vscode.window.showErrorMessage("Unexpected error when trying to request token: " + e);
         }
-      },
+      }
     );
 
-    if (!tokenRequestResult || tokenRequestResult.status !== 'success') {
+    if (!tokenRequestResult || tokenRequestResult.status !== "success") {
       return;
     }
 
@@ -112,7 +128,7 @@ async function securityAudit(
       prompt:
         "API token has been sent. If you don't get the mail within a couple minutes, check your spam folder and that the address is correct. Paste the token above.",
       ignoreFocusOut: true,
-      placeHolder: 'token',
+      placeHolder: "token",
     });
 
     if (!token) {
@@ -120,19 +136,19 @@ async function securityAudit(
     }
 
     const configuration = vscode.workspace.getConfiguration();
-    configuration.update('openapi.securityAuditToken', token, vscode.ConfigurationTarget.Global);
+    configuration.update("openapi.securityAuditToken", token, vscode.ConfigurationTarget.Global);
     apiToken = token;
   }
 
   return vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: 'Running API Contract Security Audit...',
+      title: "Running API Contract Security Audit...",
       cancellable: false,
     },
     async (progress, cancellationToken): Promise<Audit | undefined> => {
       return performAudit(context, runtimeContext, textEditor, apiToken, progress);
-    },
+    }
   );
 }
 
@@ -141,7 +157,7 @@ async function performAudit(
   runtimeContext: RuntimeContext,
   textEditor: vscode.TextEditor,
   apiToken,
-  progress,
+  progress
 ): Promise<Audit | undefined> {
   let json, mapping;
 
@@ -149,9 +165,14 @@ async function performAudit(
     runtimeContext.bundlingDiagnostics.clear();
     [json, mapping] = await bundle(textEditor.document, parserOptions);
   } catch (err) {
-    displayBundlerErrors(textEditor.document.uri, parserOptions, runtimeContext.bundlingDiagnostics, err);
-    vscode.commands.executeCommand('workbench.action.problems.focus');
-    throw new Error('Failed to bundle for audit, check OpenAPI file for errors.');
+    displayBundlerErrors(
+      textEditor.document.uri,
+      parserOptions,
+      runtimeContext.bundlingDiagnostics,
+      err
+    );
+    vscode.commands.executeCommand("workbench.action.problems.focus");
+    throw new Error("Failed to bundle for audit, check OpenAPI file for errors.");
   }
 
   try {
@@ -161,7 +182,7 @@ async function performAudit(
       json,
       mapping,
       apiToken,
-      progress,
+      progress
     );
 
     const issuesByType: IssuesByType = {};
@@ -198,14 +219,14 @@ async function performAudit(
   } catch (e) {
     if (e.statusCode && e.statusCode === 429) {
       vscode.window.showErrorMessage(
-        'Too many requests. You can run up to 3 security audits per minute, please try again later.',
+        "Too many requests. You can run up to 3 security audits per minute, please try again later."
       );
     } else if (e.statusCode && e.statusCode === 403) {
       vscode.window.showErrorMessage(
-        'Authentication failed. Please paste the token that you received in email to Preferences > Settings > Extensions > OpenAPI > Security Audit Token. If you want to receive a new token instead, clear that setting altogether and initiate a new security audit for one of your OpenAPI files.',
+        "Authentication failed. Please paste the token that you received in email to Preferences > Settings > Extensions > OpenAPI > Security Audit Token. If you want to receive a new token instead, clear that setting altogether and initiate a new security audit for one of your OpenAPI files."
       );
     } else {
-      vscode.window.showErrorMessage('Unexpected error when trying to audit API: ' + e);
+      vscode.window.showErrorMessage("Unexpected error when trying to audit API: " + e);
     }
   }
 }
@@ -239,7 +260,7 @@ function findIssueLocation(mainUri: vscode.Uri, root: Node, mappings, pointer): 
 async function processIssues(
   document,
   mappings,
-  issues: ReportedIssue[],
+  issues: ReportedIssue[]
 ): Promise<[Node, string[], { [uri: string]: ReportedIssue[] }]> {
   const mainUri = document.uri;
   const documentUris: { [uri: string]: boolean } = { [mainUri.toString()]: true };
@@ -272,16 +293,20 @@ async function auditDocument(
   json,
   mappings,
   apiToken,
-  progress,
+  progress
 ): Promise<[Grades, IssuesByDocument, { [uri: string]: TextDocument }]> {
   const [grades, reportedIssues] = await audit(json, apiToken.trim(), progress);
-  const [mainRoot, documentUris, issuesPerDocument] = await processIssues(mainDocument, mappings, reportedIssues);
+  const [mainRoot, documentUris, issuesPerDocument] = await processIssues(
+    mainDocument,
+    mappings,
+    reportedIssues
+  );
 
   const files: { [uri: string]: [TextDocument, Node] } = {
     [mainDocument.uri.toString()]: [mainDocument, mainRoot],
   };
 
-  const markerNode = mainRoot.find('/openapi') || mainRoot.find('/swagger');
+  const markerNode = mainRoot.find("/openapi") || mainRoot.find("/swagger");
 
   // load and parse all documents
   for (const uri of documentUris) {
@@ -299,7 +324,7 @@ async function auditDocument(
     issues[uri] = reportedIssues.map(
       (issue: ReportedIssue): Issue => {
         // '' applies only to the main document
-        const node = issue.pointer === '' ? markerNode : root.find(issue.pointer);
+        const node = issue.pointer === "" ? markerNode : root.find(issue.pointer);
         if (node) {
           const [start, end] = node.getRange();
           const position = document.positionAt(start);
@@ -310,13 +335,13 @@ async function auditDocument(
             lineNo: position.line,
             range: new vscode.Range(
               new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
-              new vscode.Position(position.line, line.range.end.character),
+              new vscode.Position(position.line, line.range.end.character)
             ),
           };
         } else {
           throw new Error(`Unable to locate node: ${issue.pointer}`);
         }
-      },
+      }
     );
   }
 

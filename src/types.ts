@@ -1,7 +1,7 @@
-import * as vscode from 'vscode';
+import * as vscode from "vscode";
 
-export const configId = 'openapi';
-export const extensionQualifiedId = '42Crunch.vscode-openapi';
+export const configId = "openapi";
+export const extensionQualifiedId = "42Crunch.vscode-openapi";
 export enum OpenApiVersion {
   Unknown,
   V2,

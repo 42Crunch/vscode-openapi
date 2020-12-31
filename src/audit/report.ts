@@ -3,11 +3,11 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import * as path from 'path';
-import * as vscode from 'vscode';
-import { Audit, Summary } from './types';
+import * as path from "path";
+import * as vscode from "vscode";
+import { Audit, Summary } from "./types";
 
-import articles from './articles.json';
+import articles from "./articles.json";
 
 const fallbackArticle = {
   description: {
@@ -18,11 +18,13 @@ const fallbackArticle = {
 
 function articleById(id: string, filename: string) {
   const exampleLanguage =
-    filename.toLowerCase().endsWith('.yaml') || filename.toLowerCase().endsWith('yml') ? 'yaml' : 'json';
+    filename.toLowerCase().endsWith(".yaml") || filename.toLowerCase().endsWith("yml")
+      ? "yaml"
+      : "json";
 
   function partToText(part) {
     if (!part || !part.sections) {
-      return '';
+      return "";
     }
 
     return part.sections
@@ -35,17 +37,17 @@ function articleById(id: string, filename: string) {
           return `<pre>${code}</pre>`;
         }
       })
-      .join('');
+      .join("");
   }
 
   const article = articles[id] || fallbackArticle;
 
   return [
-    article ? article.description.text : '',
+    article ? article.description.text : "",
     partToText(article.example),
     partToText(article.exploit),
     partToText(article.remediation),
-  ].join('');
+  ].join("");
 }
 
 function getHtml(
@@ -55,28 +57,28 @@ function getHtml(
   scriptUrl: vscode.Uri,
   summary: string,
   issues: string,
-  uri: string,
+  uri: string
 ): string {
-  const base64Uri = Buffer.from(uri).toString('base64');
+  const base64Uri = Buffer.from(uri).toString("base64");
   const backToReport = summary
-    ? ''
+    ? ""
     : `<h4><a class="go-full-report" data-uri="${base64Uri}" href="#">Go back to full report</a></h4>`;
 
   return `<!DOCTYPE html>
   <html lang="en">
   <head>
       <meta charset="UTF-8">
-      <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource}; style-src ${
-    webview.cspSource
-  }; script-src 'nonce-${nonce}';">
+      <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${
+        webview.cspSource
+      }; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>API Contract Security Audit Report</title>
       <link rel="stylesheet" href="${styleUrl}">
   </head>
   <body>
       <script nonce="${nonce}" src="${scriptUrl}"></script>
-      ${summary || ''}
-      ${issues || ''}
+      ${summary || ""}
+      ${issues || ""}
       ${backToReport}
   </body>
   </html>`;
@@ -84,18 +86,18 @@ function getHtml(
 
 function getIssueHtml(uri: string, filename: string, issue) {
   const criticalityNames = {
-    5: 'Critical',
-    4: 'High',
-    3: 'Medium',
-    2: 'Low',
-    1: 'Info',
+    5: "Critical",
+    4: "High",
+    3: "Medium",
+    2: "Low",
+    1: "Info",
   };
 
   const criticality = criticalityNames[issue.criticality];
-  const scoreImpact = issue.displayScore !== '0' ? `Score impact: ${issue.displayScore}` : '';
+  const scoreImpact = issue.displayScore !== "0" ? `Score impact: ${issue.displayScore}` : "";
   const article = articleById(issue.id, filename);
   const lineNo = issue.lineNo + 1;
-  const base64Uri = Buffer.from(uri).toString('base64');
+  const base64Uri = Buffer.from(uri).toString("base64");
 
   return `
     <h1>${issue.description}</h1>
@@ -141,8 +143,8 @@ function getSummary(summary: Summary) {
 }
 
 function getNonce() {
-  let text = '';
-  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let text = "";
+  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   for (let i = 0; i < 32; i++) {
     text += possible.charAt(Math.floor(Math.random() * possible.length));
   }
@@ -157,7 +159,7 @@ export class ReportWebView {
   private _disposables: vscode.Disposable[] = [];
   private currentAuditUri: string;
 
-  public static readonly viewType = 'apisecurityReport';
+  public static readonly viewType = "apisecurityReport";
 
   public static show(extensionPath: string, audit: Audit) {
     if (!ReportWebView.currentPanel) {
@@ -176,7 +178,12 @@ export class ReportWebView {
     if (!ReportWebView.currentPanel) {
       ReportWebView.currentPanel = new ReportWebView(extensionPath);
     }
-    ReportWebView.currentPanel._updateIds(audit, ReportWebView.currentPanel._panel.webview, uri, ids);
+    ReportWebView.currentPanel._updateIds(
+      audit,
+      ReportWebView.currentPanel._panel.webview,
+      uri,
+      ids
+    );
     ReportWebView.currentPanel.currentAuditUri = null;
     if (!ReportWebView.currentPanel._panel.visible) {
       ReportWebView.currentPanel._panel.reveal();
@@ -201,7 +208,7 @@ export class ReportWebView {
       const webview = ReportWebView.currentPanel._panel.webview;
 
       const image = webview.asWebviewUri(
-        vscode.Uri.file(path.join(context.extensionPath, 'resources', '42crunch_icon.png')),
+        vscode.Uri.file(path.join(context.extensionPath, "resources", "42crunch_icon.png"))
       );
 
       webview.html = `<!DOCTYPE html>
@@ -225,7 +232,7 @@ export class ReportWebView {
 
     this._panel = vscode.window.createWebviewPanel(
       ReportWebView.viewType,
-      'API Security Audit',
+      "API Security Audit",
       {
         viewColumn: vscode.ViewColumn.Two,
         preserveFocus: true,
@@ -235,33 +242,33 @@ export class ReportWebView {
         enableScripts: true,
         // And restrict the webview to only loading content from our extension's `media` directory.
         localResourceRoots: [
-          vscode.Uri.file(path.join(extensionPath, 'webview')),
-          vscode.Uri.file(path.join(extensionPath, 'resources')),
+          vscode.Uri.file(path.join(extensionPath, "webview")),
+          vscode.Uri.file(path.join(extensionPath, "resources")),
         ],
-      },
+      }
     );
 
     this._panel.webview.onDidReceiveMessage(
       (message) => {
         switch (message.command) {
-          case 'copyIssueId':
+          case "copyIssueId":
             vscode.env.clipboard.writeText(message.id);
             const disposable = vscode.window.setStatusBarMessage(`Copied ID: ${message.id}`);
             setTimeout(() => disposable.dispose(), 1000);
             return;
-          case 'goToLine':
-            this.focusLine(Buffer.from(message.uri, 'base64').toString('utf8'), message.line);
+          case "goToLine":
+            this.focusLine(Buffer.from(message.uri, "base64").toString("utf8"), message.line);
             return;
-          case 'goFullReport':
+          case "goFullReport":
             vscode.commands.executeCommand(
-              'openapi.focusSecurityAudit',
-              Buffer.from(message.uri, 'base64').toString('utf8'),
+              "openapi.focusSecurityAudit",
+              Buffer.from(message.uri, "base64").toString("utf8")
             );
             return;
         }
       },
       null,
-      this._disposables,
+      this._disposables
     );
 
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
@@ -303,8 +310,12 @@ export class ReportWebView {
   }
 
   private _update(audit: Audit, webview: vscode.Webview) {
-    const scriptUrl = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionPath, 'webview', 'main.js')));
-    const styleUrl = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionPath, 'webview', 'style.css')));
+    const scriptUrl = webview.asWebviewUri(
+      vscode.Uri.file(path.join(this._extensionPath, "webview", "main.js"))
+    );
+    const styleUrl = webview.asWebviewUri(
+      vscode.Uri.file(path.join(this._extensionPath, "webview", "style.css"))
+    );
     const nonce = getNonce();
 
     const mainPath = vscode.Uri.parse(audit.summary.documentUri).fsPath;
@@ -319,7 +330,10 @@ export class ReportWebView {
       })
       .reduce((acc, val) => acc.concat(val), []);
 
-    const issuesHtml = issuesHtmlList.length > 0 ? issuesHtmlList.join('\n') : `<h3>No issues found in this file</h3>`;
+    const issuesHtml =
+      issuesHtmlList.length > 0
+        ? issuesHtmlList.join("\n")
+        : `<h3>No issues found in this file</h3>`;
 
     this._panel.webview.html = getHtml(
       nonce,
@@ -328,13 +342,17 @@ export class ReportWebView {
       scriptUrl,
       summaryHtml,
       issuesHtml,
-      audit.summary.documentUri,
+      audit.summary.documentUri
     );
   }
 
   private _updateIds(audit: Audit, webview: vscode.Webview, uri: string, ids: any[]) {
-    const scriptUrl = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionPath, 'webview', 'main.js')));
-    const styleUrl = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionPath, 'webview', 'style.css')));
+    const scriptUrl = webview.asWebviewUri(
+      vscode.Uri.file(path.join(this._extensionPath, "webview", "main.js"))
+    );
+    const styleUrl = webview.asWebviewUri(
+      vscode.Uri.file(path.join(this._extensionPath, "webview", "style.css"))
+    );
     const nonce = getNonce();
 
     const mainPath = vscode.Uri.parse(audit.summary.documentUri).fsPath;
@@ -343,7 +361,7 @@ export class ReportWebView {
 
     const issues = ids.map((id) => audit.issues[uri][id]);
 
-    const issuesHtml = issues.map((issue) => getIssueHtml(uri, filename, issue)).join('\n');
+    const issuesHtml = issues.map((issue) => getIssueHtml(uri, filename, issue)).join("\n");
 
     this._panel.webview.html = getHtml(
       nonce,
@@ -352,7 +370,7 @@ export class ReportWebView {
       scriptUrl,
       null,
       issuesHtml,
-      audit.summary.documentUri,
+      audit.summary.documentUri
     );
   }
 }

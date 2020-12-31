@@ -3,15 +3,15 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import * as path from 'path';
-import * as vscode from 'vscode';
-import * as json from 'jsonc-parser';
-import * as yaml from 'js-yaml';
-import { parse } from './ast';
-import { parserOptions } from './parser-options';
+import * as path from "path";
+import * as vscode from "vscode";
+import * as json from "jsonc-parser";
+import * as yaml from "js-yaml";
+import { parse } from "./ast";
+import { parserOptions } from "./parser-options";
 
 function refToUri(ref: string, currentDocumentUri: vscode.Uri): vscode.Uri {
-  if (ref.startsWith('#')) {
+  if (ref.startsWith("#")) {
     // local reference
     return currentDocumentUri;
   }
@@ -22,8 +22,8 @@ function refToUri(ref: string, currentDocumentUri: vscode.Uri): vscode.Uri {
   } catch {
     // assume a local file reference
     const baseDir = path.dirname(currentDocumentUri.fsPath);
-    if (ref.includes('#')) {
-      const [filename] = ref.split('#', 2);
+    if (ref.includes("#")) {
+      const [filename] = ref.split("#", 2);
       return currentDocumentUri.with({ path: path.join(baseDir, filename) });
     } else {
       return currentDocumentUri.with({ path: path.join(baseDir, ref) });
@@ -31,10 +31,13 @@ function refToUri(ref: string, currentDocumentUri: vscode.Uri): vscode.Uri {
   }
 }
 
-async function refToLocation(ref: string, currentDocumentUri: vscode.Uri): Promise<vscode.Location> | undefined {
-  if (ref.includes('#')) {
+async function refToLocation(
+  ref: string,
+  currentDocumentUri: vscode.Uri
+): Promise<vscode.Location> | undefined {
+  if (ref.includes("#")) {
     // reference to a file and an JSON pointer
-    const [, pointer] = ref.split('#', 2);
+    const [, pointer] = ref.split("#", 2);
     const refUri = refToUri(ref, currentDocumentUri);
     const refDocument = await vscode.workspace.openTextDocument(refUri);
     const [root, errors] = parse(refDocument.getText(), refDocument.languageId, parserOptions);
@@ -45,7 +48,7 @@ async function refToLocation(ref: string, currentDocumentUri: vscode.Uri): Promi
         const [start, end] = target.getRange();
         return new vscode.Location(
           refDocument.uri,
-          new vscode.Range(refDocument.positionAt(start), refDocument.positionAt(end)),
+          new vscode.Range(refDocument.positionAt(start), refDocument.positionAt(end))
         );
       }
     }
@@ -61,13 +64,13 @@ export class JsonSchemaDefinitionProvider implements vscode.DefinitionProvider {
   async provideDefinition(
     document: vscode.TextDocument,
     position: vscode.Position,
-    token: vscode.CancellationToken,
+    token: vscode.CancellationToken
   ): Promise<vscode.Location> {
     const offset = document.offsetAt(position);
     const location = json.getLocation(document.getText(), offset);
     const last = location.path[location.path.length - 1];
     const pnode = location.previousNode;
-    if (last === '$ref' && pnode && pnode.type === 'string') {
+    if (last === "$ref" && pnode && pnode.type === "string") {
       return refToLocation(pnode.value, document.uri);
     }
     return null;
@@ -76,9 +79,9 @@ export class JsonSchemaDefinitionProvider implements vscode.DefinitionProvider {
 
 function extractRef(parsed: any) {
   for (const [name, value] of Object.entries(parsed)) {
-    if (name === '$ref') {
+    if (name === "$ref") {
       return value;
-    } else if (typeof value === 'object' && value !== null) {
+    } else if (typeof value === "object" && value !== null) {
       const nested = extractRef(value);
       if (nested) {
         return nested;
@@ -88,13 +91,13 @@ function extractRef(parsed: any) {
   return null;
 }
 
-const refRegex = new RegExp('\\$ref\\s*:\\s+([\\S]+)');
+const refRegex = new RegExp("\\$ref\\s*:\\s+([\\S]+)");
 
 export class YamlSchemaDefinitionProvider implements vscode.DefinitionProvider {
   provideDefinition(
     document: vscode.TextDocument,
     position: vscode.Position,
-    token: vscode.CancellationToken,
+    token: vscode.CancellationToken
   ): Promise<vscode.Location> {
     const line = document.lineAt(position.line);
     if (line.text.match(refRegex)) {

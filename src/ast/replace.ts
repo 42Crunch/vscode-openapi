@@ -1,5 +1,5 @@
-import { parseJson } from './json';
-import { parseYaml } from './yaml';
+import { parseJson } from "./json";
+import { parseYaml } from "./yaml";
 
 export type Range = [number, number]; // start, end
 
@@ -38,7 +38,7 @@ function replaceTextRanges(text: string, replacements: TextReplacement[]): strin
     let replacement = sorted[i].value;
     const target = i * 2 + 1;
     const original = chunks[target];
-    let quote = '';
+    let quote = "";
     if (original.startsWith(`"`) && original.endsWith(`"`)) {
       quote = `"`;
     } else if (original.startsWith(`'`) && original.endsWith(`'`)) {
@@ -48,11 +48,11 @@ function replaceTextRanges(text: string, replacements: TextReplacement[]): strin
     chunks[target] = `${quote}${replacement}${quote}`;
   }
 
-  return chunks.join('');
+  return chunks.join("");
 }
 
 export function replace(text: string, languageId: string, replacements: Replacement[]) {
-  const [root, errors] = languageId === 'yaml' ? parseYaml(text) : parseJson(text);
+  const [root, errors] = languageId === "yaml" ? parseYaml(text) : parseJson(text);
   if (errors.length) {
     throw new Error(`Unable to parse text to perform replacement in JSON/YAML in: ${text}`);
   }

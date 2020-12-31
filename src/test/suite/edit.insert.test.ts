@@ -1,21 +1,27 @@
-import assert from 'assert';
-import * as vscode from 'vscode';
-import { withRandomFileEditor } from '../utils';
-import { getFixAsJsonString, getFixAsYamlString, insertJsonNode, insertYamlNode, safeParse } from '../../util';
+import assert from "assert";
+import * as vscode from "vscode";
+import { withRandomFileEditor } from "../utils";
+import {
+  getFixAsJsonString,
+  getFixAsYamlString,
+  insertJsonNode,
+  insertYamlNode,
+  safeParse,
+} from "../../util";
 
-suite('Edit Insert Node Test Suite', () => {
-  test('Methos insertJsonNode (key - value) test', async () => {
+suite("Edit Insert Node Test Suite", () => {
+  test("Methos insertJsonNode (key - value) test", async () => {
     const text = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1\n ],\n}';
     const expected = '{\n "a": {\n  "a1": "foo",\n  "a2": "baz"\n },\n "c": [\n  1\n ],\n}';
-    const pointer = '/a';
+    const pointer = "/a";
     const fix = {
-      a2: 'baz',
+      a2: "baz",
     };
 
     await withRandomFileEditor(text, async (editor, doc) => {
       let position: vscode.Position;
       const root = safeParse(editor.document.getText(), editor.document.languageId);
-      let value = getFixAsJsonString(root, pointer, 'insert', fix, undefined, false);
+      let value = getFixAsJsonString(root, pointer, "insert", fix, undefined, false);
       [value, position] = insertJsonNode(editor.document, root, pointer, value, false);
 
       const edit = new vscode.WorkspaceEdit();
@@ -28,18 +34,19 @@ suite('Edit Insert Node Test Suite', () => {
     });
   });
 
-  test('Methos insertJsonNode (array member) test', async () => {
+  test("Methos insertJsonNode (array member) test", async () => {
     const text = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1\n ],\n}';
-    const expected = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1,\n  {\n    "a2": "baz"\n  }\n ],\n}';
-    const pointer = '/c';
+    const expected =
+      '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1,\n  {\n    "a2": "baz"\n  }\n ],\n}';
+    const pointer = "/c";
     const fix = {
-      a2: 'baz',
+      a2: "baz",
     };
 
     await withRandomFileEditor(text, async (editor, doc) => {
       let position: vscode.Position;
       const root = safeParse(editor.document.getText(), editor.document.languageId);
-      let value = getFixAsJsonString(root, pointer, 'insert', fix, undefined, false);
+      let value = getFixAsJsonString(root, pointer, "insert", fix, undefined, false);
       [value, position] = insertJsonNode(editor.document, root, pointer, value, false);
 
       const edit = new vscode.WorkspaceEdit();
@@ -52,18 +59,18 @@ suite('Edit Insert Node Test Suite', () => {
     });
   });
 
-  test('Methos insertYamlNode (key - value) test', async () => {
-    const text = 'a:\n  a1: foo\nc:\n  - 1\n';
-    const expected = 'a:\n  a1: foo\n  a2: baz\nc:\n  - 1\n';
-    const pointer = '/a';
+  test("Methos insertYamlNode (key - value) test", async () => {
+    const text = "a:\n  a1: foo\nc:\n  - 1\n";
+    const expected = "a:\n  a1: foo\n  a2: baz\nc:\n  - 1\n";
+    const pointer = "/a";
     const fix = {
-      a2: 'baz',
+      a2: "baz",
     };
 
     await withRandomFileEditor(text, async (editor, doc) => {
       let position: vscode.Position;
-      const root = safeParse(editor.document.getText(), 'yaml');
-      let value = getFixAsYamlString(root, pointer, 'insert', fix, undefined, false);
+      const root = safeParse(editor.document.getText(), "yaml");
+      let value = getFixAsYamlString(root, pointer, "insert", fix, undefined, false);
       [value, position] = insertYamlNode(editor.document, root, pointer, value);
 
       const edit = new vscode.WorkspaceEdit();
@@ -76,18 +83,18 @@ suite('Edit Insert Node Test Suite', () => {
     });
   });
 
-  test('Methos insertYamlNode (array member) test', async () => {
-    const text = 'a:\n  a1: foo\nc:\n  - 1\n';
-    const expected = 'a:\n  a1: foo\nc:\n  - 1\n  - a2: baz\n';
-    const pointer = '/c';
+  test("Methos insertYamlNode (array member) test", async () => {
+    const text = "a:\n  a1: foo\nc:\n  - 1\n";
+    const expected = "a:\n  a1: foo\nc:\n  - 1\n  - a2: baz\n";
+    const pointer = "/c";
     const fix = {
-      a2: 'baz',
+      a2: "baz",
     };
 
     await withRandomFileEditor(text, async (editor, doc) => {
       let position: vscode.Position;
-      const root = safeParse(editor.document.getText(), 'yaml');
-      let value = getFixAsYamlString(root, pointer, 'insert', fix, undefined, false);
+      const root = safeParse(editor.document.getText(), "yaml");
+      let value = getFixAsYamlString(root, pointer, "insert", fix, undefined, false);
       [value, position] = insertYamlNode(editor.document, root, pointer, value);
 
       const edit = new vscode.WorkspaceEdit();

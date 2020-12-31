@@ -3,19 +3,22 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import * as yaml from 'yaml-ast-parser-custom-tags';
-import { Schema, DEFAULT_SAFE_SCHEMA } from 'js-yaml';
-import { Node } from './types';
-import { parseJsonPointer, joinJsonPointer } from '../pointer';
+import * as yaml from "yaml-ast-parser-custom-tags";
+import { Schema, DEFAULT_SAFE_SCHEMA } from "js-yaml";
+import { Node } from "./types";
+import { parseJsonPointer, joinJsonPointer } from "../pointer";
 
-export function parseYaml(text: string, schema?: Schema): [YamlNode, { message: string; offset: number }[]] {
+export function parseYaml(
+  text: string,
+  schema?: Schema
+): [YamlNode, { message: string; offset: number }[]] {
   const documents = [];
   yaml.loadAll(
     text,
     (document) => {
       documents.push(document);
     },
-    { schema: schema ? schema : DEFAULT_SAFE_SCHEMA },
+    { schema: schema ? schema : DEFAULT_SAFE_SCHEMA }
   );
 
   if (documents.length !== 1) {
@@ -229,7 +232,7 @@ function findNodeAtLocation(root: yaml.YAMLNode, path: string[]): yaml.YAMLNode 
       } else if (
         mapping.key &&
         mapping.key.kind === yaml.Kind.SCALAR &&
-        mapping.key.value === '<<' &&
+        mapping.key.value === "<<" &&
         mapping.value.kind === yaml.Kind.ANCHOR_REF
       ) {
         mergeKey = <yaml.YAMLAnchorReference>mapping.value;

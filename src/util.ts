@@ -1,11 +1,11 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import * as vscode from 'vscode';
-import * as yaml from 'js-yaml';
-import { OpenApiVersion } from './types';
-import { parse, Node } from './ast';
-import { parserOptions } from './parser-options';
-import { replace } from './ast/replace';
+import * as fs from "fs";
+import * as path from "path";
+import * as vscode from "vscode";
+import * as yaml from "js-yaml";
+import { OpenApiVersion } from "./types";
+import { parse, Node } from "./ast";
+import { parserOptions } from "./parser-options";
+import { replace } from "./ast/replace";
 
 type FixParameters = {
   name: string;
@@ -14,8 +14,16 @@ type FixParameters = {
   type?: string;
 };
 
-export function parseDocument(document: vscode.TextDocument): [OpenApiVersion, Node, vscode.Diagnostic[]] {
-  if (!(document.languageId === 'json' || document.languageId === 'jsonc' || document.languageId == 'yaml')) {
+export function parseDocument(
+  document: vscode.TextDocument
+): [OpenApiVersion, Node, vscode.Diagnostic[]] {
+  if (
+    !(
+      document.languageId === "json" ||
+      document.languageId === "jsonc" ||
+      document.languageId == "yaml"
+    )
+  ) {
     return [OpenApiVersion.Unknown, null, null];
   }
 
@@ -26,34 +34,41 @@ export function parseDocument(document: vscode.TextDocument): [OpenApiVersion, N
       const position = document.positionAt(error.offset);
       const line = document.lineAt(position);
       return {
-        source: 'vscode-openapi',
-        code: '',
+        source: "vscode-openapi",
+        code: "",
         severity: vscode.DiagnosticSeverity.Error,
         message: error.message,
         range: line.range,
       };
-    },
+    }
   );
 
   return [version, node, messages.length > 0 ? messages : null];
 }
 
 export function getOpenApiVersion(root: Node): OpenApiVersion {
-  const swaggerVersionValue = root?.find('/swagger')?.getValue();
-  const openApiVersionValue = root?.find('/openapi')?.getValue();
+  const swaggerVersionValue = root?.find("/swagger")?.getValue();
+  const openApiVersionValue = root?.find("/openapi")?.getValue();
 
-  if (swaggerVersionValue === '2.0') {
+  if (swaggerVersionValue === "2.0") {
     return OpenApiVersion.V2;
   }
 
-  if (openApiVersionValue && typeof openApiVersionValue === 'string' && openApiVersionValue.match(/^3\.0\.\d(-.+)?$/)) {
+  if (
+    openApiVersionValue &&
+    typeof openApiVersionValue === "string" &&
+    openApiVersionValue.match(/^3\.0\.\d(-.+)?$/)
+  ) {
     return OpenApiVersion.V3;
   }
 
   return OpenApiVersion.Unknown;
 }
 
-export async function provideYamlSchemas(context: vscode.ExtensionContext, yamlExtension: vscode.Extension<any>) {
+export async function provideYamlSchemas(
+  context: vscode.ExtensionContext,
+  yamlExtension: vscode.Extension<any>
+) {
   if (!yamlExtension.isActive) {
     await yamlExtension.activate();
   }
@@ -61,12 +76,12 @@ export async function provideYamlSchemas(context: vscode.ExtensionContext, yamlE
   function requestSchema(uri: string) {
     for (const document of vscode.workspace.textDocuments) {
       if (document.uri.toString() === uri) {
-        const [node] = parse(document.getText(), 'yaml', parserOptions);
+        const [node] = parse(document.getText(), "yaml", parserOptions);
         const version = getOpenApiVersion(node);
         if (version === OpenApiVersion.V2) {
-          return 'openapi:v2';
+          return "openapi:v2";
         } else if (version === OpenApiVersion.V3) {
-          return 'openapi:v3';
+          return "openapi:v3";
         }
         break;
       }
@@ -75,18 +90,18 @@ export async function provideYamlSchemas(context: vscode.ExtensionContext, yamlE
   }
 
   function requestSchemaContent(uri: string) {
-    if (uri === 'openapi:v2') {
-      const filename = path.join(context.extensionPath, 'schema', 'openapi-2.0.json');
-      return fs.readFileSync(filename, { encoding: 'utf8' });
-    } else if (uri === 'openapi:v3') {
-      const filename = path.join(context.extensionPath, 'schema', 'openapi-3.0-2019-04-02.json');
-      return fs.readFileSync(filename, { encoding: 'utf8' });
+    if (uri === "openapi:v2") {
+      const filename = path.join(context.extensionPath, "schema", "openapi-2.0.json");
+      return fs.readFileSync(filename, { encoding: "utf8" });
+    } else if (uri === "openapi:v3") {
+      const filename = path.join(context.extensionPath, "schema", "openapi-3.0-2019-04-02.json");
+      return fs.readFileSync(filename, { encoding: "utf8" });
     }
     return null;
   }
 
   const schemaContributor = yamlExtension.exports;
-  schemaContributor.registerContributor('openapi', requestSchema, requestSchemaContent);
+  schemaContributor.registerContributor("openapi", requestSchema, requestSchemaContent);
 }
 
 function getBasicIndentation(document: vscode.TextDocument, root: Node): [number, string] {
@@ -103,7 +118,7 @@ function getBasicIndentation(document: vscode.TextDocument, root: Node): [number
   const index = document.lineAt(position.line).firstNonWhitespaceCharacterIndex;
   const p0 = new vscode.Position(position.line, index - 1);
   const p1 = new vscode.Position(position.line, index);
-  const depth = document.languageId === 'json' ? target.getDepth() : target.getDepth() - 1;
+  const depth = document.languageId === "json" ? target.getDepth() : target.getDepth() - 1;
   return [Math.round(index / depth), document.getText(new vscode.Range(p0, p1))];
 }
 
@@ -127,28 +142,39 @@ function shift(
   char: string,
   padding: number,
   extra: number = 0,
-  addFirstPadding: boolean = true,
+  addFirstPadding: boolean = true
 ): string {
   if (addFirstPadding) {
     text = char.repeat(padding) + text;
   }
-  text = text.replace(new RegExp('\n', 'g'), '\n' + char.repeat(padding + extra));
-  text = text.replace(new RegExp('\t', 'g'), char.repeat(indent));
+  text = text.replace(new RegExp("\n", "g"), "\n" + char.repeat(padding + extra));
+  text = text.replace(new RegExp("\t", "g"), char.repeat(indent));
   return text;
 }
 
-export function renameKeyNode(document: vscode.TextDocument, root: Node, pointer: string): vscode.Range {
+export function renameKeyNode(
+  document: vscode.TextDocument,
+  root: Node,
+  pointer: string
+): vscode.Range {
   const [start, end] = root.find(pointer).getKeyRange();
   return new vscode.Range(document.positionAt(start), document.positionAt(end));
 }
 
-export function deleteJsonNode(document: vscode.TextDocument, root: Node, pointer: string): vscode.Range {
+export function deleteJsonNode(
+  document: vscode.TextDocument,
+  root: Node,
+  pointer: string
+): vscode.Range {
   const target = root.find(pointer);
   let startPosition: vscode.Position;
 
   if (target.prev()) {
     const line = getLineByOffset(document, target.prev().getRange()[1]);
-    startPosition = new vscode.Position(line.lineNumber, line.text.length + (target.next() ? 0 : -1));
+    startPosition = new vscode.Position(
+      line.lineNumber,
+      line.text.length + (target.next() ? 0 : -1)
+    );
   } else {
     const line = getLineByOffset(document, target.getParent().getRange()[0]);
     startPosition = new vscode.Position(line.lineNumber, line.text.length);
@@ -160,7 +186,11 @@ export function deleteJsonNode(document: vscode.TextDocument, root: Node, pointe
   return new vscode.Range(startPosition, endPosition);
 }
 
-export function deleteYamlNode(document: vscode.TextDocument, root: Node, pointer: string): vscode.Range {
+export function deleteYamlNode(
+  document: vscode.TextDocument,
+  root: Node,
+  pointer: string
+): vscode.Range {
   const target = root.find(pointer);
   const [start, end] = target.getRange();
 
@@ -171,7 +201,7 @@ export function deleteYamlNode(document: vscode.TextDocument, root: Node, pointe
   if (target.getParent().isArray()) {
     if (target.next()) {
       const line = getLineByOffset(document, target.next().getRange()[0]);
-      startPosition = document.positionAt(start - '- '.length);
+      startPosition = document.positionAt(start - "- ".length);
       endPosition = new vscode.Position(line.lineNumber, line.firstNonWhitespaceCharacterIndex);
     } else {
       startPosition = new vscode.Position(getLineByOffset(document, start).lineNumber, 0);
@@ -199,7 +229,7 @@ export function insertJsonNode(
   root: Node,
   pointer: string,
   value: string,
-  snippet: boolean = true,
+  snippet: boolean = true
 ): [string, vscode.Position] {
   let lastChildTarget: Node;
   const target = root.find(pointer);
@@ -214,7 +244,7 @@ export function insertJsonNode(
   const index = getCurrentIdentation(document, start);
   const position = document.positionAt(end);
   const [indent, char] = getBasicIndentation(document, root);
-  value = snippet ? ',\n' + value : ',\n' + shift(value, indent, char, index);
+  value = snippet ? ",\n" + value : ",\n" + shift(value, indent, char, index);
   return [value, position];
 }
 
@@ -222,7 +252,7 @@ export function insertYamlNode(
   document: vscode.TextDocument,
   root: Node,
   pointer: string,
-  value: string,
+  value: string
 ): [string, vscode.Position] {
   let lastChildTarget: Node;
   const target = root.find(pointer);
@@ -240,10 +270,10 @@ export function insertYamlNode(
   const [indent, char] = getBasicIndentation(document, root);
 
   if (target.isObject()) {
-    value = shift(value, indent, char, index) + '\n';
+    value = shift(value, indent, char, index) + "\n";
     return [value, position];
   } else if (target.isArray()) {
-    value = shift('- ' + value, indent, char, index, '- '.length) + '\n';
+    value = shift("- " + value, indent, char, index, "- ".length) + "\n";
     return [value, position];
   }
 }
@@ -252,13 +282,13 @@ export function replaceJsonNode(
   document: vscode.TextDocument,
   root: Node,
   pointer: string,
-  value: string,
+  value: string
 ): [string, vscode.Range] {
   const target = root.find(pointer);
   const [start, end] = target.getRange();
 
-  const isObject = value.startsWith('{') && value.endsWith('}');
-  const isArray = value.startsWith('[') && value.endsWith(']');
+  const isObject = value.startsWith("{") && value.endsWith("}");
+  const isArray = value.startsWith("[") && value.endsWith("]");
 
   if (isObject || isArray) {
     const index = getCurrentIdentation(document, start);
@@ -272,13 +302,13 @@ export function replaceYamlNode(
   document: vscode.TextDocument,
   root: Node,
   pointer: string,
-  value: string,
+  value: string
 ): [string, vscode.Range] {
   const target = root.find(pointer);
   const [start, end] = target.getValueRange();
 
-  const i1 = value.indexOf(':');
-  const i2 = value.indexOf('- ');
+  const i1 = value.indexOf(":");
+  const i2 = value.indexOf("- ");
   const isObject = i1 > 0 && (i2 < 0 || (i2 > 0 && i2 > i1));
   const isArray = i2 >= 0 && (i1 < 0 || (i1 > 0 && i1 > i2));
 
@@ -290,7 +320,7 @@ export function replaceYamlNode(
     if (target.isArray()) {
       const line = getLineByOffset(document, end);
       // But do not handle the case if the last array member = the last item in the doc
-      if (!line.text.trim().startsWith('-')) {
+      if (!line.text.trim().startsWith("-")) {
         const line = getTopLineByOffset(document, end);
         const endPosition = new vscode.Position(line.lineNumber, line.text.length);
         value = shift(value, indent, char, index, 0, false);
@@ -299,7 +329,7 @@ export function replaceYamlNode(
     }
     // Replace plain value with not plain one (add a new line)
     if (!(target.isArray() || target.isObject()) && target.getParent().isObject()) {
-      value = shift('\n' + value, indent, char, index, indent, false);
+      value = shift("\n" + value, indent, char, index, indent, false);
     }
   }
   return [value, new vscode.Range(document.positionAt(start), document.positionAt(end))];
@@ -311,22 +341,22 @@ export function getFixAsJsonString(
   type: string,
   fix: object,
   parameters: FixParameters[],
-  snippet: boolean,
+  snippet: boolean
 ): string {
-  let text = JSON.stringify(fix, null, '\t').trim();
+  let text = JSON.stringify(fix, null, "\t").trim();
   if (parameters) {
-    text = insertPlaceholders(text, fix, parameters, 'json');
+    text = insertPlaceholders(text, fix, parameters, "json");
   }
   // For snippets we must escape $ symbol
-  if (snippet && (type === 'insert' || type === 'rename')) {
-    text = text.replace(new RegExp('\\$ref', 'g'), '\\$ref');
+  if (snippet && (type === "insert" || type === "rename")) {
+    text = text.replace(new RegExp("\\$ref", "g"), "\\$ref");
   }
   const target = root.find(pointer);
-  if (target.isObject() && type === 'insert') {
-    text = text.replace('{\n\t', '');
-    text = text.replace('\n}', '');
+  if (target.isObject() && type === "insert") {
+    text = text.replace("{\n\t", "");
+    text = text.replace("\n}", "");
     // Replace only trailing \t, i.e. a\t\t\ta\t\ta\t -> a\t\ta\ta
-    text = text.replace(new RegExp('\t(?!\t)', 'g'), '');
+    text = text.replace(new RegExp("\t(?!\t)", "g"), "");
   }
   return text;
 }
@@ -337,35 +367,42 @@ export function getFixAsYamlString(
   type: string,
   fix: object,
   parameters: FixParameters[],
-  snippet: boolean,
+  snippet: boolean
 ): string {
   let text = yaml.safeDump(fix).trim();
   if (parameters) {
-    text = insertPlaceholders(text, fix, parameters, 'yaml');
+    text = insertPlaceholders(text, fix, parameters, "yaml");
   }
   // For snippets we must escape $ symbol
-  if (snippet && (type === 'insert' || type === 'rename')) {
-    text = text.replace(new RegExp('\\$ref', 'g'), '\\$ref');
+  if (snippet && (type === "insert" || type === "rename")) {
+    text = text.replace(new RegExp("\\$ref", "g"), "\\$ref");
   }
   // 2 spaces is always the default ident for the safeDump
-  return text.replace(new RegExp('  ', 'g'), '\t');
+  return text.replace(new RegExp("  ", "g"), "\t");
 }
 
-function insertPlaceholders(text: string, fix: object, parameters: FixParameters[], languageId: string): string {
+function insertPlaceholders(
+  text: string,
+  fix: object,
+  parameters: FixParameters[],
+  languageId: string
+): string {
   const replacements = [];
   const root = safeParse(text, languageId);
 
   for (const parameter of parameters) {
     const pointer = parameter.path;
     const index = replacements.length + 1;
-    const replaceKey = parameter.type === 'key';
+    const replaceKey = parameter.type === "key";
     let values = parameter.values;
     const node = root.find(pointer);
     let placeholderValue = replaceKey ? node.getKey() : node.getValue();
 
-    if (!values && typeof placeholderValue === 'string') {
+    if (!values && typeof placeholderValue === "string") {
       // Escape $ and } inside placeholders (for example in regexp)
-      placeholderValue = placeholderValue.replace(new RegExp('\\$', 'g'), '\\$').replace(new RegExp('}', 'g'), '\\}');
+      placeholderValue = placeholderValue
+        .replace(new RegExp("\\$", "g"), "\\$")
+        .replace(new RegExp("}", "g"), "\\}");
     }
     replacements.push({
       pointer: pointer,
@@ -379,14 +416,14 @@ function insertPlaceholders(text: string, fix: object, parameters: FixParameters
 function getPlaceholder(index: number, value: string, quotes: boolean, values: any[]): string {
   if (values) {
     values = values.map((value: any) => {
-      if (typeof value === 'string') {
-        return value.replace(new RegExp(',', 'g'), '\\,'); // Escape comma symbols
+      if (typeof value === "string") {
+        return value.replace(new RegExp(",", "g"), "\\,"); // Escape comma symbols
       } else {
         return value;
       }
     });
   }
-  const placeholer = '${' + index + (values ? '|' + values.join() + '|' : ':' + value) + '}';
+  const placeholer = "${" + index + (values ? "|" + values.join() + "|" : ":" + value) + "}";
   return quotes ? '"' + placeholer + '"' : placeholer;
 }
 

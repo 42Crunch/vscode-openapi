@@ -3,13 +3,15 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import * as json from 'jsonc-parser';
-import { Node } from './types';
-import { parseJsonPointer, joinJsonPointer } from '../pointer';
+import * as json from "jsonc-parser";
+import { Node } from "./types";
+import { parseJsonPointer, joinJsonPointer } from "../pointer";
 
 export function parseJson(text: string): [JsonNode, { message: string; offset: number }[]] {
   const parseErrors: json.ParseError[] = [];
-  const node = new JsonNode(json.parseTree(text, parseErrors, { allowTrailingComma: true, allowEmptyContent: true }));
+  const node = new JsonNode(
+    json.parseTree(text, parseErrors, { allowTrailingComma: true, allowEmptyContent: true })
+  );
   const normalizedErrors = parseErrors.map((error) => ({
     message: json.printParseErrorCode(error.error),
     offset: error.offset,
@@ -36,7 +38,7 @@ export class JsonNode implements Node {
 
     for (let segment of pointer) {
       // each object we traverse must be either object or array
-      if (node.type === 'object' && Array.isArray(node.children)) {
+      if (node.type === "object" && Array.isArray(node.children)) {
         let found = false;
         for (let propertyNode of node.children) {
           if (Array.isArray(propertyNode.children) && propertyNode.children[0].value === segment) {
@@ -50,7 +52,12 @@ export class JsonNode implements Node {
         }
       } else {
         const index = parseInt(segment, 10);
-        if (node.type === 'array' && index >= 0 && Array.isArray(node.children) && index < node.children.length) {
+        if (
+          node.type === "array" &&
+          index >= 0 &&
+          Array.isArray(node.children) &&
+          index < node.children.length
+        ) {
           node = node.children[index];
         } else {
           return null;
@@ -66,9 +73,9 @@ export class JsonNode implements Node {
     // but check for type=object parent just in case
     const parent = this.node.parent;
     if (parent) {
-      if (parent.type === 'property') {
+      if (parent.type === "property") {
         return new JsonNode(parent.parent);
-      } else if (parent.type === 'array' || parent.type === 'object') {
+      } else if (parent.type === "array" || parent.type === "object") {
         return new JsonNode(parent);
       }
     }
@@ -77,9 +84,9 @@ export class JsonNode implements Node {
   getKey(): string {
     const parent = this.node.parent;
     if (parent) {
-      if (parent.type === 'property') {
+      if (parent.type === "property") {
         return parent.children[0].value;
-      } else if (parent.type === 'array') {
+      } else if (parent.type === "array") {
         return String(parent.children.indexOf(this.node));
       }
     }
@@ -97,28 +104,28 @@ export class JsonNode implements Node {
   getKeyRange(): [number, number] | undefined {
     const parent = this.node.parent;
     if (parent) {
-      if (parent.type === 'property') {
+      if (parent.type === "property") {
         const key = parent.children[0];
         return [key.offset + 1, key.offset + key.length - 1];
-      } 
+      }
     }
   }
 
   getValueRange(): [number, number] | undefined {
-      return this.getRange();
+    return this.getRange();
   }
 
   getChildren(): JsonNode[] {
-    if (this.node.type === 'object') {
+    if (this.node.type === "object") {
       return this.node.children.map((child) => new JsonNode(child.children[1]));
-    } else if (this.node.type === 'array') {
+    } else if (this.node.type === "array") {
       return this.node.children.map((child) => new JsonNode(child));
     }
   }
 
   next(): JsonNode | undefined {
     const children = this.getParent().getChildren();
-    for (let i = 1 ; i < children.length ; i++) {
+    for (let i = 1; i < children.length; i++) {
       if (this.node === children[i - 1].node) {
         return children[i];
       }
@@ -127,7 +134,7 @@ export class JsonNode implements Node {
 
   prev(): JsonNode | undefined {
     const children = this.getParent().getChildren();
-    for (let i = 0 ; i < (children.length - 1) ; i++) {
+    for (let i = 0; i < children.length - 1; i++) {
       if (this.node === children[i + 1].node) {
         return children[i];
       }
@@ -138,7 +145,7 @@ export class JsonNode implements Node {
     let depth = 0;
     let parent = this.node.parent;
     while (parent) {
-      if (parent.type === 'object' || parent.type === 'array') {
+      if (parent.type === "object" || parent.type === "array") {
         depth++;
       }
       parent = parent.parent;
@@ -159,10 +166,10 @@ export class JsonNode implements Node {
   }
 
   isArray(): boolean {
-    return this.node.type === 'array';
+    return this.node.type === "array";
   }
 
   isObject(): boolean {
-    return this.node.type === 'object';
+    return this.node.type === "object";
   }
 }

@@ -3,9 +3,9 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import { basename } from 'path';
-import * as vscode from 'vscode';
-import { AuditContext, DocumentDecorations } from './types';
+import { basename } from "path";
+import * as vscode from "vscode";
+import { AuditContext, DocumentDecorations } from "./types";
 
 export const decorationType = vscode.window.createTextEditorDecorationType({});
 
@@ -33,7 +33,11 @@ export function createDecorations(mainUri: string, issues): DocumentDecorations 
   return decorations;
 }
 
-function createDecoration(mainUri: string, mainFilename: string, issues): vscode.DecorationOptions[] {
+function createDecoration(
+  mainUri: string,
+  mainFilename: string,
+  issues
+): vscode.DecorationOptions[] {
   const options: vscode.DecorationOptions[] = [];
 
   const issueLines = {};
@@ -54,7 +58,7 @@ function createDecoration(mainUri: string, mainFilename: string, issues): vscode
   for (const lineNo of Object.keys(issueLines)) {
     const lineNoInt = parseInt(lineNo, 10);
     const issueIds = issueLines[lineNo].map(({ issue, issueId }) => issueId);
-    const base64Uri = Buffer.from(mainUri).toString('base64');
+    const base64Uri = Buffer.from(mainUri).toString("base64");
 
     const params = {
       ids: issueIds,
@@ -62,7 +66,7 @@ function createDecoration(mainUri: string, mainFilename: string, issues): vscode
     };
 
     const commandUri = vscode.Uri.parse(
-      `command:openapi.focusSecurityAuditById?${encodeURIComponent(JSON.stringify(params))}`,
+      `command:openapi.focusSecurityAuditById?${encodeURIComponent(JSON.stringify(params))}`
     );
 
     const count = issueLines[lineNo].length;
@@ -73,7 +77,10 @@ function createDecoration(mainUri: string, mainFilename: string, issues): vscode
 
     down.isTrusted = true;
 
-    const range = new vscode.Range(new vscode.Position(lineNoInt, 0), new vscode.Position(lineNoInt, 160));
+    const range = new vscode.Range(
+      new vscode.Position(lineNoInt, 0),
+      new vscode.Position(lineNoInt, 160)
+    );
 
     const decoration = {
       range: range,

@@ -3,12 +3,12 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import * as vscode from 'vscode';
-import * as path from 'path';
-import { parserOptions } from './parser-options';
-import { bundle, displayBundlerErrors } from './bundler';
-import { configuration } from './configuration';
-import { RuntimeContext } from './types';
+import * as vscode from "vscode";
+import * as path from "path";
+import { parserOptions } from "./parser-options";
+import { bundle, displayBundlerErrors } from "./bundler";
+import { configuration } from "./configuration";
+import { RuntimeContext } from "./types";
 
 type Preview = {
   panel: vscode.WebviewPanel;
@@ -42,7 +42,12 @@ export function activate(context: vscode.ExtensionContext, runtimeContext: Runti
             const [json, mapping, uris] = await bundle(document, parserOptions);
             showPreview(context, runtimeContext, previews, name, document, json, uris);
           } catch (err) {
-            displayBundlerErrors(document.uri, parserOptions, runtimeContext.bundlingDiagnostics, err);
+            displayBundlerErrors(
+              document.uri,
+              parserOptions,
+              runtimeContext.bundlingDiagnostics,
+              err
+            );
           }
         }, ON_CHANGE_TIMEOUT);
       }
@@ -50,27 +55,27 @@ export function activate(context: vscode.ExtensionContext, runtimeContext: Runti
   });
 
   vscode.commands.registerTextEditorCommand(
-    'openapi.previewRedoc',
+    "openapi.previewRedoc",
     async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit) =>
-      startPreview(context, runtimeContext, previews, 'redoc', textEditor.document),
+      startPreview(context, runtimeContext, previews, "redoc", textEditor.document)
   );
 
   vscode.commands.registerTextEditorCommand(
-    'openapi.previewSwaggerUI',
+    "openapi.previewSwaggerUI",
     async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit) =>
-      startPreview(context, runtimeContext, previews, 'swaggerui', textEditor.document),
+      startPreview(context, runtimeContext, previews, "swaggerui", textEditor.document)
   );
 
   vscode.commands.registerTextEditorCommand(
-    'openapi.preview',
+    "openapi.preview",
     async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit) =>
       startPreview(
         context,
         runtimeContext,
         previews,
-        configuration.get<string>('defaultPreviewRenderer'),
-        textEditor.document,
-      ),
+        configuration.get<string>("defaultPreviewRenderer"),
+        textEditor.document
+      )
   );
 }
 
@@ -79,7 +84,7 @@ async function startPreview(
   runtimeContext: RuntimeContext,
   previews: Previews,
   renderer: string,
-  document: vscode.TextDocument,
+  document: vscode.TextDocument
 ) {
   try {
     runtimeContext.bundlingDiagnostics.clear();
@@ -87,8 +92,8 @@ async function startPreview(
     showPreview(context, runtimeContext, previews, renderer, document, json, uris);
   } catch (e) {
     displayBundlerErrors(document.uri, parserOptions, runtimeContext.bundlingDiagnostics, e);
-    vscode.commands.executeCommand('workbench.action.problems.focus');
-    vscode.window.showErrorMessage('Failed to generate preview, check OpenAPI file for errors.');
+    vscode.commands.executeCommand("workbench.action.problems.focus");
+    vscode.window.showErrorMessage("Failed to generate preview, check OpenAPI file for errors.");
   }
 }
 
@@ -99,16 +104,16 @@ async function showPreview(
   name: string,
   document: vscode.TextDocument,
   json: string,
-  uris: any,
+  uris: any
 ) {
   if (previews[name]) {
     const panel = previews[name].panel;
-    panel.webview.postMessage({ command: 'preview', text: json });
+    panel.webview.postMessage({ command: "preview", text: json });
     previews[name] = { panel, uris, documentUri: document.uri };
     return;
   }
 
-  const title = name === 'redoc' ? 'OpenAPI ReDoc preview' : 'OpenAPI SwaggerUI preview';
+  const title = name === "redoc" ? "OpenAPI ReDoc preview" : "OpenAPI SwaggerUI preview";
 
   const panel = await buildWebviewPanel(context, name, title);
 
@@ -119,37 +124,44 @@ async function showPreview(
       previews[name] = null;
     },
     undefined,
-    context.subscriptions,
+    context.subscriptions
   );
 
-  panel.webview.postMessage({ command: 'preview', text: json });
+  panel.webview.postMessage({ command: "preview", text: json });
   previews[name] = { panel, uris, documentUri: document.uri };
 }
 
 function buildWebviewPanel(
   context: vscode.ExtensionContext,
   name: string,
-  title: string,
+  title: string
 ): Promise<vscode.WebviewPanel> {
-  const panel = vscode.window.createWebviewPanel(`openapiPreview-${name}`, title, vscode.ViewColumn.Two, {
-    enableScripts: true,
-    retainContextWhenHidden: true,
-  });
+  const panel = vscode.window.createWebviewPanel(
+    `openapiPreview-${name}`,
+    title,
+    vscode.ViewColumn.Two,
+    {
+      enableScripts: true,
+      retainContextWhenHidden: true,
+    }
+  );
 
   return new Promise((resolve, reject) => {
     panel.webview.onDidReceiveMessage(
       (message) => {
         switch (message.command) {
-          case 'init':
+          case "init":
             resolve(panel);
         }
       },
       undefined,
-      context.subscriptions,
+      context.subscriptions
     );
 
     const index = panel.webview.asWebviewUri(
-      vscode.Uri.file(path.join(context.extensionPath, 'webview', 'generated', 'preview', name, 'index.js')),
+      vscode.Uri.file(
+        path.join(context.extensionPath, "webview", "generated", "preview", name, "index.js")
+      )
     );
     panel.webview.html = getWebviewContent(panel.webview, index);
   });

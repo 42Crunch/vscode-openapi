@@ -3,13 +3,17 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import { Node } from './types';
-import { parseJson, JsonNode } from './json';
-import { parseYaml, findYamlNodeAtOffset, YamlNode } from './yaml';
-import { ParserOptions } from '../parser-options';
+import { Node } from "./types";
+import { parseJson, JsonNode } from "./json";
+import { parseYaml, findYamlNodeAtOffset, YamlNode } from "./yaml";
+import { ParserOptions } from "../parser-options";
 
-function parse(text: string, languageId: string, options: ParserOptions): [Node, {message: string, offset: number}[]] {
-  return languageId === 'yaml' ? parseYaml(text, options.get().yaml.schema) : parseJson(text);
+function parse(
+  text: string,
+  languageId: string,
+  options: ParserOptions
+): [Node, { message: string; offset: number }[]] {
+  return languageId === "yaml" ? parseYaml(text, options.get().yaml.schema) : parseJson(text);
 }
 
 export { parse, parseYaml, parseJson, findYamlNodeAtOffset, Node, JsonNode, YamlNode };
