@@ -3,8 +3,8 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import * as vscode from 'vscode';
-import * as fs from 'fs';
+import * as vscode from "vscode";
+import * as fs from "fs";
 
 function getHtml(contents: string): string {
   return `<!DOCTYPE html>
@@ -21,9 +21,13 @@ ${contents}
 }
 
 export function create(context: vscode.ExtensionContext) {
-  const filename = context.asAbsolutePath('webview/generated/whatsnew.html');
-  const contents = fs.readFileSync(filename, { encoding: 'utf8' });
-  const panel = vscode.window.createWebviewPanel('whatsNew', "What's new in OpenAPI Editor", vscode.ViewColumn.Active);
+  const filename = context.asAbsolutePath("webview/generated/whatsnew.html");
+  const contents = fs.readFileSync(filename, { encoding: "utf8" });
+  const panel = vscode.window.createWebviewPanel(
+    "whatsNew",
+    "What's new in OpenAPI Editor",
+    vscode.ViewColumn.Active
+  );
   panel.webview.html = getHtml(contents);
   return panel;
 }

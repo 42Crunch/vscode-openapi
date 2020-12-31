@@ -3,8 +3,8 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import * as vscode from 'vscode';
-import { Node } from './ast';
+import * as vscode from "vscode";
+import { Node } from "./ast";
 
 export function updateContext(didChangeTree: vscode.Event<[Node, vscode.TextDocumentChangeEvent]>) {
   didChangeTree(([tree, _changeEvent]) => {
@@ -15,9 +15,9 @@ export function updateContext(didChangeTree: vscode.Event<[Node, vscode.TextDocu
 }
 
 function checkTree(tree: Node) {
-  setContext('openapiMissingHost', isMissing(tree, '/host'));
-  setContext('openapiMissingBasePath', isMissing(tree, '/basePath'));
-  setContext('openapiMissingInfo', isMissing(tree, '/info'));
+  setContext("openapiMissingHost", isMissing(tree, "/host"));
+  setContext("openapiMissingBasePath", isMissing(tree, "/basePath"));
+  setContext("openapiMissingInfo", isMissing(tree, "/info"));
 }
 
 function isMissing(tree: Node, pointer: string): boolean {
@@ -25,5 +25,5 @@ function isMissing(tree: Node, pointer: string): boolean {
 }
 
 function setContext(name: string, value: boolean) {
-  vscode.commands.executeCommand('setContext', name, value);
+  vscode.commands.executeCommand("setContext", name, value);
 }

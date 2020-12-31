@@ -3,9 +3,9 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import * as vscode from 'vscode';
-import { Node } from './ast';
-import { configuration } from './configuration';
+import * as vscode from "vscode";
+import { Node } from "./ast";
+import { configuration } from "./configuration";
 
 abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
   private _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
@@ -17,7 +17,7 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
 
   constructor(
     private context: vscode.ExtensionContext,
-    didChangeTree: vscode.Event<[Node, vscode.TextDocumentChangeEvent]>,
+    didChangeTree: vscode.Event<[Node, vscode.TextDocumentChangeEvent]>
   ) {
     didChangeTree(([node, changeEvent]) => {
       const pointer = this.getRootPointer();
@@ -31,13 +31,13 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
       this._onDidChangeTreeData.fire();
     });
 
-    this.sort = configuration.get<boolean>('sortOutlines');
+    this.sort = configuration.get<boolean>("sortOutlines");
     configuration.onDidChange(this.onConfigurationChanged, this);
   }
 
   onConfigurationChanged(e: vscode.ConfigurationChangeEvent) {
-    if (configuration.changed(e, 'sortOutlines')) {
-      this.sort = configuration.get<boolean>('sortOutlines');
+    if (configuration.changed(e, "sortOutlines")) {
+      this.sort = configuration.get<boolean>("sortOutlines");
       this._onDidChangeTreeData.fire();
     }
   }
@@ -88,20 +88,24 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
 
   getCollapsible(node: Node): vscode.TreeItemCollapsibleState {
     const canDisplayChildren = node.getDepth() < this.maxDepth;
-    return canDisplayChildren ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None;
+    return canDisplayChildren
+      ? vscode.TreeItemCollapsibleState.Collapsed
+      : vscode.TreeItemCollapsibleState.None;
   }
 
   getLabel(node: Node): string {
-    return node ? node.getKey() : '<unknown>';
+    return node ? node.getKey() : "<unknown>";
   }
 
   getCommand(node: Node): vscode.Command {
     const editor = vscode.window.activeTextEditor;
     const [start, end] = node.getRange();
     return {
-      command: 'openapi.goToLine',
-      title: '',
-      arguments: [new vscode.Range(editor.document.positionAt(start), editor.document.positionAt(end))],
+      command: "openapi.goToLine",
+      title: "",
+      arguments: [
+        new vscode.Range(editor.document.positionAt(start), editor.document.positionAt(end)),
+      ],
     };
   }
 
@@ -114,7 +118,7 @@ export class PathOutlineProvider extends OutlineProvider {
   maxDepth = 5;
 
   getRootPointer() {
-    return '/paths';
+    return "/paths";
   }
 
   filterChildren(node: Node, children: Node[]) {
@@ -122,14 +126,22 @@ export class PathOutlineProvider extends OutlineProvider {
     const key = node.getKey();
     if (depth === 2) {
       return children.filter((child) => {
-        return ['get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace', 'parameters'].includes(
-          child.getKey(),
-        );
+        return [
+          "get",
+          "put",
+          "post",
+          "delete",
+          "options",
+          "head",
+          "patch",
+          "trace",
+          "parameters",
+        ].includes(child.getKey());
       });
-    } else if (depth === 3 && key !== 'parameters') {
+    } else if (depth === 3 && key !== "parameters") {
       return children.filter((child) => {
         const key = child.getKey();
-        return key === 'responses' || key === 'parameters';
+        return key === "responses" || key === "parameters";
       });
     }
     return children;
@@ -138,13 +150,13 @@ export class PathOutlineProvider extends OutlineProvider {
   getLabel(node: Node): string {
     const depth = node.getDepth();
 
-    if ((depth === 4 || depth === 5) && node.getParent().getKey() == 'parameters') {
+    if ((depth === 4 || depth === 5) && node.getParent().getKey() == "parameters") {
       // return label for a parameter
-      const ref = node.find('/$ref');
-      const name = node.find('/name');
+      const ref = node.find("/$ref");
+      const name = node.find("/name");
       const label = (ref && ref.getValue()) || (name && name.getValue());
       if (!label) {
-        return '<unknown>';
+        return "<unknown>";
       }
       return label;
     }
@@ -153,7 +165,7 @@ export class PathOutlineProvider extends OutlineProvider {
 
   getContextValue(node: Node) {
     if (node.getDepth() === 2) {
-      return 'path';
+      return "path";
     }
     return null;
   }
@@ -161,19 +173,19 @@ export class PathOutlineProvider extends OutlineProvider {
 
 export class DefinitionOutlineProvider extends OutlineProvider {
   getRootPointer() {
-    return '/definitions';
+    return "/definitions";
   }
 }
 
 export class SecurityDefinitionOutlineProvider extends OutlineProvider {
   getRootPointer() {
-    return '/securityDefinitions';
+    return "/securityDefinitions";
   }
 }
 
 export class SecurityOutlineProvider extends OutlineProvider {
   getRootPointer() {
-    return '/security';
+    return "/security";
   }
 
   getLabel(node: Node): string {
@@ -181,60 +193,60 @@ export class SecurityOutlineProvider extends OutlineProvider {
     if (children[0]) {
       return children[0].getKey();
     }
-    return '<unknown>';
+    return "<unknown>";
   }
 }
 
 export class ComponentsOutlineProvider extends OutlineProvider {
   maxDepth = 3;
   getRootPointer() {
-    return '/components';
+    return "/components";
   }
 }
 
 export class ServersOutlineProvider extends OutlineProvider {
   getRootPointer() {
-    return '/servers';
+    return "/servers";
   }
 
   getLabel(node: Node): string {
     for (const child of node.getChildren()) {
-      if (child.getKey() === 'url') {
+      if (child.getKey() === "url") {
         const label = child.getValue();
         if (!label) {
-          return '<unknown>';
+          return "<unknown>";
         }
         return label;
       }
     }
-    return '<unknown>';
+    return "<unknown>";
   }
 }
 
 export class ParametersOutlineProvider extends OutlineProvider {
   getRootPointer() {
-    return '/parameters';
+    return "/parameters";
   }
 }
 
 export class ResponsesOutlineProvider extends OutlineProvider {
   getRootPointer() {
-    return '/responses';
+    return "/responses";
   }
 }
 
 export class GeneralTwoOutlineProvider extends OutlineProvider {
   getChildren(node?: Node): Thenable<Node[]> {
     const targets = [
-      '/swagger',
-      '/host',
-      '/basePath',
-      '/info',
-      '/schemes',
-      '/consumes',
-      '/produces',
-      '/tags',
-      '/externalDocs',
+      "/swagger",
+      "/host",
+      "/basePath",
+      "/info",
+      "/schemes",
+      "/consumes",
+      "/produces",
+      "/tags",
+      "/externalDocs",
     ];
 
     const result = [];
@@ -254,7 +266,7 @@ export class GeneralTwoOutlineProvider extends OutlineProvider {
 
 export class GeneralThreeOutlineProvider extends OutlineProvider {
   getChildren(node?: Node): Thenable<Node[]> {
-    const targets = ['/openapi', '/info', '/tags', '/externalDocs'];
+    const targets = ["/openapi", "/info", "/tags", "/externalDocs"];
 
     const result = [];
 

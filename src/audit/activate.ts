@@ -3,13 +3,17 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import * as vscode from 'vscode';
-import { RuntimeContext, OpenApiVersion } from '../types';
-import { registerSecurityAudit, registerFocusSecurityAudit, registerFocusSecurityAuditById } from './commands';
-import { ReportWebView } from './report';
-import { setDecorations } from './decoration';
-import { AuditContext } from './types';
-import { registerQuickfixes } from './quickfix';
+import * as vscode from "vscode";
+import { RuntimeContext, OpenApiVersion } from "../types";
+import {
+  registerSecurityAudit,
+  registerFocusSecurityAudit,
+  registerFocusSecurityAuditById,
+} from "./commands";
+import { ReportWebView } from "./report";
+import { setDecorations } from "./decoration";
+import { AuditContext } from "./types";
+import { registerQuickfixes } from "./quickfix";
 
 export function activate(context: vscode.ExtensionContext, runtimeContext: RuntimeContext) {
   const auditContext: AuditContext = {};

@@ -3,13 +3,13 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import * as vscode from 'vscode';
-import got from 'got';
-import FormData from 'form-data';
-import { Grades, ReportedIssue } from './types';
+import * as vscode from "vscode";
+import got from "got";
+import FormData from "form-data";
+import { Grades, ReportedIssue } from "./types";
 
-const ASSESS_URL = 'https://stateless.apisecurity.io/api/v1/anon/assess/vscode';
-const TOKEN_URL = 'https://stateless.apisecurity.io/api/v1/anon/token';
+const ASSESS_URL = "https://stateless.apisecurity.io/api/v1/anon/assess/vscode";
+const TOKEN_URL = "https://stateless.apisecurity.io/api/v1/anon/token";
 
 async function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -20,7 +20,7 @@ export async function requestToken(email: string) {
     body: { email },
     form: true,
     headers: {
-      Accept: 'application/json',
+      Accept: "application/json",
     },
   });
 
@@ -29,16 +29,16 @@ export async function requestToken(email: string) {
 
 async function submitAudit(text: string, apiToken: string) {
   const form = new FormData();
-  form.append('specfile', text, {
-    filename: 'swagger.json',
-    contentType: 'application/json',
+  form.append("specfile", text, {
+    filename: "swagger.json",
+    contentType: "application/json",
   });
 
   const response = await got(ASSESS_URL, {
     body: form,
     headers: {
-      Accept: 'application/json',
-      'X-API-TOKEN': apiToken,
+      Accept: "application/json",
+      "X-API-TOKEN": apiToken,
     },
   });
 
@@ -48,8 +48,8 @@ async function submitAudit(text: string, apiToken: string) {
 async function retryAudit(token: string, apiToken: string) {
   const response = await got(`ASSESS_URL?token=${token}`, {
     headers: {
-      Accept: 'application/json',
-      'X-API-TOKEN': apiToken,
+      Accept: "application/json",
+      "X-API-TOKEN": apiToken,
     },
   });
   return JSON.parse(response.body);
@@ -58,33 +58,33 @@ async function retryAudit(token: string, apiToken: string) {
 export async function audit(
   text: string,
   apiToken: string,
-  progress: vscode.Progress<any>,
+  progress: vscode.Progress<any>
 ): Promise<[Grades, ReportedIssue[]]> {
   let result = await submitAudit(text, apiToken);
 
-  if (result.status === 'IN_PROGRESS') {
+  if (result.status === "IN_PROGRESS") {
     for (let attempt = 0; attempt < 20; attempt++) {
       await delay(5000);
       if (attempt === 2) {
         progress.report({
-          message: 'Processing takes longer than expected, please wait...',
+          message: "Processing takes longer than expected, please wait...",
         });
       }
 
       const retry = await retryAudit(result.token, apiToken);
 
-      if (retry.status === 'PROCESSED') {
+      if (retry.status === "PROCESSED") {
         result = retry;
         break;
       }
     }
   }
 
-  if (result.status === 'PROCESSED') {
+  if (result.status === "PROCESSED") {
     return [readSummary(result.report), readAssessment(result.report)];
   }
 
-  throw new Error('Failed to retrieve audit result');
+  throw new Error("Failed to retrieve audit result");
 }
 
 function readSummary(assessment): Grades {
@@ -110,7 +110,7 @@ function readSummary(assessment): Grades {
     grades.errors = true;
   }
 
-  if (assessment.openapiState === 'fileInvalid') {
+  if (assessment.openapiState === "fileInvalid") {
     grades.invalid = true;
   }
 
@@ -126,11 +126,11 @@ function readAssessment(assessment): ReportedIssue[] {
   function transformScore(score: number): string {
     const rounded = Math.abs(Math.round(score));
     if (score === 0) {
-      return '0';
+      return "0";
     } else if (rounded >= 1) {
       return rounded.toString();
     }
-    return 'less than 1';
+    return "less than 1";
   }
 
   function transformIssues(issues, defaultCriticality: number = 5): ReportedIssue[] {
@@ -140,7 +140,9 @@ function readAssessment(assessment): ReportedIssue[] {
       for (const subIssue of issue.issues) {
         result.push({
           id,
-          description: subIssue.specificDescription ? subIssue.specificDescription : issue.description,
+          description: subIssue.specificDescription
+            ? subIssue.specificDescription
+            : issue.description,
           pointer: jsonPointerIndex[subIssue.pointer],
           score: subIssue.score ? Math.abs(subIssue.score) : 0,
           displayScore: transformScore(subIssue.score ? subIssue.score : 0),

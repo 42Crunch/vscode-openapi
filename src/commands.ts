@@ -3,11 +3,11 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import * as vscode from 'vscode';
-import { parse, Node, JsonNode, YamlNode } from './ast';
-import { outlines } from './extension';
-import { parserOptions } from './parser-options';
-import * as snippets from './snippets.json';
+import * as vscode from "vscode";
+import { parse, Node, JsonNode, YamlNode } from "./ast";
+import { outlines } from "./extension";
+import { parserOptions } from "./parser-options";
+import * as snippets from "./snippets.json";
 
 const commands = {
   goToLine,
@@ -51,42 +51,42 @@ const commands = {
   copySelectedThreePathOutlineJsonReference,
   copySelectedThreeServersOutlineJsonReference,
   copySelectedThreeComponentsOutlineJsonReference,
-  copySelectedThreeSecurityOutlineJsonReference
+  copySelectedThreeSecurityOutlineJsonReference,
 };
 
 // preferred order of the tags, mixed v2 and v3 tags
 const topTags: string[] = [
-  'swagger',
-  'openapi',
-  'info',
-  'externalDocs',
-  'host',
-  'basePath',
-  'schemes',
-  'consumes',
-  'produces',
-  'tags',
-  'servers',
-  'components',
-  'paths',
-  'parameters',
-  'responses',
-  'security',
-  'securityDefinitions',
-  'definitions',
+  "swagger",
+  "openapi",
+  "info",
+  "externalDocs",
+  "host",
+  "basePath",
+  "schemes",
+  "consumes",
+  "produces",
+  "tags",
+  "servers",
+  "components",
+  "paths",
+  "parameters",
+  "responses",
+  "security",
+  "securityDefinitions",
+  "definitions",
 ];
 
 // preferred order of tags in v3 components
 const componentsTags: string[] = [
-  'schemas',
-  'responses',
-  'parameters',
-  'examples',
-  'requestBodies',
-  'headers',
-  'securitySchemes',
-  'links',
-  'callbacks',
+  "schemas",
+  "responses",
+  "parameters",
+  "examples",
+  "requestBodies",
+  "headers",
+  "securitySchemes",
+  "links",
+  "callbacks",
 ];
 
 export function registerCommands(): vscode.Disposable[] {
@@ -126,9 +126,9 @@ function copyNodeJsonReference(node: Node) {
     // JSON Pointer is allowed to have special chars, but JSON Reference
     // requires these to be encoded
     const encoded = pointer
-      .split('/')
+      .split("/")
       .map((segment) => encodeURIComponent(segment))
-      .join('/');
+      .join("/");
     vscode.env.clipboard.writeText(`#${encoded}`);
     const disposable = vscode.window.setStatusBarMessage(`Copied Reference: #${encoded}`);
     setTimeout(() => disposable.dispose(), 1000);
@@ -136,43 +136,43 @@ function copyNodeJsonReference(node: Node) {
 }
 
 function copySelectedTwoPathOutlineJsonReference() {
-  copySelectedJsonReference('openapiTwoPathOutline');
+  copySelectedJsonReference("openapiTwoPathOutline");
 }
 
 function copySelectedTwoParametersOutlineJsonReference() {
-  copySelectedJsonReference('openapiTwoParametersOutline');
+  copySelectedJsonReference("openapiTwoParametersOutline");
 }
 
 function copySelectedTwoResponsesOutlineJsonReference() {
-  copySelectedJsonReference('openapiTwoResponsesOutline');
+  copySelectedJsonReference("openapiTwoResponsesOutline");
 }
 
 function copySelectedTwoDefinitionOutlineJsonReference() {
-  copySelectedJsonReference('openapiTwoDefinitionOutline');
+  copySelectedJsonReference("openapiTwoDefinitionOutline");
 }
 
 function copySelectedTwoSecurityOutlineJsonReference() {
-  copySelectedJsonReference('openapiTwoSecurityOutline');
+  copySelectedJsonReference("openapiTwoSecurityOutline");
 }
 
 function copySelectedTwoSecurityDefinitionOutlineJsonReference() {
-  copySelectedJsonReference('openapiTwoSecurityDefinitionOutline');
+  copySelectedJsonReference("openapiTwoSecurityDefinitionOutline");
 }
 
 function copySelectedThreePathOutlineJsonReference() {
-  copySelectedJsonReference('openapiThreePathOutline');
+  copySelectedJsonReference("openapiThreePathOutline");
 }
 
 function copySelectedThreeServersOutlineJsonReference() {
-  copySelectedJsonReference('openapiThreeServersOutline');
+  copySelectedJsonReference("openapiThreeServersOutline");
 }
 
 function copySelectedThreeComponentsOutlineJsonReference() {
-  copySelectedJsonReference('openapiThreeComponentsOutline');
+  copySelectedJsonReference("openapiThreeComponentsOutline");
 }
 
 function copySelectedThreeSecurityOutlineJsonReference() {
-  copySelectedJsonReference('openapiThreeSecurityOutline');
+  copySelectedJsonReference("openapiThreeSecurityOutline");
 }
 
 function copySelectedJsonReference(viewId: string) {
@@ -189,124 +189,124 @@ async function createNew(snippet: string, language: string) {
 }
 
 async function createNewTwo() {
-  await createNew(snippets.newVersionTwo, 'json');
+  await createNew(snippets.newVersionTwo, "json");
 }
 
 async function createNewThree() {
-  await createNew(snippets.newVersionThree, 'json');
+  await createNew(snippets.newVersionThree, "json");
 }
 
 async function createNewTwoYaml() {
-  await createNew(snippets.newVersionTwoYaml, 'yaml');
+  await createNew(snippets.newVersionTwoYaml, "yaml");
 }
 
 async function createNewThreeYaml() {
-  await createNew(snippets.newVersionThreeYaml, 'yaml');
+  await createNew(snippets.newVersionThreeYaml, "yaml");
 }
 
 async function addBasePath() {
-  await insertSnippetAfter('basePath', '/swagger');
+  await insertSnippetAfter("basePath", "/swagger");
 }
 
 async function addHost() {
-  await insertSnippetAfter('host', '/swagger');
+  await insertSnippetAfter("host", "/swagger");
 }
 
 async function addInfo() {
-  await insertSnippetAfter('info', '/swagger');
+  await insertSnippetAfter("info", "/swagger");
 }
 
 async function v3addInfo() {
-  await insertSnippetAfter('info', '/openapi');
+  await insertSnippetAfter("info", "/openapi");
 }
 
 async function addPath() {
-  await insertSnippetIntoRoot('path', 'paths');
+  await insertSnippetIntoRoot("path", "paths");
 }
 
 async function addSecurityDefinitionBasic() {
-  await insertSnippetIntoRoot('securityBasic', 'securityDefinitions');
+  await insertSnippetIntoRoot("securityBasic", "securityDefinitions");
 }
 
 async function addSecurityDefinitionOauth2Implicit() {
-  await insertSnippetIntoRoot('securityOauth2Implicit', 'securityDefinitions');
+  await insertSnippetIntoRoot("securityOauth2Implicit", "securityDefinitions");
 }
 
 async function addSecurityDefinitionApiKey() {
-  await insertSnippetIntoRoot('securityApiKey', 'securityDefinitions');
+  await insertSnippetIntoRoot("securityApiKey", "securityDefinitions");
 }
 
 async function addSecurity() {
-  await insertSnippetIntoRoot('security', 'security', 'array');
+  await insertSnippetIntoRoot("security", "security", "array");
 }
 
 async function addDefinitionObject() {
-  await insertSnippetIntoRoot('definitionObject', 'definitions');
+  await insertSnippetIntoRoot("definitionObject", "definitions");
 }
 
 async function addParameterPath() {
-  await insertSnippetIntoRoot('parameterPath', 'parameters');
+  await insertSnippetIntoRoot("parameterPath", "parameters");
 }
 
 async function addParameterBody() {
-  await insertSnippetIntoRoot('parameterBody', 'parameters');
+  await insertSnippetIntoRoot("parameterBody", "parameters");
 }
 
 async function addParameterOther() {
-  await insertSnippetIntoRoot('parameterOther', 'parameters');
+  await insertSnippetIntoRoot("parameterOther", "parameters");
 }
 
 async function addResponse() {
-  await insertSnippetIntoRoot('response', 'responses');
+  await insertSnippetIntoRoot("response", "responses");
 }
 
 async function v3addComponentsResponse() {
-  await insertSnippetIntoComponents('componentsResponse', 'responses');
+  await insertSnippetIntoComponents("componentsResponse", "responses");
 }
 
 async function v3addComponentsParameter() {
-  await insertSnippetIntoComponents('componentsParameter', 'parameters');
+  await insertSnippetIntoComponents("componentsParameter", "parameters");
 }
 
 async function v3addComponentsSchema() {
-  await insertSnippetIntoComponents('componentsSchema', 'schemas');
+  await insertSnippetIntoComponents("componentsSchema", "schemas");
 }
 
 async function v3addSecuritySchemeBasic() {
-  await insertSnippetIntoComponents('componentsSecurityBasic', 'securitySchemes');
+  await insertSnippetIntoComponents("componentsSecurityBasic", "securitySchemes");
 }
 
 async function v3addSecuritySchemeApiKey() {
-  await insertSnippetIntoComponents('componentsSecurityApiKey', 'securitySchemes');
+  await insertSnippetIntoComponents("componentsSecurityApiKey", "securitySchemes");
 }
 
 async function v3addSecuritySchemeJWT() {
-  await insertSnippetIntoComponents('componentsSecurityJwt', 'securitySchemes');
+  await insertSnippetIntoComponents("componentsSecurityJwt", "securitySchemes");
 }
 
 async function v3addSecuritySchemeOauth2Implicit() {
-  await insertSnippetIntoComponents('componentsSecurityOauth2Implicit', 'securitySchemes');
+  await insertSnippetIntoComponents("componentsSecurityOauth2Implicit", "securitySchemes");
 }
 
 async function v3addServer() {
-  await insertSnippetIntoRoot('server', 'servers', 'array');
+  await insertSnippetIntoRoot("server", "servers", "array");
 }
 
 async function addOperation(node: any) {
   const editor = vscode.window.activeTextEditor;
   const languageId = editor.document.languageId;
-  if (languageId === 'yaml') {
+  if (languageId === "yaml") {
     const target = node.node.value;
     let snippet = snippets.operationYaml;
 
-    const eol = editor.document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n';
+    const eol = editor.document.eol === vscode.EndOfLine.CRLF ? "\r\n" : "\n";
     await editor.edit((builder) => {
       builder.insert(editor.document.positionAt(target.endPosition), eol);
     });
 
     await editor.insertSnippet(
       new vscode.SnippetString(`\n${increaseIndent(snippet, 2)}\n`),
-      editor.document.positionAt(target.endPosition + eol.length),
+      editor.document.positionAt(target.endPosition + eol.length)
     );
   } else {
     const target = node.node.parent.children[1];
@@ -317,7 +317,10 @@ async function addOperation(node: any) {
       snippet = `${snippet},`;
     }
 
-    await editor.insertSnippet(new vscode.SnippetString(snippet), editor.document.positionAt(target.offset + 1));
+    await editor.insertSnippet(
+      new vscode.SnippetString(snippet),
+      editor.document.positionAt(target.offset + 1)
+    );
   }
 }
 
@@ -327,7 +330,7 @@ async function insertSnippetAfter(snippetName: string, pointer: string) {
   const languageId = editor.document.languageId;
   const root = safeParse(text, languageId);
 
-  if (languageId === 'yaml') {
+  if (languageId === "yaml") {
     let snippet = snippets[`${snippetName}Yaml`];
     await insertYamlSnippetAfter(<YamlNode>root, snippet, pointer);
   } else {
@@ -340,21 +343,22 @@ async function insertYamlSnippetAfter(root: YamlNode, snippet: string, pointer: 
   const editor = vscode.window.activeTextEditor;
   const node = root.find(pointer);
 
-  const eol = editor.document.eol === vscode.EndOfLine.CRLF ? '\r\n' : '\n';
+  const eol = editor.document.eol === vscode.EndOfLine.CRLF ? "\r\n" : "\n";
   await editor.edit((builder) => {
     builder.insert(editor.document.positionAt(node.node.endPosition), eol);
   });
 
   await editor.insertSnippet(
     new vscode.SnippetString(`${snippet}`),
-    editor.document.positionAt(node.node.endPosition + eol.length),
+    editor.document.positionAt(node.node.endPosition + eol.length)
   );
 }
 
 async function insertJsonSnippetAfter(root: JsonNode, snippet: string, pointer: string) {
   const editor = vscode.window.activeTextEditor;
   const jnode = root.find(pointer).node;
-  const last = jnode.parent.parent.children.indexOf(jnode.parent) == jnode.parent.parent.children.length - 1;
+  const last =
+    jnode.parent.parent.children.indexOf(jnode.parent) == jnode.parent.parent.children.length - 1;
   let insertPosition: number;
   if (last) {
     // inserting snippet after the last node in the object
@@ -364,7 +368,10 @@ async function insertJsonSnippetAfter(root: JsonNode, snippet: string, pointer: 
     snippet = `\n${snippet},`;
     insertPosition = jnode.offset + jnode.length + 1;
   }
-  await editor.insertSnippet(new vscode.SnippetString(snippet), editor.document.positionAt(insertPosition));
+  await editor.insertSnippet(
+    new vscode.SnippetString(snippet),
+    editor.document.positionAt(insertPosition)
+  );
 }
 
 async function insertYamlSnippetInto(root: YamlNode, snippet: string, pointer: string) {
@@ -373,7 +380,7 @@ async function insertYamlSnippetInto(root: YamlNode, snippet: string, pointer: s
 
   await editor.insertSnippet(
     new vscode.SnippetString(`${snippet}\n`),
-    editor.document.positionAt(ynode.value.startPosition),
+    editor.document.positionAt(ynode.value.startPosition)
   );
 }
 
@@ -387,16 +394,23 @@ async function insertJsonSnippetInto(root: JsonNode, snippet: string, pointer: s
     snippet = `${snippet},`;
   }
 
-  await editor.insertSnippet(new vscode.SnippetString(snippet), editor.document.positionAt(jnode.offset + 1));
+  await editor.insertSnippet(
+    new vscode.SnippetString(snippet),
+    editor.document.positionAt(jnode.offset + 1)
+  );
 }
 
-async function insertSnippetIntoRoot(snippetName: string, element: string, container: string = 'object') {
+async function insertSnippetIntoRoot(
+  snippetName: string,
+  element: string,
+  container: string = "object"
+) {
   const editor = vscode.window.activeTextEditor;
   const text = editor.document.getText();
   const languageId = editor.document.languageId;
   const root = safeParse(text, languageId);
 
-  if (languageId === 'yaml') {
+  if (languageId === "yaml") {
     let snippet = snippets[`${snippetName}Yaml`];
     if (root.find(`/${element}`)) {
       await insertYamlSnippetInto(<YamlNode>root, snippet, `/${element}`);
@@ -410,7 +424,7 @@ async function insertSnippetIntoRoot(snippetName: string, element: string, conta
     if (root.find(`/${element}`)) {
       await insertJsonSnippetInto(<JsonNode>root, snippet, `/${element}`);
     } else {
-      if (container === 'object') {
+      if (container === "object") {
         snippet = `"${element}": {\n${snippet}\n}`;
       } else {
         // array container otherwise
@@ -428,44 +442,52 @@ async function insertSnippetIntoComponents(snippetName: string, element: string)
   const languageId = editor.document.languageId;
   const root = safeParse(text, languageId);
 
-  if (languageId === 'yaml') {
+  if (languageId === "yaml") {
     let snippet = snippets[`${snippetName}Yaml`];
     if (root.find(`/components/${element}`)) {
       await insertYamlSnippetInto(<YamlNode>root, snippet, `/components/${element}`);
-    } else if (root.find('/components')) {
+    } else if (root.find("/components")) {
       const position = findComponentsInsertionPosition(root, element);
       if (position >= 0) {
         // found where to insert
         snippet = `\n\t${element}:\n${increaseIndent(snippet, 2)}\n`;
-        await insertYamlSnippetAfter(<YamlNode>root, snippet, `/components/${componentsTags[position]}`);
+        await insertYamlSnippetAfter(
+          <YamlNode>root,
+          snippet,
+          `/components/${componentsTags[position]}`
+        );
       } else {
         // insert into the 'components'
         snippet = `${element}:\n${increaseIndent(snippet, 2)}\n`;
-        await insertYamlSnippetInto(<YamlNode>root, snippet, '/components');
+        await insertYamlSnippetInto(<YamlNode>root, snippet, "/components");
       }
     } else {
       snippet = `components:\n\t${element}:\n${increaseIndent(snippet, 2)}\n`;
-      const target = findInsertionAnchor(root, 'components');
+      const target = findInsertionAnchor(root, "components");
       await insertYamlSnippetAfter(<YamlNode>root, snippet, `/${target}`);
     }
   } else {
     let snippet = snippets[snippetName];
     if (root.find(`/components/${element}`)) {
       await insertJsonSnippetInto(<JsonNode>root, snippet, `/components/${element}`);
-    } else if (root.find('/components')) {
+    } else if (root.find("/components")) {
       const position = findComponentsInsertionPosition(root, element);
       if (position >= 0) {
         // found where to insert
         snippet = `"${element}": {\n${snippet}\n}`;
-        await insertJsonSnippetAfter(<JsonNode>root, snippet, `/components/${componentsTags[position]}`);
+        await insertJsonSnippetAfter(
+          <JsonNode>root,
+          snippet,
+          `/components/${componentsTags[position]}`
+        );
       } else {
         // insert into the 'components'
         snippet = `\t"${element}": {\n\t${snippet}\n\t}`;
-        await insertJsonSnippetInto(<JsonNode>root, snippet, '/components');
+        await insertJsonSnippetInto(<JsonNode>root, snippet, "/components");
       }
     } else {
       snippet = `"components": {\n\t"${element}": {\n\t${snippet}\n\t}\n}`;
-      const target = findInsertionAnchor(root, 'components');
+      const target = findInsertionAnchor(root, "components");
       await insertJsonSnippetAfter(<JsonNode>root, snippet, `/${target}`);
     }
   }
@@ -489,9 +511,9 @@ function findInsertionAnchor(root: Node, element: string): string {
 
 function increaseIndent(snippet: string, level = 1) {
   return snippet
-    .split('\n')
-    .map((line) => '\t'.repeat(level) + line)
-    .join('\n');
+    .split("\n")
+    .map((line) => "\t".repeat(level) + line)
+    .join("\n");
 }
 
 function findComponentsInsertionPosition(root: Node, element: string) {
