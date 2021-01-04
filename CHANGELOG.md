@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 3.10.0 (January 5, 2021)
+
+* Implemented quickfix functionality to resolve a subset of audit issues.
+* Fixed Identify bad or invalid $ref's with a warning [Issue #86](https://github.com/42Crunch/vscode-openapi/issues/86)
+
 ## Version 3.9.0 (December 4, 2020)
 
 * Added a button to create new OpenAPI file from the welcome view.
