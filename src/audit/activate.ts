@@ -19,7 +19,7 @@ export function activate(context: vscode.ExtensionContext, runtimeContext: Runti
   const auditContext: AuditContext = {};
   const pendingAudits: { [uri: string]: boolean } = {};
 
-  runtimeContext.didChangeEditor(([editor, version]) => {
+  vscode.window.onDidChangeActiveTextEditor((editor) => {
     if (editor) {
       setDecorations(editor, auditContext);
       const uri = editor.document.uri.toString();

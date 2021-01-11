@@ -5,7 +5,7 @@
 
 import * as vscode from "vscode";
 import { parse, Node, JsonNode, YamlNode } from "./ast";
-import { outlines } from "./extension";
+import { outlines } from "./outline";
 import { parserOptions } from "./parser-options";
 import * as snippets from "./snippets.json";
 

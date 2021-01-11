@@ -5,13 +5,23 @@
 
 import * as vscode from "vscode";
 import { Node } from "./ast";
+import { OpenApiVersion, CacheEntry } from "./types";
 
-export function updateContext(didChangeTree: vscode.Event<[Node, vscode.TextDocumentChangeEvent]>) {
-  didChangeTree(([tree, _changeEvent]) => {
-    if (tree) {
-      checkTree(tree);
-    }
-  });
+export function updateContext(current: CacheEntry) {
+  if (current.version === OpenApiVersion.V2) {
+    vscode.commands.executeCommand("setContext", "openapiTwoEnabled", true);
+    vscode.commands.executeCommand("setContext", "openapiThreeEnabled", false);
+  } else if (current.version === OpenApiVersion.V3) {
+    vscode.commands.executeCommand("setContext", "openapiThreeEnabled", true);
+    vscode.commands.executeCommand("setContext", "openapiTwoEnabled", false);
+  } else {
+    vscode.commands.executeCommand("setContext", "openapiTwoEnabled", false);
+    vscode.commands.executeCommand("setContext", "openapiThreeEnabled", false);
+  }
+
+  if (current.lastGoodRoot) {
+    checkTree(current.lastGoodRoot);
+  }
 }
 
 function checkTree(tree: Node) {
