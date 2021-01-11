@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { Node, parse } from "./ast";
 import { getOpenApiVersion } from "./util";
-import { OpenApiVersion } from "./types";
+import { OpenApiVersion, CacheEntry } from "./types";
 import { parserOptions } from "./parser-options";
 import path from "path";
 
@@ -38,10 +38,10 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
   root: Node;
   constructor(
     private context: vscode.ExtensionContext,
-    private didChangeTree: vscode.Event<[Node, vscode.TextDocumentChangeEvent]>
+    private didChangeTree: vscode.Event<CacheEntry>
   ) {
-    didChangeTree(([node, changeEvent]) => {
-      this.root = node;
+    didChangeTree((entry) => {
+      this.root = entry.root;
     });
   }
 
