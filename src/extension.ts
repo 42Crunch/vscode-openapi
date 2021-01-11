@@ -42,11 +42,18 @@ export function activate(context: vscode.ExtensionContext) {
   parserOptions.configure(yamlConfiguration);
 
   const cache = new Cache();
+
+  const runtimeContext: RuntimeContext = {
+    cache,
+    diagnostics: vscode.languages.createDiagnosticCollection("openapi"),
+    bundlingDiagnostics: vscode.languages.createDiagnosticCollection("openapi-bundling"),
+  };
+
   cache.onDidChange(updateContext);
   cache.onDidChange((entry) => updateDiagnostics(entry, runtimeContext.diagnostics));
 
   context.subscriptions.push(...registerOutlines(context, cache.onDidActiveDocumentChange));
-  context.subscriptions.push(...registerCommands());
+  context.subscriptions.push(...registerCommands(runtimeContext));
 
   const jsonFile: vscode.DocumentSelector = { language: "json" };
   const jsoncFile: vscode.DocumentSelector = { language: "jsonc" };
@@ -63,11 +70,6 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.languages.registerDefinitionProvider(jsonFile, jsonSchemaDefinitionProvider);
   vscode.languages.registerDefinitionProvider(jsoncFile, jsonSchemaDefinitionProvider);
   vscode.languages.registerDefinitionProvider(yamlFile, yamlSchemaDefinitionProvider);
-
-  const runtimeContext: RuntimeContext = {
-    diagnostics: vscode.languages.createDiagnosticCollection("openapi"),
-    bundlingDiagnostics: vscode.languages.createDiagnosticCollection("openapi-bundling"),
-  };
 
   vscode.workspace.onDidCloseTextDocument((document) => {
     runtimeContext.diagnostics.delete(document.uri);
