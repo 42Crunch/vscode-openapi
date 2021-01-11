@@ -46,8 +46,12 @@ export class Cache {
     }
   }
 
-  getEntry(uri: vscode.Uri): CacheEntry {
-    return this.cache[uri.toString()];
+  getEntryForDocument(document: vscode.TextDocument): CacheEntry {
+    const uri = document.uri.toString();
+    if (this.cache[uri]) {
+      return this.cache[uri];
+    }
+    return this.updateCache(document);
   }
 
   private updateCache(document: vscode.TextDocument): CacheEntry {
