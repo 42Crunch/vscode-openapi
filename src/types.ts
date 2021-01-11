@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { Node } from "./ast";
+import { Cache } from "./cache";
 
 export const configId = "openapi";
 export const extensionQualifiedId = "42Crunch.vscode-openapi";
@@ -10,6 +11,7 @@ export enum OpenApiVersion {
 }
 
 export interface RuntimeContext {
+  cache: Cache;
   diagnostics: vscode.DiagnosticCollection;
   bundlingDiagnostics: vscode.DiagnosticCollection;
 }

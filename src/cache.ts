@@ -6,43 +6,12 @@
 import * as vscode from "vscode";
 import { CacheEntry } from "./types";
 import { OpenApiVersion } from "./types";
-import { parseDocument, provideYamlSchemas } from "./util";
+import { parseDocument } from "./util";
 
 export class Cache {
   private cache: { [uri: string]: CacheEntry } = {};
   private _didChange = new vscode.EventEmitter<CacheEntry>();
   private _didActiveDocumentChange = new vscode.EventEmitter<CacheEntry>();
-
-  private getEntry(uri: vscode.Uri): CacheEntry {
-    const _uri = uri.toString();
-    if (this.cache[_uri]) {
-      return this.cache[_uri];
-    }
-
-    const entry = {
-      uri,
-      version: OpenApiVersion.Unknown,
-      root: null,
-      lastGoodRoot: null,
-      errors: null,
-    };
-
-    this.cache[_uri] = entry;
-    return entry;
-  }
-
-  private updateCache(document: vscode.TextDocument): CacheEntry {
-    const entry = this.getEntry(document.uri);
-
-    const [version, node, errors] = parseDocument(document);
-    entry.version = version;
-    entry.root = node;
-    entry.errors = errors;
-    if (!errors) {
-      entry.lastGoodRoot = node;
-    }
-    return entry;
-  }
 
   get onDidChange(): vscode.Event<CacheEntry> {
     return this._didChange.event;
@@ -75,5 +44,40 @@ export class Cache {
       this._didChange.fire(entry);
       this._didActiveDocumentChange.fire(entry);
     }
+  }
+
+  getEntry(uri: vscode.Uri): CacheEntry {
+    return this.cache[uri.toString()];
+  }
+
+  private updateCache(document: vscode.TextDocument): CacheEntry {
+    const entry = this.getOrCreateEntry(document.uri);
+
+    const [version, node, errors] = parseDocument(document);
+    entry.version = version;
+    entry.root = node;
+    entry.errors = errors;
+    if (!errors) {
+      entry.lastGoodRoot = node;
+    }
+    return entry;
+  }
+
+  private getOrCreateEntry(uri: vscode.Uri): CacheEntry {
+    const _uri = uri.toString();
+    if (this.cache[_uri]) {
+      return this.cache[_uri];
+    }
+
+    const entry = {
+      uri,
+      version: OpenApiVersion.Unknown,
+      root: null,
+      lastGoodRoot: null,
+      errors: null,
+    };
+
+    this.cache[_uri] = entry;
+    return entry;
   }
 }
