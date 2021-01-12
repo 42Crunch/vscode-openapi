@@ -11,7 +11,7 @@ import { createDiagnostics } from "./diagnostic";
 
 import { ReportWebView } from "./report";
 import { TextDocument } from "vscode";
-import { bundle, findMapping, displayBundlerErrors } from "../bundler";
+import { findMapping } from "../bundler";
 import { Node } from "../ast";
 import { RuntimeContext } from "../types";
 import {
@@ -160,18 +160,8 @@ async function performAudit(
   apiToken,
   progress
 ): Promise<Audit | undefined> {
-  let json, mapping;
-
-  try {
-    runtimeContext.bundlingDiagnostics.clear();
-    [json, mapping] = await bundle(textEditor.document, runtimeContext.cache);
-  } catch (err) {
-    displayBundlerErrors(
-      textEditor.document.uri,
-      parserOptions,
-      runtimeContext.bundlingDiagnostics,
-      err
-    );
+  const entry = await runtimeContext.cache.getEntryForDocument(textEditor.document);
+  if (!entry.bundled || entry.bundledErorrs) {
     vscode.commands.executeCommand("workbench.action.problems.focus");
     throw new Error("Failed to bundle for audit, check OpenAPI file for errors.");
   }
@@ -180,9 +170,9 @@ async function performAudit(
     const documentUri = textEditor.document.uri.toString();
     const [grades, issuesByDocument, documents] = await auditDocument(
       textEditor.document,
-      json,
+      JSON.stringify(entry.bundled),
       runtimeContext.cache,
-      mapping,
+      entry.bundledMapping,
       apiToken,
       progress
     );
@@ -257,7 +247,7 @@ async function processIssues(
   const documentUris: { [uri: string]: boolean } = { [mainUri.toString()]: true };
   const issuesPerDocument: { [uri: string]: ReportedIssue[] } = {};
 
-  const { astRoot: root } = cache.getEntryForDocument(document);
+  const { astRoot: root } = await cache.getEntryForDocument(document);
 
   for (const issue of issues) {
     const [uri, pointer] = findIssueLocation(mainUri, root, mappings, issue.pointer);
@@ -281,7 +271,7 @@ async function processIssues(
 
 async function auditDocument(
   mainDocument: TextDocument,
-  json,
+  json: string,
   cache: Cache,
   mappings,
   apiToken,
@@ -305,7 +295,7 @@ async function auditDocument(
   for (const uri of documentUris) {
     if (!files[uri]) {
       const document = await vscode.workspace.openTextDocument(vscode.Uri.parse(uri));
-      const { astRoot } = cache.getEntryForDocument(document);
+      const { astRoot } = await cache.getEntryForDocument(document);
       files[uri] = [document, astRoot];
     }
   }
