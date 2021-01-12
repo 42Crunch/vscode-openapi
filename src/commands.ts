@@ -118,8 +118,8 @@ function goToLine(runtimeContext: RuntimeContext, range: vscode.Range) {
 function copyJsonReference(runtimeContext: RuntimeContext, range: vscode.Range) {
   const editor = vscode.window.activeTextEditor;
   const entry = runtimeContext.cache.getEntryForDocument(editor.document);
-  if (entry.root) {
-    const node = entry.root.findNodeAtOffset(editor.document.offsetAt(editor.selection.active));
+  if (entry.astRoot) {
+    const node = entry.astRoot.findNodeAtOffset(editor.document.offsetAt(editor.selection.active));
     copyNodeJsonReference(node);
   }
 }
@@ -339,7 +339,7 @@ async function insertSnippetAfter(
 ) {
   const editor = vscode.window.activeTextEditor;
   const languageId = editor.document.languageId;
-  const { root } = runtimeContext.cache.getEntryForDocument(editor.document);
+  const { astRoot: root } = runtimeContext.cache.getEntryForDocument(editor.document);
 
   if (!root) {
     // FIXME display error message?
@@ -424,7 +424,7 @@ async function insertSnippetIntoRoot(
 ) {
   const editor = vscode.window.activeTextEditor;
   const languageId = editor.document.languageId;
-  const { root } = runtimeContext.cache.getEntryForDocument(editor.document);
+  const { astRoot: root } = runtimeContext.cache.getEntryForDocument(editor.document);
 
   if (!root) {
     // FIXME display error message?
@@ -464,7 +464,7 @@ async function insertSnippetIntoComponents(
 ) {
   const editor = vscode.window.activeTextEditor;
   const languageId = editor.document.languageId;
-  const { root } = runtimeContext.cache.getEntryForDocument(editor.document);
+  const { astRoot: root } = runtimeContext.cache.getEntryForDocument(editor.document);
 
   if (!root) {
     // FIXME display error message?

@@ -19,7 +19,8 @@ export interface RuntimeContext {
 export interface CacheEntry {
   uri: vscode.Uri;
   version: OpenApiVersion;
-  root: Node;
-  lastGoodRoot: Node;
+  astRoot: Node;
+  lastGoodAstRoot: Node;
+  parsed: any;
   errors: any;
 }

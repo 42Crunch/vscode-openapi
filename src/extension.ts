@@ -7,7 +7,6 @@ import * as vscode from "vscode";
 import * as semver from "semver";
 import { configuration, Configuration } from "./configuration";
 import { RuntimeContext, extensionQualifiedId, CacheEntry } from "./types";
-import { provideYamlSchemas } from "./util";
 import { parserOptions } from "./parser-options";
 import { registerOutlines } from "./outline";
 import { JsonSchemaDefinitionProvider, YamlSchemaDefinitionProvider } from "./reference";
@@ -17,6 +16,7 @@ import { registerCommands } from "./commands";
 import { create as createWhatsNewPanel } from "./whatsnew";
 import { Cache } from "./cache";
 
+import * as yamlSchemaContributor from "./yaml-schema-contributor";
 import * as audit from "./audit/activate";
 import * as preview from "./preview";
 
@@ -41,7 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.globalState.update(versionProperty, currentVersion.toString());
   parserOptions.configure(yamlConfiguration);
 
-  const cache = new Cache();
+  const cache = new Cache(parserOptions);
 
   const runtimeContext: RuntimeContext = {
     cache,
@@ -59,13 +59,13 @@ export function activate(context: vscode.ExtensionContext) {
   const jsoncFile: vscode.DocumentSelector = { language: "jsonc" };
   const yamlFile: vscode.DocumentSelector = { language: "yaml" };
 
-  const completionProvider = new CompletionItemProvider(context, cache.onDidActiveDocumentChange);
+  const completionProvider = new CompletionItemProvider(context, cache);
   vscode.languages.registerCompletionItemProvider(yamlFile, completionProvider, '"');
   vscode.languages.registerCompletionItemProvider(jsonFile, completionProvider, '"');
   vscode.languages.registerCompletionItemProvider(jsoncFile, completionProvider, '"');
 
-  const jsonSchemaDefinitionProvider = new JsonSchemaDefinitionProvider();
-  const yamlSchemaDefinitionProvider = new YamlSchemaDefinitionProvider();
+  const jsonSchemaDefinitionProvider = new JsonSchemaDefinitionProvider(cache);
+  const yamlSchemaDefinitionProvider = new YamlSchemaDefinitionProvider(cache);
 
   vscode.languages.registerDefinitionProvider(jsonFile, jsonSchemaDefinitionProvider);
   vscode.languages.registerDefinitionProvider(jsoncFile, jsonSchemaDefinitionProvider);
@@ -81,9 +81,7 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.window.onDidChangeActiveTextEditor((e) => cache.onActiveEditorChanged(e));
   vscode.workspace.onDidChangeTextDocument((e) => cache.onDocumentChanged(e));
 
-  const yamlExtension = vscode.extensions.getExtension("redhat.vscode-yaml");
-  provideYamlSchemas(context, yamlExtension);
-
+  yamlSchemaContributor.activate(context, runtimeContext);
   audit.activate(context, runtimeContext);
   preview.activate(context, runtimeContext);
 

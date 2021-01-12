@@ -1,9 +1,8 @@
 import * as vscode from "vscode";
-import { Node, parse } from "./ast";
-import { getOpenApiVersion } from "./util";
-import { OpenApiVersion, CacheEntry } from "./types";
-import { parserOptions } from "./parser-options";
+import { Node } from "./ast";
+import { OpenApiVersion } from "./types";
 import path from "path";
+import { Cache } from "./cache";
 
 const targetMapping = {
   [OpenApiVersion.V2]: {
@@ -27,8 +26,8 @@ const targetMapping = {
   },
 };
 
-function findTarget(root: Node, node: Node): string | undefined {
-  const mapping = targetMapping[getOpenApiVersion(root)];
+function findTarget(root: Node, version: OpenApiVersion, node: Node): string | undefined {
+  const mapping = targetMapping[version];
   if (mapping) {
     return mapping[node.getParent()?.getKey()] || mapping[node.getParent()?.getParent()?.getKey()];
   }
@@ -36,12 +35,11 @@ function findTarget(root: Node, node: Node): string | undefined {
 
 export class CompletionItemProvider implements vscode.CompletionItemProvider {
   root: Node;
-  constructor(
-    private context: vscode.ExtensionContext,
-    private didChangeTree: vscode.Event<CacheEntry>
-  ) {
-    didChangeTree((entry) => {
-      this.root = entry.root;
+  version: OpenApiVersion;
+  constructor(private context: vscode.ExtensionContext, private cache: Cache) {
+    cache.onDidActiveDocumentChange((entry) => {
+      this.root = entry.astRoot;
+      this.version = entry.version;
     });
   }
 
@@ -81,20 +79,16 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
         // stat fileUri, if it does not exists an exception is thrown
         await vscode.workspace.fs.stat(otherUri);
         const otherDocument = await vscode.workspace.openTextDocument(otherUri);
-        const [root, errors] = parse(
-          otherDocument.getText(),
-          otherDocument.languageId,
-          parserOptions
-        );
-        if (!errors.length) {
-          searchRoot = root;
+        const entry = this.cache.getEntryForDocument(otherDocument);
+        if (!entry.errors) {
+          searchRoot = entry.astRoot;
         }
       } catch (ex) {
         // file does not exists, ignore the exception
       }
     }
 
-    const target = findTarget(this.root, node);
+    const target = findTarget(this.root, this.version, node);
     const targetNode = target && searchRoot.find(target);
     const qouteChar =
       line.charAt(position.character) == '"' || line.charAt(position.character) == "'"

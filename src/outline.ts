@@ -24,10 +24,10 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
   ) {
     didActiveDocumentChange((entry) => {
       const pointer = this.getRootPointer();
-      if (entry.lastGoodRoot && pointer) {
-        this.root = entry.lastGoodRoot.find(pointer);
-      } else if (entry.lastGoodRoot) {
-        this.root = entry.lastGoodRoot;
+      if (entry.lastGoodAstRoot && pointer) {
+        this.root = entry.lastGoodAstRoot.find(pointer);
+      } else if (entry.lastGoodAstRoot) {
+        this.root = entry.lastGoodAstRoot;
       } else {
         this.root = null;
       }

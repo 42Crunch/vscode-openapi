@@ -7,8 +7,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import * as json from "jsonc-parser";
 import * as yaml from "js-yaml";
-import { parse } from "./ast";
-import { parserOptions } from "./parser-options";
+import { Cache } from "./cache";
 
 function refToUri(ref: string, currentDocumentUri: vscode.Uri): vscode.Uri {
   if (ref.startsWith("#")) {
@@ -24,26 +23,27 @@ function refToUri(ref: string, currentDocumentUri: vscode.Uri): vscode.Uri {
     const baseDir = path.dirname(currentDocumentUri.fsPath);
     if (ref.includes("#")) {
       const [filename] = ref.split("#", 2);
-      return currentDocumentUri.with({ path: path.join(baseDir, filename) });
+      return currentDocumentUri.with({ path: path.join(baseDir, decodeURIComponent(filename)) });
     } else {
-      return currentDocumentUri.with({ path: path.join(baseDir, ref) });
+      return currentDocumentUri.with({ path: path.join(baseDir, decodeURIComponent(ref)) });
     }
   }
 }
 
 async function refToLocation(
   ref: string,
-  currentDocumentUri: vscode.Uri
+  currentDocumentUri: vscode.Uri,
+  cache: Cache
 ): Promise<vscode.Location> | undefined {
   if (ref.includes("#")) {
     // reference to a file and an JSON pointer
     const [, pointer] = ref.split("#", 2);
     const refUri = refToUri(ref, currentDocumentUri);
     const refDocument = await vscode.workspace.openTextDocument(refUri);
-    const [root, errors] = parse(refDocument.getText(), refDocument.languageId, parserOptions);
+    const entry = cache.getEntryForDocument(refDocument);
 
-    if (errors.length === 0) {
-      const target = root.find(pointer);
+    if (!entry.errors) {
+      const target = entry.astRoot.find(pointer);
       if (target) {
         const [start, end] = target.getRange();
         return new vscode.Location(
@@ -61,6 +61,8 @@ async function refToLocation(
 }
 
 export class JsonSchemaDefinitionProvider implements vscode.DefinitionProvider {
+  constructor(private cache: Cache) {}
+
   async provideDefinition(
     document: vscode.TextDocument,
     position: vscode.Position,
@@ -71,7 +73,7 @@ export class JsonSchemaDefinitionProvider implements vscode.DefinitionProvider {
     const last = location.path[location.path.length - 1];
     const pnode = location.previousNode;
     if (last === "$ref" && pnode && pnode.type === "string") {
-      return refToLocation(pnode.value, document.uri);
+      return refToLocation(pnode.value, document.uri, this.cache);
     }
     return null;
   }
@@ -94,6 +96,8 @@ function extractRef(parsed: any) {
 const refRegex = new RegExp("\\$ref\\s*:\\s+([\\S]+)");
 
 export class YamlSchemaDefinitionProvider implements vscode.DefinitionProvider {
+  constructor(private cache: Cache) {}
+
   provideDefinition(
     document: vscode.TextDocument,
     position: vscode.Position,
@@ -103,7 +107,8 @@ export class YamlSchemaDefinitionProvider implements vscode.DefinitionProvider {
     if (line.text.match(refRegex)) {
       const parsed = yaml.safeLoad(line.text);
       const ref = extractRef(parsed);
-      return refToLocation(ref, document.uri);
+      const location = refToLocation(ref, document.uri, this.cache);
+      return location;
     }
     return null;
   }

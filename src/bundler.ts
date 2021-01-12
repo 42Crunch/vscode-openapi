@@ -14,7 +14,8 @@ import $Ref from "@xliic/json-schema-ref-parser/lib/ref";
 import { ResolverError } from "@xliic/json-schema-ref-parser/lib/util/errors";
 
 import { parseJsonPointer, joinJsonPointer } from "./pointer";
-import { parseDocument, bundlerJsonParser, bundlerYamlParserWithOptions } from "./bundler-parsers";
+import { Cache } from "./cache";
+import { CacheEntry } from "./types";
 
 const destinationMap = {
   v2: {
@@ -52,7 +53,7 @@ export function getOpenApiVersion(parsed: any): string {
   return null;
 }
 
-const resolver = (documentUri: vscode.Uri) => {
+const resolver = (cache: Cache, documentUri: vscode.Uri) => {
   return {
     order: 10,
     canRead: (file) => {
@@ -62,12 +63,22 @@ const resolver = (documentUri: vscode.Uri) => {
       const uri = documentUri.with({ path: decodeURIComponent(file.url) });
       try {
         const document = await vscode.workspace.openTextDocument(uri);
-        return document.getText();
+        return cache.getEntryForDocument(document);
       } catch (err) {
         throw new ResolverError(`Error opening file "${uri.fsPath}"`, uri.fsPath);
       }
     },
   };
+};
+
+export const cacheParser = {
+  order: 100,
+  canParse: [".yaml", ".yml", ".json", ".jsonc"],
+  parse: ({ data, url, extension }: { data: CacheEntry; url: string; extension: string }) => {
+    return new Promise((resolve, reject) => {
+      resolve(data.parsed);
+    });
+  },
 };
 
 function mangle(value: string) {
@@ -94,9 +105,9 @@ function set(target: any, path: string[], value: any) {
 
 export async function bundle(
   document: vscode.TextDocument,
-  options: ParserOptions
+  cache: Cache
 ): Promise<[string, Node, any]> {
-  const parsed = parseDocument(document, options);
+  const { parsed } = cache.getEntryForDocument(document);
   const cwd = dirname(document.uri.fsPath) + "/";
   const state = {
     version: null,
@@ -107,10 +118,10 @@ export async function bundle(
 
   const bundled = await parser.bundle(parsed, {
     cwd,
-    resolve: { http: false, file: resolver(document.uri) },
+    resolve: { http: false, file: resolver(cache, document.uri) },
     parse: {
-      json: bundlerJsonParser,
-      yaml: bundlerYamlParserWithOptions(options),
+      json: cacheParser,
+      yaml: cacheParser,
     },
     continueOnError: true,
     hooks: {

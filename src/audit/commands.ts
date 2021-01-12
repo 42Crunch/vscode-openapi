@@ -11,9 +11,8 @@ import { createDiagnostics } from "./diagnostic";
 
 import { ReportWebView } from "./report";
 import { TextDocument } from "vscode";
-import { parserOptions } from "../parser-options";
 import { bundle, findMapping, displayBundlerErrors } from "../bundler";
-import { parse, Node } from "../ast";
+import { Node } from "../ast";
 import { RuntimeContext } from "../types";
 import {
   AuditContext,
@@ -24,6 +23,8 @@ import {
   IssuesByDocument,
   IssuesByType,
 } from "./types";
+import { parserOptions } from "../parser-options";
+import { Cache } from "../cache";
 
 export function registerSecurityAudit(
   context: vscode.ExtensionContext,
@@ -163,7 +164,7 @@ async function performAudit(
 
   try {
     runtimeContext.bundlingDiagnostics.clear();
-    [json, mapping] = await bundle(textEditor.document, parserOptions);
+    [json, mapping] = await bundle(textEditor.document, runtimeContext.cache);
   } catch (err) {
     displayBundlerErrors(
       textEditor.document.uri,
@@ -180,6 +181,7 @@ async function performAudit(
     const [grades, issuesByDocument, documents] = await auditDocument(
       textEditor.document,
       json,
+      runtimeContext.cache,
       mapping,
       apiToken,
       progress
@@ -231,18 +233,6 @@ async function performAudit(
   }
 }
 
-function parseDocument(document: vscode.TextDocument) {
-  const [root, errors] = parse(document.getText(), document.languageId, parserOptions);
-  // FIXME ignore errors for now, the file has been bundled so
-  // errors here are mostly warnings
-
-  //if (errors.length > 0) {
-  //  throw new Error(`Unable to parse document: ${document.uri}`);
-  //}
-
-  return root;
-}
-
 function findIssueLocation(mainUri: vscode.Uri, root: Node, mappings, pointer): [string, string] {
   const node = root.find(pointer);
   if (node) {
@@ -259,6 +249,7 @@ function findIssueLocation(mainUri: vscode.Uri, root: Node, mappings, pointer): 
 
 async function processIssues(
   document,
+  cache: Cache,
   mappings,
   issues: ReportedIssue[]
 ): Promise<[Node, string[], { [uri: string]: ReportedIssue[] }]> {
@@ -266,7 +257,7 @@ async function processIssues(
   const documentUris: { [uri: string]: boolean } = { [mainUri.toString()]: true };
   const issuesPerDocument: { [uri: string]: ReportedIssue[] } = {};
 
-  const root = parseDocument(document);
+  const { astRoot: root } = cache.getEntryForDocument(document);
 
   for (const issue of issues) {
     const [uri, pointer] = findIssueLocation(mainUri, root, mappings, issue.pointer);
@@ -291,6 +282,7 @@ async function processIssues(
 async function auditDocument(
   mainDocument: TextDocument,
   json,
+  cache: Cache,
   mappings,
   apiToken,
   progress
@@ -298,6 +290,7 @@ async function auditDocument(
   const [grades, reportedIssues] = await audit(json, apiToken.trim(), progress);
   const [mainRoot, documentUris, issuesPerDocument] = await processIssues(
     mainDocument,
+    cache,
     mappings,
     reportedIssues
   );
@@ -312,8 +305,8 @@ async function auditDocument(
   for (const uri of documentUris) {
     if (!files[uri]) {
       const document = await vscode.workspace.openTextDocument(vscode.Uri.parse(uri));
-      const root = parseDocument(document);
-      files[uri] = [document, root];
+      const { astRoot } = cache.getEntryForDocument(document);
+      files[uri] = [document, astRoot];
     }
   }
 
