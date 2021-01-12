@@ -6,12 +6,18 @@
 import * as vscode from "vscode";
 import { CacheEntry } from "./types";
 import { OpenApiVersion } from "./types";
-import { parseDocument } from "./util";
+import { parseToAst, parseToObject } from "./parsers";
+import { ParserOptions } from "./parser-options";
 
 export class Cache {
   private cache: { [uri: string]: CacheEntry } = {};
+  private parserOptions: ParserOptions;
   private _didChange = new vscode.EventEmitter<CacheEntry>();
   private _didActiveDocumentChange = new vscode.EventEmitter<CacheEntry>();
+
+  constructor(parserOptions: ParserOptions) {
+    this.parserOptions = parserOptions;
+  }
 
   get onDidChange(): vscode.Event<CacheEntry> {
     return this._didChange.event;
@@ -57,13 +63,17 @@ export class Cache {
   private updateCache(document: vscode.TextDocument): CacheEntry {
     const entry = this.getOrCreateEntry(document.uri);
 
-    const [version, node, errors] = parseDocument(document);
+    const [version, node, errors] = parseToAst(document, this.parserOptions);
     entry.version = version;
-    entry.root = node;
+    entry.astRoot = node;
     entry.errors = errors;
     if (!errors) {
-      entry.lastGoodRoot = node;
+      entry.lastGoodAstRoot = node;
     }
+
+    // FIXME error handling
+    entry.parsed = parseToObject(document, this.parserOptions);
+
     return entry;
   }
 
@@ -76,8 +86,9 @@ export class Cache {
     const entry = {
       uri,
       version: OpenApiVersion.Unknown,
-      root: null,
-      lastGoodRoot: null,
+      astRoot: null,
+      lastGoodAstRoot: null,
+      parsed: null,
       errors: null,
     };
 

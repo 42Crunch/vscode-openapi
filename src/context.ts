@@ -19,8 +19,8 @@ export function updateContext(current: CacheEntry) {
     vscode.commands.executeCommand("setContext", "openapiThreeEnabled", false);
   }
 
-  if (current.lastGoodRoot) {
-    checkTree(current.lastGoodRoot);
+  if (current.lastGoodAstRoot) {
+    checkTree(current.lastGoodAstRoot);
   }
 }
 

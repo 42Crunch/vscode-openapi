@@ -39,7 +39,7 @@ export function activate(context: vscode.ExtensionContext, runtimeContext: Runti
           const document = await vscode.workspace.openTextDocument(preview.documentUri);
           try {
             runtimeContext.bundlingDiagnostics.clear();
-            const [json, mapping, uris] = await bundle(document, parserOptions);
+            const [json, mapping, uris] = await bundle(document, runtimeContext.cache);
             showPreview(context, runtimeContext, previews, name, document, json, uris);
           } catch (err) {
             displayBundlerErrors(
@@ -88,7 +88,7 @@ async function startPreview(
 ) {
   try {
     runtimeContext.bundlingDiagnostics.clear();
-    const [json, mapping, uris] = await bundle(document, parserOptions);
+    const [json, mapping, uris] = await bundle(document, runtimeContext.cache);
     showPreview(context, runtimeContext, previews, renderer, document, json, uris);
   } catch (e) {
     displayBundlerErrors(document.uri, parserOptions, runtimeContext.bundlingDiagnostics, e);

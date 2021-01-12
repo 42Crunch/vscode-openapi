@@ -1,8 +1,5 @@
-import * as fs from "fs";
-import * as path from "path";
 import * as vscode from "vscode";
 import * as yaml from "js-yaml";
-import { OpenApiVersion } from "./types";
 import { parse, Node } from "./ast";
 import { parserOptions } from "./parser-options";
 import { replace } from "./ast/replace";
@@ -13,96 +10,6 @@ type FixParameters = {
   values?: any[];
   type?: string;
 };
-
-export function parseDocument(
-  document: vscode.TextDocument
-): [OpenApiVersion, Node, vscode.Diagnostic[]] {
-  if (
-    !(
-      document.languageId === "json" ||
-      document.languageId === "jsonc" ||
-      document.languageId == "yaml"
-    )
-  ) {
-    return [OpenApiVersion.Unknown, null, null];
-  }
-
-  const [node, errors] = parse(document.getText(), document.languageId, parserOptions);
-  const version = getOpenApiVersion(node);
-  const messages = errors.map(
-    (error): vscode.Diagnostic => {
-      const position = document.positionAt(error.offset);
-      const line = document.lineAt(position);
-      return {
-        source: "vscode-openapi",
-        code: "",
-        severity: vscode.DiagnosticSeverity.Error,
-        message: error.message,
-        range: line.range,
-      };
-    }
-  );
-
-  return [version, node, messages.length > 0 ? messages : null];
-}
-
-export function getOpenApiVersion(root: Node): OpenApiVersion {
-  const swaggerVersionValue = root?.find("/swagger")?.getValue();
-  const openApiVersionValue = root?.find("/openapi")?.getValue();
-
-  if (swaggerVersionValue === "2.0") {
-    return OpenApiVersion.V2;
-  }
-
-  if (
-    openApiVersionValue &&
-    typeof openApiVersionValue === "string" &&
-    openApiVersionValue.match(/^3\.0\.\d(-.+)?$/)
-  ) {
-    return OpenApiVersion.V3;
-  }
-
-  return OpenApiVersion.Unknown;
-}
-
-export async function provideYamlSchemas(
-  context: vscode.ExtensionContext,
-  yamlExtension: vscode.Extension<any>
-) {
-  if (!yamlExtension.isActive) {
-    await yamlExtension.activate();
-  }
-
-  function requestSchema(uri: string) {
-    for (const document of vscode.workspace.textDocuments) {
-      if (document.uri.toString() === uri) {
-        const [node] = parse(document.getText(), "yaml", parserOptions);
-        const version = getOpenApiVersion(node);
-        if (version === OpenApiVersion.V2) {
-          return "openapi:v2";
-        } else if (version === OpenApiVersion.V3) {
-          return "openapi:v3";
-        }
-        break;
-      }
-    }
-    return null;
-  }
-
-  function requestSchemaContent(uri: string) {
-    if (uri === "openapi:v2") {
-      const filename = path.join(context.extensionPath, "schema", "openapi-2.0.json");
-      return fs.readFileSync(filename, { encoding: "utf8" });
-    } else if (uri === "openapi:v3") {
-      const filename = path.join(context.extensionPath, "schema", "openapi-3.0-2019-04-02.json");
-      return fs.readFileSync(filename, { encoding: "utf8" });
-    }
-    return null;
-  }
-
-  const schemaContributor = yamlExtension.exports;
-  schemaContributor.registerContributor("openapi", requestSchema, requestSchemaContent);
-}
 
 function getBasicIndentation(document: vscode.TextDocument, root: Node): [number, string] {
   let target: Node;
