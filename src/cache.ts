@@ -3,7 +3,7 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import { relative, extname } from "path";
+import { extname } from "path";
 import * as vscode from "vscode";
 import { CacheEntry } from "./types";
 import { OpenApiVersion } from "./types";
@@ -17,6 +17,7 @@ export class Cache {
   private parserOptions: ParserOptions;
   private _didChange = new vscode.EventEmitter<CacheEntry>();
   private _didActiveDocumentChange = new vscode.EventEmitter<CacheEntry>();
+
   private diagnostics = vscode.languages.createDiagnosticCollection("openapi");
 
   constructor(parserOptions: ParserOptions) {
@@ -97,13 +98,14 @@ export class Cache {
   private async updateCacheAsync(document: vscode.TextDocument): Promise<CacheEntry> {
     const entry = this.updateCacheSync(document);
 
-    if (!entry.errors) {
+    if (entry.version !== OpenApiVersion.Unknown && !entry.errors) {
       try {
-        const [bundled, mapping] = await bundle(document, this);
+        const [bundled, mapping, uris] = await bundle(document, this);
+        this.clearBundlerErrors(uris);
         entry.bundled = bundled;
         entry.bundledMapping = mapping;
       } catch (errors) {
-        this.displayBundlerErrors(document.uri, errors);
+        this.showBundlerErrors(document.uri, errors);
         entry.bundled = null;
         entry.bundledUris = null;
         entry.bundledMapping = null;
@@ -140,7 +142,7 @@ export class Cache {
     return entry;
   }
 
-  private displayBundlerErrors(documentUri: vscode.Uri, errors: any) {
+  private showBundlerErrors(documentUri: vscode.Uri, errors: any) {
     if (!errors.errors || errors.errors.length == 0) {
       vscode.window.showErrorMessage(
         `Unexpected error when trying to process ${documentUri}: ${errors}`
@@ -165,6 +167,7 @@ export class Cache {
     }
 
     const resolverErrors: { [uri: string]: any[] } = {};
+
     for (const error of uniqueErrors) {
       const source = error.source;
 
@@ -173,6 +176,7 @@ export class Cache {
       if (!resolverErrors[uri.toString()]) {
         resolverErrors[uri.toString()] = [];
       }
+
       resolverErrors[uri.toString()].push({
         message: `Failed to resolve reference: ${error.message}`,
         path: error.path,
@@ -210,6 +214,12 @@ export class Cache {
         });
       }
       this.diagnostics.set(uri, messages);
+    }
+  }
+
+  private clearBundlerErrors(uris: any) {
+    for (const uri of Object.keys(uris)) {
+      this.diagnostics.delete(vscode.Uri.parse(uri));
     }
   }
 }
