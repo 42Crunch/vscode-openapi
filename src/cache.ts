@@ -104,6 +104,7 @@ export class Cache {
         this.clearBundlerErrors(uris);
         entry.bundled = bundled;
         entry.bundledMapping = mapping;
+        entry.bundledUris = uris;
       } catch (errors) {
         this.showBundlerErrors(document.uri, errors);
         entry.bundled = null;
