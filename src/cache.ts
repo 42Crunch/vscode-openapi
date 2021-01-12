@@ -67,12 +67,13 @@ export class Cache {
     entry.version = version;
     entry.astRoot = node;
     entry.errors = errors;
+
     if (!errors) {
       entry.lastGoodAstRoot = node;
+      entry.parsed = parseToObject(document, this.parserOptions);
+    } else {
+      entry.parsed = null;
     }
-
-    // FIXME error handling
-    entry.parsed = parseToObject(document, this.parserOptions);
 
     return entry;
   }
