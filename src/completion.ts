@@ -79,7 +79,7 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
         // stat fileUri, if it does not exists an exception is thrown
         await vscode.workspace.fs.stat(otherUri);
         const otherDocument = await vscode.workspace.openTextDocument(otherUri);
-        const entry = this.cache.getEntryForDocument(otherDocument);
+        const entry = await this.cache.getEntryForDocument(otherDocument);
         if (!entry.errors) {
           searchRoot = entry.astRoot;
         }

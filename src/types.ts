@@ -16,6 +16,18 @@ export interface RuntimeContext {
   bundlingDiagnostics: vscode.DiagnosticCollection;
 }
 
+export interface Mapping {
+  file: string;
+  hash: string;
+}
+
+export interface MappingNode {
+  value: Mapping;
+  children: {
+    [key: string]: MappingNode;
+  };
+}
+
 export interface CacheEntry {
   uri: vscode.Uri;
   version: OpenApiVersion;
@@ -23,4 +35,8 @@ export interface CacheEntry {
   lastGoodAstRoot: Node;
   parsed: any;
   errors: any;
+  bundled: any;
+  bundledErorrs: any;
+  bundledUris: any;
+  bundledMapping: any;
 }

@@ -40,7 +40,7 @@ async function refToLocation(
     const [, pointer] = ref.split("#", 2);
     const refUri = refToUri(ref, currentDocumentUri);
     const refDocument = await vscode.workspace.openTextDocument(refUri);
-    const entry = cache.getEntryForDocument(refDocument);
+    const entry = await cache.getEntryForDocument(refDocument);
 
     if (!entry.errors) {
       const target = entry.astRoot.find(pointer);

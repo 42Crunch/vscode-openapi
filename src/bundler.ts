@@ -15,7 +15,7 @@ import { ResolverError } from "@xliic/json-schema-ref-parser/lib/util/errors";
 
 import { parseJsonPointer, joinJsonPointer } from "./pointer";
 import { Cache } from "./cache";
-import { CacheEntry } from "./types";
+import { CacheEntry, MappingNode, Mapping } from "./types";
 
 const destinationMap = {
   v2: {
@@ -63,7 +63,7 @@ const resolver = (cache: Cache, documentUri: vscode.Uri) => {
       const uri = documentUri.with({ path: decodeURIComponent(file.url) });
       try {
         const document = await vscode.workspace.openTextDocument(uri);
-        return cache.getEntryForDocument(document);
+        return await cache.getEntryForDocument(document);
       } catch (err) {
         throw new ResolverError(`Error opening file "${uri.fsPath}"`, uri.fsPath);
       }
@@ -106,8 +106,8 @@ function set(target: any, path: string[], value: any) {
 export async function bundle(
   document: vscode.TextDocument,
   cache: Cache
-): Promise<[string, Node, any]> {
-  const { parsed } = cache.getEntryForDocument(document);
+): Promise<[any, MappingNode, any]> {
+  const { parsed } = await cache.getEntryForDocument(document);
   const cwd = dirname(document.uri.fsPath) + "/";
   const state = {
     version: null,
@@ -177,9 +177,7 @@ export async function bundle(
     },
   });
 
-  const result = JSON.stringify(bundled);
-
-  return [result, state.mapping, state.uris];
+  return [bundled, state.mapping, state.uris];
 }
 
 export async function displayBundlerErrors(
@@ -257,21 +255,7 @@ export async function displayBundlerErrors(
   }
 }
 
-interface Mapping {
-  file: string;
-  hash: string;
-}
-
-interface NodeMap {
-  [key: string]: Node;
-}
-
-export interface Node {
-  value: Mapping;
-  children: NodeMap;
-}
-
-function insertMapping(root: Node, path: string[], value: Mapping) {
+function insertMapping(root: MappingNode, path: string[], value: Mapping) {
   let current = root;
   for (const segment of path) {
     if (!current.children[segment]) {
@@ -283,7 +267,7 @@ function insertMapping(root: Node, path: string[], value: Mapping) {
   current.value = value;
 }
 
-export function findMapping(root: Node, pointer: string): Mapping {
+export function findMapping(root: MappingNode, pointer: string): Mapping {
   const path = parseJsonPointer(pointer);
   let current = root;
   let i = 0;

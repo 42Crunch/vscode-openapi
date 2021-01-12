@@ -5,16 +5,13 @@
 
 import * as vscode from "vscode";
 import * as path from "path";
-import { parserOptions } from "./parser-options";
-import { bundle, displayBundlerErrors } from "./bundler";
 import { configuration } from "./configuration";
-import { RuntimeContext } from "./types";
+import { CacheEntry, RuntimeContext } from "./types";
 
 type Preview = {
   panel: vscode.WebviewPanel;
   documentUri: vscode.Uri;
   uris: { [key: string]: string };
-  timeout: NodeJS.Timer;
 };
 
 type Previews = {
@@ -22,34 +19,16 @@ type Previews = {
   swaggerui?: Preview;
 };
 
-const ON_CHANGE_TIMEOUT = 1000; // 1 sec timeout for onDidChange
-
 export function activate(context: vscode.ExtensionContext, runtimeContext: RuntimeContext) {
   const previews: Previews = {};
 
-  vscode.workspace.onDidChangeTextDocument(async (e) => {
-    const uri = e.document.uri.toString();
+  runtimeContext.cache.onDidChange(async (entry: CacheEntry) => {
+    const uri = entry.uri.toString();
+
     for (const name of Object.keys(previews)) {
       const preview: Preview = previews[name];
-      if (preview && preview.uris[uri]) {
-        if (preview.timeout) {
-          clearTimeout(preview.timeout);
-        }
-        setTimeout(async () => {
-          const document = await vscode.workspace.openTextDocument(preview.documentUri);
-          try {
-            runtimeContext.bundlingDiagnostics.clear();
-            const [json, mapping, uris] = await bundle(document, runtimeContext.cache);
-            showPreview(context, runtimeContext, previews, name, document, json, uris);
-          } catch (err) {
-            displayBundlerErrors(
-              document.uri,
-              parserOptions,
-              runtimeContext.bundlingDiagnostics,
-              err
-            );
-          }
-        }, ON_CHANGE_TIMEOUT);
+      if (preview && preview.uris[uri] && entry.bundled && !entry.bundledErorrs) {
+        showPreview(context, previews, name, entry.uri, entry.bundled, entry.bundledUris);
       }
     }
   });
@@ -86,30 +65,27 @@ async function startPreview(
   renderer: string,
   document: vscode.TextDocument
 ) {
-  try {
-    runtimeContext.bundlingDiagnostics.clear();
-    const [json, mapping, uris] = await bundle(document, runtimeContext.cache);
-    showPreview(context, runtimeContext, previews, renderer, document, json, uris);
-  } catch (e) {
-    displayBundlerErrors(document.uri, parserOptions, runtimeContext.bundlingDiagnostics, e);
+  const entry = await runtimeContext.cache.getEntryForDocument(document);
+  if (!entry.bundled || entry.bundledErorrs) {
     vscode.commands.executeCommand("workbench.action.problems.focus");
     vscode.window.showErrorMessage("Failed to generate preview, check OpenAPI file for errors.");
+  } else {
+    showPreview(context, previews, renderer, entry.uri, entry.bundled, entry.bundledUris);
   }
 }
 
 async function showPreview(
   context: vscode.ExtensionContext,
-  runtimeContext: RuntimeContext,
   previews: Previews,
   name: string,
-  document: vscode.TextDocument,
-  json: string,
+  documentUri: vscode.Uri,
+  bundled: any,
   uris: any
 ) {
   if (previews[name]) {
     const panel = previews[name].panel;
-    panel.webview.postMessage({ command: "preview", text: json });
-    previews[name] = { panel, uris, documentUri: document.uri };
+    panel.webview.postMessage({ command: "preview", text: JSON.stringify(bundled) });
+    previews[name] = { panel, uris, documentUri };
     return;
   }
 
@@ -119,16 +95,14 @@ async function showPreview(
 
   panel.onDidDispose(
     () => {
-      runtimeContext.bundlingDiagnostics.clear();
-      clearTimeout(previews[name].timeout);
       previews[name] = null;
     },
     undefined,
     context.subscriptions
   );
 
-  panel.webview.postMessage({ command: "preview", text: json });
-  previews[name] = { panel, uris, documentUri: document.uri };
+  panel.webview.postMessage({ command: "preview", text: JSON.stringify(bundled) });
+  previews[name] = { panel, uris, documentUri };
 }
 
 function buildWebviewPanel(
