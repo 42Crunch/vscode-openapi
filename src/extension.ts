@@ -6,7 +6,7 @@
 import * as vscode from "vscode";
 import * as semver from "semver";
 import { configuration, Configuration } from "./configuration";
-import { RuntimeContext, extensionQualifiedId, CacheEntry } from "./types";
+import { extensionQualifiedId, CacheEntry } from "./types";
 import { parserOptions } from "./parser-options";
 import { registerOutlines } from "./outline";
 import { JsonSchemaDefinitionProvider, YamlSchemaDefinitionProvider } from "./reference";
@@ -43,17 +43,12 @@ export function activate(context: vscode.ExtensionContext) {
 
   const cache = new Cache(parserOptions);
 
-  const runtimeContext: RuntimeContext = {
-    cache,
-    diagnostics: vscode.languages.createDiagnosticCollection("openapi"),
-    bundlingDiagnostics: vscode.languages.createDiagnosticCollection("openapi-bundling"),
-  };
-
   cache.onDidChange(updateContext);
-  cache.onDidChange((entry) => updateDiagnostics(entry, runtimeContext.diagnostics));
+  // FIXME decide what to do in case of parsing errors in OAS
+  // cache.onDidChange((entry) => updateDiagnostics(entry, runtimeContext.diagnostics));
 
   context.subscriptions.push(...registerOutlines(context, cache.onDidActiveDocumentChange));
-  context.subscriptions.push(...registerCommands(runtimeContext));
+  context.subscriptions.push(...registerCommands(cache));
 
   const jsonFile: vscode.DocumentSelector = { language: "json" };
   const jsoncFile: vscode.DocumentSelector = { language: "jsonc" };
@@ -71,9 +66,10 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.languages.registerDefinitionProvider(jsoncFile, jsonSchemaDefinitionProvider);
   vscode.languages.registerDefinitionProvider(yamlFile, yamlSchemaDefinitionProvider);
 
-  vscode.workspace.onDidCloseTextDocument((document) => {
-    runtimeContext.diagnostics.delete(document.uri);
-  });
+  // FIXME a part of OAS parsing diagnostics handling
+  //vscode.workspace.onDidCloseTextDocument((document) => {
+  //  runtimeContext.diagnostics.delete(document.uri);
+  //});
 
   // trigger refresh on activation
   cache.onActiveEditorChanged(vscode.window.activeTextEditor);
@@ -81,9 +77,9 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.window.onDidChangeActiveTextEditor((e) => cache.onActiveEditorChanged(e));
   vscode.workspace.onDidChangeTextDocument((e) => cache.onDocumentChanged(e));
 
-  yamlSchemaContributor.activate(context, runtimeContext);
-  audit.activate(context, runtimeContext);
-  preview.activate(context, runtimeContext);
+  yamlSchemaContributor.activate(context, cache);
+  audit.activate(context, cache);
+  preview.activate(context, cache);
 
   if (previousVersion.major < currentVersion.major) {
     createWhatsNewPanel(context);

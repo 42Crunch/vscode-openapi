@@ -10,12 +10,6 @@ export enum OpenApiVersion {
   V3,
 }
 
-export interface RuntimeContext {
-  cache: Cache;
-  diagnostics: vscode.DiagnosticCollection;
-  bundlingDiagnostics: vscode.DiagnosticCollection;
-}
-
 export interface Mapping {
   file: string;
   hash: string;

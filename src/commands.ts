@@ -4,10 +4,10 @@
 */
 
 import * as vscode from "vscode";
-import { RuntimeContext } from "./types";
 import { outlines } from "./outline";
 import * as snippets from "./snippets.json";
 import { JsonNode, Node, YamlNode } from "./ast";
+import { Cache } from "./cache";
 
 const commands = {
   goToLine,
@@ -89,18 +89,14 @@ const componentsTags: string[] = [
   "callbacks",
 ];
 
-export function registerCommands(runtimeContext: RuntimeContext): vscode.Disposable[] {
-  return Object.keys(commands).map((name) => registerCommand(name, runtimeContext, commands[name]));
+export function registerCommands(cache: Cache): vscode.Disposable[] {
+  return Object.keys(commands).map((name) => registerCommand(name, cache, commands[name]));
 }
 
-function registerCommand(
-  name: string,
-  runtimeContext: RuntimeContext,
-  handler: Function
-): vscode.Disposable {
+function registerCommand(name: string, cache: Cache, handler: Function): vscode.Disposable {
   const wrapped = async function (...args: any[]) {
     try {
-      await handler(runtimeContext, ...args);
+      await handler(cache, ...args);
     } catch (e) {
       vscode.window.showErrorMessage(`Failed to execute command: ${e.message}`);
     }
@@ -109,15 +105,15 @@ function registerCommand(
   return vscode.commands.registerCommand(`openapi.${name}`, wrapped);
 }
 
-function goToLine(runtimeContext: RuntimeContext, range: vscode.Range) {
+function goToLine(cache: Cache, range: vscode.Range) {
   const editor = vscode.window.activeTextEditor;
   editor.selection = new vscode.Selection(range.start, range.start);
   editor.revealRange(editor.selection, vscode.TextEditorRevealType.AtTop);
 }
 
-async function copyJsonReference(runtimeContext: RuntimeContext, range: vscode.Range) {
+async function copyJsonReference(cache: Cache, range: vscode.Range) {
   const editor = vscode.window.activeTextEditor;
-  const entry = await runtimeContext.cache.getEntryForDocument(editor.document);
+  const entry = await cache.getEntryForDocument(editor.document);
   if (entry.astRoot) {
     const node = entry.astRoot.findNodeAtOffset(editor.document.offsetAt(editor.selection.active));
     copyNodeJsonReference(node);
@@ -139,43 +135,43 @@ function copyNodeJsonReference(node: Node) {
   }
 }
 
-function copySelectedTwoPathOutlineJsonReference(runtimeContext: RuntimeContext) {
+function copySelectedTwoPathOutlineJsonReference(cache: Cache) {
   copySelectedJsonReference("openapiTwoPathOutline");
 }
 
-function copySelectedTwoParametersOutlineJsonReference(runtimeContext: RuntimeContext) {
+function copySelectedTwoParametersOutlineJsonReference(cache: Cache) {
   copySelectedJsonReference("openapiTwoParametersOutline");
 }
 
-function copySelectedTwoResponsesOutlineJsonReference(runtimeContext: RuntimeContext) {
+function copySelectedTwoResponsesOutlineJsonReference(cache: Cache) {
   copySelectedJsonReference("openapiTwoResponsesOutline");
 }
 
-function copySelectedTwoDefinitionOutlineJsonReference(runtimeContext: RuntimeContext) {
+function copySelectedTwoDefinitionOutlineJsonReference(cache: Cache) {
   copySelectedJsonReference("openapiTwoDefinitionOutline");
 }
 
-function copySelectedTwoSecurityOutlineJsonReference(runtimeContext: RuntimeContext) {
+function copySelectedTwoSecurityOutlineJsonReference(cache: Cache) {
   copySelectedJsonReference("openapiTwoSecurityOutline");
 }
 
-function copySelectedTwoSecurityDefinitionOutlineJsonReference(runtimeContext: RuntimeContext) {
+function copySelectedTwoSecurityDefinitionOutlineJsonReference(cache: Cache) {
   copySelectedJsonReference("openapiTwoSecurityDefinitionOutline");
 }
 
-function copySelectedThreePathOutlineJsonReference(runtimeContext: RuntimeContext) {
+function copySelectedThreePathOutlineJsonReference(cache: Cache) {
   copySelectedJsonReference("openapiThreePathOutline");
 }
 
-function copySelectedThreeServersOutlineJsonReference(runtimeContext: RuntimeContext) {
+function copySelectedThreeServersOutlineJsonReference(cache: Cache) {
   copySelectedJsonReference("openapiThreeServersOutline");
 }
 
-function copySelectedThreeComponentsOutlineJsonReference(runtimeContext: RuntimeContext) {
+function copySelectedThreeComponentsOutlineJsonReference(cache: Cache) {
   copySelectedJsonReference("openapiThreeComponentsOutline");
 }
 
-function copySelectedThreeSecurityOutlineJsonReference(runtimeContext: RuntimeContext) {
+function copySelectedThreeSecurityOutlineJsonReference(cache: Cache) {
   copySelectedJsonReference("openapiThreeSecurityOutline");
 }
 
@@ -192,115 +188,111 @@ async function createNew(snippet: string, language: string) {
   await editor.insertSnippet(new vscode.SnippetString(snippet), editor.document.positionAt(0));
 }
 
-async function createNewTwo(runtimeContext: RuntimeContext) {
+async function createNewTwo(cache: Cache) {
   await createNew(snippets.newVersionTwo, "json");
 }
 
-async function createNewThree(runtimeContext: RuntimeContext) {
+async function createNewThree(cache: Cache) {
   await createNew(snippets.newVersionThree, "json");
 }
 
-async function createNewTwoYaml(runtimeContext: RuntimeContext) {
+async function createNewTwoYaml(cache: Cache) {
   await createNew(snippets.newVersionTwoYaml, "yaml");
 }
 
-async function createNewThreeYaml(runtimeContext: RuntimeContext) {
+async function createNewThreeYaml(cache: Cache) {
   await createNew(snippets.newVersionThreeYaml, "yaml");
 }
 
-async function addBasePath(runtimeContext: RuntimeContext) {
-  await insertSnippetAfter(runtimeContext, "basePath", "/swagger");
+async function addBasePath(cache: Cache) {
+  await insertSnippetAfter(cache, "basePath", "/swagger");
 }
 
-async function addHost(runtimeContext: RuntimeContext) {
-  await insertSnippetAfter(runtimeContext, "host", "/swagger");
+async function addHost(cache: Cache) {
+  await insertSnippetAfter(cache, "host", "/swagger");
 }
 
-async function addInfo(runtimeContext: RuntimeContext) {
-  await insertSnippetAfter(runtimeContext, "info", "/swagger");
+async function addInfo(cache: Cache) {
+  await insertSnippetAfter(cache, "info", "/swagger");
 }
 
-async function v3addInfo(runtimeContext: RuntimeContext) {
-  await insertSnippetAfter(runtimeContext, "info", "/openapi");
+async function v3addInfo(cache: Cache) {
+  await insertSnippetAfter(cache, "info", "/openapi");
 }
 
-async function addPath(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoRoot(runtimeContext, "path", "paths");
+async function addPath(cache: Cache) {
+  await insertSnippetIntoRoot(cache, "path", "paths");
 }
 
-async function addSecurityDefinitionBasic(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoRoot(runtimeContext, "securityBasic", "securityDefinitions");
+async function addSecurityDefinitionBasic(cache: Cache) {
+  await insertSnippetIntoRoot(cache, "securityBasic", "securityDefinitions");
 }
 
-async function addSecurityDefinitionOauth2Implicit(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoRoot(runtimeContext, "securityOauth2Implicit", "securityDefinitions");
+async function addSecurityDefinitionOauth2Implicit(cache: Cache) {
+  await insertSnippetIntoRoot(cache, "securityOauth2Implicit", "securityDefinitions");
 }
 
-async function addSecurityDefinitionApiKey(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoRoot(runtimeContext, "securityApiKey", "securityDefinitions");
+async function addSecurityDefinitionApiKey(cache: Cache) {
+  await insertSnippetIntoRoot(cache, "securityApiKey", "securityDefinitions");
 }
 
-async function addSecurity(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoRoot(runtimeContext, "security", "security", "array");
+async function addSecurity(cache: Cache) {
+  await insertSnippetIntoRoot(cache, "security", "security", "array");
 }
 
-async function addDefinitionObject(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoRoot(runtimeContext, "definitionObject", "definitions");
+async function addDefinitionObject(cache: Cache) {
+  await insertSnippetIntoRoot(cache, "definitionObject", "definitions");
 }
 
-async function addParameterPath(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoRoot(runtimeContext, "parameterPath", "parameters");
+async function addParameterPath(cache: Cache) {
+  await insertSnippetIntoRoot(cache, "parameterPath", "parameters");
 }
 
-async function addParameterBody(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoRoot(runtimeContext, "parameterBody", "parameters");
+async function addParameterBody(cache: Cache) {
+  await insertSnippetIntoRoot(cache, "parameterBody", "parameters");
 }
 
-async function addParameterOther(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoRoot(runtimeContext, "parameterOther", "parameters");
+async function addParameterOther(cache: Cache) {
+  await insertSnippetIntoRoot(cache, "parameterOther", "parameters");
 }
 
-async function addResponse(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoRoot(runtimeContext, "response", "responses");
+async function addResponse(cache: Cache) {
+  await insertSnippetIntoRoot(cache, "response", "responses");
 }
 
-async function v3addComponentsResponse(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoComponents(runtimeContext, "componentsResponse", "responses");
+async function v3addComponentsResponse(cache: Cache) {
+  await insertSnippetIntoComponents(cache, "componentsResponse", "responses");
 }
 
-async function v3addComponentsParameter(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoComponents(runtimeContext, "componentsParameter", "parameters");
+async function v3addComponentsParameter(cache: Cache) {
+  await insertSnippetIntoComponents(cache, "componentsParameter", "parameters");
 }
 
-async function v3addComponentsSchema(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoComponents(runtimeContext, "componentsSchema", "schemas");
+async function v3addComponentsSchema(cache: Cache) {
+  await insertSnippetIntoComponents(cache, "componentsSchema", "schemas");
 }
 
-async function v3addSecuritySchemeBasic(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoComponents(runtimeContext, "componentsSecurityBasic", "securitySchemes");
+async function v3addSecuritySchemeBasic(cache: Cache) {
+  await insertSnippetIntoComponents(cache, "componentsSecurityBasic", "securitySchemes");
 }
 
-async function v3addSecuritySchemeApiKey(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoComponents(runtimeContext, "componentsSecurityApiKey", "securitySchemes");
+async function v3addSecuritySchemeApiKey(cache: Cache) {
+  await insertSnippetIntoComponents(cache, "componentsSecurityApiKey", "securitySchemes");
 }
 
-async function v3addSecuritySchemeJWT(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoComponents(runtimeContext, "componentsSecurityJwt", "securitySchemes");
+async function v3addSecuritySchemeJWT(cache: Cache) {
+  await insertSnippetIntoComponents(cache, "componentsSecurityJwt", "securitySchemes");
 }
 
-async function v3addSecuritySchemeOauth2Implicit(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoComponents(
-    runtimeContext,
-    "componentsSecurityOauth2Implicit",
-    "securitySchemes"
-  );
+async function v3addSecuritySchemeOauth2Implicit(cache: Cache) {
+  await insertSnippetIntoComponents(cache, "componentsSecurityOauth2Implicit", "securitySchemes");
 }
 
-async function v3addServer(runtimeContext: RuntimeContext) {
-  await insertSnippetIntoRoot(runtimeContext, "server", "servers", "array");
+async function v3addServer(cache: Cache) {
+  await insertSnippetIntoRoot(cache, "server", "servers", "array");
 }
 
-async function addOperation(runtimeContext: RuntimeContext, node: any) {
+async function addOperation(cache: Cache, node: any) {
   const editor = vscode.window.activeTextEditor;
   const languageId = editor.document.languageId;
   if (languageId === "yaml") {
@@ -332,14 +324,10 @@ async function addOperation(runtimeContext: RuntimeContext, node: any) {
   }
 }
 
-async function insertSnippetAfter(
-  runtimeContext: RuntimeContext,
-  snippetName: string,
-  pointer: string
-) {
+async function insertSnippetAfter(cache: Cache, snippetName: string, pointer: string) {
   const editor = vscode.window.activeTextEditor;
   const languageId = editor.document.languageId;
-  const { astRoot: root } = await runtimeContext.cache.getEntryForDocument(editor.document);
+  const { astRoot: root } = await cache.getEntryForDocument(editor.document);
 
   if (!root) {
     // FIXME display error message?
@@ -417,14 +405,14 @@ async function insertJsonSnippetInto(root: JsonNode, snippet: string, pointer: s
 }
 
 async function insertSnippetIntoRoot(
-  runtimeContext: RuntimeContext,
+  cache: Cache,
   snippetName: string,
   element: string,
   container: string = "object"
 ) {
   const editor = vscode.window.activeTextEditor;
   const languageId = editor.document.languageId;
-  const { astRoot: root } = await runtimeContext.cache.getEntryForDocument(editor.document);
+  const { astRoot: root } = await cache.getEntryForDocument(editor.document);
 
   if (!root) {
     // FIXME display error message?
@@ -457,14 +445,10 @@ async function insertSnippetIntoRoot(
   }
 }
 
-async function insertSnippetIntoComponents(
-  runtimeContext: RuntimeContext,
-  snippetName: string,
-  element: string
-) {
+async function insertSnippetIntoComponents(cache: Cache, snippetName: string, element: string) {
   const editor = vscode.window.activeTextEditor;
   const languageId = editor.document.languageId;
-  const { astRoot: root } = await runtimeContext.cache.getEntryForDocument(editor.document);
+  const { astRoot: root } = await cache.getEntryForDocument(editor.document);
 
   if (!root) {
     // FIXME display error message?

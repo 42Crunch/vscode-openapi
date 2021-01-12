@@ -6,7 +6,8 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { configuration } from "./configuration";
-import { CacheEntry, RuntimeContext } from "./types";
+import { CacheEntry } from "./types";
+import { Cache } from "./cache";
 
 type Preview = {
   panel: vscode.WebviewPanel;
@@ -19,10 +20,10 @@ type Previews = {
   swaggerui?: Preview;
 };
 
-export function activate(context: vscode.ExtensionContext, runtimeContext: RuntimeContext) {
+export function activate(context: vscode.ExtensionContext, cache: Cache) {
   const previews: Previews = {};
 
-  runtimeContext.cache.onDidChange(async (entry: CacheEntry) => {
+  cache.onDidChange(async (entry: CacheEntry) => {
     const uri = entry.uri.toString();
 
     for (const name of Object.keys(previews)) {
@@ -36,13 +37,13 @@ export function activate(context: vscode.ExtensionContext, runtimeContext: Runti
   vscode.commands.registerTextEditorCommand(
     "openapi.previewRedoc",
     async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit) =>
-      startPreview(context, runtimeContext, previews, "redoc", textEditor.document)
+      startPreview(context, cache, previews, "redoc", textEditor.document)
   );
 
   vscode.commands.registerTextEditorCommand(
     "openapi.previewSwaggerUI",
     async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit) =>
-      startPreview(context, runtimeContext, previews, "swaggerui", textEditor.document)
+      startPreview(context, cache, previews, "swaggerui", textEditor.document)
   );
 
   vscode.commands.registerTextEditorCommand(
@@ -50,7 +51,7 @@ export function activate(context: vscode.ExtensionContext, runtimeContext: Runti
     async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit) =>
       startPreview(
         context,
-        runtimeContext,
+        cache,
         previews,
         configuration.get<string>("defaultPreviewRenderer"),
         textEditor.document
@@ -60,12 +61,12 @@ export function activate(context: vscode.ExtensionContext, runtimeContext: Runti
 
 async function startPreview(
   context: vscode.ExtensionContext,
-  runtimeContext: RuntimeContext,
+  cache: Cache,
   previews: Previews,
   renderer: string,
   document: vscode.TextDocument
 ) {
-  const entry = await runtimeContext.cache.getEntryForDocument(document);
+  const entry = await cache.getEntryForDocument(document);
   if (!entry.bundled || entry.bundledErorrs) {
     vscode.commands.executeCommand("workbench.action.problems.focus");
     vscode.window.showErrorMessage("Failed to generate preview, check OpenAPI file for errors.");
