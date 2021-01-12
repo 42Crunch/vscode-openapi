@@ -13,7 +13,6 @@ import { ReportWebView } from "./report";
 import { TextDocument } from "vscode";
 import { findMapping } from "../bundler";
 import { Node } from "../ast";
-import { RuntimeContext } from "../types";
 import {
   AuditContext,
   Audit,
@@ -28,7 +27,7 @@ import { Cache } from "../cache";
 
 export function registerSecurityAudit(
   context: vscode.ExtensionContext,
-  runtimeContext: RuntimeContext,
+  cache: Cache,
   auditContext: AuditContext,
   pendingAudits
 ) {
@@ -50,7 +49,7 @@ export function registerSecurityAudit(
       pendingAudits[uri] = true;
 
       try {
-        const audit = await securityAudit(context, runtimeContext, textEditor);
+        const audit = await securityAudit(context, cache, textEditor);
         if (audit) {
           auditContext[uri] = audit;
           setDecorations(textEditor, auditContext);
@@ -89,7 +88,7 @@ export function registerFocusSecurityAuditById(context, auditContext) {
 
 async function securityAudit(
   context: vscode.ExtensionContext,
-  runtimeContext: RuntimeContext,
+  cache: Cache,
   textEditor: vscode.TextEditor
 ): Promise<Audit | undefined> {
   const configuration = vscode.workspace.getConfiguration("openapi");
@@ -148,19 +147,19 @@ async function securityAudit(
       cancellable: false,
     },
     async (progress, cancellationToken): Promise<Audit | undefined> => {
-      return performAudit(context, runtimeContext, textEditor, apiToken, progress);
+      return performAudit(context, cache, textEditor, apiToken, progress);
     }
   );
 }
 
 async function performAudit(
   context: vscode.ExtensionContext,
-  runtimeContext: RuntimeContext,
+  cache: Cache,
   textEditor: vscode.TextEditor,
   apiToken,
   progress
 ): Promise<Audit | undefined> {
-  const entry = await runtimeContext.cache.getEntryForDocument(textEditor.document);
+  const entry = await cache.getEntryForDocument(textEditor.document);
   if (!entry.bundled || entry.bundledErorrs) {
     vscode.commands.executeCommand("workbench.action.problems.focus");
     throw new Error("Failed to bundle for audit, check OpenAPI file for errors.");
@@ -171,7 +170,7 @@ async function performAudit(
     const [grades, issuesByDocument, documents] = await auditDocument(
       textEditor.document,
       JSON.stringify(entry.bundled),
-      runtimeContext.cache,
+      cache,
       entry.bundledMapping,
       apiToken,
       progress

@@ -2,11 +2,11 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 import { Cache } from "./cache";
-import { OpenApiVersion, RuntimeContext } from "./types";
+import { OpenApiVersion } from "./types";
 
-export function activate(context: vscode.ExtensionContext, runtimeContext: RuntimeContext) {
+export function activate(context: vscode.ExtensionContext, cache: Cache) {
   const yamlExtension = vscode.extensions.getExtension("redhat.vscode-yaml");
-  provideYamlSchemas(context, runtimeContext.cache, yamlExtension);
+  provideYamlSchemas(context, cache, yamlExtension);
 }
 
 export async function provideYamlSchemas(

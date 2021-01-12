@@ -4,7 +4,6 @@
 */
 
 import * as vscode from "vscode";
-import { RuntimeContext, OpenApiVersion } from "../types";
 import {
   registerSecurityAudit,
   registerFocusSecurityAudit,
@@ -14,8 +13,9 @@ import { ReportWebView } from "./report";
 import { setDecorations } from "./decoration";
 import { AuditContext } from "./types";
 import { registerQuickfixes } from "./quickfix";
+import { Cache } from "../cache";
 
-export function activate(context: vscode.ExtensionContext, runtimeContext: RuntimeContext) {
+export function activate(context: vscode.ExtensionContext, cache: Cache) {
   const auditContext: AuditContext = {};
   const pendingAudits: { [uri: string]: boolean } = {};
 
@@ -41,7 +41,7 @@ export function activate(context: vscode.ExtensionContext, runtimeContext: Runti
     }
   });
 
-  registerSecurityAudit(context, runtimeContext, auditContext, pendingAudits);
+  registerSecurityAudit(context, cache, auditContext, pendingAudits);
   registerFocusSecurityAudit(context, auditContext);
   registerFocusSecurityAuditById(context, auditContext);
   registerQuickfixes(context, auditContext);
