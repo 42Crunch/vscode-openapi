@@ -14,6 +14,7 @@ import { ResolverError } from "@xliic/json-schema-ref-parser/lib/util/errors";
 import { parseJsonPointer, joinJsonPointer } from "./pointer";
 import { Cache } from "./cache";
 import { CacheEntry, MappingNode, Mapping } from "./types";
+import { clone } from "./util";
 
 const destinationMap = {
   v2: {
@@ -61,7 +62,7 @@ const resolver = (cache: Cache, documentUri: vscode.Uri) => {
       const uri = documentUri.with({ path: decodeURIComponent(file.url) });
       try {
         const document = await vscode.workspace.openTextDocument(uri);
-        return await cache.getEntryForDocument(document);
+        return cache.getEntryForDocumentSync(document);
       } catch (err) {
         throw new ResolverError(`Error opening file "${uri.fsPath}"`, uri.fsPath);
       }
@@ -74,7 +75,7 @@ export const cacheParser = {
   canParse: [".yaml", ".yml", ".json", ".jsonc"],
   parse: ({ data, url, extension }: { data: CacheEntry; url: string; extension: string }) => {
     return new Promise((resolve, reject) => {
-      resolve(data.parsed);
+      resolve(clone(data.parsed));
     });
   },
 };
@@ -105,7 +106,7 @@ export async function bundle(
   document: vscode.TextDocument,
   cache: Cache
 ): Promise<[any, MappingNode, any]> {
-  const { parsed } = await cache.getEntryForDocument(document);
+  const { parsed } = cache.getEntryForDocumentSync(document);
   const cwd = dirname(document.uri.fsPath) + "/";
   const state = {
     version: null,
@@ -114,7 +115,7 @@ export async function bundle(
     uris: { [document.uri.toString()]: true },
   };
 
-  const bundled = await parser.bundle(parsed, {
+  const bundled = await parser.bundle(clone(parsed), {
     cwd,
     resolve: { http: false, file: resolver(cache, document.uri) },
     parse: {
