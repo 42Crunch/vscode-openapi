@@ -64,7 +64,7 @@ export class Cache {
     }
 
     const entry = this.updateCacheSync(document);
-    await this.updateCacheSync(document);
+    await this.updateCacheAsync(document);
     return entry;
   }
 
