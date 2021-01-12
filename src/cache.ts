@@ -3,18 +3,21 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
+import { relative, extname } from "path";
 import * as vscode from "vscode";
 import { CacheEntry } from "./types";
 import { OpenApiVersion } from "./types";
 import { parseToAst, parseToObject } from "./parsers";
 import { ParserOptions } from "./parser-options";
-import { bundle, findMapping, displayBundlerErrors } from "./bundler";
+import { bundle } from "./bundler";
+import { parseJsonPointer, joinJsonPointer } from "./pointer";
 
 export class Cache {
   private cache: { [uri: string]: CacheEntry } = {};
   private parserOptions: ParserOptions;
   private _didChange = new vscode.EventEmitter<CacheEntry>();
   private _didActiveDocumentChange = new vscode.EventEmitter<CacheEntry>();
+  private diagnostics = vscode.languages.createDiagnosticCollection("openapi");
 
   constructor(parserOptions: ParserOptions) {
     this.parserOptions = parserOptions;
@@ -73,9 +76,10 @@ export class Cache {
   }
 
   private updateCacheSync(document: vscode.TextDocument): CacheEntry {
-    const entry = this.getOrCreateEntry(document.uri);
+    const entry = this.getOrCreateEntry(document);
 
     const [version, node, errors] = parseToAst(document, this.parserOptions);
+
     entry.version = version;
     entry.astRoot = node;
     entry.errors = errors;
@@ -94,9 +98,16 @@ export class Cache {
     const entry = this.updateCacheSync(document);
 
     if (!entry.errors) {
-      const [bundled, mapping] = await bundle(document, this);
-      entry.bundled = bundled;
-      entry.bundledMapping = mapping;
+      try {
+        const [bundled, mapping] = await bundle(document, this);
+        entry.bundled = bundled;
+        entry.bundledMapping = mapping;
+      } catch (errors) {
+        this.displayBundlerErrors(document.uri, errors);
+        entry.bundled = null;
+        entry.bundledUris = null;
+        entry.bundledMapping = null;
+      }
     } else {
       entry.bundled = null;
       entry.bundledUris = null;
@@ -105,14 +116,15 @@ export class Cache {
     return entry;
   }
 
-  private getOrCreateEntry(uri: vscode.Uri): CacheEntry {
-    const _uri = uri.toString();
+  private getOrCreateEntry(document: vscode.TextDocument): CacheEntry {
+    const _uri = document.uri.toString();
     if (this.cache[_uri]) {
       return this.cache[_uri];
     }
 
     const entry = {
-      uri,
+      document,
+      uri: document.uri,
       version: OpenApiVersion.Unknown,
       astRoot: null,
       lastGoodAstRoot: null,
@@ -126,5 +138,78 @@ export class Cache {
 
     this.cache[_uri] = entry;
     return entry;
+  }
+
+  private displayBundlerErrors(documentUri: vscode.Uri, errors: any) {
+    if (!errors.errors || errors.errors.length == 0) {
+      vscode.window.showErrorMessage(
+        `Unexpected error when trying to process ${documentUri}: ${errors}`
+      );
+      return;
+    }
+
+    const uniqueErrors = [];
+    const exists = (error) =>
+      uniqueErrors.some(
+        (element) =>
+          element?.message === error?.message &&
+          element?.source === error?.source &&
+          element?.code === error?.code &&
+          element?.path.join() === error?.path.join()
+      );
+
+    for (const error of errors.errors) {
+      if (!exists(error)) {
+        uniqueErrors.push(error);
+      }
+    }
+
+    const resolverErrors: { [uri: string]: any[] } = {};
+    for (const error of uniqueErrors) {
+      const source = error.source;
+
+      // if source has no extension, assume it is the base document
+      const uri = extname(source) === "" ? documentUri : documentUri.with({ path: source });
+      if (!resolverErrors[uri.toString()]) {
+        resolverErrors[uri.toString()] = [];
+      }
+      resolverErrors[uri.toString()].push({
+        message: `Failed to resolve reference: ${error.message}`,
+        path: error.path,
+      });
+    }
+
+    for (const key of Object.keys(resolverErrors)) {
+      const uri = vscode.Uri.parse(key);
+      const entry = this.cache[uri.toString()];
+      if (!entry) {
+        continue;
+      }
+
+      const messages = [];
+      for (const { path, message } of resolverErrors[key]) {
+        // use pointer to $ref
+        const refPointer = joinJsonPointer([...path, "$ref"]);
+        let node = entry.astRoot.find(refPointer);
+        if (!node) {
+          // if not found, fall back to the original pointer
+          const origPointer = joinJsonPointer(path);
+          node = entry.astRoot.find(origPointer);
+        }
+        const [start, end] = node.getRange();
+        const position = entry.document.positionAt(start);
+        const line = entry.document.lineAt(position.line);
+        const range = new vscode.Range(
+          new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
+          new vscode.Position(position.line, line.range.end.character)
+        );
+        messages.push({
+          message,
+          range,
+          severity: vscode.DiagnosticSeverity.Error,
+        });
+      }
+      this.diagnostics.set(uri, messages);
+    }
   }
 }

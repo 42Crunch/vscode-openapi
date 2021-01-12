@@ -29,6 +29,7 @@ export interface MappingNode {
 }
 
 export interface CacheEntry {
+  document: vscode.TextDocument;
   uri: vscode.Uri;
   version: OpenApiVersion;
   astRoot: Node;
