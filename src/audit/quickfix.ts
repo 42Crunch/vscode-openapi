@@ -22,6 +22,7 @@ import {
   replaceJsonNode,
   replaceYamlNode,
 } from "../util";
+import { Cache } from "../cache";
 
 enum FixType {
   Insert = "insert",
@@ -184,13 +185,18 @@ async function quickFixCommand(
   editor: vscode.TextEditor,
   diagnostic: AuditDiagnostic,
   fix: InsertReplaceRenameFix | RegexReplaceFix | DeleteFix,
-  auditContext: AuditContext
+  auditContext: AuditContext,
+  cache: Cache
 ) {
   // if fix.pointer exists, append it to diagnostic.pointer
   const pointer = fix.pointer ? `${diagnostic.pointer}${fix.pointer}` : diagnostic.pointer;
   const root = safeParse(editor.document.getText(), editor.document.languageId);
   const target = root.find(pointer);
   const document = editor.document;
+
+  // FIXME use editor.document.uri to find audit this editor is part of, and getEntryForDocument() for it
+  // below should work for non-multifile OpenAPIs though
+  const { propertyHints } = await cache.getEntryForDocument(editor.document);
 
   switch (fix.type) {
     case FixType.Insert:
@@ -255,11 +261,15 @@ function range(document: vscode.TextDocument, root: Node, pointer: string) {
   }
 }
 
-export function registerQuickfixes(context: vscode.ExtensionContext, auditContext: AuditContext) {
+export function registerQuickfixes(
+  context: vscode.ExtensionContext,
+  cache: Cache,
+  auditContext: AuditContext
+) {
   vscode.commands.registerTextEditorCommand(
     "openapi.simpleQuckFix",
     async (editor, edit, diagnostic: AuditDiagnostic, fix) =>
-      quickFixCommand(editor, diagnostic, fix, auditContext)
+      quickFixCommand(editor, diagnostic, fix, auditContext, cache)
   );
 
   vscode.languages.registerCodeActionsProvider("yaml", new AuditCodeActions(auditContext), {

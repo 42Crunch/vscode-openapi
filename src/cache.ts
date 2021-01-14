@@ -10,7 +10,24 @@ import { OpenApiVersion } from "./types";
 import { parseToAst, parseToObject } from "./parsers";
 import { ParserOptions } from "./parser-options";
 import { bundle } from "./bundler";
-import { parseJsonPointer, joinJsonPointer } from "./pointer";
+import { joinJsonPointer } from "./pointer";
+
+function walk(current: any, parent: any, path: string[], visitor: any) {
+  for (const key of Object.keys(current)) {
+    const value = current[key];
+    if (typeof value === "object" && value !== null) {
+      walk(value, current, [key, ...path], visitor);
+    } else {
+      visitor(parent, path, key, value);
+    }
+  }
+}
+
+function mode(arr) {
+  return arr
+    .sort((a, b) => arr.filter((v) => v === a).length - arr.filter((v) => v === b).length)
+    .pop();
+}
 
 export class Cache {
   private cache: { [uri: string]: CacheEntry } = {};
@@ -18,7 +35,7 @@ export class Cache {
   private _didChange = new vscode.EventEmitter<CacheEntry>();
   private _didActiveDocumentChange = new vscode.EventEmitter<CacheEntry>();
 
-  private diagnostics = vscode.languages.createDiagnosticCollection("openapi");
+  private diagnostics = vscode.languages.createDiagnosticCollection("openapi-bundler");
 
   constructor(parserOptions: ParserOptions) {
     this.parserOptions = parserOptions;
@@ -105,6 +122,31 @@ export class Cache {
         entry.bundled = bundled;
         entry.bundledMapping = mapping;
         entry.bundledUris = uris;
+
+        const hints = {};
+
+        walk(bundled, null, [], (parent, path, key, value) => {
+          // TODO check items for arrays
+          if (path.length > 3 && path[1] === "properties") {
+            const property = path[0];
+            if (!hints[property]) {
+              hints[property] = {};
+            }
+            if (!hints[property][key]) {
+              hints[property][key] = [];
+            }
+            hints[property][key].push(value);
+          }
+        });
+
+        // update hints replacing arrays of occurences of values
+        // with most frequent value in the array
+        for (const property of Object.keys(hints)) {
+          for (const key of Object.keys(hints[property])) {
+            hints[property][key] = mode(hints[property][key]);
+          }
+        }
+        entry.propertyHints = hints;
       } catch (errors) {
         this.showBundlerErrors(document.uri, errors);
         entry.bundled = null;
@@ -116,6 +158,7 @@ export class Cache {
       entry.bundledUris = null;
       entry.bundledMapping = null;
     }
+
     return entry;
   }
 
@@ -137,6 +180,7 @@ export class Cache {
       bundledErorrs: null,
       bundledUris: null,
       bundledMapping: null,
+      propertyHints: null,
     };
 
     this.cache[_uri] = entry;
