@@ -34,4 +34,5 @@ export interface CacheEntry {
   bundledErorrs: any;
   bundledUris: any;
   bundledMapping: any;
+  propertyHints: any;
 }

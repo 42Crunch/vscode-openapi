@@ -6,6 +6,16 @@ import { ParserOptions } from "./parser-options";
 import { OpenApiVersion } from "./types";
 
 export function parseToObject(document: vscode.TextDocument, options: ParserOptions) {
+  if (
+    !(
+      document.languageId === "json" ||
+      document.languageId === "jsonc" ||
+      document.languageId == "yaml"
+    )
+  ) {
+    return null;
+  }
+
   if (document.languageId === "yaml") {
     // FIXME what's up with parsing errors?
     const {
