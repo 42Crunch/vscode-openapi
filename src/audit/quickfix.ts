@@ -5,7 +5,7 @@
 
 import * as vscode from "vscode";
 import * as quickfixes from "./quickfixes.json";
-import { AuditContext, AuditDiagnostic } from "./types";
+import { AuditContext, AuditDiagnostic, FixParameterSource } from "../types";
 import { Node } from "../ast";
 import { createDiagnostics } from "./diagnostic";
 import { createDecorations, setDecorations } from "./decoration";
@@ -23,32 +23,12 @@ import {
   replaceYamlNode,
 } from "../util";
 import { Cache } from "../cache";
-
-enum FixType {
-  Insert = "insert",
-  Replace = "replace",
-  Delete = "delete",
-  RegexReplace = "regex-replace",
-  RenameKey = "renameKey",
-}
-
-interface Fix {
-  problem: string[];
-  type: FixType;
-  title: string;
-  pointer?: string;
-}
-
-interface FixParameter {
-  name: string;
-  path: string;
-  values: any[];
-}
+import { Fix, FixType } from "../types";
+import parameterSources from "./quickfix-sources";
 
 interface InsertReplaceRenameFix extends Fix {
   type: FixType.Insert | FixType.Replace | FixType.RenameKey;
   fix: any;
-  parameters?: FixParameter[];
 }
 
 interface DeleteFix extends Fix {
@@ -196,7 +176,19 @@ async function quickFixCommand(
 
   // FIXME use editor.document.uri to find audit this editor is part of, and getEntryForDocument() for it
   // below should work for non-multifile OpenAPIs though
-  const { propertyHints } = await cache.getEntryForDocument(editor.document);
+  const cacheEntry = await cache.getEntryForDocument(editor.document);
+
+  if (fix.parameters) {
+    for (const parameter of fix.parameters) {
+      if (parameter.source && parameterSources[parameter.source]) {
+        const source = parameterSources[parameter.source];
+        const issue =
+          auditContext[diagnostic.issueUri].issues[diagnostic.issueUri][diagnostic.issueIndex];
+        const values = source(issue, fix, parameter, cacheEntry);
+        console.log(`parameter ${parameter.name} hints: ${values}`);
+      }
+    }
+  }
 
   switch (fix.type) {
     case FixType.Insert:

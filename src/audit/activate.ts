@@ -11,7 +11,7 @@ import {
 } from "./commands";
 import { ReportWebView } from "./report";
 import { setDecorations } from "./decoration";
-import { AuditContext } from "./types";
+import { AuditContext } from "../types";
 import { registerQuickfixes } from "./quickfix";
 import { Cache } from "../cache";
 

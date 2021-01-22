@@ -6,7 +6,7 @@
 import * as vscode from "vscode";
 import got from "got";
 import FormData from "form-data";
-import { Grades, ReportedIssue } from "./types";
+import { Grades, ReportedIssue } from "../types";
 
 const ASSESS_URL = "https://stateless.apisecurity.io/api/v1/anon/assess/vscode";
 const TOKEN_URL = "https://stateless.apisecurity.io/api/v1/anon/token";

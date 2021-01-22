@@ -5,7 +5,7 @@
 
 import * as path from "path";
 import * as vscode from "vscode";
-import { Audit, Summary } from "./types";
+import { Audit, Summary } from "../types";
 
 import articles from "./articles.json";
 
