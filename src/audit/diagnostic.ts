@@ -4,11 +4,8 @@
 */
 
 import * as vscode from "vscode";
-import { AuditDiagnostic } from "./types";
-import { parserOptions } from "../parser-options";
-import { parse, Node } from "../ast";
-import { POINT_CONVERSION_COMPRESSED } from "constants";
-import { isNull } from "util";
+import { AuditDiagnostic } from "../types";
+import { Node } from "../ast";
 
 export function createDiagnostics(
   filename: string,

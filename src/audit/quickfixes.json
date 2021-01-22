@@ -18,7 +18,8 @@
         {
           "name": "name",
           "path": "/security/0/securityRequirement",
-          "type": "key"
+          "type": "key",
+          "source": "securitySchemes"
         }
       ]
     },
@@ -100,7 +101,8 @@
       "parameters": [
         {
           "name": "minimum",
-          "path": "/minimum"
+          "path": "/minimum",
+          "source": "mostUsedByName"
         }
       ]
     },

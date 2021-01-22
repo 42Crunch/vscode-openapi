@@ -5,7 +5,7 @@
 
 import { basename } from "path";
 import * as vscode from "vscode";
-import { AuditContext, DocumentDecorations } from "./types";
+import { AuditContext, DocumentDecorations } from "../types";
 
 export const decorationType = vscode.window.createTextEditorDecorationType({});
 

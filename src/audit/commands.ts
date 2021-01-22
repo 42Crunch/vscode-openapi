@@ -21,8 +21,8 @@ import {
   ReportedIssue,
   IssuesByDocument,
   IssuesByType,
-} from "./types";
-import { parserOptions } from "../parser-options";
+} from "../types";
+
 import { Cache } from "../cache";
 
 export function registerSecurityAudit(

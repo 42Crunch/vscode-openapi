@@ -11,6 +11,7 @@ fixes:
       - name: name
         path: /security/0/securityRequirement
         type: key
+        source: securitySchemes
 
   - problem:
       - parameter-array-maxitems
@@ -69,6 +70,8 @@ fixes:
     parameters:
       - name: minimum
         path: /minimum
+        source: mostUsedByName
+
 
   # FIXME implement replace value in the existing property
   #  - problem:
