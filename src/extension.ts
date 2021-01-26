@@ -43,11 +43,11 @@ export function activate(context: vscode.ExtensionContext) {
 
   const cache = new Cache(parserOptions);
 
-  cache.onDidChange(updateContext);
+  cache.onDidChange((document) => updateContext(cache, document));
   // FIXME decide what to do in case of parsing errors in OAS
   // cache.onDidChange((entry) => updateDiagnostics(entry, runtimeContext.diagnostics));
 
-  context.subscriptions.push(...registerOutlines(context, cache.onDidActiveDocumentChange));
+  context.subscriptions.push(...registerOutlines(context, cache));
   context.subscriptions.push(...registerCommands(cache));
 
   const jsonFile: vscode.DocumentSelector = { language: "json" };

@@ -5,13 +5,15 @@
 
 import * as vscode from "vscode";
 import { Node } from "./ast";
-import { OpenApiVersion, CacheEntry } from "./types";
+import { Cache } from "./cache";
+import { OpenApiVersion } from "./types";
 
-export function updateContext(current: CacheEntry) {
-  if (current.version === OpenApiVersion.V2) {
+export function updateContext(cache: Cache, document: vscode.TextDocument) {
+  const version = cache.getDocumentVersion(document);
+  if (version === OpenApiVersion.V2) {
     vscode.commands.executeCommand("setContext", "openapiTwoEnabled", true);
     vscode.commands.executeCommand("setContext", "openapiThreeEnabled", false);
-  } else if (current.version === OpenApiVersion.V3) {
+  } else if (version === OpenApiVersion.V3) {
     vscode.commands.executeCommand("setContext", "openapiThreeEnabled", true);
     vscode.commands.executeCommand("setContext", "openapiTwoEnabled", false);
   } else {
@@ -19,8 +21,9 @@ export function updateContext(current: CacheEntry) {
     vscode.commands.executeCommand("setContext", "openapiThreeEnabled", false);
   }
 
-  if (current.lastGoodAstRoot) {
-    checkTree(current.lastGoodAstRoot);
+  const root = cache.getLastGoodDocumentAst(document);
+  if (root) {
+    checkTree(root);
   }
 }
 

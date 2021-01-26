@@ -21,10 +21,10 @@ export async function provideYamlSchemas(
   function requestSchema(uri: string) {
     for (const document of vscode.workspace.textDocuments) {
       if (document.uri.toString() === uri) {
-        const entry = cache.getEntryForDocumentSync(document);
-        if (entry.version === OpenApiVersion.V2) {
+        const version = cache.getDocumentVersion(document);
+        if (version === OpenApiVersion.V2) {
           return "openapi:v2";
-        } else if (entry.version === OpenApiVersion.V3) {
+        } else if (version === OpenApiVersion.V3) {
           return "openapi:v3";
         }
         break;

@@ -159,8 +159,8 @@ async function performAudit(
   apiToken,
   progress
 ): Promise<Audit | undefined> {
-  const entry = await cache.getEntryForDocument(textEditor.document);
-  if (!entry.bundled || entry.bundledErorrs) {
+  const bundle = await cache.getDocumentBundle(textEditor.document);
+  if (bundle.errors) {
     vscode.commands.executeCommand("workbench.action.problems.focus");
     throw new Error("Failed to bundle for audit, check OpenAPI file for errors.");
   }
@@ -169,9 +169,9 @@ async function performAudit(
     const documentUri = textEditor.document.uri.toString();
     const [grades, issuesByDocument, documents] = await auditDocument(
       textEditor.document,
-      JSON.stringify(entry.bundled),
+      JSON.stringify(bundle.value),
       cache,
-      entry.bundledMapping,
+      bundle.mapping,
       apiToken,
       progress
     );
@@ -246,7 +246,7 @@ async function processIssues(
   const documentUris: { [uri: string]: boolean } = { [mainUri.toString()]: true };
   const issuesPerDocument: { [uri: string]: ReportedIssue[] } = {};
 
-  const { astRoot: root } = await cache.getEntryForDocument(document);
+  const root = cache.getDocumentAst(document);
 
   for (const issue of issues) {
     const [uri, pointer] = findIssueLocation(mainUri, root, mappings, issue.pointer);
@@ -294,8 +294,8 @@ async function auditDocument(
   for (const uri of documentUris) {
     if (!files[uri]) {
       const document = await vscode.workspace.openTextDocument(vscode.Uri.parse(uri));
-      const { astRoot } = await cache.getEntryForDocument(document);
-      files[uri] = [document, astRoot];
+      const root = cache.getDocumentAst(document);
+      files[uri] = [document, root];
     }
   }
 

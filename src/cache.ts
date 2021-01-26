@@ -5,12 +5,13 @@
 
 import { extname } from "path";
 import * as vscode from "vscode";
-import { CacheEntry } from "./types";
+import { Bundle, CacheEntry } from "./types";
 import { OpenApiVersion } from "./types";
 import { parseToAst, parseToObject } from "./parsers";
 import { ParserOptions } from "./parser-options";
 import { bundle } from "./bundler";
 import { joinJsonPointer } from "./pointer";
+import { Node } from "./ast";
 
 function walk(current: any, parent: any, path: string[], visitor: any) {
   for (const key of Object.keys(current)) {
@@ -32,8 +33,8 @@ function mode(arr) {
 export class Cache {
   private cache: { [uri: string]: CacheEntry } = {};
   private parserOptions: ParserOptions;
-  private _didChange = new vscode.EventEmitter<CacheEntry>();
-  private _didActiveDocumentChange = new vscode.EventEmitter<CacheEntry>();
+  private _didChange = new vscode.EventEmitter<vscode.TextDocument>();
+  private _didActiveDocumentChange = new vscode.EventEmitter<vscode.TextDocument>();
 
   private diagnostics = vscode.languages.createDiagnosticCollection("openapi-bundler");
 
@@ -41,11 +42,11 @@ export class Cache {
     this.parserOptions = parserOptions;
   }
 
-  get onDidChange(): vscode.Event<CacheEntry> {
+  get onDidChange(): vscode.Event<vscode.TextDocument> {
     return this._didChange.event;
   }
 
-  get onDidActiveDocumentChange(): vscode.Event<CacheEntry> {
+  get onDidActiveDocumentChange(): vscode.Event<vscode.TextDocument> {
     return this._didActiveDocumentChange.event;
   }
 
@@ -57,9 +58,9 @@ export class Cache {
     // _didChange and _didActiveDocumentChange might fire at a different
     // times
     if (activeEditor && activeEditor.document.uri.toString() === event.document.uri.toString()) {
-      const entry = await this.updateCacheAsync(event.document);
-      this._didChange.fire(entry);
-      this._didActiveDocumentChange.fire(entry);
+      await this.updateCacheAsync(event.document);
+      this._didChange.fire(event.document);
+      this._didActiveDocumentChange.fire(event.document);
     }
   }
 
@@ -68,12 +69,51 @@ export class Cache {
   async onActiveEditorChanged(editor: vscode.TextEditor | undefined) {
     // TODO don't re-parse if we've got up-to-date contents in the cache
     if (editor) {
-      const entry = await this.updateCacheAsync(editor.document);
-      this._didChange.fire(entry);
-      this._didActiveDocumentChange.fire(entry);
+      await this.updateCacheAsync(editor.document);
+      this._didChange.fire(editor.document);
+      this._didActiveDocumentChange.fire(editor.document);
     }
   }
 
+  getDocumentVersion(document: vscode.TextDocument): OpenApiVersion {
+    const entry = this.getEntry(document);
+    return entry ? entry.version : OpenApiVersion.Unknown;
+  }
+
+  getDocumentAst(document: vscode.TextDocument): Node {
+    const entry = this.getEntry(document);
+    if (entry) {
+      return entry.astRoot;
+    }
+    return null;
+  }
+
+  getLastGoodDocumentAst(document: vscode.TextDocument): Node {
+    const entry = this.getEntry(document);
+    if (entry) {
+      return entry.lastGoodAstRoot;
+    }
+    return null;
+  }
+
+  getDocumentValue(document: vscode.TextDocument): Promise<any> {
+    const entry = this.getEntry(document);
+    if (entry) {
+      return entry.parsed;
+    }
+    return null;
+  }
+
+  async getDocumentBundle(document: vscode.TextDocument): Promise<Bundle> {
+    // FIXME initiate and await bundling
+    const entry = this.getEntry(document);
+    if (entry) {
+      return entry.bundle;
+    }
+    return null;
+  }
+
+  // deprecated
   async getEntryForDocument(document: vscode.TextDocument): Promise<CacheEntry> {
     const uri = document.uri.toString();
     if (this.cache[uri]) {
@@ -117,11 +157,9 @@ export class Cache {
 
     if (entry.version !== OpenApiVersion.Unknown && !entry.errors) {
       try {
-        const [bundled, mapping, uris] = await bundle(document, this);
-        this.clearBundlerErrors(uris);
-        entry.bundled = bundled;
-        entry.bundledMapping = mapping;
-        entry.bundledUris = uris;
+        const bundled = await bundle(document, this);
+        this.clearBundlerErrors(bundled.uris);
+        entry.bundle = bundled;
 
         const hints = {};
 
@@ -149,17 +187,22 @@ export class Cache {
         entry.propertyHints = hints;
       } catch (errors) {
         this.showBundlerErrors(document.uri, errors);
-        entry.bundled = null;
-        entry.bundledUris = null;
-        entry.bundledMapping = null;
+        entry.bundle = {
+          errors,
+          uris: null,
+          mapping: null,
+          value: null,
+        };
       }
     } else {
-      entry.bundled = null;
-      entry.bundledUris = null;
-      entry.bundledMapping = null;
+      entry.bundle = null;
     }
 
     return entry;
+  }
+
+  private getEntry(document: vscode.TextDocument): CacheEntry {
+    return this.cache[document.uri.toString()];
   }
 
   private getOrCreateEntry(document: vscode.TextDocument): CacheEntry {
@@ -176,10 +219,7 @@ export class Cache {
       lastGoodAstRoot: null,
       parsed: null,
       errors: null,
-      bundled: null,
-      bundledErorrs: null,
-      bundledUris: null,
-      bundledMapping: null,
+      bundle: null,
       propertyHints: null,
     };
 
