@@ -6,13 +6,13 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { configuration } from "./configuration";
-import { CacheEntry } from "./types";
+import { Bundle } from "./types";
 import { Cache } from "./cache";
 
 type Preview = {
   panel: vscode.WebviewPanel;
   documentUri: vscode.Uri;
-  uris: { [key: string]: string };
+  uris: Set<string>;
 };
 
 type Previews = {
@@ -23,13 +23,14 @@ type Previews = {
 export function activate(context: vscode.ExtensionContext, cache: Cache) {
   const previews: Previews = {};
 
-  cache.onDidChange(async (entry: CacheEntry) => {
-    const uri = entry.uri.toString();
+  cache.onDidChange(async (document: vscode.TextDocument) => {
+    const uri = document.uri.toString();
+    const bundle = await cache.getDocumentBundle(document);
 
     for (const name of Object.keys(previews)) {
       const preview: Preview = previews[name];
-      if (preview && preview.uris[uri] && entry.bundled && !entry.bundledErorrs) {
-        showPreview(context, previews, name, entry.uri, entry.bundled, entry.bundledUris);
+      if (preview && preview.uris.has(uri) && !bundle.errors) {
+        showPreview(context, previews, name, document.uri, bundle);
       }
     }
   });
@@ -66,12 +67,12 @@ async function startPreview(
   renderer: string,
   document: vscode.TextDocument
 ) {
-  const entry = await cache.getEntryForDocument(document);
-  if (!entry.bundled || entry.bundledErorrs) {
+  const bundle = await cache.getDocumentBundle(document);
+  if (bundle.errors) {
     vscode.commands.executeCommand("workbench.action.problems.focus");
     vscode.window.showErrorMessage("Failed to generate preview, check OpenAPI file for errors.");
   } else {
-    showPreview(context, previews, renderer, entry.uri, entry.bundled, entry.bundledUris);
+    showPreview(context, previews, renderer, document.uri, bundle);
   }
 }
 
@@ -80,13 +81,12 @@ async function showPreview(
   previews: Previews,
   name: string,
   documentUri: vscode.Uri,
-  bundled: any,
-  uris: any
+  bundle: Bundle
 ) {
   if (previews[name]) {
     const panel = previews[name].panel;
-    panel.webview.postMessage({ command: "preview", text: JSON.stringify(bundled) });
-    previews[name] = { panel, uris, documentUri };
+    panel.webview.postMessage({ command: "preview", text: JSON.stringify(bundle.value) });
+    previews[name] = { panel, uris: bundle.uris, documentUri };
     return;
   }
 
@@ -102,8 +102,8 @@ async function showPreview(
     context.subscriptions
   );
 
-  panel.webview.postMessage({ command: "preview", text: JSON.stringify(bundled) });
-  previews[name] = { panel, uris, documentUri };
+  panel.webview.postMessage({ command: "preview", text: JSON.stringify(bundle.value) });
+  previews[name] = { panel, uris: bundle.uris, documentUri };
 }
 
 function buildWebviewPanel(

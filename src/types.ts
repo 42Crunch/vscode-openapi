@@ -21,6 +21,13 @@ export interface MappingNode {
   };
 }
 
+export interface Bundle {
+  value: any;
+  mapping: MappingNode;
+  uris: Set<string>;
+  errors?: any;
+}
+
 interface Grade {
   value: number;
   max: number;
@@ -122,9 +129,6 @@ export interface CacheEntry {
   lastGoodAstRoot: Node;
   parsed: any;
   errors: any;
-  bundled: any;
-  bundledErorrs: any;
-  bundledUris: any;
-  bundledMapping: any;
+  bundle: Bundle;
   propertyHints: any;
 }

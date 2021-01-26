@@ -37,9 +37,9 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
   root: Node;
   version: OpenApiVersion;
   constructor(private context: vscode.ExtensionContext, private cache: Cache) {
-    cache.onDidActiveDocumentChange((entry) => {
-      this.root = entry.astRoot;
-      this.version = entry.version;
+    cache.onDidActiveDocumentChange((document) => {
+      this.root = cache.getDocumentAst(document);
+      this.version = cache.getDocumentVersion(document);
     });
   }
 
@@ -79,9 +79,9 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
         // stat fileUri, if it does not exists an exception is thrown
         await vscode.workspace.fs.stat(otherUri);
         const otherDocument = await vscode.workspace.openTextDocument(otherUri);
-        const entry = await this.cache.getEntryForDocument(otherDocument);
-        if (!entry.errors) {
-          searchRoot = entry.astRoot;
+        const root = await this.cache.getDocumentAst(otherDocument);
+        if (root) {
+          searchRoot = root;
         }
       } catch (ex) {
         // file does not exists, ignore the exception

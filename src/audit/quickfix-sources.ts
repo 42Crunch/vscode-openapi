@@ -7,12 +7,12 @@ function securitySchemes(
   parameter: FixParameter,
   entry: CacheEntry
 ): any[] {
-  const { version, bundled } = entry;
-  if (version !== OpenApiVersion.Unknown && bundled) {
-    if (version === OpenApiVersion.V2 && bundled.securityDefinitions) {
-      return Object.keys(bundled.securityDefinitions);
-    } else if (version === OpenApiVersion.V3 && bundled.components?.securitySchemes) {
-      return Object.keys(bundled.components.securitySchemes);
+  const { version, bundle } = entry;
+  if (version !== OpenApiVersion.Unknown && bundle.value) {
+    if (version === OpenApiVersion.V2 && bundle.value?.securityDefinitions) {
+      return Object.keys(bundle.value.securityDefinitions);
+    } else if (version === OpenApiVersion.V3 && bundle.value?.components?.securitySchemes) {
+      return Object.keys(bundle.value.components.securitySchemes);
     }
   }
 

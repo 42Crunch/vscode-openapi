@@ -13,8 +13,9 @@ import { ResolverError } from "@xliic/json-schema-ref-parser/lib/util/errors";
 
 import { parseJsonPointer, joinJsonPointer } from "./pointer";
 import { Cache } from "./cache";
-import { CacheEntry, MappingNode, Mapping } from "./types";
+import { CacheEntry, MappingNode, Mapping, Bundle } from "./types";
 import { clone } from "./util";
+import { stat } from "fs";
 
 const destinationMap = {
   v2: {
@@ -62,7 +63,7 @@ const resolver = (cache: Cache, documentUri: vscode.Uri) => {
       const uri = documentUri.with({ path: decodeURIComponent(file.url) });
       try {
         const document = await vscode.workspace.openTextDocument(uri);
-        return cache.getEntryForDocumentSync(document);
+        return cache.getDocumentValue(document);
       } catch (err) {
         throw new ResolverError(`Error opening file "${uri.fsPath}"`, uri.fsPath);
       }
@@ -75,7 +76,7 @@ export const cacheParser = {
   canParse: [".yaml", ".yml", ".json", ".jsonc"],
   parse: ({ data, url, extension }: { data: CacheEntry; url: string; extension: string }) => {
     return new Promise((resolve, reject) => {
-      resolve(clone(data.parsed));
+      resolve(clone(data));
     });
   },
 };
@@ -102,17 +103,14 @@ function set(target: any, path: string[], value: any) {
   current[last] = value;
 }
 
-export async function bundle(
-  document: vscode.TextDocument,
-  cache: Cache
-): Promise<[any, MappingNode, any]> {
-  const { parsed } = cache.getEntryForDocumentSync(document);
+export async function bundle(document: vscode.TextDocument, cache: Cache): Promise<Bundle> {
+  const parsed = cache.getDocumentValue(document);
   const cwd = dirname(document.uri.fsPath) + "/";
   const state = {
     version: null,
     parsed: null,
     mapping: { value: null, children: {} },
-    uris: { [document.uri.toString()]: true },
+    uris: new Set<string>([document.uri.toString()]),
   };
 
   const bundled = await parser.bundle(clone(parsed), {
@@ -132,8 +130,8 @@ export async function bundle(
         const filename = url.toFileSystemPath(entry.file);
         const uri = document.uri.with({ path: decodeURIComponent(entry.file) }).toString();
 
-        if (!state.uris[uri]) {
-          state.uris[uri] = true;
+        if (!state.uris.has(uri)) {
+          state.uris.add(uri);
         }
 
         // FIXME implement remap for openapi v2 and $ref location based remap
@@ -176,7 +174,11 @@ export async function bundle(
     },
   });
 
-  return [bundled, state.mapping, state.uris];
+  return {
+    value: bundled,
+    mapping: state.mapping,
+    uris: state.uris,
+  };
 }
 
 function insertMapping(root: MappingNode, path: string[], value: Mapping) {

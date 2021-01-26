@@ -5,8 +5,8 @@
 
 import * as vscode from "vscode";
 import { Node } from "./ast";
+import { Cache } from "./cache";
 import { configuration } from "./configuration";
-import { CacheEntry } from "./types";
 
 export const outlines: { [id: string]: vscode.TreeView<Node> } = {};
 
@@ -18,16 +18,14 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
   maxDepth: number = 1;
   sort: boolean;
 
-  constructor(
-    private context: vscode.ExtensionContext,
-    didActiveDocumentChange: vscode.Event<CacheEntry>
-  ) {
-    didActiveDocumentChange((entry) => {
+  constructor(private context: vscode.ExtensionContext, private cache: Cache) {
+    cache.onDidActiveDocumentChange((document) => {
       const pointer = this.getRootPointer();
-      if (entry.lastGoodAstRoot && pointer) {
-        this.root = entry.lastGoodAstRoot.find(pointer);
-      } else if (entry.lastGoodAstRoot) {
-        this.root = entry.lastGoodAstRoot;
+      const root = cache.getLastGoodDocumentAst(document);
+      if (root && pointer) {
+        this.root = root.find(pointer);
+      } else if (root) {
+        this.root = root;
       } else {
         this.root = null;
       }
@@ -297,59 +295,44 @@ function registerOutlineTreeView(id: string, provider: vscode.TreeDataProvider<N
 
 export function registerOutlines(
   context: vscode.ExtensionContext,
-  didActiveDocumentChange: vscode.Event<CacheEntry>
+  cache: Cache
 ): vscode.Disposable[] {
   // OpenAPI v2 outlines
-  registerOutlineTreeView(
-    "openapiTwoSpecOutline",
-    new GeneralTwoOutlineProvider(context, didActiveDocumentChange)
-  );
-  registerOutlineTreeView(
-    "openapiTwoPathOutline",
-    new PathOutlineProvider(context, didActiveDocumentChange)
-  );
+  registerOutlineTreeView("openapiTwoSpecOutline", new GeneralTwoOutlineProvider(context, cache));
+  registerOutlineTreeView("openapiTwoPathOutline", new PathOutlineProvider(context, cache));
   registerOutlineTreeView(
     "openapiTwoDefinitionOutline",
-    new DefinitionOutlineProvider(context, didActiveDocumentChange)
+    new DefinitionOutlineProvider(context, cache)
   );
-  registerOutlineTreeView(
-    "openapiTwoSecurityOutline",
-    new SecurityOutlineProvider(context, didActiveDocumentChange)
-  );
+  registerOutlineTreeView("openapiTwoSecurityOutline", new SecurityOutlineProvider(context, cache));
   registerOutlineTreeView(
     "openapiTwoSecurityDefinitionOutline",
-    new SecurityDefinitionOutlineProvider(context, didActiveDocumentChange)
+    new SecurityDefinitionOutlineProvider(context, cache)
   );
   registerOutlineTreeView(
     "openapiTwoParametersOutline",
-    new ParametersOutlineProvider(context, didActiveDocumentChange)
+    new ParametersOutlineProvider(context, cache)
   );
   registerOutlineTreeView(
     "openapiTwoResponsesOutline",
-    new ResponsesOutlineProvider(context, didActiveDocumentChange)
+    new ResponsesOutlineProvider(context, cache)
   );
 
   // OpenAPI v3 outlines
-  registerOutlineTreeView(
-    "openapiThreePathOutline",
-    new PathOutlineProvider(context, didActiveDocumentChange)
-  );
+  registerOutlineTreeView("openapiThreePathOutline", new PathOutlineProvider(context, cache));
   registerOutlineTreeView(
     "openapiThreeSpecOutline",
-    new GeneralThreeOutlineProvider(context, didActiveDocumentChange)
+    new GeneralThreeOutlineProvider(context, cache)
   );
   registerOutlineTreeView(
     "openapiThreeComponentsOutline",
-    new ComponentsOutlineProvider(context, didActiveDocumentChange)
+    new ComponentsOutlineProvider(context, cache)
   );
   registerOutlineTreeView(
     "openapiThreeSecurityOutline",
-    new SecurityOutlineProvider(context, didActiveDocumentChange)
+    new SecurityOutlineProvider(context, cache)
   );
-  registerOutlineTreeView(
-    "openapiThreeServersOutline",
-    new ServersOutlineProvider(context, didActiveDocumentChange)
-  );
+  registerOutlineTreeView("openapiThreeServersOutline", new ServersOutlineProvider(context, cache));
 
   return Object.values(outlines);
 }
