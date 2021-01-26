@@ -76,11 +76,13 @@ export class Cache {
   }
 
   getDocumentVersion(document: vscode.TextDocument): OpenApiVersion {
+    this.updateCacheSync(document);
     const entry = this.getEntry(document);
     return entry ? entry.version : OpenApiVersion.Unknown;
   }
 
   getDocumentAst(document: vscode.TextDocument): Node {
+    this.updateCacheSync(document);
     const entry = this.getEntry(document);
     if (entry) {
       return entry.astRoot;
@@ -89,6 +91,7 @@ export class Cache {
   }
 
   getLastGoodDocumentAst(document: vscode.TextDocument): Node {
+    this.updateCacheSync(document);
     const entry = this.getEntry(document);
     if (entry) {
       return entry.lastGoodAstRoot;
@@ -97,6 +100,7 @@ export class Cache {
   }
 
   getDocumentValue(document: vscode.TextDocument): Promise<any> {
+    this.updateCacheSync(document);
     const entry = this.getEntry(document);
     if (entry) {
       return entry.parsed;
@@ -105,7 +109,7 @@ export class Cache {
   }
 
   async getDocumentBundle(document: vscode.TextDocument): Promise<Bundle> {
-    // FIXME initiate and await bundling
+    await this.updateCacheAsync(document);
     const entry = this.getEntry(document);
     if (entry) {
       return entry.bundle;
