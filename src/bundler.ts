@@ -13,18 +13,17 @@ import { ResolverError } from "@xliic/json-schema-ref-parser/lib/util/errors";
 
 import { parseJsonPointer, joinJsonPointer } from "./pointer";
 import { Cache } from "./cache";
-import { CacheEntry, MappingNode, Mapping, Bundle } from "./types";
+import { CacheEntry, MappingNode, Mapping, BundleResult, OpenApiVersion } from "./types";
 import { clone } from "./util";
-import { stat } from "fs";
 
 const destinationMap = {
-  v2: {
+  [OpenApiVersion.V2]: {
     parameters: ["parameters"],
     schema: ["definitions"],
     responses: ["responses"],
   },
 
-  v3: {
+  [OpenApiVersion.V3]: {
     parameters: ["components", "parameters"],
     schema: ["components", "schemas"],
     responses: ["components", "responses"],
@@ -36,23 +35,6 @@ const destinationMap = {
   },
 };
 
-export function getOpenApiVersion(parsed: any): string {
-  const swaggerVersionValue = parsed["swagger"];
-  const openApiVersionValue = parsed["openapi"];
-
-  if (swaggerVersionValue === "2.0") {
-    return "v2";
-  } else if (
-    openApiVersionValue &&
-    typeof openApiVersionValue === "string" &&
-    openApiVersionValue.match(/^3\.0\.\d(-.+)?$/)
-  ) {
-    return "v3";
-  }
-
-  return null;
-}
-
 const resolver = (cache: Cache, documentUri: vscode.Uri) => {
   return {
     order: 10,
@@ -63,7 +45,7 @@ const resolver = (cache: Cache, documentUri: vscode.Uri) => {
       const uri = documentUri.with({ path: decodeURIComponent(file.url) });
       try {
         const document = await vscode.workspace.openTextDocument(uri);
-        return cache.getDocumentValue(document);
+        return await cache.getDocumentValue(document);
       } catch (err) {
         throw new ResolverError(`Error opening file "${uri.fsPath}"`, uri.fsPath);
       }
@@ -103,82 +85,90 @@ function set(target: any, path: string[], value: any) {
   current[last] = value;
 }
 
-export async function bundle(document: vscode.TextDocument, cache: Cache): Promise<Bundle> {
-  const parsed = cache.getDocumentValue(document);
+function hooks(document: vscode.TextDocument, cwd: string, state: any) {
+  return {
+    onRemap: (entry) => {
+      const filename = url.toFileSystemPath(entry.file);
+      const uri = document.uri.with({ path: decodeURIComponent(entry.file) }).toString();
+
+      if (!state.uris.has(uri)) {
+        state.uris.add(uri);
+      }
+
+      // FIXME implement remap for openapi v2 and $ref location based remap
+      const hashPath = Pointer.parse(entry.hash);
+
+      if (hashPath[0] == "components") {
+        // TODO check that hashPath == 'schemas' or 'parameters', etc.
+        const targetFileName = relative(cwd, filename);
+        let path = ["components", hashPath[1], mangle(targetFileName) + "-" + hashPath[2]];
+        if (hashPath.length > 3) {
+          path = path.concat(hashPath.slice(3));
+        }
+        set(state.parsed, path, entry.value);
+        insertMapping(state.mapping, path, { file: filename, hash: entry.hash });
+        return Pointer.join("#", path);
+      }
+
+      const path = Pointer.parse(entry.pathFromRoot);
+      const parentKey = path[path.length - 1];
+      const grandparentKey = path[path.length - 2];
+      const destinations = destinationMap[state.version];
+
+      const destination = destinations[parentKey]
+        ? destinations[parentKey]
+        : destinations[grandparentKey]
+        ? destinations[grandparentKey]
+        : null;
+      if (destination) {
+        const ref = entry.$ref.$ref;
+        const mangled = mangle(ref);
+        const path = destination.concat([mangled]);
+        set(state.parsed, path, entry.value);
+        insertMapping(state.mapping, path, { file: filename, hash: entry.hash });
+        return Pointer.join("#", path);
+      }
+
+      insertMapping(state.mapping, path, { file: filename, hash: entry.hash });
+      entry.$ref = entry.parent[entry.key] = $Ref.dereference(entry.$ref, entry.value);
+    },
+  };
+}
+
+export async function bundle(
+  document: vscode.TextDocument,
+  version: OpenApiVersion,
+  parsed: any,
+  cache: Cache
+): Promise<BundleResult> {
   const cwd = dirname(document.uri.fsPath) + "/";
   const state = {
-    version: null,
-    parsed: null,
+    version,
+    parsed,
     mapping: { value: null, children: {} },
     uris: new Set<string>([document.uri.toString()]),
   };
 
-  const bundled = await parser.bundle(clone(parsed), {
-    cwd,
-    resolve: { http: false, file: resolver(cache, document.uri) },
-    parse: {
-      json: cacheParser,
-      yaml: cacheParser,
-    },
-    continueOnError: true,
-    hooks: {
-      onParse: (parsed) => {
-        state.parsed = parsed;
-        state.version = getOpenApiVersion(parsed);
+  try {
+    const bundled = await parser.bundle(clone(parsed), {
+      cwd,
+      resolve: { http: false, file: resolver(cache, document.uri) },
+      parse: {
+        json: cacheParser,
+        yaml: cacheParser,
       },
-      onRemap: (entry) => {
-        const filename = url.toFileSystemPath(entry.file);
-        const uri = document.uri.with({ path: decodeURIComponent(entry.file) }).toString();
+      continueOnError: true,
+      hooks: hooks(document, cwd, state),
+    });
 
-        if (!state.uris.has(uri)) {
-          state.uris.add(uri);
-        }
-
-        // FIXME implement remap for openapi v2 and $ref location based remap
-        const hashPath = Pointer.parse(entry.hash);
-
-        if (hashPath[0] == "components") {
-          // TODO check that hashPath == 'schemas' or 'parameters', etc.
-          const targetFileName = relative(cwd, filename);
-          let path = ["components", hashPath[1], mangle(targetFileName) + "-" + hashPath[2]];
-          if (hashPath.length > 3) {
-            path = path.concat(hashPath.slice(3));
-          }
-          set(state.parsed, path, entry.value);
-          insertMapping(state.mapping, path, { file: filename, hash: entry.hash });
-          return Pointer.join("#", path);
-        }
-
-        const path = Pointer.parse(entry.pathFromRoot);
-        const parentKey = path[path.length - 1];
-        const grandparentKey = path[path.length - 2];
-        const destinations = destinationMap[state.version];
-
-        const destination = destinations[parentKey]
-          ? destinations[parentKey]
-          : destinations[grandparentKey]
-          ? destinations[grandparentKey]
-          : null;
-        if (destination) {
-          const ref = entry.$ref.$ref;
-          const mangled = mangle(ref);
-          const path = destination.concat([mangled]);
-          set(state.parsed, path, entry.value);
-          insertMapping(state.mapping, path, { file: filename, hash: entry.hash });
-          return Pointer.join("#", path);
-        }
-
-        insertMapping(state.mapping, path, { file: filename, hash: entry.hash });
-        entry.$ref = entry.parent[entry.key] = $Ref.dereference(entry.$ref, entry.value);
-      },
-    },
-  });
-
-  return {
-    value: bundled,
-    mapping: state.mapping,
-    uris: state.uris,
-  };
+    return {
+      value: bundled,
+      mapping: state.mapping,
+      uris: state.uris,
+    };
+  } catch (errors) {
+    return { errors };
+  }
 }
 
 function insertMapping(root: MappingNode, path: string[], value: Mapping) {

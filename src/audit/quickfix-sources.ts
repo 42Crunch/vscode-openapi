@@ -8,6 +8,11 @@ function securitySchemes(
   entry: CacheEntry
 ): any[] {
   const { version, bundle } = entry;
+
+  if ("errors" in bundle) {
+    return [];
+  }
+
   if (version !== OpenApiVersion.Unknown && bundle.value) {
     if (version === OpenApiVersion.V2 && bundle.value?.securityDefinitions) {
       return Object.keys(bundle.value.securityDefinitions);

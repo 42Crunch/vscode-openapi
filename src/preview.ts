@@ -6,7 +6,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { configuration } from "./configuration";
-import { Bundle } from "./types";
+import { Bundle, BundleResult } from "./types";
 import { Cache } from "./cache";
 
 type Preview = {
@@ -29,7 +29,7 @@ export function activate(context: vscode.ExtensionContext, cache: Cache) {
 
     for (const name of Object.keys(previews)) {
       const preview: Preview = previews[name];
-      if (preview && preview.uris.has(uri) && !bundle.errors) {
+      if (preview && preview.uris.has(uri) && !("errors" in bundle)) {
         showPreview(context, previews, name, document.uri, bundle);
       }
     }
@@ -68,7 +68,7 @@ async function startPreview(
   document: vscode.TextDocument
 ) {
   const bundle = await cache.getDocumentBundle(document);
-  if (bundle.errors) {
+  if ("errors" in bundle) {
     vscode.commands.executeCommand("workbench.action.problems.focus");
     vscode.window.showErrorMessage("Failed to generate preview, check OpenAPI file for errors.");
   } else {
