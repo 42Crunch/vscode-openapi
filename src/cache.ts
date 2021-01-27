@@ -5,7 +5,7 @@
 
 import { extname } from "path";
 import * as vscode from "vscode";
-import { Bundle, CacheEntry } from "./types";
+import { BundleResult, CacheEntry } from "./types";
 import { OpenApiVersion } from "./types";
 import { parseToAst, parseToObject } from "./parsers";
 import { ParserOptions } from "./parser-options";
@@ -32,6 +32,9 @@ function mode(arr) {
 
 export class Cache {
   private cache: { [uri: string]: CacheEntry } = {};
+  private lastUpdate: { [uri: string]: number } = {};
+  private pendingUpdates: { [uri: string]: Promise<CacheEntry> } = {};
+
   private parserOptions: ParserOptions;
   private _didChange = new vscode.EventEmitter<vscode.TextDocument>();
   private _didActiveDocumentChange = new vscode.EventEmitter<vscode.TextDocument>();
@@ -58,7 +61,7 @@ export class Cache {
     // _didChange and _didActiveDocumentChange might fire at a different
     // times
     if (activeEditor && activeEditor.document.uri.toString() === event.document.uri.toString()) {
-      await this.updateCacheAsync(event.document);
+      await this.requestCacheEntryUpdate(event.document);
       this._didChange.fire(event.document);
       this._didActiveDocumentChange.fire(event.document);
     }
@@ -69,165 +72,175 @@ export class Cache {
   async onActiveEditorChanged(editor: vscode.TextEditor | undefined) {
     // TODO don't re-parse if we've got up-to-date contents in the cache
     if (editor) {
-      await this.updateCacheAsync(editor.document);
+      await this.requestCacheEntryUpdate(editor.document);
       this._didChange.fire(editor.document);
       this._didActiveDocumentChange.fire(editor.document);
     }
   }
 
   getDocumentVersion(document: vscode.TextDocument): OpenApiVersion {
-    const entry = this.getEntry(document);
+    const entry = this.cache[document.uri.toString()];
     return entry ? entry.version : OpenApiVersion.Unknown;
   }
 
   async getDocumentAst(document: vscode.TextDocument): Promise<Node> {
-    this.updateCacheSync(document);
-    const entry = this.getEntry(document);
-    if (entry) {
-      return entry.astRoot;
-    }
-    return null;
+    const entry = await this.getCacheEntry(document);
+    return entry.astRoot;
   }
 
   async getLastGoodDocumentAst(document: vscode.TextDocument): Promise<Node> {
-    this.updateCacheSync(document);
-    const entry = this.getEntry(document);
-    if (entry) {
-      return entry.lastGoodAstRoot;
-    }
-    return null;
+    const entry = await this.getCacheEntry(document);
+    return entry.lastGoodAstRoot;
   }
 
   async getDocumentValue(document: vscode.TextDocument): Promise<any> {
-    this.updateCacheSync(document);
-    const entry = this.getEntry(document);
-    if (entry) {
-      return entry.parsed;
-    }
-    return null;
+    const entry = await this.getCacheEntry(document);
+    return entry.parsed;
   }
 
-  async getDocumentBundle(document: vscode.TextDocument): Promise<Bundle> {
-    await this.updateCacheAsync(document);
-    const entry = this.getEntry(document);
-    if (entry) {
-      return entry.bundle;
+  async getDocumentBundle(document: vscode.TextDocument): Promise<BundleResult> {
+    const entry = await this.getCacheEntry(document);
+    if (!entry.bundle) {
+      await this.bundleCacheEntry(document, entry);
     }
-    return null;
+    return entry.bundle;
   }
 
   // deprecated
   async getEntryForDocument(document: vscode.TextDocument): Promise<CacheEntry> {
-    const uri = document.uri.toString();
-    if (this.cache[uri]) {
-      return this.cache[uri];
-    }
-
-    const entry = this.updateCacheSync(document);
-    await this.updateCacheAsync(document);
+    const entry = await this.getCacheEntry(document);
     return entry;
   }
 
-  getEntryForDocumentSync(document: vscode.TextDocument): CacheEntry {
-    const uri = document.uri.toString();
-    if (this.cache[uri]) {
-      return this.cache[uri];
-    }
-    return this.updateCacheSync(document);
-  }
+  private buildPropertyHints(bundled: BundleResult) {
+    const hints = {};
 
-  private updateCacheSync(document: vscode.TextDocument): CacheEntry {
-    const entry = this.getOrCreateEntry(document);
-
-    const [version, node, errors] = parseToAst(document, this.parserOptions);
-
-    entry.version = version;
-    entry.astRoot = node;
-    entry.errors = errors;
-
-    if (!errors) {
-      entry.lastGoodAstRoot = node;
-      entry.parsed = parseToObject(document, this.parserOptions);
-    } else {
-      entry.parsed = null;
-    }
-
-    return entry;
-  }
-
-  private async updateCacheAsync(document: vscode.TextDocument): Promise<CacheEntry> {
-    const entry = this.updateCacheSync(document);
-
-    if (entry.version !== OpenApiVersion.Unknown && !entry.errors) {
-      try {
-        const bundled = await bundle(document, this);
-        this.clearBundlerErrors(bundled.uris);
-        entry.bundle = bundled;
-
-        const hints = {};
-
-        walk(bundled, null, [], (parent, path, key, value) => {
-          // TODO check items for arrays
-          if (path.length > 3 && path[1] === "properties") {
-            const property = path[0];
-            if (!hints[property]) {
-              hints[property] = {};
-            }
-            if (!hints[property][key]) {
-              hints[property][key] = [];
-            }
-            hints[property][key].push(value);
+    if (!("errors" in bundled)) {
+      walk(bundled, null, [], (parent, path, key, value) => {
+        // TODO check items for arrays
+        if (path.length > 3 && path[1] === "properties") {
+          const property = path[0];
+          if (!hints[property]) {
+            hints[property] = {};
           }
-        });
-
-        // update hints replacing arrays of occurences of values
-        // with most frequent value in the array
-        for (const property of Object.keys(hints)) {
-          for (const key of Object.keys(hints[property])) {
-            hints[property][key] = mode(hints[property][key]);
+          if (!hints[property][key]) {
+            hints[property][key] = [];
           }
+          hints[property][key].push(value);
         }
-        entry.propertyHints = hints;
-      } catch (errors) {
-        this.showBundlerErrors(document.uri, errors);
-        entry.bundle = {
-          errors,
-          uris: null,
-          mapping: null,
-          value: null,
-        };
+      });
+
+      // update hints replacing arrays of occurences of values
+      // with most frequent value in the array
+      for (const property of Object.keys(hints)) {
+        for (const key of Object.keys(hints[property])) {
+          hints[property][key] = mode(hints[property][key]);
+        }
       }
-    } else {
-      entry.bundle = null;
     }
 
-    return entry;
+    return hints;
   }
 
-  private getEntry(document: vscode.TextDocument): CacheEntry {
-    return this.cache[document.uri.toString()];
-  }
+  private async buildCacheEntry(document: vscode.TextDocument): Promise<CacheEntry> {
+    const [version, node, errors] = parseToAst(document, this.parserOptions);
+    let value = null;
+    let lastGoodAstRoot = null;
 
-  private getOrCreateEntry(document: vscode.TextDocument): CacheEntry {
-    const _uri = document.uri.toString();
-    if (this.cache[_uri]) {
-      return this.cache[_uri];
+    // produce value only if no errors encountered
+    if (!errors) {
+      lastGoodAstRoot = node;
+      value = parseToObject(document, this.parserOptions);
     }
 
-    const entry = {
+    return {
       document,
       uri: document.uri,
-      version: OpenApiVersion.Unknown,
-      astRoot: null,
-      lastGoodAstRoot: null,
-      parsed: null,
-      errors: null,
-      bundle: null,
-      propertyHints: null,
+      version,
+      astRoot: node,
+      lastGoodAstRoot,
+      parsed: value,
+      errors,
     };
+  }
 
-    this.cache[_uri] = entry;
+  private async bundleCacheEntry(
+    document: vscode.TextDocument,
+    entry: CacheEntry
+  ): Promise<CacheEntry> {
+    // bundle if it is OpenAPI file and no parsing errors
+    if (entry.version !== OpenApiVersion.Unknown && !entry.errors) {
+      entry.bundle = await bundle(document, entry.version, entry.parsed, this);
+      entry.propertyHints = this.buildPropertyHints(entry.bundle);
+      // show or clear bundling errors
+      if ("errors" in entry.bundle) {
+        this.showBundlerErrors(document.uri, entry.bundle.errors);
+      } else {
+        this.clearBundlerErrors(entry.bundle.uris);
+      }
+    }
+
     return entry;
+  }
+
+  async updateCacheEntry(document: vscode.TextDocument): Promise<CacheEntry> {
+    console.log("Updating cache entry", new Date());
+    const uri = document.uri.toString();
+    const old = this.cache[uri];
+    const entry = await this.buildCacheEntry(document);
+
+    if (!entry.lastGoodAstRoot && old.lastGoodAstRoot) {
+      entry.lastGoodAstRoot = old.lastGoodAstRoot;
+    }
+
+    this.cache[uri] = entry;
+    return entry;
+  }
+
+  async requestCacheEntryUpdate(document: vscode.TextDocument): Promise<void> {
+    const MAX_UPDATE = 5000; // update no more ofent than
+    const uri = document.uri.toString();
+    const now = Date.now();
+    const lastUpdate = this.lastUpdate[uri];
+    const pending = this.pendingUpdates[uri];
+
+    if (!lastUpdate) {
+      // first update
+      this.lastUpdate[uri] = now;
+      await this.updateCacheEntry(document);
+    } else if (!pending) {
+      // if no update is pending request a new one
+      const sinceLastUpdate = now - lastUpdate;
+      const updateDelay = MAX_UPDATE > sinceLastUpdate ? MAX_UPDATE - sinceLastUpdate : 0;
+
+      this.pendingUpdates[uri] = new Promise<CacheEntry>((resolve, reject) => {
+        setTimeout(async () => {
+          const entry = await this.bundleCacheEntry(
+            document,
+            await this.updateCacheEntry(document)
+          );
+          this.lastUpdate[uri] = Date.now();
+          delete this.pendingUpdates[uri];
+          resolve(entry);
+        }, updateDelay);
+      });
+    }
+  }
+
+  async getCacheEntry(document: vscode.TextDocument): Promise<CacheEntry> {
+    const uri = document.uri.toString();
+
+    if (this.cache[uri]) {
+      return this.cache[uri];
+    } else if (this.pendingUpdates[uri]) {
+      return this.pendingUpdates[uri];
+    }
+
+    const promise = this.updateCacheEntry(document);
+    this.lastUpdate[uri] = Date.now();
+    this.pendingUpdates[uri] = promise;
+
+    return promise;
   }
 
   private showBundlerErrors(documentUri: vscode.Uri, errors: any) {
@@ -305,8 +318,8 @@ export class Cache {
     }
   }
 
-  private clearBundlerErrors(uris: any) {
-    for (const uri of Object.keys(uris)) {
+  private clearBundlerErrors(uris: Set<string>) {
+    for (const uri of uris) {
       this.diagnostics.delete(vscode.Uri.parse(uri));
     }
   }

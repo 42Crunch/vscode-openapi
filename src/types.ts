@@ -25,8 +25,13 @@ export interface Bundle {
   value: any;
   mapping: MappingNode;
   uris: Set<string>;
-  errors?: any;
 }
+
+interface BundleError {
+  errors: any;
+}
+
+export type BundleResult = Bundle | BundleError;
 
 interface Grade {
   value: number;
@@ -129,6 +134,6 @@ export interface CacheEntry {
   lastGoodAstRoot: Node;
   parsed: any;
   errors: any;
-  bundle: Bundle;
-  propertyHints: any;
+  bundle?: BundleResult;
+  propertyHints?: any;
 }
