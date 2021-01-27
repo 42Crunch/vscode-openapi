@@ -37,8 +37,8 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
   root: Node;
   version: OpenApiVersion;
   constructor(private context: vscode.ExtensionContext, private cache: Cache) {
-    cache.onDidActiveDocumentChange((document) => {
-      this.root = cache.getDocumentAst(document);
+    cache.onDidActiveDocumentChange(async (document) => {
+      this.root = await cache.getDocumentAst(document);
       this.version = cache.getDocumentVersion(document);
     });
   }

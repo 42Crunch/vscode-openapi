@@ -19,9 +19,9 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
   sort: boolean;
 
   constructor(private context: vscode.ExtensionContext, private cache: Cache) {
-    cache.onDidActiveDocumentChange((document) => {
+    cache.onDidActiveDocumentChange(async (document) => {
       const pointer = this.getRootPointer();
-      const root = cache.getLastGoodDocumentAst(document);
+      const root = await cache.getLastGoodDocumentAst(document);
       if (root && pointer) {
         this.root = root.find(pointer);
       } else if (root) {

@@ -76,12 +76,11 @@ export class Cache {
   }
 
   getDocumentVersion(document: vscode.TextDocument): OpenApiVersion {
-    this.updateCacheSync(document);
     const entry = this.getEntry(document);
     return entry ? entry.version : OpenApiVersion.Unknown;
   }
 
-  getDocumentAst(document: vscode.TextDocument): Node {
+  async getDocumentAst(document: vscode.TextDocument): Promise<Node> {
     this.updateCacheSync(document);
     const entry = this.getEntry(document);
     if (entry) {
@@ -90,7 +89,7 @@ export class Cache {
     return null;
   }
 
-  getLastGoodDocumentAst(document: vscode.TextDocument): Node {
+  async getLastGoodDocumentAst(document: vscode.TextDocument): Promise<Node> {
     this.updateCacheSync(document);
     const entry = this.getEntry(document);
     if (entry) {
@@ -99,7 +98,7 @@ export class Cache {
     return null;
   }
 
-  getDocumentValue(document: vscode.TextDocument): Promise<any> {
+  async getDocumentValue(document: vscode.TextDocument): Promise<any> {
     this.updateCacheSync(document);
     const entry = this.getEntry(document);
     if (entry) {

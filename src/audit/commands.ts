@@ -246,7 +246,7 @@ async function processIssues(
   const documentUris: { [uri: string]: boolean } = { [mainUri.toString()]: true };
   const issuesPerDocument: { [uri: string]: ReportedIssue[] } = {};
 
-  const root = cache.getDocumentAst(document);
+  const root = await cache.getDocumentAst(document);
 
   for (const issue of issues) {
     const [uri, pointer] = findIssueLocation(mainUri, root, mappings, issue.pointer);
@@ -294,7 +294,7 @@ async function auditDocument(
   for (const uri of documentUris) {
     if (!files[uri]) {
       const document = await vscode.workspace.openTextDocument(vscode.Uri.parse(uri));
-      const root = cache.getDocumentAst(document);
+      const root = await cache.getDocumentAst(document);
       files[uri] = [document, root];
     }
   }
