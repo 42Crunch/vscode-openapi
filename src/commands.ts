@@ -113,7 +113,7 @@ function goToLine(cache: Cache, range: vscode.Range) {
 
 async function copyJsonReference(cache: Cache, range: vscode.Range) {
   const editor = vscode.window.activeTextEditor;
-  const root = cache.getDocumentAst(editor.document);
+  const root = await cache.getDocumentAst(editor.document);
   if (root) {
     const node = root.findNodeAtOffset(editor.document.offsetAt(editor.selection.active));
     copyNodeJsonReference(node);
@@ -327,7 +327,7 @@ async function addOperation(cache: Cache, node: any) {
 async function insertSnippetAfter(cache: Cache, snippetName: string, pointer: string) {
   const editor = vscode.window.activeTextEditor;
   const languageId = editor.document.languageId;
-  const root = cache.getDocumentAst(editor.document);
+  const root = await cache.getDocumentAst(editor.document);
 
   if (!root) {
     // FIXME display error message?
@@ -412,7 +412,7 @@ async function insertSnippetIntoRoot(
 ) {
   const editor = vscode.window.activeTextEditor;
   const languageId = editor.document.languageId;
-  const root = cache.getDocumentAst(editor.document);
+  const root = await cache.getDocumentAst(editor.document);
 
   if (!root) {
     // FIXME display error message?
@@ -448,7 +448,7 @@ async function insertSnippetIntoRoot(
 async function insertSnippetIntoComponents(cache: Cache, snippetName: string, element: string) {
   const editor = vscode.window.activeTextEditor;
   const languageId = editor.document.languageId;
-  const root = cache.getDocumentAst(editor.document);
+  const root = await cache.getDocumentAst(editor.document);
 
   if (!root) {
     // FIXME display error message?

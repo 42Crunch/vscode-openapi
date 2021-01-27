@@ -8,7 +8,7 @@ import { Node } from "./ast";
 import { Cache } from "./cache";
 import { OpenApiVersion } from "./types";
 
-export function updateContext(cache: Cache, document: vscode.TextDocument) {
+export async function updateContext(cache: Cache, document: vscode.TextDocument) {
   const version = cache.getDocumentVersion(document);
   if (version === OpenApiVersion.V2) {
     vscode.commands.executeCommand("setContext", "openapiTwoEnabled", true);
@@ -21,7 +21,7 @@ export function updateContext(cache: Cache, document: vscode.TextDocument) {
     vscode.commands.executeCommand("setContext", "openapiThreeEnabled", false);
   }
 
-  const root = cache.getLastGoodDocumentAst(document);
+  const root = await cache.getLastGoodDocumentAst(document);
   if (root) {
     checkTree(root);
   }
