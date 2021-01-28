@@ -148,7 +148,7 @@ To use the fixes:
 
 ## Feedback
 
-When you have a minute **PLEASE** submit your feedback and feature requests at [this superquick survey](https://www.surveymonkey.com/r/H3C8VC6).
+When you have a minute **PLEASE** submit your feedback and feature requests at [this superquick survey](https://www.surveymonkey.com/r/L7R69JR).
 
 Submit your bug reports at [GitHub project Issues](https://github.com/42Crunch/vscode-openapi/issues).
 
