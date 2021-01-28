@@ -95,8 +95,21 @@ export interface AuditContext {
 export interface AuditDiagnostic extends vscode.Diagnostic {
   id: string;
   pointer: string;
-  issueIndex: number;
-  issueUri: string;
+}
+
+export interface InsertReplaceRenameFix extends Fix {
+  type: FixType.Insert | FixType.Replace | FixType.RenameKey;
+  fix: any;
+}
+
+export interface DeleteFix extends Fix {
+  type: FixType.Delete;
+}
+
+export interface RegexReplaceFix extends Fix {
+  type: FixType.RegexReplace;
+  match: string;
+  replace: string;
 }
 
 export enum FixType {
@@ -104,7 +117,7 @@ export enum FixType {
   Replace = "replace",
   Delete = "delete",
   RegexReplace = "regex-replace",
-  RenameKey = "renameKey",
+  RenameKey = "renameKey"
 }
 
 export interface Fix {
@@ -113,17 +126,42 @@ export interface Fix {
   title: string;
   pointer?: string;
   parameters?: FixParameter[];
+  issueIndexes?: number[]; 
+  issueURIs?: string[];
 }
 
 export interface FixParameter {
   name: string;
   path: string;
-  values: any[];
+  values?: any[];
+  type?: string;
   source?: string;
+  fixIndex?: number;
 }
 
 export interface FixParameterSource {
   (issue: Issue, fix: Fix, parameter: FixParameter, entry: CacheEntry): any[];
+}
+
+export interface FixContext {
+  editor: vscode.TextEditor,
+  edit: vscode.WorkspaceEdit,
+  issues: Issue[],
+  fix: InsertReplaceRenameFix | RegexReplaceFix | DeleteFix,
+  bulk: boolean,
+  snippet?: boolean,
+  snippetParameters?: FixSnippetParameters,
+  auditContext: AuditContext,
+  cacheEntry: CacheEntry,
+  pointer: string,
+  root: Node,
+  target: Node,
+  document: vscode.TextDocument
+}
+
+export interface FixSnippetParameters {
+  snippet: vscode.SnippetString, 
+  location?: vscode.Position
 }
 
 export interface CacheEntry {

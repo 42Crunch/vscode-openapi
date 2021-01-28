@@ -38,7 +38,8 @@
       "parameters": [
         {
           "name": "items",
-          "path": "/maxItems"
+          "path": "/maxItems",
+          "source": "mostUsedByName"
         }
       ]
     },
@@ -82,7 +83,8 @@
       "parameters": [
         {
           "name": "maximum",
-          "path": "/maximum"
+          "path": "/maximum",
+          "source": "mostUsedByName"
         }
       ]
     },
@@ -121,7 +123,8 @@
       "parameters": [
         {
           "name": "maxlen",
-          "path": "/maxLength"
+          "path": "/maxLength",
+          "source": "mostUsedByName"
         }
       ]
     },
@@ -140,7 +143,8 @@
       "parameters": [
         {
           "name": "pattern",
-          "path": "/pattern"
+          "path": "/pattern",
+          "source": "mostUsedByName"
         }
       ]
     },
@@ -722,6 +726,62 @@
           ]
         }
       ]
+    },
+    {
+      "problem": [
+        "warning-schema-property-improper",
+        "validation-schema-notarray-items",
+        "warning-header-property-improper",
+        "validation-header-notarray-items",
+        "v3-warning-schema-property-improper",
+        "v3-validation-schema-notarray-items"
+      ],
+      "title": "Remove 'items' property",
+      "type": "delete"
+    },
+    {
+      "problem": [
+        "warning-global-security-scheme-unused"
+      ],
+      "title": "Remove unused reusable security scheme",
+      "type": "delete"
+    },
+    {
+      "problem": [
+        "validation-schema-array-items",
+        "v3-validation-schema-array-items",
+        "validation-header-array-items"
+      ],
+      "title": "Create 'items' property",
+      "type": "insert",
+      "fix": {
+        "items": {
+          "type": "string"
+        }
+      },
+      "parameters": [
+        {
+          "name": "items",
+          "path": "/items/type",
+          "values": [
+            "string",
+            "integer",
+            "number",
+            "boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "problem": [
+        "validation-parameter-path-required",
+        "v3-validation-parameter-path-required"
+      ],
+      "title": "Set 'required' property to true",
+      "type": "insert",
+      "fix": {
+        "required": true
+      }
     }
   ]
 }

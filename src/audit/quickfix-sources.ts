@@ -33,7 +33,6 @@ function mostUsedByName(issue: Issue, fix: Fix, parameter: FixParameter, entry: 
     return [entry.propertyHints[name][property]];
   }
 
-  console.log("mubn", fix, issue, issuePointer, parameterPointer);
   return [];
 }
 
