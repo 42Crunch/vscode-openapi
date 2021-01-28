@@ -2,11 +2,9 @@
  Copyright (c) 42Crunch Ltd. All rights reserved.
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
-import { relative } from "path";
 import * as vscode from "vscode";
 import { dirname } from "path";
 import parser from "@xliic/json-schema-ref-parser";
-import url from "@xliic/json-schema-ref-parser/lib/util/url";
 import Pointer from "@xliic/json-schema-ref-parser/lib/pointer";
 import $Ref from "@xliic/json-schema-ref-parser/lib/ref";
 import { ResolverError } from "@xliic/json-schema-ref-parser/lib/util/errors";
@@ -35,19 +33,43 @@ const destinationMap = {
   },
 };
 
-const resolver = (cache: Cache, documentUri: vscode.Uri) => {
+const resolver = (cache: Cache, documentUri: vscode.Uri, resolveHttpReferences: boolean) => {
   return {
     order: 10,
     canRead: (file) => {
       return true;
     },
     read: async (file) => {
-      const uri = documentUri.with({ path: decodeURIComponent(file.url) });
+      let uri: vscode.Uri = null;
+      if (file.url.startsWith("http:") || file.url.startsWith("https:")) {
+        const origUri = vscode.Uri.parse(file.url);
+        if (resolveHttpReferences) {
+          if (origUri.scheme === "http") {
+            uri = origUri.with({ scheme: "openapi-external-http" });
+          } else {
+            uri = origUri.with({ scheme: "openapi-external-https" });
+          }
+        } else {
+          throw new ResolverError(
+            { message: `Resolving of external HTTP references is disabled by the configuration.` },
+            origUri.fsPath
+          );
+        }
+      } else {
+        uri = documentUri.with({ path: decodeURIComponent(file.url) });
+      }
       try {
+        const cached = cache.getCachedDocumentValueByUri(uri);
+        if (cached) {
+          return cached;
+        }
         const document = await vscode.workspace.openTextDocument(uri);
         return await cache.getDocumentValue(document);
       } catch (err) {
-        throw new ResolverError(`Error opening file "${uri.fsPath}"`, uri.fsPath);
+        throw new ResolverError(
+          { message: `Error reading file "${uri.fsPath}: ${err.message}"` },
+          uri.fsPath
+        );
       }
     },
   };
@@ -56,7 +78,7 @@ const resolver = (cache: Cache, documentUri: vscode.Uri) => {
 export const cacheParser = {
   order: 100,
   canParse: [".yaml", ".yml", ".json", ".jsonc"],
-  parse: ({ data, url, extension }: { data: CacheEntry; url: string; extension: string }) => {
+  parse: ({ data, url, extension }: { data: any; url: string; extension: string }) => {
     return new Promise((resolve, reject) => {
       resolve(clone(data));
     });
@@ -64,7 +86,7 @@ export const cacheParser = {
 };
 
 function mangle(value: string) {
-  return value.replace(/~/g, "-").replace(/\//g, "-").replace(/\#/g, "");
+  return value.replace(/[~\/\#:]/g, "-");
 }
 
 function set(target: any, path: string[], value: any) {
@@ -85,11 +107,18 @@ function set(target: any, path: string[], value: any) {
   current[last] = value;
 }
 
+function refToCanonicalUri(baseUri: vscode.Uri, ref: string): vscode.Uri {
+  if (ref.startsWith("http:") || ref.startsWith("https:")) {
+    return vscode.Uri.parse(ref.replace("http", "openapi-external-http"));
+  }
+
+  return baseUri.with({ path: decodeURIComponent(ref) });
+}
+
 function hooks(document: vscode.TextDocument, cwd: string, state: any) {
   return {
     onRemap: (entry) => {
-      const filename = url.toFileSystemPath(entry.file);
-      const uri = document.uri.with({ path: decodeURIComponent(entry.file) }).toString();
+      const uri = refToCanonicalUri(document.uri, entry.file).toString();
 
       if (!state.uris.has(uri)) {
         state.uris.add(uri);
@@ -98,15 +127,14 @@ function hooks(document: vscode.TextDocument, cwd: string, state: any) {
       // FIXME implement remap for openapi v2 and $ref location based remap
       const hashPath = Pointer.parse(entry.hash);
 
-      if (hashPath[0] == "components") {
+      if (hashPath[0] == "components" && hashPath.length >= 3) {
         // TODO check that hashPath == 'schemas' or 'parameters', etc.
-        const targetFileName = relative(cwd, filename);
-        let path = ["components", hashPath[1], mangle(targetFileName) + "-" + hashPath[2]];
+        let path = ["components", hashPath[1], mangle(uri) + "-" + hashPath[2]];
         if (hashPath.length > 3) {
           path = path.concat(hashPath.slice(3));
         }
         set(state.parsed, path, entry.value);
-        insertMapping(state.mapping, path, { file: filename, hash: entry.hash });
+        insertMapping(state.mapping, path, { uri, hash: entry.hash });
         return Pointer.join("#", path);
       }
 
@@ -125,11 +153,11 @@ function hooks(document: vscode.TextDocument, cwd: string, state: any) {
         const mangled = mangle(ref);
         const path = destination.concat([mangled]);
         set(state.parsed, path, entry.value);
-        insertMapping(state.mapping, path, { file: filename, hash: entry.hash });
+        insertMapping(state.mapping, path, { uri, hash: entry.hash });
         return Pointer.join("#", path);
       }
 
-      insertMapping(state.mapping, path, { file: filename, hash: entry.hash });
+      insertMapping(state.mapping, path, { uri, hash: entry.hash });
       entry.$ref = entry.parent[entry.key] = $Ref.dereference(entry.$ref, entry.value);
     },
   };
@@ -139,20 +167,23 @@ export async function bundle(
   document: vscode.TextDocument,
   version: OpenApiVersion,
   parsed: any,
-  cache: Cache
+  cache: Cache,
+  resolveHttpReferences: boolean
 ): Promise<BundleResult> {
   const cwd = dirname(document.uri.fsPath) + "/";
+  const cloned = clone(parsed);
+
   const state = {
     version,
-    parsed,
+    parsed: cloned,
     mapping: { value: null, children: {} },
     uris: new Set<string>([document.uri.toString()]),
   };
 
   try {
-    const bundled = await parser.bundle(clone(parsed), {
+    const bundled = await parser.bundle(cloned, {
       cwd,
-      resolve: { http: false, file: resolver(cache, document.uri) },
+      resolve: { http: false, file: resolver(cache, document.uri, resolveHttpReferences) },
       parse: {
         json: cacheParser,
         yaml: cacheParser,
@@ -191,12 +222,12 @@ export function findMapping(root: MappingNode, pointer: string): Mapping {
     current = current.children[path[i]];
   }
 
-  const { file, hash } = current.value;
+  const { uri, hash } = current.value;
 
   if (i < path.length) {
     const remaining = path.slice(i, path.length);
-    return { file, hash: hash + joinJsonPointer(remaining) };
+    return { uri, hash: hash + joinJsonPointer(remaining) };
   }
 
-  return { file, hash };
+  return { uri, hash };
 }

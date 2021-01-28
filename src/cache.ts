@@ -12,6 +12,7 @@ import { ParserOptions } from "./parser-options";
 import { bundle } from "./bundler";
 import { joinJsonPointer } from "./pointer";
 import { Node } from "./ast";
+import { configuration } from "./configuration";
 
 function walk(current: any, parent: any, path: string[], visitor: any) {
   for (const key of Object.keys(current)) {
@@ -98,6 +99,10 @@ export class Cache {
     return entry.parsed;
   }
 
+  getCachedDocumentValueByUri(uri: vscode.Uri): any {
+    return this.cache[uri.toString()]?.parsed;
+  }
+
   async getDocumentBundle(document: vscode.TextDocument): Promise<BundleResult> {
     const entry = await this.getCacheEntry(document);
     if (!entry.bundle) {
@@ -170,7 +175,15 @@ export class Cache {
   ): Promise<CacheEntry> {
     // bundle if it is OpenAPI file and no parsing errors
     if (entry.version !== OpenApiVersion.Unknown && !entry.errors) {
-      entry.bundle = await bundle(document, entry.version, entry.parsed, this);
+      const resolveHttpReferences = configuration.get<boolean>("resolveHttpReferences");
+
+      entry.bundle = await bundle(
+        document,
+        entry.version,
+        entry.parsed,
+        this,
+        resolveHttpReferences
+      );
       entry.propertyHints = this.buildPropertyHints(entry.bundle);
       // show or clear bundling errors
       if ("errors" in entry.bundle) {
@@ -198,7 +211,7 @@ export class Cache {
   }
 
   async requestCacheEntryUpdate(document: vscode.TextDocument): Promise<void> {
-    const MAX_UPDATE = 5000; // update no more ofent than
+    const MAX_UPDATE = 1000; // update no more ofent than
     const uri = document.uri.toString();
     const now = Date.now();
     const lastUpdate = this.lastUpdate[uri];

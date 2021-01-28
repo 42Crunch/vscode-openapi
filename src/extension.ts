@@ -10,6 +10,7 @@ import { extensionQualifiedId, CacheEntry } from "./types";
 import { parserOptions } from "./parser-options";
 import { registerOutlines } from "./outline";
 import { JsonSchemaDefinitionProvider, YamlSchemaDefinitionProvider } from "./reference";
+import { ExternalRefDocumentProvider } from "./external-ref-provider";
 import { CompletionItemProvider } from "./completion";
 import { updateContext } from "./context";
 import { registerCommands } from "./commands";
@@ -70,6 +71,16 @@ export function activate(context: vscode.ExtensionContext) {
   //vscode.workspace.onDidCloseTextDocument((document) => {
   //  runtimeContext.diagnostics.delete(document.uri);
   //});
+
+  const externalRefProvider = new ExternalRefDocumentProvider();
+  vscode.workspace.registerTextDocumentContentProvider(
+    "openapi-external-http",
+    externalRefProvider
+  );
+  vscode.workspace.registerTextDocumentContentProvider(
+    "openapi-external-https",
+    externalRefProvider
+  );
 
   // trigger refresh on activation
   cache.onActiveEditorChanged(vscode.window.activeTextEditor);
