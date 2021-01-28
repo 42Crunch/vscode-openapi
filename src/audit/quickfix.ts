@@ -5,7 +5,17 @@
 
 import * as vscode from "vscode";
 import * as quickfixes from "./quickfixes.json";
-import { AuditContext, AuditDiagnostic, FixParameterSource } from "../types";
+import { 
+  AuditContext, 
+  AuditDiagnostic, 
+  DeleteFix, 
+  FixContext, 
+  FixParameter, 
+  FixSnippetParameters, 
+  InsertReplaceRenameFix, 
+  Issue, 
+  RegexReplaceFix 
+} from "../types";
 import { Node } from "../ast";
 import { createDiagnostics } from "./diagnostic";
 import { createDecorations, setDecorations } from "./decoration";
@@ -23,193 +33,207 @@ import {
   replaceYamlNode,
 } from "../util";
 import { Cache } from "../cache";
-import { Fix, FixType } from "../types";
-import parameterSources from "./quickfix-sources";
+import { FixType } from "../types";
 
-interface InsertReplaceRenameFix extends Fix {
-  type: FixType.Insert | FixType.Replace | FixType.RenameKey;
-  fix: any;
-}
-
-interface DeleteFix extends Fix {
-  type: FixType.Delete;
-}
-
-interface RegexReplaceFix extends Fix {
-  type: FixType.RegexReplace;
-  match: string;
-  replace: string;
-}
+const registeredQuickFixes: { [key: string]: any } = {};
 
 function clone(value: any) {
   // deep copy
   return JSON.parse(JSON.stringify(value));
 }
 
-async function fixRegexReplace(
-  document: vscode.TextDocument,
-  fix: RegexReplaceFix,
-  pointer: string,
-  root: Node,
-  target: Node
-) {
+function fixRegexReplace(context: FixContext) {
+  const document = context.document;
+  const fix = <RegexReplaceFix>context.fix;
+  const target = context.target;
   const currentValue = target.getValue();
   if (typeof currentValue !== "string") {
     return;
   }
+  context.snippet = false;
   const newValue = currentValue.replace(new RegExp(fix.match, "g"), fix.replace);
   let value: string, range: vscode.Range;
   if (document.languageId === "json") {
-    [value, range] = replaceJsonNode(document, root, pointer, '"' + newValue + '"');
+    [value, range] = replaceJsonNode(context, '"' + newValue + '"');
   } else {
-    [value, range] = replaceYamlNode(document, root, pointer, newValue);
+    [value, range] = replaceYamlNode(context, newValue);
   }
-  const edit = new vscode.WorkspaceEdit();
+  const edit = getWorkspaceEdit(context);
   edit.replace(document.uri, range, value);
-  await vscode.workspace.applyEdit(edit);
 }
 
-async function fixInsert(
-  editor: vscode.TextEditor,
-  document: vscode.TextDocument,
-  fix: InsertReplaceRenameFix,
-  pointer: string,
-  root: Node
-) {
+function fixInsert(context: FixContext) {
+  const document = context.document;
   let value: string, position: vscode.Position;
+  context.snippet = !context.bulk;
   if (document.languageId === "json") {
-    value = getFixAsJsonString(root, pointer, fix.type, clone(fix.fix), fix.parameters, true);
-    [value, position] = insertJsonNode(document, root, pointer, value);
+    [value, position] = insertJsonNode(context, getFixAsJsonString(context));
   } else {
-    value = getFixAsYamlString(root, pointer, fix.type, clone(fix.fix), fix.parameters, true);
-    [value, position] = insertYamlNode(document, root, pointer, value);
+    [value, position] = insertYamlNode(context, getFixAsYamlString(context));
   }
-  await editor.insertSnippet(new vscode.SnippetString(value), position);
+  if (context.snippet) {
+    context.snippetParameters = {
+      snippet: new vscode.SnippetString(value),
+      location: position
+    }  
+  } else {
+    const edit = getWorkspaceEdit(context);
+    if (context.bulk) {
+      edit.insert(document.uri, position, value, {
+        needsConfirmation: true,
+        label: context.fix.title,
+      });
+    } else {
+      edit.insert(document.uri, position, value);
+    }
+  }
 }
 
-async function fixReplace(
-  document: vscode.TextDocument,
-  fix: InsertReplaceRenameFix,
-  pointer: string,
-  root: Node
-) {
+function fixReplace(context: FixContext) {
+  const document = context.document;
   let value: string, range: vscode.Range;
+  context.snippet = false;
   if (document.languageId === "json") {
-    value = getFixAsJsonString(root, pointer, fix.type, clone(fix.fix), fix.parameters, false);
-    [value, range] = replaceJsonNode(document, root, pointer, value);
+    [value, range] = replaceJsonNode(context, getFixAsJsonString(context));
   } else {
-    value = getFixAsYamlString(root, pointer, fix.type, clone(fix.fix), fix.parameters, false);
-    [value, range] = replaceYamlNode(document, root, pointer, value);
+    [value, range] = replaceYamlNode(context, getFixAsYamlString(context));
   }
-  const edit = new vscode.WorkspaceEdit();
+  const edit = getWorkspaceEdit(context);
   edit.replace(document.uri, range, value);
-  await vscode.workspace.applyEdit(edit);
 }
 
-async function fixRenameKey(
-  document: vscode.TextDocument,
-  fix: InsertReplaceRenameFix,
-  pointer: string,
-  root: Node
-) {
+function fixRenameKey(context: FixContext) {
+  const document = context.document;
   let value: string;
+  context.snippet = false;
   if (document.languageId === "json") {
-    value = getFixAsJsonString(root, pointer, fix.type, clone(fix.fix), fix.parameters, false);
+    value = getFixAsJsonString(context);
   } else {
-    value = getFixAsYamlString(root, pointer, fix.type, clone(fix.fix), fix.parameters, false);
+    value = getFixAsYamlString(context);
   }
-  const range = renameKeyNode(document, root, pointer);
-  const edit = new vscode.WorkspaceEdit();
+  const range = renameKeyNode(context);
+  const edit = getWorkspaceEdit(context);
   edit.replace(document.uri, range, value);
-  await vscode.workspace.applyEdit(edit);
 }
 
-async function fixDelete(document: vscode.TextDocument, pointer: string, root: Node) {
+function fixDelete(context: FixContext) {
+  const document = context.document;
   let range: vscode.Range;
+  context.snippet = false;
   if (document.languageId === "json") {
-    range = deleteJsonNode(document, root, pointer);
+    range = deleteJsonNode(context);
   } else {
-    range = deleteYamlNode(document, root, pointer);
+    range = deleteYamlNode(context);
   }
-  const edit = new vscode.WorkspaceEdit();
+  const edit = getWorkspaceEdit(context);
   edit.delete(document.uri, range);
-  await vscode.workspace.applyEdit(edit);
 }
 
-function transformInsertToReplaceIfExists(
-  target: Node,
-  pointer: string,
-  fix: InsertReplaceRenameFix
-): [string, InsertReplaceRenameFix] {
+function transformInsertToReplaceIfExists(context: FixContext): boolean {
+
+  const target = context.target;
+  const pointer = context.pointer;
+  const fix = <InsertReplaceRenameFix>context.fix;
+
   const keys = Object.keys(fix.fix);
   if (target.isObject() && keys.length === 1) {
     const insertingKey = keys[0];
     for (let child of target.getChildren()) {
       if (child.getKey() === insertingKey) {
-        return [
-          `${pointer}/${insertingKey}`,
-          {
-            problem: fix.problem,
-            title: fix.title,
-            type: FixType.Replace,
-            fix: fix.fix[insertingKey],
-          },
-        ];
+
+        context.pointer = `${pointer}/${insertingKey}`;
+        context.target = context.root.find(context.pointer);
+        context.fix = {
+          problem: fix.problem,
+          title: fix.title,
+          type: FixType.Replace,
+          fix: fix.fix[insertingKey],
+        };
+        return true;
       }
     }
   }
-  return [null, null];
+  return false;
 }
 
 async function quickFixCommand(
   editor: vscode.TextEditor,
-  diagnostic: AuditDiagnostic,
+  issues: Issue[],
   fix: InsertReplaceRenameFix | RegexReplaceFix | DeleteFix,
   auditContext: AuditContext,
   cache: Cache
 ) {
-  // if fix.pointer exists, append it to diagnostic.pointer
-  const pointer = fix.pointer ? `${diagnostic.pointer}${fix.pointer}` : diagnostic.pointer;
-  const root = safeParse(editor.document.getText(), editor.document.languageId);
-  const target = root.find(pointer);
+  let edit: vscode.WorkspaceEdit = null;
+  let snippetParameters: FixSnippetParameters = null;
   const document = editor.document;
-
   // FIXME use editor.document.uri to find audit this editor is part of, and getEntryForDocument() for it
   // below should work for non-multifile OpenAPIs though
   const cacheEntry = await cache.getEntryForDocument(editor.document);
 
-  if (fix.parameters) {
-    for (const parameter of fix.parameters) {
-      if (parameter.source && parameterSources[parameter.source]) {
-        const source = parameterSources[parameter.source];
-        const issue =
-          auditContext[diagnostic.issueUri].issues[diagnostic.issueUri][diagnostic.issueIndex];
-        const values = source(issue, fix, parameter, cacheEntry);
-        console.log(`parameter ${parameter.name} hints: ${values}`);
-      }
+  const issuesByPointer = getIssuesByPointers(issues);
+  // Single fix has one issue in the array
+  // Assembled fix means all issues share same pointer, but have different ids
+  // Bulk means all issues share same id, but have different pointers
+  const bulk = Object.keys(issuesByPointer).length > 1;
+
+  for (const issuePointer of Object.keys(issuesByPointer)) {
+
+    // if fix.pointer exists, append it to diagnostic.pointer
+    const pointer = fix.pointer ? `${issuePointer}${fix.pointer}` : issuePointer;
+    const root = safeParse(editor.document.getText(), editor.document.languageId);
+    const target = root.find(pointer);
+
+    const context: FixContext = {
+      editor: editor,
+      edit: edit,
+      issues: bulk ? issuesByPointer[issuePointer] : issues,
+      fix: clone(fix),
+      bulk: bulk,
+      auditContext: auditContext,
+      cacheEntry: cacheEntry,
+      pointer: pointer,
+      root: root,
+      target: target,
+      document: document
+    };
+
+    switch (fix.type) {
+      case FixType.Insert:
+        if (transformInsertToReplaceIfExists(context)) {
+          fixReplace(context);
+        } else {
+          fixInsert(context);
+        }
+        break;
+      case FixType.Replace:
+        fixReplace(context);
+        break;
+      case FixType.RegexReplace:
+        fixRegexReplace(context);
+        break;
+      case FixType.RenameKey:
+        fixRenameKey(context);
+        break;
+      case FixType.Delete:
+        fixDelete(context);
+    }
+
+    // A fix handler above initialized workspace edit lazily with updates
+    // Remember it here to pass to other fix handlers in case of bulk fix feature
+    // They will always udate the same edit instance
+    if (context.edit) {
+      edit = context.edit;
+    }
+    if (context.snippetParameters) {
+      snippetParameters = context.snippetParameters;
     }
   }
 
-  switch (fix.type) {
-    case FixType.Insert:
-      const [pointer2, fix2] = transformInsertToReplaceIfExists(target, pointer, fix);
-      if (pointer2) {
-        await fixReplace(document, fix2, pointer2, root);
-      } else {
-        await fixInsert(editor, document, fix, pointer, root);
-      }
-      break;
-    case FixType.Replace:
-      await fixReplace(document, fix, pointer, root);
-      break;
-    case FixType.RegexReplace:
-      await fixRegexReplace(document, fix, pointer, root, target);
-      break;
-    case FixType.RenameKey:
-      await fixRenameKey(document, fix, pointer, root);
-      break;
-    case FixType.Delete:
-      await fixDelete(document, pointer, root);
+  // Apply only if has anything to apply
+  if (edit) {
+    await vscode.workspace.applyEdit(edit);
+  } else if (snippetParameters) {
+    await editor.insertSnippet(snippetParameters.snippet, snippetParameters.location);
   }
 
   // update diagnostics
@@ -220,15 +244,35 @@ async function quickFixCommand(
     const root2 = safeParse(document.getText(), document.languageId);
     // clear current diagnostics
     audit.diagnostics.dispose();
-    const issues = audit.issues[uri];
-    // remove the issue resolved by the fix
-    issues.splice(diagnostic.issueIndex, 1);
+    // create temp hash set to have constant time complexity while searching for fixed issues
+    const fixedIssueIds: Set<string> = new Set();
+    const fixedIssueIdAndPointers: Set<string> = new Set();
+    issues.forEach((issue: Issue) => {
+      fixedIssueIds.add(issue.id)
+      fixedIssueIdAndPointers.add(issue.id + issue.pointer)
+    });
     // update range for all issues (since the fix has potentially changed line numbering in the file)
-    audit.issues[uri] = issues.map((issue) => ({
-      ...issue,
-      range: range(document, root2, issue.pointer),
-    }));
-
+    const updatedIssues: Issue[] = [];
+    for (const issue of audit.issues[uri]) {
+      if (fixedIssueIdAndPointers.has(getIssueUniqueId(issue))) {
+        continue;
+      }
+      issue.range = range(document, root2, issue.pointer);
+      updatedIssues.push(issue);
+    }
+    audit.issues[uri] = updatedIssues;
+    // update issuesByType map alltogether 
+    for (const fixedIssueId of fixedIssueIds) {
+      const updatedIssues: Issue[] = [];
+      for (const issue of audit.issuesByType[fixedIssueId]) {
+        if (fixedIssueIdAndPointers.has(getIssueUniqueId(issue))) {
+          continue;
+        }
+        // Range has been already updated above
+        updatedIssues.push(issue);
+      }
+      audit.issuesByType[fixedIssueId] = updatedIssues;
+    }
     // rebuild diagnostics and decorations and refresh report
     audit.diagnostics = createDiagnostics(audit.filename, audit.issues, editor);
     audit.decorations = createDecorations(uri.toString(), audit.issues);
@@ -259,9 +303,9 @@ export function registerQuickfixes(
   auditContext: AuditContext
 ) {
   vscode.commands.registerTextEditorCommand(
-    "openapi.simpleQuckFix",
-    async (editor, edit, diagnostic: AuditDiagnostic, fix) =>
-      quickFixCommand(editor, diagnostic, fix, auditContext, cache)
+    "openapi.simpleQuickFix",
+    async (editor, edit, issues, fix) =>
+      quickFixCommand(editor, issues, fix, auditContext, cache)
   );
 
   vscode.languages.registerCodeActionsProvider("yaml", new AuditCodeActions(auditContext), {
@@ -271,9 +315,16 @@ export function registerQuickfixes(
   vscode.languages.registerCodeActionsProvider("json", new AuditCodeActions(auditContext), {
     providedCodeActionKinds: AuditCodeActions.providedCodeActionKinds,
   });
+
+  for (const fix of quickfixes.fixes) {
+    for (const problemId of fix.problem) {
+      registeredQuickFixes[problemId] = fix;
+    }
+  }
 }
 
 export class AuditCodeActions implements vscode.CodeActionProvider {
+
   public static readonly providedCodeActionKinds = [vscode.CodeActionKind.QuickFix];
   auditContext: AuditContext;
 
@@ -287,31 +338,156 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
     context: vscode.CodeActionContext,
     token: vscode.CancellationToken
   ): vscode.ProviderResult<(vscode.Command | vscode.CodeAction)[]> {
+
     const result: vscode.CodeAction[] = [];
+    const uri = document.uri.toString();
+    // TODO: handle case when file is just a part of audit
+    const audit = this.auditContext[uri];
+    if (!audit) {
+      return result;
+    }
+    const issuesByPointer = getIssuesByPointers(audit.issues[uri]);
+
+    const titles = [];
+    const problems = [];
+    const parameters = [];
+    const assembledIssues = [];
+    let fixObject = {};
 
     for (const diagnostic of context.diagnostics) {
+
       const auditDiagnostic = <AuditDiagnostic>diagnostic;
-      if (!auditDiagnostic.hasOwnProperty("issueIndex")) {
+      if (!auditDiagnostic.hasOwnProperty("id") || 
+        !auditDiagnostic.hasOwnProperty("pointer")) {
         continue;
       }
+      const fix = registeredQuickFixes[auditDiagnostic.id];
+      if (!fix) {
+        continue;
+      }
+      const issue = issuesByPointer[auditDiagnostic.pointer].filter(
+        (issue: Issue) => issue.id === auditDiagnostic.id);
 
-      // TODO optimize fixes lookup, build map of IDs perhaps?
-      for (const fix of quickfixes.fixes) {
-        for (const problemId of fix.problem) {
-          if (auditDiagnostic.id === problemId) {
-            const action = new vscode.CodeAction(fix.title, vscode.CodeActionKind.QuickFix);
-            action.command = {
-              arguments: [diagnostic, fix],
-              command: "openapi.simpleQuckFix",
-              title: fix.title,
-            };
-            action.diagnostics = [diagnostic];
-            action.isPreferred = true;
-            result.push(action);
-          }
+      // Single Fix
+      const action = new vscode.CodeAction(fix.title, vscode.CodeActionKind.QuickFix);
+      action.command = {
+        arguments: [
+          issue, 
+          fix
+        ],
+        command: "openapi.simpleQuickFix",
+        title: fix.title,
+      };
+      action.diagnostics = [diagnostic];
+      action.isPreferred = false;
+      result.push(action);
+
+      // Assembled Fix
+      if (fix.type == FixType.Insert && !fix.pointer &&
+        Object.prototype.toString.call(fix.fix) === '[object Object]') {
+        Array.prototype.push.apply(problems, fix.problem); 
+        updateTitle(titles, fix.title);
+        for (const parameter of fix.parameters) {
+          const par = <FixParameter>clone(parameter);
+          par.fixIndex = assembledIssues.length;
+          parameters.push(par);
         }
+        fixObject = {...fixObject, ...fix.fix};
+        assembledIssues.push(issue[0]);
+      }
+
+      // Bulk Fix
+      const sameIssues = audit.issuesByType[auditDiagnostic.id];
+      if (sameIssues && sameIssues.length > 1) {
+        const bulkTitle = fix.title + ` in all ${sameIssues.length} schemas`;
+        const bulkAction = new vscode.CodeAction(bulkTitle, vscode.CodeActionKind.QuickFix);
+        bulkAction.command = {
+          arguments: [
+            sameIssues, 
+            fix
+          ],
+          command: "openapi.simpleQuickFix",
+          title: bulkTitle
+        };
+        bulkAction.diagnostics = [diagnostic];
+        bulkAction.isPreferred = false;
+        result.push(bulkAction);
       }
     }
+
+    // Register Assembled Fix
+    if (assembledIssues.length > 1) {
+      const assembledFix = {
+        problems: problems,
+        title: titles.join(', '),
+        type: FixType.Insert,
+        fix: fixObject,
+        parameters: parameters
+      };
+      const action = new vscode.CodeAction(assembledFix.title, vscode.CodeActionKind.QuickFix);
+      action.command = {
+        arguments: [
+          assembledIssues, 
+          assembledFix
+        ],
+        command: "openapi.simpleQuickFix",
+        title: assembledFix.title
+      };
+      action.diagnostics = [];
+      action.isPreferred = true;
+      result.push(action);
+    }
+
     return result;
   }
+}
+
+export function updateTitle(titles: any[], title: string): void {
+
+  if (titles.length === 0) {
+    titles.push(title);
+    return;
+  }
+  let parts = title.split(' ');
+  let prevParts = titles[titles.length - 1].split(' ');
+  if (parts[0].toLocaleLowerCase() !== prevParts[0].toLocaleLowerCase()) {
+    parts[0] = parts[0].toLocaleLowerCase();
+    titles.push(parts.join(' '));
+    return;
+  }
+  if (parts[parts.length - 1].toLocaleLowerCase() !== prevParts[prevParts.length - 1].toLocaleLowerCase()) {
+    parts.shift();
+    titles[titles.length - 1] += (', ' + parts.join(' '));
+    return;
+  }
+  parts.shift();
+  parts.pop();
+  let lastPrevPart = prevParts.pop();
+  prevParts[prevParts.length - 1] += ',';
+  Array.prototype.push.apply(prevParts, parts);
+  prevParts.push(lastPrevPart);
+  titles[titles.length - 1] = prevParts.join(' ');
+}
+
+function getWorkspaceEdit(context: FixContext) {
+  if (context.edit) {
+    return context.edit;
+  }
+  context.edit = new vscode.WorkspaceEdit();
+  return context.edit;
+}
+
+function getIssuesByPointers(issues: Issue[]): { [key: string]: Issue[] } {
+  const issuesByPointers: { [key: string]: Issue[] } = {};
+  for (const issue of issues) {
+    if (!issuesByPointers[issue.pointer]) {
+      issuesByPointers[issue.pointer] = [];
+    }
+    issuesByPointers[issue.pointer].push(issue);    
+  }
+  return issuesByPointers;
+}
+
+function getIssueUniqueId(issue: Issue): string {
+  return issue.id + issue.pointer;
 }

@@ -1,6 +1,7 @@
 import assert from "assert";
-import { loadJson, loadYaml, parseJson, parseYaml } from "../utils";
+import { loadJson, loadYaml, parseJson, parseYaml, wrap } from "../utils";
 import { resolve } from "path";
+import { readFileSync } from 'fs';
 
 suite("Ast Test Suite", () => {
   test("finding nodes, top level, yaml", () => {
@@ -380,21 +381,39 @@ ra/ro: true`);
   });
 
   test("json getKeyRange()", () => {
-    const root = loadJson(resolve(__dirname, "../../../tests/xhr.json"));
+    const text = readFileSync(resolve(__dirname, "../../../tests/xhr.json"), { encoding: "utf8" });
+    const root = parseJson(text);
 
-    assert.deepEqual(root.find("/info/license/name").getKeyRange(), [123, 127]);
-    assert.deepEqual(root.find("/servers/1/url").getKeyRange(), [247, 250]);
-    assert.deepEqual(root.find("/paths/~1posts/get/responses/200").getKeyRange(), [443, 446]);
+    let range = root.find("/info/license/name").getKeyRange();
+    assert.equal(text.substring(range[0], range[1]), 'name');
+
+    range = root.find("/servers/1/url").getKeyRange();
+    assert.equal(text.substring(range[0], range[1]), 'url');
+
+	range = root.find("/paths/~1posts/get/responses/200").getKeyRange();
+    assert.equal(text.substring(range[0], range[1]), '200');
+
     assert.equal(root.find("/servers/1").getKeyRange(), undefined);
   });
 
   test("json getValueRange()", () => {
-    const root = loadJson(resolve(__dirname, "../../../tests/xhr.json"));
-
-    assert.deepEqual(root.find("/info/license/name").getValueRange(), [130, 135]);
-    assert.deepEqual(root.find("/servers/1/url").getValueRange(), [253, 291]);
-    assert.deepEqual(root.find("/paths/~1posts/get/responses/200").getValueRange(), [449, 496]);
-    assert.deepEqual(root.find("/servers/1").getValueRange(), [237, 298]);
+    const text = readFileSync(resolve(__dirname, "../../../tests/xhr.json"), { encoding: "utf8" });
+    const root = parseJson(text);
+	
+	let range = root.find("/info/license/name").getValueRange();
+    assert.equal(text.substring(range[0], range[1]), '"MIT"');
+	
+	range = root.find("/servers/1/url").getValueRange();
+    assert.equal(text.substring(range[0], range[1]), 
+      '"https://jsonplaceholder.typicode.com"');
+	
+	range = root.find("/paths/~1posts/get/responses/200").getValueRange();
+    assert.equal(wrap(text.substring(range[0], range[1])), 
+      '{\n            "description": "OK"\n          }');
+	
+	range = root.find("/servers/1").getValueRange();
+    assert.equal(wrap(text.substring(range[0], range[1])), 
+      '{\n      "url": "https://jsonplaceholder.typicode.com"\n    }');
   });
 
   test("yaml prev()", () => {
@@ -442,17 +461,18 @@ ra/ro: true`);
   });
 
   test("yaml getKeyRange()", () => {
-    const root = loadYaml(resolve(__dirname, "../../../tests/xkcd.yaml"));
+    const text = readFileSync(resolve(__dirname, "../../../tests/xkcd.yaml"), { encoding: "utf8" });
+    const root = parseYaml(text);
 
-    assert.deepEqual(
-      root.find("/paths/~1%7BcomicId%7D~1info.0.json/get/responses/200").getKeyRange(),
-      [1179, 1184]
-    );
-    assert.deepEqual(root.find("/info/x-tags").getKeyRange(), [569, 575]);
-    assert.deepEqual(
-      root.find("/paths/~1%7BcomicId%7D~1info.0.json/get/parameters/0/required").getKeyRange(),
-      [1113, 1121]
-    );
+    let range = root.find("/paths/~1%7BcomicId%7D~1info.0.json/get/responses/200").getKeyRange();
+    assert.equal(text.substring(range[0], range[1]), "'200'");
+   
+    range = root.find("/info/x-tags").getKeyRange();
+    assert.equal(text.substring(range[0], range[1]), 'x-tags');
+   
+    range = root.find("/paths/~1%7BcomicId%7D~1info.0.json/get/parameters/0/required").getKeyRange();
+    assert.equal(text.substring(range[0], range[1]), 'required');
+
     assert.equal(
       root.find("/paths/~1%7BcomicId%7D~1info.0.json/get/parameters/0").getKeyRange(),
       undefined
@@ -460,20 +480,22 @@ ra/ro: true`);
   });
 
   test("yaml getValueRange()", () => {
-    const root = loadYaml(resolve(__dirname, "../../../tests/xkcd.yaml"));
+    const text = readFileSync(resolve(__dirname, "../../../tests/xkcd.yaml"), { encoding: "utf8" });
+    const root = parseYaml(text);
 
-    assert.deepEqual(
-      root.find("/paths/~1%7BcomicId%7D~1info.0.json/get/responses/200").getValueRange(),
-      [1197, 1272]
-    );
-    assert.deepEqual(root.find("/info/x-tags").getValueRange(), [582, 607]);
-    assert.deepEqual(
-      root.find("/paths/~1%7BcomicId%7D~1info.0.json/get/parameters/0/required").getValueRange(),
-      [1123, 1127]
-    );
-    assert.deepEqual(
-      root.find("/paths/~1%7BcomicId%7D~1info.0.json/get/parameters/0").getValueRange(),
-      [1068, 1151]
-    );
+    let range = root.find("/paths/~1%7BcomicId%7D~1info.0.json/get/responses/200").getValueRange();
+    assert.equal(wrap(text.substring(range[0], range[1])), 
+      "description: OK\n          schema:\n            $ref: '#/definitions/comic'");
+	
+    range = root.find("/info/x-tags").getValueRange();
+      assert.equal(wrap(text.substring(range[0], range[1])), 
+        '- humor\n    - comics\n  ');
+    
+    range = root.find("/paths/~1%7BcomicId%7D~1info.0.json/get/parameters/0/required").getValueRange();
+      assert.equal(wrap(text.substring(range[0], range[1])), 'true');
+    
+    range = root.find("/paths/~1%7BcomicId%7D~1info.0.json/get/parameters/0").getValueRange();
+      assert.equal(wrap(text.substring(range[0], range[1])), 
+        'in: path\n          name: comicId\n          required: true\n          type: number');
   });
 });
