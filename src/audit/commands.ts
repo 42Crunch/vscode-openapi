@@ -229,8 +229,7 @@ function findIssueLocation(mainUri: vscode.Uri, root: Node, mappings, pointer): 
   } else {
     const mapping = findMapping(mappings, pointer);
     if (mapping) {
-      const uri = mainUri.with({ path: mapping.file });
-      return [uri.toString(), mapping.hash];
+      return [mapping.uri, mapping.hash];
     }
   }
   throw new Error(`Cannot find entry for pointer: ${pointer}`);

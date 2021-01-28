@@ -522,6 +522,12 @@
             "Use Swagger UI as a default renderer to preview OpenAPI files",
             "Use ReDoc as a default renderer to preview OpenAPI files"
           ]
+        },
+        "openapi.resolveHttpReferences": {
+          "scope": "workbench",
+          "type": "boolean",
+          "default": false,
+          "description": "Enable to resolve http:// and https:// references."
         }
       }
     },

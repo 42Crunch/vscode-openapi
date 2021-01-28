@@ -10,7 +10,7 @@ export enum OpenApiVersion {
 }
 
 export interface Mapping {
-  file: string;
+  uri: string;
   hash: string;
 }
 
