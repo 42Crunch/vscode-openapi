@@ -5,12 +5,13 @@
 
 import {
   ConfigurationChangeEvent,
+  ConfigurationTarget,
   Event,
   EventEmitter,
   ExtensionContext,
   Uri,
   workspace,
-  Selection,
+  WorkspaceConfiguration,
 } from "vscode";
 import { configId } from "./types";
 
@@ -49,6 +50,10 @@ export class Configuration {
     return defaultValue === undefined
       ? workspace.getConfiguration(this.section).get<T>(section)!
       : workspace.getConfiguration(this.section).get<T>(section, defaultValue)!;
+  }
+
+  update(section: string, value: any, configurationTarget?: ConfigurationTarget) {
+    return workspace.getConfiguration(this.section).update(section, value, configurationTarget);
   }
 }
 

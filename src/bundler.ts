@@ -11,7 +11,7 @@ import { ResolverError } from "@xliic/json-schema-ref-parser/lib/util/errors";
 
 import { parseJsonPointer, joinJsonPointer } from "./pointer";
 import { Cache } from "./cache";
-import { CacheEntry, MappingNode, Mapping, BundleResult, OpenApiVersion } from "./types";
+import { MappingNode, Mapping, BundleResult, OpenApiVersion } from "./types";
 import { clone } from "./util";
 
 const destinationMap = {
@@ -33,7 +33,7 @@ const destinationMap = {
   },
 };
 
-const resolver = (cache: Cache, documentUri: vscode.Uri, resolveHttpReferences: boolean) => {
+const resolver = (cache: Cache, documentUri: vscode.Uri, approvedHosts: string[]) => {
   return {
     order: 10,
     canRead: (file) => {
@@ -43,7 +43,11 @@ const resolver = (cache: Cache, documentUri: vscode.Uri, resolveHttpReferences: 
       let uri: vscode.Uri = null;
       if (file.url.startsWith("http:") || file.url.startsWith("https:")) {
         const origUri = vscode.Uri.parse(file.url);
-        if (resolveHttpReferences) {
+        const hostname = origUri.authority;
+        const approved = approvedHosts.some(
+          (approvedHostname) => approvedHostname.toLowerCase() === hostname.toLowerCase()
+        );
+        if (approved) {
           if (origUri.scheme === "http") {
             uri = origUri.with({ scheme: "openapi-external-http" });
           } else {
@@ -51,7 +55,10 @@ const resolver = (cache: Cache, documentUri: vscode.Uri, resolveHttpReferences: 
           }
         } else {
           throw new ResolverError(
-            { message: `Resolving of external HTTP references is disabled by the configuration.` },
+            {
+              message: `Failed to resolve external reference, "${hostname}" is not in the list of approved hostnames.`,
+              code: `rejected:${hostname}`,
+            },
             origUri.fsPath
           );
         }
@@ -168,7 +175,7 @@ export async function bundle(
   version: OpenApiVersion,
   parsed: any,
   cache: Cache,
-  resolveHttpReferences: boolean
+  approvedHosts: string[]
 ): Promise<BundleResult> {
   const cwd = dirname(document.uri.fsPath) + "/";
   const cloned = clone(parsed);
@@ -183,7 +190,7 @@ export async function bundle(
   try {
     const bundled = await parser.bundle(cloned, {
       cwd,
-      resolve: { http: false, file: resolver(cache, document.uri, resolveHttpReferences) },
+      resolve: { http: false, file: resolver(cache, document.uri, approvedHosts) },
       parse: {
         json: cacheParser,
         yaml: cacheParser,

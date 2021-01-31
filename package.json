@@ -523,11 +523,14 @@
             "Use ReDoc as a default renderer to preview OpenAPI files"
           ]
         },
-        "openapi.resolveHttpReferences": {
+        "openapi.approvedHostnames": {
           "scope": "workbench",
-          "type": "boolean",
-          "default": false,
-          "description": "Enable to resolve http:// and https:// references."
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "List of hostnames approved for resolving external http:// and https:// references"
         }
       }
     },

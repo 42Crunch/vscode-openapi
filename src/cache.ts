@@ -44,6 +44,15 @@ export class Cache {
 
   constructor(parserOptions: ParserOptions) {
     this.parserOptions = parserOptions;
+    configuration.onDidChange(async () => {
+      const editor = vscode.window.activeTextEditor;
+      const uri = editor?.document?.uri?.toString();
+      if (this.cache[uri]) {
+        await this.requestCacheEntryUpdate(editor.document);
+        this._didChange.fire(editor.document);
+        this._didActiveDocumentChange.fire(editor.document);
+      }
+    });
   }
 
   get onDidChange(): vscode.Event<vscode.TextDocument> {
@@ -175,15 +184,9 @@ export class Cache {
   ): Promise<CacheEntry> {
     // bundle if it is OpenAPI file and no parsing errors
     if (entry.version !== OpenApiVersion.Unknown && !entry.errors) {
-      const resolveHttpReferences = configuration.get<boolean>("resolveHttpReferences");
+      const approvedHosts = configuration.get<string[]>("approvedHostnames");
 
-      entry.bundle = await bundle(
-        document,
-        entry.version,
-        entry.parsed,
-        this,
-        resolveHttpReferences
-      );
+      entry.bundle = await bundle(document, entry.version, entry.parsed, this, approvedHosts);
       entry.propertyHints = this.buildPropertyHints(entry.bundle);
       // show or clear bundling errors
       if ("errors" in entry.bundle) {
@@ -197,12 +200,11 @@ export class Cache {
   }
 
   async updateCacheEntry(document: vscode.TextDocument): Promise<CacheEntry> {
-    console.log("Updating cache entry", new Date());
     const uri = document.uri.toString();
     const old = this.cache[uri];
     const entry = await this.buildCacheEntry(document);
 
-    if (!entry.lastGoodAstRoot && old.lastGoodAstRoot) {
+    if (!entry.lastGoodAstRoot && old?.lastGoodAstRoot) {
       entry.lastGoodAstRoot = old.lastGoodAstRoot;
     }
 
@@ -291,10 +293,16 @@ export class Cache {
         resolverErrors[uri.toString()] = [];
       }
 
-      resolverErrors[uri.toString()].push({
+      const message: any = {
         message: `Failed to resolve reference: ${error.message}`,
         path: error.path,
-      });
+      };
+
+      if (error.code === "ERESOLVER" && error?.ioErrorCode?.startsWith("rejected:")) {
+        message.rejectedHost = error.ioErrorCode.substring("rejected:".length);
+      }
+
+      resolverErrors[uri.toString()].push(message);
     }
 
     for (const key of Object.keys(resolverErrors)) {
@@ -305,7 +313,7 @@ export class Cache {
       }
 
       const messages = [];
-      for (const { path, message } of resolverErrors[key]) {
+      for (const { path, message, rejectedHost } of resolverErrors[key]) {
         // use pointer to $ref
         const refPointer = joinJsonPointer([...path, "$ref"]);
         let node = entry.astRoot.find(refPointer);
@@ -321,10 +329,19 @@ export class Cache {
           new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
           new vscode.Position(position.line, line.range.end.character)
         );
+
+        const additionalProperties: any = {};
+
+        if (rejectedHost) {
+          additionalProperties.rejectedHost = rejectedHost;
+          additionalProperties.code = "rejected";
+        }
+
         messages.push({
           message,
           range,
           severity: vscode.DiagnosticSeverity.Error,
+          ...additionalProperties,
         });
       }
       this.diagnostics.set(uri, messages);
