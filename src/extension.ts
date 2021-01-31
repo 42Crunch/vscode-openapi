@@ -10,7 +10,11 @@ import { extensionQualifiedId, CacheEntry } from "./types";
 import { parserOptions } from "./parser-options";
 import { registerOutlines } from "./outline";
 import { JsonSchemaDefinitionProvider, YamlSchemaDefinitionProvider } from "./reference";
-import { ExternalRefDocumentProvider } from "./external-ref-provider";
+import {
+  ExternalRefDocumentProvider,
+  ApproveHostnameAction,
+  registerAddApprovedHost,
+} from "./external-ref-provider";
 import { CompletionItemProvider } from "./completion";
 import { updateContext } from "./context";
 import { registerCommands } from "./commands";
@@ -50,22 +54,25 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(...registerOutlines(context, cache));
   context.subscriptions.push(...registerCommands(cache));
+  context.subscriptions.push(registerAddApprovedHost(context));
 
-  const jsonFile: vscode.DocumentSelector = { language: "json" };
-  const jsoncFile: vscode.DocumentSelector = { language: "jsonc" };
-  const yamlFile: vscode.DocumentSelector = { language: "yaml" };
+  const selectors = {
+    json: { language: "json" },
+    jsonc: { language: "jsonc" },
+    yaml: { language: "yaml" },
+  };
 
   const completionProvider = new CompletionItemProvider(context, cache);
-  vscode.languages.registerCompletionItemProvider(yamlFile, completionProvider, '"');
-  vscode.languages.registerCompletionItemProvider(jsonFile, completionProvider, '"');
-  vscode.languages.registerCompletionItemProvider(jsoncFile, completionProvider, '"');
+  for (const selector of Object.values(selectors)) {
+    vscode.languages.registerCompletionItemProvider(selector, completionProvider, '"');
+  }
 
   const jsonSchemaDefinitionProvider = new JsonSchemaDefinitionProvider(cache);
   const yamlSchemaDefinitionProvider = new YamlSchemaDefinitionProvider(cache);
 
-  vscode.languages.registerDefinitionProvider(jsonFile, jsonSchemaDefinitionProvider);
-  vscode.languages.registerDefinitionProvider(jsoncFile, jsonSchemaDefinitionProvider);
-  vscode.languages.registerDefinitionProvider(yamlFile, yamlSchemaDefinitionProvider);
+  vscode.languages.registerDefinitionProvider(selectors.json, jsonSchemaDefinitionProvider);
+  vscode.languages.registerDefinitionProvider(selectors.jsonc, jsonSchemaDefinitionProvider);
+  vscode.languages.registerDefinitionProvider(selectors.yaml, yamlSchemaDefinitionProvider);
 
   // FIXME a part of OAS parsing diagnostics handling
   //vscode.workspace.onDidCloseTextDocument((document) => {
@@ -81,6 +88,13 @@ export function activate(context: vscode.ExtensionContext) {
     "openapi-external-https",
     externalRefProvider
   );
+
+  const approveHostnameAction = new ApproveHostnameAction();
+  for (const selector of Object.values(selectors)) {
+    vscode.languages.registerCodeActionsProvider(selector, approveHostnameAction, {
+      providedCodeActionKinds: ApproveHostnameAction.providedCodeActionKinds,
+    });
+  }
 
   // trigger refresh on activation
   cache.onActiveEditorChanged(vscode.window.activeTextEditor);
