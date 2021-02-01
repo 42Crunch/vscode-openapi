@@ -6,6 +6,7 @@
 import * as vscode from "vscode";
 import * as quickfixes from "./quickfixes.json";
 import { 
+  Audit,
   AuditContext, 
   AuditDiagnostic, 
   DeleteFix, 
@@ -238,19 +239,24 @@ async function quickFixCommand(
 
   // update diagnostics
   const uri = document.uri.toString();
-  const audit = auditContext[uri];
+  const audits = auditContext[uri] ? [auditContext[uri]] : Object.values(auditContext).filter(
+    (audit: Audit) => uri in audit.issues);
+
+  // create temp hash set to have constant time complexity while searching for fixed issues
+  const fixedIssueIds: Set<string> = new Set();
+  const fixedIssueIdAndPointers: Set<string> = new Set();
+  issues.forEach((issue: Issue) => {
+    fixedIssueIds.add(issue.id)
+    fixedIssueIdAndPointers.add(issue.id + issue.pointer)
+  });
+
   // update audit and refresh diagnostics and decorations
-  if (audit) {
+  for (const audit of audits) {
+
     const root2 = safeParse(document.getText(), document.languageId);
     // clear current diagnostics
     audit.diagnostics.dispose();
-    // create temp hash set to have constant time complexity while searching for fixed issues
-    const fixedIssueIds: Set<string> = new Set();
-    const fixedIssueIdAndPointers: Set<string> = new Set();
-    issues.forEach((issue: Issue) => {
-      fixedIssueIds.add(issue.id)
-      fixedIssueIdAndPointers.add(issue.id + issue.pointer)
-    });
+
     // update range for all issues (since the fix has potentially changed line numbering in the file)
     const updatedIssues: Issue[] = [];
     for (const issue of audit.issues[uri]) {
@@ -261,11 +267,13 @@ async function quickFixCommand(
       updatedIssues.push(issue);
     }
     audit.issues[uri] = updatedIssues;
+
     // update issuesByType map alltogether 
     for (const fixedIssueId of fixedIssueIds) {
       const updatedIssues: Issue[] = [];
+      // consider issuesByType may return issues belong to different uris
       for (const issue of audit.issuesByType[fixedIssueId]) {
-        if (fixedIssueIdAndPointers.has(getIssueUniqueId(issue))) {
+        if ((issue.documentUri === uri) && fixedIssueIdAndPointers.has(getIssueUniqueId(issue))) {
           continue;
         }
         // Range has been already updated above
@@ -341,18 +349,17 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
 
     const result: vscode.CodeAction[] = [];
     const uri = document.uri.toString();
-    // TODO: handle case when file is just a part of audit
-    const audit = this.auditContext[uri];
-    if (!audit) {
+    const issues = getIssuesByURI(this.auditContext, uri);
+    if (issues.length === 0) {
       return result;
     }
-    const issuesByPointer = getIssuesByPointers(audit.issues[uri]);
 
     const titles = [];
     const problems = [];
     const parameters = [];
     const assembledIssues = [];
     let fixObject = {};
+    const issuesByPointer = getIssuesByPointers(issues);
 
     for (const diagnostic of context.diagnostics) {
 
@@ -397,7 +404,7 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
       }
 
       // Bulk Fix
-      const sameIssues = audit.issuesByType[auditDiagnostic.id];
+      const sameIssues = issues.filter((issue: Issue) => issue.id === auditDiagnostic.id);
       if (sameIssues && sameIssues.length > 1) {
         const bulkTitle = fix.title + ` in all ${sameIssues.length} schemas`;
         const bulkAction = new vscode.CodeAction(bulkTitle, vscode.CodeActionKind.QuickFix);
@@ -475,6 +482,21 @@ function getWorkspaceEdit(context: FixContext) {
   }
   context.edit = new vscode.WorkspaceEdit();
   return context.edit;
+}
+
+function getIssuesByURI(auditContext: AuditContext, uri: string): Issue[] {
+  let issues = [];
+  if (auditContext[uri]) {
+    issues = auditContext[uri].issues[uri];
+  } else {
+    for (const audit of Object.values(auditContext)) {
+      if (uri in audit.issues) {
+        Array.prototype.push.apply(issues, audit.issues[uri]);
+      }
+    }
+  }
+
+  return issues;
 }
 
 function getIssuesByPointers(issues: Issue[]): { [key: string]: Issue[] } {
