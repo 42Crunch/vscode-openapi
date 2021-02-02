@@ -231,8 +231,8 @@ export function getFixAsJsonString(context: FixContext): string {
   const fix = <InsertReplaceRenameFix>context.fix;
   const type = fix.type;
   let text = JSON.stringify(fix.fix, null, "\t").trim();
-  if (fix.parameters && snippet) {
-    text = insertPlaceholders(context, text);
+  if (fix.parameters) {
+    text = handleParameters(context, text);
   }
   // For snippets we must escape $ symbol
   if (snippet && (type === FixType.Insert || type === FixType.Replace)) {
@@ -254,8 +254,8 @@ export function getFixAsYamlString(context: FixContext): string {
   const fix = <InsertReplaceRenameFix>context.fix;
   const type = fix.type;
   let text = yaml.safeDump(fix.fix).trim();
-  if (fix.parameters && snippet) {
-    text = insertPlaceholders(context, text);
+  if (fix.parameters) {
+    text = handleParameters(context, text);
   }
   // For snippets we must escape $ symbol
   if (snippet && (type === FixType.Insert || type === FixType.Replace)) {
@@ -265,61 +265,88 @@ export function getFixAsYamlString(context: FixContext): string {
   return text.replace(new RegExp("  ", "g"), "\t");
 }
 
-function insertPlaceholders(context: FixContext, text: string): string {
+function handleParameters(context: FixContext, text: string): string {
 
   const replacements = [];
   const issues = context.issues;
   const fix = context.fix;
   const version = context.version;
   const bundle = context.bundle;
+  const snippet = context.snippet;
   const languageId = context.document.languageId;
   const root = safeParse(text, languageId);
 
   for (const parameter of context.fix.parameters) {
+
     const pointer = parameter.path;
     const index = replacements.length + 1;
     const replaceKey = parameter.type === "key";
     let phValues = parameter.values;
     const node = root.find(pointer);
-    let phValue = replaceKey ? node.getKey() : node.getValue();
+    let defaultValue = replaceKey ? node.getKey() : node.getValue();
+    let cacheValues = null;
 
     if (parameter.source && parameterSources[parameter.source]) {
       const source = parameterSources[parameter.source];
       const issue = parameter.fixIndex ? issues[parameter.fixIndex] : issues[0];
-      const values = source(issue, fix, parameter, version, bundle);
-      if (phValues) {
-        phValues = values;
-      } else if (values.length > 0) {
-        phValue = values[0];
+      cacheValues = source(issue, fix, parameter, version, bundle);
+    }
+
+    let finalValue: string;
+    if (snippet) {
+      finalValue = getPlaceholder(index, defaultValue, phValues, cacheValues);
+    } else {
+      if (cacheValues && cacheValues.length > 0) {
+        finalValue = cacheValues[0];
+      } else {
+        finalValue = defaultValue;
+        // Faster just to skip this replacement, leaving it default as it is
+        continue;
       }
     }
-    if (!phValues && typeof phValue === "string") {
-      // Escape $ and } inside placeholders (for example in regexp)
-      phValue = phValue
-        .replace(new RegExp("\\$", "g"), "\\$")
-        .replace(new RegExp("}", "g"), "\\}");
-    }
+
     replacements.push({
       pointer: pointer,
-      value: getPlaceholder(index, phValue, false, phValues),
+      value: finalValue,
       replaceKey: replaceKey,
     });
   }
+
   return replace(text, languageId, replacements);
 }
 
-function getPlaceholder(index: number, value: string, quotes: boolean, values: any[]): string {
-  if (values) {
-    values = values.map((value: any) => {
+function getPlaceholder(
+  index: number, 
+  defaultValue: string, 
+  possibleValues: any[], 
+  cacheValues: any[]
+): string {
+
+  if (cacheValues) {
+    if (possibleValues) {
+      possibleValues = cacheValues;
+    } else {
+      defaultValue = cacheValues[0];
+    }
+  }
+	
+  if (possibleValues) {
+    // Escape comma symbols
+    possibleValues = possibleValues.map((value: any) => {
       if (typeof value === "string") {
-        return value.replace(new RegExp(",", "g"), "\\,"); // Escape comma symbols
+        return value.replace(new RegExp(",", "g"), "\\,"); 
       } else {
         return value;
       }
     });
+  } else if (typeof defaultValue === "string") {
+    // Escape $ and } inside placeholders (for example in regexp)
+    defaultValue = defaultValue
+      .replace(new RegExp("\\$", "g"), "\\$")
+      .replace(new RegExp("}", "g"), "\\}");
   }
-  const placeholer = "${" + index + (values ? "|" + values.join() + "|" : ":" + value) + "}";
-  return quotes ? '"' + placeholer + '"' : placeholer;
+
+  return "${" + index + (possibleValues ? "|" + possibleValues.join() + "|" : ":" + defaultValue) + "}";
 }
 
 export function safeParse(text: string, languageId: string): Node {
