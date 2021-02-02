@@ -140,7 +140,7 @@ export interface FixParameter {
 }
 
 export interface FixParameterSource {
-  (issue: Issue, fix: Fix, parameter: FixParameter, entry: CacheEntry): any[];
+  (issue: Issue, fix: Fix, parameter: FixParameter, version: OpenApiVersion, bundle: BundleResult): any[];
 }
 
 export interface FixContext {
@@ -152,7 +152,8 @@ export interface FixContext {
   snippet?: boolean,
   snippetParameters?: FixSnippetParameters,
   auditContext: AuditContext,
-  cacheEntry: CacheEntry,
+  version: OpenApiVersion,
+  bundle: BundleResult,
   pointer: string,
   root: Node,
   target: Node,
