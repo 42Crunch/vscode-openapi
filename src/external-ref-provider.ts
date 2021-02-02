@@ -53,12 +53,13 @@ export class ApproveHostnameAction implements vscode.CodeActionProvider {
 }
 
 export function registerAddApprovedHost(context) {
-  return vscode.commands.registerCommand("openapi.addApprovedHost", (hostname) => {
+  return vscode.commands.registerCommand("openapi.addApprovedHost", (hostname: string) => {
     const approved = configuration.get<string[]>("approvedHostnames");
-    configuration.update(
-      "approvedHostnames",
-      [...approved, hostname],
-      vscode.ConfigurationTarget.Global
-    );
+    if (!approved.includes(hostname.toLocaleLowerCase()))
+      configuration.update(
+        "approvedHostnames",
+        [...approved, hostname.toLocaleLowerCase()],
+        vscode.ConfigurationTarget.Global
+      );
   });
 }
