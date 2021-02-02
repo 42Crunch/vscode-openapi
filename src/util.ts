@@ -270,7 +270,8 @@ function insertPlaceholders(context: FixContext, text: string): string {
   const replacements = [];
   const issues = context.issues;
   const fix = context.fix;
-  const cacheEntry = context.cacheEntry;
+  const version = context.version;
+  const bundle = context.bundle;
   const languageId = context.document.languageId;
   const root = safeParse(text, languageId);
 
@@ -285,7 +286,7 @@ function insertPlaceholders(context: FixContext, text: string): string {
     if (parameter.source && parameterSources[parameter.source]) {
       const source = parameterSources[parameter.source];
       const issue = parameter.fixIndex ? issues[parameter.fixIndex] : issues[0];
-      const values = source(issue, fix, parameter, cacheEntry);
+      const values = source(issue, fix, parameter, version, bundle);
       if (phValues) {
         phValues = values;
       } else if (values.length > 0) {

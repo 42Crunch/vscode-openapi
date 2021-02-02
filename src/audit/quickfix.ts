@@ -167,10 +167,8 @@ async function quickFixCommand(
   let edit: vscode.WorkspaceEdit = null;
   let snippetParameters: FixSnippetParameters = null;
   const document = editor.document;
-  // FIXME use editor.document.uri to find audit this editor is part of, and getEntryForDocument() for it
-  // below should work for non-multifile OpenAPIs though
-  const cacheEntry = await cache.getEntryForDocument(editor.document);
-
+  const version = cache.getDocumentVersion(document);
+  const bundle = await cache.getDocumentBundle(document);
   const issuesByPointer = getIssuesByPointers(issues);
   // Single fix has one issue in the array
   // Assembled fix means all issues share same pointer, but have different ids
@@ -191,7 +189,8 @@ async function quickFixCommand(
       fix: clone(fix),
       bulk: bulk,
       auditContext: auditContext,
-      cacheEntry: cacheEntry,
+      version: version,
+      bundle: bundle,
       pointer: pointer,
       root: root,
       target: target,
