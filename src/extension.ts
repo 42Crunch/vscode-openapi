@@ -6,7 +6,7 @@
 import * as vscode from "vscode";
 import * as semver from "semver";
 import { configuration, Configuration } from "./configuration";
-import { extensionQualifiedId, CacheEntry } from "./types";
+import { extensionQualifiedId } from "./types";
 import { parserOptions } from "./parser-options";
 import { registerOutlines } from "./outline";
 import { JsonSchemaDefinitionProvider, YamlSchemaDefinitionProvider } from "./reference";
@@ -25,6 +25,9 @@ import * as yamlSchemaContributor from "./yaml-schema-contributor";
 import * as audit from "./audit/activate";
 import * as preview from "./preview";
 
+/*
+ FIXME: this probably should be removed, - it shows general parsing errors 
+which are shown anyways by json/yaml plugins
 async function updateDiagnostics(current: CacheEntry, diagnostics: vscode.DiagnosticCollection) {
   if (current.errors) {
     diagnostics.set(current.uri, current.errors);
@@ -34,6 +37,7 @@ async function updateDiagnostics(current: CacheEntry, diagnostics: vscode.Diagno
     vscode.commands.executeCommand("setContext", "openapiErrors", false);
   }
 }
+*/
 
 export function activate(context: vscode.ExtensionContext) {
   const versionProperty = "openapiVersion";
