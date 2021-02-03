@@ -12,7 +12,7 @@ import { ResolverError } from "@xliic/json-schema-ref-parser/lib/util/errors";
 import { parseJsonPointer, joinJsonPointer } from "./pointer";
 import { Cache } from "./cache";
 import { MappingNode, Mapping, BundleResult, OpenApiVersion } from "./types";
-import { clone } from "./util";
+import { simpleClone } from "./util";
 
 const destinationMap = {
   [OpenApiVersion.V2]: {
@@ -87,7 +87,7 @@ export const cacheParser = {
   canParse: [".yaml", ".yml", ".json", ".jsonc"],
   parse: ({ data, url, extension }: { data: any; url: string; extension: string }) => {
     return new Promise((resolve, reject) => {
-      resolve(clone(data));
+      resolve(simpleClone(data));
     });
   },
 };
@@ -178,7 +178,7 @@ export async function bundle(
   approvedHosts: string[]
 ): Promise<BundleResult> {
   const cwd = dirname(document.uri.fsPath) + "/";
-  const cloned = clone(parsed);
+  const cloned = simpleClone(parsed);
 
   const state = {
     version,
