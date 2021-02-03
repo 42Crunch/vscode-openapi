@@ -76,6 +76,11 @@ export class Cache {
     return entry ? entry.version : OpenApiVersion.Unknown;
   }
 
+  getDocumentVersionByDocumentUri(uri: string): OpenApiVersion {
+    const entry = this.cache[uri];
+    return entry ? entry.version : OpenApiVersion.Unknown;
+  }
+
   async getDocumentAst(document: vscode.TextDocument): Promise<Node> {
     const entry = await this.getCacheEntry(document);
     return entry.astRoot;
@@ -95,6 +100,10 @@ export class Cache {
     return this.cache[uri.toString()]?.parsed;
   }
 
+  getDocumentBundleByDocumentUri(uri: string): any {
+    return this.cache[uri].bundle;
+  }
+
   async getDocumentBundle(document: vscode.TextDocument): Promise<BundleResult> {
     const entry = await this.getCacheEntry(document);
     if (!entry.bundle) {
@@ -102,14 +111,6 @@ export class Cache {
     }
     return entry.bundle;
   }
-
-  // deprecated
-  async getEntryForDocument(document: vscode.TextDocument): Promise<CacheEntry> {
-    const entry = await this.getCacheEntry(document);
-    return entry;
-  }
-
-
 
   private async buildCacheEntry(document: vscode.TextDocument): Promise<CacheEntry> {
     const [version, node, errors] = parseToAst(document, this.parserOptions);

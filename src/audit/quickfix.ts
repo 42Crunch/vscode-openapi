@@ -15,6 +15,7 @@ import {
   FixSnippetParameters, 
   InsertReplaceRenameFix, 
   Issue, 
+  OpenApiVersion, 
   RegexReplaceFix 
 } from "../types";
 import { Node } from "../ast";
@@ -167,8 +168,24 @@ async function quickFixCommand(
   let edit: vscode.WorkspaceEdit = null;
   let snippetParameters: FixSnippetParameters = null;
   const document = editor.document;
-  const version = cache.getDocumentVersion(document);
-  const bundle = await cache.getDocumentBundle(document);
+  const uri = document.uri.toString();
+  let version: OpenApiVersion = null;
+  let bundle: any = null;
+
+  if (uri in auditContext) {
+    version = cache.getDocumentVersion(document);
+    bundle = await cache.getDocumentBundle(document); 
+  } else {
+    for (const audit of Object.values(auditContext)) {
+      // TODO: make final decision is it worth supporting multiple audits?
+      if (uri in audit.issues) {
+        version = cache.getDocumentVersionByDocumentUri(audit.summary.documentUri);
+        bundle = await cache.getDocumentBundleByDocumentUri(audit.summary.documentUri); 
+        break;
+      }
+    }
+  }
+
   const issuesByPointer = getIssuesByPointers(issues);
   // Single fix has one issue in the array
   // Assembled fix means all issues share same pointer, but have different ids
@@ -237,7 +254,6 @@ async function quickFixCommand(
   }
 
   // update diagnostics
-  const uri = document.uri.toString();
   const audits = auditContext[uri] ? [auditContext[uri]] : Object.values(auditContext).filter(
     (audit: Audit) => uri in audit.issues);
 
