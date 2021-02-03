@@ -5,7 +5,7 @@
 
 import { extname } from "path";
 import * as vscode from "vscode";
-import { BundleResult, CacheEntry } from "./types";
+import { BundleResult } from "./types";
 import { OpenApiVersion } from "./types";
 import { parseToAst, parseToObject } from "./parsers";
 import { ParserOptions } from "./parser-options";
@@ -13,6 +13,18 @@ import { bundle } from "./bundler";
 import { joinJsonPointer } from "./pointer";
 import { Node } from "./ast";
 import { configuration } from "./configuration";
+
+interface CacheEntry {
+  document: vscode.TextDocument;
+  uri: vscode.Uri;
+  version: OpenApiVersion;
+  astRoot: Node;
+  lastGoodAstRoot: Node;
+  parsed: any;
+  errors: any;
+  bundle?: BundleResult;
+  propertyHints?: any;
+}
 
 export class Cache {
   private cache: { [uri: string]: CacheEntry } = {};
@@ -101,7 +113,7 @@ export class Cache {
   }
 
   getDocumentBundleByDocumentUri(uri: string): any {
-    return this.cache[uri].bundle;
+    return this.cache[uri]?.bundle;
   }
 
   async getDocumentBundle(document: vscode.TextDocument): Promise<BundleResult> {
