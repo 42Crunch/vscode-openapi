@@ -14,23 +14,6 @@ import { joinJsonPointer } from "./pointer";
 import { Node } from "./ast";
 import { configuration } from "./configuration";
 
-function walk(current: any, parent: any, path: string[], visitor: any) {
-  for (const key of Object.keys(current)) {
-    const value = current[key];
-    if (typeof value === "object" && value !== null) {
-      walk(value, current, [key, ...path], visitor);
-    } else {
-      visitor(parent, path, key, value);
-    }
-  }
-}
-
-function mode(arr) {
-  return arr
-    .sort((a, b) => arr.filter((v) => v === a).length - arr.filter((v) => v === b).length)
-    .pop();
-}
-
 export class Cache {
   private cache: { [uri: string]: CacheEntry } = {};
   private lastUpdate: { [uri: string]: number } = {};
@@ -93,6 +76,11 @@ export class Cache {
     return entry ? entry.version : OpenApiVersion.Unknown;
   }
 
+  getDocumentVersionByDocumentUri(uri: string): OpenApiVersion {
+    const entry = this.cache[uri];
+    return entry ? entry.version : OpenApiVersion.Unknown;
+  }
+
   async getDocumentAst(document: vscode.TextDocument): Promise<Node> {
     const entry = await this.getCacheEntry(document);
     return entry.astRoot;
@@ -112,48 +100,16 @@ export class Cache {
     return this.cache[uri.toString()]?.parsed;
   }
 
+  getDocumentBundleByDocumentUri(uri: string): any {
+    return this.cache[uri].bundle;
+  }
+
   async getDocumentBundle(document: vscode.TextDocument): Promise<BundleResult> {
     const entry = await this.getCacheEntry(document);
     if (!entry.bundle) {
       await this.bundleCacheEntry(document, entry);
     }
     return entry.bundle;
-  }
-
-  // deprecated
-  async getEntryForDocument(document: vscode.TextDocument): Promise<CacheEntry> {
-    const entry = await this.getCacheEntry(document);
-    return entry;
-  }
-
-  private buildPropertyHints(bundled: BundleResult) {
-    const hints = {};
-
-    if (!("errors" in bundled)) {
-      walk(bundled, null, [], (parent, path, key, value) => {
-        // TODO check items for arrays
-        if (path.length > 3 && path[1] === "properties") {
-          const property = path[0];
-          if (!hints[property]) {
-            hints[property] = {};
-          }
-          if (!hints[property][key]) {
-            hints[property][key] = [];
-          }
-          hints[property][key].push(value);
-        }
-      });
-
-      // update hints replacing arrays of occurences of values
-      // with most frequent value in the array
-      for (const property of Object.keys(hints)) {
-        for (const key of Object.keys(hints[property])) {
-          hints[property][key] = mode(hints[property][key]);
-        }
-      }
-    }
-
-    return hints;
   }
 
   private async buildCacheEntry(document: vscode.TextDocument): Promise<CacheEntry> {
@@ -185,9 +141,7 @@ export class Cache {
     // bundle if it is OpenAPI file and no parsing errors
     if (entry.version !== OpenApiVersion.Unknown && !entry.errors) {
       const approvedHosts = configuration.get<string[]>("approvedHostnames");
-
       entry.bundle = await bundle(document, entry.version, entry.parsed, this, approvedHosts);
-      entry.propertyHints = this.buildPropertyHints(entry.bundle);
       // show or clear bundling errors
       if ("errors" in entry.bundle) {
         this.showBundlerErrors(document.uri, entry.bundle.errors);
