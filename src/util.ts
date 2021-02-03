@@ -3,7 +3,7 @@ import * as yaml from "js-yaml";
 import { parse, Node } from "./ast";
 import { parserOptions } from "./parser-options";
 import { replace } from "./ast/replace";
-import { InsertReplaceRenameFix, FixType, FixContext } from './types';
+import { InsertReplaceRenameFix, FixType, FixContext } from "./types";
 import parameterSources from "./audit/quickfix-sources";
 
 function getBasicIndentation(document: vscode.TextDocument, root: Node): [number, string] {
@@ -57,12 +57,11 @@ function shift(
 export function renameKeyNode(context: FixContext): vscode.Range {
   const document = context.document;
   const target = context.target;
-  const [start, end] = target .getKeyRange();
+  const [start, end] = target.getKeyRange();
   return new vscode.Range(document.positionAt(start), document.positionAt(end));
 }
 
 export function deleteJsonNode(context: FixContext): vscode.Range {
-
   const document = context.document;
   const target = context.target;
   let startPosition: vscode.Position;
@@ -85,7 +84,6 @@ export function deleteJsonNode(context: FixContext): vscode.Range {
 }
 
 export function deleteYamlNode(context: FixContext): vscode.Range {
-  
   const document = context.document;
   const target = context.target;
   const [start, end] = target.getRange();
@@ -121,7 +119,6 @@ export function deleteYamlNode(context: FixContext): vscode.Range {
 }
 
 export function insertJsonNode(context: FixContext, value: string): [string, vscode.Position] {
-
   const document = context.document;
   const root = context.root;
   const target = context.target;
@@ -153,8 +150,7 @@ export function insertJsonNode(context: FixContext, value: string): [string, vsc
   return [value, position];
 }
 
-export function insertYamlNode(context: FixContext,  value: string): [string, vscode.Position] {
-
+export function insertYamlNode(context: FixContext, value: string): [string, vscode.Position] {
   const document = context.document;
   const root = context.root;
   const target = context.target;
@@ -182,7 +178,6 @@ export function insertYamlNode(context: FixContext,  value: string): [string, vs
 }
 
 export function replaceJsonNode(context: FixContext, value: string): [string, vscode.Range] {
-
   const document = context.document;
   const root = context.root;
   const target = context.target;
@@ -200,7 +195,6 @@ export function replaceJsonNode(context: FixContext, value: string): [string, vs
 }
 
 export function replaceYamlNode(context: FixContext, value: string): [string, vscode.Range] {
-
   const document = context.document;
   const root = context.root;
   const target = context.target;
@@ -235,7 +229,6 @@ export function replaceYamlNode(context: FixContext, value: string): [string, vs
 }
 
 export function getFixAsJsonString(context: FixContext): string {
-
   const root = context.root;
   const pointer = context.pointer;
   const snippet = context.snippet;
@@ -260,7 +253,6 @@ export function getFixAsJsonString(context: FixContext): string {
 }
 
 export function getFixAsYamlString(context: FixContext): string {
-
   const snippet = context.snippet;
   const fix = <InsertReplaceRenameFix>context.fix;
   const type = fix.type;
@@ -277,7 +269,6 @@ export function getFixAsYamlString(context: FixContext): string {
 }
 
 function handleParameters(context: FixContext, text: string): string {
-
   const replacements = [];
   const issues = context.issues;
   const fix = context.fix;
@@ -288,7 +279,6 @@ function handleParameters(context: FixContext, text: string): string {
   const root = safeParse(text, languageId);
 
   for (const parameter of context.fix.parameters) {
-
     const pointer = parameter.path;
     const index = replacements.length + 1;
     const replaceKey = parameter.type === "key";
@@ -327,12 +317,11 @@ function handleParameters(context: FixContext, text: string): string {
 }
 
 function getPlaceholder(
-  index: number, 
-  defaultValue: string, 
-  possibleValues: any[], 
+  index: number,
+  defaultValue: string,
+  possibleValues: any[],
   cacheValues: any[]
 ): string {
-
   if (cacheValues && cacheValues.length > 0) {
     if (possibleValues) {
       possibleValues = cacheValues;
@@ -340,12 +329,12 @@ function getPlaceholder(
       defaultValue = cacheValues[0];
     }
   }
-	
+
   if (possibleValues) {
     // Escape comma symbols
     possibleValues = possibleValues.map((value: any) => {
       if (typeof value === "string") {
-        return value.replace(new RegExp(",", "g"), "\\,"); 
+        return value.replace(new RegExp(",", "g"), "\\,");
       } else {
         return value;
       }
@@ -357,7 +346,9 @@ function getPlaceholder(
       .replace(new RegExp("}", "g"), "\\}");
   }
 
-  return "${" + index + (possibleValues ? "|" + possibleValues.join() + "|" : ":" + defaultValue) + "}";
+  return (
+    "${" + index + (possibleValues ? "|" + possibleValues.join() + "|" : ":" + defaultValue) + "}"
+  );
 }
 
 export function safeParse(text: string, languageId: string): Node {
@@ -368,7 +359,7 @@ export function safeParse(text: string, languageId: string): Node {
   return root;
 }
 
-function cloneArray(a: any, fn: any) {
+function cloneArray(a: any, fn: any): any {
   const keys = Object.keys(a);
   const a2 = new Array(keys.length);
   for (let i = 0; i < keys.length; i++) {
@@ -384,7 +375,8 @@ function cloneArray(a: any, fn: any) {
 }
 
 // for cloning simple objects only (parsed json)
-export function clone(o: any) {
+export function clone<T>(orig: T): T {
+  const o = <any>orig;
   if (Array.isArray(o)) return cloneArray(o, clone);
   const o2 = {};
   for (const k in o) {
@@ -395,5 +387,5 @@ export function clone(o: any) {
       o2[k] = clone(cur);
     }
   }
-  return o2;
+  return o2 as T;
 }
