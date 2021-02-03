@@ -23,7 +23,6 @@ interface CacheEntry {
   parsed: any;
   errors: any;
   bundle?: BundleResult;
-  propertyHints?: any;
 }
 
 export class Cache {
