@@ -74,9 +74,7 @@ export function createDiagnosticsForUri(filename: string, uri: string, issues): 
   };
 
   return issues.map(
-    (issue, issueIndex): AuditDiagnostic => ({
-      issueIndex: issueIndex,
-      issueUri: uri,
+    (issue): AuditDiagnostic => ({
       source: `audit of ${filename}`,
       id: issue.id,
       pointer: issue.pointer,

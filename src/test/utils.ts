@@ -25,6 +25,7 @@ import {
   Uri,
   env,
 } from "vscode";
+import { FixContext } from '../types';
 
 export function rndName() {
   return Math.random()
@@ -121,23 +122,24 @@ export function loadYaml(filename) {
 
 export function withRandomFileEditor(
   initialContents: string,
+  languageId: string,
   run: (editor: TextEditor, doc: TextDocument) => Thenable<void>
 ): Thenable<boolean> {
-  return createRandomFile(initialContents).then((file) => {
-    return workspace.openTextDocument(file).then((doc) => {
-      return window.showTextDocument(doc).then((editor) => {
-        return run(editor, doc).then((_) => {
-          if (doc.isDirty) {
-            return doc.save().then((saved) => {
-              assert.ok(saved);
-              assert.ok(!doc.isDirty);
-              return deleteFile(file);
-            });
-          } else {
-            return deleteFile(file);
-          }
-        });
+  return workspace.openTextDocument({language: languageId, content: initialContents}).then((doc) => {
+    return window.showTextDocument(doc).then((editor) => {
+      return run(editor, doc).then((_) => {
+        return true;
       });
     });
   });
+}
+
+export function getContextUpdatedByPointer(context: FixContext, pointer: string): FixContext {
+  context.pointer = pointer;
+  context.target = context.root.find(pointer);
+  return context;
+}
+
+export function wrap(text: string): string {
+  return text.replace(new RegExp('\r\n', 'g'), '\n');
 }
