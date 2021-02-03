@@ -128,17 +128,28 @@ export function insertJsonNode(context: FixContext, value: string): [string, vsc
   const snippet = context.snippet;
   let lastChildTarget: Node;
   const children = target.getChildren();
+  const [indent, char] = getBasicIndentation(document, root);
+  let start: number, end: number;
+  let comma = ",";
 
   // Insert pointer is either {} or [], nothing else
-  if (children && children.length > 0) {
-    lastChildTarget = children[children.length - 1];
+  if (children) {
+    if (children.length > 0) {
+      lastChildTarget = children[children.length - 1];
+      [start, end] = lastChildTarget.getRange();
+    } else {
+      [start, end] = target.getRange();
+      start += 1;
+      end = start;
+      comma = "";
+      // Snippet identation won't work correctly, add child padding here
+      value = char.repeat(indent) + value;
+    }
   }
 
-  const [start, end] = lastChildTarget.getRange();
   const index = getCurrentIdentation(document, start);
   const position = document.positionAt(end);
-  const [indent, char] = getBasicIndentation(document, root);
-  value = snippet ? ",\n" + value : ",\n" + shift(value, indent, char, index);
+  value = comma + "\n" + (snippet ? value : shift(value, indent, char, index));
   return [value, position];
 }
 
