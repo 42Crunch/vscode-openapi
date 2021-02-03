@@ -5,18 +5,18 @@
 
 import * as vscode from "vscode";
 import * as quickfixes from "./quickfixes.json";
-import { 
+import {
   Audit,
-  AuditContext, 
-  AuditDiagnostic, 
-  DeleteFix, 
-  FixContext, 
-  FixParameter, 
-  FixSnippetParameters, 
-  InsertReplaceRenameFix, 
-  Issue, 
-  OpenApiVersion, 
-  RegexReplaceFix 
+  AuditContext,
+  AuditDiagnostic,
+  DeleteFix,
+  FixContext,
+  FixParameter,
+  FixSnippetParameters,
+  InsertReplaceRenameFix,
+  Issue,
+  OpenApiVersion,
+  RegexReplaceFix,
 } from "../types";
 import { Node } from "../ast";
 import { createDiagnostics } from "./diagnostic";
@@ -33,16 +33,12 @@ import {
   renameKeyNode,
   replaceJsonNode,
   replaceYamlNode,
+  clone,
 } from "../util";
 import { Cache } from "../cache";
 import { FixType } from "../types";
 
 const registeredQuickFixes: { [key: string]: any } = {};
-
-function clone(value: any) {
-  // deep copy
-  return JSON.parse(JSON.stringify(value));
-}
 
 function fixRegexReplace(context: FixContext) {
   const document = context.document;
@@ -76,8 +72,8 @@ function fixInsert(context: FixContext) {
   if (context.snippet) {
     context.snippetParameters = {
       snippet: new vscode.SnippetString(value),
-      location: position
-    }  
+      location: position,
+    };
   } else {
     const edit = getWorkspaceEdit(context);
     if (context.bulk) {
@@ -132,7 +128,6 @@ function fixDelete(context: FixContext) {
 }
 
 function transformInsertToReplaceIfExists(context: FixContext): boolean {
-
   const target = context.target;
   const pointer = context.pointer;
   const fix = <InsertReplaceRenameFix>context.fix;
@@ -142,7 +137,6 @@ function transformInsertToReplaceIfExists(context: FixContext): boolean {
     const insertingKey = keys[0];
     for (let child of target.getChildren()) {
       if (child.getKey() === insertingKey) {
-
         context.pointer = `${pointer}/${insertingKey}`;
         context.target = context.root.find(context.pointer);
         context.fix = {
@@ -174,13 +168,13 @@ async function quickFixCommand(
 
   if (uri in auditContext) {
     version = cache.getDocumentVersion(document);
-    bundle = await cache.getDocumentBundle(document); 
+    bundle = await cache.getDocumentBundle(document);
   } else {
     for (const audit of Object.values(auditContext)) {
       // TODO: make final decision is it worth supporting multiple audits?
       if (uri in audit.issues) {
         version = cache.getDocumentVersionByDocumentUri(audit.summary.documentUri);
-        bundle = await cache.getDocumentBundleByDocumentUri(audit.summary.documentUri); 
+        bundle = await cache.getDocumentBundleByDocumentUri(audit.summary.documentUri);
         break;
       }
     }
@@ -193,7 +187,6 @@ async function quickFixCommand(
   const bulk = Object.keys(issuesByPointer).length > 1;
 
   for (const issuePointer of Object.keys(issuesByPointer)) {
-
     // if fix.pointer exists, append it to diagnostic.pointer
     const pointer = fix.pointer ? `${issuePointer}${fix.pointer}` : issuePointer;
     const root = safeParse(editor.document.getText(), editor.document.languageId);
@@ -211,7 +204,7 @@ async function quickFixCommand(
       pointer: pointer,
       root: root,
       target: target,
-      document: document
+      document: document,
     };
 
     switch (fix.type) {
@@ -254,20 +247,20 @@ async function quickFixCommand(
   }
 
   // update diagnostics
-  const audits = auditContext[uri] ? [auditContext[uri]] : Object.values(auditContext).filter(
-    (audit: Audit) => uri in audit.issues);
+  const audits = auditContext[uri]
+    ? [auditContext[uri]]
+    : Object.values(auditContext).filter((audit: Audit) => uri in audit.issues);
 
   // create temp hash set to have constant time complexity while searching for fixed issues
   const fixedIssueIds: Set<string> = new Set();
   const fixedIssueIdAndPointers: Set<string> = new Set();
   issues.forEach((issue: Issue) => {
-    fixedIssueIds.add(issue.id)
-    fixedIssueIdAndPointers.add(issue.id + issue.pointer)
+    fixedIssueIds.add(issue.id);
+    fixedIssueIdAndPointers.add(issue.id + issue.pointer);
   });
 
   // update audit and refresh diagnostics and decorations
   for (const audit of audits) {
-
     const root2 = safeParse(document.getText(), document.languageId);
     // clear current diagnostics
     audit.diagnostics.dispose();
@@ -283,12 +276,12 @@ async function quickFixCommand(
     }
     audit.issues[uri] = updatedIssues;
 
-    // update issuesByType map alltogether 
+    // update issuesByType map alltogether
     for (const fixedIssueId of fixedIssueIds) {
       const updatedIssues: Issue[] = [];
       // consider issuesByType may return issues belong to different uris
       for (const issue of audit.issuesByType[fixedIssueId]) {
-        if ((issue.documentUri === uri) && fixedIssueIdAndPointers.has(getIssueUniqueId(issue))) {
+        if (issue.documentUri === uri && fixedIssueIdAndPointers.has(getIssueUniqueId(issue))) {
           continue;
         }
         // Range has been already updated above
@@ -327,8 +320,7 @@ export function registerQuickfixes(
 ) {
   vscode.commands.registerTextEditorCommand(
     "openapi.simpleQuickFix",
-    async (editor, edit, issues, fix) =>
-      quickFixCommand(editor, issues, fix, auditContext, cache)
+    async (editor, edit, issues, fix) => quickFixCommand(editor, issues, fix, auditContext, cache)
   );
 
   vscode.languages.registerCodeActionsProvider("yaml", new AuditCodeActions(auditContext), {
@@ -347,7 +339,6 @@ export function registerQuickfixes(
 }
 
 export class AuditCodeActions implements vscode.CodeActionProvider {
-
   public static readonly providedCodeActionKinds = [vscode.CodeActionKind.QuickFix];
   auditContext: AuditContext;
 
@@ -361,7 +352,6 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
     context: vscode.CodeActionContext,
     token: vscode.CancellationToken
   ): vscode.ProviderResult<(vscode.Command | vscode.CodeAction)[]> {
-
     const result: vscode.CodeAction[] = [];
     const uri = document.uri.toString();
     const issues = getIssuesByURI(this.auditContext, uri);
@@ -377,10 +367,8 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
     const issuesByPointer = getIssuesByPointers(issues);
 
     for (const diagnostic of context.diagnostics) {
-
       const auditDiagnostic = <AuditDiagnostic>diagnostic;
-      if (!auditDiagnostic.hasOwnProperty("id") || 
-        !auditDiagnostic.hasOwnProperty("pointer")) {
+      if (!auditDiagnostic.hasOwnProperty("id") || !auditDiagnostic.hasOwnProperty("pointer")) {
         continue;
       }
       const fix = registeredQuickFixes[auditDiagnostic.id];
@@ -388,15 +376,13 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
         continue;
       }
       const issue = issuesByPointer[auditDiagnostic.pointer].filter(
-        (issue: Issue) => issue.id === auditDiagnostic.id);
+        (issue: Issue) => issue.id === auditDiagnostic.id
+      );
 
       // Single Fix
       const action = new vscode.CodeAction(fix.title, vscode.CodeActionKind.QuickFix);
       action.command = {
-        arguments: [
-          issue, 
-          fix
-        ],
+        arguments: [issue, fix],
         command: "openapi.simpleQuickFix",
         title: fix.title,
       };
@@ -405,16 +391,19 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
       result.push(action);
 
       // Assembled Fix
-      if (fix.type == FixType.Insert && !fix.pointer &&
-        Object.prototype.toString.call(fix.fix) === '[object Object]') {
-        Array.prototype.push.apply(problems, fix.problem); 
+      if (
+        fix.type == FixType.Insert &&
+        !fix.pointer &&
+        Object.prototype.toString.call(fix.fix) === "[object Object]"
+      ) {
+        Array.prototype.push.apply(problems, fix.problem);
         updateTitle(titles, fix.title);
         for (const parameter of fix.parameters) {
           const par = <FixParameter>clone(parameter);
           par.fixIndex = assembledIssues.length;
           parameters.push(par);
         }
-        fixObject = {...fixObject, ...fix.fix};
+        fixObject = { ...fixObject, ...fix.fix };
         assembledIssues.push(issue[0]);
       }
 
@@ -424,12 +413,9 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
         const bulkTitle = fix.title + ` in all ${sameIssues.length} schemas`;
         const bulkAction = new vscode.CodeAction(bulkTitle, vscode.CodeActionKind.QuickFix);
         bulkAction.command = {
-          arguments: [
-            sameIssues, 
-            fix
-          ],
+          arguments: [sameIssues, fix],
           command: "openapi.simpleQuickFix",
-          title: bulkTitle
+          title: bulkTitle,
         };
         bulkAction.diagnostics = [diagnostic];
         bulkAction.isPreferred = false;
@@ -441,19 +427,16 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
     if (assembledIssues.length > 1) {
       const assembledFix = {
         problems: problems,
-        title: titles.join(', '),
+        title: titles.join(", "),
         type: FixType.Insert,
         fix: fixObject,
-        parameters: parameters
+        parameters: parameters,
       };
       const action = new vscode.CodeAction(assembledFix.title, vscode.CodeActionKind.QuickFix);
       action.command = {
-        arguments: [
-          assembledIssues, 
-          assembledFix
-        ],
+        arguments: [assembledIssues, assembledFix],
         command: "openapi.simpleQuickFix",
-        title: assembledFix.title
+        title: assembledFix.title,
       };
       action.diagnostics = [];
       action.isPreferred = true;
@@ -465,30 +448,32 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
 }
 
 export function updateTitle(titles: any[], title: string): void {
-
   if (titles.length === 0) {
     titles.push(title);
     return;
   }
-  let parts = title.split(' ');
-  let prevParts = titles[titles.length - 1].split(' ');
+  let parts = title.split(" ");
+  let prevParts = titles[titles.length - 1].split(" ");
   if (parts[0].toLocaleLowerCase() !== prevParts[0].toLocaleLowerCase()) {
     parts[0] = parts[0].toLocaleLowerCase();
-    titles.push(parts.join(' '));
+    titles.push(parts.join(" "));
     return;
   }
-  if (parts[parts.length - 1].toLocaleLowerCase() !== prevParts[prevParts.length - 1].toLocaleLowerCase()) {
+  if (
+    parts[parts.length - 1].toLocaleLowerCase() !==
+    prevParts[prevParts.length - 1].toLocaleLowerCase()
+  ) {
     parts.shift();
-    titles[titles.length - 1] += (', ' + parts.join(' '));
+    titles[titles.length - 1] += ", " + parts.join(" ");
     return;
   }
   parts.shift();
   parts.pop();
   let lastPrevPart = prevParts.pop();
-  prevParts[prevParts.length - 1] += ',';
+  prevParts[prevParts.length - 1] += ",";
   Array.prototype.push.apply(prevParts, parts);
   prevParts.push(lastPrevPart);
-  titles[titles.length - 1] = prevParts.join(' ');
+  titles[titles.length - 1] = prevParts.join(" ");
 }
 
 function getWorkspaceEdit(context: FixContext) {
@@ -520,7 +505,7 @@ function getIssuesByPointers(issues: Issue[]): { [key: string]: Issue[] } {
     if (!issuesByPointers[issue.pointer]) {
       issuesByPointers[issue.pointer] = [];
     }
-    issuesByPointers[issue.pointer].push(issue);    
+    issuesByPointers[issue.pointer].push(issue);
   }
   return issuesByPointers;
 }
