@@ -322,7 +322,7 @@ function getPlaceholder(
   cacheValues: any[]
 ): string {
 
-  if (cacheValues) {
+  if (cacheValues && cacheValues.length > 0) {
     if (possibleValues) {
       possibleValues = cacheValues;
     } else {
