@@ -375,16 +375,16 @@ function cloneArray(a: any, fn: any): any {
 }
 
 // for cloning simple objects only (parsed json)
-export function clone<T>(orig: T): T {
+export function simpleClone<T>(orig: T): T {
   const o = <any>orig;
-  if (Array.isArray(o)) return cloneArray(o, clone);
+  if (Array.isArray(o)) return cloneArray(o, simpleClone);
   const o2 = {};
   for (const k in o) {
     const cur = o[k];
     if (typeof cur !== "object" || cur === null) {
       o2[k] = cur;
     } else {
-      o2[k] = clone(cur);
+      o2[k] = simpleClone(cur);
     }
   }
   return o2 as T;

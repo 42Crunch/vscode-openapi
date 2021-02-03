@@ -33,7 +33,7 @@ import {
   renameKeyNode,
   replaceJsonNode,
   replaceYamlNode,
-  clone,
+  simpleClone,
 } from "../util";
 import { Cache } from "../cache";
 import { FixType } from "../types";
@@ -196,7 +196,7 @@ async function quickFixCommand(
       editor: editor,
       edit: edit,
       issues: bulk ? issuesByPointer[issuePointer] : issues,
-      fix: clone(fix),
+      fix: simpleClone(fix),
       bulk: bulk,
       auditContext: auditContext,
       version: version,
@@ -399,7 +399,7 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
         Array.prototype.push.apply(problems, fix.problem);
         updateTitle(titles, fix.title);
         for (const parameter of fix.parameters) {
-          const par = <FixParameter>clone(parameter);
+          const par = <FixParameter>simpleClone(parameter);
           par.fixIndex = assembledIssues.length;
           parameters.push(par);
         }
