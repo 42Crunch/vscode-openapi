@@ -16,6 +16,7 @@ import { configuration } from "./configuration";
 
 interface CacheEntry {
   document: vscode.TextDocument;
+  documentVersion: number;
   uri: vscode.Uri;
   version: OpenApiVersion;
   astRoot: Node;
@@ -42,9 +43,7 @@ export class Cache {
       const editor = vscode.window.activeTextEditor;
       const uri = editor?.document?.uri?.toString();
       if (this.cache[uri]) {
-        await this.requestCacheEntryUpdate(editor.document);
-        this._didChange.fire(editor.document);
-        this._didActiveDocumentChange.fire(editor.document);
+        this.requestCacheEntryUpdateForActiveDocument(editor.document);
       }
     });
   }
@@ -58,16 +57,8 @@ export class Cache {
   }
 
   async onDocumentChanged(event: vscode.TextDocumentChangeEvent) {
-    const activeEditor = vscode.window.activeTextEditor;
-    // check change events for the active editor only
-    // triggers both events, in future we might update cache
-    // not only for the currently active editor, in this case
-    // _didChange and _didActiveDocumentChange might fire at a different
-    // times
-    if (activeEditor && activeEditor.document.uri.toString() === event.document.uri.toString()) {
-      await this.requestCacheEntryUpdate(event.document);
-      this._didChange.fire(event.document);
-      this._didActiveDocumentChange.fire(event.document);
+    if (vscode.window?.activeTextEditor?.document === event.document) {
+      this.requestCacheEntryUpdateForActiveDocument(event.document);
     }
   }
 
@@ -75,10 +66,9 @@ export class Cache {
 
   async onActiveEditorChanged(editor: vscode.TextEditor | undefined) {
     // TODO don't re-parse if we've got up-to-date contents in the cache
+    // compare documentVersion
     if (editor) {
-      await this.requestCacheEntryUpdate(editor.document);
-      this._didChange.fire(editor.document);
-      this._didActiveDocumentChange.fire(editor.document);
+      this.requestCacheEntryUpdateForActiveDocument(editor.document);
     }
   }
 
@@ -123,19 +113,20 @@ export class Cache {
     return entry.bundle;
   }
 
-  private async buildCacheEntry(document: vscode.TextDocument): Promise<CacheEntry> {
+  private buildCacheEntry(document: vscode.TextDocument): CacheEntry {
     const [version, node, errors] = parseToAst(document, this.parserOptions);
     let value = null;
     let lastGoodAstRoot = null;
 
     // produce value only if no errors encountered
-    if (!errors) {
+    if (!errors && version !== OpenApiVersion.Unknown) {
       lastGoodAstRoot = node;
       value = parseToObject(document, this.parserOptions);
     }
 
     return {
       document,
+      documentVersion: document.version,
       uri: document.uri,
       version,
       astRoot: node,
@@ -167,17 +158,22 @@ export class Cache {
   async updateCacheEntry(document: vscode.TextDocument): Promise<CacheEntry> {
     const uri = document.uri.toString();
     const old = this.cache[uri];
-    const entry = await this.buildCacheEntry(document);
+    const entry = this.buildCacheEntry(document);
 
     if (!entry.lastGoodAstRoot && old?.lastGoodAstRoot) {
       entry.lastGoodAstRoot = old.lastGoodAstRoot;
     }
 
     this.cache[uri] = entry;
+
+    if (vscode.window?.activeTextEditor?.document === document) {
+      this._didActiveDocumentChange.fire(document);
+    }
+    this._didChange.fire(document);
     return entry;
   }
 
-  async requestCacheEntryUpdate(document: vscode.TextDocument): Promise<void> {
+  async requestCacheEntryUpdateForActiveDocument(document: vscode.TextDocument): Promise<void> {
     const MAX_UPDATE = 1000; // update no more ofent than
     const uri = document.uri.toString();
     const now = Date.now();
@@ -187,7 +183,7 @@ export class Cache {
     if (!lastUpdate) {
       // first update
       this.lastUpdate[uri] = now;
-      await this.updateCacheEntry(document);
+      await this.bundleCacheEntry(document, await this.updateCacheEntry(document));
     } else if (!pending) {
       // if no update is pending request a new one
       const sinceLastUpdate = now - lastUpdate;
@@ -210,7 +206,7 @@ export class Cache {
   async getCacheEntry(document: vscode.TextDocument): Promise<CacheEntry> {
     const uri = document.uri.toString();
 
-    if (this.cache[uri]) {
+    if (this.cache[uri] && this.cache[uri].documentVersion === document.version) {
       return this.cache[uri];
     } else if (this.pendingUpdates[uri]) {
       return this.pendingUpdates[uri];
