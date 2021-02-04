@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import * as yaml from "js-yaml";
-import { parse, Node } from "./ast";
+import { parse, Node } from "@xliic/openapi-ast-node";
 import { parserOptions } from "./parser-options";
-import { replace } from "./ast/replace";
+import { replace } from "@xliic/openapi-ast-node";
 import { InsertReplaceRenameFix, FixType, FixContext } from "./types";
 import parameterSources from "./audit/quickfix-sources";
 

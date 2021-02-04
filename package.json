@@ -554,6 +554,7 @@
     "got": "^9.6.0",
     "js-yaml": "^3.13.1",
     "@xliic/json-schema-ref-parser": "^9.1.6",
+    "@xliic/openapi-ast-node": "^1.1.0",
     "jsonc-parser": "^2.2.1",
     "semver": "^6.3.0",
     "yaml-ast-parser-custom-tags": "0.0.43"
