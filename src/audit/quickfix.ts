@@ -18,7 +18,7 @@ import {
   OpenApiVersion,
   RegexReplaceFix,
 } from "../types";
-import { Node } from "../ast";
+import { Node } from "@xliic/openapi-ast-node";
 import { createDiagnostics } from "./diagnostic";
 import { createDecorations, setDecorations } from "./decoration";
 import { ReportWebView } from "./report";

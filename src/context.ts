@@ -4,7 +4,7 @@
 */
 
 import * as vscode from "vscode";
-import { Node } from "./ast";
+import { Node } from "@xliic/openapi-ast-node";
 import { Cache } from "./cache";
 import { OpenApiVersion } from "./types";
 

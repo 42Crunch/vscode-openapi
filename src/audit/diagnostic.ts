@@ -5,7 +5,7 @@
 
 import * as vscode from "vscode";
 import { AuditDiagnostic } from "../types";
-import { Node } from "../ast";
+import { Node } from "@xliic/openapi-ast-node";
 
 export function createDiagnostics(
   filename: string,

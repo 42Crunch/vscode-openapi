@@ -11,7 +11,7 @@ import { parseToAst, parseToObject } from "./parsers";
 import { ParserOptions } from "./parser-options";
 import { bundle } from "./bundler";
 import { joinJsonPointer } from "./pointer";
-import { Node } from "./ast";
+import { Node } from "@xliic/openapi-ast-node";
 import { configuration } from "./configuration";
 
 interface CacheEntry {

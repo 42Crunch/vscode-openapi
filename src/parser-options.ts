@@ -6,32 +6,39 @@
 import * as vscode from "vscode";
 import { Schema, Type } from "js-yaml";
 import { Configuration } from "./configuration";
+import { Options } from "@xliic/openapi-ast-node";
 
-export class ParserOptions {
+export class ParserOptions implements Options {
   configuration: Configuration;
-  yamlSchema: Schema;
+  yaml: { schema: Schema };
 
   constructor() {
-    this.yamlSchema = this.buildYamlSchema([]);
+    this.yaml = {
+      schema: this.buildYamlSchema([])
+    };
   }
 
   configure(configuration: Configuration) {
     this.configuration = configuration;
     const customTags = configuration.get<[string]>("customTags");
-    this.yamlSchema = this.buildYamlSchema(customTags);
+    this.yaml = {
+      schema: this.buildYamlSchema(customTags)
+    };
     configuration.onDidChange(this.onConfigurationChanged, this);
   }
 
   get() {
     return {
-      yaml: { schema: this.yamlSchema },
+      yaml: this.yaml
     };
   }
 
   onConfigurationChanged(e: vscode.ConfigurationChangeEvent) {
     if (this.configuration.changed(e, "customTags")) {
       const customTags = this.configuration.get<string[]>("customTags");
-      this.yamlSchema = this.buildYamlSchema(customTags);
+      this.yaml = {
+        schema: this.buildYamlSchema(customTags)
+      };
     }
   }
 
