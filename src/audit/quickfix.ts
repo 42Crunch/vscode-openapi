@@ -23,7 +23,6 @@ import { createDiagnostics } from "./diagnostic";
 import { createDecorations, setDecorations } from "./decoration";
 import { ReportWebView } from "./report";
 import {
-  safeParse,
   deleteJsonNode,
   deleteYamlNode,
   getFixAsJsonString,
@@ -189,7 +188,7 @@ async function quickFixCommand(
   for (const issuePointer of Object.keys(issuesByPointer)) {
     // if fix.pointer exists, append it to diagnostic.pointer
     const pointer = fix.pointer ? `${issuePointer}${fix.pointer}` : issuePointer;
-    const root = safeParse(editor.document.getText(), editor.document.languageId);
+    const root = await cache.getDocumentAst(document);
     const target = root.find(pointer);
 
     const context: FixContext = {
@@ -261,7 +260,7 @@ async function quickFixCommand(
 
   // update audit and refresh diagnostics and decorations
   for (const audit of audits) {
-    const root2 = safeParse(document.getText(), document.languageId);
+    const root2 = await cache.getDocumentAst(document);
     // clear current diagnostics
     audit.diagnostics.dispose();
 
