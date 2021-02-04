@@ -76,7 +76,11 @@ export interface Summary extends Grades {
 }
 
 export interface DocumentDecorations {
-  [key: string]: vscode.DecorationOptions[];
+  [uri: string]: vscode.DecorationOptions[];
+}
+
+export interface DocumentAudits {
+  [uri: string]: Audit;
 }
 
 export interface Audit {
@@ -84,12 +88,12 @@ export interface Audit {
   summary: Summary;
   issues: IssuesByDocument;
   issuesByType: IssuesByType;
-  diagnostics: vscode.DiagnosticCollection;
-  decorations: DocumentDecorations;
 }
 
 export interface AuditContext {
-  [uri: string]: Audit;
+  audits: DocumentAudits;
+  decorations: DocumentDecorations;
+  diagnostics: vscode.DiagnosticCollection;
 }
 
 export interface AuditDiagnostic extends vscode.Diagnostic {

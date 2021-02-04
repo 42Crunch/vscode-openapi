@@ -19,8 +19,8 @@ import {
   RegexReplaceFix,
 } from "../types";
 import { Node } from "../ast";
-import { createDiagnostics } from "./diagnostic";
-import { createDecorations, setDecorations } from "./decoration";
+import { updateDiagnostics } from "./diagnostic";
+import { updateDecorations, setDecorations } from "./decoration";
 import { ReportWebView } from "./report";
 import {
   deleteJsonNode,
@@ -165,11 +165,11 @@ async function quickFixCommand(
   let version: OpenApiVersion = null;
   let bundle: any = null;
 
-  if (uri in auditContext) {
+  if (uri in auditContext.audits) {
     version = cache.getDocumentVersion(document);
     bundle = await cache.getDocumentBundle(document);
   } else {
-    for (const audit of Object.values(auditContext)) {
+    for (const audit of Object.values(auditContext.audits)) {
       // TODO: make final decision is it worth supporting multiple audits?
       if (uri in audit.issues) {
         version = cache.getDocumentVersionByDocumentUri(audit.summary.documentUri);
@@ -246,9 +246,9 @@ async function quickFixCommand(
   }
 
   // update diagnostics
-  const audits = auditContext[uri]
-    ? [auditContext[uri]]
-    : Object.values(auditContext).filter((audit: Audit) => uri in audit.issues);
+  const audits: Audit[] = auditContext.audits[uri]
+    ? [auditContext.audits[uri]]
+    : Object.values(auditContext.audits).filter((audit: Audit) => uri in audit.issues);
 
   // create temp hash set to have constant time complexity while searching for fixed issues
   const fixedIssueIds: Set<string> = new Set();
@@ -261,8 +261,6 @@ async function quickFixCommand(
   // update audit and refresh diagnostics and decorations
   for (const audit of audits) {
     const root2 = await cache.getDocumentAst(document);
-    // clear current diagnostics
-    audit.diagnostics.dispose();
 
     // update range for all issues (since the fix has potentially changed line numbering in the file)
     const updatedIssues: Issue[] = [];
@@ -289,8 +287,8 @@ async function quickFixCommand(
       audit.issuesByType[fixedIssueId] = updatedIssues;
     }
     // rebuild diagnostics and decorations and refresh report
-    audit.diagnostics = createDiagnostics(audit.filename, audit.issues, editor);
-    audit.decorations = createDecorations(uri.toString(), audit.issues);
+    updateDiagnostics(auditContext.diagnostics, audit.filename, audit.issues, editor);
+    updateDecorations(auditContext.decorations, uri.toString(), audit.issues);
     setDecorations(editor, auditContext);
     ReportWebView.showIfVisible(audit);
   }
@@ -485,10 +483,10 @@ function getWorkspaceEdit(context: FixContext) {
 
 function getIssuesByURI(auditContext: AuditContext, uri: string): Issue[] {
   let issues = [];
-  if (auditContext[uri]) {
-    issues = auditContext[uri].issues[uri];
+  if (auditContext.audits[uri]) {
+    issues = auditContext.audits[uri].issues[uri];
   } else {
-    for (const audit of Object.values(auditContext)) {
+    for (const audit of Object.values(auditContext.audits)) {
       if (uri in audit.issues) {
         Array.prototype.push.apply(issues, audit.issues[uri]);
       }

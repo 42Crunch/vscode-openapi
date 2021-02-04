@@ -10,24 +10,28 @@ import {
   registerFocusSecurityAuditById,
 } from "./commands";
 import { ReportWebView } from "./report";
-import { setDecorations } from "./decoration";
 import { AuditContext } from "../types";
 import { registerQuickfixes } from "./quickfix";
 import { Cache } from "../cache";
+import { setDecorations } from "./decoration";
 
 export function activate(context: vscode.ExtensionContext, cache: Cache) {
-  const auditContext: AuditContext = {};
+  const auditContext: AuditContext = {
+    audits: {},
+    decorations: {},
+    diagnostics: vscode.languages.createDiagnosticCollection("audits"),
+  };
   const pendingAudits: { [uri: string]: boolean } = {};
 
   vscode.window.onDidChangeActiveTextEditor((editor) => {
     if (editor) {
       setDecorations(editor, auditContext);
       const uri = editor.document.uri.toString();
-      if (auditContext[uri]) {
-        ReportWebView.showIfVisible(auditContext[uri]);
+      if (auditContext.audits[uri]) {
+        ReportWebView.showIfVisible(auditContext.audits[uri]);
       } else {
         let subdocument = false;
-        for (const audit of Object.values(auditContext)) {
+        for (const audit of Object.values(auditContext.audits)) {
           if (audit.summary.subdocumentUris.includes(uri)) {
             subdocument = true;
           }
