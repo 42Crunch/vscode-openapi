@@ -50,21 +50,21 @@ export function activate(context: vscode.ExtensionContext) {
   context.globalState.update(versionProperty, currentVersion.toString());
   parserOptions.configure(yamlConfiguration);
 
-  const cache = new Cache(parserOptions);
+  const selectors = {
+    json: { language: "json" },
+    jsonc: { language: "jsonc" },
+    yaml: { language: "yaml" },
+  };
 
-  cache.onDidChange((document) => updateContext(cache, document));
+  const cache = new Cache(parserOptions, Object.values(selectors));
+
+  cache.onDidActiveDocumentChange((document) => updateContext(cache, document));
   // FIXME decide what to do in case of parsing errors in OAS
   // cache.onDidChange((entry) => updateDiagnostics(entry, runtimeContext.diagnostics));
 
   context.subscriptions.push(...registerOutlines(context, cache));
   context.subscriptions.push(...registerCommands(cache));
   context.subscriptions.push(registerAddApprovedHost(context));
-
-  const selectors = {
-    json: { language: "json" },
-    jsonc: { language: "jsonc" },
-    yaml: { language: "yaml" },
-  };
 
   const completionProvider = new CompletionItemProvider(context, cache);
   for (const selector of Object.values(selectors)) {
@@ -100,9 +100,6 @@ export function activate(context: vscode.ExtensionContext) {
     });
   }
 
-  // trigger refresh on activation
-  cache.onActiveEditorChanged(vscode.window.activeTextEditor);
-
   vscode.window.onDidChangeActiveTextEditor((e) => cache.onActiveEditorChanged(e));
   vscode.workspace.onDidChangeTextDocument((e) => cache.onDocumentChanged(e));
 
@@ -116,6 +113,10 @@ export function activate(context: vscode.ExtensionContext) {
 
   configuration.configure(context);
   yamlConfiguration.configure(context);
+
+  if (vscode.window.activeTextEditor) {
+    cache.onActiveEditorChanged(vscode.window.activeTextEditor);
+  }
 }
 
 export function deactivate() {}

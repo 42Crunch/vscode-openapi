@@ -36,9 +36,11 @@ export class Cache {
   private _didActiveDocumentChange = new vscode.EventEmitter<vscode.TextDocument>();
 
   private diagnostics = vscode.languages.createDiagnosticCollection("openapi-bundler");
+  private selector: vscode.DocumentSelector;
 
-  constructor(parserOptions: ParserOptions) {
+  constructor(parserOptions: ParserOptions, selector: vscode.DocumentSelector) {
     this.parserOptions = parserOptions;
+    this.selector = selector;
     configuration.onDidChange(async () => {
       const editor = vscode.window.activeTextEditor;
       const uri = editor?.document?.uri?.toString();
@@ -57,7 +59,11 @@ export class Cache {
   }
 
   async onDocumentChanged(event: vscode.TextDocumentChangeEvent) {
-    if (vscode.window?.activeTextEditor?.document === event.document) {
+    const activeDocument = vscode.window?.activeTextEditor.document;
+    if (
+      activeDocument === event.document &&
+      vscode.languages.match(this.selector, activeDocument) > 0
+    ) {
       this.requestCacheEntryUpdateForActiveDocument(event.document);
     }
   }
@@ -67,7 +73,7 @@ export class Cache {
   async onActiveEditorChanged(editor: vscode.TextEditor | undefined) {
     // TODO don't re-parse if we've got up-to-date contents in the cache
     // compare documentVersion
-    if (editor) {
+    if (editor && vscode.languages.match(this.selector, editor.document) > 0) {
       this.requestCacheEntryUpdateForActiveDocument(editor.document);
     }
   }
@@ -121,6 +127,9 @@ export class Cache {
     // produce value only if no errors encountered
     if (!errors && version !== OpenApiVersion.Unknown) {
       lastGoodAstRoot = node;
+    }
+
+    if (!errors && node !== null) {
       value = parseToObject(document, this.parserOptions);
     }
 
