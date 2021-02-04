@@ -1,6 +1,5 @@
 import assert from "assert";
-import { loadJson, loadYaml, parseJson, parseYaml } from "../utils";
-import { replace } from "../../ast/replace";
+import { replace } from "@xliic/openapi-ast-node";
 
 suite("Replace Test Suite", () => {
   test("yaml replace value", () => {

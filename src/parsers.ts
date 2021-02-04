@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import * as yaml from "js-yaml";
 import * as json from "jsonc-parser";
-import { parse, Node } from "./ast";
+import { parse, Node } from "@xliic/openapi-ast-node";
 import { ParserOptions } from "./parser-options";
 import { OpenApiVersion } from "./types";
 
@@ -19,7 +19,7 @@ export function parseToObject(document: vscode.TextDocument, options: ParserOpti
   if (document.languageId === "yaml") {
     // FIXME what's up with parsing errors?
     const {
-      yaml: { schema },
+      yaml: { schema }
     } = options.get();
     return yaml.safeLoad(document.getText(), { schema });
   }

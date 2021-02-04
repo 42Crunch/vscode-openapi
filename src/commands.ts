@@ -6,7 +6,7 @@
 import * as vscode from "vscode";
 import { outlines } from "./outline";
 import * as snippets from "./snippets.json";
-import { JsonNode, Node, YamlNode } from "./ast";
+import { JsonNode, Node, YamlNode } from "@xliic/openapi-ast-node";
 import { Cache } from "./cache";
 
 const commands = {
