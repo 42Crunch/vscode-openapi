@@ -9,21 +9,12 @@ import * as assert from "assert";
 import { readFileSync } from "fs";
 import * as yaml from "yaml-ast-parser-custom-tags";
 import * as json from "jsonc-parser";
-import { JsonNode, YamlNode, findYamlNodeAtOffset } from "../ast";
+import { JsonNode, YamlNode } from "@xliic/openapi-ast-node";
 import {
   workspace,
   window,
-  Position,
-  Range,
-  commands,
   TextEditor,
   TextDocument,
-  TextEditorCursorStyle,
-  TextEditorLineNumbersStyle,
-  SnippetString,
-  Selection,
-  Uri,
-  env,
 } from "vscode";
 import { FixContext } from '../types';
 

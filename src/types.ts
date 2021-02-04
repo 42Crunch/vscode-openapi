@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { Node } from "./ast";
+import { Node } from "@xliic/openapi-ast-node";
 
 export const configId = "openapi";
 export const extensionQualifiedId = "42Crunch.vscode-openapi";

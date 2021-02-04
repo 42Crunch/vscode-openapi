@@ -12,7 +12,7 @@ import { createDiagnostics } from "./diagnostic";
 import { ReportWebView } from "./report";
 import { TextDocument } from "vscode";
 import { findMapping } from "../bundler";
-import { Node } from "../ast";
+import { Node } from "@xliic/openapi-ast-node";
 import {
   AuditContext,
   Audit,
