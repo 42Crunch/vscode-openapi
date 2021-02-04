@@ -66,7 +66,7 @@ const resolver = (cache: Cache, documentUri: vscode.Uri, approvedHosts: string[]
         uri = documentUri.with({ path: decodeURIComponent(file.url) });
       }
       try {
-        const cached = cache.getCachedDocumentValueByUri(uri);
+        const cached = await cache.getExistingDocumentValueByUri(uri);
         if (cached) {
           return cached;
         }

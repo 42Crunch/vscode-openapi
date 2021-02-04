@@ -10,26 +10,22 @@ import { AuditContext, DocumentDecorations } from "../types";
 export const decorationType = vscode.window.createTextEditorDecorationType({});
 
 export function setDecorations(editor: vscode.TextEditor, auditContext: AuditContext) {
-  const uri = editor.document.uri.toString();
-
-  let combinedDecorations: vscode.DecorationOptions[] = [];
-  for (const audit of Object.values(auditContext)) {
-    for (const [decorationsUri, decoration] of Object.entries(audit.decorations)) {
-      if (uri == decorationsUri) {
-        combinedDecorations = combinedDecorations.concat(decoration);
-      }
-    }
+  if (auditContext.decorations[editor.document.uri.toString()]) {
+    editor.setDecorations(decorationType, auditContext.decorations[editor.document.uri.toString()]);
   }
-  editor.setDecorations(decorationType, combinedDecorations);
 }
 
-export function createDecorations(mainUri: string, issues): DocumentDecorations {
+export function updateDecorations(
+  decorations: DocumentDecorations,
+  mainUri: string,
+  issues
+): DocumentDecorations {
   const mainFilename = basename(vscode.Uri.parse(mainUri).fsPath);
 
-  const decorations = {};
   for (const [uri, issuez] of Object.entries(issues)) {
     decorations[uri] = createDecoration(mainUri, mainFilename, issuez);
   }
+
   return decorations;
 }
 

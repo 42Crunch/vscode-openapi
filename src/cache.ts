@@ -13,6 +13,7 @@ import { bundle } from "./bundler";
 import { joinJsonPointer } from "./pointer";
 import { Node } from "./ast";
 import { configuration } from "./configuration";
+import { isDate } from "util";
 
 interface CacheEntry {
   document: vscode.TextDocument;
@@ -103,8 +104,11 @@ export class Cache {
     return entry.parsed;
   }
 
-  getCachedDocumentValueByUri(uri: vscode.Uri): any {
-    return this.cache[uri.toString()]?.parsed;
+  async getExistingDocumentValueByUri(uri: vscode.Uri): Promise<any> {
+    const entry = this.cache[uri.toString()];
+    if (entry) {
+      return await this.getDocumentValue(entry.document);
+    }
   }
 
   getDocumentBundleByDocumentUri(uri: string): any {
@@ -154,11 +158,17 @@ export class Cache {
       const approvedHosts = configuration.get<string[]>("approvedHostnames");
       entry.bundle = await bundle(document, entry.version, entry.parsed, this, approvedHosts);
       // show or clear bundling errors
-      if ("errors" in entry.bundle) {
-        this.showBundlerErrors(document.uri, entry.bundle.errors);
-      } else {
-        this.clearBundlerErrors(entry.bundle.uris);
+      if (entry.bundle) {
+        if ("errors" in entry.bundle) {
+          this.showBundlerErrors(document.uri, entry.bundle.errors);
+        } else {
+          this.clearBundlerErrors(entry.bundle.uris);
+        }
       }
+    } else {
+      entry.bundle = {
+        errors: [],
+      };
     }
 
     return entry;
@@ -200,13 +210,17 @@ export class Cache {
 
       this.pendingUpdates[uri] = new Promise<CacheEntry>((resolve, reject) => {
         setTimeout(async () => {
-          const entry = await this.bundleCacheEntry(
-            document,
-            await this.updateCacheEntry(document)
-          );
-          this.lastUpdate[uri] = Date.now();
-          delete this.pendingUpdates[uri];
-          resolve(entry);
+          try {
+            const entry = await this.bundleCacheEntry(
+              document,
+              await this.updateCacheEntry(document)
+            );
+            this.lastUpdate[uri] = Date.now();
+            delete this.pendingUpdates[uri];
+            resolve(entry);
+          } catch (e) {
+            reject(e);
+          }
         }, updateDelay);
       });
     }
@@ -221,11 +235,10 @@ export class Cache {
       return this.pendingUpdates[uri];
     }
 
-    const promise = this.updateCacheEntry(document);
+    const entry = await this.updateCacheEntry(document);
     this.lastUpdate[uri] = Date.now();
-    this.pendingUpdates[uri] = promise;
 
-    return promise;
+    return entry;
   }
 
   private showBundlerErrors(documentUri: vscode.Uri, errors: any) {
