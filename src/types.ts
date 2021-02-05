@@ -66,10 +66,6 @@ export interface IssuesByDocument {
   [uri: string]: Issue[];
 }
 
-export interface IssuesByType {
-  [id: string]: Issue[];
-}
-
 export interface Summary extends Grades {
   documentUri: string;
   subdocumentUris: string[];
@@ -87,11 +83,11 @@ export interface Audit {
   filename: string;
   summary: Summary;
   issues: IssuesByDocument;
-  issuesByType: IssuesByType;
 }
 
 export interface AuditContext {
   audits: DocumentAudits;
+  auditsBySubDocument: DocumentAudits;
   decorations: DocumentDecorations;
   diagnostics: vscode.DiagnosticCollection;
 }

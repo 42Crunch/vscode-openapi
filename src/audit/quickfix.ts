@@ -9,6 +9,7 @@ import {
   Audit,
   AuditContext,
   AuditDiagnostic,
+  configId,
   DeleteFix,
   FixContext,
   FixParameter,
@@ -273,19 +274,6 @@ async function quickFixCommand(
     }
     audit.issues[uri] = updatedIssues;
 
-    // update issuesByType map alltogether
-    for (const fixedIssueId of fixedIssueIds) {
-      const updatedIssues: Issue[] = [];
-      // consider issuesByType may return issues belong to different uris
-      for (const issue of audit.issuesByType[fixedIssueId]) {
-        if (issue.documentUri === uri && fixedIssueIdAndPointers.has(getIssueUniqueId(issue))) {
-          continue;
-        }
-        // Range has been already updated above
-        updatedIssues.push(issue);
-      }
-      audit.issuesByType[fixedIssueId] = updatedIssues;
-    }
     // rebuild diagnostics and decorations and refresh report
     updateDiagnostics(auditContext.diagnostics, audit.filename, audit.issues, editor);
     updateDecorations(auditContext.decorations, uri.toString(), audit.issues);
@@ -349,11 +337,14 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
     context: vscode.CodeActionContext,
     token: vscode.CancellationToken
   ): vscode.ProviderResult<(vscode.Command | vscode.CodeAction)[]> {
-    const result: vscode.CodeAction[] = [];
+    const simple: vscode.CodeAction[] = [];
+    const combined: vscode.CodeAction[] = [];
+    const bulk: vscode.CodeAction[] = [];
+
     const uri = document.uri.toString();
     const issues = getIssuesByURI(this.auditContext, uri);
     if (issues.length === 0) {
-      return result;
+      return [];
     }
 
     const titles = [];
@@ -384,16 +375,12 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
         title: fix.title,
       };
       action.diagnostics = [diagnostic];
-      action.isPreferred = false;
-      result.push(action);
+      action.isPreferred = true;
+      simple.push(action);
 
       // Assembled Fix
-      if (
-        fix.type == FixType.Insert &&
-        !fix.pointer &&
-        Object.prototype.toString.call(fix.fix) === "[object Object]"
-      ) {
-        Array.prototype.push.apply(problems, fix.problem);
+      if (fix.type == FixType.Insert && !fix.pointer && !Array.isArray(fix.fix)) {
+        problems.push(fix.problem);
         updateTitle(titles, fix.title);
         for (const parameter of fix.parameters) {
           const par = <FixParameter>simpleClone(parameter);
@@ -407,7 +394,7 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
       // Bulk Fix
       const sameIssues = issues.filter((issue: Issue) => issue.id === auditDiagnostic.id);
       if (sameIssues && sameIssues.length > 1) {
-        const bulkTitle = fix.title + ` in all ${sameIssues.length} schemas`;
+        const bulkTitle = `Group fix: ${fix.title} in ${sameIssues.length} locations`;
         const bulkAction = new vscode.CodeAction(bulkTitle, vscode.CodeActionKind.QuickFix);
         bulkAction.command = {
           arguments: [sameIssues, fix],
@@ -416,7 +403,7 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
         };
         bulkAction.diagnostics = [diagnostic];
         bulkAction.isPreferred = false;
-        result.push(bulkAction);
+        bulk.push(bulkAction);
       }
     }
 
@@ -437,10 +424,10 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
       };
       action.diagnostics = [];
       action.isPreferred = true;
-      result.push(action);
+      combined.push(action);
     }
 
-    return result;
+    return [...simple, ...combined, ...bulk];
   }
 }
 
@@ -482,18 +469,7 @@ function getWorkspaceEdit(context: FixContext) {
 }
 
 function getIssuesByURI(auditContext: AuditContext, uri: string): Issue[] {
-  let issues = [];
-  if (auditContext.audits[uri]) {
-    issues = auditContext.audits[uri].issues[uri];
-  } else {
-    for (const audit of Object.values(auditContext.audits)) {
-      if (uri in audit.issues) {
-        Array.prototype.push.apply(issues, audit.issues[uri]);
-      }
-    }
-  }
-
-  return issues;
+  return auditContext?.auditsBySubDocument[uri]?.issues[uri];
 }
 
 function getIssuesByPointers(issues: Issue[]): { [key: string]: Issue[] } {

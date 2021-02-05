@@ -18,6 +18,7 @@ import { setDecorations } from "./decoration";
 export function activate(context: vscode.ExtensionContext, cache: Cache) {
   const auditContext: AuditContext = {
     audits: {},
+    auditsBySubDocument: {},
     decorations: {},
     diagnostics: vscode.languages.createDiagnosticCollection("audits"),
   };

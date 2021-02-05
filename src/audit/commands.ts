@@ -13,15 +13,7 @@ import { ReportWebView } from "./report";
 import { TextDocument } from "vscode";
 import { findMapping } from "../bundler";
 import { Node } from "@xliic/openapi-ast-node";
-import {
-  AuditContext,
-  Audit,
-  Grades,
-  Issue,
-  ReportedIssue,
-  IssuesByDocument,
-  IssuesByType,
-} from "../types";
+import { AuditContext, Audit, Grades, Issue, ReportedIssue, IssuesByDocument } from "../types";
 
 import { Cache } from "../cache";
 
@@ -164,7 +156,7 @@ async function performAudit(
 
   try {
     const documentUri = textEditor.document.uri.toString();
-    const [grades, issuesByDocument, documents] = await auditDocument(
+    const [grades, issues, documents] = await auditDocument(
       textEditor.document,
       JSON.stringify(bundle.value),
       cache,
@@ -173,21 +165,7 @@ async function performAudit(
       progress
     );
 
-    const issuesByType: IssuesByType = {};
-
-    for (const issues of Object.values(issuesByDocument)) {
-      for (const issue of issues) {
-        if (!issuesByType[issue.id]) {
-          issuesByType[issue.id] = [];
-        }
-        issuesByType[issue.id].push(issue);
-      }
-    }
-
     const filename = basename(textEditor.document.fileName);
-    updateDecorations(auditContext.decorations, documentUri, issuesByDocument);
-    updateDiagnostics(auditContext.diagnostics, filename, issuesByDocument, textEditor);
-    setDecorations(textEditor, auditContext);
 
     const audit = {
       summary: {
@@ -195,9 +173,22 @@ async function performAudit(
         documentUri,
         subdocumentUris: Object.keys(documents).filter((uri) => uri != documentUri),
       },
-      issues: issuesByDocument,
-      issuesByType,
+      issues,
       filename,
+    };
+
+    const auditsBySubDocument = {};
+    for (const uri of Object.keys(documents)) {
+      auditsBySubDocument[uri] = audit;
+    }
+
+    updateDecorations(auditContext.decorations, documentUri, issues);
+    updateDiagnostics(auditContext.diagnostics, filename, issues, textEditor);
+    setDecorations(textEditor, auditContext);
+
+    auditContext.auditsBySubDocument = {
+      ...auditContext.auditsBySubDocument,
+      ...auditsBySubDocument,
     };
 
     ReportWebView.show(context.extensionPath, audit);
