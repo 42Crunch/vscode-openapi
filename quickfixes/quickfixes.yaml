@@ -2,7 +2,7 @@ fixes:
   - problem:
       - global-security
       - v3-global-security
-    title: Create 'security' property
+    title: Add 'security' property
     type: insert
     fix:
       security:
@@ -18,7 +18,7 @@ fixes:
       - response-header-array-maxitems
       - schema-array-maxitems
       - v3-schema-array-maxitems
-    title: Create 'maxItems' property
+    title: Add 'maxItems' property
     type: insert
     fix:
       maxItems: 100
@@ -33,7 +33,7 @@ fixes:
       - response-header-numerical-format
       - schema-numerical-format
       - v3-schema-numerical-format
-    title: Create 'format' property
+    title: Add 'format' property
     type: insert
     fix:
       format: int32
@@ -51,7 +51,7 @@ fixes:
       - response-header-numerical-max
       - schema-numerical-max
       - v3-schema-numerical-max
-    title: Create 'maximum' property
+    title: Add 'maximum' property
     type: insert
     fix:
       maximum: 1024
@@ -65,7 +65,7 @@ fixes:
       - response-header-numerical-min
       - schema-numerical-min
       - v3-schema-numerical-min
-    title: Create 'minimum' property
+    title: Add 'minimum' property
     type: insert
     fix:
       minimum: 0
@@ -92,7 +92,7 @@ fixes:
       - response-header-string-maxlength
       - schema-string-maxlength
       - v3-schema-string-maxlength
-    title: Create 'maxLength' property
+    title: Add 'maxLength' property
     type: insert
     fix:
       maxLength: 32
@@ -106,7 +106,7 @@ fixes:
       - response-header-string-pattern
       - schema-string-pattern
       - v3-schema-string-pattern
-    title: Create 'pattern' property
+    title: Add 'pattern' property
     type: insert
     fix:
       pattern: ^example[0-9a-f]{8}$
@@ -128,7 +128,7 @@ fixes:
       # content type message/http for the TRACE message response
       # check usage, and implement if required
       - v3-response-trace-2xx
-    title: Create '200' response
+    title: Add '200' response
     type: insert
     fix:
       '200':
@@ -149,7 +149,7 @@ fixes:
   - problem:
       - v3-response-delete-2xx
       - v3-response-patch-2xx
-    title: Create '202' response
+    title: Add '202' response
     type: insert
     fix:
       '202':
@@ -176,7 +176,7 @@ fixes:
       - response-put-2xx
       - response-delete-2xx
       - response-patch-2xx
-    title: Create '204' response
+    title: Add '204' response
     type: insert
     fix:
       '204':
@@ -188,7 +188,7 @@ fixes:
   - problem:
       - v3-response-head-2xx
       - response-head-2xx
-    title: Create '200' or '202' response
+    title: Add '200' or '202' response
     type: insert
     fix:
       '200':
@@ -205,7 +205,7 @@ fixes:
 
   - problem:
       - v3-response-401
-    title: Create '401' response
+    title: Add '401' response
     type: insert
     fix:
       '401':
@@ -225,7 +225,7 @@ fixes:
 
   - problem:
       - v3-response-403
-    title: Create '403' response
+    title: Add '403' response
     type: insert
     fix:
       '403':
@@ -245,7 +245,7 @@ fixes:
 
   - problem:
       - v3-response-404
-    title: Create '404' response
+    title: Add '404' response
     type: insert
     fix:
       '404':
@@ -265,7 +265,7 @@ fixes:
 
   - problem:
       - v3-response-429
-    title: Create '429' response
+    title: Add '429' response
     type: insert
     fix:
       '429':
@@ -285,7 +285,7 @@ fixes:
 
   - problem:
       - v3-response-default-undefined
-    title: Create 'default' response
+    title: Add 'default' response
     type: insert
     fix:
       'default':
@@ -312,7 +312,7 @@ fixes:
       # it in the fix
       - response-options-2xx
       - response-patch-2xx
-    title: Create '200' response
+    title: Add '200' response
     type: insert
     fix:
       '200':
@@ -328,7 +328,7 @@ fixes:
   - problem:
       - response-delete-2xx
       - response-patch-2xx
-    title: Create '202' response
+    title: Add '202' response
     type: insert
     fix:
       '202':
@@ -343,7 +343,7 @@ fixes:
 
   - problem:
       - response-401
-    title: Create '401' response
+    title: Add '401' response
     type: insert
     fix:
       '401':
@@ -358,7 +358,7 @@ fixes:
 
   - problem:
       - response-403
-    title: Create '403' response
+    title: Add '403' response
     type: insert
     fix:
       '403':
@@ -373,7 +373,7 @@ fixes:
 
   - problem:
       - response-404
-    title: Create '404' response
+    title: Add '404' response
     type: insert
     fix:
       '404':
@@ -388,7 +388,7 @@ fixes:
 
   - problem:
       - response-429
-    title: Create '429' response
+    title: Add '429' response
     type: insert
     fix:
       '429':
@@ -403,7 +403,7 @@ fixes:
 
   - problem:
       - response-default-undefined
-    title: Create 'default' response
+    title: Add 'default' response
     type: insert
     fix:
       'default':
@@ -470,7 +470,7 @@ fixes:
   - problem:
       - v3-schema-notype
       - schema-notype
-    title: Create 'type' property
+    title: Add 'type' property
     type: insert
     fix:
       type: integer
@@ -502,7 +502,7 @@ fixes:
       - validation-schema-array-items
       - v3-validation-schema-array-items
       - validation-header-array-items
-    title: Create 'items' property
+    title: Add 'items' property
     type: insert
     fix:
       items:
