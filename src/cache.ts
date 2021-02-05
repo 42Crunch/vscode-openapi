@@ -13,7 +13,6 @@ import { bundle } from "./bundler";
 import { joinJsonPointer } from "./pointer";
 import { Node } from "@xliic/openapi-ast-node";
 import { configuration } from "./configuration";
-import { isDate } from "util";
 
 interface CacheEntry {
   document: vscode.TextDocument;
@@ -223,6 +222,21 @@ export class Cache {
           }
         }, updateDelay);
       });
+    }
+    this.clearStaleCacheEntries();
+  }
+
+  clearStaleCacheEntries(): void {
+    const MAX_CACHE_ENTRY_AGE = 30000;
+    const now = Date.now();
+    for (const uri of Object.keys(this.cache)) {
+      const lastUpdate = this.lastUpdate[uri];
+      const pending = this.pendingUpdates[uri];
+      if (!pending && lastUpdate && now - lastUpdate > MAX_CACHE_ENTRY_AGE) {
+        delete this.cache[uri];
+        delete this.lastUpdate[uri];
+        delete this.pendingUpdates[uri];
+      }
     }
   }
 
