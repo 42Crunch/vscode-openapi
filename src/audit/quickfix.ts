@@ -412,7 +412,7 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
     if (assembledIssues.length > 1) {
       const assembledFix = {
         problems: problems,
-        title: titles.join(", "),
+        title: titles.join(", ").replace("property", "properties").replace("response", "responses"),
         type: FixType.Insert,
         fix: fixObject,
         parameters: parameters,
