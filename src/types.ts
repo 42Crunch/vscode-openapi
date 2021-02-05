@@ -30,7 +30,6 @@ export interface Bundle {
 interface BundleError {
   errors: any;
 }
-
 export type BundleResult = Bundle | BundleError;
 
 interface Grade {
