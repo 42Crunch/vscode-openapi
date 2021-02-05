@@ -381,10 +381,12 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
       if (fix.type == FixType.Insert && !fix.pointer && !Array.isArray(fix.fix)) {
         problems.push(fix.problem);
         updateTitle(titles, fix.title);
-        for (const parameter of fix.parameters) {
-          const par = <FixParameter>simpleClone(parameter);
-          par.fixIndex = assembledIssues.length;
-          parameters.push(par);
+        if (fix.parameters) {
+          for (const parameter of fix.parameters) {
+            const par = <FixParameter>simpleClone(parameter);
+            par.fixIndex = assembledIssues.length;
+            parameters.push(par);
+          }
         }
         fixObject = { ...fixObject, ...fix.fix };
         assembledIssues.push(issue[0]);

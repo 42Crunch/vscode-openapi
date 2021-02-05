@@ -743,7 +743,7 @@
       "problem": [
         "warning-global-security-scheme-unused"
       ],
-      "title": "Remove unused reusable security scheme",
+      "title": "Remove unused security scheme",
       "type": "delete"
     },
     {
