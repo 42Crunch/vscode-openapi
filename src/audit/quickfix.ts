@@ -431,7 +431,7 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
   }
 }
 
-export function updateTitle(titles: any[], title: string): void {
+export function updateTitle(titles: string[], title: string): void {
   if (titles.length === 0) {
     titles.push(title);
     return;
@@ -455,7 +455,7 @@ export function updateTitle(titles: any[], title: string): void {
   parts.pop();
   let lastPrevPart = prevParts.pop();
   prevParts[prevParts.length - 1] += ",";
-  Array.prototype.push.apply(prevParts, parts);
+  prevParts.push(...parts);
   prevParts.push(lastPrevPart);
   titles[titles.length - 1] = prevParts.join(" ");
 }
