@@ -40,6 +40,7 @@ fixes:
     parameters:
       - name: format
         path: /format
+        source: mostUsedByName
         values:
           - int32
           - int64
