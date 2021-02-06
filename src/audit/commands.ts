@@ -33,13 +33,32 @@ export function registerSecurityAudit(
         return;
       }
 
-      delete auditContext.audits[uri];
+      delete auditContext.auditsByMainDocument[uri];
       pendingAudits[uri] = true;
 
       try {
         const audit = await securityAudit(context, auditContext, cache, textEditor);
         if (audit) {
-          auditContext.audits[uri] = audit;
+          auditContext.auditsByMainDocument[uri] = audit;
+
+          const auditsBySubDocument = {
+            [audit.summary.documentUri]: audit,
+          };
+
+          for (const uri of audit.summary.subdocumentUris) {
+            auditsBySubDocument[uri] = audit;
+          }
+
+          auditContext.auditsByDocument = {
+            ...auditContext.auditsByDocument,
+            ...auditsBySubDocument,
+          };
+
+          updateDecorations(auditContext.decorations, audit.summary.documentUri, audit.issues);
+          updateDiagnostics(auditContext.diagnostics, audit.filename, audit.issues, textEditor);
+          setDecorations(textEditor, auditContext);
+
+          ReportWebView.show(context.extensionPath, audit);
         }
         delete pendingAudits[uri];
       } catch (e) {
@@ -156,6 +175,7 @@ async function performAudit(
 
   try {
     const documentUri = textEditor.document.uri.toString();
+
     const [grades, issues, documents] = await auditDocument(
       textEditor.document,
       JSON.stringify(bundle.value),
@@ -176,22 +196,6 @@ async function performAudit(
       issues,
       filename,
     };
-
-    const auditsBySubDocument = {};
-    for (const uri of Object.keys(documents)) {
-      auditsBySubDocument[uri] = audit;
-    }
-
-    updateDecorations(auditContext.decorations, documentUri, issues);
-    updateDiagnostics(auditContext.diagnostics, filename, issues, textEditor);
-    setDecorations(textEditor, auditContext);
-
-    auditContext.auditsBySubDocument = {
-      ...auditContext.auditsBySubDocument,
-      ...auditsBySubDocument,
-    };
-
-    ReportWebView.show(context.extensionPath, audit);
 
     return audit;
   } catch (e) {

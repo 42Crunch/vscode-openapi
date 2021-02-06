@@ -162,22 +162,14 @@ async function quickFixCommand(
   let snippetParameters: FixSnippetParameters = null;
   const document = editor.document;
   const uri = document.uri.toString();
-  let version: OpenApiVersion = null;
-  let bundle: any = null;
 
-  if (uri in auditContext.audits) {
-    version = cache.getDocumentVersion(document);
-    bundle = await cache.getDocumentBundle(document);
-  } else {
-    for (const audit of Object.values(auditContext.audits)) {
-      // TODO: make final decision is it worth supporting multiple audits?
-      if (uri in audit.issues) {
-        version = cache.getDocumentVersionByDocumentUri(audit.summary.documentUri);
-        bundle = await cache.getDocumentBundleByDocumentUri(audit.summary.documentUri);
-        break;
-      }
-    }
+  const audit = auditContext.auditsByDocument[uri];
+  if (!audit) {
+    return;
   }
+
+  const version = cache.getDocumentVersionByDocumentUri(audit.summary.documentUri);
+  const bundle = await cache.getDocumentBundleByDocumentUri(audit.summary.documentUri);
 
   const issuesByPointer = getIssuesByPointers(issues);
   // Single fix has one issue in the array
@@ -246,9 +238,11 @@ async function quickFixCommand(
   }
 
   // update diagnostics
-  const audits: Audit[] = auditContext.audits[uri]
-    ? [auditContext.audits[uri]]
-    : Object.values(auditContext.audits).filter((audit: Audit) => uri in audit.issues);
+  const audits: Audit[] = auditContext.auditsByMainDocument[uri]
+    ? [auditContext.auditsByMainDocument[uri]]
+    : Object.values(auditContext.auditsByMainDocument).filter(
+        (audit: Audit) => uri in audit.issues
+      );
 
   // create temp hash set to have constant time complexity while searching for fixed issues
   const fixedIssueIds: Set<string> = new Set();
@@ -470,7 +464,7 @@ function getWorkspaceEdit(context: FixContext) {
 }
 
 function getIssuesByURI(auditContext: AuditContext, uri: string): Issue[] {
-  return auditContext?.auditsBySubDocument[uri]?.issues[uri];
+  return auditContext?.auditsByDocument[uri]?.issues[uri];
 }
 
 function getIssuesByPointers(issues: Issue[]): { [key: string]: Issue[] } {
