@@ -319,6 +319,89 @@ export function registerQuickfixes(
   }
 }
 
+function createSingleAction(
+  diagnostic: AuditDiagnostic,
+  issues: Issue[],
+  fix: Fix
+): vscode.CodeAction[] {
+  const action = new vscode.CodeAction(fix.title, vscode.CodeActionKind.QuickFix);
+  action.command = {
+    arguments: [issues, fix],
+    command: "openapi.simpleQuickFix",
+    title: fix.title,
+  };
+  action.diagnostics = [diagnostic];
+  action.isPreferred = true;
+  return [action];
+}
+
+function createCombinedAction(
+  issues: Issue[],
+  titles: string[],
+  problem: string[],
+  parameters: FixParameter[],
+  fixfix: object
+): vscode.CodeAction[] {
+  if (issues.length > 1) {
+    const combinedFix: InsertReplaceRenameFix = {
+      problem,
+      title: titles.join(", ").replace("property", "properties").replace("response", "responses"),
+      type: FixType.Insert,
+      fix: fixfix,
+      parameters: parameters,
+    };
+
+    const action = new vscode.CodeAction(combinedFix.title, vscode.CodeActionKind.QuickFix);
+    action.command = {
+      arguments: [issues, combinedFix],
+      command: "openapi.simpleQuickFix",
+      title: combinedFix.title,
+    };
+    action.diagnostics = [];
+    action.isPreferred = true;
+
+    return [action];
+  }
+  return [];
+}
+
+function createBulkAction(
+  version: OpenApiVersion,
+  bundle: BundleResult,
+  diagnostic: AuditDiagnostic,
+  issues: Issue[],
+  fix: Fix
+): vscode.CodeAction[] {
+  // find issues with the same id, and if the fix has parameters
+  // check that all issues have parameter values retrieved from 'source'
+  // so there is no issues where default parameters would be applied
+  const similarIssues = issues
+    .filter((issue: Issue) => issue.id === diagnostic.id)
+    .filter((issue) => {
+      if (!fix.parameters) {
+        return true;
+      }
+      const nonEmptyParameterValues = fix.parameters
+        .map((parameter) => getSourceValue(issue, fix, parameter, version, bundle))
+        .filter((values) => values.length > 0);
+      return fix.parameters.length === nonEmptyParameterValues.length;
+    });
+
+  if (similarIssues.length > 1) {
+    const bulkTitle = `Group fix: ${fix.title} in ${similarIssues.length} locations`;
+    const bulkAction = new vscode.CodeAction(bulkTitle, vscode.CodeActionKind.QuickFix);
+    bulkAction.command = {
+      arguments: [similarIssues, fix],
+      command: "openapi.simpleQuickFix",
+      title: bulkTitle,
+    };
+    bulkAction.diagnostics = [diagnostic];
+    bulkAction.isPreferred = false;
+    return [bulkAction];
+  }
+  return [];
+}
+
 export class AuditCodeActions implements vscode.CodeActionProvider {
   public static readonly providedCodeActionKinds = [vscode.CodeActionKind.QuickFix];
   constructor(private auditContext: AuditContext, private cache: Cache) {}
@@ -329,20 +412,23 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
     context: vscode.CodeActionContext,
     token: vscode.CancellationToken
   ): Promise<vscode.CodeAction[]> {
-    const simple: vscode.CodeAction[] = [];
-    const combined: vscode.CodeAction[] = [];
-    const bulk: vscode.CodeAction[] = [];
+    const actions: vscode.CodeAction[] = [];
 
     const uri = document.uri.toString();
-    const issues = this.auditContext.auditsByDocument[uri]?.issues[uri];
+    const audit = this.auditContext.auditsByDocument[uri];
+    const issues = audit?.issues[uri];
+
     if (!issues || issues.length === 0) {
       return [];
     }
 
-    const titles = [];
-    const problems = [];
+    const version = this.cache.getDocumentVersionByDocumentUri(audit.summary.documentUri);
+    const bundle = await this.cache.getDocumentBundleByDocumentUri(audit.summary.documentUri);
+
+    const titles: string[] = [];
+    const problems: string[] = [];
     const parameters = [];
-    const assembledIssues = [];
+    const combinedIssues: Issue[] = [];
     let fixObject = {};
     const issuesByPointer = getIssuesByPointers(issues);
 
@@ -359,89 +445,28 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
         (issue: Issue) => issue.id === diagnostic.id
       );
 
-      // Single Fix
-      const action = new vscode.CodeAction(fix.title, vscode.CodeActionKind.QuickFix);
-      action.command = {
-        arguments: [issue, fix],
-        command: "openapi.simpleQuickFix",
-        title: fix.title,
-      };
-      action.diagnostics = [diagnostic];
-      action.isPreferred = true;
-      simple.push(action);
+      actions.push(...createSingleAction(diagnostic, issue, fix));
+      actions.push(...createBulkAction(version, bundle, diagnostic, issues, fix));
 
-      if (fix.type === FixType.Insert) {
-        fix.fix;
-      }
-
-      // Assembled Fix
+      // Combined Fix
       if (fix.type == FixType.Insert && !fix.pointer && !Array.isArray(fix.fix)) {
-        problems.push(fix.problem);
+        problems.push(...fix.problem);
         updateTitle(titles, fix.title);
         if (fix.parameters) {
           for (const parameter of fix.parameters) {
             const par = <FixParameter>simpleClone(parameter);
-            par.fixIndex = assembledIssues.length;
+            par.fixIndex = combinedIssues.length;
             parameters.push(par);
           }
         }
         fixObject = { ...fixObject, ...fix.fix };
-        assembledIssues.push(issue[0]);
-      }
-
-      // Bulk Fix
-      const mainDocumentUri = this.auditContext.auditsByDocument[document.uri.toString()]?.summary
-        .documentUri;
-      const version = this.cache.getDocumentVersionByDocumentUri(mainDocumentUri);
-      const bundle = await this.cache.getDocumentBundleByDocumentUri(mainDocumentUri);
-
-      const similarIssues = issues
-        .filter((issue: Issue) => issue.id === diagnostic.id)
-        .filter((issue) => {
-          if (!fix.parameters) {
-            return true;
-          }
-          const nonEmptyParameterValues = fix.parameters
-            .map((parameter) => getSourceValue(issue, fix, parameter, version, bundle))
-            .filter((values) => values.length > 0);
-          return fix.parameters.length === nonEmptyParameterValues.length;
-        });
-
-      if (similarIssues.length > 1) {
-        const bulkTitle = `Group fix: ${fix.title} in ${similarIssues.length} locations`;
-        const bulkAction = new vscode.CodeAction(bulkTitle, vscode.CodeActionKind.QuickFix);
-        bulkAction.command = {
-          arguments: [similarIssues, fix],
-          command: "openapi.simpleQuickFix",
-          title: bulkTitle,
-        };
-        bulkAction.diagnostics = [diagnostic];
-        bulkAction.isPreferred = false;
-        bulk.push(bulkAction);
+        combinedIssues.push(issue[0]);
       }
     }
 
-    // Register Assembled Fix
-    if (assembledIssues.length > 1) {
-      const assembledFix = {
-        problems: problems,
-        title: titles.join(", ").replace("property", "properties").replace("response", "responses"),
-        type: FixType.Insert,
-        fix: fixObject,
-        parameters: parameters,
-      };
-      const action = new vscode.CodeAction(assembledFix.title, vscode.CodeActionKind.QuickFix);
-      action.command = {
-        arguments: [assembledIssues, assembledFix],
-        command: "openapi.simpleQuickFix",
-        title: assembledFix.title,
-      };
-      action.diagnostics = [];
-      action.isPreferred = true;
-      combined.push(action);
-    }
+    actions.push(...createCombinedAction(combinedIssues, titles, problems, parameters, fixObject));
 
-    return [...simple, ...combined, ...bulk];
+    return actions;
   }
 }
 
