@@ -15,8 +15,11 @@ import {
   FixSnippetParameters,
   InsertReplaceRenameFix,
   Issue,
-  OpenApiVersion,
   RegexReplaceFix,
+  Fix,
+  FixType,
+  OpenApiVersion,
+  BundleResult,
 } from "../types";
 import { Node } from "@xliic/openapi-ast-node";
 import { updateDiagnostics } from "./diagnostic";
@@ -35,9 +38,9 @@ import {
   simpleClone,
 } from "../util";
 import { Cache } from "../cache";
-import { FixType } from "../types";
+import parameterSources from "./quickfix-sources";
 
-const registeredQuickFixes: { [key: string]: any } = {};
+const registeredQuickFixes: { [key: string]: Fix } = {};
 
 function fixRegexReplace(context: FixContext) {
   const document = context.document;
@@ -301,42 +304,38 @@ export function registerQuickfixes(
     async (editor, edit, issues, fix) => quickFixCommand(editor, issues, fix, auditContext, cache)
   );
 
-  vscode.languages.registerCodeActionsProvider("yaml", new AuditCodeActions(auditContext), {
+  vscode.languages.registerCodeActionsProvider("yaml", new AuditCodeActions(auditContext, cache), {
     providedCodeActionKinds: AuditCodeActions.providedCodeActionKinds,
   });
 
-  vscode.languages.registerCodeActionsProvider("json", new AuditCodeActions(auditContext), {
+  vscode.languages.registerCodeActionsProvider("json", new AuditCodeActions(auditContext, cache), {
     providedCodeActionKinds: AuditCodeActions.providedCodeActionKinds,
   });
 
   for (const fix of quickfixes.fixes) {
     for (const problemId of fix.problem) {
-      registeredQuickFixes[problemId] = fix;
+      registeredQuickFixes[problemId] = <Fix>fix;
     }
   }
 }
 
 export class AuditCodeActions implements vscode.CodeActionProvider {
   public static readonly providedCodeActionKinds = [vscode.CodeActionKind.QuickFix];
-  auditContext: AuditContext;
+  constructor(private auditContext: AuditContext, private cache: Cache) {}
 
-  constructor(auditContext: AuditContext) {
-    this.auditContext = auditContext;
-  }
-
-  provideCodeActions(
+  async provideCodeActions(
     document: vscode.TextDocument,
     range: vscode.Range | vscode.Selection,
     context: vscode.CodeActionContext,
     token: vscode.CancellationToken
-  ): vscode.ProviderResult<(vscode.Command | vscode.CodeAction)[]> {
+  ): Promise<vscode.CodeAction[]> {
     const simple: vscode.CodeAction[] = [];
     const combined: vscode.CodeAction[] = [];
     const bulk: vscode.CodeAction[] = [];
 
     const uri = document.uri.toString();
-    const issues = getIssuesByURI(this.auditContext, uri);
-    if (issues.length === 0) {
+    const issues = this.auditContext.auditsByDocument[uri]?.issues[uri];
+    if (!issues || issues.length === 0) {
       return [];
     }
 
@@ -347,17 +346,17 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
     let fixObject = {};
     const issuesByPointer = getIssuesByPointers(issues);
 
-    for (const diagnostic of context.diagnostics) {
-      const auditDiagnostic = <AuditDiagnostic>diagnostic;
-      if (!auditDiagnostic.hasOwnProperty("id") || !auditDiagnostic.hasOwnProperty("pointer")) {
-        continue;
+    // Only AuditDiagnostic with fixes in registeredQuickFixes
+    const diagnostics: AuditDiagnostic[] = <AuditDiagnostic[]>context.diagnostics.filter(
+      (diagnostic) => {
+        return diagnostic["id"] && diagnostic["pointer"] && registeredQuickFixes[diagnostic["id"]];
       }
-      const fix = registeredQuickFixes[auditDiagnostic.id];
-      if (!fix) {
-        continue;
-      }
-      const issue = issuesByPointer[auditDiagnostic.pointer].filter(
-        (issue: Issue) => issue.id === auditDiagnostic.id
+    );
+
+    for (const diagnostic of diagnostics) {
+      const fix = registeredQuickFixes[diagnostic.id];
+      const issue = issuesByPointer[diagnostic.pointer].filter(
+        (issue: Issue) => issue.id === diagnostic.id
       );
 
       // Single Fix
@@ -370,6 +369,10 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
       action.diagnostics = [diagnostic];
       action.isPreferred = true;
       simple.push(action);
+
+      if (fix.type === FixType.Insert) {
+        fix.fix;
+      }
 
       // Assembled Fix
       if (fix.type == FixType.Insert && !fix.pointer && !Array.isArray(fix.fix)) {
@@ -387,12 +390,28 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
       }
 
       // Bulk Fix
-      const sameIssues = issues.filter((issue: Issue) => issue.id === auditDiagnostic.id);
-      if (sameIssues && sameIssues.length > 1) {
-        const bulkTitle = `Group fix: ${fix.title} in ${sameIssues.length} locations`;
+      const mainDocumentUri = this.auditContext.auditsByDocument[document.uri.toString()]?.summary
+        .documentUri;
+      const version = this.cache.getDocumentVersionByDocumentUri(mainDocumentUri);
+      const bundle = await this.cache.getDocumentBundleByDocumentUri(mainDocumentUri);
+
+      const similarIssues = issues
+        .filter((issue: Issue) => issue.id === diagnostic.id)
+        .filter((issue) => {
+          if (!fix.parameters) {
+            return true;
+          }
+          const nonEmptyParameterValues = fix.parameters
+            .map((parameter) => getSourceValue(issue, fix, parameter, version, bundle))
+            .filter((values) => values.length > 0);
+          return fix.parameters.length === nonEmptyParameterValues.length;
+        });
+
+      if (similarIssues.length > 1) {
+        const bulkTitle = `Group fix: ${fix.title} in ${similarIssues.length} locations`;
         const bulkAction = new vscode.CodeAction(bulkTitle, vscode.CodeActionKind.QuickFix);
         bulkAction.command = {
-          arguments: [sameIssues, fix],
+          arguments: [similarIssues, fix],
           command: "openapi.simpleQuickFix",
           title: bulkTitle,
         };
@@ -424,6 +443,21 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
 
     return [...simple, ...combined, ...bulk];
   }
+}
+
+function getSourceValue(
+  issue: Issue,
+  fix: Fix,
+  parameter: FixParameter,
+  version: OpenApiVersion,
+  bundle: BundleResult
+): any[] {
+  if (parameter.source && parameterSources[parameter.source]) {
+    const source = parameterSources[parameter.source];
+    const value = source(issue, fix, parameter, version, bundle);
+    return value;
+  }
+  return [];
 }
 
 export function updateTitle(titles: string[], title: string): void {
@@ -461,10 +495,6 @@ function getWorkspaceEdit(context: FixContext) {
   }
   context.edit = new vscode.WorkspaceEdit();
   return context.edit;
-}
-
-function getIssuesByURI(auditContext: AuditContext, uri: string): Issue[] {
-  return auditContext?.auditsByDocument[uri]?.issues[uri];
 }
 
 function getIssuesByPointers(issues: Issue[]): { [key: string]: Issue[] } {

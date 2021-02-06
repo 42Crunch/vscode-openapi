@@ -25,7 +25,7 @@ export function registerSecurityAudit(
 ) {
   return vscode.commands.registerTextEditorCommand(
     "openapi.securityAudit",
-    async (textEditor, edit) => {
+    async (textEditor: vscode.TextEditor, edit) => {
       const uri = textEditor.document.uri.toString();
 
       if (pendingAudits[uri]) {
@@ -69,22 +69,28 @@ export function registerSecurityAudit(
   );
 }
 
-export function registerFocusSecurityAudit(context, auditContext) {
+export function registerFocusSecurityAudit(
+  context: vscode.ExtensionContext,
+  auditContext: AuditContext
+) {
   return vscode.commands.registerCommand("openapi.focusSecurityAudit", (documentUri) => {
-    const audit = auditContext.audits[documentUri];
+    const audit = auditContext.auditsByMainDocument[documentUri];
     if (audit) {
-      ReportWebView.show(context.extensiontPath, audit);
+      ReportWebView.show(context.extensionPath, audit);
     }
   });
 }
 
-export function registerFocusSecurityAuditById(context, auditContext) {
+export function registerFocusSecurityAuditById(
+  context: vscode.ExtensionContext,
+  auditContext: AuditContext
+) {
   return vscode.commands.registerTextEditorCommand(
     "openapi.focusSecurityAuditById",
     (textEditor, edit, params) => {
       const documentUri = textEditor.document.uri.toString();
       const uri = Buffer.from(params.uri, "base64").toString("utf8");
-      const audit = auditContext.audits[uri];
+      const audit = auditContext.auditsByMainDocument[uri];
       if (audit && audit.issues[documentUri]) {
         ReportWebView.showIds(context.extensionPath, audit, documentUri, params.ids);
       }
@@ -227,7 +233,7 @@ function findIssueLocation(mainUri: vscode.Uri, root: Node, mappings, pointer): 
 }
 
 async function processIssues(
-  document,
+  document: vscode.TextDocument,
   cache: Cache,
   mappings,
   issues: ReportedIssue[]

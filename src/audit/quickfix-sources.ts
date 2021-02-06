@@ -1,5 +1,12 @@
 import { parseJsonPointer } from "../pointer";
-import { Fix, FixParameter, Issue, FixParameterSource, OpenApiVersion, BundleResult } from "../types";
+import {
+  Fix,
+  FixParameter,
+  Issue,
+  FixParameterSource,
+  OpenApiVersion,
+  BundleResult,
+} from "../types";
 
 function securitySchemes(
   issue: Issue,
@@ -8,7 +15,6 @@ function securitySchemes(
   version: OpenApiVersion,
   bundle: BundleResult
 ): any[] {
-
   if ("errors" in bundle) {
     return [];
   }
@@ -31,13 +37,12 @@ function mostUsedByName(
   version: OpenApiVersion,
   bundle: BundleResult
 ): any[] {
-
   const propertyHints = buildPropertyHints(bundle);
   const issuePointer = parseJsonPointer(issue.pointer);
   const parameterPointer = parseJsonPointer(parameter.path);
   const name = issuePointer[issuePointer.length - 1];
   const property = parameterPointer[parameterPointer.length - 1];
-  if (propertyHints[name] && propertyHints[name][property]) {
+  if (propertyHints[name] && propertyHints[name][property] !== undefined) {
     return [propertyHints[name][property]];
   }
 

@@ -96,21 +96,6 @@ export interface AuditDiagnostic extends vscode.Diagnostic {
   pointer: string;
 }
 
-export interface InsertReplaceRenameFix extends Fix {
-  type: FixType.Insert | FixType.Replace | FixType.RenameKey;
-  fix: any;
-}
-
-export interface DeleteFix extends Fix {
-  type: FixType.Delete;
-}
-
-export interface RegexReplaceFix extends Fix {
-  type: FixType.RegexReplace;
-  match: string;
-  replace: string;
-}
-
 export enum FixType {
   Insert = "insert",
   Replace = "replace",
@@ -119,7 +104,7 @@ export enum FixType {
   RenameKey = "renameKey",
 }
 
-export interface Fix {
+export interface BaseFix {
   problem: string[];
   type: FixType;
   title: string;
@@ -128,6 +113,23 @@ export interface Fix {
   issueIndexes?: number[];
   issueURIs?: string[];
 }
+
+export interface InsertReplaceRenameFix extends BaseFix {
+  type: FixType.Insert | FixType.Replace | FixType.RenameKey;
+  fix: any;
+}
+
+export interface DeleteFix extends BaseFix {
+  type: FixType.Delete;
+}
+
+export interface RegexReplaceFix extends BaseFix {
+  type: FixType.RegexReplace;
+  match: string;
+  replace: string;
+}
+
+export type Fix = InsertReplaceRenameFix | DeleteFix | RegexReplaceFix;
 
 export interface FixParameter {
   name: string;
@@ -152,7 +154,7 @@ export interface FixContext {
   editor: vscode.TextEditor;
   edit: vscode.WorkspaceEdit;
   issues: Issue[];
-  fix: InsertReplaceRenameFix | RegexReplaceFix | DeleteFix;
+  fix: Fix;
   bulk: boolean;
   snippet?: boolean;
   snippetParameters?: FixSnippetParameters;
