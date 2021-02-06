@@ -17,8 +17,8 @@ import { setDecorations } from "./decoration";
 
 export function activate(context: vscode.ExtensionContext, cache: Cache) {
   const auditContext: AuditContext = {
-    audits: {},
-    auditsBySubDocument: {},
+    auditsByMainDocument: {},
+    auditsByDocument: {},
     decorations: {},
     diagnostics: vscode.languages.createDiagnosticCollection("audits"),
   };
@@ -28,11 +28,11 @@ export function activate(context: vscode.ExtensionContext, cache: Cache) {
     if (editor) {
       setDecorations(editor, auditContext);
       const uri = editor.document.uri.toString();
-      if (auditContext.audits[uri]) {
-        ReportWebView.showIfVisible(auditContext.audits[uri]);
+      if (auditContext.auditsByMainDocument[uri]) {
+        ReportWebView.showIfVisible(auditContext.auditsByMainDocument[uri]);
       } else {
         let subdocument = false;
-        for (const audit of Object.values(auditContext.audits)) {
+        for (const audit of Object.values(auditContext.auditsByMainDocument)) {
           if (audit.summary.subdocumentUris.includes(uri)) {
             subdocument = true;
           }

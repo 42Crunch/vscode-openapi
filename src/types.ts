@@ -85,8 +85,8 @@ export interface Audit {
 }
 
 export interface AuditContext {
-  audits: DocumentAudits;
-  auditsBySubDocument: DocumentAudits;
+  auditsByMainDocument: DocumentAudits;
+  auditsByDocument: DocumentAudits;
   decorations: DocumentDecorations;
   diagnostics: vscode.DiagnosticCollection;
 }
