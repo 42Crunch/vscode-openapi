@@ -7,7 +7,7 @@ export function getLocationByPointer(
   pointer: string
 ): [number, vscode.Range] {
   // FIXME markerNode can only be returned for the main document
-  // perhaps we nee dto pass Audit here and make this function
+  // perhaps we need to pass Audit here and make this function
   // to return documentUri of current/main document
   // depending on pointer == ""?
   const markerNode = root.find("/openapi") || root.find("/swagger");
