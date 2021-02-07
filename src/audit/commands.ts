@@ -16,6 +16,7 @@ import { Node } from "@xliic/openapi-ast-node";
 import { AuditContext, Audit, Grades, Issue, ReportedIssue, IssuesByDocument } from "../types";
 
 import { Cache } from "../cache";
+import { getLocationByPointer } from "./util";
 
 export function registerSecurityAudit(
   context: vscode.ExtensionContext,
@@ -284,8 +285,6 @@ async function auditDocument(
     [mainDocument.uri.toString()]: [mainDocument, mainRoot],
   };
 
-  const markerNode = mainRoot.find("/openapi") || mainRoot.find("/swagger");
-
   // load and parse all documents
   for (const uri of documentUris) {
     if (!files[uri]) {
@@ -296,29 +295,17 @@ async function auditDocument(
   }
 
   const issues: IssuesByDocument = {};
-
   for (const [uri, reportedIssues] of Object.entries(issuesPerDocument)) {
     const [document, root] = files[uri];
     issues[uri] = reportedIssues.map(
       (issue: ReportedIssue): Issue => {
-        // '' applies only to the main document
-        const node = issue.pointer === "" ? markerNode : root.find(issue.pointer);
-        if (node) {
-          const [start, end] = node.getRange();
-          const position = document.positionAt(start);
-          const line = document.lineAt(position.line);
-          return {
-            ...issue,
-            documentUri: uri,
-            lineNo: position.line,
-            range: new vscode.Range(
-              new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
-              new vscode.Position(position.line, line.range.end.character)
-            ),
-          };
-        } else {
-          throw new Error(`Unable to locate node: ${issue.pointer}`);
-        }
+        const [lineNo, range] = getLocationByPointer(document, root, issue.pointer);
+        return {
+          ...issue,
+          documentUri: uri,
+          lineNo,
+          range,
+        };
       }
     );
   }
