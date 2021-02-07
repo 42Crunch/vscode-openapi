@@ -6,7 +6,6 @@
 import * as vscode from "vscode";
 import * as quickfixes from "./quickfixes.json";
 import {
-  Audit,
   AuditContext,
   AuditDiagnostic,
   DeleteFix,
@@ -39,6 +38,7 @@ import {
 } from "../util";
 import { Cache } from "../cache";
 import parameterSources from "./quickfix-sources";
+import { getLocationByPointer } from "./util";
 
 const registeredQuickFixes: { [key: string]: Fix } = {};
 
@@ -241,12 +241,6 @@ async function quickFixCommand(
   }
 
   // update diagnostics
-  const audits: Audit[] = auditContext.auditsByMainDocument[uri]
-    ? [auditContext.auditsByMainDocument[uri]]
-    : Object.values(auditContext.auditsByMainDocument).filter(
-        (audit: Audit) => uri in audit.issues
-      );
-
   // create temp hash set to have constant time complexity while searching for fixed issues
   const fixedIssueIds: Set<string> = new Set();
   const fixedIssueIdAndPointers: Set<string> = new Set();
@@ -255,43 +249,25 @@ async function quickFixCommand(
     fixedIssueIdAndPointers.add(issue.id + issue.pointer);
   });
 
-  // update audit and refresh diagnostics and decorations
-  for (const audit of audits) {
-    const root2 = await cache.getDocumentAst(document);
-
-    // update range for all issues (since the fix has potentially changed line numbering in the file)
-    const updatedIssues: Issue[] = [];
-    for (const issue of audit.issues[uri]) {
-      if (fixedIssueIdAndPointers.has(getIssueUniqueId(issue))) {
-        continue;
-      }
-      issue.range = range(document, root2, issue.pointer);
-      updatedIssues.push(issue);
+  // update range for all issues (since the fix has potentially changed line numbering in the file)
+  const root = await cache.getDocumentAst(document);
+  const updatedIssues: Issue[] = [];
+  for (const issue of audit.issues[uri]) {
+    if (fixedIssueIdAndPointers.has(getIssueUniqueId(issue))) {
+      continue;
     }
-    audit.issues[uri] = updatedIssues;
-
-    // rebuild diagnostics and decorations and refresh report
-    updateDiagnostics(auditContext.diagnostics, audit.filename, audit.issues, editor);
-    updateDecorations(auditContext.decorations, uri.toString(), audit.issues);
-    setDecorations(editor, auditContext);
-    ReportWebView.showIfVisible(audit);
+    const [lineNo, range] = getLocationByPointer(document, root, issue.pointer);
+    issue.lineNo = lineNo;
+    issue.range = range;
+    updatedIssues.push(issue);
   }
-}
+  audit.issues[uri] = updatedIssues;
 
-function range(document: vscode.TextDocument, root: Node, pointer: string) {
-  const markerNode = root.find("/openapi") || root.find("/swagger");
-  const node = pointer === "" ? markerNode : root.find(pointer);
-  if (node) {
-    const [start, end] = node.getRange();
-    const position = document.positionAt(start);
-    const line = document.lineAt(position.line);
-    return new vscode.Range(
-      new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
-      new vscode.Position(position.line, line.range.end.character)
-    );
-  } else {
-    throw new Error(`Unable to locate node: ${pointer}`);
-  }
+  // rebuild diagnostics and decorations and refresh report
+  updateDiagnostics(auditContext.diagnostics, audit.filename, audit.issues, editor);
+  updateDecorations(auditContext.decorations, audit.summary.documentUri, audit.issues);
+  setDecorations(editor, auditContext);
+  ReportWebView.showIfVisible(audit);
 }
 
 export function registerQuickfixes(
@@ -369,23 +345,22 @@ function createBulkAction(
   version: OpenApiVersion,
   bundle: BundleResult,
   diagnostic: AuditDiagnostic,
+  issue: Issue,
   issues: Issue[],
   fix: Fix
 ): vscode.CodeAction[] {
-  // find issues with the same id, and if the fix has parameters
-  // check that all issues have parameter values retrieved from 'source'
-  // so there is no issues where default parameters would be applied
+  // FIXME for offering the bulk action, make sure that current issue also has
+  // parameter values from source
+
+  // continue only if the current issue has non-default params
+  if (!hasNonDefaultParams(issue, fix, version, bundle)) {
+    return [];
+  }
+
+  // all issues with same id and non-default params
   const similarIssues = issues
     .filter((issue: Issue) => issue.id === diagnostic.id)
-    .filter((issue) => {
-      if (!fix.parameters) {
-        return true;
-      }
-      const nonEmptyParameterValues = fix.parameters
-        .map((parameter) => getSourceValue(issue, fix, parameter, version, bundle))
-        .filter((values) => values.length > 0);
-      return fix.parameters.length === nonEmptyParameterValues.length;
-    });
+    .filter((issue) => hasNonDefaultParams(issue, fix, version, bundle));
 
   if (similarIssues.length > 1) {
     const bulkTitle = `Group fix: ${fix.title} in ${similarIssues.length} locations`;
@@ -399,7 +374,25 @@ function createBulkAction(
     bulkAction.isPreferred = false;
     return [bulkAction];
   }
+
   return [];
+}
+
+function hasNonDefaultParams(
+  issue: Issue,
+  fix: Fix,
+  version: OpenApiVersion,
+  bundle: BundleResult
+) {
+  if (!fix.parameters) {
+    return true;
+  }
+
+  const nonDefaultParameterValues = fix.parameters
+    .map((parameter) => getSourceValue(issue, fix, parameter, version, bundle))
+    .filter((values) => values.length > 0);
+
+  return fix.parameters.length === nonDefaultParameterValues.length;
 }
 
 export class AuditCodeActions implements vscode.CodeActionProvider {
@@ -446,7 +439,7 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
       );
 
       actions.push(...createSingleAction(diagnostic, issue, fix));
-      actions.push(...createBulkAction(version, bundle, diagnostic, issues, fix));
+      actions.push(...createBulkAction(version, bundle, diagnostic, issue[0], issues, fix));
 
       // Combined Fix
       if (fix.type == FixType.Insert && !fix.pointer && !Array.isArray(fix.fix)) {
