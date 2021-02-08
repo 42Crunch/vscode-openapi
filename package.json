@@ -4,7 +4,7 @@
   "displayName": "OpenAPI (Swagger) Editor",
   "description": "OpenAPI extension for Visual Studio Code",
   "license": "AGPL-3.0-only",
-  "version": "3.10.0",
+  "version": "3.11.0",
   "publisher": "42Crunch",
   "repository": "https://github.com/42Crunch/vscode-openapi",
   "icon": "resources/icons/extension.png",
@@ -195,7 +195,7 @@
           "when": "!openapiErrors && view == openapiTwoSecurityDefinitionOutline"
         },
         {
-          "command": "openapi.addSecurityDefinitionOauth2Implicit",
+          "command": "openapi.addSecurityDefinitionOauth2Access",
           "when": "!openapiErrors && view == openapiTwoSecurityDefinitionOutline"
         },
         {
@@ -235,7 +235,7 @@
           "when": "!openapiErrors && view == openapiThreeComponentsOutline"
         },
         {
-          "command": "openapi.v3addSecuritySchemeOauth2Implicit",
+          "command": "openapi.v3addSecuritySchemeOauth2Access",
           "when": "!openapiErrors && view == openapiThreeComponentsOutline"
         },
         {
@@ -311,7 +311,7 @@
       },
       {
         "command": "openapi.v3addSecuritySchemeBasic",
-        "title": "OpenAPI: add security scheme 'basic'"
+        "title": "OpenAPI: add security scheme 'Basic'"
       },
       {
         "command": "openapi.v3addSecuritySchemeApiKey",
@@ -322,8 +322,8 @@
         "title": "OpenAPI: add security scheme 'JWT Bearer'"
       },
       {
-        "command": "openapi.v3addSecuritySchemeOauth2Implicit",
-        "title": "OpenAPI: add security scheme 'Oauth2 Implicit flow'"
+        "command": "openapi.v3addSecuritySchemeOauth2Access",
+        "title": "OpenAPI: add security scheme 'Oauth2 Authorization Code'"
       },
       {
         "command": "openapi.securityAudit",
@@ -352,15 +352,15 @@
       },
       {
         "command": "openapi.addSecurityDefinitionBasic",
-        "title": "OpenAPI: add 'basic' auth entry"
+        "title": "OpenAPI: add security scheme 'Basic'"
       },
       {
-        "command": "openapi.addSecurityDefinitionOauth2Implicit",
-        "title": "OpenAPI: add 'oauth2' implicit flow entry"
+        "command": "openapi.addSecurityDefinitionOauth2Access",
+        "title": "OpenAPI: add security scheme 'OAuth2 Authorization Code'"
       },
       {
         "command": "openapi.addSecurityDefinitionApiKey",
-        "title": "OpenAPI: add 'apiKey' auth entry"
+        "title": "OpenAPI: add security scheme 'API Key'"
       },
       {
         "command": "openapi.addDefinitionObject",
