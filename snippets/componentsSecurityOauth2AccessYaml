@@ -1,8 +1,9 @@
 ${1:name}:
 	type: oauth2
 	flows:
-		implicit:
+		authorizationCode:
 			authorizationUrl: '${2:https://domain.test/api/oauth/dialog}'
+			tokenUrl: '${3:https://domain.test/api/oauth/token}'
 			scopes:
 				read: example read scope
 				write: example write scope

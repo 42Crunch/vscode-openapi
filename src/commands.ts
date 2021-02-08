@@ -25,7 +25,7 @@ const commands = {
   addInfo,
   addSecurityDefinitionBasic,
   addSecurityDefinitionApiKey,
-  addSecurityDefinitionOauth2Implicit,
+  addSecurityDefinitionOauth2Access,
   addDefinitionObject,
   addParameterBody,
   addParameterPath,
@@ -40,7 +40,7 @@ const commands = {
   v3addSecuritySchemeBasic,
   v3addSecuritySchemeApiKey,
   v3addSecuritySchemeJWT,
-  v3addSecuritySchemeOauth2Implicit,
+  v3addSecuritySchemeOauth2Access,
 
   copySelectedTwoPathOutlineJsonReference,
   copySelectedTwoParametersOutlineJsonReference,
@@ -228,8 +228,8 @@ async function addSecurityDefinitionBasic(cache: Cache) {
   await insertSnippetIntoRoot(cache, "securityBasic", "securityDefinitions");
 }
 
-async function addSecurityDefinitionOauth2Implicit(cache: Cache) {
-  await insertSnippetIntoRoot(cache, "securityOauth2Implicit", "securityDefinitions");
+async function addSecurityDefinitionOauth2Access(cache: Cache) {
+  await insertSnippetIntoRoot(cache, "securityOauth2Access", "securityDefinitions");
 }
 
 async function addSecurityDefinitionApiKey(cache: Cache) {
@@ -284,8 +284,8 @@ async function v3addSecuritySchemeJWT(cache: Cache) {
   await insertSnippetIntoComponents(cache, "componentsSecurityJwt", "securitySchemes");
 }
 
-async function v3addSecuritySchemeOauth2Implicit(cache: Cache) {
-  await insertSnippetIntoComponents(cache, "componentsSecurityOauth2Implicit", "securitySchemes");
+async function v3addSecuritySchemeOauth2Access(cache: Cache) {
+  await insertSnippetIntoComponents(cache, "componentsSecurityOauth2Access", "securitySchemes");
 }
 
 async function v3addServer(cache: Cache) {
