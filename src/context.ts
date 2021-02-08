@@ -10,20 +10,22 @@ import { OpenApiVersion } from "./types";
 
 export async function updateContext(cache: Cache, document: vscode.TextDocument) {
   const version = cache.getDocumentVersion(document);
-  if (version === OpenApiVersion.V2) {
-    vscode.commands.executeCommand("setContext", "openapiTwoEnabled", true);
-    vscode.commands.executeCommand("setContext", "openapiThreeEnabled", false);
-  } else if (version === OpenApiVersion.V3) {
-    vscode.commands.executeCommand("setContext", "openapiThreeEnabled", true);
-    vscode.commands.executeCommand("setContext", "openapiTwoEnabled", false);
+
+  if (version !== OpenApiVersion.Unknown) {
+    if (version === OpenApiVersion.V2) {
+      vscode.commands.executeCommand("setContext", "openapiTwoEnabled", true);
+      vscode.commands.executeCommand("setContext", "openapiThreeEnabled", false);
+    } else if (version === OpenApiVersion.V3) {
+      vscode.commands.executeCommand("setContext", "openapiThreeEnabled", true);
+      vscode.commands.executeCommand("setContext", "openapiTwoEnabled", false);
+    }
+    const root = await cache.getLastGoodDocumentAst(document);
+    if (root) {
+      checkTree(root);
+    }
   } else {
     vscode.commands.executeCommand("setContext", "openapiTwoEnabled", false);
     vscode.commands.executeCommand("setContext", "openapiThreeEnabled", false);
-  }
-
-  const root = await cache.getLastGoodDocumentAst(document);
-  if (root) {
-    checkTree(root);
   }
 }
 

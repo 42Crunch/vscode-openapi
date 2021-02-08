@@ -20,7 +20,6 @@ import {
   OpenApiVersion,
   BundleResult,
 } from "../types";
-import { Node } from "@xliic/openapi-ast-node";
 import { updateDiagnostics } from "./diagnostic";
 import { updateDecorations, setDecorations } from "./decoration";
 import { ReportWebView } from "./report";
@@ -428,7 +427,11 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
     // Only AuditDiagnostic with fixes in registeredQuickFixes
     const diagnostics: AuditDiagnostic[] = <AuditDiagnostic[]>context.diagnostics.filter(
       (diagnostic) => {
-        return diagnostic["id"] && diagnostic["pointer"] && registeredQuickFixes[diagnostic["id"]];
+        return (
+          diagnostic["id"] &&
+          diagnostic["pointer"] !== undefined &&
+          registeredQuickFixes[diagnostic["id"]]
+        );
       }
     );
 
