@@ -493,9 +493,12 @@ export function updateTitle(titles: string[], title: string): void {
     titles.push(parts.join(" "));
     return;
   }
+  const plurals = {
+    property: "properties",
+    response: "responses"
+  };
   if (
-    parts[parts.length - 1].toLocaleLowerCase() !==
-    prevParts[prevParts.length - 1].toLocaleLowerCase()
+    !compareAsWord(parts[parts.length - 1], prevParts[prevParts.length - 1], plurals)
   ) {
     parts.shift();
     titles[titles.length - 1] += ", " + parts.join(" ");
@@ -506,8 +509,17 @@ export function updateTitle(titles: string[], title: string): void {
   let lastPrevPart = prevParts.pop();
   prevParts[prevParts.length - 1] += ",";
   prevParts.push(...parts);
+  if (lastPrevPart in plurals) {
+    lastPrevPart = plurals[lastPrevPart];
+  }
   prevParts.push(lastPrevPart);
   titles[titles.length - 1] = prevParts.join(" ");
+}
+
+function compareAsWord(a: string, b: string, plural: { [key: string]: string }): boolean {
+  a = a.toLocaleLowerCase();
+  b = b.toLocaleLowerCase();
+  return a === b || plural[a] === b || plural[b] === a;
 }
 
 function getWorkspaceEdit(context: FixContext) {
