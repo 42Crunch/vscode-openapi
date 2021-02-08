@@ -320,7 +320,7 @@ function createCombinedAction(
   if (issues.length > 1) {
     const combinedFix: InsertReplaceRenameFix = {
       problem,
-      title: titles.join(", ").replace("property", "properties").replace("response", "responses"),
+      title: titles.join(", "),
       type: FixType.Insert,
       fix: fixfix,
       parameters: parameters,
@@ -495,11 +495,9 @@ export function updateTitle(titles: string[], title: string): void {
   }
   const plurals = {
     property: "properties",
-    response: "responses"
+    response: "responses",
   };
-  if (
-    !compareAsWord(parts[parts.length - 1], prevParts[prevParts.length - 1], plurals)
-  ) {
+  if (!compareAsWord(parts[parts.length - 1], prevParts[prevParts.length - 1], plurals)) {
     parts.shift();
     titles[titles.length - 1] += ", " + parts.join(" ");
     return;
