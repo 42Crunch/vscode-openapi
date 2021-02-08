@@ -59,13 +59,7 @@ export class Cache {
   }
 
   async onDocumentChanged(event: vscode.TextDocumentChangeEvent) {
-    const activeDocument = vscode.window?.activeTextEditor.document;
-    if (
-      activeDocument === event.document &&
-      vscode.languages.match(this.selector, activeDocument) > 0
-    ) {
-      this.requestCacheEntryUpdateForActiveDocument(event.document);
-    }
+    this.requestCacheEntryUpdateForActiveDocument(event.document);
   }
 
   // TODO track on close events and clear non-json documents
@@ -73,14 +67,15 @@ export class Cache {
   async onActiveEditorChanged(editor: vscode.TextEditor | undefined) {
     // TODO don't re-parse if we've got up-to-date contents in the cache
     // compare documentVersion
-    if (editor && vscode.languages.match(this.selector, editor.document) > 0) {
-      this.requestCacheEntryUpdateForActiveDocument(editor.document);
-    }
+    this.requestCacheEntryUpdateForActiveDocument(editor?.document);
   }
 
   getDocumentVersion(document: vscode.TextDocument): OpenApiVersion {
-    const entry = this.cache[document.uri.toString()];
-    return entry ? entry.version : OpenApiVersion.Unknown;
+    if (document) {
+      const entry = this.cache[document.uri.toString()];
+      return entry ? entry.version : OpenApiVersion.Unknown;
+    }
+    return OpenApiVersion.Unknown;
   }
 
   getDocumentVersionByDocumentUri(uri: string): OpenApiVersion {
@@ -193,6 +188,11 @@ export class Cache {
 
   async requestCacheEntryUpdateForActiveDocument(document: vscode.TextDocument): Promise<void> {
     const MAX_UPDATE = 1000; // update no more ofent than
+    if (!document || vscode.languages.match(this.selector, document) === 0) {
+      this._didActiveDocumentChange.fire(document);
+      return;
+    }
+
     const uri = document.uri.toString();
     const now = Date.now();
     const lastUpdate = this.lastUpdate[uri];

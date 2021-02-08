@@ -7,6 +7,7 @@ import * as vscode from "vscode";
 import { Node } from "@xliic/openapi-ast-node";
 import { Cache } from "./cache";
 import { configuration } from "./configuration";
+import { OpenApiVersion } from "./types";
 
 export const outlines: { [id: string]: vscode.TreeView<Node> } = {};
 
@@ -20,14 +21,17 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
 
   constructor(private context: vscode.ExtensionContext, private cache: Cache) {
     cache.onDidActiveDocumentChange(async (document) => {
-      const pointer = this.getRootPointer();
-      const root = await cache.getLastGoodDocumentAst(document);
-      if (root && pointer) {
-        this.root = root.find(pointer);
-      } else if (root) {
-        this.root = root;
-      } else {
-        this.root = null;
+      const version = this.cache.getDocumentVersion(document);
+      if (version !== OpenApiVersion.Unknown) {
+        const pointer = this.getRootPointer();
+        const root = await cache.getLastGoodDocumentAst(document);
+        if (root && pointer) {
+          this.root = root.find(pointer);
+        } else if (root) {
+          this.root = root;
+        } else {
+          this.root = null;
+        }
       }
       this._onDidChangeTreeData.fire();
     });
