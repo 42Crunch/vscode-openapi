@@ -167,6 +167,8 @@ fixes:
         type: key
       - name: schema
         path: /202/content/application~1json/schema/$ref
+        source: schemaRefByResponseCode
+
 
   - problem:
       - v3-response-post-2xx
@@ -223,6 +225,7 @@ fixes:
         type: key
       - name: schema
         path: /401/content/application~1json/schema/$ref
+        source: schemaRefByResponseCode
 
   - problem:
       - v3-response-403
@@ -243,6 +246,7 @@ fixes:
         type: key
       - name: schema
         path: /403/content/application~1json/schema/$ref
+        source: schemaRefByResponseCode
 
   - problem:
       - v3-response-404
@@ -263,6 +267,8 @@ fixes:
         type: key
       - name: schema
         path: /404/content/application~1json/schema/$ref
+        source: schemaRefByResponseCode
+
 
   - problem:
       - v3-response-429
@@ -283,6 +289,7 @@ fixes:
         type: key
       - name: schema
         path: /429/content/application~1json/schema/$ref
+        source: schemaRefByResponseCode
 
   - problem:
       - v3-response-default-undefined
@@ -303,6 +310,7 @@ fixes:
         type: key
       - name: schema
         path: /default/content/application~1json/schema/$ref
+        source: schemaRefByResponseCode
 
   - problem:
       - response-post-2xx
@@ -341,6 +349,7 @@ fixes:
         path: /202/description
       - name: schema
         path: /202/schema/$ref
+        source: schemaRefByResponseCode
 
   - problem:
       - response-401
@@ -356,6 +365,7 @@ fixes:
         path: /401/description
       - name: schema
         path: /401/schema/$ref
+        source: schemaRefByResponseCode
 
   - problem:
       - response-403
@@ -371,6 +381,7 @@ fixes:
         path: /403/description
       - name: schema
         path: /403/schema/$ref
+        source: schemaRefByResponseCode
 
   - problem:
       - response-404
@@ -386,6 +397,7 @@ fixes:
         path: /404/description
       - name: schema
         path: /404/schema/$ref
+        source: schemaRefByResponseCode
 
   - problem:
       - response-429
@@ -401,6 +413,7 @@ fixes:
         path: /429/description
       - name: schema
         path: /429/schema/$ref
+        source: schemaRefByResponseCode
 
   - problem:
       - response-default-undefined
@@ -416,6 +429,7 @@ fixes:
         path: /default/description
       - name: schema
         path: /default/schema/$ref
+        source: schemaRefByResponseCode
 
   - problem:
       - v3-response-schema-defined
@@ -444,6 +458,7 @@ fixes:
         type: key
       - name: schema
         path: /content/application~1json/schema/$ref
+        source: schemaRefByResponseCode
 
   - problem:
       - response-schema-undefined
@@ -455,6 +470,7 @@ fixes:
     parameters:
       - name: schema
         path: /schema/$ref
+        source: schemaRefByResponseCode
 
   - problem:
       - v3-validation-schema-write-read-only

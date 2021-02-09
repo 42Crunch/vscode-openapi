@@ -220,7 +220,8 @@
         },
         {
           "name": "schema",
-          "path": "/202/content/application~1json/schema/$ref"
+          "path": "/202/content/application~1json/schema/$ref",
+          "source": "schemaRefByResponseCode"
         }
       ]
     },
@@ -307,7 +308,8 @@
         },
         {
           "name": "schema",
-          "path": "/401/content/application~1json/schema/$ref"
+          "path": "/401/content/application~1json/schema/$ref",
+          "source": "schemaRefByResponseCode"
         }
       ]
     },
@@ -341,7 +343,8 @@
         },
         {
           "name": "schema",
-          "path": "/403/content/application~1json/schema/$ref"
+          "path": "/403/content/application~1json/schema/$ref",
+          "source": "schemaRefByResponseCode"
         }
       ]
     },
@@ -375,7 +378,8 @@
         },
         {
           "name": "schema",
-          "path": "/404/content/application~1json/schema/$ref"
+          "path": "/404/content/application~1json/schema/$ref",
+          "source": "schemaRefByResponseCode"
         }
       ]
     },
@@ -409,7 +413,8 @@
         },
         {
           "name": "schema",
-          "path": "/429/content/application~1json/schema/$ref"
+          "path": "/429/content/application~1json/schema/$ref",
+          "source": "schemaRefByResponseCode"
         }
       ]
     },
@@ -443,7 +448,8 @@
         },
         {
           "name": "schema",
-          "path": "/default/content/application~1json/schema/$ref"
+          "path": "/default/content/application~1json/schema/$ref",
+          "source": "schemaRefByResponseCode"
         }
       ]
     },
@@ -499,7 +505,8 @@
         },
         {
           "name": "schema",
-          "path": "/202/schema/$ref"
+          "path": "/202/schema/$ref",
+          "source": "schemaRefByResponseCode"
         }
       ]
     },
@@ -524,7 +531,8 @@
         },
         {
           "name": "schema",
-          "path": "/401/schema/$ref"
+          "path": "/401/schema/$ref",
+          "source": "schemaRefByResponseCode"
         }
       ]
     },
@@ -549,7 +557,8 @@
         },
         {
           "name": "schema",
-          "path": "/403/schema/$ref"
+          "path": "/403/schema/$ref",
+          "source": "schemaRefByResponseCode"
         }
       ]
     },
@@ -574,7 +583,8 @@
         },
         {
           "name": "schema",
-          "path": "/404/schema/$ref"
+          "path": "/404/schema/$ref",
+          "source": "schemaRefByResponseCode"
         }
       ]
     },
@@ -599,7 +609,8 @@
         },
         {
           "name": "schema",
-          "path": "/429/schema/$ref"
+          "path": "/429/schema/$ref",
+          "source": "schemaRefByResponseCode"
         }
       ]
     },
@@ -624,7 +635,8 @@
         },
         {
           "name": "schema",
-          "path": "/default/schema/$ref"
+          "path": "/default/schema/$ref",
+          "source": "schemaRefByResponseCode"
         }
       ]
     },
@@ -667,7 +679,8 @@
         },
         {
           "name": "schema",
-          "path": "/content/application~1json/schema/$ref"
+          "path": "/content/application~1json/schema/$ref",
+          "source": "schemaRefByResponseCode"
         }
       ]
     },
@@ -685,7 +698,8 @@
       "parameters": [
         {
           "name": "schema",
-          "path": "/schema/$ref"
+          "path": "/schema/$ref",
+          "source": "schemaRefByResponseCode"
         }
       ]
     },
