@@ -49,6 +49,55 @@ function mostUsedByName(
   return [];
 }
 
+function schemaRefByResponseCode(
+  issue: Issue,
+  fix: Fix,
+  parameter: FixParameter,
+  version: OpenApiVersion,
+  bundle: BundleResult
+): any[] {
+  const schemaRefs = buildSchemaRefByResponseCode(version, bundle);
+  // FIXME maybe should account for fix.path?
+  const path = [...parseJsonPointer(issue.pointer), ...parseJsonPointer(parameter.path)].reverse();
+  const code = version === OpenApiVersion.V2 ? path[2] : path[4];
+  if (code && schemaRefs[code]) {
+    return [schemaRefs[code]];
+  }
+  return [];
+}
+
+function buildSchemaRefByResponseCode(version: OpenApiVersion, bundled: BundleResult): any {
+  if ("errors" in bundled) {
+    return [];
+  }
+
+  const hints = {};
+  const paths = bundled.value["paths"] ?? {};
+  for (const path of Object.keys(paths)) {
+    for (const operation of Object.values(paths[path])) {
+      const responses = operation["responses"] ?? {};
+      for (const [code, response] of Object.entries(responses)) {
+        const ref =
+          version == OpenApiVersion.V2
+            ? response?.["schema"]?.["$ref"]
+            : response?.["content"]?.["application/json"]?.["schema"]?.["$ref"];
+        if (ref) {
+          if (!hints[code]) {
+            hints[code] = [];
+          }
+          hints[code].push(ref);
+        }
+      }
+    }
+  }
+
+  for (const code of Object.keys(hints)) {
+    hints[code] = mode(hints[code]);
+  }
+
+  return hints;
+}
+
 function buildPropertyHints(bundled: BundleResult): any {
   const hints = {};
 
@@ -97,6 +146,10 @@ function mode(arr) {
     .pop();
 }
 
-const SOURCES: { [name: string]: FixParameterSource } = { securitySchemes, mostUsedByName };
+const SOURCES: { [name: string]: FixParameterSource } = {
+  securitySchemes,
+  mostUsedByName,
+  schemaRefByResponseCode,
+};
 
 export default SOURCES;
