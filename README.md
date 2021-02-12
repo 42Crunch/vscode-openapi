@@ -127,19 +127,21 @@ After the audit finishes, you get the audit report directly in the VS Code view,
 
 Many of the issues reported by the Security Audit have Fixes associated with them. These are code snippets that you can get inserted into the OpenAPI file and then customize with the appropriate value.
 
-To use the fixes:
-
-1. Perform Security Audit.
-
-2. Click on the line with the issue. If the issue has QuickFixes associated with it, the QuickFix floating menu appears to the left of the code.
-
-3. Expand the QuickFix menu and pick the fix that you want to be applied.
-
-4. Tweak the values inside of the snippet as you see fit.
+#### Individual fixes:
+1. Perform the Security Audit by clicking the **42c** button.
+2. When you click some of the error lines in your OpenAPI file, you will see the QuickFix icon show up on the left of the line.
+3. Click the icon and select the QuickFix to apply.
+4. Tweak the values in the inserted code snippet as you see fit.
 
 ![Quick Fixes in VSCode](/images/Quick_Fixes_in_VSCode.gif)
 
+#### Bulk fixes:
 
+If your OpenAPI file contains multiple similar issues - for example, a parameter with the same name is missing the pattern definition - you can fix all such occurances in one go:
+1. Fix the first occurance and supply the proper values in the code snippet.
+2. Go to the next occurance and use the bulk QuickFix. This bulk QuickFix will reuse the values that you used previously for the parameter with the same name.
+
+![Bulk Fixes in VSCode](/images/VSCode_OpenAPI_bulk_security_fixes.gif)
 
 ## Known issues
 
