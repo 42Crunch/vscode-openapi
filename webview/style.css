@@ -1,3 +1,127 @@
+body {
+		padding: 90px 20px 0px 20px;
+}
+
+h2 {
+	margin-top:40px;
+}
+
+.c_header {
+background-color: #f1f1f1;
+    position: fixed;
+    width: 100%;
+    padding: 10px 20px 10px 20px;
+    margin-left: -20px;
+    top: 0px;
+    border-bottom: 1px solid #bbb;
+    color: black;
+    font-size: 14px;
+	z-index:10
+}
+
+.c_footer {
+background-color: #f1f1f1;
+    position: fixed;
+    width: 100%;
+    padding: 20px 20px 20px 20px;
+    margin-left: -20px;
+    bottom: 0px;
+    border-top: 1px solid #bbb;
+    color: black;
+    font-size: 14px;
+}
+.bottom-menu ul{
+    margin: 0px;
+    padding: 0px;
+}
+.bottom-menu li{
+    float: left;
+    list-style: none;
+    font-weight: bold;
+    margin-right: 10px;
+}
+.bottom-menu li a{
+	text-decoration:none;
+}
+.c_header span img {
+	width:100px;
+	margin-left:10px;
+}
+
+.font-weight-bold {
+	font-weight:bold;
+}
+
+.c_roundedbox {
+	    padding: 20px;
+    border: 1px solid #c4c4c4;
+    border-radius: 10px;
+	margin-bottom:40px;
+}
+
+
+
+
+.c_roundedbox_section {
+	    padding: 20px;
+    border: 1px solid #c4c4c4;
+    border-radius: 10px;
+	margin-bottom:40px;
+}
+.c_roundedbox_section  h1{
+	margin-top:0px;
+}
+.c_roundedbox  h1{
+	margin-top:0px;
+	
+}
+.c_roundedbox h1 span{
+    border: 1px solid #c4c4c4;
+    border-radius: 5px;
+    padding: 5px 10px 5px 10px;
+	
+}
+.c_roundedbox h3 span{
+    border: 1px solid #c4c4c4;
+    border-radius: 5px;
+    padding: 5px 10px 5px 10px;
+	
+}
+.progress-bar-holder {
+	height: 10px;
+    width: 100%;
+    background-color: #c4c4c4;
+	position:relative;
+	border-radius: 10px;
+	
+}
+
+.progress-bar {
+	position:absolute;
+	left:0px;
+	top:0px;
+	height:100%;
+	background-color:#000;
+	border-radius: 10px;
+}
+.bar-red {
+	background-color:#ff1d5a;
+}
+.bar-yellow {
+	background-color:#ffb01d;
+}
+.bar-green {
+	background-color:#7bd21e;
+}
+.issue-id {
+border: 1px solid #c4c4c4;
+    border-radius: 5px;
+    padding: 5px 10px 5px 10px;
+    background-color: #b1b0b0;
+    color: #FFF;
+}
+
+/*
 .issue-id {
   color: rgba(255, 255, 255, 0.9);
   background-color: #6c757dbb;
@@ -7,3 +131,6 @@
   padding: 2px 6px;
   cursor: pointer;
 }
+*/
+
+
