@@ -51,9 +51,9 @@ function articleById(id: string, filename: string) {
 }
 
 function getHtml(
-  nonce: string,
   webview: vscode.Webview,
   styleUrl: vscode.Uri,
+  bootstrapUrl: vscode.Uri,
   scriptUrl: vscode.Uri,
   summary: string,
   issues: string,
@@ -70,13 +70,15 @@ function getHtml(
       <meta charset="UTF-8">
       <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${
         webview.cspSource
-      }; style-src ${webview.cspSource}; script-src 'nonce-${nonce}';">
+      }; style-src ${webview.cspSource} 'unsafe-inline'; script-src ${webview.cspSource};">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>API Contract Security Audit Report</title>
+      <link rel="stylesheet" href="${bootstrapUrl}">
       <link rel="stylesheet" href="${styleUrl}">
   </head>
   <body>
-      <script nonce="${nonce}" src="${scriptUrl}"></script>
+      <script src="${scriptUrl}"></script>
+
       ${summary || ""}
       ${issues || ""}
       ${backToReport}
@@ -100,6 +102,7 @@ function getIssueHtml(uri: string, filename: string, issue) {
   const base64Uri = Buffer.from(uri).toString("base64");
 
   return `
+  <div class="c_roundedbox_section">
     <h1>${issue.description}</h1>
 
 	<p>
@@ -115,7 +118,8 @@ function getIssueHtml(uri: string, filename: string, issue) {
 	  </small>
     </p>
 
-    ${article}`;
+    ${article}
+  </div>`;
 }
 
 function getSummary(summary: Summary) {
@@ -130,25 +134,20 @@ function getSummary(summary: Summary) {
     <hr>`;
   }
   return `
-    <h1>Security audit score: ${summary.all}</h1>
-    <h3>Security (${summary.security.value}/${summary.security.max})</h3>
-    <h3>Data validation (${summary.datavalidation.value}/${summary.datavalidation.max})</h3>
-    <div>
-    <small>
-      Please submit your feedback for the security audit <a href="https://github.com/42Crunch/vscode-openapi/issues">here</a>
-    </small>
+  <div class="c_roundedbox">  
+    <h1>Security audit score: <span>${summary.all} / 100</span></h1>
+    <div class="progress-bar-holder">
+      <div class="progress-bar bar-red" style="width: ${summary.all}%"></div>
     </div>
-    <hr>
+    <h3>Security: <span>${summary.security.value} / ${summary.security.max}</span></h3>
+    <h3>Data validation: <span>${summary.datavalidation.value} / ${summary.datavalidation.max}</span></h3>
+    <div>
+      <small>
+        Please submit your feedback for the security audit <a href="https://github.com/42Crunch/vscode-openapi/issues" title="https://github.com/42Crunch/vscode-openapi/issues">here</a>
+      </small>
+    </div>
+  </div>
 `;
-}
-
-function getNonce() {
-  let text = "";
-  const possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (let i = 0; i < 32; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
 }
 
 export class ReportWebView {
@@ -316,7 +315,9 @@ export class ReportWebView {
     const styleUrl = webview.asWebviewUri(
       vscode.Uri.file(path.join(this._extensionPath, "webview", "style.css"))
     );
-    const nonce = getNonce();
+    const bootstrapUrl = webview.asWebviewUri(
+      vscode.Uri.file(path.join(this._extensionPath, "webview", "bootstrap.min.css"))
+    );
 
     const mainPath = vscode.Uri.parse(audit.summary.documentUri).fsPath;
     const mainDir = path.dirname(mainPath);
@@ -341,9 +342,9 @@ export class ReportWebView {
         : `<h3>No issues found in this file</h3>`;
 
     this._panel.webview.html = getHtml(
-      nonce,
       webview,
       styleUrl,
+      bootstrapUrl,
       scriptUrl,
       summaryHtml,
       issuesHtml,
@@ -358,7 +359,9 @@ export class ReportWebView {
     const styleUrl = webview.asWebviewUri(
       vscode.Uri.file(path.join(this._extensionPath, "webview", "style.css"))
     );
-    const nonce = getNonce();
+    const bootstrapUrl = webview.asWebviewUri(
+      vscode.Uri.file(path.join(this._extensionPath, "webview", "bootstrap.min.css"))
+    );
 
     const mainPath = vscode.Uri.parse(audit.summary.documentUri).fsPath;
     const mainDir = path.dirname(mainPath);
@@ -369,9 +372,9 @@ export class ReportWebView {
     const issuesHtml = issues.map((issue) => getIssueHtml(uri, filename, issue)).join("\n");
 
     this._panel.webview.html = getHtml(
-      nonce,
       webview,
       styleUrl,
+      bootstrapUrl,
       scriptUrl,
       null,
       issuesHtml,
