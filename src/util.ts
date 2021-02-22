@@ -20,7 +20,7 @@ function getBasicIndentation(document: vscode.TextDocument, root: Node): [number
   const index = document.lineAt(position.line).firstNonWhitespaceCharacterIndex;
   const p0 = new vscode.Position(position.line, index - 1);
   const p1 = new vscode.Position(position.line, index);
-  const depth = document.languageId === "json" ? target.getDepth() : target.getDepth() - 1;
+  const depth = document.languageId === "yaml" ? target.getDepth() - 1 : target.getDepth();
   return [Math.round(index / depth), document.getText(new vscode.Range(p0, p1))];
 }
 

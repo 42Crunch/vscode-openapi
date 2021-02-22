@@ -52,10 +52,10 @@ function fixRegexReplace(context: FixContext) {
   context.snippet = false;
   const newValue = currentValue.replace(new RegExp(fix.match, "g"), fix.replace);
   let value: string, range: vscode.Range;
-  if (document.languageId === "json") {
-    [value, range] = replaceJsonNode(context, '"' + newValue + '"');
-  } else {
+  if (document.languageId === "yaml") {
     [value, range] = replaceYamlNode(context, newValue);
+  } else {
+    [value, range] = replaceJsonNode(context, '"' + newValue + '"');
   }
   const edit = getWorkspaceEdit(context);
   edit.replace(document.uri, range, value);
@@ -65,10 +65,10 @@ function fixInsert(context: FixContext) {
   const document = context.document;
   let value: string, position: vscode.Position;
   context.snippet = !context.bulk;
-  if (document.languageId === "json") {
-    [value, position] = insertJsonNode(context, getFixAsJsonString(context));
-  } else {
+  if (document.languageId === "yaml") {
     [value, position] = insertYamlNode(context, getFixAsYamlString(context));
+  } else {
+    [value, position] = insertJsonNode(context, getFixAsJsonString(context));
   }
   if (context.snippet) {
     context.snippetParameters = {
@@ -92,10 +92,10 @@ function fixReplace(context: FixContext) {
   const document = context.document;
   let value: string, range: vscode.Range;
   context.snippet = false;
-  if (document.languageId === "json") {
-    [value, range] = replaceJsonNode(context, getFixAsJsonString(context));
-  } else {
+  if (document.languageId === "yaml") {
     [value, range] = replaceYamlNode(context, getFixAsYamlString(context));
+  } else {
+    [value, range] = replaceJsonNode(context, getFixAsJsonString(context));
   }
   const edit = getWorkspaceEdit(context);
   edit.replace(document.uri, range, value);
@@ -105,10 +105,10 @@ function fixRenameKey(context: FixContext) {
   const document = context.document;
   let value: string;
   context.snippet = false;
-  if (document.languageId === "json") {
-    value = getFixAsJsonString(context);
-  } else {
+  if (document.languageId === "yaml") {
     value = getFixAsYamlString(context);
+  } else {
+    value = getFixAsJsonString(context);
   }
   const range = renameKeyNode(context);
   const edit = getWorkspaceEdit(context);
@@ -119,10 +119,10 @@ function fixDelete(context: FixContext) {
   const document = context.document;
   let range: vscode.Range;
   context.snippet = false;
-  if (document.languageId === "json") {
-    range = deleteJsonNode(context);
-  } else {
+  if (document.languageId === "yaml") {
     range = deleteYamlNode(context);
+  } else {
+    range = deleteJsonNode(context);
   }
   const edit = getWorkspaceEdit(context);
   edit.delete(document.uri, range);
@@ -284,6 +284,10 @@ export function registerQuickfixes(
   });
 
   vscode.languages.registerCodeActionsProvider("json", new AuditCodeActions(auditContext, cache), {
+    providedCodeActionKinds: AuditCodeActions.providedCodeActionKinds,
+  });
+
+  vscode.languages.registerCodeActionsProvider("jsonc", new AuditCodeActions(auditContext, cache), {
     providedCodeActionKinds: AuditCodeActions.providedCodeActionKinds,
   });
 
