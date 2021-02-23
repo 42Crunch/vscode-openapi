@@ -57,9 +57,13 @@ function getHtml(
   scriptUrl: vscode.Uri,
   summary: string,
   issues: string,
-  uri: string
+  uri: string,
+  extensionPath: string
 ): string {
   const base64Uri = Buffer.from(uri).toString("base64");
+  const logo = webview.asWebviewUri(
+    vscode.Uri.file(path.join(extensionPath, "resources", "logo.png"))
+  );
   const backToReport = summary
     ? ""
     : `<h4><a class="go-full-report" data-uri="${base64Uri}" href="#">Go back to full report</a></h4>`;
@@ -70,7 +74,9 @@ function getHtml(
       <meta charset="UTF-8">
       <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${
         webview.cspSource
-      }; style-src ${webview.cspSource} 'unsafe-inline'; script-src ${webview.cspSource};">
+      }; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'unsafe-inline' ${
+    webview.cspSource
+  };">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>API Contract Security Audit Report</title>
       <link rel="stylesheet" href="${bootstrapUrl}">
@@ -78,7 +84,26 @@ function getHtml(
   </head>
   <body>
       <script src="${scriptUrl}"></script>
-
+      <div class="c_header">
+      <div class="d-flex justify-content-between">
+        <div>
+          <span class="font-weight-bold">Powered by</span>
+          <span
+            ><a href="https://www.42crunch.com"><img valign="middle" src="${logo}" alt="" /></a
+          ></span>
+        </div>
+        <div>
+          <div class="dropdown">
+            <button class="dropbtn">Learn More</button>
+            <div class="dropdown-content">
+              <a href="#">42Crunch API Security Audit</a>
+              <a href="#">42Crunch API Conformance Scan</a>
+              <a href="#">42Crunch API Protection</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
       ${summary || ""}
       ${issues || ""}
       ${backToReport}
@@ -348,7 +373,8 @@ export class ReportWebView {
       scriptUrl,
       summaryHtml,
       issuesHtml,
-      audit.summary.documentUri
+      audit.summary.documentUri,
+      this._extensionPath
     );
   }
 
@@ -378,7 +404,8 @@ export class ReportWebView {
       scriptUrl,
       null,
       issuesHtml,
-      audit.summary.documentUri
+      audit.summary.documentUri,
+      this._extensionPath
     );
   }
 }
