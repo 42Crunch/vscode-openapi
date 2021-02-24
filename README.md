@@ -146,7 +146,6 @@ If your OpenAPI file contains multiple similar issues - for example, a parameter
 ## Known issues
 
 - For new files, IntelliSense does not work until you save the file. File extension must be `.json` or `.yaml`.
-- When you expand the sections and elements in the OpenAPI explorer, if the the left-hand panel gets very long, VS Code may push the last sections out of the UI. To view the sections that got pushed out, minimize the sections and elements you do not need. There is no scroll bar (yet) for the explorer section.
 
 ## Feedback
 
