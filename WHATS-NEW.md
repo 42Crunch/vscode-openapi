@@ -1,3 +1,37 @@
+# What's new in OpenAPI (Swagger) Editor version 4.0
+
+## QuickFixes for security issues found by Security Audit
+
+The extension now not only locates but also helps fix security issues in your OpenAPI definition.
+
+### Individual fixes:
+1. Perform the Security Audit by clicking the **42c** button.
+2. When you click some of the error lines in your OpenAPI file, you will see the QuickFix icon show up on the left of the line.
+3. Click the icon and select the QuickFix to apply.
+4. Tweak the values in the inserted code snippet as you see fit.
+
+![Quick Fixes in VSCode](/images/Quick_Fixes_in_VSCode.gif)
+
+### Bulk fixes:
+
+If your OpenAPI file contains multiple similar issues - for example, a parameter with the same name is missing the pattern definition - you can fix all such occurances in one go:
+1. Fix the first occurance and supply the proper values in the code snippet.
+2. Go to the next occurance and use the bulk QuickFix. This bulk QuickFix will reuse the values that you used previously for the parameter with the same name.
+
+![Bulk Fixes in VSCode](/images/VSCode_OpenAPI_bulk_security_fixes.gif)
+
+## HTML Preview Pane 
+
+You can get a documentation-style preview of the API you are editing by clicking the Preview button <img src="images/Preview_button.png" width=19 /> at the top right:
+
+![OpenAPI Preview Pane](images/OpenAPI_preview_pane.gif)
+
+## Support for external http references
+
+OpenAPI definiton files can be composite with parts of the API definition stored in external files and referenced in the main file using the `$ref` notation. We now support not only local component files but also ones referenced with http/https URLs. 
+
+For security reasons, the domains from which you want such component files to be downloaded should be added to the **Approved Hostnames** list in the extension's setting. 
+
 # What's new in OpenAPI (Swagger) Editor version 3.0
 
 Security Audit now supports composite OpenAPI files.
