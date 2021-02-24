@@ -17,8 +17,9 @@ Both OAS v2 and v3 are supported.
   * [Jump to a reference](#jump-to-a-reference)
   * [Sort entries in the navigation pane](#sort-entries-in-the-navigation-pane)
   * [Preview OpenAPI documentation](#preview-openapi-documentation)
-- [Use the extension to audit your API](#use-the-extension-to-audit-your-API)
+- [Use the extension to audit the security of your API](#use-the-extension-to-audit-the-security-of-your-API)
   * [Navigate the issues in the audit report](#navigate-the-issues-in-the-audit-report)
+  * [Fix issues](#fix-issues)
 - [Known issues](#known-issues)
 - [Feedback](#feedback)
 
@@ -121,6 +122,25 @@ After the audit finishes, you get the audit report directly in the VS Code view,
 4. Click the icons in the Status Bar to open the PROBLEMS panel and scroll through the issue titles. The issues are ordered from most to least severe, so it is easy for fix the worst offenders first. Note that recommendations are not listed in the PROBLEMS panel.
 5. Click on an issue in the PROBLEMS panel to jump to view it inline in your API definition.
 
+
+### Fix issues
+
+Many of the issues reported by the Security Audit have Fixes associated with them. These are code snippets that you can get inserted into the OpenAPI file and then customize with the appropriate value.
+
+To use the fixes:
+
+1. Perform Security Audit.
+
+2. Click on the line with the issue. If the issue has QuickFixes associated with it, the QuickFix floating menu appears to the left of the code.
+
+3. Expand the QuickFix menu and pick the fix that you want to be applied.
+
+4. Tweak the values inside of the snippet as you see fit.
+
+![Quick Fixes in VSCode](/images/Quick_Fixes_in_VSCode.gif)
+
+
+
 ## Known issues
 
 - For new files, IntelliSense does not work until you save the file. File extension must be `.json` or `.yaml`.
@@ -128,7 +148,7 @@ After the audit finishes, you get the audit report directly in the VS Code view,
 
 ## Feedback
 
-When you have a minute **PLEASE** submit your feedback and feature requests at [this superquick survey](https://www.surveymonkey.com/r/H3C8VC6).
+When you have a minute **PLEASE** submit your feedback and feature requests at [this superquick survey](https://www.surveymonkey.com/r/L7R69JR).
 
 Submit your bug reports at [GitHub project Issues](https://github.com/42Crunch/vscode-openapi/issues).
 
