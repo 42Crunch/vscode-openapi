@@ -22,7 +22,7 @@ If your OpenAPI file contains multiple similar issues - for example, a parameter
 
 ## HTML Preview Pane 
 
-You can get a documentation-style preview of the API you are editing by clicking the Preview button <img src="images/Preview_button.png" width=19 /> at the top right:
+You can get a documentation-style preview of the API you are editing by clicking the Preview button ![](images/Preview_button.png) at the top right:
 
 ![OpenAPI Preview Pane](images/OpenAPI_preview_pane.gif)
 
