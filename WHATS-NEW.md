@@ -10,7 +10,7 @@ The extension now not only locates but also helps fix security issues in your Op
 3. Click the icon and select the QuickFix to apply.
 4. Tweak the values in the inserted code snippet as you see fit.
 
-![Quick Fixes in VSCode](/images/Quick_Fixes_in_VSCode.gif)
+![Quick Fixes in VSCode](images/Quick_Fixes_in_VSCode.gif)
 
 ### Bulk fixes:
 
@@ -18,7 +18,7 @@ If your OpenAPI file contains multiple similar issues - for example, a parameter
 1. Fix the first occurance and supply the proper values in the code snippet.
 2. Go to the next occurance and use the bulk QuickFix. This bulk QuickFix will reuse the values that you used previously for the parameter with the same name.
 
-![Bulk Fixes in VSCode](/images/VSCode_OpenAPI_bulk_security_fixes.gif)
+![Bulk Fixes in VSCode](images/VSCode_OpenAPI_bulk_security_fixes.gif)
 
 ## HTML Preview Pane 
 
