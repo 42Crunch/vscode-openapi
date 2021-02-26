@@ -10,3 +10,4 @@ quickfixes/**
 src/**
 src-webviews/**
 tests/**
+out/test/**
