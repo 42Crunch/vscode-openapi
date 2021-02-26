@@ -4,5 +4,9 @@
 .gitignore
 **/tsconfig.json
 **/tsconfig.base.json
-client/node_modules/**
 images/**
+publish.sh
+quickfixes/**
+src/**
+src-webviews/**
+tests/**
