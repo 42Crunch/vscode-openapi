@@ -173,3 +173,53 @@ pre {
 .show {
   display: block;
 }
+
+.vscode-dark .c_header,
+.vscode-high-contrast .c_header {
+  background-color: #1e1e1e;
+  color: #f3f3f3;
+  border-bottom: 1px solid #bbb;
+}
+
+.vscode-dark .c_footer,
+.vscode-high-contrast .c_footer {
+  background-color: #1e1e1e;
+  color: #f3f3f3;
+}
+
+.vscode-dark .dropbtn {
+  background-color: #835194;
+  color: #ffffff;
+  border: 1px solid #835194;
+}
+
+.vscode-high-contrast .dropbtn {
+  background-color: #1e1e1e;
+  color: #ffffff;
+  border: 1px solid #1e1e1e;
+}
+
+.vscode-dark .dropdown-content,
+.vscode-high-contrast .dropdown-content {
+  background-color: #1e1e1e;
+}
+
+.vscode-dark .dropdown-content a,
+.vscode-high-contrast .dropdown-content a {
+  color: white;
+}
+
+.vscode-dark .dropdown-content a:hover,
+.vscode-high-contrast .dropdown-content a:hover {
+  background-color: #3c3b3b;
+}
+
+.vscode-dark .issue-id {
+  border: 1px solid #834e93;
+  background-color: #834c8f;
+  color: #fff;
+}
+
+.vscode-high-contrast .issue-id {
+  background-color: #1e1e1e;
+}
