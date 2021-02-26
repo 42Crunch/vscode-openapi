@@ -6,8 +6,10 @@
 **/tsconfig.base.json
 images/**
 publish.sh
+publish-open-vsx.sh
 quickfixes/**
 src/**
 src-webviews/**
 tests/**
 out/test/**
+.prettierrc.yaml
