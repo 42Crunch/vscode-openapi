@@ -60,10 +60,12 @@ function getHtml(
   uri: string,
   extensionPath: string
 ): string {
+  const logoUri =
+    vscode.window.activeColorTheme.kind == vscode.ColorThemeKind.Light
+      ? vscode.Uri.file(path.join(extensionPath, "resources", "light", "logo.svg"))
+      : vscode.Uri.file(path.join(extensionPath, "resources", "dark", "logo.svg"));
+  const logo = webview.asWebviewUri(logoUri);
   const base64Uri = Buffer.from(uri).toString("base64");
-  const logo = webview.asWebviewUri(
-    vscode.Uri.file(path.join(extensionPath, "resources", "logo.png"))
-  );
   const backToReport = summary
     ? ""
     : `<h4><a class="go-full-report" data-uri="${base64Uri}" href="#">Go back to full report</a></h4>`;
@@ -84,6 +86,7 @@ function getHtml(
   </head>
   <body>
       <script src="${scriptUrl}"></script>
+
       <div class="c_header">
       <div class="d-flex justify-content-between">
         <div>
@@ -96,17 +99,39 @@ function getHtml(
           <div class="dropdown">
             <button class="dropbtn">Learn More</button>
             <div class="dropdown-content">
-              <a href="#">42Crunch API Security Audit</a>
-              <a href="#">42Crunch API Conformance Scan</a>
-              <a href="#">42Crunch API Protection</a>
+              <a href="https://42crunch.com/api-security-audit/">42Crunch API Security Audit</a>
+              <a href="https://42crunch.com/api-conformance-scan/">42Crunch API Conformance Scan</a>
+              <a href="https://42crunch.com/micro-api-firewall-protection/">42Crunch API Protection</a>
             </div>
           </div>
         </div>
       </div>
       </div>
+
       ${summary || ""}
       ${issues || ""}
       ${backToReport}
+
+      <div class="c_footer">
+      <div class="d-flex justify-content-between">
+        <div>
+          <span class="font-weight-bold">Powered by</span>
+          <span
+            ><a href="https://www.42crunch.com"><img valign="middle" src="${logo}" alt="" /></a
+          ></span>
+        </div>
+        <div>
+          <div class="dropdown">
+            <button class="dropbtn">Learn More</button>
+            <div class="dropdown-content">
+              <a href="https://42crunch.com/api-security-audit/">42Crunch API Security Audit</a>
+              <a href="https://42crunch.com/api-conformance-scan/">42Crunch API Conformance Scan</a>
+              <a href="https://42crunch.com/micro-api-firewall-protection/">42Crunch API Protection</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
   </body>
   </html>`;
 }
