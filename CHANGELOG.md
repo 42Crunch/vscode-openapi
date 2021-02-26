@@ -1,10 +1,14 @@
 # Changelog
 
+## Version 4.0.3 (February 26, 2021) 
+
+* Fix go to reference issue [Issue #113](https://github.com/42Crunch/vscode-openapi/issues/113)
+
 ## Version 4.0.2 (February 24, 2021) 
 
 * Implemented quickfixes for Security Audit
-* Implemented support for external (http:// and https://) $refs resolving [Issue #101](https://github.com/42Crunch/vscode-openapi/issues/101) [Issue #102](https://github.com/42Crunch/vscode-openapi/issues/98)
-* Published extension to OpenVSX registry resolving [Issue #102](https://github.com/42Crunch/vscode-openapi/issues/98)
+* Implemented support for external (http:// and https://) $refs resolving [Issue #101](https://github.com/42Crunch/vscode-openapi/issues/101) [Issue #102](https://github.com/42Crunch/vscode-openapi/issues/102)
+* Published extension to OpenVSX registry resolving [Issue #98](https://github.com/42Crunch/vscode-openapi/issues/98)
 
 ## Version 3.10.0 (January 5, 2021)
 
