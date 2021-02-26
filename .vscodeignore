@@ -13,3 +13,5 @@ src-webviews/**
 tests/**
 out/test/**
 .prettierrc.yaml
+scripts/**
+snippets/**
