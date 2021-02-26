@@ -185,7 +185,7 @@ function getSummary(summary: Summary) {
   }
   return `
   <div class="c_roundedbox">  
-    <h1>Security audit score: <span>${summary.all} / 100</span></h1>
+    <h1>Security audit score: <span>${summary.all}&nbsp;/&nbsp;100</span></h1>
     <div class="progress-bar-holder">
       <div class="progress-bar bar-red" style="width: ${summary.all}%"></div>
     </div>

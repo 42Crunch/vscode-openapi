@@ -39,7 +39,8 @@ pre {
 .bottom-menu li a {
   text-decoration: none;
 }
-.c_header span img {
+.c_header span img,
+.c_footer span img {
   width: 100px;
   margin-left: 10px;
 }
