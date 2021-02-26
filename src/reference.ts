@@ -42,7 +42,7 @@ async function refToLocation(
     const refDocument = await vscode.workspace.openTextDocument(refUri);
     const root = await cache.getDocumentAst(refDocument);
 
-    if (!root) {
+    if (root) {
       const target = root.find(pointer);
       if (target) {
         const [start, end] = target.getRange();
