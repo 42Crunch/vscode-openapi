@@ -22,8 +22,6 @@
 
   const toggleDropdown = function (event) {
     event.currentTarget.querySelector("div.dropdown-content").classList.toggle("show");
-    event.preventDefault();
-    event.stopPropagation();
   };
 
   const goFullReport = function (event) {
