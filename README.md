@@ -8,20 +8,24 @@ Both OAS v2 and v3 are supported.
 
 ## Table of contents
 
-- [Quick start](#quick-start)
-- [Use the extension while editing your API](#use-the-extension-while-editing-your-API)
-  * [Create new OpenAPI files](#create-new-openapi-files)
-  * [Navigate API definition](#navigate-API-definition)
-  * [Add new elements in the OpenAPI explorer](#add-new-elements-in-the-openapi-explorer)
-  * [Use IntelliSense](#use-intellisense)
-  * [Jump to a reference](#jump-to-a-reference)
-  * [Sort entries in the navigation pane](#sort-entries-in-the-navigation-pane)
-  * [Preview OpenAPI documentation](#preview-openapi-documentation)
-- [Use the extension to audit the security of your API](#use-the-extension-to-audit-the-security-of-your-API)
-  * [Navigate the issues in the audit report](#navigate-the-issues-in-the-audit-report)
-  * [Fix issues](#fix-issues)
-- [Known issues](#known-issues)
-- [Feedback](#feedback)
+- [OpenAPI extension for Visual Studio Code](#openapi-extension-for-visual-studio-code)
+  - [Table of contents](#table-of-contents)
+  - [Quick start](#quick-start)
+  - [Use the extension while editing your API](#use-the-extension-while-editing-your-api)
+    - [Create new OpenAPI files](#create-new-openapi-files)
+    - [Navigate API definition](#navigate-api-definition)
+    - [Add new elements in the OpenAPI explorer](#add-new-elements-in-the-openapi-explorer)
+    - [Use IntelliSense](#use-intellisense)
+    - [Jump to a reference](#jump-to-a-reference)
+    - [Sort entries in the navigation pane](#sort-entries-in-the-navigation-pane)
+    - [Preview OpenAPI documentation](#preview-openapi-documentation)
+  - [Use the extension to audit the security of your API](#use-the-extension-to-audit-the-security-of-your-api)
+    - [Navigate the issues in the audit report](#navigate-the-issues-in-the-audit-report)
+    - [Fix issues](#fix-issues)
+      - [Individual fixes:](#individual-fixes)
+      - [Bulk fixes:](#bulk-fixes)
+  - [Known issues](#known-issues)
+  - [Feedback](#feedback)
 
 ## Quick start
 
@@ -137,9 +141,9 @@ Many of the issues reported by the Security Audit have Fixes associated with the
 
 #### Bulk fixes:
 
-If your OpenAPI file contains multiple similar issues - for example, a parameter with the same name is missing the pattern definition - you can fix all such occurances in one go:
-1. Fix the first occurance and supply the proper values in the code snippet.
-2. Go to the next occurance and use the bulk QuickFix. This bulk QuickFix will reuse the values that you used previously for the parameter with the same name.
+If your OpenAPI file contains multiple similar issues - for example, a parameter with the same name is missing the pattern definition - you can fix all such occurrences in one go:
+1. Fix the first occurrence and supply the proper values in the code snippet.
+2. Go to the next occurrence and use the bulk QuickFix. This bulk QuickFix will reuse the values that you used previously for the parameter with the same name.
 
 ![Bulk Fixes in VSCode](/images/VSCode_OpenAPI_bulk_security_fixes.gif)
 
