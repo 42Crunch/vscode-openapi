@@ -14,9 +14,9 @@ The extension now not only locates but also helps fix security issues in your Op
 
 ### Bulk fixes:
 
-If your OpenAPI file contains multiple similar issues - for example, a parameter with the same name is missing the pattern definition - you can fix all such occurances in one go:
-1. Fix the first occurance and supply the proper values in the code snippet.
-2. Go to the next occurance and use the bulk QuickFix. This bulk QuickFix will reuse the values that you used previously for the parameter with the same name.
+If your OpenAPI file contains multiple similar issues - for example, a parameter with the same name is missing the pattern definition - you can fix all such occurrences in one go:
+1. Fix the first occurrences and supply the proper values in the code snippet.
+2. Go to the next occurrences and use the bulk QuickFix. This bulk QuickFix will reuse the values that you used previously for the parameter with the same name.
 
 ![Bulk Fixes in VSCode](images/VSCode_OpenAPI_bulk_security_fixes.gif)
 
@@ -26,9 +26,9 @@ You can get a documentation-style preview of the API you are editing by clicking
 
 ![OpenAPI Preview Pane](images/OpenAPI_preview_pane.gif)
 
-## Support for external http references
+## Support for external HTTP references
 
-OpenAPI definiton files can be composite with parts of the API definition stored in external files and referenced in the main file using the `$ref` notation. We now support not only local component files but also ones referenced with http/https URLs. 
+OpenAPI definition files can be composite with parts of the API definition stored in external files and referenced in the main file using the `$ref` notation. We now support not only local component files but also ones referenced with HTTP/HTTPS URLs. 
 
 For security reasons, the domains from which you want such component files to be downloaded should be added to the **Approved Hostnames** list in the extension's setting. 
 
@@ -50,14 +50,22 @@ Starting with OpenAPI (Swagger) Editor v3.0, such composite OpenAPI files are fu
 
 We have updated our OpenAPI extension to version 2.0. This is a major release with the Security Audit getting to where we wanted it to be for its initial scope and a few other improvements.
 
-- [API Security Audit](#api-security-audit)
-  * [Navigate the issues in the audit report](#navigate-the-issues-in-the-audit-report)
-  * [Jump to the line in the code](#jump-to-the-line-in-the-code)
-  * [Navigate back to full report](#navigate-back-to-full-report)
-  * [Submit feedback](#submit-feedback)
-- [Other improvements](#other-improvements)
-  * [API navigation extended to parameters and responses](#api-navigation-extended-to-parameters-and-responses)
-  * [API navigation no longer disappearing while API is being edited](#api-navigation-no-longer-disappearing-while-api-is-being-edited)
+- [What's new in OpenAPI (Swagger) Editor version 4.0](#whats-new-in-openapi-swagger-editor-version-40)
+  - [QuickFixes for security issues found by Security Audit](#quickfixes-for-security-issues-found-by-security-audit)
+    - [Individual fixes:](#individual-fixes)
+    - [Bulk fixes:](#bulk-fixes)
+  - [HTML Preview Pane](#html-preview-pane)
+  - [Support for external HTTP references](#support-for-external-http-references)
+- [What's new in OpenAPI (Swagger) Editor version 3.0](#whats-new-in-openapi-swagger-editor-version-30)
+- [What's new in OpenAPI (Swagger) Editor version 2.0](#whats-new-in-openapi-swagger-editor-version-20)
+  - [API Security Audit](#api-security-audit)
+    - [Navigate the issues in the audit report](#navigate-the-issues-in-the-audit-report)
+    - [Jump to the line in the code](#jump-to-the-line-in-the-code)
+    - [Navigate back to full report](#navigate-back-to-full-report)
+    - [Submit feedback](#submit-feedback)
+  - [Other improvements](#other-improvements)
+    - [API navigation extended to parameters and responses](#api-navigation-extended-to-parameters-and-responses)
+    - [API navigation no longer disappearing while API is being edited](#api-navigation-no-longer-disappearing-while-api-is-being-edited)
 
 ## API Security Audit
 
@@ -103,7 +111,7 @@ We have added the ability to jump to the specific place in the API definition fo
 
 ### Navigate back to full report
 
-When you are reading Security Audit information for a particular issue, you can now jump back to the full security audit report by clicking the **Go back to full report** link at the bottom of the article.
+When you read Security Audit information for a particular issue, you can now jump back to the full security audit report by clicking the **Go back to full report** link at the bottom of the article.
 
 ![](images/Navigate%20back%20to%20full%20report.gif)
 
