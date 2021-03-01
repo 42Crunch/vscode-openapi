@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.0.3 (March, 2021) 
+
+* Update security audit report styling
+
 ## Version 4.0.3 (February 26, 2021) 
 
 * Fix go to reference issue [Issue #113](https://github.com/42Crunch/vscode-openapi/issues/113)
