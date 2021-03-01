@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 4.0.3 (March, 2021) 
+## Version 4.1.0 (March 1, 2021) 
 
 * Update security audit report styling
 
