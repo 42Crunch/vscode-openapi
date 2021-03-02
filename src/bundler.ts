@@ -99,7 +99,7 @@ export const cacheParser = {
 };
 
 function mangle(value: string) {
-  return value.replace(/[~\/\#:]/g, "-");
+  return value.replace(/[~\/\#:%]/g, "-");
 }
 
 function set(target: any, path: string[], value: any) {
