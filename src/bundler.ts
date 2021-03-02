@@ -63,7 +63,13 @@ const resolver = (cache: Cache, documentUri: vscode.Uri, approvedHosts: string[]
           );
         }
       } else {
-        uri = documentUri.with({ path: decodeURIComponent(file.url) });
+        try {
+          uri = documentUri.with({ path: decodeURIComponent(file.url) });
+        } catch (err) {
+          throw new ResolverError({
+            message: `Failed to decode URL "${file.url}: ${err.message}"`,
+          });
+        }
       }
       try {
         const cached = await cache.getExistingDocumentValueByUri(uri);
