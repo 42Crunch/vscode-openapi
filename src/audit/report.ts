@@ -99,9 +99,9 @@ function getHtml(
           <div class="dropdown">
             <button class="dropbtn">Learn More</button>
             <div class="dropdown-content">
-              <a href="https://42crunch.com/api-security-audit/">42Crunch API Security Audit</a>
-              <a href="https://42crunch.com/api-conformance-scan/">42Crunch API Conformance Scan</a>
-              <a href="https://42crunch.com/micro-api-firewall-protection/">42Crunch API Protection</a>
+              <a href="https://42crunch.com/api-security-audit/">API Contract Security Audit</a>
+              <a href="https://42crunch.com/api-conformance-scan/">API Contract Conformance Scan</a>
+              <a href="https://42crunch.com/micro-api-firewall-protection/">API Protection</a>
             </div>
           </div>
         </div>
@@ -124,9 +124,9 @@ function getHtml(
           <div class="dropdown">
             <button class="dropbtn">Learn More</button>
             <div class="dropdown-content">
-              <a href="https://42crunch.com/api-security-audit/">42Crunch API Security Audit</a>
-              <a href="https://42crunch.com/api-conformance-scan/">42Crunch API Conformance Scan</a>
-              <a href="https://42crunch.com/micro-api-firewall-protection/">42Crunch API Protection</a>
+              <a href="https://42crunch.com/api-security-audit/">API Contract Security Audit</a>
+              <a href="https://42crunch.com/api-conformance-scan/">API Contract Conformance Scan</a>
+              <a href="https://42crunch.com/micro-api-firewall-protection/">API Protection</a>
             </div>
           </div>
         </div>
