@@ -6,20 +6,56 @@
 import * as vscode from "vscode";
 import got from "got";
 import { configuration } from "./configuration";
+import { IncomingHttpHeaders } from "http";
 
-const SCHEMES = {
-  "openapi-external-http": "http",
-  "openapi-external-https": "https",
-};
+function fixUri(uri: vscode.Uri): string {
+  const SCHEMES = {
+    "openapi-external-http": "http",
+    "openapi-external-https": "https",
+  };
+  return uri.with({ scheme: SCHEMES[uri.scheme] }).toString();
+}
+
+function getLanguageId(uri: string, headers: IncomingHttpHeaders): string | undefined {
+  const contentType = headers["content-type"];
+
+  if (contentType && contentType === "application/json") {
+    return "json";
+  }
+  if (
+    contentType &&
+    (contentType === "application/x-yaml" || contentType === "application/x-yaml")
+  ) {
+    return "yaml";
+  }
+
+  if (uri.endsWith(".json")) {
+    return "json";
+  }
+
+  if (uri.endsWith(".yaml") || uri.endsWith(".yml")) {
+    return "yaml";
+  }
+
+  return undefined;
+}
 
 export class ExternalRefDocumentProvider implements vscode.TextDocumentContentProvider {
+  private cache: { [uri: string]: string } = {};
+
+  getLanguageId(uri: vscode.Uri): string | undefined {
+    const actualUri = fixUri(uri);
+    return this.cache[actualUri];
+  }
+
   async provideTextDocumentContent(
     uri: vscode.Uri,
     token: vscode.CancellationToken
   ): Promise<string> {
-    const actualUri = uri.with({ scheme: SCHEMES[uri.scheme] });
-    const response = await got(actualUri.toString());
-    return response.body;
+    const actualUri = fixUri(uri);
+    const { body, headers } = await got(actualUri);
+    this.cache[actualUri] = getLanguageId(actualUri, headers);
+    return body;
   }
 }
 

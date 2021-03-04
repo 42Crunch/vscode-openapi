@@ -25,20 +25,6 @@ import * as yamlSchemaContributor from "./yaml-schema-contributor";
 import * as audit from "./audit/activate";
 import * as preview from "./preview";
 
-/*
- FIXME: this probably should be removed, - it shows general parsing errors 
-which are shown anyways by json/yaml plugins
-async function updateDiagnostics(current: CacheEntry, diagnostics: vscode.DiagnosticCollection) {
-  if (current.errors) {
-    diagnostics.set(current.uri, current.errors);
-    vscode.commands.executeCommand("setContext", "openapiErrors", true);
-  } else {
-    diagnostics.delete(current.uri);
-    vscode.commands.executeCommand("setContext", "openapiErrors", false);
-  }
-}
-*/
-
 export function activate(context: vscode.ExtensionContext) {
   const versionProperty = "openapiVersion";
   const openapiExtension = vscode.extensions.getExtension(extensionQualifiedId);
@@ -56,11 +42,20 @@ export function activate(context: vscode.ExtensionContext) {
     yaml: { language: "yaml" },
   };
 
-  const cache = new Cache(parserOptions, Object.values(selectors));
+  const externalRefProvider = new ExternalRefDocumentProvider();
+
+  vscode.workspace.registerTextDocumentContentProvider(
+    "openapi-external-http",
+    externalRefProvider
+  );
+  vscode.workspace.registerTextDocumentContentProvider(
+    "openapi-external-https",
+    externalRefProvider
+  );
+
+  const cache = new Cache(parserOptions, Object.values(selectors), externalRefProvider);
 
   cache.onDidActiveDocumentChange((document) => updateContext(cache, document));
-  // FIXME decide what to do in case of parsing errors in OAS
-  // cache.onDidChange((entry) => updateDiagnostics(entry, runtimeContext.diagnostics));
 
   context.subscriptions.push(...registerOutlines(context, cache));
   context.subscriptions.push(...registerCommands(cache));
@@ -77,21 +72,6 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.languages.registerDefinitionProvider(selectors.json, jsonSchemaDefinitionProvider);
   vscode.languages.registerDefinitionProvider(selectors.jsonc, jsonSchemaDefinitionProvider);
   vscode.languages.registerDefinitionProvider(selectors.yaml, yamlSchemaDefinitionProvider);
-
-  // FIXME a part of OAS parsing diagnostics handling
-  //vscode.workspace.onDidCloseTextDocument((document) => {
-  //  runtimeContext.diagnostics.delete(document.uri);
-  //});
-
-  const externalRefProvider = new ExternalRefDocumentProvider();
-  vscode.workspace.registerTextDocumentContentProvider(
-    "openapi-external-http",
-    externalRefProvider
-  );
-  vscode.workspace.registerTextDocumentContentProvider(
-    "openapi-external-https",
-    externalRefProvider
-  );
 
   const approveHostnameAction = new ApproveHostnameAction();
   for (const selector of Object.values(selectors)) {

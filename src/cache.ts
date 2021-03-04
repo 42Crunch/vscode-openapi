@@ -13,6 +13,7 @@ import { bundle } from "./bundler";
 import { joinJsonPointer } from "./pointer";
 import { Node } from "@xliic/openapi-ast-node";
 import { configuration } from "./configuration";
+import { ExternalRefDocumentProvider } from "./external-ref-provider";
 
 interface CacheEntry {
   document: vscode.TextDocument;
@@ -37,15 +38,22 @@ export class Cache {
 
   private diagnostics = vscode.languages.createDiagnosticCollection("openapi-bundler");
   private selector: vscode.DocumentSelector;
+  private externalRefProvider: ExternalRefDocumentProvider;
 
-  constructor(parserOptions: ParserOptions, selector: vscode.DocumentSelector) {
+  constructor(
+    parserOptions: ParserOptions,
+    selector: vscode.DocumentSelector,
+    externalRefProvider: ExternalRefDocumentProvider
+  ) {
     this.parserOptions = parserOptions;
     this.selector = selector;
+    this.externalRefProvider = externalRefProvider;
     configuration.onDidChange(async () => {
-      const editor = vscode.window.activeTextEditor;
-      const uri = editor?.document?.uri?.toString();
-      if (this.cache[uri]) {
-        this.requestCacheEntryUpdateForActiveDocument(editor.document);
+      // when configuration is updated, re-bundle all bundled cache entries
+      for (const entry of Object.values(this.cache)) {
+        if (entry.bundle) {
+          this.requestCacheEntryUpdate(entry.document);
+        }
       }
     });
   }
@@ -150,7 +158,14 @@ export class Cache {
     // bundle if it is OpenAPI file and no parsing errors
     if (entry.version !== OpenApiVersion.Unknown && !entry.errors) {
       const approvedHosts = configuration.get<string[]>("approvedHostnames");
-      entry.bundle = await bundle(document, entry.version, entry.parsed, this, approvedHosts);
+      entry.bundle = await bundle(
+        document,
+        entry.version,
+        entry.parsed,
+        this,
+        approvedHosts,
+        this.externalRefProvider
+      );
       // show or clear bundling errors
       if (entry.bundle) {
         if ("errors" in entry.bundle) {
@@ -187,12 +202,16 @@ export class Cache {
   }
 
   async requestCacheEntryUpdateForActiveDocument(document: vscode.TextDocument): Promise<void> {
-    const MAX_UPDATE = 1000; // update no more ofent than
     if (!document || vscode.languages.match(this.selector, document) === 0) {
       this._didActiveDocumentChange.fire(document);
       return;
     }
 
+    return this.requestCacheEntryUpdate(document);
+  }
+
+  async requestCacheEntryUpdate(document: vscode.TextDocument): Promise<void> {
+    const MAX_UPDATE = 1000; // update no more ofent than
     const uri = document.uri.toString();
     const now = Date.now();
     const lastUpdate = this.lastUpdate[uri];
