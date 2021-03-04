@@ -13,6 +13,7 @@ import { parseJsonPointer, joinJsonPointer } from "./pointer";
 import { Cache } from "./cache";
 import { MappingNode, Mapping, BundleResult, OpenApiVersion } from "./types";
 import { simpleClone } from "./util";
+import { ExternalRefDocumentProvider } from "./external-ref-provider";
 
 const destinationMap = {
   [OpenApiVersion.V2]: {
@@ -33,7 +34,12 @@ const destinationMap = {
   },
 };
 
-const resolver = (cache: Cache, documentUri: vscode.Uri, approvedHosts: string[]) => {
+const resolver = (
+  cache: Cache,
+  documentUri: vscode.Uri,
+  approvedHosts: string[],
+  externalRefProvider: ExternalRefDocumentProvider
+) => {
   return {
     order: 10,
     canRead: (file) => {
@@ -76,7 +82,14 @@ const resolver = (cache: Cache, documentUri: vscode.Uri, approvedHosts: string[]
         if (cached) {
           return cached;
         }
+
         const document = await vscode.workspace.openTextDocument(uri);
+        if (uri.scheme === "openapi-external-http" || uri.scheme === "openapi-external-https") {
+          const languageId = externalRefProvider.getLanguageId(uri);
+          if (languageId) {
+            await vscode.languages.setTextDocumentLanguage(document, languageId);
+          }
+        }
         return await cache.getDocumentValue(document);
       } catch (err) {
         throw new ResolverError(
@@ -181,7 +194,8 @@ export async function bundle(
   version: OpenApiVersion,
   parsed: any,
   cache: Cache,
-  approvedHosts: string[]
+  approvedHosts: string[],
+  externalRefProvider: ExternalRefDocumentProvider
 ): Promise<BundleResult> {
   const cwd = dirname(document.uri.fsPath) + "/";
   const cloned = simpleClone(parsed);
@@ -196,7 +210,9 @@ export async function bundle(
   try {
     const bundled = await parser.bundle(cloned, {
       cwd,
-      resolve: { http: false, file: resolver(cache, document.uri, approvedHosts) },
+      resolve: {
+        file: resolver(cache, document.uri, approvedHosts, externalRefProvider),
+      },
       parse: {
         json: cacheParser,
         yaml: cacheParser,
