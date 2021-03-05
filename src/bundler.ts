@@ -212,6 +212,7 @@ export async function bundle(
       cwd,
       resolve: {
         file: resolver(cache, document.uri, approvedHosts, externalRefProvider),
+        http: false, // disable built in http resolver
       },
       parse: {
         json: cacheParser,
