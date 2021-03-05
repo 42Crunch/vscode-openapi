@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 4.1.1 (March ???, 2021)
+## Version 4.1.1 (March 5, 2021)
 
 * Fix issue where remote reference was not handled correctly [Issue #115](https://github.com/42Crunch/vscode-openapi/issues/115)
 
