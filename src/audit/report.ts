@@ -5,6 +5,7 @@
 
 import * as path from "path";
 import * as vscode from "vscode";
+import { fromInternalUri } from "../external-refs";
 import { Audit, Summary } from "../types";
 
 import articles from "./articles.json";
@@ -375,14 +376,12 @@ export class ReportWebView {
     const summaryHtml = getSummary(audit.summary);
     const issuesHtmlList = Object.entries(audit.issues)
       .map(([uri, issues]) => {
-        if (uri.startsWith("openapi-external-http")) {
-          const externalUri = uri.replace("openapi-external-http", "http");
-          return issues.map((issue) => getIssueHtml(uri, externalUri, issue));
-        } else {
-          const fsPath = vscode.Uri.parse(uri).fsPath;
-          const filename = path.relative(mainDir, fsPath);
-          return issues.map((issue) => getIssueHtml(uri, filename, issue));
+        const publicUri = fromInternalUri(vscode.Uri.parse(uri));
+        if (publicUri.scheme === "http" || publicUri.scheme === "https") {
+          return issues.map((issue) => getIssueHtml(uri, publicUri.toString(), issue));
         }
+        const filename = path.relative(mainDir, publicUri.fsPath);
+        return issues.map((issue) => getIssueHtml(uri, filename, issue));
       })
       .reduce((acc, val) => acc.concat(val), []);
 
