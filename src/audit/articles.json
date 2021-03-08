@@ -1121,7 +1121,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not specify the format of numeric values, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not specify an enforceable format of numeric values, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
         }
       ]
     },
@@ -1350,7 +1350,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings, any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings, no restrictions can be enforced and any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
         }
       ]
     },
@@ -1400,7 +1400,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not specify the format of numeric values, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not specify an enforceable format of numeric values, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
         }
       ]
     },
@@ -1502,6 +1502,53 @@
             "json": "{\n    \"parameters\": {\n        \"type\": \"integer\",\n        \"name\": \"total\",\n        \"in\": \"query\",\n        \"format\": \"int32\",\n        \"minimum\": 0,\n        \"maximum\": 100,\n        \"description\": \"Number of the objects in the array.\"\n    }\n}",
             "yaml": "parameters:\n  type: integer\n  name: total\n  in: query\n  format: int32\n  minimum: 0\n  maximum: 100\n  description: Number of the objects in the array.\n"
           }
+        }
+      ]
+    }
+  },
+  "parameter-numerical-unknown-format": {
+    "group": "datavalidation",
+    "subgroup": "parameters",
+    "title": {
+      "text": "<h1>Format of a numeric parameter is unknown</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have defined for a numeric parameter does not match formats defined in either the OpenAPI Specification (OAS) or JSON Schema Specification. Unknown formats cannot be enforced to protect your API, so it is like you had not defined a format at all.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a> and <a href=\"https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3\" target=\"_blank\">JSON Schema Validation</a>.</p>\n                "
+    },
+    "shortDescription": "The format you have defined for a numeric parameter does not match formats defined in either the OpenAPI Specification (OAS) or JSON Schema Specification. Unknown formats cannot be enforced to protect your API, so it is like you had not defined a format at all.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The parameter type is set to <code>integer</code> but there is a typo in the format, rendering it unknown:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"parameters\": {\n        \"type\": \"integer\",\n        \"format\": \"int3\",\n        \"name\": \"total\",\n        \"in\": \"query\",\n        \"description\": \"Number of the objects in the array.\"\n    }\n}",
+            "yaml": "parameters:\n  type: integer\n  format: int3\n  name: total\n  in: query\n  description: Number of the objects in the array.\n"
+          }
+        }
+      ]
+    },
+    "exploit": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not specify an enforceable format of numeric values, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Define a known <code>format</code> for all numeric parameters. This ensures that only parameters of the expected format get passed to the backend.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"parameters\": {\n        \"type\": \"integer\",\n        \"name\": \"total\",\n        \"in\": \"query\",\n        \"format\": \"int32\",\n        \"description\": \"Number of the objects in the array.\"\n    }\n}",
+            "yaml": "parameters:\n  type: integer\n  name: total\n  in: query\n  format: int32\n  description: Number of the objects in the array.\n"
+          }
+        },
+        {
+          "text": "\n                    <p>If you want to use your internal, company-specific format, make sure to also use properties like <code>maximum</code>, <code>minimum</code>, <code>pattern</code>, and <code>maxLenght</code> to constrain the accepted values.</p>\n                "
         }
       ]
     }
@@ -1629,7 +1676,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings, any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings, no restrictions can be enforced and any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
         }
       ]
     },
@@ -1649,6 +1696,53 @@
         },
         {
           "text": "\n                    <p>For examples on some of the common regulars expressions, see the <a href=\"https://apisecurity.io/encyclopedia/content/oasv2/datavalidation/parameters/parameter-string-pattern.htm\" target=\"_blank\">full article</a>.</p>\n                "
+        }
+      ]
+    }
+  },
+  "parameter-string-unknown-format": {
+    "group": "datavalidation",
+    "subgroup": "parameters",
+    "title": {
+      "text": "<h1>Format of a string parameter is unknown</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have defined for a string parameter does not match formats defined in either the OpenAPI Specification (OAS) or JSON Schema Specification. Unknown formats cannot be enforced to protect your API, so it is like you had not defined a format at all.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a> and <a href=\"https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3\" target=\"_blank\">JSON Schema Validation</a>.</p>\n                "
+    },
+    "shortDescription": "The format you have defined for a string parameter does not match formats defined in either the OpenAPI Specification (OAS) or JSON Schema Specification. Unknown formats cannot be enforced to protect your API, so it is like you had not defined a format at all.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The format <code>ip</code> is unknown:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"IPaddress\",\n        \"type\": \"string\",\n        \"format\": \"ip\",\n        \"description\": \"IP address\"\n    }\n}",
+            "yaml": "parameters:\n  in: query\n  name: IPaddress\n  type: string\n  format: ip\n  description: IP address\n"
+          }
+        }
+      ]
+    },
+    "exploit": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a known format for strings, no restrictions can be enforced and any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you only use known formats for strings. This ensures that only parameters of the expected format get passed to the backend.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"IPaddress\",\n        \"type\": \"string\",\n        \"format\": \"ipv4\",\n        \"description\": \"IP address\"\n    }\n}",
+            "yaml": "parameters:\n  in: query\n  name: IPaddress\n  type: string\n  format: ipv4\n  description: IP address\n"
+          }
+        },
+        {
+          "text": "\n                    <p>If you want to use your internal, company-specific format, make sure to also use properties like <code>maximum</code>, <code>minimum</code>, <code>pattern</code>, and <code>maxLenght</code> to constrain the accepted values.</p>\n                "
         }
       ]
     }
@@ -2251,7 +2345,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>Attackers strive to make your APIs behave in an unexpected way to learn more about your system or to cause a data breach. It is unlikely that the difference between the format of numeric items can cause a significant breach, but we highly recommend that you minimize any risks and clearly specify the data that your API produces in each method.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>Attackers strive to make your APIs behave in an unexpected way to learn more about your system or to cause a data breach. It is unlikely that  the format of numeric items can cause a significant breach, but we highly recommend that you minimize any risks and clearly specify the data that your API produces in each method.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
         }
       ]
     },
@@ -2530,7 +2624,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>Attackers strive to make your APIs behave in an unexpected way to learn more about your system or to cause a data breach. It is unlikely that the difference between the format of numeric items can cause a significant breach, but we highly recommend that you minimize any risks and clearly specify the data that your API produces in each method.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>Attackers strive to make your APIs behave in an unexpected way to learn more about your system or to cause a data breach. It is unlikely that  the format of numeric items can cause a significant breach, but we highly recommend that you minimize any risks and clearly specify the data that your API produces in each method.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
         }
       ]
     },
@@ -2632,6 +2726,53 @@
             "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"integer\",\n                        \"format\": \"int32\",\n                        \"minimum\":0,\n                        \"maximum\":100\n                    }\n                }\n            }\n        }\n    }\n}\n",
             "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: integer\n          format: int32\n          minimum: 0\n          maximum: 100\n"
           }
+        }
+      ]
+    }
+  },
+  "response-header-numerical-unknown-format": {
+    "group": "datavalidation",
+    "subgroup": "responseheader",
+    "title": {
+      "text": "<h1>Format of a numeric header is unknown</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have defined for a numeric header does not match formats defined in either the OpenAPI Specification (OAS) or JSON Schema Specification. Unknown formats cannot be enforced to protect your API, so it is like you had not defined a format at all.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a> and <a href=\"https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3\" target=\"_blank\">JSON Schema Validation</a>.</p>\n                "
+    },
+    "shortDescription": "The format you have defined for a numeric header does not match formats defined in either the OpenAPI Specification (OAS) or JSON Schema Specification. Unknown formats cannot be enforced to protect your API, so it is like you had not defined a format at all.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The parameter type is set to <code>integer</code> but there is a typo in the format, rendering it unknown:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"integer\",\n                        \"format\": \"int3\"\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: integer\n          format: int3\n"
+          }
+        }
+      ]
+    },
+    "exploit": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>Attackers strive to make your APIs behave in an unexpected way to learn more about your system or to cause a data breach. It is unlikely that  the format of numeric items can cause a significant breach, but we highly recommend that you minimize any risks and clearly specify the data that your API produces in each method.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Define a known <code>format</code> for numeric headers. This provides an extra layer of safety ensuring that your API only returns data formats that you expect it to return.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"integer\",\n                        \"format\": \"int32\"\n                    }\n                }\n            }\n        }\n    }\n}\n",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: integer\n          format: int32\n"
+          }
+        },
+        {
+          "text": "\n                    <p>If you want to use your internal, company-specific format, make sure to also use properties like <code>maximum</code>, <code>minimum</code>, <code>pattern</code>, and <code>maxLenght</code> to constrain the accepted values.</p>\n                "
         }
       ]
     }
@@ -2779,6 +2920,53 @@
         },
         {
           "text": "\n                    <p>For examples on some of the common regulars expressions, see the <a href=\"https://apisecurity.io/encyclopedia/content/oasv2/datavalidation/responseheader/response-header-string-pattern.htm\" target=\"_blank\">full article</a>.</p>\n                "
+        }
+      ]
+    }
+  },
+  "response-header-string-unknown-format": {
+    "group": "datavalidation",
+    "subgroup": "responseheader",
+    "title": {
+      "text": "<h1>Format of a string header is unknown</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have defined for a string header does not match formats defined in either the OpenAPI Specification (OAS) or JSON Schema Specification. Unknown formats cannot be enforced to protect your API, so it is like you had not defined a format at all.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a> and <a href=\"https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3\" target=\"_blank\">JSON Schema Validation</a>.</p>\n                "
+    },
+    "shortDescription": "The format you have defined for a string header does not match formats defined in either the OpenAPI Specification (OAS) or JSON Schema Specification. Unknown formats cannot be enforced to protect your API, so it is like you had not defined a format at all.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The format <code>host</code> is unknown:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-host\": {\n                    \"schema\": {\n                        \"type\": \"string\",\n                        \"format\": \"host\"\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-host:\n        schema:\n          type: string\n          format: host\n"
+          }
+        }
+      ]
+    },
+    "exploit": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>Your API has been designed to return specific data. If you define an unknown format for strings, you do not actually limit what can be included in response headers.</p>\n                    <p>Attackers typically want to make the API to change its behavior and return different data than it is supposed to. A particular API failure might leak some other data, such as records or stack trace.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Define a known <code>format</code> for string headers. This provides an extra layer of safety ensuring that your API only returns data formats that you expect it to return.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-host\": {\n                    \"schema\": {\n                        \"type\": \"string\",\n                        \"format\": \"hostname\"\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-host:\n        schema:\n          type: string\n          format: hostname\n"
+          }
+        },
+        {
+          "text": "\n                    <p>If you want to use your internal, company-specific format, make sure to also use properties like <code>maximum</code>, <code>minimum</code>, <code>pattern</code>, and <code>maxLenght</code> to constrain the accepted values.</p>\n                "
         }
       ]
     }
@@ -3050,50 +3238,6 @@
       ]
     }
   },
-  "schema-additionalproperties-boolean": {
-    "group": "datavalidation",
-    "subgroup": "schema",
-    "title": {
-      "text": "<h1>Schema defines 'additionalProperties' as a boolean value</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The schema defines <code>additionalProperties</code> as a Boolean value.</p>\n                    <p>The reason <code>additionalProperties</code> takes a boolean value comes from the role the attribute plays in JSON schemas. In JSON, by default, any object can also accept additional properties that are not defined in its schema as long as the properties defined in the schema are present. To change this behavior and stop allowing any additional properties to those explicitly defined in the schema, you can set <code>additionalProperties</code> to <code>false</code>.</p>\n                    <p>OpenAPI Specification (OAS) v2 does not define this behavior, and the current tooling (such as parsers and codegen) does not support it. Instead, they only accept the value <code>object</code> for this property. Thus, it is not recommended to use Boolean values.</p>\n                    <p>However, OAS v2 does support using <code>additionalProperties</code> to specify a schema to which the additional properties must conform.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The schema defines <code>additionalProperties</code> as a Boolean value.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. Here, <code>additionalProperties</code> is set to <code>false</code>. This behavior is supported in regular JSON but <strong>not</strong> in OAS v2:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"tag\": {\n                            \"type\": \"string\"\n                        }\n                    },\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"additionalProperties\": false\n                }\n            }\n        ]\n    }\n}\n",
-            "yaml": "post:\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        properties:\n          name:\n            type: string\n          tag:\n            type: string\n        required:\n          - name\n        additionalProperties: false\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>While it is unlikely that attackers will be able to <em>directly</em> breach your API because of a boolean value for <code>additionalProperties</code>, it may still pose a risk to API security. Because this is not a documented part of the OAS, the API implementation may not behave according to developer expectations. Such a discrepancy has an inherent risk and is not recommended.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>If you need to allow additional properties, use <code>additionalProperties</code> to provide the schema that you want to support. For example:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"tag\": {\n                            \"type\": \"string\"\n                        }\n                    },\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"additionalProperties\": {\n                        \"schema\": {    \n                            \"$ref\": \"#/definitions/PetDetails\"\n                            \n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        properties:\n          name:\n            type: string\n          tag:\n            type: string\n        required:\n          - name\n        additionalProperties:\n          schema:\n            $ref: \"#/definitions/PetDetails\"\n"
-          }
-        }
-      ]
-    }
-  },
   "schema-array-items-notype": {
     "group": "datavalidation",
     "subgroup": "schema",
@@ -3208,7 +3352,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not specify the format of numeric values, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not specify an enforceable format of numeric values, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
         }
       ]
     },
@@ -3437,7 +3581,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings, any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings, no restrictions can be enforced and any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
         }
       ]
     },
@@ -3478,8 +3622,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": {\n            \"name\": \"pet\",\n            \"in\": \"body\",\n            \"description\": \"pet to add to the system\",\n            \"required\": true,\n            \"schema\": {    \n            }\n        }\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    name: pet\n    in: body\n    description: pet to add to the system\n    required: true\n    schema: {}\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"pet to add to the system\",\n                \"required\": true,\n                \"schema\": {    \n                }\n            }\n        ]\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: pet to add to the system\n      required: true\n      schema: {}\n"
           }
         }
       ]
@@ -3575,7 +3719,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not specify the format of numeric values, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not specify an enforceable format of numeric values, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
         }
       ]
     },
@@ -3676,6 +3820,97 @@
           "code": {
             "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"additionalProperties\": false,\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"age\": {\n                            \"type\": \"integer\",\n                            \"minimum\": 0,\n                            \"maximum\": 100,\n                            \"format\": \"int32\"\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
             "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        additionalProperties: false\n        required:\n          - name\n        properties:\n          name:\n            type: string\n          age:\n            type: integer\n            minimum: 0\n            maximum: 100\n            format: int32\n"
+          }
+        }
+      ]
+    }
+  },
+  "schema-numerical-unknown-format": {
+    "group": "datavalidation",
+    "subgroup": "schema",
+    "title": {
+      "text": "<h1>Format of a numeric schema is unknown</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have defined for a numeric schema does not match formats defined in either the OpenAPI Specification (OAS) or JSON Schema Specification. Unknown formats cannot be enforced to protect your API, so it is like you had not defined a format at all.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a> and <a href=\"https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3\" target=\"_blank\">JSON Schema Validation</a>.</p>\n                "
+    },
+    "shortDescription": "The format you have defined for a numeric schema does not match formats defined in either the OpenAPI Specification (OAS) or JSON Schema Specification. Unknown formats cannot be enforced to protect your API, so it is like you had not defined a format at all.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The property <code>age</code> is set to be <code>integer</code> but there is a typo in the format, making it unknown:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"additionalProperties\": false,\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"age\": {\n                            \"type\": \"integer\",\n                            \"format\": \"int3\"\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        additionalProperties: false\n        required:\n          - name\n        properties:\n          name:\n            type: string\n          age:\n            type: integer\n            format: int3\n"
+          }
+        }
+      ]
+    },
+    "exploit": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not specify an enforceable format of numeric values, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Define a known <code>format</code> for numeric properties in schemas. This ensures that only parameters of the expected format get passed to the backend.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"additionalProperties\": false,\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"age\": {\n                            \"type\": \"integer\",\n                            \"minimum\": 0,\n                            \"maximum\": 100,\n                            \"format\": \"int32\"\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        additionalProperties: false\n        required:\n          - name\n        properties:\n          name:\n            type: string\n          age:\n            type: integer\n            minimum: 0\n            maximum: 100\n            format: int32\n"
+          }
+        },
+        {
+          "text": "\n                    <p>If you want to use your internal, company-specific format, make sure to also use properties like <code>maximum</code>, <code>minimum</code>, <code>pattern</code>, and <code>maxLenght</code> to constrain the accepted values.</p>\n                "
+        }
+      ]
+    }
+  },
+  "schema-object-additionalproperties-true": {
+    "group": "datavalidation",
+    "subgroup": "schema",
+    "title": {
+      "text": "<h1>Schema allows additional properties</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The schema you have defined allows additional properties, either intentionally or unintentionally.</p>\n                    <p>In JSON, by default, any object can also accept additional properties. OpenAPI Specification (OAS) v2 does not define this behavior, and the current tooling (such as parsers and codegen) does not support it. Instead, they only accept the value <code>object</code> for this property. Thus, it is not recommended to use Boolean values.</p>\n                    <p>However, OAS v2 does support using <code>additionalProperties</code> to specify a schema to which the additional properties must conform.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The schema you have defined allows additional properties, either intentionally or unintentionally.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. In this case, the schema does not use any combining operations (so there is no need to allow additional properties) but <code>additionalProperties</code> is set to <code>true</code>:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"tag\": {\n                            \"type\": \"string\"\n                        }\n                    },\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"additionalProperties\": true\n                }\n            }\n        ]\n    }\n}\n",
+            "yaml": "post:\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        properties:\n          name:\n            type: string\n          tag:\n            type: string\n        required:\n          - name\n        additionalProperties: true\n"
+          }
+        }
+      ]
+    },
+    "exploit": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not clearly define the schema and you leave properties of a JSON payload empty, you effectively allow attackers to pass in any data. This means that you are opening your backend to various attacks, such as SQL injection.</p>\n                    <p>This also lets attackers to try various unexpected inputs. Unexpected inputs may cause the backend server to crash or behave in an unexpected way. This in turn may cause the server to potentially leak stack trace that can be used for further attacks, or even data.</p>\n                    <p>If no restrictions to the set of properties in the JSON payload are enforced, the API might also accept more fields than expected. The received payloads could be blindly transformed into an object and stored, overwriting sensitive internal data.</p>\n                "
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2><a name=\"Remediat\"></a>Remediation</h2>\n                    <p>The safest option is not to allow additional properties. If the schema does not use <code>allOf</code> at all, make sure you define all properties of the accepted JSON payload in the schema itself.</p>\n                    <p>Do not use combining operations (<code>allOf</code>) for defining additional properties in API definitions following the OAS v2. </p>\n                    <p>We recommend updating your API definition to follow the OAS v3, because it offers proper support for <code>additionalProperties</code> as Boolean, in addition to other improvements.</p>\n                    <p>If you cannot update your API to OAS v3, use <code>additionalProperties</code> to provide the schema that you want to support:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"definitions\": {\n        \"Pet\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"name\": {\n                    \"type\": \"string\"\n                },\n                \"petType\": {\n                    \"type\": \"string\"\n                }\n            },\n            \"required\": [\n                \"name\",\n                \"petType\"\n            ],\n            \"additionalProperties\": \"#/definitions/Cat\"    \n        },\n        \"Cat\": {\n            \"properties\": {\n                \"furType\": {\n                    \"type\": \"enum\",\n                    \"enum\": [\n                        \"short-haired\",\n                        \"long-haired\",\n                        \"curly\",\n                        \"naked\"\n                    ],\n                    \"default\": \"short-haired\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "definitions:\n  Pet:\n    type: object\n    properties:\n      name:\n        type: string\n      petType:\n        type: string\n    required:\n      - name\n      - petType\n    additionalProperties: \"#/definitions/Cat\"\n  Cat:\n    properties:\n      furType:\n        type: enum\n        enum:\n          - short-haired\n          - long-haired\n          - curly\n          - naked\n        default: short-haired\n"
           }
         }
       ]
@@ -3848,7 +4083,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings, any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings, no restrictions can be enforced and any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
         }
       ]
     },
@@ -3872,6 +4107,53 @@
       ]
     }
   },
+  "schema-string-unknown-format": {
+    "group": "datavalidation",
+    "subgroup": "schema",
+    "title": {
+      "text": "<h1>Format of a string schema is unknown</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have defined for a string schema does not match formats defined in either the OpenAPI Specification (OAS) or JSON Schema Specification. Unknown formats cannot be enforced to protect your API, so it is like you had not defined a format at all.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a> and <a href=\"https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3\" target=\"_blank\">JSON Schema Validation</a>.</p>\n                "
+    },
+    "shortDescription": "The format you have defined for a string schema does not match formats defined in either the OpenAPI Specification (OAS) or JSON Schema Specification. Unknown formats cannot be enforced to protect your API, so it is like you had not defined a format at all.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The format <code>mail</code> for the property <code>userName</code> is unknown  and therefore does not restrict the accepted values:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new user\",\n        \"operationId\": \"addUser\",\n        \"parameters\": [\n            {\n                \"name\": \"user\",\n                \"in\": \"body\",\n                \"description\": \"User to add\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"additionalProperties\": false,\n                    \"required\": [\n                        \"name\",\n                        \"userName\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"userName\": {\n                            \"type\": \"string\",\n                            \"format\": \"mail\"     \n                        }       \n                    }\n                }\n            }\n        ]\n    }\n}",
+            "yaml": "post:\n  description: Creates a new user\n  operationId: addUser\n  parameters:\n    - name: user\n      in: body\n      description: User to add\n      required: true\n      schema:\n        type: object\n        additionalProperties: false\n        required:\n          - name\n          - userName\n        properties:\n          name:\n            type: string\n          userName:\n            type: string\n            format: mail\n"
+          }
+        }
+      ]
+    },
+    "exploit": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a known format for strings, no restrictions can be enforced and any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you only use known formats for strings. This ensures that only parameters of the expected format get passed to the backend.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new user\",\n        \"operationId\": \"addUser\",\n        \"parameters\": [\n            {\n                \"name\": \"user\",\n                \"in\": \"body\",\n                \"description\": \"User to add\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"additionalProperties\": false,\n                    \"required\": [\n                        \"name\",\n                        \"userName\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"userName\": {\n                            \"type\": \"string\",\n                            \"format\": \"email\"   \n                        }       \n                    }\n                }\n            }\n        ]\n    }\n}",
+            "yaml": "post:\n  description: Creates a new user\n  operationId: addUser\n  parameters:\n    - name: user\n      in: body\n      description: User to add\n      required: true\n      schema:\n        type: object\n        additionalProperties: false\n        required:\n          - name\n          - userName\n        properties:\n          name:\n            type: string\n          userName:\n            type: string\n            format: email\n"
+          }
+        },
+        {
+          "text": "\n                    <p>If you want to use your internal, company-specific format, make sure to also use properties like <code>maximum</code>, <code>minimum</code>, <code>pattern</code>, and <code>maxLenght</code> to constrain the accepted values.</p>\n                "
+        }
+      ]
+    }
+  },
   "schema-xof-additionalproperties-false": {
     "group": "datavalidation",
     "subgroup": "schema",
@@ -3879,13 +4161,13 @@
       "text": "<h1>Schema defines combining operations</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The schema defines combining operations <code>allOf</code>, <code>anyOf</code>, or <code>oneOf</code>, which requires <code>additionalProperties</code> to behave as Boolean.</p>\n                    <p>In JSON, by default, any object can also accept additional properties. OpenAPI Specification (OAS) v2 does not define this behavior, and the current tooling (such as parsers and codegen) does not support it. Instead, they only accept the value <code>object</code> for this property. Thus, it is not recommended to use Boolean values.</p>\n                    <p>However, OAS v2 does support using <code>additionalProperties</code> to specify a schema to which the additional properties must conform.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The schema defines combining operations <code>allOf</code> which requires <code>additionalProperties</code> to behave as Boolean.</p>\n                    <p>In JSON, by default, any object can also accept additional properties. OpenAPI Specification (OAS) v2 does not define this behavior, and the current tooling (such as parsers and codegen) does not support it. Instead, they only accept the value <code>object</code> for this property. Thus, it is not recommended to use Boolean values.</p>\n                    <p>However, OAS v2 does support using <code>additionalProperties</code> to specify a schema to which the additional properties must conform.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "The schema defines combining operations <code>allOf</code>, <code>anyOf</code>, or <code>oneOf</code>, which requires <code>additionalProperties</code> to behave as Boolean.",
+    "shortDescription": "The schema defines combining operations <code>allOf</code> which requires <code>additionalProperties</code> to behave as Boolean.",
     "example": {
       "sections": [
         {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. A reusable schema in the <code>definitions</code> section has been extended with an <code>enum</code> from <code>allOf</code>, and the property <code>additionalProperties</code> is set to <code>true</code>to allow additional properties (this is the default is <code>additionalProperties</code> is not explicitly defined as <code>false</code>):</p>\n                "
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. A reusable schema in the <code>definitions</code> section has been extended with an <code>enum</code> from <code>allOf</code>, and the property <code>additionalProperties</code> is set to <code>true</code>to allow additional properties:</p>\n                "
         },
         {
           "code": {
@@ -3905,7 +4187,7 @@
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Do not use combining operations <code>allOf</code>, <code>anyOf</code>, or <code>oneOf</code> for defining additional properties in API definitions following the OAS v2. </p>\n                    <p>We recommend updating your API definition to follow the OAS v3, because it offers proper support for <code>additionalProperties</code> as Boolean, in addition to other improvements.</p>\n                    <p>If you cannot update your API to OAS v3, use <code>additionalProperties</code> to provide the schema that you want to support:</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Do not use combining operations (<code>allOf</code>) for defining additional properties in API definitions following the OAS v2. </p>\n                    <p>We recommend updating your API definition to follow the OAS v3, because it offers proper support for <code>additionalProperties</code> as Boolean, in addition to other improvements.</p>\n                    <p>If you cannot update your API to OAS v3, use <code>additionalProperties</code> to provide the schema that you want to support:</p>\n                "
         },
         {
           "code": {
@@ -3923,9 +4205,9 @@
       "text": "<h1>Value of the schema discriminator must be a required property</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The value of the <code>discriminator</code> property in the schema in question has not been listed as a required property. The value of the <code>discriminator</code> property must be a string.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schema-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The  <code>discriminator</code> property in the schema in question has not been listed as a required property. The value of the <code>discriminator</code> property must be a string.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schema-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "The value of the <code>discriminator</code> property in the schema in question has not been listed as a required property. The value of the <code>discriminator</code> property must be a string.",
+    "shortDescription": "The  <code>discriminator</code> property in the schema in question has not been listed as a required property. The value of the <code>discriminator</code> property must be a string.",
     "example": {
       "sections": [
         {
@@ -3960,9 +4242,9 @@
       "text": "<h1>Schema discriminator property must be a string</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>You have defined a discriminator that is not a string. Discriminator values must always be of the type <code>string</code>.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>You have defined a discriminator that is not a string. Discriminators must always be of the type <code>string</code>.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "You have defined a discriminator that is not a string. Discriminator values must always be of the type <code>string</code>.",
+    "shortDescription": "You have defined a discriminator that is not a string. Discriminators must always be of the type <code>string</code>.",
     "example": {
       "sections": [
         {
@@ -4601,21 +4883,21 @@
     "group": "oasconformance",
     "subgroup": "semantics",
     "title": {
-      "text": "<h1>Schema does not define a required property</h1>"
+      "text": "<h1>Required property is missing</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>One or more properties that you have defined as <code>required</code> are not defined in the schema.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>Your API is missing one or more properties that the OpenAPI Specification (OAS) defines as required. If you do not define all required properties, your API definition does not fully conform to the OAS.</p>\n                    <p>The names of objects and properties are case-sensitive, so make sure that you have spelled them correctly.</p>\n                    <p>The following objects themselves are optional, but if defined in the API definition, must have the following properties defined:</p>\n                    <table>\n                        <col />\n                        <col />\n                        <thead>\n                            <tr>\n                                <th>Object</th>\n                                <th>Required properties</th>\n                            </tr>\n                        </thead>\n                        <tbody>\n                            <tr>\n                                <td>External Documentation</td>\n                                <td><code>url</code>\n                                </td>\n                            </tr>\n                            <tr>\n                                <td>License</td>\n                                <td><code>name</code>\n                                </td>\n                            </tr>\n                            <tr>\n                                <td>Response</td>\n                                <td><code>description</code>\n                                </td>\n                            </tr>\n                            <tr>\n                                <td>Tag</td>\n                                <td><code>name</code>\n                                </td>\n                            </tr>\n                        </tbody>\n                    </table>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#openapi-specification\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "One or more properties that you have defined as <code>required</code> are not defined in the schema.",
+    "shortDescription": "Your API is missing one or more properties that the OpenAPI Specification (OAS) defines as required. If you do not define all required properties, your API definition does not fully conform to the OAS.",
     "example": {
       "sections": [
         {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The schema requires the property <code>name</code>, but it has not been defined:</p>\n                "
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The <code>license</code> object of this sample API is missing the field <code>name</code>, which is defined as a required property in the OAS:</p>\n                "
         },
         {
           "code": {
-            "json": "{\n    \"name\": \"Pet\",\n    \"in\": \"body\",\n    \"description\": \"pet to add to the system\",\n    \"required\": true,\n    \"schema\": {  \n        \"type\": \"object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"breed\": {\n                \"type\": \"string\"\n            },\n            \"age\": {\n                \"type\": \"integer\"\n            }\n        }\n    }\n}",
-            "yaml": "name: Pet\nin: body\ndescription: pet to add to the system\nrequired: true\nschema:\n  type: object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    breed:\n      type: string\n    age:\n      type: integer\n"
+            "json": "{\n    \"license\": {\n        \"description\": \"This is a sample license.\"\n    }\n}",
+            "yaml": "license:\n  description: This is a sample license.\n"
           }
         }
       ]
@@ -4623,12 +4905,12 @@
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all properties you have defined as <code>required</code> are also defined in the schema.</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that your API has all the properties that the OAS requires.</p>\n                "
         },
         {
           "code": {
-            "json": "{\n    \"name\": \"pet\",\n    \"in\": \"body\",\n    \"description\": \"pet to add to the system\",\n    \"required\": true,\n    \"schema\": {  \n        \"type\": \"object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\"\n            },\n            \"breed\": {\n                \"type\": \"string\"\n            },\n            \"age\": {\n                \"type\": \"integer\"\n            }\n        }\n    }\n}",
-            "yaml": "name: pet\nin: body\ndescription: pet to add to the system\nrequired: true\nschema:\n  type: object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n    breed:\n      type: string\n    age:\n      type: integer\n"
+            "json": "{\n    \"license\": {\n        \"name\": \"My Sample License\",\n        \"description\": \"This is a sample license.\"\n    }\n}",
+            "yaml": "license:\n  name: My Sample License\n  description: This is a sample license.\n"
           }
         }
       ]
@@ -4712,6 +4994,80 @@
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all enum values for schemas match the type of schema.</p>\n                "
+        }
+      ]
+    }
+  },
+  "semantic-schema-property-required": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Schema does not define a required property</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>One or more properties that you have defined as <code>required</code> are not defined in the schema.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "One or more properties that you have defined as <code>required</code> are not defined in the schema.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The schema requires the property <code>name</code>, but it has not been defined:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"name\": \"Pet\",\n    \"in\": \"body\",\n    \"description\": \"pet to add to the system\",\n    \"required\": true,\n    \"schema\": {  \n        \"type\": \"object\",\n        \"additionalProperties\": \"false\",\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"breed\": {\n                \"type\": \"string\"\n            },\n            \"age\": {\n                \"type\": \"integer\"\n            }\n        }\n    }\n}",
+            "yaml": "name: Pet\nin: body\ndescription: pet to add to the system\nrequired: true\nschema:\n  type: object\n  additionalProperties: \"false\"\n  required:\n    - name\n  properties:\n    breed:\n      type: string\n    age:\n      type: integer\n"
+          }
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all properties you have defined as <code>required</code> are also defined in the schema.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"name\": \"pet\",\n    \"in\": \"body\",\n    \"description\": \"pet to add to the system\",\n    \"required\": true,\n    \"schema\": {  \n        \"type\": \"object\",\n        \"additionalProperties\": \"false\",\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\"\n            },\n            \"breed\": {\n                \"type\": \"string\"\n            },\n            \"age\": {\n                \"type\": \"integer\"\n            }\n        }\n    }\n}",
+            "yaml": "name: pet\nin: body\ndescription: pet to add to the system\nrequired: true\nschema:\n  type: object\n  additionalProperties: \"false\"\n  required:\n    - name\n  properties:\n    name:\n      type: string\n    breed:\n      type: string\n    age:\n      type: integer\n"
+          }
+        }
+      ]
+    }
+  },
+  "semantic-schemes-undefined": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Schemes should be defined</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>You have not defined the <code>schemes</code> field in your API.</p>\n                    <p>The Open API Specification (OAS) does not define the <code>schemes</code> field as mandatory and states that when missing, the default scheme  is the same as used to access your API definition itself. However, because API definitions are uploaded to 42Crunch Platform, not retrieved from URLs, Security Audit cannot infer the default scheme and thus the scheme must be defined.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#serverObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "You have not defined the <code>schemes</code> field in your API.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"swagger\": \"2.0\",\n    \"info\": {\n        \"version\": \"1.0.0\",\n        \"title\": \"Swagger Petstore\"\n    },\n    \"host\": \"petstore.swagger.io\",\n    \"basePath\": \"/v1\",\n    \"schemes\": [\n    ]\n}",
+            "yaml": "swagger: \"2.0\"\ninfo:\n  version: 1.0.0\n  title: Swagger Petstore\nhost: petstore.swagger.io\nbasePath: /v1\nschemes: []\n"
+          }
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you have defined at least one scheme for your API:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"swagger\": \"2.0\",\n    \"info\": {\n        \"version\": \"1.0.0\",\n        \"title\": \"Swagger Petstore\"\n    },\n    \"host\": \"petstore.swagger.io\",\n    \"basePath\": \"/v1\",\n    \"schemes\": [\n        \"https\"\n    ]\n}",
+            "yaml": "swagger: \"2.0\"\ninfo:\n  version: 1.0.0\n  title: Swagger Petstore\nhost: petstore.swagger.io\nbasePath: /v1\nschemes:\n  - https\n"
+          }
         }
       ]
     }
@@ -6343,8 +6699,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"204\": {\n            \"description\": \"No content\",\n            \"schema\": {\n                \"$ref\": \"#/components/schemas/Pets\"\n            }\n        }\n    }\n}",
-            "yaml": "responses:\n  \"204\":\n    description: No content\n    schema:\n      $ref: \"#/components/schemas/Pets\"\n"
+            "json": "{\n    \"responses\": {\n        \"204\": {\n            \"description\": \"No content\",\n            \"schema\": {\n                \"content\": {\n                    \"application/json\": {\n                        \"schema\": {\n                            \"$ref\": \"#/components/schemas/Pets\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"204\":\n    description: No content\n    schema:\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/Pets\"\n"
           }
         }
       ]
@@ -6421,23 +6777,23 @@
     "group": "datavalidation",
     "subgroup": "responsedefinition",
     "title": {
-      "text": "<h1>At least one 200 response should be defined for TRACE operations</h1>"
+      "text": "<h1>200 response should be defined for TRACE operations</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p><code>TRACE</code> operations in your API must have at least one <code>200</code> response defined.</p>\n                    <p>For more details, see <a href=\"https://tools.ietf.org/html/rfc7231#section-6.3\" target=\"_blank\" rel=\"noopener\">RFC 7231</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p><code>TRACE</code> operations in your API must have the <code>200</code> response defined.</p>\n                    <p>For more details, see <a href=\"https://tools.ietf.org/html/rfc7231#section-6.3\" target=\"_blank\" rel=\"noopener\">RFC 7231</a>.</p>\n                "
     },
-    "shortDescription": "<code>TRACE</code> operations in your API must have at least one <code>200</code> response defined.",
+    "shortDescription": "<code>TRACE</code> operations in your API must have the <code>200</code> response defined.",
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>Attackers strive to make your APIs behave in an unexpected way to learn more about your system or to cause a data breach. We highly recommend that you minimize any risks and clearly specify the data that your API operations can return for each possible response code.</p>\n                    <p>In&#160;<code>TRACE</code> operations, the messages are reflected back to the client. If you do not carefully define the response for&#160;<code>TRACE</code> operations, the output might accidentally&#160;contain sensitive data that should have been excluded.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>Attackers strive to make your APIs behave in an unexpected way to learn more about your system or to cause a data breach. We highly recommend that you minimize any risks and clearly specify the data that your API operations can return for each possible response code.</p>\n                    <p>In <code>TRACE</code> operations, the messages are reflected back to the client. If you do not carefully define the response for <code>TRACE</code> operations, the output might accidentally contain sensitive data that should have been excluded.</p>\n                "
         }
       ]
     },
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Define <code>200</code> or <code>202</code> responses for all <code>HEAD</code> operations.</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Define <code>200</code> responses for all <code>TRACE</code> operations.</p>\n                "
         }
       ]
     }
@@ -6547,8 +6903,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": {\n            \"name\": \"pet\",\n            \"in\": \"body\",\n            \"description\": \"pet to add to the system\",\n            \"required\": true,\n            \"schema\": {    \n            }\n        }\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    name: pet\n    in: body\n    description: pet to add to the system\n    required: true\n    schema: {}\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"pet to add to the system\",\n                \"required\": true,\n                \"schema\": {    \n                }\n            }\n        ]\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: pet to add to the system\n      required: true\n      schema: {}\n"
           }
         }
       ]
@@ -6567,8 +6923,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": {\n            \"name\": \"pet\",\n            \"in\": \"body\",\n            \"description\": \"pet to add to the system\",\n            \"required\": true,\n            \"schema\": {\n                \"$ref\": \"#components/schemas/NewPet\"\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"description\": \"Pet name\"\n            },\n            \"tag\": {\n                \"type\": \"string\",\n                \"description\": \"Pet tag\"\n            }\n        }\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    name: pet\n    in: body\n    description: pet to add to the system\n    required: true\n    schema:\n      $ref: \"#components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      description: Pet name\n    tag:\n      type: string\n      description: Pet tag\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"pet to add to the system\",\n                \"required\": true,\n                \"schema\": {\n                    \"$ref\": \"#/components/schemas/NewPet\"\n                }\n            }\n        ]\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"description\": \"Pet name\"\n            },\n            \"tag\": {\n                \"type\": \"string\",\n                \"description\": \"Pet tag\"\n            }\n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: pet to add to the system\n      required: true\n      schema:\n        $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      description: Pet name\n    tag:\n      type: string\n      description: Pet tag\n"
           }
         }
       ]
@@ -6591,8 +6947,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": {\n            \"name\": \"pet\",\n            \"in\": \"body\",\n            \"description\": \"pet to add to the system\",\n            \"required\": true,\n            \"schema\": {\n                \"$ref\": \"#/components/schemas/NewPet\"\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"description\": \"Pet name\",\n                \"type\": \"string\"\n            },\n            \"tag\": {\n                \"description\": \"Pet tag\"\n            }\n        }\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    name: pet\n    in: body\n    description: pet to add to the system\n    required: true\n    schema:\n      $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  required:\n    - name\n  properties:\n    name:\n      description: Pet name\n      type: string\n    tag:\n      description: Pet tag\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the system\",\n                \"required\": true,\n                \"schema\": {\n                    \"$ref\": \"#components/schemas/NewPet\"\n                }\n            }\n        ]\n    },\n    // ...\n    \"NewPet\": {\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"description\": \"Pet name\"\n            },\n            \"tag\": {\n                \"description\": \"Pet tag\"\n            }\n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the system\n      required: true\n      schema:\n        $ref: \"#components/schemas/NewPet\"\n# ...\nNewPet:\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      description: Pet name\n    tag:\n      description: Pet tag\n"
           }
         }
       ]
@@ -6611,8 +6967,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": {\n            \"name\": \"pet\",\n            \"in\": \"body\",\n            \"description\": \"pet to add to the system\",\n            \"required\": true,\n            \"schema\": {\n                \"$ref\": \"#components/schemas/NewPet\"\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"description\": \"Pet name\"\n            },\n            \"tag\": {\n                \"type\": \"string\",\n                \"description\": \"Pet tag\"\n            }\n        }\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    name: pet\n    in: body\n    description: pet to add to the system\n    required: true\n    schema:\n      $ref: \"#components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      description: Pet name\n    tag:\n      type: string\n      description: Pet tag\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"pet to add to the system\",\n                \"required\": true,\n                \"schema\": {\n                    \"$ref\": \"#/components/schemas/NewPet\"\n                }\n            }\n        ]\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"description\": \"Pet name\"\n            },\n            \"tag\": {\n                \"type\": \"string\",\n                \"description\": \"Pet tag\"\n            }\n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: pet to add to the system\n      required: true\n      schema:\n        $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      description: Pet name\n    tag:\n      type: string\n      description: Pet tag\n"
           }
         }
       ]
@@ -6644,7 +7000,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not specify the format of numeric values, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not specify an enforceable format of numeric values, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
         }
       ]
     },
@@ -6750,6 +7106,53 @@
       ]
     }
   },
+  "v3-schema-numerical-unknown-format": {
+    "group": "datavalidation",
+    "subgroup": "schema",
+    "title": {
+      "text": "<h1>Format of a numeric schema is unknown</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have defined for a numeric schema does not match formats defined in either the OpenAPI Specification (OAS) or JSON Schema Specification. Unknown formats cannot be enforced to protect your API, so it is like you had not defined a format at all.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a> and <a href=\"https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3\" target=\"_blank\">JSON Schema Validation</a>.</p>\n                "
+    },
+    "shortDescription": "The format you have defined for a numeric schema does not match formats defined in either the OpenAPI Specification (OAS) or JSON Schema Specification. Unknown formats cannot be enforced to protect your API, so it is like you had not defined a format at all.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The property <code>age</code> is set to be <code>integer</code> but there is a typo in the format, rendering it unknown:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewPet\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a Pet object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\"\n            },\n            \"age\": {\n                \"type\": \"integer\",\n                \"format\": \"int3\"\n            }\n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  description: JSON defining a Pet object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n    age:\n      type: integer\n      format: int3\n"
+          }
+        }
+      ]
+    },
+    "exploit": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not specify an enforceable format of numeric values, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Define a known <code>format</code> for numeric properties in schemas. This ensures that only parameters of the expected format get passed to the backend.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewPet\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a Pet object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\"\n            },\n            \"age\": {\n                \"type\": \"integer\",\n                \"minimum\": 0,\n                \"maximum\": 100,\n                \"format\": \"int32\"\n            }\n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  description: JSON defining a Pet object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n    age:\n      type: integer\n      minimum: 0\n      maximum: 100\n      format: int32\n"
+          }
+        },
+        {
+          "text": "\n                    <p>If you want to use your internal, company-specific format, make sure to also use properties like <code>maximum</code>, <code>minimum</code>, <code>pattern</code>, and <code>maxLenght</code> to constrain the accepted values.</p>\n                "
+        }
+      ]
+    }
+  },
   "v3-schema-object-additionalproperties-true": {
     "group": "datavalidation",
     "subgroup": "schema",
@@ -6757,9 +7160,9 @@
       "text": "<h1>Schema allows additional properties</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The schema you have defined allows additional properties, either intentionally or unintentionally. </p>\n                    <p>Unlike in the OpenAPI Specification (OAS) v2, in OAS v3 it is not enough to just state the type of the properties in the schema. By default, the property <code>additionalProperties</code> is <code>true</code>. Unless you specifically set <code>additionalProperties</code> to <code>false</code>, the schema continues to accept properties of any type.</p>\n                    <p>However, sometimes you intentionally want to allow additional properties, especially when using the combining operations combining operations <code>allOf</code>, <code>anyOf</code>, or <code>oneOf</code>. </p>\n                    <ul>\n                        <li>If you are using combining operations for objects with properties, <code>additionalProperties</code> must be <code>true</code> or the combining operations will not work.</li>\n                        <li>If you are using combining operations for primitives with no properties, <code>additionalProperties</code> can be <code>false</code> and the combining operations still work.</li>\n                        <li>If you have nested combining operations inside each other (for example, <code>allOf</code> with <code>anyOf</code> nested under it), the correct <code>additionalProperties</code> value depends on the combinations of the combining operations.</li>\n                    </ul>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The schema you have defined allows additional properties, either intentionally or unintentionally.</p>\n                    <p>Unlike in the OpenAPI Specification (OAS) v2, in OAS v3 it is not enough to just state the type of the properties in the schema. By default, the property <code>additionalProperties</code> is <code>true</code>. Unless you specifically set <code>additionalProperties</code> to <code>false</code>, the schema continues to accept properties of any type.</p>\n                    <p>However, sometimes you intentionally want to allow additional properties, especially when using the combining operations combining operations <code>allOf</code>, <code>anyOf</code>, or <code>oneOf</code>. </p>\n                    <ul>\n                        <li>If you are using combining operations for objects with properties, <code>additionalProperties</code> must be <code>true</code> or the combining operations will not work.</li>\n                        <li>If you are using combining operations for primitives with no properties, <code>additionalProperties</code> can be <code>false</code> and the combining operations still work.</li>\n                        <li>If you have nested combining operations inside each other (for example, <code>allOf</code> with <code>anyOf</code> nested under it), the correct <code>additionalProperties</code> value depends on the combinations of the combining operations.</li>\n                    </ul>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "The schema you have defined allows additional properties, either intentionally or unintentionally. ",
+    "shortDescription": "The schema you have defined allows additional properties, either intentionally or unintentionally.",
     "example": {
       "sections": [
         {
@@ -6767,8 +7170,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": {\n            \"name\": \"pet\",\n            \"in\": \"body\",\n            \"description\": \"Pet to add to the system\",\n            \"required\": true,\n            \"schema\": {\n                \"$ref\": \"#components/schemas/NewPet\"\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"description\": \"Pet name\"\n            },\n            \"tag\": {\n                \"type\": \"string\",\n                \"description\": \"Pet tag\"\n            }\n        }\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    name: pet\n    in: body\n    description: Pet to add to the system\n    required: true\n    schema:\n      $ref: \"#components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      description: Pet name\n    tag:\n      type: string\n      description: Pet tag\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the system\",\n                \"required\": true,\n                \"schema\": {\n                    \"$ref\": \"#components/schemas/NewPet\"\n                }\n            }\n        ]\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"description\": \"Pet name\"\n            },\n            \"tag\": {\n                \"type\": \"string\",\n                \"description\": \"Pet tag\"\n            }\n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the system\n      required: true\n      schema:\n        $ref: \"#components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      description: Pet name\n    tag:\n      type: string\n      description: Pet tag\n"
           }
         }
       ]
@@ -6787,8 +7190,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": {\n            \"name\": \"pet\",\n            \"in\": \"body\",\n            \"description\": \"pet to add to the system\",\n            \"required\": true,\n            \"schema\": {\n                \"$ref\": \"#components/schemas/NewPet\"\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"description\": \"Pet name\"\n            },\n            \"tag\": {\n                \"type\": \"string\",\n                \"description\": \"Pet tag\"\n            }\n        }\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    name: pet\n    in: body\n    description: pet to add to the system\n    required: true\n    schema:\n      $ref: \"#components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      description: Pet name\n    tag:\n      type: string\n      description: Pet tag\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"pet to add to the system\",\n                \"required\": true,\n                \"schema\": {\n                    \"$ref\": \"#/components/schemas/NewPet\"\n                }\n            }\n        ]\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"description\": \"Pet name\"\n            },\n            \"tag\": {\n                \"type\": \"string\",\n                \"description\": \"Pet tag\"\n            }\n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: pet to add to the system\n      required: true\n      schema:\n        $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      description: Pet name\n    tag:\n      type: string\n      description: Pet tag\n"
           }
         },
         {
@@ -6882,8 +7285,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": {\n            \"name\": \"pet\",\n            \"in\": \"body\",\n            \"description\": \"pet to add to the system\",\n            \"required\": true,\n            \"schema\": {\n                \"$ref\": \"#components/schemas/NewPet\"\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"description\": \"Pet name\"\n            },\n            \"tag\": {\n                \"type\": \"string\",\n                \"description\": \"Pet tag\"\n            }\n        }\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    name: pet\n    in: body\n    description: pet to add to the system\n    required: true\n    schema:\n      $ref: \"#components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      description: Pet name\n    tag:\n      type: string\n      description: Pet tag\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"pet to add to the system\",\n                \"required\": true,\n                \"schema\": {\n                    \"$ref\": \"#/components/schemas/NewPet\"\n                }\n            }\n        ]\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"description\": \"Pet name\"\n            },\n            \"tag\": {\n                \"type\": \"string\",\n                \"description\": \"Pet tag\"\n            }\n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: pet to add to the system\n      required: true\n      schema:\n        $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      description: Pet name\n    tag:\n      type: string\n      description: Pet tag\n"
           }
         }
       ]
@@ -7012,7 +7415,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings, any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings, no restrictions can be enforced and any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
         }
       ]
     },
@@ -7032,6 +7435,53 @@
         },
         {
           "text": "\n                    <p>For examples on some of the common regulars expressions, see the <a href=\"https://apisecurity.io/encyclopedia/content/oasv3/datavalidation/schema/v3-schema-string-pattern.htm\" target=\"_blank\">full article</a>.</p>\n                "
+        }
+      ]
+    }
+  },
+  "v3-schema-string-unknown-format": {
+    "group": "datavalidation",
+    "subgroup": "schema",
+    "title": {
+      "text": "<h1>Format of a string schema is unknown</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have defined for a string schema does not match formats defined in either the OpenAPI Specification (OAS) or JSON Schema Specification. Unknown formats cannot be enforced to protect your API, so it is like you had not defined a format at all.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a> and <a href=\"https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3\" target=\"_blank\">JSON Schema Validation</a>.</p>\n                "
+    },
+    "shortDescription": "The format you have defined for a string schema does not match formats defined in either the OpenAPI Specification (OAS) or JSON Schema Specification. Unknown formats cannot be enforced to protect your API, so it is like you had not defined a format at all.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The format <code>mail</code> for the property <code>userName</code> is unknown  and therefore does not restrict the accepted values:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new user\",\n        \"operationId\": \"addUser\",\n        \"requestBody\": {\n            \"description\": \"User to add\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewUser\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewUser\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a User object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\",\n            \"userName\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\"\n            },\n            \"userName\": {\n                \"type\": \"string\",\n                \"format\": \"mail\" \n            }\n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new user\n  operationId: addUser\n  requestBody:\n    description: User to add\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewUser\"\n# ...\nNewUser:\n  type: object\n  description: JSON defining a User object\n  additionalProperties: false\n  required:\n    - name\n    - userName\n  properties:\n    name:\n      type: string\n    userName:\n      type: string\n      format: mail\n"
+          }
+        }
+      ]
+    },
+    "exploit": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a known format for strings, no restrictions can be enforced and any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you only use known formats for strings. This ensures that only parameters of the expected format get passed to the backend.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new user\",\n        \"operationId\": \"addUser\",\n        \"requestBody\": {\n            \"description\": \"User to add\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewUser\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewUser\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a User object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\",\n            \"userName\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\"\n            },\n            \"userName\": {\n                \"type\": \"string\",\n                \"format\": \"email\"         \n            }\n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new user\n  operationId: addUser\n  requestBody:\n    description: User to add\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewUser\"\n# ...\nNewUser:\n  type: object\n  description: JSON defining a User object\n  additionalProperties: false\n  required:\n    - name\n    - userName\n  properties:\n    name:\n      type: string\n    userName:\n      type: string\n      format: email\n"
+          }
+        },
+        {
+          "text": "\n                    <p>If you want to use your internal, company-specific format, make sure to also use properties like <code>maximum</code>, <code>minimum</code>, <code>pattern</code>, and <code>maxLenght</code> to constrain the accepted values.</p>\n                "
         }
       ]
     }
@@ -7129,9 +7579,9 @@
       "text": "<h1>Value of the schema discriminator must be a required property</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The value of the <code>discriminator</code> property in the schema in question has not been listed as a required property. The value of the <code>discriminator</code> property must be a string.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaComposition\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The <code>discriminator</code> property in the schema in question has not been listed as a required property.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaComposition\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "The value of the <code>discriminator</code> property in the schema in question has not been listed as a required property. The value of the <code>discriminator</code> property must be a string.",
+    "shortDescription": "The <code>discriminator</code> property in the schema in question has not been listed as a required property.",
     "example": {
       "sections": [
         {
@@ -7139,8 +7589,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"Pet\": {\n        \"type\": \"object\",\n        \"discriminator\": \"petType\",\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\"\n            },\n            \"petType\": {\n                \"type\": \"string\"\n            }\n        },\n        \"required\": [\n            \"name\"\n        ]\n    }\n}",
-            "yaml": "Pet:\n  type: object\n  discriminator: petType\n  properties:\n    name:\n      type: string\n    petType:\n      type: string\n  required:\n    - name\n"
+            "json": "{\n    \"Pet\": {\n        \"type\": \"object\",\n        \"discriminator\": {\n            \"propertyName\": \"petType\"\n        },\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\"\n            },\n            \"petType\": {\n                \"type\": \"string\"\n            }\n        },\n        \"required\": [\n            \"name\"\n        ]\n    }\n}",
+            "yaml": "Pet:\n  type: object\n  discriminator:\n    propertyName: petType\n  properties:\n    name:\n      type: string\n    petType:\n      type: string\n  required:\n    - name\n"
           }
         }
       ]
@@ -7148,12 +7598,12 @@
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all discriminator values are listed as required properties.</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all discriminators are listed as required properties.</p>\n                "
         },
         {
           "code": {
-            "json": "{\n    \"Pet\": {\n        \"type\": \"object\",\n        \"discriminator\": \"petType\",\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\"\n            },\n            \"petType\": {\n                \"type\": \"string\"\n            }\n        },\n        \"required\": [\n            \"name\",\n            \"petType\"\n        ]\n    }\n}",
-            "yaml": "Pet:\n  type: object\n  discriminator: petType\n  properties:\n    name:\n      type: string\n    petType:\n      type: string\n  required:\n    - name\n    - petType\n"
+            "json": "{\n    \"Pet\": {\n        \"type\": \"object\",\n        \"discriminator\": {\n            \"propertyName\": \"petType\"\n        },\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\"\n            },\n            \"petType\": {\n                \"type\": \"string\"\n            }\n        },\n        \"required\": [\n            \"name\",\n            \"petType\"\n        ]\n    }\n}",
+            "yaml": "Pet:\n  type: object\n  discriminator:\n    propertyName: petType\n  properties:\n    name:\n      type: string\n    petType:\n      type: string\n  required:\n    - name\n    - petType\n"
           }
         }
       ]
@@ -7166,9 +7616,9 @@
       "text": "<h1>Schema discriminator property must be a string</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>You have defined a discriminator that is not a string. Discriminator values must always be of the type <code>string</code>.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>You have defined a discriminator that is not a string. Discriminators must always be of the type <code>string</code>.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "You have defined a discriminator that is not a string. Discriminator values must always be of the type <code>string</code>.",
+    "shortDescription": "You have defined a discriminator that is not a string. Discriminators must always be of the type <code>string</code>.",
     "example": {
       "sections": [
         {
@@ -7176,8 +7626,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"definitions\": {\n        \"Pet\": {\n            \"type\": \"object\",\n            \"discriminator\": \"age\",\n            \"properties\": {\n                \"name\": {\n                    \"type\": \"string\"\n                },\n                \"age\": {\n                    \"type\": \"integer\"\n                }\n            },\n            \"required\": [\n                \"name\",\n                \"age\"\n            ]\n        }\n    }\n}",
-            "yaml": "definitions:\n  Pet:\n    type: object\n    discriminator: age\n    properties:\n      name:\n        type: string\n      age:\n        type: integer\n    required:\n      - name\n      - age\n"
+            "json": "{\n    \"Pet\": {\n        \"type\": \"object\",\n        \"discriminator\": {\n            \"propertyName\": \"age\"\n        },\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\"\n            },\n            \"age\": {\n                \"type\": \"integer\"\n            }\n        },\n        \"required\": [\n            \"name\",\n            \"age\"\n        ]\n    }\n}",
+            "yaml": "Pet:\n  type: object\n  discriminator:\n    propertyName: age\n  properties:\n    name:\n      type: string\n    age:\n      type: integer\n  required:\n    - name\n    - age\n"
           }
         }
       ]
@@ -7189,8 +7639,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"definitions\": {\n        \"Pet\": {\n            \"type\": \"object\",\n            \"discriminator\": \"age\",\n            \"properties\": {\n                \"name\": {\n                    \"type\": \"string\"\n                },\n                \"age\": {\n                    \"type\": \"string\"\n                }\n            },\n            \"required\": [\n                \"name\",\n                \"age\"\n            ]\n        }\n    }\n}",
-            "yaml": "definitions:\n  Pet:\n    type: object\n    discriminator: age\n    properties:\n      name:\n        type: string\n      age:\n        type: string\n    required:\n      - name\n      - age\n"
+            "json": "{\n    \"Pet\": {\n        \"type\": \"object\",\n        \"discriminator\": {\n            \"propertyName\": \"age\"\n        },\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\"\n            },\n            \"age\": {\n                \"type\": \"string\"\n            }\n        },\n        \"required\": [\n            \"name\",\n            \"age\"\n        ]\n    }\n}",
+            "yaml": "Pet:\n  type: object\n  discriminator:\n    propertyName: age\n  properties:\n    name:\n      type: string\n    age:\n      type: string\n  required:\n    - name\n    - age\n"
           }
         }
       ]
@@ -7213,8 +7663,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"definitions\": {\n        \"Pet\": {\n            \"type\": \"object\",\n            \"discriminator\": \"animalType\",\n            \"properties\": {\n                \"name\": {\n                    \"type\": \"string\"\n                },\n                \"petType\": {\n                    \"type\": \"string\"\n                }\n            },\n            \"required\": [\n                \"name\",\n                \"animalType\"\n            ]\n        }\n    }\n}",
-            "yaml": "definitions:\n  Pet:\n    type: object\n    discriminator: animalType\n    properties:\n      name:\n        type: string\n      petType:\n        type: string\n    required:\n      - name\n      - animalType\n"
+            "json": "{\n    \"Pet\": {\n        \"type\": \"object\",\n        \"discriminator\": {\n            \"propertyName\": \"animalType\"\n        },\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\"\n            },\n            \"petType\": {\n                \"type\": \"string\"\n            }\n        },\n        \"required\": [\n            \"name\",\n            \"animalType\"\n        ]\n    }\n}",
+            "yaml": "Pet:\n  type: object\n  discriminator:\n    propertyName: animalType\n  properties:\n    name:\n      type: string\n    petType:\n      type: string\n  required:\n    - name\n    - animalType\n"
           }
         }
       ]
@@ -7226,8 +7676,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"definitions\": {\n        \"Pet\": {\n            \"type\": \"object\",\n            \"discriminator\": \"petType\",\n            \"properties\": {\n                \"name\": {\n                    \"type\": \"string\"\n                },\n                \"petType\": {\n                    \"type\": \"string\"\n                }\n            },\n            \"required\": [\n                \"name\",\n                \"petType\"\n            ]\n        }\n    }\n}",
-            "yaml": "definitions:\n  Pet:\n    type: object\n    discriminator: petType\n    properties:\n      name:\n        type: string\n      petType:\n        type: string\n    required:\n      - name\n      - petType\n"
+            "json": "{\n    \"Pet\": {\n        \"type\": \"object\",\n        \"discriminator\": {\n            \"propertyName\": \"petType\"\n        },\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\"\n            },\n            \"petType\": {\n                \"type\": \"string\"\n            }\n        },\n        \"required\": [\n            \"name\",\n            \"petType\"\n        ]\n    }\n}",
+            "yaml": "Pet:\n  type: object\n  discriminator:\n    propertyName: petType\n  properties:\n    name:\n      type: string\n    petType:\n      type: string\n  required:\n    - name\n    - petType\n"
           }
         }
       ]
@@ -7669,21 +8119,21 @@
     "group": "oasconformance",
     "subgroup": "semantics",
     "title": {
-      "text": "<h1>Schema does not define a required property</h1>"
+      "text": "<h1>Required property is missing</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>One or more properties that you have defined as <code>required</code> are not defined in the schema.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>Your API is missing one or more properties that the OpenAPI Specification (OAS) defines as required. If you do not define all required properties, your API definition does not fully conform to the OAS.</p>\n                    <p>The names of objects and properties are case-sensitive, so make sure that you have spelled them correctly.</p>\n                    <p>The following objects themselves are optional, but if defined in the API definition, must have the following properties defined:</p>\n                    <table>\n                        <col />\n                        <col />\n                        <thead>\n                            <tr>\n                                <th>Object</th>\n                                <th>Required properties</th>\n                            </tr>\n                        </thead>\n                        <tbody>\n                            <tr>\n                                <td>External Documentation</td>\n                                <td><code>url</code>\n                                </td>\n                            </tr>\n                            <tr>\n                                <td>Discriminator</td>\n                                <td><code>propertyName</code>\n                                </td>\n                            </tr>\n                            <tr>\n                                <td>License</td>\n                                <td><code>name</code>\n                                </td>\n                            </tr>\n                            <tr>\n                                <td>Request Body</td>\n                                <td><code>content</code>\n                                </td>\n                            </tr>\n                            <tr>\n                                <td>Response</td>\n                                <td><code>description</code>\n                                </td>\n                            </tr>\n                            <tr>\n                                <td>Server Variable</td>\n                                <td><code>default</code>\n                                </td>\n                            </tr>\n                            <tr>\n                                <td>Tag</td>\n                                <td><code>name</code>\n                                </td>\n                            </tr>\n                        </tbody>\n                    </table>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#openapi-specification\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "One or more properties that you have defined as <code>required</code> are not defined in the schema.",
+    "shortDescription": "Your API is missing one or more properties that the OpenAPI Specification (OAS) defines as required. If you do not define all required properties, your API definition does not fully conform to the OAS.",
     "example": {
       "sections": [
         {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The schema requires the property <code>name</code>, but it has not been defined:</p>\n                "
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The <code>license</code> object of this sample API is missing the field <code>name</code>, which is defined as a required property in the OAS:</p>\n                "
         },
         {
           "code": {
-            "json": "{\n    \"name\": \"Pet\",\n    \"in\": \"body\",\n    \"description\": \"pet to add to the system\",\n    \"required\": true,\n    \"schema\": {  \n        \"type\": \"object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"breed\": {\n                \"type\": \"string\"\n            },\n            \"age\": {\n                \"type\": \"integer\"\n            }\n        }\n    }\n}",
-            "yaml": "name: Pet\nin: body\ndescription: pet to add to the system\nrequired: true\nschema:\n  type: object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    breed:\n      type: string\n    age:\n      type: integer\n"
+            "json": "{\n    \"license\": {\n        \"description\": \"This is a sample license.\"\n    }\n}",
+            "yaml": "license:\n  description: This is a sample license.\n"
           }
         }
       ]
@@ -7691,12 +8141,12 @@
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all properties you have defined as <code>required</code> are also defined in the schema.</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that your API has all the properties that the OAS requires.</p>\n                "
         },
         {
           "code": {
-            "json": "{\n    \"name\": \"pet\",\n    \"in\": \"body\",\n    \"description\": \"pet to add to the system\",\n    \"required\": true,\n    \"schema\": {  \n        \"type\": \"object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\"\n            },\n            \"breed\": {\n                \"type\": \"string\"\n            },\n            \"age\": {\n                \"type\": \"integer\"\n            }\n        }\n    }\n}",
-            "yaml": "name: pet\nin: body\ndescription: pet to add to the system\nrequired: true\nschema:\n  type: object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n    breed:\n      type: string\n    age:\n      type: integer\n"
+            "json": "{\n    \"license\": {\n        \"name\": \"My Sample License\",\n        \"description\": \"This is a sample license.\"\n    }\n}",
+            "yaml": "license:\n  name: My Sample License\n  description: This is a sample license.\n"
           }
         }
       ]
@@ -7780,6 +8230,43 @@
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all enum values for schemas match the type of schema.</p>\n                "
+        }
+      ]
+    }
+  },
+  "v3-semantic-schema-property-required": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Schema does not define a required property</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>One or more properties that you have defined as <code>required</code> are not defined in the schema.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "One or more properties that you have defined as <code>required</code> are not defined in the schema.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The schema requires the property <code>name</code>, but it has not been defined:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"name\": \"Pet\",\n    \"in\": \"body\",\n    \"description\": \"pet to add to the system\",\n    \"required\": true,\n    \"schema\": {  \n        \"type\": \"object\",\n        \"additionalProperties\": \"false\",\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"breed\": {\n                \"type\": \"string\"\n            },\n            \"age\": {\n                \"type\": \"integer\"\n            }\n        }\n    }\n}",
+            "yaml": "name: Pet\nin: body\ndescription: pet to add to the system\nrequired: true\nschema:\n  type: object\n  additionalProperties: \"false\"\n  required:\n    - name\n  properties:\n    breed:\n      type: string\n    age:\n      type: integer\n"
+          }
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all properties you have defined as <code>required</code> are also defined in the schema.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"name\": \"pet\",\n    \"in\": \"body\",\n    \"description\": \"pet to add to the system\",\n    \"required\": true,\n    \"schema\": {  \n        \"type\": \"object\",\n        \"additionalProperties\": \"false\",\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\"\n            },\n            \"breed\": {\n                \"type\": \"string\"\n            },\n            \"age\": {\n                \"type\": \"integer\"\n            }\n        }\n    }\n}",
+            "yaml": "name: pet\nin: body\ndescription: pet to add to the system\nrequired: true\nschema:\n  type: object\n  additionalProperties: \"false\"\n  required:\n    - name\n  properties:\n    name:\n      type: string\n    breed:\n      type: string\n    age:\n      type: integer\n"
+          }
         }
       ]
     }
@@ -8361,7 +8848,7 @@
       "text": "<h1>Property must have an integer value</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The property in question requires a value of the type <code>integer</code>, but the value you have defined does not match this.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The property in question requires a value of the type <code>integer</code>, but the value you have defined does not match this.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a> and <a href=\"https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3\" target=\"_blank\">JSON Schema Validation</a>.</p>\n                "
     },
     "shortDescription": "The property in question requires a value of the type <code>integer</code>, but the value you have defined does not match this.",
     "remediation": {
@@ -8412,16 +8899,16 @@
     "group": "oasconformance",
     "subgroup": "structure",
     "title": {
-      "text": "<h1>Property required by the OpenAPI Specification is missing</h1>"
+      "text": "<h1>Mandatory property is missing</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>Your API is missing one or more properties that the OpenAPI Specification (OAS) defines as mandatory.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#openapi-specification\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>Your API is missing one or more properties that are mandatory. Either the OpenAPI Specification (OAS) defines them as required, or defining them is mandatory for 42Crunch Platform to be able to properly use your API definition.</p>\n                    <p>The names of objects and properties are case-sensitive, so make sure that you have spelled them correctly.</p>\n                    <p>The following objects and properties are the bare minimum that the OAS requires from an OpenAPI definition and must always be defined:</p>\n                    <ul>\n                        <li><code>openapi</code>\n                        </li>\n                        <li><code>info</code>\n                            <ul>\n                                <li><code>title</code>\n                                </li>\n                                <li><code>version</code>\n                                </li>\n                            </ul>\n                        </li>\n                        <li><code>paths</code>\n                        </li>\n                    </ul>\n                    <p>The following objects themselves are optional, but if defined in the API definition, must have the following properties defined:</p>\n                    <table>\n                        <col />\n                        <col />\n                        <thead>\n                            <tr>\n                                <th>Object</th>\n                                <th>Required properties</th>\n                            </tr>\n                        </thead>\n                        <tbody>\n                            <tr>\n                                <td>Operation</td>\n                                <td><code>responses</code>\n                                </td>\n                            </tr>\n                            <tr>\n                                <td>Parameter</td>\n                                <td>\n                                    <ul>\n                                        <li><code>name</code>\n                                        </li>\n                                        <li><code>in</code>\n                                        </li>\n                                    </ul>\n                                </td>\n                            </tr>\n                            <tr>\n                                <td>Security Scheme</td>\n                                <td><code>type</code>\n                                </td>\n                            </tr>\n                        </tbody>\n                    </table>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#openapi-specification\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "Your API is missing one or more properties that the OpenAPI Specification (OAS) defines as mandatory.",
+    "shortDescription": "Your API is missing one or more properties that are mandatory. Either the OpenAPI Specification (OAS) defines them as required, or defining them is mandatory for 42Crunch Platform to be able to properly use your API definition.",
     "example": {
       "sections": [
         {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The <code>info</code> field of this sample API is missing the version of the API, which is defined as a required property in the OAS:</p>\n                "
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The <code>info</code> object of this sample API is missing the field <code>version</code>, which is defined as a required property in the OAS:</p>\n                "
         },
         {
           "code": {
@@ -8452,7 +8939,7 @@
       "text": "<h1>Property value has different type than what the OpenAPI Specification requires for this property</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The property in question has a value of a type does not match the required type.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The property in question has a value of a type does not match the required type.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a> and <a href=\"https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3\" target=\"_blank\">JSON Schema Validation</a>.</p>\n                "
     },
     "shortDescription": "The property in question has a value of a type does not match the required type.",
     "remediation": {
@@ -8480,8 +8967,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"201\": {\n            \"description\": \"subscription created\",\n            \"content\": {\n                // ...\n                \"callbacks\": {\n                    \"callback_1\": {\n                        \"$ref\": \"#/components/parameters/reusableCallback\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"components\": {\n        // ...\n        \"callbacks\": {\n            \"onData\": {\n                \"{$request.query.callbackUrl}/data\": {\n                    \"post\": {\n                        \"requestBody\": {\n                            \"description\": \"subscription payload\",\n                            \"content\": {\n                                \"application/json\": {\n                                    \"schema\": {\n                                        \"properties\": {\n                                            \"timestamp\": {\n                                                \"type\": \"string\",\n                                                \"format\": \"date-time\"\n                                            },\n                                            \"userData\": {\n                                                \"type\": \"string\"\n                                            }\n                                        }\n                                    }\n                                }\n                            }\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
-            "yaml": "responses:\n  \"201\":\n    description: subscription created\n    content:\n      # ...\n      callbacks:\n        callback_1:\n          $ref: \"#/components/parameters/reusableCallback\"\n# ...\ncomponents:\n  # ...\n  callbacks:\n    onData:\n      \"{$request.query.callbackUrl}/data\":\n        post:\n          requestBody:\n            description: subscription payload\n            content:\n              application/json:\n                schema:\n                  properties:\n                    timestamp:\n                      type: string\n                      format: date-time\n                    userData:\n                      type: string\n"
+            "json": "{\n    \"responses\": {\n        \"201\": {\n            \"description\": \"subscription created\",\n            \"content\": {\n                // ...\n            },\n            \"callbacks\": {\n                \"callback_1\": {\n                    \"$ref\": \"#/components/parameters/reusableCallback\"\n                }\n            }\n        }\n    },\n    // ...\n    \"components\": {\n        // ...\n        \"callbacks\": {\n            \"onData\": {\n                \"{$request.query.callbackUrl}/data\": {\n                    \"post\": {\n                        \"requestBody\": {\n                            \"description\": \"subscription payload\",\n                            \"content\": {\n                                \"application/json\": {\n                                    \"schema\": {\n                                        \"properties\": {\n                                            \"timestamp\": {\n                                                \"type\": \"string\",\n                                                \"format\": \"date-time\"\n                                            },\n                                            \"userData\": {\n                                                \"type\": \"string\"\n                                            }\n                                        }\n                                    }\n                                }\n                            }\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"201\":\n    description: subscription created\n    content:\n      {}\n      # ...\n    callbacks:\n      callback_1:\n        $ref: \"#/components/parameters/reusableCallback\"\n# ...\ncomponents:\n  # ...\n  callbacks:\n    onData:\n      \"{$request.query.callbackUrl}/data\":\n        post:\n          requestBody:\n            description: subscription payload\n            content:\n              application/json:\n                schema:\n                  properties:\n                    timestamp:\n                      type: string\n                      format: date-time\n                    userData:\n                      type: string\n"
           }
         }
       ]
@@ -8493,8 +8980,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"201\": {\n            \"description\": \"subscription created\",\n            \"content\": {\n                // ...\n                \"callbacks\": {\n                    \"callback_1\": {\n                        \"$ref\": \"#/components/callbacks/reusableCallback\"\n                    }\n                }\n            }\n        }\n    }\n}",
-            "yaml": "responses:\n  \"201\":\n    description: subscription created\n    content:\n      # ...\n      callbacks:\n        callback_1:\n          $ref: \"#/components/callbacks/reusableCallback\"\n"
+            "json": "{\n    \"responses\": {\n        \"201\": {\n            \"description\": \"subscription created\",\n            \"content\": {\n                // ...\n            },\n            \"callbacks\": {\n                \"callback_1\": {\n                    \"$ref\": \"#/components/callbacks/reusableCallback\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"201\":\n    description: subscription created\n    content:\n      {}\n      # ...\n    callbacks:\n      callback_1:\n        $ref: \"#/components/callbacks/reusableCallback\"\n"
           }
         }
       ]
@@ -8917,8 +9404,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"name\": \"user\",\n    \"in\": \"body\",\n    \"description\": \"The user to be added\",\n    \"required\": true,\n    \"schema\": {\n        \"type\": \"array\",\n        \"type\": \"string\"\n    }\n}",
-            "yaml": "name: user\nin: body\ndescription: The user to be added\nrequired: true\nschema:\n  type: array\n  type: string\n"
+            "json": "{\n    \"name\": \"user\",\n    \"in\": \"body\",\n    \"description\": \"The user to be added\",\n    \"required\": true,\n    \"schema\": {\n        \"type\": \"array\"\n    }\n}",
+            "yaml": "name: user\nin: body\ndescription: The user to be added\nrequired: true\nschema:\n  type: array\n"
           }
         }
       ]
@@ -10024,9 +10511,9 @@
       "text": "<h1>Schema format is not applicable to the schema's type</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have specified for a numeric schema is not consistent with the type you have defined for the schema. While this is acceptable, it may not be what you want.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have specified for a schema is not consistent with the type you have defined for the schema. While this is acceptable, it may not be what you want.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a> and <a href=\"https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3\" target=\"_blank\">JSON Schema Validation</a>.</p>\n                "
     },
-    "shortDescription": "The format you have specified for a numeric schema is not consistent with the type you have defined for the schema. While this is acceptable, it may not be what you want.",
+    "shortDescription": "The format you have specified for a schema is not consistent with the type you have defined for the schema. While this is acceptable, it may not be what you want.",
     "example": {
       "sections": [
         {
@@ -10043,7 +10530,7 @@
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the formats of all numeric schemas match the type of the schemas.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the formats of all schemas match the type of the schemas.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
         },
         {
           "code": {
@@ -10547,7 +11034,7 @@
       "text": "<h1>Property must have an integer value</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The property in question requires a value of the type <code>integer</code>, but the value you have defined does not match this.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The property in question requires a value of the type <code>integer</code>, but the value you have defined does not match this.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a> and <a href=\"https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3\" target=\"_blank\">JSON Schema Validation</a>.</p>\n                "
     },
     "shortDescription": "The property in question requires a value of the type <code>integer</code>, but the value you have defined does not match this.",
     "remediation": {
@@ -10616,16 +11103,16 @@
     "group": "oasconformance",
     "subgroup": "structure",
     "title": {
-      "text": "<h1>Property required by the OpenAPI Specification is missing</h1>"
+      "text": "<h1>Mandatory property is missing</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>Your API is missing one or more properties that the OpenAPI Specification (OAS) defines as mandatory.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#openapi-specification\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>Your API is missing one or more properties that are mandatory. Either the OpenAPI Specification (OAS) defines them as required, or defining them is mandatory for 42Crunch Platform to be able to properly use your API definition.</p>\n                    <p>The names of objects and properties are case-sensitive, so make sure that you have spelled them correctly.</p>\n                    <p>The following objects and properties are the bare minimum that the OAS requires from an OpenAPI definition and must always be defined:</p>\n                    <ul>\n                        <li><code>swagger</code>\n                        </li>\n                        <li><code>info</code>\n                            <ul>\n                                <li><code>title</code>\n                                </li>\n                                <li><code>version</code>\n                                </li>\n                            </ul>\n                        </li>\n                        <li><code>paths</code>\n                        </li>\n                    </ul>\n                    <p>The following objects themselves are optional, but if defined in the API definition, must have the following properties defined:</p>\n                    <table>\n                        <col />\n                        <col />\n                        <thead>\n                            <tr>\n                                <th>Object</th>\n                                <th>Required properties</th>\n                            </tr>\n                        </thead>\n                        <tbody>\n                            <tr>\n                                <td>Header</td>\n                                <td><code>type</code>\n                                </td>\n                            </tr>\n                            <tr>\n                                <td>Items</td>\n                                <td><code>type</code>\n                                </td>\n                            </tr>\n                            <tr>\n                                <td>Operation</td>\n                                <td><code>responses</code>\n                                </td>\n                            </tr>\n                            <tr>\n                                <td>Parameter (if not referenced)</td>\n                                <td>\n                                    <ul>\n                                        <li><code>name</code>\n                                        </li>\n                                        <li><code>type</code>\n                                        </li>\n                                        <li><code>in</code>\n                                        </li>\n                                    </ul>\n                                </td>\n                            </tr>\n                            <tr>\n                                <td>Security Scheme</td>\n                                <td><code>type</code>\n                                </td>\n                            </tr>\n                        </tbody>\n                    </table>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#openapi-specification\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
-    "shortDescription": "Your API is missing one or more properties that the OpenAPI Specification (OAS) defines as mandatory.",
+    "shortDescription": "Your API is missing one or more properties that are mandatory. Either the OpenAPI Specification (OAS) defines them as required, or defining them is mandatory for 42Crunch Platform to be able to properly use your API definition.",
     "example": {
       "sections": [
         {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The <code>info</code> field of this sample API is missing the version of the API, which is defined as a required property in the OAS:</p>\n                "
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The <code>info</code> object of this sample API is missing the field <code>version</code>, which is defined as a required property in the OAS:</p>\n                "
         },
         {
           "code": {
@@ -10674,7 +11161,7 @@
       "text": "<h1>Property value has different type than what the OpenAPI Specification requires for this property</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The property in question has a value of a type does not match the required type.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The property in question has a value of a type does not match the required type.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a> and <a href=\"https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3\" target=\"_blank\">JSON Schema Validation</a>.</p>\n                "
     },
     "shortDescription": "The property in question has a value of a type does not match the required type.",
     "remediation": {
@@ -10883,8 +11370,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"name\": \"user\",\n    \"in\": \"body\",\n    \"description\": \"The user to be added\",\n    \"required\": true,\n    \"schema\": {\n        \"type\": \"array\",\n        \"type\": \"string\"\n    }\n}",
-            "yaml": "name: user\nin: body\ndescription: The user to be added\nrequired: true\nschema:\n  type: array\n  type: string\n"
+            "json": "{\n    \"name\": \"user\",\n    \"in\": \"body\",\n    \"description\": \"The user to be added\",\n    \"required\": true,\n    \"schema\": {\n        \"type\": \"array\"\n    }\n}",
+            "yaml": "name: user\nin: body\ndescription: The user to be added\nrequired: true\nschema:\n  type: array\n"
           }
         }
       ]
@@ -11331,9 +11818,9 @@
       "text": "<h1>Header format is not applicable to the header's type</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have specified for a numeric header is not consistent with the type you have defined. While this is acceptable, it may not be what you want.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have specified for a header is not consistent with the type you have defined. While this is acceptable, it may not be what you want.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a> and <a href=\"https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3\" target=\"_blank\">JSON Schema Validation</a>.</p>\n                "
     },
-    "shortDescription": "The format you have specified for a numeric header is not consistent with the type you have defined. While this is acceptable, it may not be what you want.",
+    "shortDescription": "The format you have specified for a header is not consistent with the type you have defined. While this is acceptable, it may not be what you want.",
     "example": {
       "sections": [
         {
@@ -11350,7 +11837,7 @@
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the formats of all numeric headers match the type of the headers.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the formats of all headers match the type of the headers.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
         },
         {
           "code": {
@@ -11441,9 +11928,9 @@
       "text": "<h1>Item format is not applicable to the type the array items</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have specified for one or more numeric array items is not consistent with their type. While this is acceptable, it probably is not what you want.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have specified for one or more array items is not consistent with their type. While this is acceptable, it probably is not what you want.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a> and <a href=\"https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3\" target=\"_blank\">JSON Schema Validation</a>.</p>\n                "
     },
-    "shortDescription": "The format you have specified for one or more numeric array items is not consistent with their type. While this is acceptable, it probably is not what you want.",
+    "shortDescription": "The format you have specified for one or more array items is not consistent with their type. While this is acceptable, it probably is not what you want.",
     "example": {
       "sections": [
         {
@@ -11460,7 +11947,7 @@
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the formats of all numeric array items match the type of the items.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the formats of all array items match the type of the items.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
         },
         {
           "code": {
@@ -11643,9 +12130,9 @@
       "text": "<h1>Parameter format is not applicable to the parameter's type</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have specified for a numeric parameter is not consistent with the type you have defined for the parameter. While this is acceptable, it may not be what you want.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have specified for a parameter is not consistent with the type you have defined for the parameter. While this is acceptable, it may not be what you want.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a> and <a href=\"https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3\" target=\"_blank\">JSON Schema Validation</a>.</p>\n                "
     },
-    "shortDescription": "The format you have specified for a numeric parameter is not consistent with the type you have defined for the parameter. While this is acceptable, it may not be what you want.",
+    "shortDescription": "The format you have specified for a parameter is not consistent with the type you have defined for the parameter. While this is acceptable, it may not be what you want.",
     "example": {
       "sections": [
         {
@@ -11662,7 +12149,7 @@
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the formats of all numeric parameters match the type of the parameters.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the formats of all parameters match the type of the parameters.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
         },
         {
           "code": {
@@ -11930,6 +12417,43 @@
       ]
     }
   },
+  "warning-schema-additionalproperties-boolean": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>Schema defines 'additionalProperties' as a boolean value</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The schema defines <code>additionalProperties</code> as a Boolean value.</p>\n                    <p>The reason <code>additionalProperties</code> takes a boolean value comes from the role the attribute plays in JSON schemas. In JSON, by default, any object can also accept additional properties that are not defined in its schema as long as the properties defined in the schema are present. To change this behavior and stop allowing any additional properties to those explicitly defined in the schema, you can set <code>additionalProperties</code> to <code>false</code>.</p>\n                    <p>OpenAPI Specification (OAS) v2 does not define this behavior, and the current tooling (such as parsers and codegen) does not support it. Instead, they only accept the value <code>object</code> for this property. OAS v2 does also support using <code>additionalProperties</code> to specify a schema to which the additional properties must conform.</p>\n                    <p>Because boolean in <code>additionalProperties</code> is not a documented part of the OAS, the API implementation may not behave according to developer expectations. Such a discrepancy has an inherent risk and is not recommended.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The schema defines <code>additionalProperties</code> as a Boolean value.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. Here, <code>additionalProperties</code> is set to <code>false</code>. This behavior is supported in regular JSON but <strong>not</strong> in OAS v2:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"tag\": {\n                            \"type\": \"string\"\n                        }\n                    },\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"additionalProperties\": false\n                }\n            }\n        ]\n    }\n}\n",
+            "yaml": "post:\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        properties:\n          name:\n            type: string\n          tag:\n            type: string\n        required:\n          - name\n        additionalProperties: false\n"
+          }
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>The safest option is not to allow additional properties. If the schema does not use <code>allOf</code> at all, make sure you define all properties of the accepted JSON payload in the schema itself.</p>\n                    <p>Do not use combining operations (<code>allOf</code>) for defining additional properties in API definitions following the OAS v2. </p>\n                    <p>We recommend updating your API definition to follow the OAS v3, because it offers proper support for <code>additionalProperties</code> as Boolean, in addition to other improvements.</p>\n                    <p>If you cannot update your API to OAS v3, use <code>additionalProperties</code> to provide the schema that you want to support:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"tag\": {\n                            \"type\": \"string\"\n                        }\n                    },\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"additionalProperties\": {\n                        \"schema\": {    \n                            \"$ref\": \"#/definitions/PetDetails\"\n                            \n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
+            "yaml": "post:\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        properties:\n          name:\n            type: string\n          tag:\n            type: string\n        required:\n          - name\n        additionalProperties:\n          schema:\n            $ref: \"#/definitions/PetDetails\"\n"
+          }
+        }
+      ]
+    }
+  },
   "warning-schema-enum-property-improper": {
     "group": "oasconformance",
     "subgroup": "bestpractices",
@@ -12010,9 +12534,9 @@
       "text": "<h1>Schema format is not applicable to the schema's type</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have specified for a numeric schema is not consistent with the type you have defined for the schema. While this is acceptable, it may not be what you want.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>The format you have specified for a schema is not consistent with the type you have defined for the schema. While this is acceptable, it may not be what you want.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#dataTypeFormat\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a> and <a href=\"https://tools.ietf.org/html/draft-wright-json-schema-validation-00#section-7.3\" target=\"_blank\">JSON Schema Validation</a>.</p>\n                "
     },
-    "shortDescription": "The format you have specified for a numeric schema is not consistent with the type you have defined for the schema. While this is acceptable, it may not be what you want.",
+    "shortDescription": "The format you have specified for a schema is not consistent with the type you have defined for the schema. While this is acceptable, it may not be what you want.",
     "example": {
       "sections": [
         {
@@ -12029,7 +12553,7 @@
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the formats of all numeric schemas match the type of the schemas.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the formats of all schemas match the type of the schemas.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
         },
         {
           "code": {

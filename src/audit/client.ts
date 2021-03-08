@@ -8,8 +8,8 @@ import got from "got";
 import FormData from "form-data";
 import { Grades, ReportedIssue } from "../types";
 
-const ASSESS_URL = "https://stateless.apisecurity.io/api/v1/anon/assess/vscode";
-const TOKEN_URL = "https://stateless.apisecurity.io/api/v1/anon/token";
+const ASSESS_URL = "https://stateless.42crunch.com/api/v1/anon/assess/vscode";
+const TOKEN_URL = "https://stateless.42crunch.com/api/v1/anon/token";
 
 async function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
