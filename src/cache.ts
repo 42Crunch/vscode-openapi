@@ -13,7 +13,7 @@ import { bundle } from "./bundler";
 import { joinJsonPointer } from "./pointer";
 import { Node } from "@xliic/openapi-ast-node";
 import { configuration } from "./configuration";
-import { ExternalRefDocumentProvider } from "./external-ref-provider";
+import { ExternalRefDocumentProvider } from "./external-refs";
 
 interface CacheEntry {
   document: vscode.TextDocument;

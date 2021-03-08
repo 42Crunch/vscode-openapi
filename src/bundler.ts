@@ -3,7 +3,6 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 import * as vscode from "vscode";
-import { dirname } from "path";
 import parser from "@xliic/json-schema-ref-parser";
 import Pointer from "@xliic/json-schema-ref-parser/lib/pointer";
 import $Ref from "@xliic/json-schema-ref-parser/lib/ref";
@@ -13,7 +12,7 @@ import { parseJsonPointer, joinJsonPointer } from "./pointer";
 import { Cache } from "./cache";
 import { MappingNode, Mapping, BundleResult, OpenApiVersion } from "./types";
 import { simpleClone } from "./util";
-import { ExternalRefDocumentProvider } from "./external-ref-provider";
+import { toInternalUri, requiresApproval, ExternalRefDocumentProvider } from "./external-refs";
 
 const destinationMap = {
   [OpenApiVersion.V2]: {
@@ -34,6 +33,36 @@ const destinationMap = {
   },
 };
 
+function refToUri(ref: string) {
+  try {
+    const uri = vscode.Uri.parse(ref, true);
+    return toInternalUri(uri);
+  } catch (err) {
+    throw new ResolverError({
+      message: `Failed to decode $ref: "${ref}: ${err.message}"`,
+    });
+  }
+}
+
+function checkApproval(approvedHosts: string[], uri: vscode.Uri): void {
+  if (requiresApproval(uri)) {
+    const host = uri.authority;
+    const approved = approvedHosts.some(
+      (approvedHostname) => approvedHostname.toLowerCase() === host.toLowerCase()
+    );
+
+    if (!approved) {
+      throw new ResolverError(
+        {
+          message: `Failed to resolve external reference, "${host}" is not in the list of approved hosts.`,
+          code: `rejected:${host}`,
+        },
+        uri.fsPath
+      );
+    }
+  }
+}
+
 const resolver = (
   cache: Cache,
   documentUri: vscode.Uri,
@@ -46,55 +75,26 @@ const resolver = (
       return true;
     },
     read: async (file) => {
-      let uri: vscode.Uri = null;
-      if (file.url.startsWith("http:") || file.url.startsWith("https:")) {
-        const origUri = vscode.Uri.parse(file.url);
-        const hostname = origUri.authority;
-        const approved = approvedHosts.some(
-          (approvedHostname) => approvedHostname.toLowerCase() === hostname.toLowerCase()
-        );
-        if (approved) {
-          if (origUri.scheme === "http") {
-            uri = origUri.with({ scheme: "openapi-external-http" });
-          } else {
-            uri = origUri.with({ scheme: "openapi-external-https" });
-          }
-        } else {
-          throw new ResolverError(
-            {
-              message: `Failed to resolve external reference, "${hostname}" is not in the list of approved hostnames.`,
-              code: `rejected:${hostname}`,
-            },
-            origUri.fsPath
-          );
-        }
-      } else {
-        try {
-          uri = documentUri.with({ path: decodeURIComponent(file.url) });
-        } catch (err) {
-          throw new ResolverError({
-            message: `Failed to decode URL "${file.url}: ${err.message}"`,
-          });
-        }
-      }
-      try {
-        const cached = await cache.getExistingDocumentValueByUri(uri);
-        if (cached) {
-          return cached;
-        }
+      const uri = refToUri(file.url);
 
+      const cached = await cache.getExistingDocumentValueByUri(uri);
+      if (cached) {
+        return cached;
+      }
+
+      checkApproval(approvedHosts, uri);
+
+      try {
         const document = await vscode.workspace.openTextDocument(uri);
-        if (uri.scheme === "openapi-external-http" || uri.scheme === "openapi-external-https") {
-          const languageId = externalRefProvider.getLanguageId(uri);
-          if (languageId) {
-            await vscode.languages.setTextDocumentLanguage(document, languageId);
-          }
+        const languageId = externalRefProvider.getLanguageId(uri);
+        if (languageId) {
+          await vscode.languages.setTextDocumentLanguage(document, languageId);
         }
         return await cache.getDocumentValue(document);
       } catch (err) {
         throw new ResolverError(
-          { message: `Error reading file "${uri.fsPath}: ${err.message}"` },
-          uri.fsPath
+          { message: `Error reading file "${file.url}: ${err.message}"` },
+          file.url
         );
       }
     },
@@ -103,7 +103,7 @@ const resolver = (
 
 export const cacheParser = {
   order: 100,
-  canParse: [".yaml", ".yml", ".json", ".jsonc"],
+  canParse: true,
   parse: ({ data, url, extension }: { data: any; url: string; extension: string }) => {
     return new Promise((resolve, reject) => {
       resolve(simpleClone(data));
@@ -133,21 +133,13 @@ function set(target: any, path: string[], value: any) {
   current[last] = value;
 }
 
-function refToCanonicalUri(baseUri: vscode.Uri, ref: string): vscode.Uri {
-  if (ref.startsWith("http:") || ref.startsWith("https:")) {
-    return vscode.Uri.parse(ref.replace("http", "openapi-external-http"));
-  }
-
-  return baseUri.with({ path: decodeURIComponent(ref) });
-}
-
-function hooks(document: vscode.TextDocument, cwd: string, state: any) {
+function hooks(document: vscode.TextDocument, state: any) {
   return {
     onRemap: (entry) => {
-      const uri = refToCanonicalUri(document.uri, entry.file).toString();
+      const uri = toInternalUri(vscode.Uri.parse(entry.file)).toString();
 
-      if (!state.uris.has(uri)) {
-        state.uris.add(uri);
+      if (!state.uris.has(entry.file)) {
+        state.uris.add(entry.file);
       }
 
       // FIXME implement remap for openapi v2 and $ref location based remap
@@ -155,7 +147,7 @@ function hooks(document: vscode.TextDocument, cwd: string, state: any) {
 
       if (hashPath[0] == "components" && hashPath.length >= 3) {
         // TODO check that hashPath == 'schemas' or 'parameters', etc.
-        let path = ["components", hashPath[1], mangle(uri) + "-" + hashPath[2]];
+        let path = ["components", hashPath[1], mangle(entry.file) + "-" + hashPath[2]];
         if (hashPath.length > 3) {
           path = path.concat(hashPath.slice(3));
         }
@@ -197,7 +189,6 @@ export async function bundle(
   approvedHosts: string[],
   externalRefProvider: ExternalRefDocumentProvider
 ): Promise<BundleResult> {
-  const cwd = dirname(document.uri.fsPath) + "/";
   const cloned = simpleClone(parsed);
 
   const state = {
@@ -209,7 +200,7 @@ export async function bundle(
 
   try {
     const bundled = await parser.bundle(cloned, {
-      cwd,
+      cwd: document.uri.toString(),
       resolve: {
         file: resolver(cache, document.uri, approvedHosts, externalRefProvider),
         http: false, // disable built in http resolver
@@ -219,7 +210,7 @@ export async function bundle(
         yaml: cacheParser,
       },
       continueOnError: true,
-      hooks: hooks(document, cwd, state),
+      hooks: hooks(document, state),
     });
 
     return {

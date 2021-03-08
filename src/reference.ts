@@ -8,6 +8,7 @@ import * as vscode from "vscode";
 import * as json from "jsonc-parser";
 import * as yaml from "js-yaml";
 import { Cache } from "./cache";
+import { toInternalUri } from "./external-refs";
 
 function refToUri(ref: string, currentDocumentUri: vscode.Uri): vscode.Uri {
   if (ref.startsWith("#")) {
@@ -17,7 +18,7 @@ function refToUri(ref: string, currentDocumentUri: vscode.Uri): vscode.Uri {
   try {
     // see if this is an extenral url by trying to parse it,
     // if no scheme: is present, exception is thrown
-    return vscode.Uri.parse(ref, true);
+    return toInternalUri(vscode.Uri.parse(ref, true));
   } catch {
     // assume a local file reference
     const baseDir = path.dirname(currentDocumentUri.fsPath);
@@ -40,6 +41,8 @@ async function refToLocation(
     const [, pointer] = ref.split("#", 2);
     const refUri = refToUri(ref, currentDocumentUri);
     const refDocument = await vscode.workspace.openTextDocument(refUri);
+    await vscode.languages.setTextDocumentLanguage(refDocument, "json");
+
     const root = await cache.getDocumentAst(refDocument);
 
     if (root) {

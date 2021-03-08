@@ -14,7 +14,8 @@ import {
   ExternalRefDocumentProvider,
   ApproveHostnameAction,
   registerAddApprovedHost,
-} from "./external-ref-provider";
+  INTERNAL_SCHEMES,
+} from "./external-refs";
 import { CompletionItemProvider } from "./completion";
 import { updateContext } from "./context";
 import { registerCommands } from "./commands";
@@ -43,15 +44,8 @@ export function activate(context: vscode.ExtensionContext) {
   };
 
   const externalRefProvider = new ExternalRefDocumentProvider();
-
-  vscode.workspace.registerTextDocumentContentProvider(
-    "openapi-external-http",
-    externalRefProvider
-  );
-  vscode.workspace.registerTextDocumentContentProvider(
-    "openapi-external-https",
-    externalRefProvider
-  );
+  vscode.workspace.registerTextDocumentContentProvider(INTERNAL_SCHEMES.http, externalRefProvider);
+  vscode.workspace.registerTextDocumentContentProvider(INTERNAL_SCHEMES.https, externalRefProvider);
 
   const cache = new Cache(parserOptions, Object.values(selectors), externalRefProvider);
 

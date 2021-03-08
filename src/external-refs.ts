@@ -6,35 +6,55 @@
 import * as vscode from "vscode";
 import got from "got";
 import { configuration } from "./configuration";
-import { IncomingHttpHeaders } from "http";
 
-function fixUri(uri: vscode.Uri): string {
-  const SCHEMES = {
-    "openapi-external-http": "http",
-    "openapi-external-https": "https",
-  };
-  return uri.with({ scheme: SCHEMES[uri.scheme] }).toString();
+export const INTERNAL_SCHEMES = {
+  http: "openapi-internal-http",
+  https: "openapi-internal-https",
+};
+
+const CONTENT_TYPES = {
+  "application/json": "json",
+  "application/x-yaml": "yaml",
+  "text/yaml": "yaml",
+};
+
+const EXTENSIONS = {
+  ".json": "json",
+  ".yaml": "yaml",
+  ".yml": "yaml",
+};
+
+export function requiresApproval(internalUri: vscode.Uri): boolean {
+  return Object.values(INTERNAL_SCHEMES).includes(internalUri.scheme?.toLowerCase());
 }
 
-function getLanguageId(uri: string, headers: IncomingHttpHeaders): string | undefined {
-  const contentType = headers["content-type"];
-
-  if (contentType && contentType === "application/json") {
-    return "json";
+export function toInternalUri(uri: vscode.Uri): vscode.Uri {
+  const scheme = INTERNAL_SCHEMES[uri.scheme];
+  if (scheme) {
+    return uri.with({ scheme });
   }
-  if (
-    contentType &&
-    (contentType === "application/x-yaml" || contentType === "application/x-yaml")
-  ) {
-    return "yaml";
+  return uri;
+}
+
+export function fromInternalUri(uri: vscode.Uri): vscode.Uri {
+  for (const [external, internal] of Object.entries(INTERNAL_SCHEMES)) {
+    if (uri.scheme === internal) {
+      return uri.with({ scheme: external });
+    }
+  }
+  return uri;
+}
+
+function getLanguageId(uri: string, contentType: string): string | undefined {
+  const fromContentType = contentType && CONTENT_TYPES[contentType.toLowerCase()];
+  if (fromContentType) {
+    return fromContentType;
   }
 
-  if (uri.endsWith(".json")) {
-    return "json";
-  }
-
-  if (uri.endsWith(".yaml") || uri.endsWith(".yml")) {
-    return "yaml";
+  for (const [extension, language] of Object.entries(EXTENSIONS)) {
+    if (uri.toLowerCase().endsWith(extension)) {
+      return language;
+    }
   }
 
   return undefined;
@@ -44,17 +64,28 @@ export class ExternalRefDocumentProvider implements vscode.TextDocumentContentPr
   private cache: { [uri: string]: string } = {};
 
   getLanguageId(uri: vscode.Uri): string | undefined {
-    const actualUri = fixUri(uri);
-    return this.cache[actualUri];
+    const actualUri = fromInternalUri(uri);
+    return this.cache[actualUri.toString()];
   }
 
   async provideTextDocumentContent(
     uri: vscode.Uri,
     token: vscode.CancellationToken
   ): Promise<string> {
-    const actualUri = fixUri(uri);
-    const { body, headers } = await got(actualUri);
-    this.cache[actualUri] = getLanguageId(actualUri, headers);
+    const actualUri = fromInternalUri(uri);
+    const { body, headers } = await got(actualUri.toString());
+
+    const languageId = getLanguageId(actualUri.toString(), headers["content-type"]);
+    this.cache[actualUri.toString()] = languageId;
+
+    try {
+      if (languageId === "json") {
+        return JSON.stringify(JSON.parse(body), null, 2);
+      }
+    } catch (ex) {
+      // ignore
+    }
+
     return body;
   }
 }
@@ -88,7 +119,7 @@ export class ApproveHostnameAction implements vscode.CodeActionProvider {
   }
 }
 
-export function registerAddApprovedHost(context) {
+export function registerAddApprovedHost(context: vscode.ExtensionContext) {
   return vscode.commands.registerCommand("openapi.addApprovedHost", (hostname: string) => {
     const approved = configuration.get<string[]>("approvedHostnames");
     if (!approved.includes(hostname.toLocaleLowerCase()))
