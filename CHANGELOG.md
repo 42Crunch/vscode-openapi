@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.2.0 (March 8, 2021)
+
+* Update KDB articles and migrate to new security audit service
+
 ## Version 4.1.1 (March 5, 2021)
 
 * Fix issue where remote reference was not handled correctly [Issue #115](https://github.com/42Crunch/vscode-openapi/issues/115)
