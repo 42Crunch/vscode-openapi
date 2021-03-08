@@ -22,8 +22,8 @@ Both OAS v2 and v3 are supported.
   - [Use the extension to audit the security of your API](#use-the-extension-to-audit-the-security-of-your-api)
     - [Navigate the issues in the audit report](#navigate-the-issues-in-the-audit-report)
     - [Fix issues](#fix-issues)
-      - [Individual fixes:](#individual-fixes)
-      - [Bulk fixes:](#bulk-fixes)
+      - [Individual fixes](#individual-fixes)
+      - [Bulk fixes](#bulk-fixes)
   - [Known issues](#known-issues)
   - [Feedback](#feedback)
 
@@ -131,7 +131,7 @@ After the audit finishes, you get the audit report directly in the VS Code view,
 
 Many of the issues reported by the Security Audit have Fixes associated with them. These are code snippets that you can get inserted into the OpenAPI file and then customize with the appropriate value.
 
-#### Individual fixes:
+#### Individual fixes
 1. Perform the Security Audit by clicking the **42c** button.
 2. When you click some of the error lines in your OpenAPI file, you will see the QuickFix icon show up on the left of the line.
 3. Click the icon and select the QuickFix to apply.
@@ -139,7 +139,7 @@ Many of the issues reported by the Security Audit have Fixes associated with the
 
 ![Quick Fixes in VSCode](/images/Quick_Fixes_in_VSCode.gif)
 
-#### Bulk fixes:
+#### Bulk fixes
 
 If your OpenAPI file contains multiple similar issues - for example, a parameter with the same name is missing the pattern definition - you can fix all such occurrences in one go:
 1. Fix the first occurrence and supply the proper values in the code snippet.
