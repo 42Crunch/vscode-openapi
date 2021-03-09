@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 4.2.0 (March 8, 2021)
+## Version 4.2.0 (March 9, 2021)
 
 * Update KDB articles and migrate to new security audit service
 
