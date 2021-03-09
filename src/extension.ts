@@ -60,8 +60,8 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.languages.registerCompletionItemProvider(selector, completionProvider, '"');
   }
 
-  const jsonSchemaDefinitionProvider = new JsonSchemaDefinitionProvider(cache);
-  const yamlSchemaDefinitionProvider = new YamlSchemaDefinitionProvider(cache);
+  const jsonSchemaDefinitionProvider = new JsonSchemaDefinitionProvider(cache, externalRefProvider);
+  const yamlSchemaDefinitionProvider = new YamlSchemaDefinitionProvider(cache, externalRefProvider);
 
   vscode.languages.registerDefinitionProvider(selectors.json, jsonSchemaDefinitionProvider);
   vscode.languages.registerDefinitionProvider(selectors.jsonc, jsonSchemaDefinitionProvider);
