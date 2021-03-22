@@ -243,6 +243,10 @@ export function findMapping(root: MappingNode, pointer: string): Mapping {
     current = current.children[path[i]];
   }
 
+  if (!current?.value) {
+    return null;
+  }
+
   const { uri, hash } = current.value;
 
   if (i < path.length) {
