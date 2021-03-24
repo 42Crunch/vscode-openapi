@@ -183,7 +183,7 @@ async function performAudit(
   try {
     const documentUri = textEditor.document.uri.toString();
 
-    const [grades, issues, documents] = await auditDocument(
+    const [grades, issues, documents, badIssues] = await auditDocument(
       textEditor.document,
       JSON.stringify(bundle.value),
       cache,
@@ -191,6 +191,14 @@ async function performAudit(
       apiToken,
       progress
     );
+
+    if (badIssues.length > 0) {
+      const messages = badIssues.map(
+        (issue: ReportedIssue) => `Unable to locate issue "${issue.id}" at "${issue.pointer}".`
+      );
+      messages.unshift("Some issues have not been displayed:");
+      vscode.window.showErrorMessage(messages.join(" "));
+    }
 
     const filename = basename(textEditor.document.fileName);
 
@@ -220,7 +228,12 @@ async function performAudit(
   }
 }
 
-function findIssueLocation(mainUri: vscode.Uri, root: Node, mappings, pointer): [string, string] {
+function findIssueLocation(
+  mainUri: vscode.Uri,
+  root: Node,
+  mappings,
+  pointer
+): [string, string] | undefined {
   const node = root.find(pointer);
   if (node) {
     return [mainUri.toString(), pointer];
@@ -230,7 +243,6 @@ function findIssueLocation(mainUri: vscode.Uri, root: Node, mappings, pointer): 
       return [mapping.uri, mapping.hash];
     }
   }
-  throw new Error(`Cannot find entry for pointer: ${pointer}`);
 }
 
 async function processIssues(
@@ -238,31 +250,38 @@ async function processIssues(
   cache: Cache,
   mappings,
   issues: ReportedIssue[]
-): Promise<[Node, string[], { [uri: string]: ReportedIssue[] }]> {
+): Promise<[Node, string[], { [uri: string]: ReportedIssue[] }, ReportedIssue[]]> {
   const mainUri = document.uri;
   const documentUris: { [uri: string]: boolean } = { [mainUri.toString()]: true };
   const issuesPerDocument: { [uri: string]: ReportedIssue[] } = {};
+  const badIssues: ReportedIssue[] = [];
 
   const root = await cache.getDocumentAst(document);
 
   for (const issue of issues) {
-    const [uri, pointer] = findIssueLocation(mainUri, root, mappings, issue.pointer);
+    const location = findIssueLocation(mainUri, root, mappings, issue.pointer);
+    if (location) {
+      const [uri, pointer] = location;
 
-    if (!issuesPerDocument[uri]) {
-      issuesPerDocument[uri] = [];
+      if (!issuesPerDocument[uri]) {
+        issuesPerDocument[uri] = [];
+      }
+
+      if (!documentUris[uri]) {
+        documentUris[uri] = true;
+      }
+
+      issuesPerDocument[uri].push({
+        ...issue,
+        pointer: pointer,
+      });
+    } else {
+      // can't find issue, add to the list ot bad issues
+      badIssues.push(issue);
     }
-
-    if (!documentUris[uri]) {
-      documentUris[uri] = true;
-    }
-
-    issuesPerDocument[uri].push({
-      ...issue,
-      pointer: pointer,
-    });
   }
 
-  return [root, Object.keys(documentUris), issuesPerDocument];
+  return [root, Object.keys(documentUris), issuesPerDocument, badIssues];
 }
 
 async function auditDocument(
@@ -272,9 +291,9 @@ async function auditDocument(
   mappings,
   apiToken,
   progress
-): Promise<[Grades, IssuesByDocument, { [uri: string]: TextDocument }]> {
+): Promise<[Grades, IssuesByDocument, { [uri: string]: TextDocument }, ReportedIssue[]]> {
   const [grades, reportedIssues] = await audit(json, apiToken.trim(), progress);
-  const [mainRoot, documentUris, issuesPerDocument] = await processIssues(
+  const [mainRoot, documentUris, issuesPerDocument, badIssues] = await processIssues(
     mainDocument,
     cache,
     mappings,
@@ -315,5 +334,5 @@ async function auditDocument(
     documents[uri] = document;
   }
 
-  return [grades, issues, documents];
+  return [grades, issues, documents, badIssues];
 }
