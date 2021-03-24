@@ -10,6 +10,7 @@ export function getLocationByPointer(
   // perhaps we need to pass Audit here and make this function
   // to return documentUri of current/main document
   // depending on pointer == ""?
+
   const markerNode = root.find("/openapi") || root.find("/swagger");
   const node = pointer === "" ? markerNode : root.find(pointer);
   if (node) {

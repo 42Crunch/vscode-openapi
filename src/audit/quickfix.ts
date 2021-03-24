@@ -170,8 +170,11 @@ async function quickFixCommand(
     return;
   }
 
-  const version = cache.getDocumentVersionByDocumentUri(audit.summary.documentUri);
-  const bundle = await cache.getDocumentBundleByDocumentUri(audit.summary.documentUri);
+  const auditDocument = await vscode.workspace.openTextDocument(
+    vscode.Uri.parse(audit.summary.documentUri)
+  );
+  const bundle = await cache.getDocumentBundle(auditDocument);
+  const version = cache.getDocumentVersion(auditDocument);
 
   const issuesByPointer = getIssuesByPointers(issues);
   // Single fix has one issue in the array
@@ -418,8 +421,11 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
       return [];
     }
 
-    const version = this.cache.getDocumentVersionByDocumentUri(audit.summary.documentUri);
-    const bundle = await this.cache.getDocumentBundleByDocumentUri(audit.summary.documentUri);
+    const auditDocument = await vscode.workspace.openTextDocument(
+      vscode.Uri.parse(audit.summary.documentUri)
+    );
+    const bundle = await this.cache.getDocumentBundle(auditDocument);
+    const version = this.cache.getDocumentVersion(auditDocument);
 
     const titles: string[] = [];
     const problems: string[] = [];

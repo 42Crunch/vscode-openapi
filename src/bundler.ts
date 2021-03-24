@@ -17,7 +17,7 @@ import { toInternalUri, requiresApproval, ExternalRefDocumentProvider } from "./
 const destinationMap = {
   [OpenApiVersion.V2]: {
     parameters: ["parameters"],
-    schema: ["definitions"],
+    definitions: ["definitions"],
     responses: ["responses"],
   },
 
@@ -150,6 +150,19 @@ function hooks(document: vscode.TextDocument, state: any) {
         let path = ["components", hashPath[1], mangle(entry.file) + "-" + hashPath[2]];
         if (hashPath.length > 3) {
           path = path.concat(hashPath.slice(3));
+        }
+        set(state.parsed, path, entry.value);
+        insertMapping(state.mapping, path, { uri, hash: entry.hash });
+        return Pointer.join("#", path);
+      } else if (
+        (hashPath[0] === "parameters" ||
+          hashPath[0] === "definitions" ||
+          hashPath[0] === "responses") &&
+        hashPath.length >= 2
+      ) {
+        let path = [hashPath[0], mangle(entry.file) + "-" + hashPath[1]];
+        if (hashPath.length > 2) {
+          path = path.concat(hashPath.slice(2));
         }
         set(state.parsed, path, entry.value);
         insertMapping(state.mapping, path, { uri, hash: entry.hash });
