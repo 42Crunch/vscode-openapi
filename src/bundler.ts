@@ -17,7 +17,7 @@ import { toInternalUri, requiresApproval, ExternalRefDocumentProvider } from "./
 const destinationMap = {
   [OpenApiVersion.V2]: {
     parameters: ["parameters"],
-    definitions: ["definitions"],
+    schema: ["definitions"],
     responses: ["responses"],
   },
 
