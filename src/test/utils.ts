@@ -7,16 +7,11 @@ import * as vscode from "vscode";
 import { TestFS } from "./memfs";
 import * as assert from "assert";
 import { readFileSync } from "fs";
-import * as yaml from "yaml-ast-parser-custom-tags";
+import * as yaml from "yaml-language-server-parser";
 import * as json from "jsonc-parser";
 import { JsonNode, YamlNode } from "@xliic/openapi-ast-node";
-import {
-  workspace,
-  window,
-  TextEditor,
-  TextDocument,
-} from "vscode";
-import { FixContext } from '../types';
+import { workspace, window, TextEditor, TextDocument } from "vscode";
+import { FixContext } from "../types";
 
 export function rndName() {
   return Math.random()
@@ -116,13 +111,15 @@ export function withRandomFileEditor(
   languageId: string,
   run: (editor: TextEditor, doc: TextDocument) => Thenable<void>
 ): Thenable<boolean> {
-  return workspace.openTextDocument({language: languageId, content: initialContents}).then((doc) => {
-    return window.showTextDocument(doc).then((editor) => {
-      return run(editor, doc).then((_) => {
-        return true;
+  return workspace
+    .openTextDocument({ language: languageId, content: initialContents })
+    .then((doc) => {
+      return window.showTextDocument(doc).then((editor) => {
+        return run(editor, doc).then((_) => {
+          return true;
+        });
       });
     });
-  });
 }
 
 export function getContextUpdatedByPointer(context: FixContext, pointer: string): FixContext {
@@ -132,5 +129,5 @@ export function getContextUpdatedByPointer(context: FixContext, pointer: string)
 }
 
 export function wrap(text: string): string {
-  return text.replace(new RegExp('\r\n', 'g'), '\n');
+  return text.replace(new RegExp("\r\n", "g"), "\n");
 }

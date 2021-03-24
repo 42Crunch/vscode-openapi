@@ -246,7 +246,7 @@ export class Cache {
   }
 
   clearStaleCacheEntries(): void {
-    const MAX_CACHE_ENTRY_AGE = 30000;
+    const MAX_CACHE_ENTRY_AGE = 3000;
     const now = Date.now();
     for (const uri of Object.keys(this.cache)) {
       const lastUpdate = this.lastUpdate[uri];

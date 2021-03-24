@@ -4,7 +4,7 @@
   "displayName": "OpenAPI (Swagger) Editor",
   "description": "OpenAPI extension for Visual Studio Code",
   "license": "AGPL-3.0-only",
-  "version": "4.2.0",
+  "version": "4.3.0",
   "publisher": "42Crunch",
   "repository": "https://github.com/42Crunch/vscode-openapi",
   "icon": "resources/icons/extension.png",
@@ -543,13 +543,13 @@
   },
   "dependencies": {
     "@xliic/json-schema-ref-parser": "^9.1.6",
-    "@xliic/openapi-ast-node": "^1.1.0",
+    "@xliic/openapi-ast-node": "^1.4.0",
     "form-data": "^2.3.3",
     "got": "^9.6.0",
     "js-yaml": "^3.13.1",
-    "jsonc-parser": "^2.2.1",
+    "jsonc-parser": "^3.0.0",
     "semver": "^6.3.0",
-    "yaml-ast-parser-custom-tags": "0.0.43"
+    "yaml-language-server-parser": "0.1.2"
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",
