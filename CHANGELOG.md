@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.3.0 (March 24, 2021)
+
+* Fix issue working with multi-file Swagger 2.0 files
+
 ## Version 4.2.0 (March 9, 2021)
 
 * Update KDB articles and migrate to new security audit service
