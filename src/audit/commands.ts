@@ -196,7 +196,9 @@ async function performAudit(
       const messages = badIssues.map(
         (issue: ReportedIssue) => `Unable to locate issue "${issue.id}" at "${issue.pointer}".`
       );
-      messages.unshift("Some issues have not been displayed:");
+      messages.unshift(
+        "Some issues have not been displayed, please contact suport at https://support.42crunch.com with the following information:"
+      );
       vscode.window.showErrorMessage(messages.join(" "));
     }
 
