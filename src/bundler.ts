@@ -65,7 +65,7 @@ function checkApproval(approvedHosts: string[], uri: vscode.Uri): void {
 
 const resolver = (
   cache: Cache,
-  documentUri: vscode.Uri,
+  state,
   approvedHosts: string[],
   externalRefProvider: ExternalRefDocumentProvider
 ) => {
@@ -75,12 +75,8 @@ const resolver = (
       return true;
     },
     read: async (file) => {
+      // file.url is already resolved uri, provided by json-schema-ref-parser
       const uri = refToUri(file.url);
-
-      const cached = await cache.getExistingDocumentValueByUri(uri);
-      if (cached) {
-        return cached;
-      }
 
       checkApproval(approvedHosts, uri);
 
@@ -89,6 +85,10 @@ const resolver = (
         const languageId = externalRefProvider.getLanguageId(uri);
         if (languageId) {
           await vscode.languages.setTextDocumentLanguage(document, languageId);
+        }
+        if (!state.documents.has(document.uri.toString())) {
+          // add document to the list of documents
+          state.documents.set(document.uri.toString(), { version: document.version });
         }
         return await cache.getDocumentValue(document);
       } catch (err) {
@@ -137,10 +137,6 @@ function hooks(document: vscode.TextDocument, state: any) {
   return {
     onRemap: (entry) => {
       const uri = toInternalUri(vscode.Uri.parse(entry.file)).toString();
-
-      if (!state.uris.has(entry.file)) {
-        state.uris.add(entry.file);
-      }
 
       // FIXME implement remap for openapi v2 and $ref location based remap
       const hashPath = Pointer.parse(entry.hash);
@@ -208,14 +204,14 @@ export async function bundle(
     version,
     parsed: cloned,
     mapping: { value: null, children: {} },
-    uris: new Set<string>([document.uri.toString()]),
+    documents: new Map([[document.uri.toString(), { version: document.version }]]),
   };
 
   try {
     const bundled = await parser.bundle(cloned, {
       cwd: document.uri.toString(),
       resolve: {
-        file: resolver(cache, document.uri, approvedHosts, externalRefProvider),
+        file: resolver(cache, state, approvedHosts, externalRefProvider),
         http: false, // disable built in http resolver
       },
       parse: {
@@ -229,10 +225,10 @@ export async function bundle(
     return {
       value: bundled,
       mapping: state.mapping,
-      uris: state.uris,
+      documents: state.documents,
     };
   } catch (errors) {
-    return { errors };
+    return { errors, documents: state.documents };
   }
 }
 
