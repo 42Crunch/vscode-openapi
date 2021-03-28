@@ -6,13 +6,12 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import { configuration } from "./configuration";
-import { Bundle, BundleResult } from "./types";
+import { Bundle } from "./types";
 import { Cache } from "./cache";
 
 type Preview = {
   panel: vscode.WebviewPanel;
   documentUri: vscode.Uri;
-  uris: Set<string>;
 };
 
 type Previews = {
@@ -27,10 +26,12 @@ export function activate(context: vscode.ExtensionContext, cache: Cache) {
     const uri = document.uri.toString();
     const bundle = await cache.getDocumentBundle(document);
 
-    for (const name of Object.keys(previews)) {
-      const preview: Preview = previews[name];
-      if (preview && preview.uris.has(uri) && !("errors" in bundle)) {
-        showPreview(context, previews, name, document.uri, bundle);
+    if (!("errors" in bundle)) {
+      for (const name of Object.keys(previews)) {
+        const preview: Preview = previews[name];
+        if (preview && preview.documentUri.toString() === uri) {
+          showPreview(context, previews, name, document.uri, bundle);
+        }
       }
     }
   });
@@ -86,7 +87,7 @@ async function showPreview(
   if (previews[name]) {
     const panel = previews[name].panel;
     panel.webview.postMessage({ command: "preview", text: JSON.stringify(bundle.value) });
-    previews[name] = { panel, uris: bundle.uris, documentUri };
+    previews[name] = { panel, documentUri };
     return;
   }
 
@@ -103,7 +104,7 @@ async function showPreview(
   );
 
   panel.webview.postMessage({ command: "preview", text: JSON.stringify(bundle.value) });
-  previews[name] = { panel, uris: bundle.uris, documentUri };
+  previews[name] = { panel, documentUri };
 }
 
 function buildWebviewPanel(

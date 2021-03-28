@@ -28,9 +28,9 @@ interface CacheEntry {
 }
 
 export class Cache {
-  private cache: { [uri: string]: CacheEntry } = {};
-  private lastUpdate: { [uri: string]: number } = {};
-  private pendingUpdates: { [uri: string]: Promise<CacheEntry> } = {};
+  private cache = new Map<string, CacheEntry>();
+  private lastUpdate = new Map<string, number>();
+  private pendingUpdates = new Map<string, Promise<CacheEntry>>();
 
   private parserOptions: ParserOptions;
   private _didChange = new vscode.EventEmitter<vscode.TextDocument>();
@@ -67,15 +67,21 @@ export class Cache {
   }
 
   async onDocumentChanged(event: vscode.TextDocumentChangeEvent) {
-    this.requestCacheEntryUpdateForActiveDocument(event.document);
+    if (vscode.languages.match(this.selector, event.document) === 0) {
+      this._didActiveDocumentChange.fire(event.document);
+    } else {
+      this.requestCacheEntryUpdate(event.document);
+      this._didActiveDocumentChange.fire(event.document);
+    }
   }
 
-  // TODO track on close events and clear non-json documents
-
   async onActiveEditorChanged(editor: vscode.TextEditor | undefined) {
-    // TODO don't re-parse if we've got up-to-date contents in the cache
-    // compare documentVersion
-    this.requestCacheEntryUpdateForActiveDocument(editor?.document);
+    if (!editor?.document || vscode.languages.match(this.selector, editor.document) === 0) {
+      this._didActiveDocumentChange.fire(editor?.document);
+    } else {
+      this.requestCacheEntryUpdate(editor.document);
+      this._didActiveDocumentChange.fire(editor.document);
+    }
   }
 
   getDocumentVersion(document: vscode.TextDocument): OpenApiVersion {
@@ -104,13 +110,6 @@ export class Cache {
   async getDocumentValue(document: vscode.TextDocument): Promise<any> {
     const entry = await this.getCacheEntry(document);
     return entry.parsed;
-  }
-
-  async getExistingDocumentValueByUri(uri: vscode.Uri): Promise<any> {
-    const entry = this.cache[uri.toString()];
-    if (entry) {
-      return await this.getDocumentValue(entry.document);
-    }
   }
 
   getDocumentBundleByDocumentUri(uri: string): any {
@@ -171,12 +170,13 @@ export class Cache {
         if ("errors" in entry.bundle) {
           this.showBundlerErrors(document.uri, entry.bundle.errors);
         } else {
-          this.clearBundlerErrors(entry.bundle.uris);
+          this.clearBundlerErrors(entry.bundle.documents);
         }
       }
     } else {
       entry.bundle = {
         errors: [],
+        documents: new Map(),
       };
     }
 
@@ -204,43 +204,86 @@ export class Cache {
   async requestCacheEntryUpdateForActiveDocument(document: vscode.TextDocument): Promise<void> {
     if (!document || vscode.languages.match(this.selector, document) === 0) {
       this._didActiveDocumentChange.fire(document);
-      return;
+    } else {
+      this.requestCacheEntryUpdate(document);
     }
-
-    return this.requestCacheEntryUpdate(document);
   }
 
-  async requestCacheEntryUpdate(document: vscode.TextDocument): Promise<void> {
+  // returns a list of documents for which the cache needs to be updated
+  // if this particular document changes
+  getAffectedDocuments(document: vscode.TextDocument): Set<vscode.TextDocument> {
+    const affected = new Set<vscode.TextDocument>();
+
+    // document needs to be updated if it's not in cache
+    // or the documentVersion of cache entry is different to that of
+    // the document
+    const entry = this.cache.get(document.uri.toString());
+    if (!entry || entry.documentVersion !== document.version) {
+      affected.add(document);
+    }
+
+    // also check all cache entries which have bundles and see if
+    // document belongs to a bundle, if so re-bundle the relevant
+    // cache entry
+    for (const entry of this.cache.values()) {
+      if (entry.bundle) {
+        const bundleDocument = entry.bundle.documents.get(document.uri.toString());
+        if (bundleDocument && bundleDocument.version !== document.version) {
+          affected.add(entry.document);
+        }
+      }
+    }
+    return affected;
+  }
+
+  getUpdateDelay(uri: string): number {
     const MAX_UPDATE = 1000; // update no more ofent than
-    const uri = document.uri.toString();
+
+    // zero delay if never been updated before
+    if (!this.lastUpdate.has(uri)) {
+      return 0;
+    }
+
     const now = Date.now();
-    const lastUpdate = this.lastUpdate[uri];
-    const pending = this.pendingUpdates[uri];
+    const sinceLastUpdate = now - this.lastUpdate.get(uri);
 
-    if (!lastUpdate) {
-      // first update
-      this.lastUpdate[uri] = now;
-      await this.bundleCacheEntry(document, await this.updateCacheEntry(document));
-    } else if (!pending) {
-      // if no update is pending request a new one
-      const sinceLastUpdate = now - lastUpdate;
-      const updateDelay = MAX_UPDATE > sinceLastUpdate ? MAX_UPDATE - sinceLastUpdate : 0;
+    return MAX_UPDATE > sinceLastUpdate ? MAX_UPDATE - sinceLastUpdate : 0;
+  }
 
-      this.pendingUpdates[uri] = new Promise<CacheEntry>((resolve, reject) => {
-        setTimeout(async () => {
-          try {
-            const entry = await this.bundleCacheEntry(
-              document,
-              await this.updateCacheEntry(document)
-            );
-            this.lastUpdate[uri] = Date.now();
-            delete this.pendingUpdates[uri];
-            resolve(entry);
-          } catch (e) {
-            reject(e);
-          }
-        }, updateDelay);
-      });
+  enqueueCacheUpdate(document: vscode.TextDocument): Promise<CacheEntry> {
+    const uri = document.uri.toString();
+
+    // enqueue the update if not already pending
+    if (!this.pendingUpdates.has(uri)) {
+      const updateDelay = this.getUpdateDelay(uri);
+      this.pendingUpdates.set(
+        uri,
+        new Promise<CacheEntry>((resolve, reject) => {
+          setTimeout(async () => {
+            try {
+              const entry = await this.bundleCacheEntry(
+                document,
+                await this.updateCacheEntry(document)
+              );
+              this.cache.set(uri, entry);
+              this.lastUpdate.set(uri, Date.now());
+              this.pendingUpdates.delete(uri);
+              resolve(entry);
+            } catch (e) {
+              reject(e);
+            }
+          }, updateDelay);
+        })
+      );
+    }
+
+    return this.pendingUpdates.get(uri);
+  }
+
+  async requestCacheEntryUpdate(document: vscode.TextDocument) {
+    const affectedDocuments = this.getAffectedDocuments(document);
+    for (const affected of affectedDocuments.values()) {
+      this.enqueueCacheUpdate(affected);
     }
     this.clearStaleCacheEntries();
   }
@@ -262,7 +305,7 @@ export class Cache {
   async getCacheEntry(document: vscode.TextDocument): Promise<CacheEntry> {
     const uri = document.uri.toString();
 
-    if (this.cache[uri] && this.cache[uri].documentVersion === document.version) {
+    if (this.cache[uri]) {
       return this.cache[uri];
     } else if (this.pendingUpdates[uri]) {
       return this.pendingUpdates[uri];
@@ -364,8 +407,8 @@ export class Cache {
     }
   }
 
-  private clearBundlerErrors(uris: Set<string>) {
-    for (const uri of uris) {
+  private clearBundlerErrors(documents) {
+    for (const uri of documents.keys()) {
       this.diagnostics.delete(vscode.Uri.parse(uri));
     }
   }

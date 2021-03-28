@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { Node } from "@xliic/openapi-ast-node";
+import { version } from "react";
 
 export const configId = "openapi";
 export const extensionQualifiedId = "42Crunch.vscode-openapi";
@@ -24,11 +25,12 @@ export interface MappingNode {
 export interface Bundle {
   value: any;
   mapping: MappingNode;
-  uris: Set<string>;
+  documents: Map<string, { version: number }>;
 }
 
 interface BundleError {
   errors: any;
+  documents: Map<string, { version: number }>;
 }
 export type BundleResult = Bundle | BundleError;
 
