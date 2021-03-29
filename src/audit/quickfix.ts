@@ -185,7 +185,7 @@ async function quickFixCommand(
   for (const issuePointer of Object.keys(issuesByPointer)) {
     // if fix.pointer exists, append it to diagnostic.pointer
     const pointer = fix.pointer ? `${issuePointer}${fix.pointer}` : issuePointer;
-    const root = await cache.getDocumentAst(document);
+    const root = await cache.getLastGoodDocumentAst(document);
     const target = root.find(pointer);
 
     const context: FixContext = {
@@ -252,7 +252,7 @@ async function quickFixCommand(
   });
 
   // update range for all issues (since the fix has potentially changed line numbering in the file)
-  const root = await cache.getDocumentAst(document);
+  const root = await cache.getLastGoodDocumentAst(document);
   const updatedIssues: Issue[] = [];
   for (const issue of audit.issues[uri]) {
     if (fixedIssueIdAndPointers.has(getIssueUniqueId(issue))) {

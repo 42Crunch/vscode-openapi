@@ -99,7 +99,9 @@ export class Cache {
 
   async getDocumentAst(document: vscode.TextDocument): Promise<Node> {
     const entry = await this.getCacheEntry(document);
-    return entry.astRoot;
+    if (!entry.errors) {
+      return entry.astRoot;
+    }
   }
 
   async getLastGoodDocumentAst(document: vscode.TextDocument): Promise<Node> {

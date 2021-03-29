@@ -5,10 +5,12 @@
 
 import * as path from "path";
 import * as vscode from "vscode";
+import { Cache } from "../cache";
 import { fromInternalUri } from "../external-refs";
 import { Audit, Summary } from "../types";
 
 import articles from "./articles.json";
+import { getLocationByPointer } from "./util";
 
 const fallbackArticle = {
   description: {
@@ -163,7 +165,7 @@ function getIssueHtml(uri: string, filename: string, issue) {
 	</p>
 	<p>
       <small>
-        <a class="focus-line" data-line-no="${issue.lineNo}" data-uri="${base64Uri}" href="#">${filename}:${lineNo}</a>.
+        <a class="focus-line" data-line-no="${issue.lineNo}" data-line-pointer="${issue.pointer}" data-uri="${base64Uri}" href="#">${filename}:${lineNo}</a>.
         Severity: ${criticality}.
 	    ${scoreImpact}
 	  </small>
@@ -203,6 +205,7 @@ function getSummary(summary: Summary) {
 
 export class ReportWebView {
   public static currentPanel: ReportWebView | undefined;
+  public static cache: Cache | undefined;
 
   readonly _panel: vscode.WebviewPanel;
   private readonly _extensionPath: string;
@@ -211,7 +214,9 @@ export class ReportWebView {
 
   public static readonly viewType = "apisecurityReport";
 
-  public static show(extensionPath: string, audit: Audit) {
+  public static show(extensionPath: string, audit: Audit, cache: Cache) {
+    ReportWebView.cache = cache;
+
     if (!ReportWebView.currentPanel) {
       ReportWebView.currentPanel = new ReportWebView(extensionPath);
     }
@@ -307,7 +312,11 @@ export class ReportWebView {
             setTimeout(() => disposable.dispose(), 1000);
             return;
           case "goToLine":
-            this.focusLine(Buffer.from(message.uri, "base64").toString("utf8"), message.line);
+            this.focusLine(
+              Buffer.from(message.uri, "base64").toString("utf8"),
+              message.pointer,
+              message.line
+            );
             return;
           case "goFullReport":
             vscode.commands.executeCommand(
@@ -324,28 +333,36 @@ export class ReportWebView {
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables);
   }
 
-  private async focusLine(uri: string, line: string) {
-    function focus(editor: vscode.TextEditor, lineNo: number) {
-      const textLine = editor.document.lineAt(lineNo);
-      editor.selection = new vscode.Selection(lineNo, 0, lineNo, 0);
-      editor.revealRange(textLine.range, vscode.TextEditorRevealType.AtTop);
-    }
-
-    const lineNo = parseInt(line, 10);
+  private async focusLine(uri: string, pointer: string, line: string) {
+    let editor: vscode.TextEditor;
 
     // check if document is already open
-    for (const editor of vscode.window.visibleTextEditors) {
-      if (editor.document.uri.toString() == uri) {
-        // document is already open
-        focus(editor, lineNo);
-        return;
+    for (const visibleEditor of vscode.window.visibleTextEditors) {
+      if (visibleEditor.document.uri.toString() == uri) {
+        editor = visibleEditor;
       }
     }
 
-    // if not already open, load and show it
-    const document = await vscode.workspace.openTextDocument(vscode.Uri.parse(uri));
-    const editor = await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
-    focus(editor, lineNo);
+    if (!editor) {
+      // if not already open, load and show it
+      const document = await vscode.workspace.openTextDocument(vscode.Uri.parse(uri));
+      editor = await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+    }
+
+    let lineNo: number;
+
+    const root = await ReportWebView.cache.getDocumentAst(editor.document);
+    if (root) {
+      // use pointer by default
+      lineNo = getLocationByPointer(editor.document, root, pointer)[0];
+    } else {
+      // fallback to line no
+      lineNo = parseInt(line, 10);
+    }
+
+    const textLine = editor.document.lineAt(lineNo);
+    editor.selection = new vscode.Selection(lineNo, 0, lineNo, 0);
+    editor.revealRange(textLine.range, vscode.TextEditorRevealType.AtTop);
   }
 
   public dispose() {

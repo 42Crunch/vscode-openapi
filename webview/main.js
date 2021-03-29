@@ -5,6 +5,7 @@
     vscode.postMessage({
       command: "goToLine",
       uri: event.target.dataset.uri,
+      pointer: event.target.dataset.linePointer,
       line: event.target.dataset.lineNo,
     });
     event.preventDefault();
