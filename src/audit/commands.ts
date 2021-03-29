@@ -59,7 +59,7 @@ export function registerSecurityAudit(
           updateDiagnostics(auditContext.diagnostics, audit.filename, audit.issues, textEditor);
           setDecorations(textEditor, auditContext);
 
-          ReportWebView.show(context.extensionPath, audit);
+          ReportWebView.show(context.extensionPath, audit, cache);
         }
         delete pendingAudits[uri];
       } catch (e) {
@@ -72,12 +72,13 @@ export function registerSecurityAudit(
 
 export function registerFocusSecurityAudit(
   context: vscode.ExtensionContext,
+  cache: Cache,
   auditContext: AuditContext
 ) {
   return vscode.commands.registerCommand("openapi.focusSecurityAudit", (documentUri) => {
     const audit = auditContext.auditsByMainDocument[documentUri];
     if (audit) {
-      ReportWebView.show(context.extensionPath, audit);
+      ReportWebView.show(context.extensionPath, audit, cache);
     }
   });
 }
@@ -258,7 +259,7 @@ async function processIssues(
   const issuesPerDocument: { [uri: string]: ReportedIssue[] } = {};
   const badIssues: ReportedIssue[] = [];
 
-  const root = await cache.getDocumentAst(document);
+  const root = await cache.getLastGoodDocumentAst(document);
 
   for (const issue of issues) {
     const location = findIssueLocation(mainUri, root, mappings, issue.pointer);
@@ -310,7 +311,7 @@ async function auditDocument(
   for (const uri of documentUris) {
     if (!files[uri]) {
       const document = await vscode.workspace.openTextDocument(vscode.Uri.parse(uri));
-      const root = await cache.getDocumentAst(document);
+      const root = await cache.getLastGoodDocumentAst(document);
       files[uri] = [document, root];
     }
   }

@@ -47,7 +47,7 @@ export function activate(context: vscode.ExtensionContext, cache: Cache) {
   });
 
   registerSecurityAudit(context, cache, auditContext, pendingAudits);
-  registerFocusSecurityAudit(context, auditContext);
+  registerFocusSecurityAudit(context, cache, auditContext);
   registerFocusSecurityAuditById(context, auditContext);
   registerQuickfixes(context, cache, auditContext);
 }
