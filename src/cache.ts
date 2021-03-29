@@ -132,7 +132,7 @@ export class Cache {
     let lastGoodAstRoot = null;
 
     // produce value only if no errors encountered
-    if (!errors && version !== OpenApiVersion.Unknown) {
+    if (!errors) {
       lastGoodAstRoot = node;
     }
 
