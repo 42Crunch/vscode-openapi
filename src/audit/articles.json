@@ -5109,6 +5109,43 @@
       ]
     }
   },
+  "semantic-unknown-property": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Property is not defined in the OpenAPI Specification</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The property you have defined is unknown. This property is not included in the OpenAPI Specification (OAS).</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#openapi-specification\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The property you have defined is unknown. This property is not included in the OpenAPI Specification (OAS).",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The OAS does not recognize a property called <code>language</code> for strings:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"id\",\n        \"type\": \"string\",\n        \"maxLength\": 8,\n        \"language\": \"en-US\",\n        \"description\": \"Identifier of the object to be extracted.\"\n    }\n}",
+            "yaml": "parameters:\n  in: query\n  name: id\n  type: string\n  maxLength: 8\n  language: en-US\n  description: Identifier of the object to be extracted.\n"
+          }
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Do not use unknown properties not defined in the OAS.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"id\",\n        \"type\": \"string\",\n        \"maxLength\": 8,\n        \"description\": \"Identifier of the object to be extracted.\"\n    }\n}",
+            "yaml": "parameters:\n  in: query\n  name: id\n  type: string\n  maxLength: 8\n  description: Identifier of the object to be extracted.\n"
+          }
+        }
+      ]
+    }
+  },
   "v3-global-http-clear": {
     "group": "security",
     "subgroup": "transport",
@@ -8465,6 +8502,43 @@
       ]
     }
   },
+  "v3-semantic-unknown-property": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Property is not defined in the OpenAPI Specification</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The property you have defined is unknown. This property is not included in the OpenAPI Specification (OAS).</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#openapi-specification\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "The property you have defined is unknown. This property is not included in the OpenAPI Specification (OAS).",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The OAS does not recognize a property called <code>language</code> for strings:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"id\",\n        \"type\": \"string\",\n        \"maxLength\": 8,\n        \"language\": \"en-US\",\n        \"description\": \"Identifier of the object to be extracted.\"\n    }\n}",
+            "yaml": "parameters:\n  in: query\n  name: id\n  type: string\n  maxLength: 8\n  language: en-US\n  description: Identifier of the object to be extracted.\n"
+          }
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Do not use unknown properties not defined in the OAS.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"id\",\n        \"type\": \"string\",\n        \"maxLength\": 8,\n        \"description\": \"Identifier of the object to be extracted.\"\n    }\n}",
+            "yaml": "parameters:\n  in: query\n  name: id\n  type: string\n  maxLength: 8\n  description: Identifier of the object to be extracted.\n"
+          }
+        }
+      ]
+    }
+  },
   "v3-validation-array-void": {
     "group": "oasconformance",
     "subgroup": "structure",
@@ -9570,43 +9644,6 @@
       ]
     }
   },
-  "v3-validation-unknown-property": {
-    "group": "oasconformance",
-    "subgroup": "structure",
-    "title": {
-      "text": "<h1>Property is not defined in the OpenAPI Specification</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The property you have defined is unknown. This property is not included in the OpenAPI Specification (OAS).</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#openapi-specification\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The property you have defined is unknown. This property is not included in the OpenAPI Specification (OAS).",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The OAS does not recognize a property called <code>language</code> for strings:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"id\",\n        \"type\": \"string\",\n        \"maxLength\": 8,\n        \"language\": \"en-US\",\n        \"description\": \"Identifier of the object to be extracted.\"\n    }\n}",
-            "yaml": "parameters:\n  in: query\n  name: id\n  type: string\n  maxLength: 8\n  language: en-US\n  description: Identifier of the object to be extracted.\n"
-          }
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Do not use unknown properties not defined in the OAS.</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"id\",\n        \"type\": \"string\",\n        \"maxLength\": 8,\n        \"description\": \"Identifier of the object to be extracted.\"\n    }\n}",
-            "yaml": "parameters:\n  in: query\n  name: id\n  type: string\n  maxLength: 8\n  description: Identifier of the object to be extracted.\n"
-          }
-        }
-      ]
-    }
-  },
   "v3-warning-contact-email": {
     "group": "oasconformance",
     "subgroup": "bestpractices",
@@ -10114,43 +10151,6 @@
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the media type of the request body is <code>multipart</code> or <code>application/x-www-form-urlencoded</code> to apply the encoding.</p>\n                "
-        }
-      ]
-    }
-  },
-  "v3-warning-media-type-schema": {
-    "group": "oasconformance",
-    "subgroup": "bestpractices",
-    "title": {
-      "text": "<h1>Media type object has no schema defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>One or more media type objects in your API do not have schemas defined. All media types should have schema defined to restrict what input your API accepts.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#mediaTypeObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "One or more media type objects in your API do not have schemas defined. All media types should have schema defined to restrict what input your API accepts.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. This request body would accept anything as input:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"requestBody\": {\n        \"content\": {\n            \"application/octet-stream\": {\n            }\n        }\n    }\n}",
-            "yaml": "requestBody:\n  content:\n    application/octet-stream: {}\n"
-          }
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you have defined schemas for all media type objects in your API.</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"requestBody\": {\n        \"content\": {\n            \"application/octet-stream\": {\n                \"schema\": {\n                    \"type\": \"string\",\n                    \"format\": \"binary\",\n                    \"additionalProperties\": false\n                }\n            }\n        }\n    }\n}",
-            "yaml": "requestBody:\n  content:\n    application/octet-stream:\n      schema:\n        type: string\n        format: binary\n        additionalProperties: false\n"
-          }
         }
       ]
     }
@@ -11495,43 +11495,6 @@
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that exclusive properties are not used by security schemes that the properties are not defined for.</p>\n                "
-        }
-      ]
-    }
-  },
-  "validation-unknown-property": {
-    "group": "oasconformance",
-    "subgroup": "structure",
-    "title": {
-      "text": "<h1>Property is not defined in the OpenAPI Specification</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The property you have defined is unknown. This property is not included in the OpenAPI Specification (OAS).</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#openapi-specification\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The property you have defined is unknown. This property is not included in the OpenAPI Specification (OAS).",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The OAS does not recognize a property called <code>language</code> for strings:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"id\",\n        \"type\": \"string\",\n        \"maxLength\": 8,\n        \"language\": \"en-US\",\n        \"description\": \"Identifier of the object to be extracted.\"\n    }\n}",
-            "yaml": "parameters:\n  in: query\n  name: id\n  type: string\n  maxLength: 8\n  language: en-US\n  description: Identifier of the object to be extracted.\n"
-          }
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Do not use unknown properties not defined in the OAS.</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"id\",\n        \"type\": \"string\",\n        \"maxLength\": 8,\n        \"description\": \"Identifier of the object to be extracted.\"\n    }\n}",
-            "yaml": "parameters:\n  in: query\n  name: id\n  type: string\n  maxLength: 8\n  description: Identifier of the object to be extracted.\n"
-          }
         }
       ]
     }
