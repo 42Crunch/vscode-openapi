@@ -139,7 +139,7 @@
       "title": "Add 'pattern' property",
       "type": "insert",
       "fix": {
-        "pattern": "^example[0-9a-f]{8}$"
+        "pattern": "^example-[0-9a-z]+$"
       },
       "parameters": [
         {
