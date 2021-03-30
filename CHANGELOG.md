@@ -2,7 +2,7 @@
 
 ## Version 4.3.1 (March 30, 2021)
 
-* Fix stying issue in preview [Issue #121](https://github.com/42Crunch/vscode-openapi/issues/121)
+* Fix styling issue in preview [Issue #121](https://github.com/42Crunch/vscode-openapi/issues/121)
 * Do not unnecessarily re-render the preview when switching away to the editor pane.
 
 ## Version 4.3.0 (March 24, 2021)
