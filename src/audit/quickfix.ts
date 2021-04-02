@@ -348,6 +348,7 @@ function createCombinedAction(
 }
 
 function createBulkAction(
+  document: vscode.TextDocument,
   version: OpenApiVersion,
   bundle: BundleResult,
   diagnostic: AuditDiagnostic,
@@ -359,14 +360,14 @@ function createBulkAction(
   // parameter values from source
 
   // continue only if the current issue has non-default params
-  if (!hasNonDefaultParams(issue, fix, version, bundle)) {
+  if (!hasNonDefaultParams(issue, fix, version, bundle, document)) {
     return [];
   }
 
   // all issues with same id and non-default params
   const similarIssues = issues
     .filter((issue: Issue) => issue.id === diagnostic.id)
-    .filter((issue) => hasNonDefaultParams(issue, fix, version, bundle));
+    .filter((issue) => hasNonDefaultParams(issue, fix, version, bundle, document));
 
   if (similarIssues.length > 1) {
     const bulkTitle = `Group fix: ${fix.title} in ${similarIssues.length} locations`;
@@ -388,14 +389,15 @@ function hasNonDefaultParams(
   issue: Issue,
   fix: Fix,
   version: OpenApiVersion,
-  bundle: BundleResult
+  bundle: BundleResult,
+  document: vscode.TextDocument
 ) {
   if (!fix.parameters) {
     return true;
   }
 
   const nonDefaultParameterValues = fix.parameters
-    .map((parameter) => getSourceValue(issue, fix, parameter, version, bundle))
+    .map((parameter) => getSourceValue(issue, fix, parameter, version, bundle, document))
     .filter((values) => values.length > 0);
 
   return fix.parameters.length === nonDefaultParameterValues.length;
@@ -452,7 +454,9 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
       );
 
       actions.push(...createSingleAction(diagnostic, issue, fix));
-      actions.push(...createBulkAction(version, bundle, diagnostic, issue[0], issues, fix));
+      actions.push(
+        ...createBulkAction(document, version, bundle, diagnostic, issue[0], issues, fix)
+      );
 
       // Combined Fix
       if (fix.type == FixType.Insert && !fix.pointer && !Array.isArray(fix.fix)) {
@@ -481,11 +485,12 @@ function getSourceValue(
   fix: Fix,
   parameter: FixParameter,
   version: OpenApiVersion,
-  bundle: BundleResult
+  bundle: BundleResult,
+  document: vscode.TextDocument
 ): any[] {
   if (parameter.source && parameterSources[parameter.source]) {
     const source = parameterSources[parameter.source];
-    const value = source(issue, fix, parameter, version, bundle);
+    const value = source(issue, fix, parameter, version, bundle, document);
     return value;
   }
   return [];

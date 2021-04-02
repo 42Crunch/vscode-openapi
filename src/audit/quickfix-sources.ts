@@ -1,3 +1,6 @@
+import { posix } from "path";
+import * as vscode from "vscode";
+import { findMapping } from "../bundler";
 import { parseJsonPointer } from "../pointer";
 import {
   Fix,
@@ -6,6 +9,7 @@ import {
   FixParameterSource,
   OpenApiVersion,
   BundleResult,
+  Mapping,
 } from "../types";
 
 function securitySchemes(
@@ -13,7 +17,8 @@ function securitySchemes(
   fix: Fix,
   parameter: FixParameter,
   version: OpenApiVersion,
-  bundle: BundleResult
+  bundle: BundleResult,
+  document: vscode.TextDocument
 ): any[] {
   if ("errors" in bundle) {
     return [];
@@ -35,7 +40,8 @@ function mostUsedByName(
   fix: Fix,
   parameter: FixParameter,
   version: OpenApiVersion,
-  bundle: BundleResult
+  bundle: BundleResult,
+  document: vscode.TextDocument
 ): any[] {
   const propertyHints = buildPropertyHints(bundle);
   const issuePointer = parseJsonPointer(issue.pointer);
@@ -49,19 +55,31 @@ function mostUsedByName(
   return [];
 }
 
+function relativeReference(base: vscode.Uri, mapping: Mapping) {
+  const target = vscode.Uri.parse(mapping.uri);
+  const hash = mapping.hash === null || mapping.hash === "#" ? "" : mapping.hash;
+  if (base.scheme !== target.scheme || base.authority !== target.authority) {
+    return `${mapping.uri}${hash}`;
+  }
+  const relative = posix.relative(posix.dirname(base.path), target.path);
+  return `${relative}${hash}`;
+}
+
 function schemaRefByResponseCode(
   issue: Issue,
   fix: Fix,
   parameter: FixParameter,
   version: OpenApiVersion,
-  bundle: BundleResult
+  bundle: BundleResult,
+  document: vscode.TextDocument
 ): any[] {
   const schemaRefs = buildSchemaRefByResponseCode(version, bundle);
   // FIXME maybe should account for fix.path?
   const path = [...parseJsonPointer(issue.pointer), ...parseJsonPointer(parameter.path)].reverse();
   const code = version === OpenApiVersion.V2 ? path[2] : path[4];
   if (code && schemaRefs[code]) {
-    return [schemaRefs[code]];
+    const mapping = schemaRefs[code];
+    return [relativeReference(document.uri, mapping)];
   }
   return [];
 }
@@ -82,10 +100,14 @@ function buildSchemaRefByResponseCode(version: OpenApiVersion, bundled: BundleRe
             ? response?.["schema"]?.["$ref"]
             : response?.["content"]?.["application/json"]?.["schema"]?.["$ref"];
         if (ref) {
+          const mapping = findMapping(bundled.mapping, ref) || {
+            uri: bundled.mapping.value.uri,
+            hash: ref,
+          };
           if (!hints[code]) {
             hints[code] = [];
           }
-          hints[code].push(ref);
+          hints[code].push(mapping);
         }
       }
     }

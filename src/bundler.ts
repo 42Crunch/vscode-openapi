@@ -10,7 +10,7 @@ import { ResolverError } from "@xliic/json-schema-ref-parser/lib/util/errors";
 
 import { parseJsonPointer, joinJsonPointer } from "./pointer";
 import { Cache } from "./cache";
-import { MappingNode, Mapping, BundleResult, OpenApiVersion } from "./types";
+import { MappingNode, Mapping, BundleResult, OpenApiVersion, BundlingError } from "./types";
 import { simpleClone } from "./util";
 import { toInternalUri, requiresApproval, ExternalRefDocumentProvider } from "./external-refs";
 
@@ -137,8 +137,6 @@ function hooks(document: vscode.TextDocument, state: any) {
   return {
     onRemap: (entry) => {
       const uri = toInternalUri(vscode.Uri.parse(entry.file)).toString();
-
-      // FIXME implement remap for openapi v2 and $ref location based remap
       const hashPath = Pointer.parse(entry.hash);
 
       if (hashPath[0] == "components" && hashPath.length >= 3) {
@@ -166,22 +164,24 @@ function hooks(document: vscode.TextDocument, state: any) {
       }
 
       const path = Pointer.parse(entry.pathFromRoot);
-      const parentKey = path[path.length - 1];
-      const grandparentKey = path[path.length - 2];
-      const destinations = destinationMap[state.version];
+      if (state.version !== OpenApiVersion.Unknown) {
+        const parentKey = path[path.length - 1];
+        const grandparentKey = path[path.length - 2];
+        const destinations = destinationMap[state.version];
 
-      const destination = destinations[parentKey]
-        ? destinations[parentKey]
-        : destinations[grandparentKey]
-        ? destinations[grandparentKey]
-        : null;
-      if (destination) {
-        const ref = entry.$ref.$ref;
-        const mangled = mangle(ref);
-        const path = destination.concat([mangled]);
-        set(state.parsed, path, entry.value);
-        insertMapping(state.mapping, path, { uri, hash: entry.hash });
-        return Pointer.join("#", path);
+        const destination = destinations[parentKey]
+          ? destinations[parentKey]
+          : destinations[grandparentKey]
+          ? destinations[grandparentKey]
+          : null;
+        if (destination) {
+          const ref = entry.$ref.$ref;
+          const mangled = mangle(ref);
+          const path = destination.concat([mangled]);
+          set(state.parsed, path, entry.value);
+          insertMapping(state.mapping, path, { uri, hash: entry.hash });
+          return Pointer.join("#", path);
+        }
       }
 
       insertMapping(state.mapping, path, { uri, hash: entry.hash });
@@ -203,7 +203,7 @@ export async function bundle(
   const state = {
     version,
     parsed: cloned,
-    mapping: { value: null, children: {} },
+    mapping: { value: { uri: document.uri.toString(), hash: null }, children: {} },
     documents: new Map([[document.uri.toString(), { version: document.version }]]),
   };
 
@@ -223,13 +223,51 @@ export async function bundle(
     });
 
     return {
+      document,
       value: bundled,
       mapping: state.mapping,
       documents: state.documents,
     };
   } catch (errors) {
-    return { errors, documents: state.documents };
+    if (!errors.errors) {
+      throw new Error(`Unexpected exception while bundling: ${errors}`);
+    }
+    return {
+      errors: processErrors(errors.errors),
+      document,
+      documents: state.documents,
+    };
   }
+}
+
+function processErrors(errors: any[]): Map<string, [BundlingError]> {
+  const result = new Map();
+  for (const error of errors) {
+    if (!error?.path?.length) {
+      // skip no path and zero length path
+      continue;
+    }
+
+    if (!result.has(error.source)) {
+      result.set(error.source, []);
+    }
+
+    const errors = result.get(error.source);
+
+    const bundlingError: BundlingError = {
+      pointer: joinJsonPointer([...error.path, "$ref"]),
+      message: error.message,
+      code: error.code,
+    };
+
+    if (error.code === "ERESOLVER" && error?.ioErrorCode?.startsWith("rejected:")) {
+      bundlingError.rejectedHost = error.ioErrorCode.substring("rejected:".length);
+    }
+
+    errors.push(bundlingError);
+  }
+
+  return result;
 }
 
 function insertMapping(root: MappingNode, path: string[], value: Mapping) {

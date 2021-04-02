@@ -23,13 +23,12 @@ export function activate(context: vscode.ExtensionContext, cache: Cache) {
   const previews: Previews = {};
 
   cache.onDidChange(async (document: vscode.TextDocument) => {
-    const uri = document.uri.toString();
-    const bundle = await cache.getDocumentBundle(document);
-
-    if (!("errors" in bundle)) {
-      for (const name of Object.keys(previews)) {
-        const preview: Preview = previews[name];
-        if (preview && preview.documentUri.toString() === uri) {
+    for (const name of Object.keys(previews)) {
+      const preview: Preview = previews[name];
+      const uri = document.uri.toString();
+      if (preview && preview.documentUri.toString() === uri) {
+        const bundle = await cache.getDocumentBundle(document);
+        if (!("errors" in bundle)) {
           showPreview(context, previews, name, document.uri, bundle);
         }
       }
