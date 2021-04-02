@@ -72,6 +72,16 @@ export class ExternalRefDocumentProvider implements vscode.TextDocumentContentPr
     uri: vscode.Uri,
     token: vscode.CancellationToken
   ): Promise<string> {
+    const approvedHosts = configuration.get<string[]>("approvedHostnames");
+
+    const approved = approvedHosts.some(
+      (approvedHostname) => approvedHostname.toLowerCase() === uri.authority.toLowerCase()
+    );
+
+    if (!approved) {
+      throw new Error(`Hostname ${uri.authority}" is not in the list of approved hosts`);
+    }
+
     const actualUri = fromInternalUri(uri);
     const { body, headers } = await got(actualUri.toString());
 

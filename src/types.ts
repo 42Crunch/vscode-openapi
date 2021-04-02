@@ -25,14 +25,23 @@ export interface MappingNode {
 export interface Bundle {
   value: any;
   mapping: MappingNode;
+  document: vscode.TextDocument;
   documents: Map<string, { version: number }>;
 }
 
-interface BundleError {
-  errors: any;
+export interface BundlingError {
+  message: string;
+  pointer: string;
+  code: string;
+  rejectedHost?: string;
+}
+
+export interface BundlingFailure {
+  errors: Map<string, BundlingError[]>;
+  document: vscode.TextDocument;
   documents: Map<string, { version: number }>;
 }
-export type BundleResult = Bundle | BundleError;
+export type BundleResult = Bundle | BundlingFailure;
 
 interface Grade {
   value: number;
@@ -148,7 +157,8 @@ export interface FixParameterSource {
     fix: Fix,
     parameter: FixParameter,
     version: OpenApiVersion,
-    bundle: BundleResult
+    bundle: BundleResult,
+    document: vscode.TextDocument
   ): any[];
 }
 

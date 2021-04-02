@@ -270,12 +270,9 @@ export function getFixAsYamlString(context: FixContext): string {
 
 function handleParameters(context: FixContext, text: string): string {
   const replacements = [];
-  const issues = context.issues;
-  const fix = context.fix;
-  const version = context.version;
-  const bundle = context.bundle;
-  const snippet = context.snippet;
+  const { issues, fix, version, bundle, document, snippet } = context;
   const languageId = context.document.languageId;
+
   const root = safeParse(text, languageId);
 
   for (const parameter of context.fix.parameters) {
@@ -290,7 +287,7 @@ function handleParameters(context: FixContext, text: string): string {
     if (parameter.source && parameterSources[parameter.source]) {
       const source = parameterSources[parameter.source];
       const issue = parameter.fixIndex ? issues[parameter.fixIndex] : issues[0];
-      cacheValues = source(issue, fix, parameter, version, bundle);
+      cacheValues = source(issue, fix, parameter, version, bundle, document);
     }
 
     let finalValue: string;
