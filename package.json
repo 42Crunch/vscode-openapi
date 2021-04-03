@@ -6,7 +6,10 @@
   "license": "AGPL-3.0-only",
   "version": "4.4.0",
   "publisher": "42Crunch",
-  "repository": "https://github.com/42Crunch/vscode-openapi",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/42Crunch/vscode-openapi.git"
+  },
   "icon": "resources/icons/extension.png",
   "categories": [
     "Programming Languages",
