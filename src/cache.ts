@@ -66,9 +66,12 @@ export class Cache {
 
   async onDocumentChanged(event: vscode.TextDocumentChangeEvent) {
     if (vscode.languages.match(this.selector, event.document) === 0) {
-      this._didActiveDocumentChange.fire(event.document);
+      this._didChange.fire(event.document);
     } else {
-      this.requestCacheEntryUpdate(event.document);
+      await this.requestCacheEntryUpdate(event.document);
+      if (vscode.window?.activeTextEditor?.document === event.document) {
+        this._didActiveDocumentChange.fire(event.document);
+      }
     }
   }
 
