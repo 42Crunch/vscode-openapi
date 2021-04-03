@@ -290,6 +290,35 @@ export class GeneralThreeOutlineProvider extends OutlineProvider {
   }
 }
 
+export class OperationIdOutlineProvider extends OutlineProvider {
+  getRootPointer() {
+    return "/paths";
+  }
+
+  getChildren(node?: Node): Thenable<Node[]> {
+    if (!this.root) {
+      return Promise.resolve([]);
+    }
+
+    const operations = [];
+
+    for (const path of this.root.getChildren()) {
+      for (const operation of path.getChildren()) {
+        const operationId = operation.find("/operationId");
+        if (operationId) {
+          operations.push(operationId);
+        }
+      }
+    }
+
+    return Promise.resolve(this.sortChildren(operations));
+  }
+
+  getLabel(node: Node): string {
+    return node.getValue();
+  }
+}
+
 function registerOutlineTreeView(id: string, provider: vscode.TreeDataProvider<Node>): void {
   outlines[id] = vscode.window.createTreeView(id, {
     treeDataProvider: provider,
@@ -307,6 +336,11 @@ export function registerOutlines(
   // OpenAPI v2 outlines
   registerOutlineTreeView("openapiTwoSpecOutline", new GeneralTwoOutlineProvider(context, cache));
   registerOutlineTreeView("openapiTwoPathOutline", new PathOutlineProvider(context, cache));
+  registerOutlineTreeView(
+    "openapiTwoOperationIdOutline",
+    new OperationIdOutlineProvider(context, cache)
+  );
+
   registerOutlineTreeView(
     "openapiTwoDefinitionOutline",
     new DefinitionOutlineProvider(context, cache)
@@ -327,6 +361,11 @@ export function registerOutlines(
 
   // OpenAPI v3 outlines
   registerOutlineTreeView("openapiThreePathOutline", new PathOutlineProvider(context, cache));
+  registerOutlineTreeView(
+    "openapiThreeOperationIdOutline",
+    new OperationIdOutlineProvider(context, cache)
+  );
+
   registerOutlineTreeView(
     "openapiThreeSpecOutline",
     new GeneralThreeOutlineProvider(context, cache)

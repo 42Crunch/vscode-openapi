@@ -66,6 +66,11 @@
           "when": "openapiTwoEnabled"
         },
         {
+          "id": "openapiTwoOperationIdOutline",
+          "name": "Operation ID",
+          "when": "openapiTwoEnabled"
+        },
+        {
           "id": "openapiTwoParametersOutline",
           "name": "Parameters",
           "when": "openapiTwoEnabled"
@@ -98,6 +103,11 @@
         {
           "id": "openapiThreePathOutline",
           "name": "Paths",
+          "when": "openapiThreeEnabled"
+        },
+        {
+          "id": "openapiThreeOperationIdOutline",
+          "name": "Operation ID",
           "when": "openapiThreeEnabled"
         },
         {
