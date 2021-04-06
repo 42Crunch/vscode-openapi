@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.4.0 (April 6, 2021)
+
+* Add 'Operation ID' panel to OpenAPI tree view
+* Fix issues with preview generation [Issue #123](https://github.com/42Crunch/vscode-openapi/issues/123}
+
 ## Version 4.3.1 (March 30, 2021)
 
 * Fix styling issue in preview [Issue #121](https://github.com/42Crunch/vscode-openapi/issues/121)
