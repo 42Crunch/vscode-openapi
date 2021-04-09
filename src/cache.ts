@@ -289,10 +289,6 @@ export class Cache implements vscode.Disposable {
     return this.parsedDocuments.get(document).lastGoodAstRoot;
   }
 
-  getDocumentValue(document: vscode.TextDocument): any | undefined {
-    return this.parsedDocuments.get(document).parsed;
-  }
-
   async getDocumentBundle(document: vscode.TextDocument): Promise<BundleResult | undefined> {
     return this.bundledDocuments.get(document);
   }
