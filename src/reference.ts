@@ -48,7 +48,7 @@ async function refToLocation(
       await vscode.languages.setTextDocumentLanguage(refDocument, languageId);
     }
 
-    const root = await cache.getDocumentAst(refDocument);
+    const root = cache.getDocumentAst(refDocument);
 
     if (root) {
       const target = root.find(pointer);
