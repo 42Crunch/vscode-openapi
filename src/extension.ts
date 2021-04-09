@@ -48,6 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.workspace.registerTextDocumentContentProvider(INTERNAL_SCHEMES.https, externalRefProvider);
 
   const cache = new Cache(parserOptions, Object.values(selectors), externalRefProvider);
+  context.subscriptions.push(cache);
 
   cache.onDidActiveDocumentChange((document) => updateContext(cache, document));
 

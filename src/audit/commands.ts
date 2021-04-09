@@ -176,7 +176,7 @@ async function performAudit(
   progress
 ): Promise<Audit | undefined> {
   const bundle = await cache.getDocumentBundle(textEditor.document);
-  if ("errors" in bundle) {
+  if (!bundle || "errors" in bundle) {
     vscode.commands.executeCommand("workbench.action.problems.focus");
     throw new Error("Failed to bundle for audit, check OpenAPI file for errors.");
   }
