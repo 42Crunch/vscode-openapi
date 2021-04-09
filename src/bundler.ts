@@ -9,10 +9,23 @@ import $Ref from "@xliic/json-schema-ref-parser/lib/ref";
 import { ResolverError } from "@xliic/json-schema-ref-parser/lib/util/errors";
 
 import { parseJsonPointer, joinJsonPointer } from "./pointer";
-import { Cache } from "./cache";
-import { MappingNode, Mapping, BundleResult, OpenApiVersion, BundlingError } from "./types";
+import {
+  MappingNode,
+  Mapping,
+  BundleResult,
+  OpenApiVersion,
+  BundlingError,
+  DocumentToObjectParser,
+} from "./types";
 import { simpleClone } from "./util";
 import { toInternalUri, requiresApproval, ExternalRefDocumentProvider } from "./external-refs";
+
+interface BundlerState {
+  version: OpenApiVersion;
+  parsed: any;
+  mapping: MappingNode;
+  documents: Set<vscode.TextDocument>;
+}
 
 const destinationMap = {
   [OpenApiVersion.V2]: {
@@ -64,8 +77,8 @@ function checkApproval(approvedHosts: string[], uri: vscode.Uri): void {
 }
 
 const resolver = (
-  cache: Cache,
-  state,
+  documentParser: DocumentToObjectParser,
+  state: BundlerState,
   approvedHosts: string[],
   externalRefProvider: ExternalRefDocumentProvider
 ) => {
@@ -86,11 +99,8 @@ const resolver = (
         if (languageId) {
           await vscode.languages.setTextDocumentLanguage(document, languageId);
         }
-        if (!state.documents.has(document.uri.toString())) {
-          // add document to the list of documents
-          state.documents.set(document.uri.toString(), { version: document.version });
-        }
-        return await cache.getDocumentValue(document);
+        state.documents.add(document);
+        return documentParser(document);
       } catch (err) {
         throw new ResolverError(
           { message: `Error reading file "${file.url}: ${err.message}"` },
@@ -133,7 +143,7 @@ function set(target: any, path: string[], value: any) {
   current[last] = value;
 }
 
-function hooks(document: vscode.TextDocument, state: any) {
+function hooks(document: vscode.TextDocument, state: BundlerState) {
   return {
     onRemap: (entry) => {
       const uri = toInternalUri(vscode.Uri.parse(entry.file)).toString();
@@ -194,24 +204,24 @@ export async function bundle(
   document: vscode.TextDocument,
   version: OpenApiVersion,
   parsed: any,
-  cache: Cache,
+  documentParser: DocumentToObjectParser,
   approvedHosts: string[],
   externalRefProvider: ExternalRefDocumentProvider
 ): Promise<BundleResult> {
   const cloned = simpleClone(parsed);
 
-  const state = {
+  const state: BundlerState = {
     version,
     parsed: cloned,
     mapping: { value: { uri: document.uri.toString(), hash: null }, children: {} },
-    documents: new Map([[document.uri.toString(), { version: document.version }]]),
+    documents: new Set<vscode.TextDocument>(),
   };
 
   try {
     const bundled = await parser.bundle(cloned, {
       cwd: document.uri.toString(),
       resolve: {
-        file: resolver(cache, state, approvedHosts, externalRefProvider),
+        file: resolver(documentParser, state, approvedHosts, externalRefProvider),
         http: false, // disable built in http resolver
       },
       parse: {

@@ -22,11 +22,13 @@ export interface MappingNode {
   };
 }
 
+export type DocumentToObjectParser = (document: vscode.TextDocument) => any;
+
 export interface Bundle {
   value: any;
   mapping: MappingNode;
   document: vscode.TextDocument;
-  documents: Map<string, { version: number }>;
+  documents: Set<vscode.TextDocument>;
 }
 
 export interface BundlingError {
@@ -39,7 +41,7 @@ export interface BundlingError {
 export interface BundlingFailure {
   errors: Map<string, BundlingError[]>;
   document: vscode.TextDocument;
-  documents: Map<string, { version: number }>;
+  documents: Set<vscode.TextDocument>;
 }
 export type BundleResult = Bundle | BundlingFailure;
 

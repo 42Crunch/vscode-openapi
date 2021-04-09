@@ -28,7 +28,7 @@ export function activate(context: vscode.ExtensionContext, cache: Cache) {
       const uri = document.uri.toString();
       if (preview && preview.documentUri.toString() === uri) {
         const bundle = await cache.getDocumentBundle(document);
-        if (!("errors" in bundle)) {
+        if (bundle && !("errors" in bundle)) {
           showPreview(context, previews, name, document.uri, bundle);
         }
       }
@@ -68,7 +68,7 @@ async function startPreview(
   document: vscode.TextDocument
 ) {
   const bundle = await cache.getDocumentBundle(document);
-  if ("errors" in bundle) {
+  if (!bundle || "errors" in bundle) {
     vscode.commands.executeCommand("workbench.action.problems.focus");
     vscode.window.showErrorMessage("Failed to generate preview, check OpenAPI file for errors.");
   } else {
