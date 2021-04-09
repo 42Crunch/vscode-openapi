@@ -19,7 +19,7 @@ export function parseToObject(document: vscode.TextDocument, options: ParserOpti
   if (document.languageId === "yaml") {
     // FIXME what's up with parsing errors?
     const {
-      yaml: { schema }
+      yaml: { schema },
     } = options.get();
     return yaml.safeLoad(document.getText(), { schema });
   }
@@ -69,6 +69,10 @@ export function parseToAst(
 }
 
 export function getOpenApiVersion(root: Node): OpenApiVersion {
+  if (!root) {
+    return OpenApiVersion.Unknown;
+  }
+
   const swaggerVersionValue = root?.find("/swagger")?.getValue();
   const openApiVersionValue = root?.find("/openapi")?.getValue();
 
