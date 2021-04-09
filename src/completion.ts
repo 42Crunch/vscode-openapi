@@ -39,7 +39,7 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
   constructor(private context: vscode.ExtensionContext, private cache: Cache) {
     cache.onDidActiveDocumentChange(async (document) => {
       if (cache.getDocumentVersion(document) !== OpenApiVersion.Unknown) {
-        this.root = await cache.getLastGoodDocumentAst(document);
+        this.root = cache.getLastGoodDocumentAst(document);
         this.version = cache.getDocumentVersion(document);
       }
     });
@@ -51,6 +51,10 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
     token: vscode.CancellationToken,
     context: vscode.CompletionContext
   ) {
+    if (!this.root) {
+      return;
+    }
+
     const line = document.lineAt(position).text;
     if (!(line.includes("$ref:") || line.includes('"$ref"'))) {
       return undefined;
@@ -81,7 +85,7 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
         // stat fileUri, if it does not exists an exception is thrown
         await vscode.workspace.fs.stat(otherUri);
         const otherDocument = await vscode.workspace.openTextDocument(otherUri);
-        const root = await this.cache.getLastGoodDocumentAst(otherDocument);
+        const root = this.cache.getLastGoodDocumentAst(otherDocument);
         if (root) {
           searchRoot = root;
         }

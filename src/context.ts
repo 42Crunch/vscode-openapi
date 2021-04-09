@@ -19,7 +19,7 @@ export async function updateContext(cache: Cache, document: vscode.TextDocument)
       vscode.commands.executeCommand("setContext", "openapiThreeEnabled", true);
       vscode.commands.executeCommand("setContext", "openapiTwoEnabled", false);
     }
-    const root = await cache.getLastGoodDocumentAst(document);
+    const root = cache.getLastGoodDocumentAst(document);
     if (root) {
       checkTree(root);
     }
