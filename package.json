@@ -556,7 +556,7 @@
   },
   "dependencies": {
     "@xliic/json-schema-ref-parser": "^9.2.0",
-    "@xliic/openapi-ast-node": "^1.4.2",
+    "@xliic/openapi-ast-node": "^1.4.3",
     "form-data": "^2.3.3",
     "got": "^9.6.0",
     "js-yaml": "^3.13.1",
