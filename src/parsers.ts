@@ -5,7 +5,10 @@ import { parse, Node } from "@xliic/openapi-ast-node";
 import { ParserOptions } from "./parser-options";
 import { OpenApiVersion } from "./types";
 
-export function parseToObject(document: vscode.TextDocument, options: ParserOptions) {
+export function parseToObject(
+  document: vscode.TextDocument,
+  options: ParserOptions
+): any | undefined {
   if (
     !(
       document.languageId === "json" ||
@@ -16,23 +19,23 @@ export function parseToObject(document: vscode.TextDocument, options: ParserOpti
     return null;
   }
 
-  if (document.languageId === "yaml") {
-    // FIXME what's up with parsing errors?
-    const {
-      yaml: { schema },
-    } = options.get();
-    return yaml.safeLoad(document.getText(), { schema });
-  }
+  try {
+    if (document.languageId === "yaml") {
+      // FIXME what's up with parsing errors?
+      const {
+        yaml: { schema },
+      } = options.get();
+      return yaml.safeLoad(document.getText(), { schema });
+    }
 
-  const errors: json.ParseError[] = [];
-  const parsed = json.parse(document.getText(), errors, { allowTrailingComma: true });
-  if (errors.length > 0) {
-    const message = errors
-      .map((error) => `${json.printParseErrorCode(error.error)} at offset ${error.offset}`)
-      .join(", ");
-    throw new Error(`Failed to parse JSON: ${message}`);
+    const errors: json.ParseError[] = [];
+    const parsed = json.parse(document.getText(), errors, { allowTrailingComma: true });
+    if (errors.length == 0) {
+      return parsed;
+    }
+  } catch (ex) {
+    // ignore, return undefined on parsing errors
   }
-  return parsed;
 }
 
 export function parseToAst(
