@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.4.1 (April 12, 2021)
+
+* Fix regressions introduced in previous release
+
 ## Version 4.4.0 (April 6, 2021)
 
 * Add 'Operation ID' panel to OpenAPI tree view
