@@ -278,7 +278,7 @@ export class Cache implements vscode.Disposable {
   }
 
   getDocumentVersion(document: vscode.TextDocument): OpenApiVersion {
-    return this.parsedDocuments.get(document).openApiVersion;
+    return document ? this.parsedDocuments.get(document).openApiVersion : OpenApiVersion.Unknown;
   }
 
   getDocumentAst(document: vscode.TextDocument): Node | undefined {
