@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.5 (April 14, 2021)
+
+* Trigger $ref autocompletion on single quotes when editing YAML file (contributed by @klementtan)
+* Update KDB articles
+
 ## Version 4.4.1 (April 12, 2021)
 
 * Fix regressions introduced in previous release
