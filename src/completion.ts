@@ -96,16 +96,16 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
 
     const target = findTarget(this.root, this.version, node);
     const targetNode = target && searchRoot.find(target);
-    const qouteChar =
+    const quoteChar =
       line.charAt(position.character) == '"' || line.charAt(position.character) == "'"
         ? line.charAt(position.character)
         : '"';
     if (targetNode) {
       // don't include trailing quote when completing YAML and
       // there are already quotes in line
-      let trailingQuote = qouteChar;
+      let trailingQuote = quoteChar;
       let leadingSpace = " ";
-      if (line.charAt(position.character) == qouteChar) {
+      if (line.charAt(position.character) == quoteChar) {
         leadingSpace = "";
         if (document.languageId === "yaml") {
           trailingQuote = "";
@@ -114,7 +114,7 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
       const completions = targetNode.getChildren().map((child) => {
         const key = child.getKey();
         return new vscode.CompletionItem(
-          `${leadingSpace}${qouteChar}${fileRef}#${target}/${key}${trailingQuote}`
+          `${leadingSpace}${quoteChar}${fileRef}#${target}/${key}${trailingQuote}`
         );
       });
       return completions;
