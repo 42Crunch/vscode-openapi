@@ -51,7 +51,6 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
     token: vscode.CancellationToken,
     context: vscode.CompletionContext
   ) {
-	
     if (!this.root) {
       return;
     }
