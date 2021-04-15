@@ -242,7 +242,7 @@ function findIssueLocation(
     return [mainUri.toString(), pointer];
   } else {
     const mapping = findMapping(mappings, pointer);
-    if (mapping) {
+    if (mapping.hash) {
       return [mapping.uri, mapping.hash];
     }
   }
