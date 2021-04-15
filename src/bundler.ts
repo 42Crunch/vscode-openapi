@@ -300,15 +300,13 @@ export function findMapping(root: MappingNode, pointer: string): Mapping {
     current = current.children[path[i]];
   }
 
-  if (!current?.value) {
-    return null;
-  }
-
   const { uri, hash } = current.value;
 
-  if (i < path.length) {
-    const remaining = path.slice(i, path.length);
-    return { uri, hash: hash + joinJsonPointer(remaining) };
+  if (hash) {
+    if (i < path.length) {
+      const remaining = path.slice(i, path.length);
+      return { uri, hash: hash + joinJsonPointer(remaining) };
+    }
   }
 
   return { uri, hash };
