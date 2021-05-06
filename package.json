@@ -4,7 +4,7 @@
   "displayName": "OpenAPI (Swagger) Editor",
   "description": "OpenAPI extension for Visual Studio Code",
   "license": "AGPL-3.0-only",
-  "version": "4.5.0",
+  "version": "4.5.1",
   "publisher": "42Crunch",
   "repository": {
     "type": "git",
@@ -32,6 +32,12 @@
   "activationEvents": [
     "*"
   ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
+    "virtualWorkspaces": true
+  },
   "main": "./out/extension",
   "scripts": {
     "vscode:prepublish": "npm run build-quickfixes && npm run build-whatsnew && npm run build-preview-redoc && npm run build-preview-swaggerui && npm run build-snippets && npm run compile",
