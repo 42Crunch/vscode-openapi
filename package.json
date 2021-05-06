@@ -343,8 +343,8 @@
         "title": "OpenAPI: perform security audit",
         "enablement": "!openapiErrors",
         "icon": {
-          "light": "./resources/42crunch_icon.png",
-          "dark": "./resources/42crunch_icon.png"
+          "light": "./resources/42crunch_icon.svg",
+          "dark": "./resources/42crunch_icon.svg"
         }
       },
       {

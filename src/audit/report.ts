@@ -263,7 +263,7 @@ export class ReportWebView {
       const webview = ReportWebView.currentPanel._panel.webview;
 
       const image = webview.asWebviewUri(
-        vscode.Uri.file(path.join(context.extensionPath, "resources", "42crunch_icon.png"))
+        vscode.Uri.file(path.join(context.extensionPath, "resources", "42crunch_icon.svg"))
       );
 
       webview.html = `<!DOCTYPE html>
