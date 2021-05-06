@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.5.1 (May 6, 2021)
+
+* Declare support for untrusted and virtual workspaces in the extension manifest
+* Fix 42Crunch icon affected by VS Code update
+
 ## Version 4.5 (April 15, 2021)
 
 * Trigger $ref autocompletion on single quotes when editing YAML file (contributed by @klementtan)
