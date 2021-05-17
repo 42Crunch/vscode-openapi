@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.5.2 (May 17, 2021)
+
+* Update audit KDB artciles
+
 ## Version 4.5.1 (May 6, 2021)
 
 * Declare support for untrusted and virtual workspaces in the extension manifest
