@@ -3,6 +3,7 @@
 ## Version 4.5.2 (May 17, 2021)
 
 * Update audit KDB artciles
+* Update Swagger UI to 3.48.0
 
 ## Version 4.5.1 (May 6, 2021)
 
