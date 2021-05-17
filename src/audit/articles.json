@@ -2972,7 +2972,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings, no restrictions can be enforced and any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings,  any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
         }
       ]
     },
@@ -3298,7 +3298,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings, no restrictions can be enforced and any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings,  any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
         }
       ]
     },
@@ -3386,8 +3386,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/definitions/Pet\"\n                    }\n                }\n            }\n        }\n    }\n}",
-            "yaml": "responses:\n  \"200\":\n    description: pet response\n    content:\n      application/json:\n        schema:\n          $ref: \"#/definitions/Pet\"\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"schema\": {\n                \"$ref\": \"#/definitions/Pet\"\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: pet response\n    schema:\n      $ref: \"#/definitions/Pet\"\n"
           }
         }
       ]
@@ -3406,8 +3406,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/definitions/Pet\"\n                    }\n                }\n            }\n        },\n        // ...\n        \"400\": {\n            \"description\": \"Bad request\",\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/definitions/400\"\n                    }\n                }\n            }           \n        }\n    }\n}",
-            "yaml": "responses:\n  \"200\":\n    description: pet response\n    content:\n      application/json:\n        schema:\n          $ref: \"#/definitions/Pet\"\n  # ...\n  \"400\":\n    description: Bad request\n    content:\n      application/json:\n        schema:\n          $ref: \"#/definitions/400\"\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"schema\": {\n                \"$ref\": \"#/definitions/Pet\"\n            }\n        },\n        // ...\n        \"400\": {\n            \"description\": \"Bad request\",\n            \"schema\": {\n                \"$ref\": \"#/definitions/400\"\n            }           \n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: pet response\n    schema:\n      $ref: \"#/definitions/Pet\"\n  # ...\n  \"400\":\n    description: Bad request\n    schema:\n      $ref: \"#/definitions/400\"\n"
           }
         }
       ]
@@ -3538,8 +3538,52 @@
         },
         {
           "code": {
-            "json": "{\n    \"/pets\": {\n        \"get\": {\n            \"description\": \"Returns all pets from the system that the user has access to\",\n            \"produces\": [\n                \"application/json\"\n            ],\n            \"responses\": {\n                \"200\": {\n                    \"description\": \"A list of pets\",\n                    \"schema\": {\n                        \"type\": \"array\",\n                        \"items\": {\n                            \"$ref\": \"#/definitions/Pet\"\n                        }\n                    }\n                },\n                \"404\": {\n                    \"description\": \"Not found\",\n                    \"content\": {\n                        \"application/json\": {\n                            \"schema\": {\n                                \"$ref\": \"#/definitions/404\"\n                            }\n                        }\n                    }           \n                }\n            }\n        }\n    }\n}",
-            "yaml": "/pets:\n  get:\n    description: Returns all pets from the system that the user has access to\n    produces:\n      - application/json\n    responses:\n      \"200\":\n        description: A list of pets\n        schema:\n          type: array\n          items:\n            $ref: \"#/definitions/Pet\"\n      \"404\":\n        description: Not found\n        content:\n          application/json:\n            schema:\n              $ref: \"#/definitions/404\"\n"
+            "json": "{\n    \"/pets\": {\n        \"get\": {\n            \"description\": \"Returns all pets from the system that the user has access to\",\n            \"produces\": [\n                \"application/json\"\n            ],\n            \"responses\": {\n                \"200\": {\n                    \"description\": \"A list of pets\",\n                    \"schema\": {\n                        \"type\": \"array\",\n                        \"items\": {\n                            \"$ref\": \"#/definitions/Pet\"\n                        }\n                    }\n                },\n                \"404\": {\n                    \"description\": \"Not found\",\n                    \"schema\": {\n                        \"$ref\": \"#/definitions/404\"\n                    }           \n                }\n            }\n        }\n    }\n}",
+            "yaml": "/pets:\n  get:\n    description: Returns all pets from the system that the user has access to\n    produces:\n      - application/json\n    responses:\n      \"200\":\n        description: A list of pets\n        schema:\n          type: array\n          items:\n            $ref: \"#/definitions/Pet\"\n      \"404\":\n        description: Not found\n        schema:\n          $ref: \"#/definitions/404\"\n"
+          }
+        }
+      ]
+    }
+  },
+  "response-406": {
+    "group": "datavalidation",
+    "subgroup": "responsedefinition",
+    "title": {
+      "text": "<h1>406 response should be defined for all GET, POST, PUT, PATCH, and DELETE operations</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>One or more operations in your API are missing <code>406</code> responses. Operations should have <code>406</code> or <code>default</code> response defined if they do both of the following:</p>\n                    <ul>\n                        <li>The operation defines a response that is <em>not</em> a <code>204</code> response. </li>\n                        <li>The operation constrains the MIME type of the response. </li>\n                    </ul>\n                    <p>For more details, see <a href=\"https://tools.ietf.org/html/rfc7231#section-6.5\" target=\"_blank\" rel=\"noopener\">RFC 7231</a>.</p>\n                "
+    },
+    "shortDescription": "One or more operations in your API are missing <code>406</code> responses. Operations should have <code>406</code> or <code>default</code> response defined if they do both of the following:",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"schema\": {\n                \"$ref\": \"#/definitions/Pet\"\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: pet response\n    schema:\n      $ref: \"#/definitions/Pet\"\n"
+          }
+        }
+      ]
+    },
+    "exploit": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>Attackers strive to make your APIs behave in an unexpected way to learn more about your system or to cause a data breach. We highly recommend that you minimize any risks and clearly specify the data that your API operations can return for each possible response code.</p>\n                "
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p> Make sure that all operations that define a response that is not  <code>204</code> and that constrain the MIME type of the response have the <code>406</code> response defined too.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"schema\": {\n                \"$ref\": \"#/definitions/Pet\"\n            }\n        },\n        // ...\n        \"406\": {\n            \"description\": \"Not Acceptable\",\n            \"schema\": {\n                \"$ref\": \"#/definitions/406\"\n            }           \n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: pet response\n    schema:\n      $ref: \"#/definitions/Pet\"\n  # ...\n  \"406\":\n    description: Not Acceptable\n    schema:\n      $ref: \"#/definitions/406\"\n"
           }
         }
       ]
@@ -3562,8 +3606,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n           \"description\": \"Pet to add to the store\",\n           \"required\": true\n            // ...\n        },\n        \"responses\": {\n           \"200\": {\n                \"description\": \"pet response\",\n                \"content\": {\n                    \"application/json\": {\n                        \"schema\": {\n                            \"$ref\": \"#/definitions/Pet\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    # ...\n  responses:\n    \"200\":\n      description: pet response\n      content:\n        application/json:\n          schema:\n            $ref: \"#/definitions/Pet\"\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n           \"description\": \"Pet to add to the store\",\n           \"required\": true\n            // ...\n        },\n        \"responses\": {\n           \"200\": {\n                \"description\": \"pet response\",\n                \"schema\": {\n                    \"$ref\": \"#/definitions/Pet\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    # ...\n  responses:\n    \"200\":\n      description: pet response\n      schema:\n        $ref: \"#/definitions/Pet\"\n"
           }
         }
       ]
@@ -3582,8 +3626,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true\n            // ...\n        },\n        \"responses\": {\n            \"200\": {\n                \"description\": \"pet response\",\n                \"content\": {\n                    \"application/json\": {\n                        \"schema\": {\n                            \"$ref\": \"#/definitions/Pet\"\n                        }\n                    }\n                }\n            },\n            // ...\n            \"415\": {\n                \"description\": \"Unsupported media type\",\n                \"content\": {\n                    \"application/json\": {\n                        \"schema\": {\n                            \"$ref\": \"#/definitions/415\"\n                        }\n                    }\n                }         \n            }\n        }\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    # ...\n  responses:\n    \"200\":\n      description: pet response\n      content:\n        application/json:\n          schema:\n            $ref: \"#/definitions/Pet\"\n    # ...\n    \"415\":\n      description: Unsupported media type\n      content:\n        application/json:\n          schema:\n            $ref: \"#/definitions/415\"\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true\n            // ...\n        },\n        \"responses\": {\n            \"200\": {\n                \"description\": \"pet response\",\n                \"schema\": {\n                    \"$ref\": \"#/definitions/Pet\"\n                }\n            },\n            // ...\n            \"415\": {\n                \"description\": \"Unsupported media type\",\n                \"schema\": {\n                    \"$ref\": \"#/definitions/415\"\n                }         \n            }\n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    # ...\n  responses:\n    \"200\":\n      description: pet response\n      schema:\n        $ref: \"#/definitions/Pet\"\n    # ...\n    \"415\":\n      description: Unsupported media type\n      schema:\n        $ref: \"#/definitions/415\"\n"
           }
         }
       ]
@@ -3606,8 +3650,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/definitions/Pet\"\n                    }\n                }\n            }\n        }\n    }\n}",
-            "yaml": "responses:\n  \"200\":\n    description: pet response\n    content:\n      application/json:\n        schema:\n          $ref: \"#/definitions/Pet\"\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"schema\": {\n                \"$ref\": \"#/definitions/Pet\"\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: pet response\n    schema:\n      $ref: \"#/definitions/Pet\"\n"
           }
         }
       ]
@@ -3626,8 +3670,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/definitions/Pet\"\n                    }\n                }\n            }\n        },\n        // ...\n        \"429\": {\n            \"description\": \"Too many requests\",\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/definitions/429\"\n                    }\n                }\n            }           \n        }\n    }\n}",
-            "yaml": "responses:\n  \"200\":\n    description: pet response\n    content:\n      application/json:\n        schema:\n          $ref: \"#/definitions/Pet\"\n  # ...\n  \"429\":\n    description: Too many requests\n    content:\n      application/json:\n        schema:\n          $ref: \"#/definitions/429\"\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"schema\": {\n                \"$ref\": \"#/definitions/Pet\"\n            }\n        },\n        // ...\n        \"429\": {\n            \"description\": \"Too many requests\",\n            \"schema\": {\n                \"$ref\": \"#/definitions/429\"\n            }           \n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: pet response\n    schema:\n      $ref: \"#/definitions/Pet\"\n  # ...\n  \"429\":\n    description: Too many requests\n    schema:\n      $ref: \"#/definitions/429\"\n"
           }
         }
       ]
@@ -3650,8 +3694,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/definitions/Pet\"\n                    }\n                }\n            }\n        }\n    }\n}",
-            "yaml": "responses:\n  \"200\":\n    description: pet response\n    content:\n      application/json:\n        schema:\n          $ref: \"#/definitions/Pet\"\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"schema\": {\n                \"$ref\": \"#/definitions/Pet\"\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: pet response\n    schema:\n      $ref: \"#/definitions/Pet\"\n"
           }
         }
       ]
@@ -3670,8 +3714,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/definitions/Pet\"\n                    }\n                }\n            }\n        },\n        // ...\n        \"500\": {\n            \"description\": \"Internal Server Error\",\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/definitions/500\"\n                    }\n                }\n            }           \n        }\n    }\n}",
-            "yaml": "responses:\n  \"200\":\n    description: pet response\n    content:\n      application/json:\n        schema:\n          $ref: \"#/definitions/Pet\"\n  # ...\n  \"500\":\n    description: Internal Server Error\n    content:\n      application/json:\n        schema:\n          $ref: \"#/definitions/500\"\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"schema\": {\n                \"$ref\": \"#/definitions/Pet\"\n            }\n        },\n        // ...\n        \"500\": {\n            \"description\": \"Internal Server Error\",\n            \"schema\": {\n                \"$ref\": \"#/definitions/500\"\n            }           \n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: pet response\n    schema:\n      $ref: \"#/definitions/Pet\"\n  # ...\n  \"500\":\n    description: Internal Server Error\n    schema:\n      $ref: \"#/definitions/500\"\n"
           }
         }
       ]
@@ -3826,8 +3870,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"head\": {\n        // ...\n        \"responses\": {\n            \"404\": {\n                \"description\": \"Not found\",\n                \"content\": {\n                    \"application/json\": {\n                        \"schema\": {\n                            \"$ref\": \"#/definitions/404\"\n                        }\n                    }\n                }           \n            }\n        }\n    }\n}",
-            "yaml": "head:\n  # ...\n  responses:\n    \"404\":\n      description: Not found\n      content:\n        application/json:\n          schema:\n            $ref: \"#/definitions/404\"\n"
+            "json": "{\n    \"head\": {\n        // ...\n        \"responses\": {\n            \"404\": {\n                \"description\": \"Not found\",\n                \"schema\": {\n                    \"$ref\": \"#/definitions/404\"\n                }           \n            }\n        }\n    }\n}",
+            "yaml": "head:\n  # ...\n  responses:\n    \"404\":\n      description: Not found\n      schema:\n        $ref: \"#/definitions/404\"\n"
           }
         }
       ]
@@ -4610,8 +4654,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"options\": {\n        \"description\": \"Returns allowed methods\",\n        // ...\n        \"responses\": {\n            \"429\": {\n                \"description\": \"Too many requests\",\n                \"content\": {\n                    \"application/json\": {\n                        \"schema\": {\n                            \"$ref\": \"#/definitions/429\"\n                        }\n                    }\n                }              \n            }\n        }\n    }\n}",
-            "yaml": "options:\n  description: Returns allowed methods\n  # ...\n  responses:\n    \"429\":\n      description: Too many requests\n      content:\n        application/json:\n          schema:\n            $ref: \"#/definitions/429\"\n"
+            "json": "{\n    \"options\": {\n        \"description\": \"Returns allowed methods\",\n        // ...\n        \"responses\": {\n            \"429\": {\n                \"description\": \"Too many requests\",\n                \"schema\": {\n                    \"$ref\": \"#/definitions/429\"\n                }              \n            }\n        }\n    }\n}",
+            "yaml": "options:\n  description: Returns allowed methods\n  # ...\n  responses:\n    \"429\":\n      description: Too many requests\n      schema:\n        $ref: \"#/definitions/429\"\n"
           }
         }
       ]
@@ -4630,8 +4674,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"options\": {\n        \"description\": \"Returns allowed methods\",\n        // ...\n        \"responses\": {\n           \"200\": {\n                \"description\": \"OK\",\n                \"headers\": {\n                    \"Allow\": \"GET, HEAD, PUT\"\n                }\n            },\n            \"429\": {\n                \"description\": \"Too many requests\",\n                \"content\": {\n                    \"application/json\": {\n                        \"schema\": {\n                            \"$ref\": \"#/definitions/429\"\n                        }\n                    }\n                }       \n            }\n        }\n    }\n}",
-            "yaml": "options:\n  description: Returns allowed methods\n  # ...\n  responses:\n    \"200\":\n      description: OK\n      headers:\n        Allow: GET, HEAD, PUT\n    \"429\":\n      description: Too many requests\n      content:\n        application/json:\n          schema:\n            $ref: \"#/definitions/429\"\n"
+            "json": "{\n    \"options\": {\n        \"description\": \"Returns allowed methods\",\n        // ...\n        \"responses\": {\n           \"200\": {\n                \"description\": \"OK\",\n                \"headers\": {\n                    \"Allow\": \"GET, HEAD, PUT\"\n                }\n            },\n            \"429\": {\n                \"description\": \"Too many requests\",\n                \"schema\": {\n                    \"$ref\": \"#/definitions/429\"\n                }       \n            }\n        }\n    }\n}",
+            "yaml": "options:\n  description: Returns allowed methods\n  # ...\n  responses:\n    \"200\":\n      description: OK\n      headers:\n        Allow: GET, HEAD, PUT\n    \"429\":\n      description: Too many requests\n      schema:\n        $ref: \"#/definitions/429\"\n"
           }
         }
       ]
@@ -5117,8 +5161,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {   \n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"favfood\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"pattern\": \"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\",\n                                \"maxLength\": 10\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        required:\n          - name\n        properties:\n          name:\n            type: string\n          favfood:\n            type: array\n            items:\n              type: string\n              pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\n              maxLength: 10\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {   \n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"favfood\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"pattern\": \"^[A-Za-z0-9]{3,10}$\",\n                                \"maxLength\": 10\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        required:\n          - name\n        properties:\n          name:\n            type: string\n          favfood:\n            type: array\n            items:\n              type: string\n              pattern: ^[A-Za-z0-9]{3,10}$\n              maxLength: 10\n"
           }
         },
         {
@@ -5167,8 +5211,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {   \n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"favfood\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"pattern\": \"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\",\n                                \"maxLength\": 10\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        required:\n          - name\n        properties:\n          name:\n            type: string\n          favfood:\n            type: array\n            items:\n              type: string\n              pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\n              maxLength: 10\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {   \n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"favfood\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"pattern\": \"^[A-Za-z0-9]{3,10}$\",\n                                \"maxLength\": 10\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        required:\n          - name\n        properties:\n          name:\n            type: string\n          favfood:\n            type: array\n            items:\n              type: string\n              pattern: ^[A-Za-z0-9]{3,10}$\n              maxLength: 10\n"
           }
         },
         {
@@ -5203,7 +5247,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings, no restrictions can be enforced and any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings,  any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
         }
       ]
     },
@@ -5214,8 +5258,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {   \n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"favfood\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"pattern\": \"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\",\n                                \"maxLength\": 10\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        required:\n          - name\n        properties:\n          name:\n            type: string\n          favfood:\n            type: array\n            items:\n              type: string\n              pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\n              maxLength: 10\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {   \n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"favfood\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"pattern\": \"^[A-Za-z0-9]{3,10}$\",\n                                \"maxLength\": 10\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        required:\n          - name\n        properties:\n          name:\n            type: string\n          favfood:\n            type: array\n            items:\n              type: string\n              pattern: ^[A-Za-z0-9]{3,10}$\n              maxLength: 10\n"
           }
         },
         {
@@ -5619,8 +5663,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"additionalProperties\": false,\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\",\n                            \"maxLength\": 10,\n                            \"pattern\": \"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\"\n                        }       \n                    }\n                }\n            }\n        ]\n    }\n} ",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        additionalProperties: false\n        required:\n          - name\n        properties:\n          name:\n            type: string\n            maxLength: 10\n            pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"additionalProperties\": false,\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\",\n                            \"maxLength\": 10,\n                            \"pattern\": \"^[A-Za-z0-9]{3,10}$\"\n                        }       \n                    }\n                }\n            }\n        ]\n    }\n} ",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        additionalProperties: false\n        required:\n          - name\n        properties:\n          name:\n            type: string\n            maxLength: 10\n            pattern: ^[A-Za-z0-9]{3,10}$\n"
           }
         },
         {
@@ -5669,8 +5713,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"additionalProperties\": false,\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\",\n                            \"maxLength\": 10,\n                            \"pattern\": \"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\"\n                        }       \n                    }\n                }\n            }\n        ]\n    }\n} ",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        additionalProperties: false\n        required:\n          - name\n        properties:\n          name:\n            type: string\n            maxLength: 10\n            pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"additionalProperties\": false,\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\",\n                            \"maxLength\": 10,\n                            \"pattern\": \"^[A-Za-z0-9]{3,10}$\"\n                        }       \n                    }\n                }\n            }\n        ]\n    }\n} ",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        additionalProperties: false\n        required:\n          - name\n        properties:\n          name:\n            type: string\n            maxLength: 10\n            pattern: ^[A-Za-z0-9]{3,10}$\n"
           }
         },
         {
@@ -5705,7 +5749,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings, no restrictions can be enforced and any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings,  any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
         }
       ]
     },
@@ -5716,8 +5760,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"additionalProperties\": false,\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\",\n                            \"maxLength\": 10,\n                            \"pattern\": \"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\"\n                        }       \n                    }\n                }\n            }\n        ]\n    }\n} ",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        additionalProperties: false\n        required:\n          - name\n        properties:\n          name:\n            type: string\n            maxLength: 10\n            pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"additionalProperties\": false,\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\",\n                            \"maxLength\": 10,\n                            \"pattern\": \"^[A-Za-z0-9]{3,10}$\"\n                        }       \n                    }\n                }\n            }\n        ]\n    }\n} ",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        additionalProperties: false\n        required:\n          - name\n        properties:\n          name:\n            type: string\n            maxLength: 10\n            pattern: ^[A-Za-z0-9]{3,10}$\n"
           }
         },
         {
@@ -6277,8 +6321,8 @@
         },
         {
           "code": {
-            "json": "{         \n    \"parameters\":[\n        {\n            \"name\": \"myAPIparameter\",\n            \"type\": \"string\",\n            \"in\": \"header\",\n            \"required\": true,\n            \"pattern\": \"^([a-zA-Z0-9_=]{4,})\\\\.([a-zA-Z0-9_=]{4,})\\\\.([a-zA-Z0-9_\\\\-\\\\+\\\\/=]{4,})$\",\n            \"maxLength\": 700,\n            \"allowEmptyValue\": true\n        }\n        // ...\n    ]\n}",
-            "yaml": "parameters:\n  - name: myAPIparameter\n    type: string\n    in: header\n    required: true\n    pattern: ^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})$\n    maxLength: 700\n    allowEmptyValue: true\n  # ...\n"
+            "json": "{         \n    \"parameters\":[\n        {\n            \"name\": \"myAPIparameter\",\n            \"type\": \"string\",\n            \"in\": \"header\",\n            \"required\": true,\n            \"pattern\": \"^([a-zA-Z0-9_=]{4,100})\\\\.([a-zA-Z0-9_=]{4,100})\\\\.([a-zA-Z0-9_\\\\-\\\\+\\\\/=]{4,100})$\",\n            \"maxLength\": 300,\n            \"allowEmptyValue\": true\n        }\n        // ...\n    ]\n}",
+            "yaml": "parameters:\n  - name: myAPIparameter\n    type: string\n    in: header\n    required: true\n    pattern: ^([a-zA-Z0-9_=]{4,100})\\.([a-zA-Z0-9_=]{4,100})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,100})$\n    maxLength: 300\n    allowEmptyValue: true\n  # ...\n"
           }
         }
       ]
@@ -6290,8 +6334,8 @@
         },
         {
           "code": {
-            "json": "{         \n    \"parameters\":[\n        {\n            \"name\": \"myAPIparameter\",\n            \"type\": \"string\",\n            \"in\": \"query\",\n            \"required\": true,\n            \"pattern\": \"^([a-zA-Z0-9_=]{4,})\\\\.([a-zA-Z0-9_=]{4,})\\\\.([a-zA-Z0-9_\\\\-\\\\+\\\\/=]{4,})$\",\n            \"maxLength\": 700,\n            \"allowEmptyValue\": true\n        }\n        // ...\n    ]\n}",
-            "yaml": "parameters:\n  - name: myAPIparameter\n    type: string\n    in: query\n    required: true\n    pattern: ^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})$\n    maxLength: 700\n    allowEmptyValue: true\n  # ...\n"
+            "json": "{         \n    \"parameters\":[\n        {\n            \"name\": \"myAPIparameter\",\n            \"type\": \"string\",\n            \"in\": \"query\",\n            \"required\": true,\n            \"pattern\": \"^([a-zA-Z0-9_=]{4,100})\\\\.([a-zA-Z0-9_=]{4,100})\\\\.([a-zA-Z0-9_\\\\-\\\\+\\\\/=]{4,100})$\",\n            \"maxLength\": 300,\n            \"allowEmptyValue\": true\n        }\n        // ...\n    ]\n}",
+            "yaml": "parameters:\n  - name: myAPIparameter\n    type: string\n    in: query\n    required: true\n    pattern: ^([a-zA-Z0-9_=]{4,100})\\.([a-zA-Z0-9_=]{4,100})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,100})$\n    maxLength: 300\n    allowEmptyValue: true\n  # ...\n"
           }
         }
       ]
@@ -11159,6 +11203,50 @@
       ]
     }
   },
+  "v3-response-406": {
+    "group": "datavalidation",
+    "subgroup": "responsedefinition",
+    "title": {
+      "text": "<h1>406 response should be defined for all GET, POST, PUT, PATCH, and DELETE operations</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>One or more operations in your API are missing <code>406</code> responses. Operations should have <code>406</code> or <code>default</code> response defined if they do both of the following:</p>\n                    <ul>\n                        <li>The operation defines a response that is <em>not</em> a <code>204</code> response. </li>\n                        <li>The operation constrains the MIME type of the response. </li>\n                    </ul>\n                    <p>For more details, see <a href=\"https://tools.ietf.org/html/rfc7231#section-6.5\" target=\"_blank\" rel=\"noopener\">RFC 7231</a>.</p>\n                "
+    },
+    "shortDescription": "One or more operations in your API are missing <code>406</code> responses. Operations should have <code>406</code> or <code>default</code> response defined if they do both of the following:",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"pet response\",\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/Pet\"\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: pet response\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/Pet\"\n"
+          }
+        }
+      ]
+    },
+    "exploit": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>Attackers strive to make your APIs behave in an unexpected way to learn more about your system or to cause a data breach. We highly recommend that you minimize any risks and clearly specify the data that your API operations can return for each possible response code.</p>\n                "
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p> Make sure that all operations that define a response that is not  <code>204</code> and that constrain the MIME type of the response have the <code>406</code> response defined too.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"responses\": {\n            \"200\": {\n                \"description\": \"pet response\",\n                \"content\": {\n                    \"application/json\": {\n                        \"schema\": {\n                            \"$ref\": \"#/components/schemas/Pet\"\n                        }\n                    }\n                }\n        },\n        // ...\n        \"406\": {\n            \"description\": \"Not Acceptable\",\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/responses/406\"\n                    }\n                }\n            }           \n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: pet response\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/Pet\"\n  # ...\n  \"406\":\n    description: Not Acceptable\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/responses/406\"\n"
+          }
+        }
+      ]
+    }
+  },
   "v3-response-415": {
     "group": "datavalidation",
     "subgroup": "responsedefinition",
@@ -12248,8 +12336,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewPet\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a Pet object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"maxLength\": 10,\n                \"pattern\": \"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\"\n            }       \n        }\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  description: JSON defining a Pet object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      maxLength: 10\n      pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewPet\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a Pet object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"maxLength\": 10,\n                \"pattern\": \"^[A-Za-z0-9]{3,10}$\"\n            }       \n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  description: JSON defining a Pet object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      maxLength: 10\n      pattern: ^[A-Za-z0-9]{3,10}$\n"
           }
         },
         {
@@ -12298,8 +12386,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewPet\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a Pet object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"maxLength\": 10,\n                \"pattern\": \"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\"\n            }       \n        }\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  description: JSON defining a Pet object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      maxLength: 10\n      pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewPet\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a Pet object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"maxLength\": 10,\n                \"pattern\": \"^[A-Za-z0-9]{3,10}$\"\n            }       \n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  description: JSON defining a Pet object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      maxLength: 10\n      pattern: ^[A-Za-z0-9]{3,10}$\n"
           }
         },
         {
@@ -12334,7 +12422,7 @@
     "exploit": {
       "sections": [
         {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings, no restrictions can be enforced and any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings,  any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
         }
       ]
     },
@@ -12345,8 +12433,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewPet\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a Pet object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"maxLength\": 10,\n                \"pattern\": \"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\"\n            }       \n        }\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  description: JSON defining a Pet object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      maxLength: 10\n      pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\n"
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewPet\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a Pet object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"maxLength\": 10,\n                \"pattern\": \"^[A-Za-z0-9]{3,10}$\"\n            }       \n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  description: JSON defining a Pet object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      maxLength: 10\n      pattern: ^[A-Za-z0-9]{3,10}$\n"
           }
         },
         {
@@ -13556,7 +13644,7 @@
       "text": "<h1>Key does not match the allowed pattern</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>A key in a map you have defined does not match the regex defined for the <code>components</code> object. All keys must follow the regular expression <code>^[a-zA-Z0-9\\.\\-_]+$</code>.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#componentsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>A key in a map you have defined does not match the regex defined for the <code>components</code> object. All keys must follow the regular expression <code>^[a-zA-Z0-9\\.\\-_]+$</code>.</p>\n                    <p class=\"info\">JSON and YAML both require that you escape <code>\\</code> characters. Remeber to use <code>\\\\</code> instead of <code>\\</code> in all regular expressions.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#componentsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
     "shortDescription": "A key in a map you have defined does not match the regex defined for the <code>components</code> object. All keys must follow the regular expression <code>^[a-zA-Z0-9\\.\\-_]+$</code>.",
     "example": {
@@ -16802,8 +16890,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"name\": \"someArray\",\n    \"in\": \"body\",\n    \"type\": \"array\",\n    \"items\": {\n        \"type\": \"string\",\n        \"pattern\": \"^((4\\\\d{3})|(5[1-5]\\\\d{2})|(6011))-?\\\\d{4}-?\\\\d{4}-?\\\\d{4}|3[4,7]\\\\d{13}$\",\n        \"maximum\": 8\n    }\n}",
-            "yaml": "name: someArray\nin: body\ntype: array\nitems:\n  type: string\n  pattern: ^((4\\d{3})|(5[1-5]\\d{2})|(6011))-?\\d{4}-?\\d{4}-?\\d{4}|3[4,7]\\d{13}$\n  maximum: 8\n"
+            "json": "{\n    \"name\": \"someArray\",\n    \"in\": \"body\",\n    \"type\": \"array\",\n    \"items\": {\n        \"type\": \"string\",\n        \"pattern\": \"^[A-Za-z0-9]{3,8}$\",\n        \"maximum\": 8\n    }\n}",
+            "yaml": "name: someArray\nin: body\ntype: array\nitems:\n  type: string\n  pattern: ^[A-Za-z0-9]{3,8}$\n  maximum: 8\n"
           }
         }
       ]
@@ -16815,8 +16903,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"name\": \"someArray\",\n    \"in\": \"body\",\n    \"type\": \"array\",\n    \"items\": {\n        \"type\": \"string\",\n        \"pattern\": \"^((4\\\\d{3})|(5[1-5]\\\\d{2})|(6011))-?\\\\d{4}-?\\\\d{4}-?\\\\d{4}|3[4,7]\\\\d{13}$\",\n        \"maxLength\": 8\n    }\n}",
-            "yaml": "name: someArray\nin: body\ntype: array\nitems:\n  type: string\n  pattern: ^((4\\d{3})|(5[1-5]\\d{2})|(6011))-?\\d{4}-?\\d{4}-?\\d{4}|3[4,7]\\d{13}$\n  maxLength: 8\n"
+            "json": "{\n    \"name\": \"someArray\",\n    \"in\": \"body\",\n    \"type\": \"array\",\n    \"items\": {\n        \"type\": \"string\",\n        \"pattern\": \"^^[A-Za-z0-9]{3,8}$\",\n        \"maxLength\": 8\n    }\n}",
+            "yaml": "name: someArray\nin: body\ntype: array\nitems:\n  type: string\n  pattern: ^^[A-Za-z0-9]{3,8}$\n  maxLength: 8\n"
           }
         }
       ]
