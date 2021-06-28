@@ -5,6 +5,7 @@ import { parserOptions } from "./parser-options";
 import { replace } from "@xliic/openapi-ast-node";
 import { InsertReplaceRenameFix, FixType, FixContext } from "./types";
 import parameterSources from "./audit/quickfix-sources";
+import { topTags } from "./commands";
 
 function getBasicIndentation(document: vscode.TextDocument, root: Node): [number, string] {
   let target: Node;
@@ -154,17 +155,31 @@ export function insertYamlNode(context: FixContext, value: string): [string, vsc
   const document = context.document;
   const root = context.root;
   const target = context.target;
-  let lastChildTarget: Node;
+  let insertAtTarget: Node;
   const children = target.getChildren();
+  let position: vscode.Position;
+  let start: number, end: number;
+
+  if (target.getDepth() === 0) {
+    insertAtTarget = findTopLevelInsertionFollower(root, <InsertReplaceRenameFix>context.fix);
+    if (insertAtTarget) {
+      [start, end] = insertAtTarget.getRange();
+      position = document.positionAt(start);     
+    }
+  } 
 
   // Insert pointer is either {} or [], nothing else
-  if (children && children.length > 0) {
-    lastChildTarget = children[children.length - 1];
+  if (!insertAtTarget && children && children.length > 0) {
+    insertAtTarget = children[children.length - 1];
+    [start, end] = insertAtTarget.getRange();
+    position = document.positionAt(end);
+    if (position.line + 1 === document.lineCount) {
+      position = document.positionAt(start);
+    } else {
+      position = new vscode.Position(position.line + 1, 0);
+    }
   }
-
-  const [start, end] = lastChildTarget.getRange();
-  let position = document.positionAt(end);
-  position = new vscode.Position(position.line + 1, 0);
+  
   const index = getCurrentIdentation(document, start);
   const [indent, char] = getBasicIndentation(document, root);
 
@@ -266,6 +281,23 @@ export function getFixAsYamlString(context: FixContext): string {
   }
   // 2 spaces is always the default ident for the safeDump
   return text.replace(new RegExp("  ", "g"), "\t");
+}
+
+function findTopLevelInsertionFollower(root: Node, fix: InsertReplaceRenameFix): Node {
+  let result: Node;
+  const keys = Object.keys(fix.fix);
+  if (keys && (keys.length === 1)) {
+    const n = topTags.indexOf(keys[0]);
+    if (n >= 0) {
+      for (let i = n + 1; i < topTags.length; i++) {
+        result = root.find(`/${topTags[i]}`);
+        if (result) {
+          return result;
+        }
+      }  
+    }
+  }
+  return result;
 }
 
 function handleParameters(context: FixContext, text: string): string {
