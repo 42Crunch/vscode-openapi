@@ -55,7 +55,7 @@ const commands = {
 };
 
 // preferred order of the tags, mixed v2 and v3 tags
-const topTags: string[] = [
+export const topTags: string[] = [
   "swagger",
   "openapi",
   "info",
