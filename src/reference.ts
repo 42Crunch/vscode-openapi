@@ -31,7 +31,7 @@ function refToUri(ref: string, currentDocumentUri: vscode.Uri): vscode.Uri {
   }
 }
 
-async function refToLocation(
+export async function refToLocation(
   ref: string,
   currentDocumentUri: vscode.Uri,
   cache: Cache,

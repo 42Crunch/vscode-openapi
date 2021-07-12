@@ -172,6 +172,7 @@ export interface FixContext {
   bulk: boolean;
   snippet?: boolean;
   snippetParameters?: FixSnippetParameters;
+  skipConfirmation?: boolean;
   auditContext: AuditContext;
   version: OpenApiVersion;
   bundle: BundleResult;

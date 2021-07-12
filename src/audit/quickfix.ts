@@ -5,6 +5,7 @@
 
 import * as vscode from "vscode";
 import * as quickfixes from "./quickfixes.json";
+import { Node } from "@xliic/openapi-ast-node";
 import {
   AuditContext,
   AuditDiagnostic,
@@ -38,6 +39,7 @@ import {
 import { Cache } from "../cache";
 import parameterSources from "./quickfix-sources";
 import { getLocationByPointer } from "./util";
+import { generateSchemaFixCommand, createGenerateSchemaAction } from './quickfix-schema';
 
 const registeredQuickFixes: { [key: string]: Fix } = {};
 
@@ -61,7 +63,7 @@ function fixRegexReplace(context: FixContext) {
   edit.replace(document.uri, range, value);
 }
 
-function fixInsert(context: FixContext) {
+export function fixInsert(context: FixContext) {
   const document = context.document;
   let value: string, position: vscode.Position;
   context.snippet = !context.bulk;
@@ -77,13 +79,13 @@ function fixInsert(context: FixContext) {
     };
   } else {
     const edit = getWorkspaceEdit(context);
-    if (context.bulk) {
+    if (context.skipConfirmation) {
+      edit.insert(document.uri, position, value);
+    } else {
       edit.insert(document.uri, position, value, {
         needsConfirmation: true,
         label: context.fix.title,
       });
-    } else {
-      edit.insert(document.uri, position, value);
     }
   }
 }
@@ -200,7 +202,7 @@ async function quickFixCommand(
       pointer: pointer,
       root: root,
       target: target,
-      document: document,
+      document: document
     };
 
     switch (fix.type) {
@@ -243,6 +245,22 @@ async function quickFixCommand(
   }
 
   // update diagnostics
+  updateReport(editor, issues, auditContext, cache);
+}
+
+export function updateReport(
+  editor: vscode.TextEditor,
+  issues: Issue[],
+  auditContext: AuditContext,
+  cache: Cache): void {
+
+  const document = editor.document;
+  const uri = document.uri.toString();
+  const audit = auditContext.auditsByDocument[uri];
+  if (!audit) {
+    return;
+  }
+ 
   // create temp hash set to have constant time complexity while searching for fixed issues
   const fixedIssueIds: Set<string> = new Set();
   const fixedIssueIdAndPointers: Set<string> = new Set();
@@ -282,6 +300,11 @@ export function registerQuickfixes(
     async (editor, edit, issues, fix) => quickFixCommand(editor, issues, fix, auditContext, cache)
   );
 
+  vscode.commands.registerTextEditorCommand(
+    "openapi.generateSchemaQuickFix",
+    async (editor, edit, issue, fix, examples, inline) => generateSchemaFixCommand(editor, issue, fix, examples, inline, auditContext, cache)
+  );
+  
   vscode.languages.registerCodeActionsProvider("yaml", new AuditCodeActions(auditContext, cache), {
     providedCodeActionKinds: AuditCodeActions.providedCodeActionKinds,
   });
@@ -428,6 +451,7 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
     );
     const bundle = await this.cache.getDocumentBundle(auditDocument);
     const version = this.cache.getDocumentVersion(auditDocument);
+    const root = this.cache.getDocumentAst(document);
 
     const titles: string[] = [];
     const problems: string[] = [];
@@ -456,6 +480,9 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
       actions.push(...createSingleAction(diagnostic, issue, fix));
       actions.push(
         ...createBulkAction(document, version, bundle, diagnostic, issue[0], issues, fix)
+      );
+      actions.push(
+        ...createGenerateSchemaAction(document, version, root, diagnostic, issue[0], fix)
       );
 
       // Combined Fix

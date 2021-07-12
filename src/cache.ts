@@ -277,6 +277,10 @@ export class Cache implements vscode.Disposable {
     return this._didActiveDocumentChange.event;
   }
 
+  getExternalRefDocumentProvider(): ExternalRefDocumentProvider {
+    return this.externalRefProvider;
+  }
+
   getDocumentVersion(document: vscode.TextDocument): OpenApiVersion {
     return document ? this.parsedDocuments.get(document).openApiVersion : OpenApiVersion.Unknown;
   }
