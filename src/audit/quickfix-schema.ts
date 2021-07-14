@@ -11,13 +11,13 @@ import {
   RegexReplaceFix,
   Fix,
   FixType,
-  OpenApiVersion
+  OpenApiVersion,
 } from "../types";
 import { simpleClone } from "../util";
 import { Cache } from "../cache";
-import { generateSchema, generateOneOfSchema } from './schema';
-import { updateReport, fixInsert } from './quickfix';
-import { refToLocation } from '../reference';
+import { generateSchema, generateOneOfSchema } from "./schema";
+import { updateReport, fixInsert } from "./quickfix";
+import { refToLocation } from "../reference";
 
 export async function generateSchemaFixCommand(
   editor: vscode.TextEditor,
@@ -44,14 +44,14 @@ export async function generateSchemaFixCommand(
   }
   if (inline) {
     await insertSchemaInline(editor, issue, fix, genSchema, auditContext, cache);
-  }
-  else {
+  } else {
     const root = cache.getDocumentAst(document);
     const schemaNames = getSchemaNames(root, version);
     const schemaName = await vscode.window.showInputBox({
       value: getUniqueSchemaName(schemaNames),
-      prompt: 'Enter new schema name.',
-      validateInput: (value) => !schemaNames.has(value) ? null : "Please enter unique schema name",
+      prompt: "Enter new schema name.",
+      validateInput: (value) =>
+        !schemaNames.has(value) ? null : "Please enter unique schema name",
     });
     if (schemaName) {
       await insertSchemaByRef(schemaName, editor, issue, fix, genSchema, auditContext, cache);
@@ -68,7 +68,6 @@ export function createGenerateSchemaAction(
   issue: Issue,
   fix: Fix
 ): vscode.CodeAction[] {
-
   if (fix.type !== FixType.Insert) {
     return [];
   }
@@ -77,14 +76,13 @@ export function createGenerateSchemaAction(
   if (version === OpenApiVersion.V2) {
     genFrom = getSchemaV2Examples(issue.pointer, fix.problem, root);
     genFrom = genFrom || getSchemaV2Example(issue.pointer, fix.problem, root);
-  }
-  else {
+  } else {
     genFrom = getSchemaV3Examples(issue.pointer, fix.problem, root);
     genFrom = genFrom || getSchemaV3Example(issue.pointer, fix.problem, root);
   }
 
   if (genFrom) {
-    const title = 'Generate inline schema from examples';
+    const title = "Generate inline schema from examples";
     const action = new vscode.CodeAction(title, vscode.CodeActionKind.QuickFix);
     action.command = {
       arguments: [issue, fix, genFrom, true],
@@ -94,8 +92,8 @@ export function createGenerateSchemaAction(
     action.diagnostics = [diagnostic];
     action.isPreferred = false;
 
-    const place = (version === OpenApiVersion.V2) ? 'definitions' : 'components';
-    const title2 = 'Generate schema from examples and place it in ' + place;
+    const place = version === OpenApiVersion.V2 ? "definitions" : "components";
+    const title2 = "Generate schema from examples and place it in " + place;
     const action2 = new vscode.CodeAction(title2, vscode.CodeActionKind.QuickFix);
     action2.command = {
       arguments: [issue, fix, genFrom, false],
@@ -105,7 +103,7 @@ export function createGenerateSchemaAction(
     action2.diagnostics = [diagnostic];
     action2.isPreferred = false;
 
-    return [action, action2];  
+    return [action, action2];
   }
   return [];
 }
@@ -116,8 +114,8 @@ async function insertSchemaInline(
   fix: InsertReplaceRenameFix | RegexReplaceFix | DeleteFix,
   genSchema: any,
   auditContext: AuditContext,
-  cache: Cache) {
-
+  cache: Cache
+) {
   const document = editor.document;
   const uri = document.uri.toString();
   const audit = auditContext.auditsByDocument[uri];
@@ -133,11 +131,11 @@ async function insertSchemaInline(
   const pointer = fix.pointer ? `${issue.pointer}${fix.pointer}` : issue.pointer;
   const root = cache.getDocumentAst(document);
   const target = root.find(pointer);
-  
+
   const newFix = <InsertReplaceRenameFix>simpleClone(fix);
-  newFix.fix = (target.getKey() === 'schema') ? genSchema : {schema: genSchema};
+  newFix.fix = target.getKey() === "schema" ? genSchema : { schema: genSchema };
   delete newFix.parameters;
-    
+
   const context: FixContext = {
     editor: editor,
     edit: null,
@@ -151,7 +149,7 @@ async function insertSchemaInline(
     root: root,
     target: target,
     document: document,
-    skipConfirmation: true
+    skipConfirmation: true,
   };
   fixInsert(context);
   const params = context.snippetParameters;
@@ -167,8 +165,8 @@ async function insertSchemaByRef(
   fix: InsertReplaceRenameFix | RegexReplaceFix | DeleteFix,
   genSchema: any,
   auditContext: AuditContext,
-  cache: Cache) {
-
+  cache: Cache
+) {
   const document = editor.document;
   const uri = document.uri.toString();
   const audit = auditContext.auditsByDocument[uri];
@@ -181,7 +179,7 @@ async function insertSchemaByRef(
   const bundle = await cache.getDocumentBundle(auditDocument);
   const version = cache.getDocumentVersion(auditDocument);
 
-  const edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();;
+  const edit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
 
   const schemaFix = <InsertReplaceRenameFix>simpleClone(fix);
   schemaFix.fix = {};
@@ -193,36 +191,34 @@ async function insertSchemaByRef(
   const root = cache.getDocumentAst(document);
 
   if (version === OpenApiVersion.V2) {
-    pointer = '/definitions';
+    pointer = "/definitions";
     target = root.find(pointer);
     if (!target) {
-      pointer = '';
+      pointer = "";
       target = root;
       schemaFix.fix = {
-        "definitions": {}
+        definitions: {},
       };
       schemaFix.fix["definitions"][schemaName] = genSchema;
     }
-  }
-  else {
-    pointer = '/components/schemas';
+  } else {
+    pointer = "/components/schemas";
     target = root.find(pointer);
     if (!target) {
-      pointer = '/components';
+      pointer = "/components";
       target = root.find(pointer);
       if (target) {
         schemaFix.fix = {
-          "schemas": {}
+          schemas: {},
         };
         schemaFix.fix["schemas"][schemaName] = genSchema;
-      }
-      else {
-        pointer = '';
+      } else {
+        pointer = "";
         target = root;
         schemaFix.fix = {
-          "components": {
-            "schemas": {}
-          }
+          components: {
+            schemas: {},
+          },
         };
         schemaFix.fix["components"]["schemas"][schemaName] = genSchema;
       }
@@ -242,7 +238,7 @@ async function insertSchemaByRef(
     root: root,
     target: target,
     document: document,
-    skipConfirmation: true
+    skipConfirmation: true,
   };
   fixInsert(context);
 
@@ -251,27 +247,24 @@ async function insertSchemaByRef(
 
   const schemaRefFix = <InsertReplaceRenameFix>simpleClone(fix);
   if (version === OpenApiVersion.V2) {
-    if (target2.getKey() === 'schema') {
+    if (target2.getKey() === "schema") {
       schemaRefFix.fix = {
-        '$ref': '#/definitions/' + schemaName
+        $ref: "#/definitions/" + schemaName,
       };
+    } else {
+      schemaRefFix.fix["schema"]["$ref"] = "#/definitions/" + schemaName;
     }
-    else {
-      schemaRefFix.fix['schema']['$ref'] = '#/definitions/' + schemaName;
-    }
-  }
-  else {
-    if (target2.getKey() === 'schema') {
+  } else {
+    if (target2.getKey() === "schema") {
       schemaRefFix.fix = {
-        '$ref': '#/components/schemas/' + schemaName
+        $ref: "#/components/schemas/" + schemaName,
       };
-    }
-    else {
-      schemaRefFix.fix['schema']['$ref'] = '#/components/schemas/' + schemaName;
+    } else {
+      schemaRefFix.fix["schema"]["$ref"] = "#/components/schemas/" + schemaName;
     }
   }
   delete schemaRefFix.parameters;
-  
+
   const context2: FixContext = {
     editor: editor,
     edit: edit,
@@ -285,7 +278,7 @@ async function insertSchemaByRef(
     root: root,
     target: target2,
     document: document,
-    skipConfirmation: true
+    skipConfirmation: true,
   };
   fixInsert(context2);
 
@@ -294,53 +287,73 @@ async function insertSchemaByRef(
   }
 }
 
-async function astToJsonSchema(document: vscode.TextDocument, genFrom: Node, version: OpenApiVersion, cache: Cache): Promise<any> {
+async function astToJsonSchema(
+  document: vscode.TextDocument,
+  genFrom: Node,
+  version: OpenApiVersion,
+  cache: Cache
+): Promise<any> {
   try {
     if (version === OpenApiVersion.V2) {
-      return generateSchema(await getJsonFromAST(genFrom, document, cache));  
-    }
-    else {
-      if (genFrom.getKey() === 'example') {
-        return generateSchema(await getJsonFromAST(genFrom, document, cache));    
-      }
-      else {
+      return generateSchema(await getJsonFromAST(genFrom, document, cache));
+    } else {
+      if (genFrom.getKey() === "example") {
+        return generateSchema(await getJsonFromAST(genFrom, document, cache));
+      } else {
         const values = [];
         for (const exampleChild of genFrom.getChildren()) {
           for (const contentChild of exampleChild.getChildren()) {
-            if (contentChild.getKey() === 'value') {
-              values.push(await getJsonFromAST(contentChild, document, cache));  
+            if (contentChild.getKey() === "value") {
+              values.push(await getJsonFromAST(contentChild, document, cache));
             }
           }
         }
         return generateOneOfSchema(values);
       }
     }
-  } 
-  catch (err) {}
+  } catch (err) {}
   return null;
 }
 
-async function getJsonFromAST(target: Node, document: vscode.TextDocument, cache: Cache): Promise<any> {
-
+async function getJsonFromAST(
+  target: Node,
+  document: vscode.TextDocument,
+  cache: Cache
+): Promise<any> {
   let text: string;
-  const children  = target.getChildren();
-  if ((children.length === 1) && (children[0].getKey() === '$ref')) {
+  const children = target.getChildren();
+  if (children.length === 1 && children[0].getKey() === "$ref") {
     const ref = children[0].getValue();
-    const location = await refToLocation(ref, document.uri, cache, cache.getExternalRefDocumentProvider());
+    const location = await refToLocation(
+      ref,
+      document.uri,
+      cache,
+      cache.getExternalRefDocumentProvider()
+    );
     if (location) {
       const refDocument = await vscode.workspace.openTextDocument(location.uri);
       text = refDocument.getText(location.range);
     }
-  }
-  else {
+  } else {
     const [start, end] = target.getValueRange();
-    text = document.getText(new vscode.Range(document.positionAt(start), document.positionAt(end)));
-  } 
-  if (document.languageId === 'json') {
-    return JSON.parse(text);
+    let position = document.positionAt(start);
+    if (document.languageId === "yaml") {
+      const position0 = new vscode.Position(position.line, 0);
+      const text0 = document.getText(new vscode.Range(position0, position)).trim();
+      if (text0 === '') {
+        position = position0;
+      }
+    }
+    text = document.getText(new vscode.Range(position, document.positionAt(end)));
   }
-  else {
-    return JSON.parse(yaml.load(text));
+  if (document.languageId === "json") {
+    return JSON.parse(text);
+  } else {
+    const result = yaml.load(text);
+    if (typeof result === "string") {
+      return JSON.parse(result);
+    }
+    return result;
   }
 }
 
@@ -354,38 +367,38 @@ function hasId(id: string, problem: string[]): boolean {
 }
 
 function getUniqueSchemaName(schemaNames: Set<string>): string {
-  const result = 'GeneratedSchemaName';
-  for (let index = 1 ; index < 1000 ; index++) {
+  const result = "GeneratedSchemaName";
+  for (let index = 1; index < 1000; index++) {
     const newName = result + index;
     if (!schemaNames.has(newName)) {
       return newName;
     }
   }
-  return '';
+  return "";
 }
 
 function getSchemaNames(root: Node, version: OpenApiVersion): Set<string> {
   const result: Set<string> = new Set();
-  const schemas = (version === OpenApiVersion.V2) ? root.find('/definitions') : root.find('/components/schemas');
-  if (schemas){
+  const schemas =
+    version === OpenApiVersion.V2 ? root.find("/definitions") : root.find("/components/schemas");
+  if (schemas) {
     for (const schema of schemas.getChildren()) {
       result.add(schema.getKey());
-    }  
+    }
   }
   return result;
 }
 
 function getSchemaV2Examples(pointer: string, problem: string[], root: Node): Node {
-  if (hasId('response-schema-undefined', problem)) {
+  if (hasId("response-schema-undefined", problem)) {
     const target = root.find(pointer);
     if (target && target.isObject()) {
       let schema: Node = null;
       let examples: Node = null;
       for (const child of target.getChildren()) {
-        if (child.getKey() === 'schema') {
+        if (child.getKey() === "schema") {
           schema = child;
-        }
-        else if (child.getKey() === 'examples') {
+        } else if (child.getKey() === "examples") {
           examples = child;
         }
       }
@@ -393,7 +406,11 @@ function getSchemaV2Examples(pointer: string, problem: string[], root: Node): No
         const children = examples.getChildren();
         if (children.length === 1) {
           const child = children[0];
-          if ((child.getKey() === 'application/json') && child.isObject() && (child.getChildren().length > 0)) {
+          if (
+            child.getKey() === "application/json" &&
+            child.isObject() &&
+            child.getChildren().length > 0
+          ) {
             return child;
           }
         }
@@ -404,13 +421,13 @@ function getSchemaV2Examples(pointer: string, problem: string[], root: Node): No
 }
 
 function getSchemaV2Example(pointer: string, problem: string[], root: Node): Node {
-  if (hasId('schema-notype', problem)) {
+  if (hasId("schema-notype", problem)) {
     const target = root.find(pointer);
-    if (target && target.isObject() && (target.getKey() === 'schema')) {
+    if (target && target.isObject() && target.getKey() === "schema") {
       const children = target.getChildren();
       if (children.length === 1) {
         const child = children[0];
-        if (child.getKey() === 'example') {
+        if (child.getKey() === "example") {
           return child;
         }
       }
@@ -420,16 +437,15 @@ function getSchemaV2Example(pointer: string, problem: string[], root: Node): Nod
 }
 
 function getSchemaV3Examples(pointer: string, problem: string[], root: Node): Node {
-  if (hasId('v3-mediatype-schema-undefined', problem)) {
+  if (hasId("v3-mediatype-schema-undefined", problem)) {
     const target = root.find(pointer);
-    if (target && target.isObject() && (target.getKey() === 'application/json')) {
+    if (target && target.isObject() && target.getKey() === "application/json") {
       let schema: Node = null;
       let examples: Node = null;
       for (const child of target.getChildren()) {
-        if (child.getKey() === 'schema') {
+        if (child.getKey() === "schema") {
           schema = child;
-        }
-        else if (child.getKey() === 'examples') {
+        } else if (child.getKey() === "examples") {
           examples = child;
         }
       }
@@ -438,7 +454,7 @@ function getSchemaV3Examples(pointer: string, problem: string[], root: Node): No
         if (children.length > 0) {
           for (const exampleChild of children) {
             for (const contentChild of exampleChild.getChildren()) {
-              if (contentChild.getKey() === 'value') {
+              if (contentChild.getKey() === "value") {
                 return examples;
               }
             }
@@ -451,13 +467,13 @@ function getSchemaV3Examples(pointer: string, problem: string[], root: Node): No
 }
 
 function getSchemaV3Example(pointer: string, problem: string[], root: Node): Node {
-  if (hasId('v3-schema-notype', problem)) {
+  if (hasId("v3-schema-notype", problem)) {
     const target = root.find(pointer);
-    if (target && target.isObject() && (target.getKey() === 'schema')) {
+    if (target && target.isObject() && target.getKey() === "schema") {
       const children = target.getChildren();
       if (children.length === 1) {
         const child = children[0];
-        if (child.getKey() === 'example') {
+        if (child.getKey() === "example") {
           return child;
         }
       }
