@@ -39,7 +39,7 @@ import {
 import { Cache } from "../cache";
 import parameterSources from "./quickfix-sources";
 import { getLocationByPointer } from "./util";
-import { generateSchemaFixCommand, createGenerateSchemaAction } from './quickfix-schema';
+import { generateSchemaFixCommand, createGenerateSchemaAction } from "./quickfix-schema";
 
 const registeredQuickFixes: { [key: string]: Fix } = {};
 
@@ -202,7 +202,7 @@ async function quickFixCommand(
       pointer: pointer,
       root: root,
       target: target,
-      document: document
+      document: document,
     };
 
     switch (fix.type) {
@@ -252,15 +252,15 @@ export function updateReport(
   editor: vscode.TextEditor,
   issues: Issue[],
   auditContext: AuditContext,
-  cache: Cache): void {
-
+  cache: Cache
+): void {
   const document = editor.document;
   const uri = document.uri.toString();
   const audit = auditContext.auditsByDocument[uri];
   if (!audit) {
     return;
   }
- 
+
   // create temp hash set to have constant time complexity while searching for fixed issues
   const fixedIssueIds: Set<string> = new Set();
   const fixedIssueIdAndPointers: Set<string> = new Set();
@@ -302,9 +302,10 @@ export function registerQuickfixes(
 
   vscode.commands.registerTextEditorCommand(
     "openapi.generateSchemaQuickFix",
-    async (editor, edit, issue, fix, examples, inline) => generateSchemaFixCommand(editor, issue, fix, examples, inline, auditContext, cache)
+    async (editor, edit, issue, fix, examples, inline) =>
+      generateSchemaFixCommand(editor, issue, fix, examples, inline, auditContext, cache)
   );
-  
+
   vscode.languages.registerCodeActionsProvider("yaml", new AuditCodeActions(auditContext, cache), {
     providedCodeActionKinds: AuditCodeActions.providedCodeActionKinds,
   });

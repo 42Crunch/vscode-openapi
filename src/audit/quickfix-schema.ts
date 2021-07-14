@@ -340,7 +340,7 @@ async function getJsonFromAST(
     if (document.languageId === "yaml") {
       const position0 = new vscode.Position(position.line, 0);
       const text0 = document.getText(new vscode.Range(position0, position)).trim();
-      if (text0 === '') {
+      if (text0 === "") {
         position = position0;
       }
     }
