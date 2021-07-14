@@ -658,6 +658,25 @@
     },
     {
       "problem": [
+        "v3-mediatype-schema-undefined"
+      ],
+      "title": "Create response schema",
+      "type": "insert",
+      "fix": {
+        "schema": {
+          "$ref": "#/components/schemas/"
+        }
+      },
+      "parameters": [
+        {
+          "name": "schema",
+          "path": "/schema/$ref",
+          "source": "schemaRefByResponseCode"
+        }
+      ]
+    },
+    {
+      "problem": [
         "v3-response-schema-undefined"
       ],
       "title": "Create response schema",
