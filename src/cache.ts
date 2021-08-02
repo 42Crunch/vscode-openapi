@@ -8,9 +8,10 @@ import { Node } from "@xliic/openapi-ast-node";
 import { ExternalRefDocumentProvider } from "./external-refs";
 import { ParserOptions } from "./parser-options";
 import { BundleResult, BundlingError, OpenApiVersion } from "./types";
-import { parseToAst, parseToObject } from "./parsers";
+import { parseToAst } from "./parsers";
 import { configuration } from "./configuration";
 import { bundle } from "./bundler";
+import { parse } from '@xliic/preserving-json-yaml-parser';
 
 interface ParsedDocument {
   documentVersion: number;
@@ -130,7 +131,7 @@ class ParsedDocumentCache implements vscode.Disposable {
     const lastGoodAstRoot = errors ? previous?.lastGoodAstRoot : astRoot;
 
     // parse if no errors
-    const parsed = !errors ? parseToObject(document, this.parserOptions) : undefined;
+    const parsed = !errors ? parse(document.getText(), astRoot) : undefined;
 
     return {
       openApiVersion,
