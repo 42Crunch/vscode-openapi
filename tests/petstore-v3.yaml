@@ -12,7 +12,7 @@ paths:
       summary: List all pets
       operationId: listPets
       tags:
-        - pets
+        - &anchor3 pets
       parameters:
         - name: limit
           in: query
@@ -24,7 +24,7 @@ paths:
       responses:
         '200':
           description: A paged array of pets
-          headers:
+          headers: &anchor5
             x-next:
               description: A link to the next page of responses
               schema:
@@ -38,27 +38,28 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: &anchor4 "#/components/schemas/Error"
     post:
       summary: Create a pet
       operationId: createPets
       tags:
-        - pets
+        - *anchor3
       responses:
         '201':
           description: Null response
+          headers: *anchor5
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: *anchor4
   /pets/{petId}:
     get:
       summary: Info for a specific pet
       operationId: showPetById
       tags:
-        - pets
+        - *anchor3
       parameters:
         - name: petId
           in: path
@@ -68,7 +69,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Expected response to a valid request
+          description: Expected response to a valid requestt
           content:
             application/json:
               schema:
@@ -78,22 +79,26 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: *anchor4
 components:
   schemas:
-    Pet:
+    Pet: &anchor1
       type: object
       required:
         - id
         - name
       properties:
-        id:
+        id: &anchor2
           type: integer
           format: int64
+          maximum: 9007199254740991
+          minimum: 1.000099
         name:
           type: string
         tag:
           type: string
+    A:
+      <<: *anchor1
     Pets:
       type: array
       items:
@@ -105,7 +110,8 @@ components:
         - message
       properties:
         code:
-          type: integer
-          format: int32
+          <<: *anchor2
+          maximum: 9007_1992_5474_0991
+          minimum: 6.003e+23
         message:
           type: string

@@ -17,6 +17,7 @@ import { AuditContext, Audit, Grades, Issue, ReportedIssue, IssuesByDocument } f
 
 import { Cache } from "../cache";
 import { getLocationByPointer } from "./util";
+import { stringify } from '@xliic/preserving-json-yaml-parser';
 
 export function registerSecurityAudit(
   context: vscode.ExtensionContext,
@@ -186,7 +187,7 @@ async function performAudit(
 
     const [grades, issues, documents, badIssues] = await auditDocument(
       textEditor.document,
-      JSON.stringify(bundle.value),
+      stringify(bundle.value),
       cache,
       bundle.mapping,
       apiToken,
