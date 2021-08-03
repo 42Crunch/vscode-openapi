@@ -17,8 +17,8 @@ async function delay(ms: number) {
 
 export async function requestToken(email: string) {
   const response = await got(TOKEN_URL, {
-    body: { email },
-    form: true,
+    method: "POST",
+    form: { email },
     headers: {
       Accept: "application/json",
     },
@@ -35,6 +35,7 @@ async function submitAudit(text: string, apiToken: string) {
   });
 
   const response = await got(ASSESS_URL, {
+    method: "POST",
     body: form,
     headers: {
       Accept: "application/json",
@@ -47,6 +48,7 @@ async function submitAudit(text: string, apiToken: string) {
 
 async function retryAudit(token: string, apiToken: string) {
   const response = await got(`ASSESS_URL?token=${token}`, {
+    method: "POST",
     headers: {
       Accept: "application/json",
       "X-API-TOKEN": apiToken,
