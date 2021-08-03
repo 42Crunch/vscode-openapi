@@ -13,11 +13,11 @@ import {
   FixType,
   OpenApiVersion,
 } from "../types";
-import { simpleClone } from "../util";
 import { Cache } from "../cache";
 import { generateSchema, generateOneOfSchema } from "./schema";
 import { updateReport, fixInsert } from "./quickfix";
 import { refToLocation } from "../reference";
+import { simpleClone } from '@xliic/preserving-json-yaml-parser';
 
 export async function generateSchemaFixCommand(
   editor: vscode.TextEditor,

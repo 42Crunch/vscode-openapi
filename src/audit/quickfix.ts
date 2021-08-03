@@ -34,12 +34,12 @@ import {
   renameKeyNode,
   replaceJsonNode,
   replaceYamlNode,
-  simpleClone,
 } from "../util";
 import { Cache } from "../cache";
 import parameterSources from "./quickfix-sources";
 import { getLocationByPointer } from "./util";
 import { generateSchemaFixCommand, createGenerateSchemaAction } from "./quickfix-schema";
+import { simpleClone } from '@xliic/preserving-json-yaml-parser';
 
 const registeredQuickFixes: { [key: string]: Fix } = {};
 

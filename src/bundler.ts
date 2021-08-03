@@ -17,8 +17,8 @@ import {
   BundlingError,
   DocumentToObjectParser,
 } from "./types";
-import { simpleClone } from "./util";
 import { toInternalUri, requiresApproval, ExternalRefDocumentProvider } from "./external-refs";
+import { simpleClone } from '@xliic/preserving-json-yaml-parser';
 
 interface BundlerState {
   version: OpenApiVersion;
