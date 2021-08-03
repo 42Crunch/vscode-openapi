@@ -164,9 +164,9 @@ export function insertYamlNode(context: FixContext, value: string): [string, vsc
     insertAtTarget = findTopLevelInsertionFollower(root, <InsertReplaceRenameFix>context.fix);
     if (insertAtTarget) {
       [start, end] = insertAtTarget.getRange();
-      position = document.positionAt(start);     
+      position = document.positionAt(start);
     }
-  } 
+  }
 
   // Insert pointer is either {} or [], nothing else
   if (!insertAtTarget && children && children.length > 0) {
@@ -179,7 +179,7 @@ export function insertYamlNode(context: FixContext, value: string): [string, vsc
       position = new vscode.Position(position.line + 1, 0);
     }
   }
-  
+
   const index = getCurrentIdentation(document, start);
   const [indent, char] = getBasicIndentation(document, root);
 
@@ -286,7 +286,7 @@ export function getFixAsYamlString(context: FixContext): string {
 function findTopLevelInsertionFollower(root: Node, fix: InsertReplaceRenameFix): Node {
   let result: Node;
   const keys = Object.keys(fix.fix);
-  if (keys && (keys.length === 1)) {
+  if (keys && keys.length === 1) {
     const n = topTags.indexOf(keys[0]);
     if (n >= 0) {
       for (let i = n + 1; i < topTags.length; i++) {
@@ -294,7 +294,7 @@ function findTopLevelInsertionFollower(root: Node, fix: InsertReplaceRenameFix):
         if (result) {
           return result;
         }
-      }  
+      }
     }
   }
   return result;
@@ -386,35 +386,4 @@ export function safeParse(text: string, languageId: string): Node {
     throw new Error("Can't parse OpenAPI file");
   }
   return root;
-}
-
-function cloneArray(a: any, fn: any): any {
-  const keys = Object.keys(a);
-  const a2 = new Array(keys.length);
-  for (let i = 0; i < keys.length; i++) {
-    const k = keys[i];
-    const cur = a[k];
-    if (typeof cur !== "object" || cur === null) {
-      a2[k] = cur;
-    } else {
-      a2[k] = fn(cur);
-    }
-  }
-  return a2;
-}
-
-// for cloning simple objects only (parsed json)
-export function simpleClone<T>(orig: T): T {
-  const o = <any>orig;
-  if (Array.isArray(o)) return cloneArray(o, simpleClone);
-  const o2 = {};
-  for (const k in o) {
-    const cur = o[k];
-    if (typeof cur !== "object" || cur === null) {
-      o2[k] = cur;
-    } else {
-      o2[k] = simpleClone(cur);
-    }
-  }
-  return o2 as T;
 }
