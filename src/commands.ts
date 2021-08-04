@@ -5,7 +5,7 @@
 
 import * as vscode from "vscode";
 import { outlines } from "./outline";
-import * as snippets from "./snippets.json";
+import * as snippets from "./generated/snippets.json";
 import { JsonNode, Node, YamlNode } from "@xliic/openapi-ast-node";
 import { Cache } from "./cache";
 

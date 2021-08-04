@@ -4,8 +4,7 @@
 */
 
 import * as vscode from "vscode";
-import * as quickfixes from "./quickfixes.json";
-import { Node } from "@xliic/openapi-ast-node";
+import * as quickfixes from "../generated/quickfixes.json";
 import {
   AuditContext,
   AuditDiagnostic,
@@ -39,7 +38,7 @@ import { Cache } from "../cache";
 import parameterSources from "./quickfix-sources";
 import { getLocationByPointer } from "./util";
 import { generateSchemaFixCommand, createGenerateSchemaAction } from "./quickfix-schema";
-import { simpleClone } from '@xliic/preserving-json-yaml-parser';
+import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 
 const registeredQuickFixes: { [key: string]: Fix } = {};
 

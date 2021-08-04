@@ -10,5 +10,5 @@ for(const name of snippets) {
   result[name] = text.substring(0, text.length - 1); // strip \n at the end
 }
 
-console.log(`Writing ${snippets.length} snippets to src/snippets.json`);
-fs.writeFileSync('src/snippets.json', JSON.stringify(result, null, 2));
+console.log(`Writing ${snippets.length} snippets to src/generated/snippets.json`);
+fs.writeFileSync('src/generated/snippets.json', JSON.stringify(result, null, 2));
