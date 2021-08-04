@@ -3,6 +3,7 @@ node_modules
 .vscode-test
 .DS_Store
 webview/generated
+src/generated/*.json
 src/.log/
 .cache/
 /.idea/

@@ -42,7 +42,7 @@
   "scripts": {
     "vscode:prepublish": "npm run build-quickfixes && npm run build-whatsnew && npm run build-preview-redoc && npm run build-preview-swaggerui && npm run build-snippets && npm run compile",
     "build-snippets": "scripts/build-snippets.js",
-    "build-quickfixes": "js-yaml quickfixes/quickfixes.yaml > src/audit/quickfixes.json",
+    "build-quickfixes": "js-yaml quickfixes/quickfixes.yaml > src/generated/quickfixes.json",
     "build-whatsnew": "scripts/build-whatsnew.js",
     "build-preview-redoc": "webpack --config src-webviews/preview-redoc/webpack.config.js",
     "build-preview-swaggerui": "webpack --config src-webviews/preview-swaggerui/webpack.config.js",
@@ -597,7 +597,7 @@
     "swagger-ui-react": "^3.48.0",
     "to-arraybuffer": "^1.0.1",
     "ts-loader": "^8.0.3",
-    "typescript": "^4.2.2",
+    "typescript": "^4.3.0",
     "vscode-test": "^1.5.1",
     "webpack": "^5.24.2",
     "webpack-cli": "^4.5.0"
