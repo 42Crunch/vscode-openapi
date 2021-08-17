@@ -11,7 +11,8 @@ import { BundleResult, BundlingError, OpenApiVersion } from "./types";
 import { parseToAst } from "./parsers";
 import { configuration } from "./configuration";
 import { bundle } from "./bundler";
-import { parse } from '@xliic/preserving-json-yaml-parser';
+import { parse } from "@xliic/preserving-json-yaml-parser";
+import { error } from "console";
 
 interface ParsedDocument {
   documentVersion: number;
@@ -104,6 +105,7 @@ class ExpiringCache<K, T> implements vscode.Disposable {
 
 class ParsedDocumentCache implements vscode.Disposable {
   private cache: ExpiringCache<string, ParsedDocument>;
+  private diagnostics = vscode.languages.createDiagnosticCollection("openapi-parser");
 
   constructor(interval: number, maxAge: number, private parserOptions: ParserOptions) {
     this.cache = new ExpiringCache<string, ParsedDocument>(interval, maxAge);
@@ -124,6 +126,27 @@ class ParsedDocumentCache implements vscode.Disposable {
     this.cache.dispose();
   }
 
+  private showErrors(
+    document: vscode.TextDocument,
+    version: OpenApiVersion,
+    errors: vscode.Diagnostic[]
+  ) {
+    const messages = {
+      DuplicateKey: "Duplicate object key",
+      InvalidCommentToken: "Comment is not permitted",
+    };
+    // do not show errors for non-openapi documents
+    if (!errors || version === OpenApiVersion.Unknown) {
+      this.diagnostics.delete(document.uri);
+    } else {
+      // only display duplicate key errors, other errors shown by a vs-code json extension
+      const filtered = errors
+        .filter((error) => error.message in messages)
+        .map((error) => ({ ...error, message: messages[error.message] }));
+      this.diagnostics.set(document.uri, filtered);
+    }
+  }
+
   private parse(document: vscode.TextDocument, previous: ParsedDocument | undefined) {
     const [openApiVersion, astRoot, errors] = parseToAst(document, this.parserOptions);
 
@@ -131,7 +154,9 @@ class ParsedDocumentCache implements vscode.Disposable {
     const lastGoodAstRoot = errors ? previous?.lastGoodAstRoot : astRoot;
 
     // parse if no errors
-    const parsed = !errors ? parse(document.getText(), astRoot) : undefined;
+    const parsed = astRoot && !errors ? parse(document.getText(), astRoot) : undefined;
+
+    this.showErrors(document, openApiVersion, errors);
 
     return {
       openApiVersion,
