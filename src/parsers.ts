@@ -54,19 +54,18 @@ export function parseToAst(
 
   const [node, errors] = parse(document.getText(), document.languageId, parserOptions);
   const version = getOpenApiVersion(node);
-  const messages = errors.map(
-    (error): vscode.Diagnostic => {
-      const position = document.positionAt(error.offset);
-      const line = document.lineAt(position);
-      return {
-        source: "vscode-openapi",
-        code: "",
-        severity: vscode.DiagnosticSeverity.Error,
-        message: error.message,
-        range: line.range,
-      };
-    }
-  );
+  const messages = errors.map((error): vscode.Diagnostic => {
+    const start = document.positionAt(error.offset);
+    const end = error.length ? document.positionAt(error.offset + error.length) : undefined;
+    const range = end ? new vscode.Range(start, end) : document.lineAt(start).range;
+    return {
+      source: "vscode-openapi",
+      code: "",
+      severity: vscode.DiagnosticSeverity.Error,
+      message: error.message,
+      range,
+    };
+  });
 
   return [version, node, messages.length > 0 ? messages : null];
 }
