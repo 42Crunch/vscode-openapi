@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 4.6.1 (May 31, 2021)
+
+* Fix issue #85 adding support for integers longer than MAX_SAFE_INTEGER
+* Report duplicate keys and comments in JSON as errors
+* Prohibit using JSONC with trailing commas
+* Retain formatting of an integer values with trailing .0
+
 ## Version 4.5.2 (May 31, 2021)
 
 * Update audit KDB artciles
