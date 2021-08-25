@@ -9,6 +9,12 @@ import { Cache } from "./cache";
 import { OpenApiVersion } from "./types";
 
 export async function updateContext(cache: Cache, document: vscode.TextDocument) {
+  if (!document) {
+    // don't disable outlines when no editor is selected (which happens if audit or preview
+    // webviews are selected) to prevent flicker
+    return;
+  }
+
   const version = cache.getDocumentVersion(document);
 
   if (version !== OpenApiVersion.Unknown) {
