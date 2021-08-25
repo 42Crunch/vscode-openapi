@@ -8,6 +8,7 @@ import { outlines } from "./outline";
 import * as snippets from "./generated/snippets.json";
 import { JsonNode, Node, YamlNode } from "@xliic/openapi-ast-node";
 import { Cache } from "./cache";
+import { OpenApiVersion } from "./types";
 
 const commands = {
   goToLine,
@@ -293,6 +294,10 @@ async function v3addServer(cache: Cache) {
 }
 
 async function addOperation(cache: Cache, node: any) {
+  if (noActiveOpenApiEditorGuard(cache)) {
+    return;
+  }
+
   const editor = vscode.window.activeTextEditor;
   const languageId = editor.document.languageId;
   if (languageId === "yaml") {
@@ -325,6 +330,10 @@ async function addOperation(cache: Cache, node: any) {
 }
 
 async function insertSnippetAfter(cache: Cache, snippetName: string, pointer: string) {
+  if (noActiveOpenApiEditorGuard(cache)) {
+    return;
+  }
+
   const editor = vscode.window.activeTextEditor;
   const languageId = editor.document.languageId;
   const root = cache.getDocumentAst(editor.document);
@@ -336,15 +345,19 @@ async function insertSnippetAfter(cache: Cache, snippetName: string, pointer: st
 
   if (languageId === "yaml") {
     let snippet = snippets[`${snippetName}Yaml`];
-    await insertYamlSnippetAfter(<YamlNode>root, snippet, pointer);
+    await insertYamlSnippetAfter(editor, <YamlNode>root, snippet, pointer);
   } else {
     let snippet = snippets[snippetName];
-    await insertJsonSnippetAfter(<JsonNode>root, snippet, pointer);
+    await insertJsonSnippetAfter(editor, <JsonNode>root, snippet, pointer);
   }
 }
 
-async function insertYamlSnippetAfter(root: YamlNode, snippet: string, pointer: string) {
-  const editor = vscode.window.activeTextEditor;
+async function insertYamlSnippetAfter(
+  editor: vscode.TextEditor,
+  root: YamlNode,
+  snippet: string,
+  pointer: string
+) {
   const node = root.find(pointer);
 
   const eol = editor.document.eol === vscode.EndOfLine.CRLF ? "\r\n" : "\n";
@@ -358,8 +371,12 @@ async function insertYamlSnippetAfter(root: YamlNode, snippet: string, pointer: 
   );
 }
 
-async function insertJsonSnippetAfter(root: JsonNode, snippet: string, pointer: string) {
-  const editor = vscode.window.activeTextEditor;
+async function insertJsonSnippetAfter(
+  editor: vscode.TextEditor,
+  root: JsonNode,
+  snippet: string,
+  pointer: string
+) {
   const jnode = root.find(pointer).node;
   const last =
     jnode.parent.parent.children.indexOf(jnode.parent) == jnode.parent.parent.children.length - 1;
@@ -378,8 +395,12 @@ async function insertJsonSnippetAfter(root: JsonNode, snippet: string, pointer: 
   );
 }
 
-async function insertYamlSnippetInto(root: YamlNode, snippet: string, pointer: string) {
-  const editor = vscode.window.activeTextEditor;
+async function insertYamlSnippetInto(
+  editor: vscode.TextEditor,
+  root: YamlNode,
+  snippet: string,
+  pointer: string
+) {
   const ynode = root.find(pointer).node;
 
   await editor.insertSnippet(
@@ -388,8 +409,12 @@ async function insertYamlSnippetInto(root: YamlNode, snippet: string, pointer: s
   );
 }
 
-async function insertJsonSnippetInto(root: JsonNode, snippet: string, pointer: string) {
-  const editor = vscode.window.activeTextEditor;
+async function insertJsonSnippetInto(
+  editor: vscode.TextEditor,
+  root: JsonNode,
+  snippet: string,
+  pointer: string
+) {
   const jnode = root.find(pointer).node;
 
   snippet = `\n${snippet}`;
@@ -410,6 +435,10 @@ async function insertSnippetIntoRoot(
   element: string,
   container: string = "object"
 ) {
+  if (noActiveOpenApiEditorGuard(cache)) {
+    return;
+  }
+
   const editor = vscode.window.activeTextEditor;
   const languageId = editor.document.languageId;
   const root = cache.getDocumentAst(editor.document);
@@ -422,16 +451,16 @@ async function insertSnippetIntoRoot(
   if (languageId === "yaml") {
     let snippet = snippets[`${snippetName}Yaml`];
     if (root.find(`/${element}`)) {
-      await insertYamlSnippetInto(<YamlNode>root, snippet, `/${element}`);
+      await insertYamlSnippetInto(editor, <YamlNode>root, snippet, `/${element}`);
     } else {
       const target = findInsertionAnchor(root, element);
       snippet = `${element}:\n${increaseIndent(snippet)}\n`;
-      await insertYamlSnippetAfter(<YamlNode>root, snippet, `/${target}`);
+      await insertYamlSnippetAfter(editor, <YamlNode>root, snippet, `/${target}`);
     }
   } else {
     let snippet = snippets[snippetName];
     if (root.find(`/${element}`)) {
-      await insertJsonSnippetInto(<JsonNode>root, snippet, `/${element}`);
+      await insertJsonSnippetInto(editor, <JsonNode>root, snippet, `/${element}`);
     } else {
       if (container === "object") {
         snippet = `"${element}": {\n${snippet}\n}`;
@@ -440,12 +469,16 @@ async function insertSnippetIntoRoot(
         snippet = `"${element}": [\n${snippet}\n]`;
       }
       const target = findInsertionAnchor(root, element);
-      await insertJsonSnippetAfter(<JsonNode>root, snippet, `/${target}`);
+      await insertJsonSnippetAfter(editor, <JsonNode>root, snippet, `/${target}`);
     }
   }
 }
 
 async function insertSnippetIntoComponents(cache: Cache, snippetName: string, element: string) {
+  if (noActiveOpenApiEditorGuard(cache)) {
+    return;
+  }
+
   const editor = vscode.window.activeTextEditor;
   const languageId = editor.document.languageId;
   const root = cache.getDocumentAst(editor.document);
@@ -458,13 +491,14 @@ async function insertSnippetIntoComponents(cache: Cache, snippetName: string, el
   if (languageId === "yaml") {
     let snippet = snippets[`${snippetName}Yaml`];
     if (root.find(`/components/${element}`)) {
-      await insertYamlSnippetInto(<YamlNode>root, snippet, `/components/${element}`);
+      await insertYamlSnippetInto(editor, <YamlNode>root, snippet, `/components/${element}`);
     } else if (root.find("/components")) {
       const position = findComponentsInsertionPosition(root, element);
       if (position >= 0) {
         // found where to insert
         snippet = `\n\t${element}:\n${increaseIndent(snippet, 2)}\n`;
         await insertYamlSnippetAfter(
+          editor,
           <YamlNode>root,
           snippet,
           `/components/${componentsTags[position]}`
@@ -472,23 +506,24 @@ async function insertSnippetIntoComponents(cache: Cache, snippetName: string, el
       } else {
         // insert into the 'components'
         snippet = `${element}:\n${increaseIndent(snippet, 2)}\n`;
-        await insertYamlSnippetInto(<YamlNode>root, snippet, "/components");
+        await insertYamlSnippetInto(editor, <YamlNode>root, snippet, "/components");
       }
     } else {
       snippet = `components:\n\t${element}:\n${increaseIndent(snippet, 2)}\n`;
       const target = findInsertionAnchor(root, "components");
-      await insertYamlSnippetAfter(<YamlNode>root, snippet, `/${target}`);
+      await insertYamlSnippetAfter(editor, <YamlNode>root, snippet, `/${target}`);
     }
   } else {
     let snippet = snippets[snippetName];
     if (root.find(`/components/${element}`)) {
-      await insertJsonSnippetInto(<JsonNode>root, snippet, `/components/${element}`);
+      await insertJsonSnippetInto(editor, <JsonNode>root, snippet, `/components/${element}`);
     } else if (root.find("/components")) {
       const position = findComponentsInsertionPosition(root, element);
       if (position >= 0) {
         // found where to insert
         snippet = `"${element}": {\n${snippet}\n}`;
         await insertJsonSnippetAfter(
+          editor,
           <JsonNode>root,
           snippet,
           `/components/${componentsTags[position]}`
@@ -496,12 +531,12 @@ async function insertSnippetIntoComponents(cache: Cache, snippetName: string, el
       } else {
         // insert into the 'components'
         snippet = `\t"${element}": {\n\t${snippet}\n\t}`;
-        await insertJsonSnippetInto(<JsonNode>root, snippet, "/components");
+        await insertJsonSnippetInto(editor, <JsonNode>root, snippet, "/components");
       }
     } else {
       snippet = `"components": {\n\t"${element}": {\n\t${snippet}\n\t}\n}`;
       const target = findInsertionAnchor(root, "components");
-      await insertJsonSnippetAfter(<JsonNode>root, snippet, `/${target}`);
+      await insertJsonSnippetAfter(editor, <JsonNode>root, snippet, `/${target}`);
     }
   }
 }
@@ -538,4 +573,14 @@ function findComponentsInsertionPosition(root: Node, element: string) {
     }
   }
   return position;
+}
+
+function noActiveOpenApiEditorGuard(cache: Cache) {
+  if (
+    cache.getDocumentVersion(vscode.window.activeTextEditor?.document) === OpenApiVersion.Unknown
+  ) {
+    vscode.window.showErrorMessage(`Can't run the command, no active editor with OpenAPI file`);
+    return true;
+  }
+  return false;
 }
