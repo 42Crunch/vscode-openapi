@@ -12,7 +12,6 @@ import { parseToAst } from "./parsers";
 import { configuration } from "./configuration";
 import { bundle } from "./bundler";
 import { parse } from "@xliic/preserving-json-yaml-parser";
-import { error } from "console";
 
 interface ParsedDocument {
   documentVersion: number;
@@ -154,7 +153,7 @@ class ParsedDocumentCache implements vscode.Disposable {
     const lastGoodAstRoot = errors ? previous?.lastGoodAstRoot : astRoot;
 
     // parse if no errors
-    const parsed = astRoot && !errors ? parse(document.getText(), astRoot) : undefined;
+    const parsed = astRoot && !errors ? parse(astRoot) : undefined;
 
     this.showErrors(document, openApiVersion, errors);
 
@@ -221,7 +220,7 @@ class BundledDocumentCache implements vscode.Disposable {
   private async bundle(document: vscode.TextDocument): Promise<BundleResult | undefined> {
     const approvedHosts = configuration.get<string[]>("approvedHostnames");
     const parsed = this.documentParser(document);
-    if (!parsed.errors) {
+    if (!parsed.errors && parsed.parsed) {
       return await bundle(
         document,
         parsed.openApiVersion,

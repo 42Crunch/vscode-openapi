@@ -8,26 +8,21 @@ import {
   replaceYamlNode,
   safeParse,
 } from "../../util";
-import { FixContext, FixType, InsertReplaceRenameFix } from '../../types';
+import { FixContext, FixType, InsertReplaceRenameFix } from "../../types";
 
 suite("Edit Replace Node Test Suite", () => {
-
-  test("Methos replaceJsonNode (key - value) test", async () => {
-
-    const text = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1\n ],\n}';
-    const expected = '{\n "a": {\n  "a1": [\n   "qwe",\n   "baz"\n  ]\n },\n "c": [\n  1\n ],\n}';
+  test("Method replaceJsonNode (key - value) test", async () => {
+    const text = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1\n ]\n}';
+    const expected = '{\n "a": {\n  "a1": [\n   "qwe",\n   "baz"\n  ]\n },\n "c": [\n  1\n ]\n}';
     const pointer = "/a/a1";
     const fix = {
       problem: ["xxx"],
       title: "xxx",
       type: FixType.Replace,
-      fix: [
-        "qwe", "baz"
-      ]
+      fix: ["qwe", "baz"],
     };
 
     await withRandomFileEditor(text, "json", async (editor, doc) => {
-
       let range: vscode.Range;
       const root = safeParse(editor.document.getText(), editor.document.languageId);
 
@@ -44,9 +39,9 @@ suite("Edit Replace Node Test Suite", () => {
         pointer: pointer,
         root: root,
         target: root.find(pointer),
-        document: editor.document
+        document: editor.document,
       };
-      
+
       let value = getFixAsJsonString(context);
       [value, range] = replaceJsonNode(context, value);
 
@@ -60,22 +55,20 @@ suite("Edit Replace Node Test Suite", () => {
     });
   });
 
-  test("Methos replaceJsonNode (array member) test", async () => {
-
-    const text = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1\n ],\n}';
-    const expected = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  {\n   "a2": "baz"\n  }\n ],\n}';
+  test("Method replaceJsonNode (array member) test", async () => {
+    const text = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1\n ]\n}';
+    const expected = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  {\n   "a2": "baz"\n  }\n ]\n}';
     const pointer = "/c/0";
     const fix = {
       problem: ["xxx"],
       title: "xxx",
       type: FixType.Replace,
       fix: {
-        a2: "baz"
-      }
+        a2: "baz",
+      },
     };
 
     await withRandomFileEditor(text, "json", async (editor, doc) => {
-
       let range: vscode.Range;
       const root = safeParse(editor.document.getText(), editor.document.languageId);
 
@@ -92,7 +85,7 @@ suite("Edit Replace Node Test Suite", () => {
         pointer: pointer,
         root: root,
         target: root.find(pointer),
-        document: editor.document
+        document: editor.document,
       };
 
       let value = getFixAsJsonString(context);
@@ -108,8 +101,7 @@ suite("Edit Replace Node Test Suite", () => {
     });
   });
 
-  test("Methos replaceYamlNode (key - value) test", async () => {
-
+  test("Method replaceYamlNode (key - value) test", async () => {
     const text = "a:\n  a1: foo\nc:\n  - 1\n";
     const expected = "a:\n  a1: \n    - qwe\n    - baz\nc:\n  - 1\n";
     const pointer = "/a/a1";
@@ -117,13 +109,10 @@ suite("Edit Replace Node Test Suite", () => {
       problem: ["xxx"],
       title: "xxx",
       type: FixType.Replace,
-      fix: [
-        "qwe", "baz"
-      ]
+      fix: ["qwe", "baz"],
     };
 
     await withRandomFileEditor(text, "yaml", async (editor, doc) => {
-
       let range: vscode.Range;
       const root = safeParse(editor.document.getText(), editor.document.languageId);
 
@@ -140,7 +129,7 @@ suite("Edit Replace Node Test Suite", () => {
         pointer: pointer,
         root: root,
         target: root.find(pointer),
-        document: editor.document
+        document: editor.document,
       };
 
       let value = getFixAsYamlString(context);
@@ -156,8 +145,7 @@ suite("Edit Replace Node Test Suite", () => {
     });
   });
 
-  test("Methos replaceYamlNode (array member) test", async () => {
-    
+  test("Method replaceYamlNode (array member) test", async () => {
     const text = "a:\n  a1: foo\nc:\n  - 1\n";
     const expected = "a:\n  a1: foo\nc:\n  - a2: baz\n";
     const pointer = "/c/0";
@@ -166,12 +154,11 @@ suite("Edit Replace Node Test Suite", () => {
       title: "xxx",
       type: FixType.Replace,
       fix: {
-        a2: "baz"
-      }
+        a2: "baz",
+      },
     };
 
     await withRandomFileEditor(text, "yaml", async (editor, doc) => {
-
       let range: vscode.Range;
       const root = safeParse(editor.document.getText(), editor.document.languageId);
 
@@ -188,7 +175,7 @@ suite("Edit Replace Node Test Suite", () => {
         pointer: pointer,
         root: root,
         target: root.find(pointer),
-        document: editor.document
+        document: editor.document,
       };
 
       let value = getFixAsYamlString(context);

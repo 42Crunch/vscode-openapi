@@ -113,7 +113,7 @@ export class YamlSchemaDefinitionProvider implements vscode.DefinitionProvider {
   ): Promise<vscode.Location> {
     const line = document.lineAt(position.line);
     if (line.text.match(refRegex)) {
-      const parsed = yaml.safeLoad(line.text);
+      const parsed = yaml.load(line.text);
       const ref = extractRef(parsed);
       const location = refToLocation(ref, document.uri, this.cache, this.externalRefProvider);
       return location;

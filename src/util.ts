@@ -271,7 +271,7 @@ export function getFixAsYamlString(context: FixContext): string {
   const snippet = context.snippet;
   const fix = <InsertReplaceRenameFix>context.fix;
   const type = fix.type;
-  let text = yaml.safeDump(fix.fix).trim();
+  let text = yaml.dump(fix.fix, { indent: 2 }).trim();
   if (fix.parameters) {
     text = handleParameters(context, text);
   }
@@ -279,7 +279,7 @@ export function getFixAsYamlString(context: FixContext): string {
   if (snippet && (type === FixType.Insert || type === FixType.Replace)) {
     text = text.replace(new RegExp("\\$ref", "g"), "\\$ref");
   }
-  // 2 spaces is always the default ident for the safeDump
+  // 2 spaces is the ident for the dump()
   return text.replace(new RegExp("  ", "g"), "\t");
 }
 

@@ -4,32 +4,29 @@
 */
 
 import * as vscode from "vscode";
-import { Schema, Type } from "js-yaml";
 import { Configuration } from "./configuration";
 import { Options } from "@xliic/openapi-ast-node";
 
 export class ParserOptions implements Options {
   configuration: Configuration;
-  yaml: { schema: Schema };
+  yaml: { customTags?: { [tag: string]: "scalar" | "sequence" | "mapping" } };
 
   constructor() {
-    this.yaml = {
-      schema: this.buildYamlSchema([])
-    };
+    this.yaml = {};
   }
 
   configure(configuration: Configuration) {
     this.configuration = configuration;
     const customTags = configuration.get<[string]>("customTags");
     this.yaml = {
-      schema: this.buildYamlSchema(customTags)
+      customTags: this.buildCustomTags(customTags),
     };
     configuration.onDidChange(this.onConfigurationChanged, this);
   }
 
   get() {
     return {
-      yaml: this.yaml
+      yaml: this.yaml,
     };
   }
 
@@ -37,62 +34,23 @@ export class ParserOptions implements Options {
     if (this.configuration.changed(e, "customTags")) {
       const customTags = this.configuration.get<string[]>("customTags");
       this.yaml = {
-        schema: this.buildYamlSchema(customTags)
+        customTags: this.buildCustomTags(customTags),
       };
     }
   }
 
-  buildYamlSchema(customTags: string[]) {
-    const filteredTags = filterInvalidCustomTags(customTags);
+  buildCustomTags(customTags: string[]): { [tag: string]: "scalar" | "sequence" | "mapping" } {
+    const tags = {};
 
-    const schemaWithAdditionalTags = Schema.create(
-      filteredTags.map((tag) => {
-        const typeInfo = tag.split(" ");
-        return new Type(typeInfo[0], {
-          kind: (typeInfo[1] && typeInfo[1].toLowerCase()) || "scalar",
-        });
-      })
-    );
-
-    const tagWithAdditionalItems = new Map<string, string[]>();
-    filteredTags.forEach((tag) => {
-      const typeInfo = tag.split(" ");
-      const tagName = typeInfo[0];
-      const tagType = (typeInfo[1] && typeInfo[1].toLowerCase()) || "scalar";
-      if (tagWithAdditionalItems.has(tagName)) {
-        tagWithAdditionalItems.set(tagName, tagWithAdditionalItems.get(tagName).concat([tagType]));
-      } else {
-        tagWithAdditionalItems.set(tagName, [tagType]);
+    for (const tag of customTags) {
+      let [name, type] = tag.split(" ");
+      type = type ? type.toLowerCase() : "scalar";
+      if (["mapping", "scalar", "sequence"].includes(type)) {
+        tags[name] = type;
       }
-    });
-
-    tagWithAdditionalItems.forEach((additionalTagKinds, key) => {
-      const newTagType = new Type(key, { kind: additionalTagKinds[0] || "scalar" });
-      newTagType.additionalKinds = additionalTagKinds;
-      schemaWithAdditionalTags.compiledTypeMap[key] = newTagType;
-    });
-
-    return schemaWithAdditionalTags;
-  }
-}
-
-export function filterInvalidCustomTags(customTags: string[]): string[] {
-  const validCustomTags = ["mapping", "scalar", "sequence"];
-
-  return customTags.filter((tag) => {
-    if (typeof tag === "string") {
-      const typeInfo = tag.split(" ");
-      const type = (typeInfo[1] && typeInfo[1].toLowerCase()) || "scalar";
-
-      // We need to check if map is a type because map will throw an error within the yaml-ast-parser
-      if (type === "map") {
-        return false;
-      }
-
-      return validCustomTags.indexOf(type) !== -1;
     }
-    return false;
-  });
+    return tags;
+  }
 }
 
 export const parserOptions = new ParserOptions();
