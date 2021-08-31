@@ -8,26 +8,23 @@ import {
   insertYamlNode,
   safeParse,
 } from "../../util";
-import { FixContext, FixType, InsertReplaceRenameFix } from '../../types';
+import { FixContext, FixType, InsertReplaceRenameFix } from "../../types";
 
 suite("Edit Insert Node as Snippet Test Suite", () => {
-
-  test("Methos insertJsonNode (key - value) test", async () => {
-
-    const text = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1\n ],\n}';
-    const expected = '{\n "a": {\n  "a1": "foo",\n  "a2": "baz"\n },\n "c": [\n  1\n ],\n}';
+  test("Method insertJsonNode (key - value) test", async () => {
+    const text = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1\n ]\n}';
+    const expected = '{\n "a": {\n  "a1": "foo",\n  "a2": "baz"\n },\n "c": [\n  1\n ]\n}';
     const pointer = "/a";
     const fix = {
       problem: ["xxx"],
       title: "xxx",
       type: FixType.Insert,
       fix: {
-        a2: "baz"
-      }
+        a2: "baz",
+      },
     };
 
     await withRandomFileEditor(text, "json", async (editor, doc) => {
-
       let position: vscode.Position;
       const root = safeParse(editor.document.getText(), editor.document.languageId);
 
@@ -44,7 +41,7 @@ suite("Edit Insert Node as Snippet Test Suite", () => {
         pointer: pointer,
         root: root,
         target: root.find(pointer),
-        document: editor.document
+        document: editor.document,
       };
 
       let value = getFixAsJsonString(context);
@@ -57,26 +54,24 @@ suite("Edit Insert Node as Snippet Test Suite", () => {
     });
   });
 
-  test("Methos insertJsonNode (array member) test", async () => {
-
-    const text = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1\n ],\n}';
+  test("Method insertJsonNode (array member) test", async () => {
+    const text = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1\n ]\n}';
     // Windows insert snippet doesn't format correctly
     const expectedForWindows =
-      '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1,\n  {\n      "a2": "baz"\n  }\n ],\n}';
+      '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1,\n  {\n      "a2": "baz"\n  }\n ]\n}';
     const expected =
-      '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1,\n  {\n   "a2": "baz"\n  }\n ],\n}';
+      '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1,\n  {\n   "a2": "baz"\n  }\n ]\n}';
     const pointer = "/c";
     const fix = {
       problem: ["xxx"],
       title: "xxx",
       type: FixType.Insert,
       fix: {
-        a2: "baz"
-      }
+        a2: "baz",
+      },
     };
 
     await withRandomFileEditor(text, "json", async (editor, doc) => {
-
       let position: vscode.Position;
       const root = safeParse(editor.document.getText(), editor.document.languageId);
 
@@ -93,7 +88,7 @@ suite("Edit Insert Node as Snippet Test Suite", () => {
         pointer: pointer,
         root: root,
         target: root.find(pointer),
-        document: editor.document
+        document: editor.document,
       };
 
       let value = getFixAsJsonString(context);
@@ -102,13 +97,12 @@ suite("Edit Insert Node as Snippet Test Suite", () => {
       return editor.insertSnippet(new vscode.SnippetString(value), position).then(() => {
         assert.ok(doc.isDirty);
         const text = doc.getText();
-        assert.ok((text == expected) || (text == expectedForWindows));
+        assert.ok(text == expected || text == expectedForWindows);
       });
     });
   });
 
-  test("Methos insertYamlNode (key - value) test", async () => {
-
+  test("Method insertYamlNode (key - value) test", async () => {
     const text = "a:\n  a1: foo\nc:\n  - 1\n";
     const expected = "a:\n  a1: foo\n  a2: baz\nc:\n  - 1\n";
     const pointer = "/a";
@@ -117,12 +111,11 @@ suite("Edit Insert Node as Snippet Test Suite", () => {
       title: "xxx",
       type: FixType.Insert,
       fix: {
-        a2: "baz"
-      }
+        a2: "baz",
+      },
     };
 
     await withRandomFileEditor(text, "yaml", async (editor, doc) => {
-
       let position: vscode.Position;
       const root = safeParse(editor.document.getText(), editor.document.languageId);
 
@@ -139,7 +132,7 @@ suite("Edit Insert Node as Snippet Test Suite", () => {
         pointer: pointer,
         root: root,
         target: root.find(pointer),
-        document: editor.document
+        document: editor.document,
       };
 
       let value = getFixAsYamlString(context);
@@ -152,7 +145,7 @@ suite("Edit Insert Node as Snippet Test Suite", () => {
     });
   });
 
-  test("Methos insertYamlNode (array member) test", async () => {
+  test("Method insertYamlNode (array member) test", async () => {
     const text = "a:\n  a1: foo\nc:\n  - 1\n";
     const expected = "a:\n  a1: foo\nc:\n  - 1\n  - a2: baz\n";
     const pointer = "/c";
@@ -161,12 +154,11 @@ suite("Edit Insert Node as Snippet Test Suite", () => {
       title: "xxx",
       type: FixType.Insert,
       fix: {
-        a2: "baz"
-      }
+        a2: "baz",
+      },
     };
 
     await withRandomFileEditor(text, "yaml", async (editor, doc) => {
-
       let position: vscode.Position;
       const root = safeParse(editor.document.getText(), editor.document.languageId);
 
@@ -183,7 +175,7 @@ suite("Edit Insert Node as Snippet Test Suite", () => {
         pointer: pointer,
         root: root,
         target: root.find(pointer),
-        document: editor.document
+        document: editor.document,
       };
 
       let value = getFixAsYamlString(context);

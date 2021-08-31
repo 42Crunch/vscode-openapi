@@ -5,39 +5,6 @@ import { parse, Node } from "@xliic/openapi-ast-node";
 import { ParserOptions } from "./parser-options";
 import { OpenApiVersion } from "./types";
 
-export function parseToObject(
-  document: vscode.TextDocument,
-  options: ParserOptions
-): any | undefined {
-  if (
-    !(
-      document.languageId === "json" ||
-      document.languageId === "jsonc" ||
-      document.languageId == "yaml"
-    )
-  ) {
-    return null;
-  }
-
-  try {
-    if (document.languageId === "yaml") {
-      // FIXME what's up with parsing errors?
-      const {
-        yaml: { schema },
-      } = options.get();
-      return yaml.safeLoad(document.getText(), { schema });
-    }
-
-    const errors: json.ParseError[] = [];
-    const parsed = json.parse(document.getText(), errors, { allowTrailingComma: true });
-    if (errors.length == 0) {
-      return parsed;
-    }
-  } catch (ex) {
-    // ignore, return undefined on parsing errors
-  }
-}
-
 export function parseToAst(
   document: vscode.TextDocument,
   parserOptions: ParserOptions

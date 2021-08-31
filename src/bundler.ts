@@ -18,7 +18,7 @@ import {
   DocumentToObjectParser,
 } from "./types";
 import { toInternalUri, requiresApproval, ExternalRefDocumentProvider } from "./external-refs";
-import { simpleClone } from '@xliic/preserving-json-yaml-parser';
+import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 
 interface BundlerState {
   version: OpenApiVersion;
