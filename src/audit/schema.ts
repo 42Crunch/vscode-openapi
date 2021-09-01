@@ -7,6 +7,7 @@ interface ObjectSchema {
   type: string;
   properties: object;
   required: string[];
+  additionalProperties: boolean;
 }
 
 function isMixedTypeArray(json: Array<any>): boolean {
@@ -42,6 +43,7 @@ function getSchemaForMixedArray(json: Array<any>): ArraySchema {
         type: "object",
         properties: {},
         required: [],
+        additionalProperties: false,
       };
       valueSchema = getSchemaForObject(value, nextSchema);
     } else if (itemType === "array") {
@@ -80,6 +82,7 @@ function getSchemaForUniformArray(json: Array<any>): ArraySchema {
         type: "object",
         properties: schema.items.properties,
         required: [],
+        additionalProperties: false,
       };
       schema.items.properties = getSchemaForObject(value, nextSchema).properties;
     } else if (itemType === "array") {
@@ -106,11 +109,13 @@ function getSchemaForObject(json: any, schema?: ObjectSchema): ObjectSchema {
     schema.type = "object";
     schema.properties = schema.properties || {};
     schema.required = Object.keys(json);
+    schema.additionalProperties = false;
   } else {
     schema = {
       type: "object",
       properties: {},
       required: Object.keys(json),
+      additionalProperties: false,
     };
   }
 
@@ -174,6 +179,7 @@ export function generateSchema(json: any): ObjectSchema | ArraySchema {
     const schema = getSchemaForObject(json);
     result.type = schema.type;
     result.properties = schema.properties;
+    result.additionalProperties = schema.additionalProperties;
     result.required = Object.keys(json).filter(function (key) {
       return !key.startsWith("$");
     });

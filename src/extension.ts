@@ -58,15 +58,19 @@ export function activate(context: vscode.ExtensionContext) {
 
   const completionProvider = new CompletionItemProvider(context, cache);
   for (const selector of Object.values(selectors)) {
-		if (selector.language === "yaml") {
-			vscode.languages.registerCompletionItemProvider(selector, completionProvider, "'", '"');
-		} else {
-			vscode.languages.registerCompletionItemProvider(selector, completionProvider, '"');
-		}
+    if (selector.language === "yaml") {
+      vscode.languages.registerCompletionItemProvider(selector, completionProvider, "'", '"');
+    } else {
+      vscode.languages.registerCompletionItemProvider(selector, completionProvider, '"');
+    }
   }
 
   const jsonSchemaDefinitionProvider = new JsonSchemaDefinitionProvider(cache, externalRefProvider);
-  const yamlSchemaDefinitionProvider = new YamlSchemaDefinitionProvider(cache, externalRefProvider);
+  const yamlSchemaDefinitionProvider = new YamlSchemaDefinitionProvider(
+    cache,
+    externalRefProvider,
+    parserOptions
+  );
 
   vscode.languages.registerDefinitionProvider(selectors.json, jsonSchemaDefinitionProvider);
   vscode.languages.registerDefinitionProvider(selectors.jsonc, jsonSchemaDefinitionProvider);

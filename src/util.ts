@@ -175,6 +175,7 @@ export function insertYamlNode(context: FixContext, value: string): [string, vsc
     position = document.positionAt(end);
     if (position.line + 1 === document.lineCount) {
       position = document.positionAt(start);
+      position = new vscode.Position(position.line, 0);
     } else {
       position = new vscode.Position(position.line + 1, 0);
     }

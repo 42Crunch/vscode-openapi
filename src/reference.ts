@@ -6,9 +6,11 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import * as json from "jsonc-parser";
-import * as yaml from "js-yaml";
+import { parse as parseToAst } from "@xliic/openapi-ast-node";
 import { Cache } from "./cache";
 import { ExternalRefDocumentProvider, toInternalUri } from "./external-refs";
+import { ParserOptions } from "./parser-options";
+import { parse } from "@xliic/preserving-json-yaml-parser";
 
 function refToUri(ref: string, currentDocumentUri: vscode.Uri): vscode.Uri {
   if (ref.startsWith("#")) {
@@ -104,7 +106,11 @@ function extractRef(parsed: any) {
 const refRegex = new RegExp("\\$ref\\s*:\\s+([\\S]+)");
 
 export class YamlSchemaDefinitionProvider implements vscode.DefinitionProvider {
-  constructor(private cache: Cache, private externalRefProvider: ExternalRefDocumentProvider) {}
+  constructor(
+    private cache: Cache,
+    private externalRefProvider: ExternalRefDocumentProvider,
+    private parserOptions: ParserOptions
+  ) {}
 
   provideDefinition(
     document: vscode.TextDocument,
@@ -113,8 +119,8 @@ export class YamlSchemaDefinitionProvider implements vscode.DefinitionProvider {
   ): Promise<vscode.Location> {
     const line = document.lineAt(position.line);
     if (line.text.match(refRegex)) {
-      const parsed = yaml.load(line.text);
-      const ref = extractRef(parsed);
+      const [node, errors] = parseToAst(line.text, "yaml", this.parserOptions);
+      const ref = extractRef(parse(node));
       const location = refToLocation(ref, document.uri, this.cache, this.externalRefProvider);
       return location;
     }

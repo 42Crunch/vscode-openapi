@@ -1,4 +1,3 @@
-import * as yaml from "js-yaml";
 import * as vscode from "vscode";
 import { Node } from "@xliic/openapi-ast-node";
 import {
@@ -16,8 +15,7 @@ import {
 import { Cache } from "../cache";
 import { generateSchema, generateOneOfSchema } from "./schema";
 import { updateReport, fixInsert } from "./quickfix";
-import { refToLocation } from "../reference";
-import { simpleClone } from '@xliic/preserving-json-yaml-parser';
+import { simpleClone, parse } from "@xliic/preserving-json-yaml-parser";
 
 export async function generateSchemaFixCommand(
   editor: vscode.TextEditor,
@@ -320,41 +318,8 @@ async function getJsonFromAST(
   document: vscode.TextDocument,
   cache: Cache
 ): Promise<any> {
-  let text: string;
-  const children = target.getChildren();
-  if (children.length === 1 && children[0].getKey() === "$ref") {
-    const ref = children[0].getValue();
-    const location = await refToLocation(
-      ref,
-      document.uri,
-      cache,
-      cache.getExternalRefDocumentProvider()
-    );
-    if (location) {
-      const refDocument = await vscode.workspace.openTextDocument(location.uri);
-      text = refDocument.getText(location.range);
-    }
-  } else {
-    const [start, end] = target.getValueRange();
-    let position = document.positionAt(start);
-    if (document.languageId === "yaml") {
-      const position0 = new vscode.Position(position.line, 0);
-      const text0 = document.getText(new vscode.Range(position0, position)).trim();
-      if (text0 === "") {
-        position = position0;
-      }
-    }
-    text = document.getText(new vscode.Range(position, document.positionAt(end)));
-  }
-  if (document.languageId === "json") {
-    return JSON.parse(text);
-  } else {
-    const result = yaml.load(text);
-    if (typeof result === "string") {
-      return JSON.parse(result);
-    }
-    return result;
-  }
+  // FIXME check if targert contains a $ref (possibly to an external document) and follow it
+  return parse(target);
 }
 
 function hasId(id: string, problem: string[]): boolean {
@@ -437,6 +402,7 @@ function getSchemaV2Example(pointer: string, problem: string[], root: Node): Nod
 }
 
 function getSchemaV3Examples(pointer: string, problem: string[], root: Node): Node {
+  // FIXME doesn't handle $ref in the examples
   if (hasId("v3-mediatype-schema-undefined", problem)) {
     const target = root.find(pointer);
     if (target && target.isObject() && target.getKey() === "application/json") {
