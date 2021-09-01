@@ -1,6 +1,11 @@
 # Changelog
 
-## Version 4.6.1 (May 31, 2021)
+## Version 4.6.3 (September 2, 2021)
+
+* Fix issue #140 an audit regression caused by previous update
+* Fix issue with quickfix formatting in YAML files
+
+## Version 4.6.1 (August 31, 2021)
 
 * Fix issue #85 adding support for integers longer than MAX_SAFE_INTEGER
 * Report duplicate keys and comments in JSON as errors
