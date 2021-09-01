@@ -70,6 +70,7 @@ suite("Schema Generate Test Suite", () => {
               },
             },
             required: ["length", "width", "height"],
+            additionalProperties: false,
           },
           warehouseLocation: {
             type: "object",
@@ -82,6 +83,7 @@ suite("Schema Generate Test Suite", () => {
               },
             },
             required: ["latitude", "longitude"],
+            additionalProperties: false,
           },
           misc: {
             type: "array",
@@ -113,6 +115,7 @@ suite("Schema Generate Test Suite", () => {
                     },
                   },
                   required: ["a", "b"],
+                  additionalProperties: false,
                 },
               ],
             },
@@ -249,12 +252,15 @@ suite("Schema Generate Test Suite", () => {
                                     },
                                   },
                                   required: ["$ref"],
+                                  additionalProperties: false,
                                 },
                               },
                               required: ["type", "items"],
+                              additionalProperties: false,
                             },
                           },
                           required: ["description", "schema"],
+                          additionalProperties: false,
                         },
                         default: {
                           type: "object",
@@ -270,23 +276,30 @@ suite("Schema Generate Test Suite", () => {
                                 },
                               },
                               required: ["$ref"],
+                              additionalProperties: false,
                             },
                           },
                           required: ["description", "schema"],
+                          additionalProperties: false,
                         },
                       },
                       required: ["200", "default"],
+                      additionalProperties: false,
                     },
                   },
                   required: ["summary", "description", "parameters", "tags", "responses"],
+                  additionalProperties: false,
                 },
               },
               required: ["get"],
+              additionalProperties: false,
             },
           },
           required: ["/products"],
+          additionalProperties: false,
         },
       },
+      additionalProperties: false,
       required: ["paths"],
     };
 
@@ -341,6 +354,7 @@ suite("Schema Generate Test Suite", () => {
               type: "string",
             },
           },
+          additionalProperties: false,
           required: ["a"],
         },
         {
@@ -350,6 +364,7 @@ suite("Schema Generate Test Suite", () => {
               type: "integer",
             },
           },
+          additionalProperties: false,
           required: ["b"],
         },
         {
@@ -385,6 +400,7 @@ suite("Schema Generate Test Suite", () => {
           type: "string",
         },
       },
+      additionalProperties: false,
       required: ["a"],
     };
 
@@ -407,6 +423,7 @@ suite("Schema Generate Test Suite", () => {
           type: "string",
         },
       },
+      additionalProperties: false,
       required: ["a"],
     };
 

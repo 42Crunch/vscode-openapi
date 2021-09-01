@@ -549,6 +549,6 @@ fixes:
       schema:
         $ref: "#/components/schemas/"
     parameters:
-      name: schema
-      path: /schema/$ref
-      source: schemaRefByResponseCode
+      - name: schema
+        path: /schema/$ref
+        source: schemaRefByResponseCode
