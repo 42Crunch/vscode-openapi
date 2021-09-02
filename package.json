@@ -566,6 +566,7 @@
     "@xliic/preserving-json-yaml-parser": "^1.5.0",
     "form-data": "^2.3.3",
     "got": "^11.8.2",
+    "js-yaml": "^4.1.0",
     "jsonc-parser": "^3.0.0",
     "semver": "^6.3.0",
     "yaml-language-server-parser": "^0.1.2"
@@ -584,7 +585,6 @@
     "eslint": "^7.1.0",
     "esm": "^3.2.25",
     "glob": "^7.1.4",
-    "js-yaml": "^4.1.0",
     "json-schema": "^0.2.5",
     "marked": "^0.7.0",
     "mobx": "^6.1.7",
