@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.6.4 (October 11, 2021)
+
+* Update KDB articles for Security Audit
+
 ## Version 4.6.3 (September 2, 2021)
 
 * Fix issue #140 an audit regression caused by previous update
