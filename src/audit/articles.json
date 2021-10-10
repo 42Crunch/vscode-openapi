@@ -3369,6 +3369,50 @@
       ]
     }
   },
+  "paths-pathitem-empty": {
+    "group": "datavalidation",
+    "subgroup": "paths",
+    "title": {
+      "text": "<h1>Path item is empty</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>One or more path items in your API are empty.</p>\n                    <p>While the OpenAPI Specification allows for empty path items, this means that API Protection in 42Crunch Platform cannot properly secure your API.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#path-item-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "One or more path items in your API are empty.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"paths\": {\n        \"/pets\": {}\n    }\n}",
+            "yaml": "paths:\n  /pets: {}\n"
+          }
+        }
+      ]
+    },
+    "exploit": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If a path item is empty, it prevents viewing the operations or parameters of the path, effectively hiding them completely. The path itself is visible and its existence is clear, but empty path items are not. While this may not be a problem for your API consumers using the API, it is a problem for protecting your API. </p>\n                    <p>Because API Protection uses a positive security model and bases allowlisting strictly on the API contract spelled out in your API definition, it requires the complete, canonical form of your OpenAPI definition. What API Protection cannot see, it cannot fully protect. Thus, if your OpenAPI definition has empty path items, API Protection cannot see those path items, and you cannot consider your API to be fully protected even if you had deployed API Firewall instance for it. Attackers could find a way to exploit the path items invisible to API Firewall.</p>\n                "
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure your define all paths items in your API.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"paths\": {\n        \"/pets\": {\n            \"post\": {\n                \"description\": \"Creates a new pet in the store\",\n                \"operationId\": \"addPet\",\n                \"requestBody\": {\n                    \"description\": \"Pet to add to the store\",\n                    \"required\": true,\n                    \"content\": {\n                        \"application/json\": {\n                            \"schema\": {\n                                \"$ref\": \"#/definitions/NewPet\"\n                            }\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "paths:\n  /pets:\n    post:\n      description: Creates a new pet in the store\n      operationId: addPet\n      requestBody:\n        description: Pet to add to the store\n        required: true\n        content:\n          application/json:\n            schema:\n              $ref: \"#/definitions/NewPet\"\n"
+          }
+        }
+      ]
+    }
+  },
   "response-400": {
     "group": "datavalidation",
     "subgroup": "responsedefinition",
@@ -6103,43 +6147,6 @@
       ]
     }
   },
-  "semantic-host-undefined": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>At least one host must be defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>You have not defined any hosts in your API definition.</p>\n                    <p>According to the Open API Specification (OAS), the top-level property <code>host</code> is optional and if not present, the host and the port serving the API documentation are used. However, there is no host serving the documentation for the APIs in 42Crunch Platform, so Security Audit cannot infer the host.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swagger-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "You have not defined any hosts in your API definition.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"swagger\": \"2.0\",\n    \"info\": {\n        \"description\": \"My example API\",\n        \"version\": \"1.0.0\",\n        \"title\": \"My API\"\n    },\n    \"paths\": {\n    // ...\n    }\n}",
-            "yaml": "swagger: \"2.0\"\ninfo:\n  description: My example API\n  version: 1.0.0\n  title: My API\npaths:\n  {}\n  # ...\n"
-          }
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you have defined at least one host for your API.</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"swagger\": \"2.0\",\n    \"info\": {\n        \"description\": \"My example API\",\n        \"version\": \"1.0.0\",\n        \"title\": \"My API\"\n    },\n    \"host\": \"my.api.com:8090\",\n    \"paths\": {\n    // ...\n    }\n}",
-            "yaml": "swagger: \"2.0\"\ninfo:\n  description: My example API\n  version: 1.0.0\n  title: My API\nhost: my.api.com:8090\npaths:\n  {}\n  # ...\n"
-          }
-        }
-      ]
-    }
-  },
   "semantic-item-default-invalid": {
     "group": "oasconformance",
     "subgroup": "semantics",
@@ -6750,43 +6757,6 @@
           "code": {
             "json": "{\n    \"name\": \"pet\",\n    \"in\": \"body\",\n    \"description\": \"pet to add to the system\",\n    \"required\": true,\n    \"schema\": {  \n        \"type\": \"object\",\n        \"additionalProperties\": \"false\",\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\"\n            },\n            \"breed\": {\n                \"type\": \"string\"\n            },\n            \"age\": {\n                \"type\": \"integer\"\n            }\n        }\n    }\n}",
             "yaml": "name: pet\nin: body\ndescription: pet to add to the system\nrequired: true\nschema:\n  type: object\n  additionalProperties: \"false\"\n  required:\n    - name\n  properties:\n    name:\n      type: string\n    breed:\n      type: string\n    age:\n      type: integer\n"
-          }
-        }
-      ]
-    }
-  },
-  "semantic-schemes-undefined": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>Schemes should be defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>You have not defined the <code>schemes</code> field in your API.</p>\n                    <p>The Open API Specification (OAS) does not define the <code>schemes</code> field as mandatory and states that when missing, the default scheme  is the same as used to access your API definition itself. However, because API definitions are uploaded to 42Crunch Platform, not retrieved from URLs, Security Audit cannot infer the default scheme and thus the scheme must be defined.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#serverObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "You have not defined the <code>schemes</code> field in your API.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"swagger\": \"2.0\",\n    \"info\": {\n        \"version\": \"1.0.0\",\n        \"title\": \"Swagger Petstore\"\n    },\n    \"host\": \"petstore.swagger.io\",\n    \"basePath\": \"/v1\",\n    \"schemes\": [\n    ]\n}",
-            "yaml": "swagger: \"2.0\"\ninfo:\n  version: 1.0.0\n  title: Swagger Petstore\nhost: petstore.swagger.io\nbasePath: /v1\nschemes: []\n"
-          }
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you have defined at least one scheme for your API:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"swagger\": \"2.0\",\n    \"info\": {\n        \"version\": \"1.0.0\",\n        \"title\": \"Swagger Petstore\"\n    },\n    \"host\": \"petstore.swagger.io\",\n    \"basePath\": \"/v1\",\n    \"schemes\": [\n        \"https\"\n    ]\n}",
-            "yaml": "swagger: \"2.0\"\ninfo:\n  version: 1.0.0\n  title: Swagger Petstore\nhost: petstore.swagger.io\nbasePath: /v1\nschemes:\n  - https\n"
           }
         }
       ]
@@ -11027,6 +10997,50 @@
       ]
     }
   },
+  "v3-paths-pathitem-empty": {
+    "group": "datavalidation",
+    "subgroup": "paths",
+    "title": {
+      "text": "<h1>Path item is empty</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>One or more path items in your API are empty.</p>\n                    <p>While the OpenAPI Specification allows for empty path items, this means that API Protection in 42Crunch Platform cannot properly secure your API.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#path-item-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "One or more path items in your API are empty.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"paths\": {\n        \"/pets\": {}\n    }\n}",
+            "yaml": "paths:\n  /pets: {}\n"
+          }
+        }
+      ]
+    },
+    "exploit": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If a path item is empty, it prevents viewing the operations or parameters of the path, effectively hiding them completely. The path itself is visible and its existence is clear, but empty path items are not. While this may not be a problem for your API consumers using the API, it is a problem for protecting your API. </p>\n                    <p>Because API Protection uses a positive security model and bases allowlisting strictly on the API contract spelled out in your API definition, it requires the complete, canonical form of your OpenAPI definition. What API Protection cannot see, it cannot fully protect. Thus, if your OpenAPI definition has empty path items, API Protection cannot see those path items, and you cannot consider your API to be fully protected even if you had deployed API Firewall instance for it. Attackers could find a way to exploit the path items invisible to API Firewall.</p>\n                "
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure your define all paths items in your API.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"paths\": {\n        \"/pets\": {\n            \"post\": {\n                \"description\": \"Creates a new pet in the store\",\n                \"operationId\": \"addPet\",\n                \"requestBody\": {\n                    \"description\": \"Pet to add to the store\",\n                    \"required\": true,\n                    \"content\": {\n                        \"application/json\": {\n                            \"schema\": {\n                                \"$ref\": \"#/components/schemas/NewPet\"\n                            }\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "paths:\n  /pets:\n    post:\n      description: Creates a new pet in the store\n      operationId: addPet\n      requestBody:\n        description: Pet to add to the store\n        required: true\n        content:\n          application/json:\n            schema:\n              $ref: \"#/components/schemas/NewPet\"\n"
+          }
+        }
+      ]
+    }
+  },
   "v3-response-400": {
     "group": "datavalidation",
     "subgroup": "responsedefinition",
@@ -13426,52 +13440,6 @@
       ]
     }
   },
-  "v3-semantic-servers-required": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>At least one server must be defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>You have not defined any servers for your API. You must define at least one server for your API in the top-level <code>servers</code> field.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#serverObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "You have not defined any servers for your API. You must define at least one server for your API in the top-level <code>servers</code> field.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"servers\": {\n    }\n}",
-            "yaml": "servers: {}\n"
-          }
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you have defined at least one server for your API.</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"servers\": {\n        \"url\": \"https://my.api.server.com/\",\n        \"description\": \"My API server\"\n    }\n}",
-            "yaml": "servers:\n  url: https://my.api.server.com/\n  description: My API server\n"
-          }
-        },
-        {
-          "text": "\n                    <p>OAS v3 also supports defining an array of multiple servers for a single API:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"servers\": [\n        {\n            \"url\": \"https://my.api.server1.com/\",\n            \"description\": \"API server 1\"\n        },\n        {\n            \"url\": \"https://my.api.server2.com/\",\n            \"description\": \"API server 2\"\n        }\n    ]\n}",
-            "yaml": "servers:\n  - url: https://my.api.server1.com/\n    description: API server 1\n  - url: https://my.api.server2.com/\n    description: API server 2\n"
-          }
-        }
-      ]
-    }
-  },
   "v3-semantic-unknown-property": {
     "group": "oasconformance",
     "subgroup": "semantics",
@@ -14011,8 +13979,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"201\": {\n            \"description\": \"subscription created\",\n            \"content\": {\n                // ...\n            },\n            \"callbacks\": {\n                \"callback_1\": {\n                    \"$ref\": \"#/components/parameters/reusableCallback\"\n                }\n            }\n        }\n    },\n    // ...\n    \"components\": {\n        // ...\n        \"callbacks\": {\n            \"onData\": {\n                \"{$request.query.callbackUrl}/data\": {\n                    \"post\": {\n                        \"requestBody\": {\n                            \"description\": \"subscription payload\",\n                            \"content\": {\n                                \"application/json\": {\n                                    \"schema\": {\n                                        \"properties\": {\n                                            \"timestamp\": {\n                                                \"type\": \"string\",\n                                                \"format\": \"date-time\"\n                                            },\n                                            \"userData\": {\n                                                \"type\": \"string\"\n                                            }\n                                        }\n                                    }\n                                }\n                            }\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
-            "yaml": "responses:\n  \"201\":\n    description: subscription created\n    content:\n      {}\n      # ...\n    callbacks:\n      callback_1:\n        $ref: \"#/components/parameters/reusableCallback\"\n# ...\ncomponents:\n  # ...\n  callbacks:\n    onData:\n      \"{$request.query.callbackUrl}/data\":\n        post:\n          requestBody:\n            description: subscription payload\n            content:\n              application/json:\n                schema:\n                  properties:\n                    timestamp:\n                      type: string\n                      format: date-time\n                    userData:\n                      type: string\n"
+            "json": "{\n    \"responses\": {\n        \"201\": {\n            \"description\": \"subscription created\",\n            \"content\": {\n                // ...\n            },\n            \"callbacks\": {\n                \"callback_1\": {\n                    \"$ref\": \"#/components/parameters/onData\"\n                }\n            }\n        }\n    },\n    // ...\n    \"components\": {\n        // ...\n        \"callbacks\": {\n            \"onData\": {\n                \"{$request.query.callbackUrl}/data\": {\n                    \"post\": {\n                        \"requestBody\": {\n                            \"description\": \"subscription payload\",\n                            \"content\": {\n                                \"application/json\": {\n                                    \"schema\": {\n                                        \"properties\": {\n                                            \"timestamp\": {\n                                                \"type\": \"string\",\n                                                \"format\": \"date-time\"\n                                            },\n                                            \"userData\": {\n                                                \"type\": \"string\"\n                                            }\n                                        }\n                                    }\n                                }\n                            }\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"201\":\n    description: subscription created\n    content:\n      {}\n      # ...\n    callbacks:\n      callback_1:\n        $ref: \"#/components/parameters/onData\"\n# ...\ncomponents:\n  # ...\n  callbacks:\n    onData:\n      \"{$request.query.callbackUrl}/data\":\n        post:\n          requestBody:\n            description: subscription payload\n            content:\n              application/json:\n                schema:\n                  properties:\n                    timestamp:\n                      type: string\n                      format: date-time\n                    userData:\n                      type: string\n"
           }
         }
       ]
@@ -14024,8 +13992,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"201\": {\n            \"description\": \"subscription created\",\n            \"content\": {\n                // ...\n            },\n            \"callbacks\": {\n                \"callback_1\": {\n                    \"$ref\": \"#/components/callbacks/reusableCallback\"\n                }\n            }\n        }\n    }\n}",
-            "yaml": "responses:\n  \"201\":\n    description: subscription created\n    content:\n      {}\n      # ...\n    callbacks:\n      callback_1:\n        $ref: \"#/components/callbacks/reusableCallback\"\n"
+            "json": "{\n    \"responses\": {\n        \"201\": {\n            \"description\": \"subscription created\",\n            \"content\": {\n                // ...\n            },\n            \"callbacks\": {\n                \"callback_1\": {\n                    \"$ref\": \"#/components/callbacks/onData\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"201\":\n    description: subscription created\n    content:\n      {}\n      # ...\n    callbacks:\n      callback_1:\n        $ref: \"#/components/callbacks/onData\"\n"
           }
         }
       ]
@@ -14041,10 +14009,29 @@
       "text": "\n                    <h2>Description</h2>\n                    <p>The target of the JSON reference of the callback cannot be found in your API. You must define the target callback in your API.</p>\n                "
     },
     "shortDescription": "The target of the JSON reference of the callback cannot be found in your API. You must define the target callback in your API.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition.. The name used in the reference does not match the name of the callback:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"responses\": {\n        \"201\": {\n            \"description\": \"subscription created\",\n            \"content\": {\n                // ...\n            },\n            \"callbacks\": {\n                \"callback_1\": {\n                    \"$ref\": \"#/components/callbacks/reusableCallback\"\n                }\n            }\n        }\n    },\n    // ...\n    \"components\": {\n        // ...\n        \"callbacks\": {\n            \"onData\": {\n                \"{$request.query.callbackUrl}/data\": {\n                    \"post\": {\n                        \"requestBody\": {\n                            \"description\": \"subscription payload\",\n                            \"content\": {\n                                \"application/json\": {\n                                    \"schema\": {\n                                        \"properties\": {\n                                            \"timestamp\": {\n                                                \"type\": \"string\",\n                                                \"format\": \"date-time\"\n                                            },\n                                            \"userData\": {\n                                                \"type\": \"string\"\n                                            }\n                                        }\n                                    }\n                                }\n                            }\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"201\":\n    description: subscription created\n    content:\n      {}\n      # ...\n    callbacks:\n      callback_1:\n        $ref: \"#/components/callbacks/reusableCallback\"\n# ...\ncomponents:\n  # ...\n  callbacks:\n    onData:\n      \"{$request.query.callbackUrl}/data\":\n        post:\n          requestBody:\n            description: subscription payload\n            content:\n              application/json:\n                schema:\n                  properties:\n                    timestamp:\n                      type: string\n                      format: date-time\n                    userData:\n                      type: string\n"
+          }
+        }
+      ]
+    },
     "remediation": {
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all targets of JSON references are defined in your API.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"responses\": {\n        \"201\": {\n            \"description\": \"subscription created\",\n            \"content\": {\n                // ...\n            },\n            \"callbacks\": {\n                \"callback_1\": {\n                    \"$ref\": \"#/components/callbacks/onData\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"201\":\n    description: subscription created\n    content:\n      {}\n      # ...\n    callbacks:\n      callback_1:\n        $ref: \"#/components/callbacks/onData\"\n"
+          }
         }
       ]
     }
@@ -14114,10 +14101,29 @@
       "text": "\n                    <h2>Description</h2>\n                    <p>The target of the JSON reference of the example cannot be found in your API. You must define the target example in your API.</p>\n                "
     },
     "shortDescription": "The target of the JSON reference of the example cannot be found in your API. You must define the target example in your API.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The name used in the reference does not match the name of the example:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"content\": {\n        \"application/json\": {\n            \"schema\": {\n                \"type\": \"array\",\n                \"items\": {\n                    \"$ref\": \"#/components/schemas/Pet\"\n                }\n            },\n            \"examples\": {\n                \"objectExample\": {\n                    \"$ref\": \"#/components/examples/Pet\"\n                }\n            }\n        }\n    },\n     // ...  \n    \"components\": {\n        \"examples\": {\n            \"myExample\": {\n                \"value\": \"foo\"\n                //...\n            }\n        }\n    }   \n}",
+            "yaml": "content:\n  application/json:\n    schema:\n      type: array\n      items:\n        $ref: \"#/components/schemas/Pet\"\n    examples:\n      objectExample:\n        $ref: \"#/components/examples/Pet\"\n# ...  \ncomponents:\n  examples:\n    myExample:\n      value: foo\n      #...\n"
+          }
+        }
+      ]
+    },
     "remediation": {
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all targets of JSON references are defined in your API.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"content\": {\n        \"application/json\": {\n            \"schema\": {\n                \"type\": \"array\",\n                \"items\": {\n                    \"$ref\": \"#/components/schemas/Pet\"\n                }\n            },\n            \"examples\": {\n                \"objectExample\": {\n                    \"$ref\": \"#/components/examples/myExample\"\n                }\n            }\n        }\n    },\n     // ...  \n    \"components\": {\n        \"examples\": {\n            \"myExample\": {\n                \"value\": \"foo\"\n                //...\n            }\n        }\n    }   \n}",
+            "yaml": "content:\n  application/json:\n    schema:\n      type: array\n      items:\n        $ref: \"#/components/schemas/Pet\"\n    examples:\n      objectExample:\n        $ref: \"#/components/examples/myExample\"\n# ...  \ncomponents:\n  examples:\n    myExample:\n      value: foo\n      #...\n"
+          }
         }
       ]
     }
@@ -14205,10 +14211,29 @@
       "text": "\n                    <h2>Description</h2>\n                    <p>The target of the JSON reference of the link cannot be found in your API. You must define the target link in your API.</p>\n                "
     },
     "shortDescription": "The target of the JSON reference of the link cannot be found in your API. You must define the target link in your API.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The name used in the reference does not match the name of the link:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"get\": {\n        \"operationId\": \"getUserByName\",\n        \"parameters\": [\n            {\n                \"name\": \"username\",\n                \"in\": \"path\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"string\"\n                }\n            }\n        ],\n        \"responses\": {\n            \"200\": {\n                \"description\": \"The User\",\n                \"content\": {\n                    \"application/json\": {\n                        \"schema\": {\n                            \"$ref\": \"#/components/schemas/user\"\n                        }\n                    }\n                },\n                \"links\": {\n                    \"userRepositories\": {\n                        \"$ref\": \"#/components/links/UserRepos\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"components\": {\n        \"links\": {\n            \"UserRepositories\": {\n                \"operationId\": \"getRepositoriesByOwner\",\n                \"parameters\": {\n                    \"username\": \"$response.body#/username\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "get:\n  operationId: getUserByName\n  parameters:\n    - name: username\n      in: path\n      required: true\n      schema:\n        type: string\n  responses:\n    \"200\":\n      description: The User\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/user\"\n      links:\n        userRepositories:\n          $ref: \"#/components/links/UserRepos\"\n# ...\ncomponents:\n  links:\n    UserRepositories:\n      operationId: getRepositoriesByOwner\n      parameters:\n        username: $response.body#/username\n"
+          }
+        }
+      ]
+    },
     "remediation": {
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all targets of JSON references are defined in your API.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"The User\",\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/user\"\n                    }\n                }\n            },\n            \"links\": {\n                \"userRepositories\": {\n                    \"$ref\": \"#/components/links/UserRepositories\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: The User\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/user\"\n    links:\n      userRepositories:\n        $ref: \"#/components/links/UserRepositories\"\n"
+          }
         }
       ]
     }
@@ -14314,10 +14339,29 @@
       "text": "\n                    <h2>Description</h2>\n                    <p>The target of the JSON reference of the request body cannot be found in your API. You must define the target request body in your API.</p>\n                "
     },
     "shortDescription": "The target of the JSON reference of the request body cannot be found in your API. You must define the target request body in your API.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The name used in the reference does not match the name of the request body:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Add a new pet\",\n        \"requestBody\": {\n            \"$ref\": \"#/components/requestBodies/petReqBody\"\n        }\n    },\n    // ...\n    \"components\": {\n        \"requestBodies\": {\n            \"petRequestBody\": {\n                \"description\": \"A JSON object for reusable request body containing the details of a pet\",\n                \"required\": true,\n                \"content\": {\n                    \"application/json\": {\n                        \"schema\": {\n                            \"$ref\": \"#/components/schemas/Pet\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "post:\n  description: Add a new pet\n  requestBody:\n    $ref: \"#/components/requestBodies/petReqBody\"\n# ...\ncomponents:\n  requestBodies:\n    petRequestBody:\n      description: A JSON object for reusable request body containing the details of a pet\n      required: true\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/Pet\"\n"
+          }
+        }
+      ]
+    },
     "remediation": {
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all targets of JSON references are defined in your API.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Add a new pet\",\n        \"requestBody\": {\n            \"$ref\": \"#/components/requestBodies/petRequestBody\"\n        }\n    },\n    // ...\n    \"components\": {\n        \"requestBodies\": {\n            \"petRequestBody\": {\n                \"description\": \"A JSON object for reusable request body containing the details of a pet\",\n                \"required\": true,\n                \"content\": {\n                    \"application/json\": {\n                        \"schema\": {\n                            \"$ref\": \"#/components/schemas/Pet\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "post:\n  description: Add a new pet\n  requestBody:\n    $ref: \"#/components/requestBodies/petRequestBody\"\n# ...\ncomponents:\n  requestBodies:\n    petRequestBody:\n      description: A JSON object for reusable request body containing the details of a pet\n      required: true\n      content:\n        application/json:\n          schema:\n            $ref: \"#/components/schemas/Pet\"\n"
+          }
         }
       ]
     }
@@ -14390,6 +14434,80 @@
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all targets of JSON references are defined in your API.</p>\n                "
+        }
+      ]
+    }
+  },
+  "v3-validation-reference-securityscheme": {
+    "group": "oasconformance",
+    "subgroup": "structure",
+    "title": {
+      "text": "<h1>Security scheme cannot be a JSON reference that points outside '#/components/securitySchemes'</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>One or more JSON references to reusable security schemes in your API point outside the <code>#/components/securitySchemes</code> object in the API definition. The <code>$ref</code> of all reusable security schemes must point to a <code>securityScheme</code> object in the <code>components</code> object, otherwise they have no effect.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#componentsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "One or more JSON references to reusable security schemes in your API point outside the <code>#/components/securitySchemes</code> object in the API definition. The <code>$ref</code> of all reusable security schemes must point to a <code>securityScheme</code> object in the <code>components</code> object, otherwise they have no effect.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. Here, a reusable security scheme has been defined incorrectly in <code>schemas</code> and therefore ignored:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"components\": {\n        \"securitySchemes\": {\n            \"APIkey\": {\n                \"type\": \"apiKey\",\n                \"name\": \"X-API-Key\",\n                \"in\": \"header\"\n            },\n            \"OAuth\": {\n                \"$ref\": \"#/components/schemas/OAuth\"\n            }\n        },\n        //...\n        \"schemas\" :{\n            \"OAuth\": {\n                \"type\": \"oauth2\",\n                \"flows\": {\n                    \"authorizationCode\": {\n                        \"authorizationUrl\": \"https://example.com/api/oauth/dialog\",\n                        \"tokenUrl\": \"https://example.com/api/oauth/token\",\n                        \"scopes\": {\n                            \"write:pets\": \"modify pets in your account\",\n                            \"read:pets\": \"read your pets\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "components:\n  securitySchemes:\n    APIkey:\n      type: apiKey\n      name: X-API-Key\n      in: header\n    OAuth:\n      $ref: \"#/components/schemas/OAuth\"\n  #...\n  schemas:\n    OAuth:\n      type: oauth2\n      flows:\n        authorizationCode:\n          authorizationUrl: https://example.com/api/oauth/dialog\n          tokenUrl: https://example.com/api/oauth/token\n          scopes:\n            write:pets: modify pets in your account\n            read:pets: read your pets\n"
+          }
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all JSON references to reusable security schemes point to <code>#/components/securitySchemes</code>.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"components\": {\n        \"securitySchemes\": {\n            \"APIkey\": {\n                \"type\": \"apiKey\",\n                \"name\": \"X-API-Key\",\n                \"in\": \"header\"\n            },\n            \"OAuth\": {\n                \"$ref\": \"#/components/securityschemes/OAuth\"\n            },\n            //...\n            \"OAuth\": {\n                \"type\": \"oauth2\",\n                \"flows\": {\n                    \"authorizationCode\": {\n                        \"authorizationUrl\": \"https://example.com/api/oauth/dialog\",\n                        \"tokenUrl\": \"https://example.com/api/oauth/token\",\n                        \"scopes\": {\n                            \"write:pets\": \"modify pets in your account\",\n                            \"read:pets\": \"read your pets\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "components:\n  securitySchemes:\n    APIkey:\n      type: apiKey\n      name: X-API-Key\n      in: header\n    OAuth:\n      $ref: \"#/components/securityschemes/OAuth\"\n    #...\n    OAuth:\n      type: oauth2\n      flows:\n        authorizationCode:\n          authorizationUrl: https://example.com/api/oauth/dialog\n          tokenUrl: https://example.com/api/oauth/token\n          scopes:\n            write:pets: modify pets in your account\n            read:pets: read your pets\n"
+          }
+        }
+      ]
+    }
+  },
+  "v3-validation-reference-securityscheme-unresolved": {
+    "group": "oasconformance",
+    "subgroup": "structure",
+    "title": {
+      "text": "<h1>Target of the JSON reference of the security scheme does not exist</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>The target of the JSON reference of the security scheme cannot be found in your API. You must define the target link in your, and the name used in the reference must match to a security scheme you have defined the reusable security schemes.</p>\n                "
+    },
+    "shortDescription": "The target of the JSON reference of the security scheme cannot be found in your API. You must define the target link in your, and the name used in the reference must match to a security scheme you have defined the reusable security schemes.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The name used in the reference does not match the name of the security scheme:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"components\": {\n        \"securitySchemes\": {\n            \"APIkey\": {\n                \"type\": \"apiKey\",\n                \"name\": \"X-API-Key\",\n                \"in\": \"header\"\n            },\n            \"MyOAuth\": {\n                \"$ref\": \"#/components/securitySchemes/OAuthCode\"\n            },\n            //...\n            \"OAuth\": {\n                \"type\": \"oauth2\",\n                \"flows\": {\n                    \"authorizationCode\": {\n                        \"authorizationUrl\": \"https://example.com/api/oauth/dialog\",\n                        \"tokenUrl\": \"https://example.com/api/oauth/token\",\n                        \"scopes\": {\n                            \"write:pets\": \"modify pets in your account\",\n                            \"read:pets\": \"read your pets\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "components:\n  securitySchemes:\n    APIkey:\n      type: apiKey\n      name: X-API-Key\n      in: header\n    MyOAuth:\n      $ref: \"#/components/securitySchemes/OAuthCode\"\n    #...\n    OAuth:\n      type: oauth2\n      flows:\n        authorizationCode:\n          authorizationUrl: https://example.com/api/oauth/dialog\n          tokenUrl: https://example.com/api/oauth/token\n          scopes:\n            write:pets: modify pets in your account\n            read:pets: read your pets\n"
+          }
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all targets of JSON references are defined in your API.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"components\": {\n        \"securitySchemes\": {\n            \"APIkey\": {\n                \"type\": \"apiKey\",\n                \"name\": \"X-API-Key\",\n                \"in\": \"header\"\n            },\n            \"MyOAuth\": {\n                \"$ref\": \"#/components/securitySchemes/OAuth\"\n            },\n            //...\n            \"OAuth\": {\n                \"type\": \"oauth2\",\n                \"flows\": {\n                    \"authorizationCode\": {\n                        \"authorizationUrl\": \"https://example.com/api/oauth/dialog\",\n                        \"tokenUrl\": \"https://example.com/api/oauth/token\",\n                        \"scopes\": {\n                            \"write:pets\": \"modify pets in your account\",\n                            \"read:pets\": \"read your pets\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "components:\n  securitySchemes:\n    APIkey:\n      type: apiKey\n      name: X-API-Key\n      in: header\n    MyOAuth:\n      $ref: \"#/components/securitySchemes/OAuth\"\n    #...\n    OAuth:\n      type: oauth2\n      flows:\n        authorizationCode:\n          authorizationUrl: https://example.com/api/oauth/dialog\n          tokenUrl: https://example.com/api/oauth/token\n          scopes:\n            write:pets: modify pets in your account\n            read:pets: read your pets\n"
+          }
         }
       ]
     }
@@ -14573,7 +14691,7 @@
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Replace with the description of how to fix the issue.</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all properties that OAuth2 security schemes require are defined in your API.</p>\n                "
         }
       ]
     }
@@ -15547,6 +15665,52 @@
       ]
     }
   },
+  "v3-warning-servers-required": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>At least one server should be defined</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>You have not defined any servers for your API.</p>\n                    <p>According to the Open API Specification (OAS), the top-level property <code>servers</code> is optional and if not present, the host and the port serving the API documentation are used. However, there is no host serving the documentation for the APIs in 42Crunch Platform, so Security Audit cannot infer the server.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#serverObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "You have not defined any servers for your API.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"servers\": {\n    }\n}",
+            "yaml": "servers: {}\n"
+          }
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you have defined at least one server for your API.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"servers\": {\n        \"url\": \"https://my.api.server.com/\",\n        \"description\": \"My API server\"\n    }\n}",
+            "yaml": "servers:\n  url: https://my.api.server.com/\n  description: My API server\n"
+          }
+        },
+        {
+          "text": "\n                    <p>OAS v3 also supports defining an array of multiple servers for a single API:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"servers\": [\n        {\n            \"url\": \"https://my.api.server1.com/\",\n            \"description\": \"API server 1\"\n        },\n        {\n            \"url\": \"https://my.api.server2.com/\",\n            \"description\": \"API server 2\"\n        }\n    ]\n}",
+            "yaml": "servers:\n  - url: https://my.api.server1.com/\n    description: API server 1\n  - url: https://my.api.server2.com/\n    description: API server 2\n"
+          }
+        }
+      ]
+    }
+  },
   "v3-warning-tag-externaldocumentation-url": {
     "group": "oasconformance",
     "subgroup": "bestpractices",
@@ -16410,7 +16574,7 @@
     "remediation": {
       "sections": [
         {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Replace with the description of how to fix the issue.</p>\n                "
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all properties that OAuth2 security schemes require are defined in your API.</p>\n                "
         }
       ]
     }
@@ -16814,6 +16978,43 @@
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the <code>x-42c-sample</code> extension matches the associated header.</p>\n                "
+        }
+      ]
+    }
+  },
+  "warning-host-undefined": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>At least one host should be defined</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>You have not defined any hosts in your API definition.</p>\n                    <p>According to the Open API Specification (OAS), the top-level property <code>host</code> is optional and if not present, the host and the port serving the API documentation are used. However, there is no host serving the documentation for the APIs in 42Crunch Platform, so Security Audit cannot infer the host.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swagger-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "You have not defined any hosts in your API definition.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"swagger\": \"2.0\",\n    \"info\": {\n        \"description\": \"My example API\",\n        \"version\": \"1.0.0\",\n        \"title\": \"My API\"\n    },\n    \"paths\": {\n    // ...\n    }\n}",
+            "yaml": "swagger: \"2.0\"\ninfo:\n  description: My example API\n  version: 1.0.0\n  title: My API\npaths:\n  {}\n  # ...\n"
+          }
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you have defined at least one host for your API.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"swagger\": \"2.0\",\n    \"info\": {\n        \"description\": \"My example API\",\n        \"version\": \"1.0.0\",\n        \"title\": \"My API\"\n    },\n    \"host\": \"my.api.com:8090\",\n    \"paths\": {\n    // ...\n    }\n}",
+            "yaml": "swagger: \"2.0\"\ninfo:\n  description: My example API\n  version: 1.0.0\n  title: My API\nhost: my.api.com:8090\npaths:\n  {}\n  # ...\n"
+          }
         }
       ]
     }
@@ -17511,6 +17712,43 @@
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the <code>x-42c-sample</code> extension matches the schema of the associated value.</p>\n                "
+        }
+      ]
+    }
+  },
+  "warning-schemes-undefined": {
+    "group": "oasconformance",
+    "subgroup": "bestpractices",
+    "title": {
+      "text": "<h1>Schemes should be defined</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>You have not defined the <code>schemes</code> field in your API.</p>\n                    <p>The Open API Specification (OAS) does not define the <code>schemes</code> field as mandatory and states that when missing, the default scheme  is the same as used to access your API definition itself. However, because API definitions are uploaded to 42Crunch Platform, not retrieved from URLs, Security Audit cannot infer the default scheme.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#serverObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "You have not defined the <code>schemes</code> field in your API.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"swagger\": \"2.0\",\n    \"info\": {\n        \"version\": \"1.0.0\",\n        \"title\": \"Swagger Petstore\"\n    },\n    \"host\": \"petstore.swagger.io\",\n    \"basePath\": \"/v1\",\n    \"schemes\": [\n    ]\n}",
+            "yaml": "swagger: \"2.0\"\ninfo:\n  version: 1.0.0\n  title: Swagger Petstore\nhost: petstore.swagger.io\nbasePath: /v1\nschemes: []\n"
+          }
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you have defined at least one scheme for your API:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"swagger\": \"2.0\",\n    \"info\": {\n        \"version\": \"1.0.0\",\n        \"title\": \"Swagger Petstore\"\n    },\n    \"host\": \"petstore.swagger.io\",\n    \"basePath\": \"/v1\",\n    \"schemes\": [\n        \"https\"\n    ]\n}",
+            "yaml": "swagger: \"2.0\"\ninfo:\n  version: 1.0.0\n  title: Swagger Petstore\nhost: petstore.swagger.io\nbasePath: /v1\nschemes:\n  - https\n"
+          }
         }
       ]
     }
