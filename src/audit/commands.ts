@@ -17,7 +17,7 @@ import { AuditContext, Audit, Grades, Issue, ReportedIssue, IssuesByDocument } f
 
 import { Cache } from "../cache";
 import { getLocationByPointer } from "./util";
-import { stringify } from '@xliic/preserving-json-yaml-parser';
+import { stringify } from "@xliic/preserving-json-yaml-parser";
 
 export function registerSecurityAudit(
   context: vscode.ExtensionContext,
@@ -218,11 +218,11 @@ async function performAudit(
 
     return audit;
   } catch (e) {
-    if (e.statusCode && e.statusCode === 429) {
+    if (e?.response?.statusCode === 429) {
       vscode.window.showErrorMessage(
         "Too many requests. You can run up to 3 security audits per minute, please try again later."
       );
-    } else if (e.statusCode && e.statusCode === 403) {
+    } else if (e?.response?.statusCode === 403) {
       vscode.window.showErrorMessage(
         "Authentication failed. Please paste the token that you received in email to Preferences > Settings > Extensions > OpenAPI > Security Audit Token. If you want to receive a new token instead, clear that setting altogether and initiate a new security audit for one of your OpenAPI files."
       );
@@ -320,17 +320,15 @@ async function auditDocument(
   const issues: IssuesByDocument = {};
   for (const [uri, reportedIssues] of Object.entries(issuesPerDocument)) {
     const [document, root] = files[uri];
-    issues[uri] = reportedIssues.map(
-      (issue: ReportedIssue): Issue => {
-        const [lineNo, range] = getLocationByPointer(document, root, issue.pointer);
-        return {
-          ...issue,
-          documentUri: uri,
-          lineNo,
-          range,
-        };
-      }
-    );
+    issues[uri] = reportedIssues.map((issue: ReportedIssue): Issue => {
+      const [lineNo, range] = getLocationByPointer(document, root, issue.pointer);
+      return {
+        ...issue,
+        documentUri: uri,
+        lineNo,
+        range,
+      };
+    });
   }
 
   const documents = {};
