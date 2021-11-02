@@ -1,0 +1,86 @@
+[
+	{
+	  "paths": [
+		"openapi-2.0.json#/properties",
+		"openapi-3.0-2019-04-02.json#/properties"
+	  ],
+	  "schemas": {
+		"x-42c-local-strategy": {
+			"$ref": "#/definitions/X42cLocalStrategy"
+		},
+		"x-42c-request-strategies": {
+			"$ref": "#/definitions/X42cRequestStrategies"
+		},
+		"x-42c-response-strategies": {
+			"$ref": "#/definitions/X42cResponseStrategies"
+		},
+		"x-42c-no-authentication": {
+			"$ref": "#/definitions/X42cNoAuthentication"
+		},
+		"x-42c-sensitivity": {
+			"$ref": "#/definitions/X42cSensitivity"
+		}
+	  }
+	},
+	{
+	  "paths": [  
+		"openapi-2.0.json#/definitions/pathItem/properties",
+		"openapi-3.0-2019-04-02.json#/definitions/PathItem/properties"
+	  ],
+	  "schemas": {
+		"x-42c-local-strategy": {
+			"$ref": "#/definitions/X42cLocalStrategy"
+		}
+	  }		
+	},
+	{
+		"paths": [
+			"openapi-2.0.json#/definitions/operation/properties",
+			"openapi-3.0-2019-04-02.json#/definitions/Operation/properties"
+		],
+		"schemas": {
+			"x-42c-local-strategy": {
+				"$ref": "#/definitions/X42cLocalStrategy"
+			},
+			"x-42c-no-authentication": {
+				"$ref": "#/definitions/X42cNoAuthentication"
+			},
+			"x-42c-sensitivity": {
+				"$ref": "#/definitions/X42cSensitivity"
+			}
+		}		
+	},
+	{
+		"paths": [
+			"openapi-3.0-2019-04-02.json#/definitions/Responses/properties"
+		],
+		"schemas": {
+			"x-42c-local-strategy": {
+				"$ref": "#/definitions/X42cLocalStrategy"
+			}
+		}
+	},
+	{
+		"paths": [
+			"openapi-2.0.json#/definitions/response/properties",
+			"openapi-3.0-2019-04-02.json#/definitions/Response/properties"
+		],
+		"schemas": {
+			"x-42c-local-strategy": {
+				"$ref": "#/definitions/X42cLocalStrategy"
+			}
+		}
+	},
+	{
+		"paths": [
+			"openapi-2.0.json#/definitions/responses"
+		],
+		"schemas": {
+			"properties": {
+                "x-42c-local-strategy": {
+                    "$ref": "#/definitions/X42cLocalStrategy"
+                }
+            }
+		}
+	}
+]

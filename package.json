@@ -40,12 +40,13 @@
   },
   "main": "./out/extension",
   "scripts": {
-    "vscode:prepublish": "npm run build-quickfixes && npm run build-whatsnew && npm run build-preview-redoc && npm run build-preview-swaggerui && npm run build-snippets && npm run compile",
+    "vscode:prepublish": "npm run build-quickfixes && npm run build-whatsnew && npm run build-preview-redoc && npm run build-preview-swaggerui && npm run build-snippets && npm run build-schema && npm run compile",
     "build-snippets": "js-yaml snippets/snippets.yaml > src/generated/snippets.json",
     "build-quickfixes": "js-yaml quickfixes/quickfixes.yaml > src/generated/quickfixes.json",
     "build-whatsnew": "scripts/build-whatsnew.js",
     "build-preview-redoc": "webpack --config src-webviews/preview-redoc/webpack.config.js",
     "build-preview-swaggerui": "webpack --config src-webviews/preview-swaggerui/webpack.config.js",
+    "build-schema": "scripts/build-schema.js",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
     "lint": "eslint . --ext .ts,.tsx",
@@ -556,14 +557,13 @@
     "jsonValidation": [
       {
         "fileMatch": "*.json",
-        "url": "./schema/openapi.json"
+        "url": "./schema/generated/openapi.json"
       }
     ]
   },
   "dependencies": {
     "@xliic/json-schema-ref-parser": "^9.2.0",
-    "@xliic/openapi-ast-node": "^1.7.0",
-    "@xliic/preserving-json-yaml-parser": "^1.6.3",
+    "@xliic/preserving-json-yaml-parser": "^1.7.0",
     "form-data": "^2.3.3",
     "got": "^11.8.2",
     "js-yaml": "^4.1.0",
