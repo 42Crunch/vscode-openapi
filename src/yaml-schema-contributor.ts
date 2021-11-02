@@ -35,10 +35,14 @@ export async function provideYamlSchemas(
 
   function requestSchemaContent(uri: string) {
     if (uri === "openapi:v2") {
-      const filename = path.join(context.extensionPath, "schema", "openapi-2.0.json");
+      const filename = path.join(context.extensionPath, "schema/generated", "openapi-2.0.json");
       return fs.readFileSync(filename, { encoding: "utf8" });
     } else if (uri === "openapi:v3") {
-      const filename = path.join(context.extensionPath, "schema", "openapi-3.0-2019-04-02.json");
+      const filename = path.join(
+        context.extensionPath,
+        "schema/generated",
+        "openapi-3.0-2019-04-02.json"
+      );
       return fs.readFileSync(filename, { encoding: "utf8" });
     }
     return null;
