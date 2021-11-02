@@ -3,11 +3,48 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
+import { find, getLocation, Location } from "@xliic/preserving-json-yaml-parser";
 import * as vscode from "vscode";
-import { Node } from "@xliic/openapi-ast-node";
 import { Cache } from "./cache";
 import { configuration } from "./configuration";
 import { OpenApiVersion } from "./types";
+
+interface Node {
+  parent: Node;
+  key: string | number;
+  value: any;
+  depth: number;
+  location: Location;
+}
+
+function getChildren(node: Node): Node[] {
+  const keys = Array.isArray(node.value) ? Array.from(node.value.keys()) : Object.keys(node.value);
+  return keys.map((key: string | number) => ({
+    parent: node,
+    key,
+    depth: node.depth + 1,
+    value: node.value[key],
+    location: getLocation(node.value, key),
+  }));
+}
+
+function getChildrenByName(root: Node, names: string[]): Node[] {
+  const result = [];
+  if (root) {
+    for (const key of names) {
+      if (root.value[key]) {
+        result.push({
+          parent: root,
+          key,
+          value: root.value[key],
+          depth: root.depth + 1,
+          location: getLocation(root.value, key),
+        });
+      }
+    }
+  }
+  return result;
+}
 
 export const outlines: { [id: string]: vscode.TreeView<Node> } = {};
 
@@ -26,9 +63,22 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
         const pointer = this.getRootPointer();
         const root = cache.getLastGoodDocumentAst(document);
         if (root && pointer) {
-          this.root = root.find(pointer);
+          const found = find(root, pointer);
+          this.root = {
+            parent: undefined,
+            key: undefined,
+            depth: 0,
+            value: found,
+            location: undefined,
+          };
         } else if (root) {
-          this.root = root;
+          this.root = {
+            parent: undefined,
+            key: undefined,
+            depth: 0,
+            value: root,
+            location: undefined,
+          };
         } else {
           this.root = null;
         }
@@ -60,11 +110,15 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
       node = this.root;
     }
 
-    if (node.getDepth() > this.maxDepth) {
+    if (node.depth > this.maxDepth) {
       return Promise.resolve([]);
     }
 
-    return Promise.resolve(this.sortChildren(this.filterChildren(node, node.getChildren())));
+    if (typeof node.value === "object") {
+      return Promise.resolve(this.sortChildren(this.filterChildren(node, getChildren(node))));
+    } else {
+      return Promise.resolve([]);
+    }
   }
 
   filterChildren(node: Node, children: Node[]) {
@@ -92,20 +146,20 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
   }
 
   getCollapsible(node: Node): vscode.TreeItemCollapsibleState {
-    const canDisplayChildren = node.getDepth() < this.maxDepth;
+    const canDisplayChildren = node.depth < this.maxDepth;
     return canDisplayChildren
       ? vscode.TreeItemCollapsibleState.Collapsed
       : vscode.TreeItemCollapsibleState.None;
   }
 
   getLabel(node: Node): string {
-    return node ? node.getKey() : "<unknown>";
+    return node ? String(node.key) : "<unknown>";
   }
 
   getCommand(node: Node): vscode.Command | undefined {
     const editor = vscode.window?.activeTextEditor;
     if (editor && node) {
-      const [start, end] = node.getRange();
+      const { start, end } = node.location.value;
       return {
         command: "openapi.goToLine",
         title: "",
@@ -130,8 +184,8 @@ export class PathOutlineProvider extends OutlineProvider {
   }
 
   filterChildren(node: Node, children: Node[]) {
-    const depth = node.getDepth();
-    const key = node.getKey();
+    const depth = node.depth;
+    const key = node.key;
     if (depth === 2) {
       return children.filter((child) => {
         return [
@@ -144,11 +198,11 @@ export class PathOutlineProvider extends OutlineProvider {
           "patch",
           "trace",
           "parameters",
-        ].includes(child.getKey());
+        ].includes(String(child.key));
       });
     } else if (depth === 3 && key !== "parameters") {
       return children.filter((child) => {
-        const key = child.getKey();
+        const key = child.key;
         return key === "responses" || key === "parameters";
       });
     }
@@ -156,23 +210,19 @@ export class PathOutlineProvider extends OutlineProvider {
   }
 
   getLabel(node: Node): string {
-    const depth = node.getDepth();
-
-    if ((depth === 4 || depth === 5) && node.getParent().getKey() == "parameters") {
+    if ((node.depth === 4 || node.depth === 5) && node.parent.key == "parameters") {
       // return label for a parameter
-      const ref = node.find("/$ref");
-      const name = node.find("/name");
-      const label = (ref && ref.getValue()) || (name && name.getValue());
+      const label = node.value["$ref"] || node.value["name"];
       if (!label) {
         return "<unknown>";
       }
       return label;
     }
-    return node.getKey();
+    return String(node.key);
   }
 
   getContextValue(node: Node) {
-    if (node.getDepth() === 2) {
+    if (node.depth === 2) {
       return "path";
     }
     return null;
@@ -197,9 +247,9 @@ export class SecurityOutlineProvider extends OutlineProvider {
   }
 
   getLabel(node: Node): string {
-    const children = node.getChildren();
-    if (children[0]) {
-      return children[0].getKey();
+    const keys = Object.keys(node.value);
+    if (keys[0]) {
+      return keys[0];
     }
     return "<unknown>";
   }
@@ -218,16 +268,7 @@ export class ServersOutlineProvider extends OutlineProvider {
   }
 
   getLabel(node: Node): string {
-    for (const child of node.getChildren()) {
-      if (child.getKey() === "url") {
-        const label = child.getValue();
-        if (!label) {
-          return "<unknown>";
-        }
-        return label;
-      }
-    }
-    return "<unknown>";
+    return node.value && node.value.url ? node.value.url : "<unknown>";
   }
 }
 
@@ -246,47 +287,25 @@ export class ResponsesOutlineProvider extends OutlineProvider {
 export class GeneralTwoOutlineProvider extends OutlineProvider {
   getChildren(node?: Node): Thenable<Node[]> {
     const targets = [
-      "/swagger",
-      "/host",
-      "/basePath",
-      "/info",
-      "/schemes",
-      "/consumes",
-      "/produces",
-      "/tags",
-      "/externalDocs",
+      "swagger",
+      "host",
+      "basePath",
+      "info",
+      "schemes",
+      "consumes",
+      "produces",
+      "tags",
+      "externalDocs",
     ];
 
-    const result = [];
-
-    if (this.root) {
-      for (const pointer of targets) {
-        const node = this.root.find(pointer);
-        if (node) {
-          result.push(node);
-        }
-      }
-    }
-
-    return Promise.resolve(result);
+    return Promise.resolve(getChildrenByName(this.root, targets));
   }
 }
 
 export class GeneralThreeOutlineProvider extends OutlineProvider {
   getChildren(node?: Node): Thenable<Node[]> {
-    const targets = ["/openapi", "/info", "/tags", "/externalDocs"];
-
-    const result = [];
-
-    if (this.root) {
-      for (const pointer of targets) {
-        const node = this.root.find(pointer);
-        if (node) {
-          result.push(node);
-        }
-      }
-    }
-    return Promise.resolve(result);
+    const targets = ["openapi", "info", "tags", "externalDocs"];
+    return Promise.resolve(getChildrenByName(this.root, targets));
   }
 }
 
@@ -301,12 +320,12 @@ export class OperationIdOutlineProvider extends OutlineProvider {
     }
 
     const operations = [];
-
-    for (const path of this.root.getChildren()) {
-      for (const operation of path.getChildren()) {
-        const operationId = operation.find("/operationId");
+    const paths = getChildren(this.root);
+    for (const path of paths) {
+      for (const operation of getChildren(path)) {
+        const operationId = operation.value["operationId"];
         if (operationId) {
-          operations.push(operationId);
+          operations.push(operation);
         }
       }
     }
@@ -315,7 +334,7 @@ export class OperationIdOutlineProvider extends OutlineProvider {
   }
 
   getLabel(node: Node): string {
-    return node.getValue();
+    return node.value["operationId"];
   }
 }
 

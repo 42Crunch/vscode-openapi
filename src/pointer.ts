@@ -43,3 +43,18 @@ export function parseJsonPointer(pointer: string): string[] {
 
   return pointer.split("/").slice(1).map(untilde).map(decodeURIComponent);
 }
+
+export function getPointerLastSegment(pointer: string): string {
+  const segments = parseJsonPointer(pointer);
+  return segments[segments.length - 1];
+}
+
+export function getPointerParent(pointer: string): string {
+  return pointer.substring(0, pointer.lastIndexOf("/"));
+}
+
+export function getPointerChild(pointer: string, key: string): string {
+  const segments = parseJsonPointer(pointer);
+  segments.push(key);
+  return joinJsonPointer(segments);
+}

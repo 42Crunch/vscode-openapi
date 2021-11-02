@@ -193,7 +193,7 @@ export function generateSchema(json: any): ObjectSchema | ArraySchema {
   return result;
 }
 
-function getType(value: any, nullForUndefined?: boolean): string {
+export function getType(value: any, nullForUndefined?: boolean): string {
   const type = typeof value;
   if (type === "object") {
     return value === null ? "null" : value instanceof Array ? "array" : type;

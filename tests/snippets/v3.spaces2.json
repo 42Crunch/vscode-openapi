@@ -1,0 +1,131 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API Title",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "https://elvis.bom/v1",
+      "description": "Server description"
+    },
+    {
+      "url": "https://api.server.test/v1",
+      "description": "Server description"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "schemasKey": {
+        "type": "object",
+        "properties": {
+          "property": {
+            "type": "integer"
+          }
+        }
+      },
+      "name": {
+        "type": "object",
+        "properties": {
+          "property": {
+            "type": "integer"
+          }
+        }
+      }
+    },
+    "responses": {
+      "responsesKey": {
+        "description": "",
+        "content": {
+          "application/json": {
+            "schema": {}
+          }
+        }
+      },
+      "name": {
+        "description": "",
+        "content": {
+          "application/json": {
+            "schema": {}
+          }
+        }
+      }
+    },
+    "parameters": {
+      "parametersKey": {
+        "name": "name",
+        "in": "query",
+        "required": true,
+        "description": ""
+      },
+      "name": {
+        "name": "name",
+        "in": "query",
+        "required": true,
+        "description": ""
+      }
+    },
+    "securitySchemes": {
+      "schemeBasic": {
+        "type": "http",
+        "scheme": "basic"
+      },
+      "schemeApiKey": {
+        "type": "apiKey",
+        "name": "api_key",
+        "in": "query"
+      },
+      "schemeJWT": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "schemeOauth2Access": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://domain.test/api/oauth/dialog",
+            "tokenUrl": "https://domain.test/api/oauth/token",
+            "scopes": {
+              "read": "example read scope",
+              "write": "example write scope"
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/path1": {
+      "put": {
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "get": {
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/name": {
+      "get": {
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

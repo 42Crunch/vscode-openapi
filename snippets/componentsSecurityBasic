@@ -1,4 +1,0 @@
-	"${1:name}": {
-		"type": "http",
-		"scheme": "basic"
-	}

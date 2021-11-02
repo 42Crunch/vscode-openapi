@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
-import { Node } from "@xliic/openapi-ast-node";
+import { find, findNodeAtOffset, Path, getRootRange } from "@xliic/preserving-json-yaml-parser";
+
 import { OpenApiVersion } from "./types";
 import path from "path";
 import { Cache } from "./cache";
@@ -26,15 +27,20 @@ const targetMapping = {
   },
 };
 
-function findTarget(root: Node, version: OpenApiVersion, node: Node): string | undefined {
+function findTarget(
+  root: any,
+  version: OpenApiVersion,
+  node: any,
+  nodePath: Path
+): string | undefined {
   const mapping = targetMapping[version];
   if (mapping) {
-    return mapping[node.getParent()?.getKey()] || mapping[node.getParent()?.getParent()?.getKey()];
+    return mapping[nodePath[nodePath.length - 1]] || mapping[nodePath[nodePath.length - 2]];
   }
 }
 
 export class CompletionItemProvider implements vscode.CompletionItemProvider {
-  root: Node;
+  root: any;
   version: OpenApiVersion;
   constructor(private context: vscode.ExtensionContext, private cache: Cache) {
     cache.onDidActiveDocumentChange(async (document) => {
@@ -61,12 +67,12 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
     }
 
     const offset = document.offsetAt(position);
-    const [start, end] = this.root.getRange();
+    const { end } = getRootRange(this.root);
     // if offset is beyond the range of the root node
     // which could happen in case of incomplete yaml node with
     // bunch of spaces at the end;
     // look for the node at the end of the root node range
-    const node = this.root.findNodeAtOffset(offset > end ? end : offset);
+    const [node, nodePath] = findNodeAtOffset(this.root, offset > end ? end : offset);
 
     let searchRoot = this.root;
     let fileRef = "";
@@ -94,8 +100,8 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
       }
     }
 
-    const target = findTarget(this.root, this.version, node);
-    const targetNode = target && searchRoot.find(target);
+    const target = findTarget(this.root, this.version, node, nodePath);
+    const targetNode = target && find(searchRoot, target);
     const quoteChar =
       line.charAt(position.character) == '"' || line.charAt(position.character) == "'"
         ? line.charAt(position.character)

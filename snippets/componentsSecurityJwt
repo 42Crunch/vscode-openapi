@@ -1,5 +1,0 @@
-	"${1:name}": {
-		"type": "http",
-		"scheme": "bearer",
-		"bearerFormat": "JWT"
-	}
