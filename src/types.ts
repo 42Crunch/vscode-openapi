@@ -1,5 +1,6 @@
+import { Parsed } from "@xliic/preserving-json-yaml-parser";
 import * as vscode from "vscode";
-import { Node } from "@xliic/openapi-ast-node";
+import { JsonNodeValue } from "./json-utils";
 
 export const configId = "openapi";
 export const extensionQualifiedId = "42Crunch.vscode-openapi";
@@ -8,6 +9,8 @@ export enum OpenApiVersion {
   V2,
   V3,
 }
+
+type Node = any;
 
 export interface Mapping {
   uri: string;
@@ -175,13 +178,15 @@ export interface FixContext {
   auditContext: AuditContext;
   version: OpenApiVersion;
   bundle: BundleResult;
-  pointer: string;
-  root: Node;
-  target: Node;
+  root: Parsed;
+  target: JsonNodeValue;
+  anchor?: JsonNodeValue;
   document: vscode.TextDocument;
+  dropBrackets?: number[];
 }
 
 export interface FixSnippetParameters {
-  snippet: vscode.SnippetString;
+  snippet?: vscode.SnippetString;
   location?: vscode.Position;
+  dropLine?: boolean;
 }

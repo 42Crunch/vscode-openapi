@@ -4,21 +4,20 @@
 */
 
 import * as vscode from "vscode";
-import { Node } from "@xliic/openapi-ast-node";
 import { ExternalRefDocumentProvider } from "./external-refs";
 import { ParserOptions } from "./parser-options";
 import { BundleResult, BundlingError, OpenApiVersion } from "./types";
 import { parseToAst } from "./parsers";
 import { configuration } from "./configuration";
 import { bundle } from "./bundler";
-import { parse } from "@xliic/preserving-json-yaml-parser";
+import { find, findLocationForJsonPointer, Parsed } from "@xliic/preserving-json-yaml-parser";
 
 interface ParsedDocument {
   documentVersion: number;
   openApiVersion: OpenApiVersion;
-  lastGoodAstRoot?: Node;
-  astRoot?: Node;
-  parsed?: any;
+  lastGoodAstRoot?: Parsed;
+  astRoot?: Parsed;
+  parsed?: Parsed;
   errors: vscode.Diagnostic[];
 }
 
@@ -153,7 +152,7 @@ class ParsedDocumentCache implements vscode.Disposable {
     const lastGoodAstRoot = errors ? previous?.lastGoodAstRoot : astRoot;
 
     // parse if no errors
-    const parsed = astRoot && !errors ? parse(astRoot) : undefined;
+    const parsed = astRoot && !errors ? astRoot : undefined;
 
     this.showErrors(document, openApiVersion, errors);
 
@@ -310,11 +309,11 @@ export class Cache implements vscode.Disposable {
     return document ? this.parsedDocuments.get(document).openApiVersion : OpenApiVersion.Unknown;
   }
 
-  getDocumentAst(document: vscode.TextDocument): Node | undefined {
+  getDocumentAst(document: vscode.TextDocument): Parsed | undefined {
     return this.parsedDocuments.get(document).astRoot;
   }
 
-  getLastGoodDocumentAst(document: vscode.TextDocument): Node | undefined {
+  getLastGoodDocumentAst(document: vscode.TextDocument): Parsed | undefined {
     return this.parsedDocuments.get(document).lastGoodAstRoot;
   }
 
@@ -417,9 +416,9 @@ export class Cache implements vscode.Disposable {
         if (!parsed.astRoot) {
           continue;
         }
-        const node = parsed.astRoot.find(error.pointer);
+        const node = find(parsed.astRoot, error.pointer);
         if (node) {
-          const [start] = node.getRange();
+          const { start } = findLocationForJsonPointer(parsed.astRoot, error.pointer).value;
           const position = document.positionAt(start);
           const line = document.lineAt(position.line);
           const range = new vscode.Range(

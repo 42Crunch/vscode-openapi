@@ -1,6 +1,0 @@
-${1:name}:
-	name: ${1}
-	in: path
-	required: true
-	type: ${2|string,number,integer,boolean,array|}
-	description: ${3}

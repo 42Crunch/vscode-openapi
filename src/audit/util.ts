@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { Node } from "@xliic/openapi-ast-node";
+import { findLocationForJsonPointer, Location } from "@xliic/preserving-json-yaml-parser";
 
 export function getLocationByPointer(
   document: vscode.TextDocument,
-  root: Node,
+  root: any,
   pointer: string
 ): [number, vscode.Range] {
   // FIXME markerNode can only be returned for the main document
@@ -11,10 +11,21 @@ export function getLocationByPointer(
   // to return documentUri of current/main document
   // depending on pointer == ""?
 
-  const markerNode = root.find("/openapi") || root.find("/swagger");
-  const node = pointer === "" ? markerNode : root.find(pointer);
-  if (node) {
-    const [start, end] = node.getRange();
+  let location: Location;
+  if (pointer == "") {
+    // if pointer == "" return location for well known node
+    // which is depending on OAS version is either "/swagger" or "/openapi
+    if (root["openapi"]) {
+      location = findLocationForJsonPointer(root, "/openapi");
+    } else {
+      location = findLocationForJsonPointer(root, "/swagger");
+    }
+  } else {
+    location = findLocationForJsonPointer(root, pointer);
+  }
+
+  if (location) {
+    const start = location.key ? location.key.start : location.value.start;
     const position = document.positionAt(start);
     const line = document.lineAt(position.line);
     const range = new vscode.Range(

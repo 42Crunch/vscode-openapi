@@ -5,7 +5,7 @@
 
 import * as vscode from "vscode";
 import { Configuration } from "./configuration";
-import { Options } from "@xliic/openapi-ast-node";
+import { ParserOptions as Options } from "@xliic/preserving-json-yaml-parser";
 
 export class ParserOptions implements Options {
   configuration: Configuration;

@@ -7,11 +7,77 @@ import * as vscode from "vscode";
 import { TestFS } from "./memfs";
 import * as assert from "assert";
 import { readFileSync } from "fs";
-import * as yaml from "yaml-language-server-parser";
-import * as json from "jsonc-parser";
-import { JsonNode, YamlNode } from "@xliic/openapi-ast-node";
 import { workspace, window, TextEditor, TextDocument } from "vscode";
-import { FixContext } from "../types";
+import { FixContext, FixType } from "../types";
+import { Parsed, parseJson, parseYaml } from "@xliic/preserving-json-yaml-parser";
+import { findJsonNodeValue, getRootAsJsonNodeValue, JsonNodeValue } from "../json-utils";
+import {
+  getFixAsJsonString,
+  getFixAsYamlString,
+  renameKeyNode,
+  replaceJsonNode,
+  safeParse,
+} from "../util";
+import { componentsTags, topTags } from "../audit/quickfix";
+
+export async function replaceKey(editor: vscode.TextEditor, pointer: string, key: string) {
+  const root = safeParse(editor.document.getText(), editor.document.languageId);
+  const context: FixContext = {
+    editor: editor,
+    edit: null,
+    issues: [],
+    fix: {
+      problem: ["x"],
+      title: "x",
+      type: FixType.RenameKey,
+      fix: key,
+    },
+    bulk: false,
+    snippet: false,
+    auditContext: null,
+    version: null,
+    bundle: null,
+    root: root,
+    target: findJsonNodeValue(root, pointer),
+    document: editor.document,
+  };
+
+  const edit = new vscode.WorkspaceEdit();
+  if (editor.document.languageId === "json") {
+    edit.replace(editor.document.uri, renameKeyNode(context), getFixAsJsonString(context));
+  } else {
+    edit.replace(editor.document.uri, renameKeyNode(context), getFixAsYamlString(context));
+  }
+  await vscode.workspace.applyEdit(edit);
+}
+
+export async function replaceValue(editor: vscode.TextEditor, pointer: string, value: string) {
+  const root = safeParse(editor.document.getText(), editor.document.languageId);
+  const context: FixContext = {
+    editor: editor,
+    edit: null,
+    issues: [],
+    fix: {
+      problem: ["x"],
+      title: "x",
+      type: FixType.Replace,
+      fix: value,
+    },
+    bulk: false,
+    snippet: false,
+    auditContext: null,
+    version: null,
+    bundle: null,
+    root: root,
+    target: findJsonNodeValue(root, pointer),
+    document: editor.document,
+  };
+
+  const edit = new vscode.WorkspaceEdit();
+  const [fixAsString, range] = replaceJsonNode(context, getFixAsJsonString(context));
+  edit.replace(editor.document.uri, range, fixAsString);
+  await vscode.workspace.applyEdit(edit);
+}
 
 export function rndName() {
   return Math.random()
@@ -88,18 +154,8 @@ export function withLogDisabled(runnable: () => Promise<any>): () => Promise<voi
   };
 }
 
-export function parseJson(text) {
-  const jsonTree = json.parseTree(text);
-  return new JsonNode(jsonTree);
-}
-
 export function loadJson(filename) {
   return parseJson(readFileSync(filename, { encoding: "utf8" }));
-}
-
-export function parseYaml(text) {
-  const yamlTree = yaml.load(text);
-  return new YamlNode(yamlTree);
 }
 
 export function loadYaml(filename) {
@@ -123,11 +179,50 @@ export function withRandomFileEditor(
 }
 
 export function getContextUpdatedByPointer(context: FixContext, pointer: string): FixContext {
-  context.pointer = pointer;
-  context.target = context.root.find(pointer);
+  context.target = findJsonNodeValue(context.root, pointer);
   return context;
 }
 
 export function wrap(text: string): string {
   return text.replace(new RegExp("\r\n", "g"), "\n");
+}
+
+export function assertStrictNodesEqual(node1: JsonNodeValue, node2: JsonNodeValue) {
+  assert.strictEqual(node1.value, node2.value);
+  assert.strictEqual(node1.pointer, node2.pointer);
+}
+
+export function assertStrictNodeEqual(node: JsonNodeValue, value: any, pointer: string) {
+  assert.strictEqual(node.value, value);
+  assert.strictEqual(node.pointer, pointer);
+}
+
+export function ignoreJsonTextFeatures(text: string): string {
+  return text.replace(new RegExp("}( )+\n", "g"), "}\n");
+}
+
+export function ignoreYamlTextFeatures(text: string): string {
+  return text.replace(new RegExp(":( )+\n", "g"), ":\n");
+}
+
+export function assertTagsOrder(root: Parsed) {
+  const asc = function (a: number, b: number) {
+    return a - b;
+  };
+  const children = getRootAsJsonNodeValue(root).getChildren(true);
+  const ids = children.map((child) => topTags.indexOf(child.getKey()));
+  const idsSorted = [...ids].sort(asc);
+  assert.notStrictEqual(idsSorted[0], -1);
+  assert.deepStrictEqual(ids, idsSorted);
+
+  const components = findJsonNodeValue(root, "/components");
+  if (components) {
+    const children = components.getChildren(true);
+    if (children && children.length > 1) {
+      const ids = children.map((child) => componentsTags.indexOf(child.getKey()));
+      const idsSorted = [...ids].sort(asc);
+      assert.notStrictEqual(idsSorted[0], -1);
+      assert.deepStrictEqual(ids, idsSorted);
+    }
+  }
 }

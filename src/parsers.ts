@@ -1,14 +1,12 @@
 import * as vscode from "vscode";
-import * as yaml from "js-yaml";
-import * as json from "jsonc-parser";
-import { parse, Node } from "@xliic/openapi-ast-node";
+import { parse } from "@xliic/preserving-json-yaml-parser";
 import { ParserOptions } from "./parser-options";
 import { OpenApiVersion } from "./types";
 
 export function parseToAst(
   document: vscode.TextDocument,
   parserOptions: ParserOptions
-): [OpenApiVersion, Node, vscode.Diagnostic[]] {
+): [OpenApiVersion, any, vscode.Diagnostic[]] {
   if (
     !(
       document.languageId === "json" ||
@@ -37,25 +35,16 @@ export function parseToAst(
   return [version, node, messages.length > 0 ? messages : null];
 }
 
-export function getOpenApiVersion(root: Node): OpenApiVersion {
-  if (!root) {
-    return OpenApiVersion.Unknown;
-  }
-
-  const swaggerVersionValue = root?.find("/swagger")?.getValue();
-  const openApiVersionValue = root?.find("/openapi")?.getValue();
-
-  if (swaggerVersionValue === "2.0") {
+export function getOpenApiVersion(root: any): OpenApiVersion {
+  if (root?.swagger === "2.0") {
     return OpenApiVersion.V2;
-  }
-
-  if (
-    openApiVersionValue &&
-    typeof openApiVersionValue === "string" &&
-    openApiVersionValue.match(/^3\.0\.\d(-.+)?$/)
+  } else if (
+    root?.openapi &&
+    typeof root?.openapi === "string" &&
+    root?.openapi?.match(/^3\.0\.\d(-.+)?$/)
   ) {
     return OpenApiVersion.V3;
+  } else {
+    return OpenApiVersion.Unknown;
   }
-
-  return OpenApiVersion.Unknown;
 }

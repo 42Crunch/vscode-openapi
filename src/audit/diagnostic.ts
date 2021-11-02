@@ -5,7 +5,6 @@
 
 import * as vscode from "vscode";
 import { AuditDiagnostic } from "../types";
-import { Node } from "@xliic/openapi-ast-node";
 
 export function updateDiagnostics(
   diagnostics: vscode.DiagnosticCollection,
@@ -41,19 +40,4 @@ export function createDiagnosticsForUri(filename: string, uri: string, issues): 
       range: issue.range,
     })
   );
-}
-
-function getListOfAllJsonPointers(node: Node, pointers, ranges) {
-  if (!node.getChildren()) {
-    return;
-  }
-  for (let child of node.getChildren()) {
-    if (child.getKeyRange() == null) {
-      ranges.push(child.getRange());
-    } else {
-      ranges.push(child.getKeyRange());
-    }
-    pointers.push(child.getJsonPonter());
-    getListOfAllJsonPointers(child, pointers, ranges);
-  }
 }

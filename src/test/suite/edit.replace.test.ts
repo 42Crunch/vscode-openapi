@@ -9,9 +9,10 @@ import {
   safeParse,
 } from "../../util";
 import { FixContext, FixType, InsertReplaceRenameFix } from "../../types";
+import { findJsonNodeValue } from "../../json-utils";
 
-suite("Edit Replace Node Test Suite", () => {
-  test("Method replaceJsonNode (key - value) test", async () => {
+suite("Replace Node", () => {
+  test("Method replaceJsonNode (object)", async () => {
     const text = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1\n ]\n}';
     const expected = '{\n "a": {\n  "a1": [\n   "qwe",\n   "baz"\n  ]\n },\n "c": [\n  1\n ]\n}';
     const pointer = "/a/a1";
@@ -36,9 +37,8 @@ suite("Edit Replace Node Test Suite", () => {
         auditContext: null,
         version: null,
         bundle: null,
-        pointer: pointer,
         root: root,
-        target: root.find(pointer),
+        target: findJsonNodeValue(root, pointer),
         document: editor.document,
       };
 
@@ -50,12 +50,12 @@ suite("Edit Replace Node Test Suite", () => {
 
       return vscode.workspace.applyEdit(edit).then(() => {
         assert.ok(doc.isDirty);
-        assert.equal(doc.getText(), expected);
+        assert.strictEqual(doc.getText(), expected);
       });
     });
   });
 
-  test("Method replaceJsonNode (array member) test", async () => {
+  test("Method replaceJsonNode (array)", async () => {
     const text = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1\n ]\n}';
     const expected = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  {\n   "a2": "baz"\n  }\n ]\n}';
     const pointer = "/c/0";
@@ -82,9 +82,8 @@ suite("Edit Replace Node Test Suite", () => {
         auditContext: null,
         version: null,
         bundle: null,
-        pointer: pointer,
         root: root,
-        target: root.find(pointer),
+        target: findJsonNodeValue(root, pointer),
         document: editor.document,
       };
 
@@ -96,12 +95,12 @@ suite("Edit Replace Node Test Suite", () => {
 
       return vscode.workspace.applyEdit(edit).then(() => {
         assert.ok(doc.isDirty);
-        assert.equal(doc.getText(), expected);
+        assert.strictEqual(doc.getText(), expected);
       });
     });
   });
 
-  test("Method replaceYamlNode (key - value) test", async () => {
+  test("Method replaceYamlNode (object)", async () => {
     const text = "a:\n  a1: foo\nc:\n  - 1\n";
     const expected = "a:\n  a1: \n    - qwe\n    - baz\nc:\n  - 1\n";
     const pointer = "/a/a1";
@@ -126,9 +125,8 @@ suite("Edit Replace Node Test Suite", () => {
         auditContext: null,
         version: null,
         bundle: null,
-        pointer: pointer,
         root: root,
-        target: root.find(pointer),
+        target: findJsonNodeValue(root, pointer),
         document: editor.document,
       };
 
@@ -140,12 +138,12 @@ suite("Edit Replace Node Test Suite", () => {
 
       return vscode.workspace.applyEdit(edit).then(() => {
         assert.ok(doc.isDirty);
-        assert.equal(doc.getText(), expected);
+        assert.strictEqual(doc.getText(), expected);
       });
     });
   });
 
-  test("Method replaceYamlNode (array member) test", async () => {
+  test("Method replaceYamlNode (array)", async () => {
     const text = "a:\n  a1: foo\nc:\n  - 1\n";
     const expected = "a:\n  a1: foo\nc:\n  - a2: baz\n";
     const pointer = "/c/0";
@@ -172,9 +170,8 @@ suite("Edit Replace Node Test Suite", () => {
         auditContext: null,
         version: null,
         bundle: null,
-        pointer: pointer,
         root: root,
-        target: root.find(pointer),
+        target: findJsonNodeValue(root, pointer),
         document: editor.document,
       };
 
@@ -186,7 +183,7 @@ suite("Edit Replace Node Test Suite", () => {
 
       return vscode.workspace.applyEdit(edit).then(() => {
         assert.ok(doc.isDirty);
-        assert.equal(doc.getText(), expected);
+        assert.strictEqual(doc.getText(), expected);
       });
     });
   });

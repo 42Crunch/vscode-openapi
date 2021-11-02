@@ -26,10 +26,12 @@ import { ReportWebView } from "./report";
 import {
   deleteJsonNode,
   deleteYamlNode,
+  dropBracketsOnEdit,
   getFixAsJsonString,
   getFixAsYamlString,
   insertJsonNode,
   insertYamlNode,
+  processSnippetParameters,
   renameKeyNode,
   replaceJsonNode,
   replaceYamlNode,
@@ -39,14 +41,50 @@ import parameterSources from "./quickfix-sources";
 import { getLocationByPointer } from "./util";
 import { generateSchemaFixCommand, createGenerateSchemaAction } from "./quickfix-schema";
 import { simpleClone } from "@xliic/preserving-json-yaml-parser";
+import { findJsonNodeValue } from "../json-utils";
 
 const registeredQuickFixes: { [key: string]: Fix } = {};
+
+// preferred order of the tags, mixed v2 and v3 tags
+export const topTags: string[] = [
+  "swagger",
+  "openapi",
+  "info",
+  "externalDocs",
+  "host",
+  "basePath",
+  "schemes",
+  "consumes",
+  "produces",
+  "tags",
+  "servers",
+  "components",
+  "paths",
+  "parameters",
+  "responses",
+  "security",
+  "securityDefinitions",
+  "definitions",
+];
+
+// preferred order of tags in v3 components
+export const componentsTags: string[] = [
+  "schemas",
+  "responses",
+  "parameters",
+  "examples",
+  "requestBodies",
+  "headers",
+  "securitySchemes",
+  "links",
+  "callbacks",
+];
 
 function fixRegexReplace(context: FixContext) {
   const document = context.document;
   const fix = <RegexReplaceFix>context.fix;
   const target = context.target;
-  const currentValue = target.getValue();
+  const currentValue = target.value;
   if (typeof currentValue !== "string") {
     return;
   }
@@ -66,18 +104,21 @@ export function fixInsert(context: FixContext) {
   const document = context.document;
   let value: string, position: vscode.Position;
   context.snippet = !context.bulk;
+  context.snippetParameters = {};
   if (document.languageId === "yaml") {
     [value, position] = insertYamlNode(context, getFixAsYamlString(context));
   } else {
     [value, position] = insertJsonNode(context, getFixAsJsonString(context));
   }
   if (context.snippet) {
-    context.snippetParameters = {
-      snippet: new vscode.SnippetString(value),
-      location: position,
-    };
+    context.snippetParameters.snippet = new vscode.SnippetString(value);
+    context.snippetParameters.location = position;
   } else {
     const edit = getWorkspaceEdit(context);
+    context.snippetParameters = null;
+    if (context.dropBrackets) {
+      dropBracketsOnEdit(context.editor, context.dropBrackets, edit);
+    }
     if (context.skipConfirmation) {
       edit.insert(document.uri, position, value);
     } else {
@@ -131,16 +172,17 @@ function fixDelete(context: FixContext) {
 
 function transformInsertToReplaceIfExists(context: FixContext): boolean {
   const target = context.target;
-  const pointer = context.pointer;
   const fix = <InsertReplaceRenameFix>context.fix;
-
   const keys = Object.keys(fix.fix);
+
   if (target.isObject() && keys.length === 1) {
     const insertingKey = keys[0];
-    for (let child of target.getChildren()) {
+    for (const child of target.getChildren()) {
       if (child.getKey() === insertingKey) {
-        context.pointer = `${pointer}/${insertingKey}`;
-        context.target = context.root.find(context.pointer);
+        context.target = findJsonNodeValue(
+          context.root,
+          `${context.target.pointer}/${insertingKey}`
+        );
         context.fix = {
           problem: fix.problem,
           title: fix.title,
@@ -163,6 +205,7 @@ async function quickFixCommand(
 ) {
   let edit: vscode.WorkspaceEdit = null;
   let snippetParameters: FixSnippetParameters = null;
+  let dropBrackets = null;
   const document = editor.document;
   const uri = document.uri.toString();
 
@@ -187,7 +230,7 @@ async function quickFixCommand(
     // if fix.pointer exists, append it to diagnostic.pointer
     const pointer = fix.pointer ? `${issuePointer}${fix.pointer}` : issuePointer;
     const root = cache.getLastGoodDocumentAst(document);
-    const target = root.find(pointer);
+    const target = findJsonNodeValue(root, pointer);
 
     const context: FixContext = {
       editor: editor,
@@ -198,7 +241,6 @@ async function quickFixCommand(
       auditContext: auditContext,
       version: version,
       bundle: bundle,
-      pointer: pointer,
       root: root,
       target: target,
       document: document,
@@ -232,6 +274,7 @@ async function quickFixCommand(
       edit = context.edit;
     }
     if (context.snippetParameters) {
+      dropBrackets = context["dropBrackets"];
       snippetParameters = context.snippetParameters;
     }
   }
@@ -240,6 +283,7 @@ async function quickFixCommand(
   if (edit) {
     await vscode.workspace.applyEdit(edit);
   } else if (snippetParameters) {
+    await processSnippetParameters(editor, snippetParameters, dropBrackets);
     await editor.insertSnippet(snippetParameters.snippet, snippetParameters.location);
   }
 

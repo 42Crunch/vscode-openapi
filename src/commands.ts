@@ -4,11 +4,19 @@
 */
 
 import * as vscode from "vscode";
-import { outlines } from "./outline";
+import {
+  find,
+  findNodeAtOffset,
+  joinJsonPointer,
+  simpleClone,
+} from "@xliic/preserving-json-yaml-parser";
 import * as snippets from "./generated/snippets.json";
-import { JsonNode, Node, YamlNode } from "@xliic/openapi-ast-node";
 import { Cache } from "./cache";
-import { OpenApiVersion } from "./types";
+import { Fix, FixContext, FixType, OpenApiVersion } from "./types";
+import { findJsonNodeValue } from "./json-utils";
+import { fixInsert } from "./audit/quickfix";
+import { getPointerLastSegment, getPointerParent } from "./pointer";
+import { processSnippetParameters } from "./util";
 
 const commands = {
   goToLine,
@@ -55,42 +63,12 @@ const commands = {
   copySelectedThreeSecurityOutlineJsonReference,
 };
 
-// preferred order of the tags, mixed v2 and v3 tags
-export const topTags: string[] = [
-  "swagger",
-  "openapi",
-  "info",
-  "externalDocs",
-  "host",
-  "basePath",
-  "schemes",
-  "consumes",
-  "produces",
-  "tags",
-  "servers",
-  "components",
-  "paths",
-  "parameters",
-  "responses",
-  "security",
-  "securityDefinitions",
-  "definitions",
-];
-
-// preferred order of tags in v3 components
-const componentsTags: string[] = [
-  "schemas",
-  "responses",
-  "parameters",
-  "examples",
-  "requestBodies",
-  "headers",
-  "securitySchemes",
-  "links",
-  "callbacks",
-];
+export const registeredSnippetQuickFixes: { [key: string]: Fix } = {};
 
 export function registerCommands(cache: Cache): vscode.Disposable[] {
+  for (const fix of snippets.fixes) {
+    registeredSnippetQuickFixes[fix.problem[0]] = fix as Fix;
+  }
   return Object.keys(commands).map((name) => registerCommand(name, cache, commands[name]));
 }
 
@@ -116,22 +94,10 @@ async function copyJsonReference(cache: Cache, range: vscode.Range) {
   const editor = vscode.window.activeTextEditor;
   const root = cache.getDocumentAst(editor.document);
   if (root) {
-    const node = root.findNodeAtOffset(editor.document.offsetAt(editor.selection.active));
-    copyNodeJsonReference(node);
-  }
-}
-
-function copyNodeJsonReference(node: Node) {
-  if (node) {
-    const pointer = node.getJsonPonter();
-    // JSON Pointer is allowed to have special chars, but JSON Reference
-    // requires these to be encoded
-    const encoded = pointer
-      .split("/")
-      .map((segment) => encodeURIComponent(segment))
-      .join("/");
-    vscode.env.clipboard.writeText(`#${encoded}`);
-    const disposable = vscode.window.setStatusBarMessage(`Copied Reference: #${encoded}`);
+    const [node, path] = findNodeAtOffset(root, editor.document.offsetAt(editor.selection.active));
+    const jsonPointer = joinJsonPointer(path);
+    vscode.env.clipboard.writeText(`#${jsonPointer}`);
+    const disposable = vscode.window.setStatusBarMessage(`Copied Reference: #${jsonPointer}`);
     setTimeout(() => disposable.dispose(), 1000);
   }
 }
@@ -177,7 +143,8 @@ function copySelectedThreeSecurityOutlineJsonReference(cache: Cache) {
 }
 
 function copySelectedJsonReference(viewId: string) {
-  copyNodeJsonReference(outlines[viewId].selection[0]);
+  // FIXME
+  //copyNodeJsonReference(outlines[viewId].selection[0]);
 }
 
 async function createNew(snippet: string, language: string) {
@@ -190,389 +157,172 @@ async function createNew(snippet: string, language: string) {
 }
 
 async function createNewTwo(cache: Cache) {
-  await createNew(snippets.newVersionTwo, "json");
+  await createNew(
+    `{
+    "swagger":"2.0",
+    "info": {
+      "title":"\${1:API Title\}",
+      "version":"\${2:1.0}"
+    },
+    "host": "\${3:api.server.test}",
+    "basePath": "/",
+    "schemes": ["https"],
+    "paths": {
+    }
+  }`,
+    "json"
+  );
 }
 
 async function createNewThree(cache: Cache) {
-  await createNew(snippets.newVersionThree, "json");
+  await createNew(
+    `{
+    "openapi":"3.0.2",
+    "info": {
+      "title":"\${1:API Title}",
+      "version":"\${2:1.0}"
+    },
+    "servers": [
+      {"url":"\${3:https://api.server.test/v1}"}
+    ],
+    "paths": {
+    }
+  }`,
+    "json"
+  );
 }
 
 async function createNewTwoYaml(cache: Cache) {
-  await createNew(snippets.newVersionTwoYaml, "yaml");
+  await createNew(
+    `swagger: '2.0'
+info:
+  title: \${1:API Title}
+  version: \${2:'1.0'}
+host: \${3:api.server.test}
+basePath: /
+schemes:
+  - https
+paths:
+  /test:
+    get:
+      responses:
+        '200':
+          description: OK`,
+    "yaml"
+  );
 }
 
 async function createNewThreeYaml(cache: Cache) {
-  await createNew(snippets.newVersionThreeYaml, "yaml");
+  await createNew(
+    `openapi: '3.0.2'
+info:
+  title: \${1:API Title}
+  version: \${2:'1.0'}
+servers:
+  - url: \${3:https://api.server.test/v1}
+paths:
+  /test:
+    get:
+      responses:
+        '200':
+          description: OK
+`,
+    "yaml"
+  );
 }
 
 async function addBasePath(cache: Cache) {
-  await insertSnippetAfter(cache, "basePath", "/swagger");
+  await snippetCommand(registeredSnippetQuickFixes["basePath"], cache);
 }
 
 async function addHost(cache: Cache) {
-  await insertSnippetAfter(cache, "host", "/swagger");
+  await snippetCommand(registeredSnippetQuickFixes["host"], cache);
 }
 
 async function addInfo(cache: Cache) {
-  await insertSnippetAfter(cache, "info", "/swagger");
+  await snippetCommand(registeredSnippetQuickFixes["info"], cache);
 }
 
 async function v3addInfo(cache: Cache) {
-  await insertSnippetAfter(cache, "info", "/openapi");
+  await snippetCommand(registeredSnippetQuickFixes["info"], cache);
 }
 
 async function addPath(cache: Cache) {
-  await insertSnippetIntoRoot(cache, "path", "paths");
+  await snippetCommand(registeredSnippetQuickFixes["path"], cache);
 }
 
 async function addSecurityDefinitionBasic(cache: Cache) {
-  await insertSnippetIntoRoot(cache, "securityBasic", "securityDefinitions");
+  await snippetCommand(registeredSnippetQuickFixes["securityBasic"], cache);
 }
 
 async function addSecurityDefinitionOauth2Access(cache: Cache) {
-  await insertSnippetIntoRoot(cache, "securityOauth2Access", "securityDefinitions");
+  await snippetCommand(registeredSnippetQuickFixes["securityOauth2Access"], cache);
 }
 
 async function addSecurityDefinitionApiKey(cache: Cache) {
-  await insertSnippetIntoRoot(cache, "securityApiKey", "securityDefinitions");
+  await snippetCommand(registeredSnippetQuickFixes["securityApiKey"], cache);
 }
 
 async function addSecurity(cache: Cache) {
-  await insertSnippetIntoRoot(cache, "security", "security", "array");
+  await snippetCommand(registeredSnippetQuickFixes["security"], cache);
 }
 
 async function addDefinitionObject(cache: Cache) {
-  await insertSnippetIntoRoot(cache, "definitionObject", "definitions");
+  await snippetCommand(registeredSnippetQuickFixes["definitionObject"], cache);
 }
 
 async function addParameterPath(cache: Cache) {
-  await insertSnippetIntoRoot(cache, "parameterPath", "parameters");
+  await snippetCommand(registeredSnippetQuickFixes["parameterPath"], cache);
 }
 
 async function addParameterBody(cache: Cache) {
-  await insertSnippetIntoRoot(cache, "parameterBody", "parameters");
+  await snippetCommand(registeredSnippetQuickFixes["parameterBody"], cache);
 }
 
 async function addParameterOther(cache: Cache) {
-  await insertSnippetIntoRoot(cache, "parameterOther", "parameters");
+  await snippetCommand(registeredSnippetQuickFixes["parameterOther"], cache);
 }
 
 async function addResponse(cache: Cache) {
-  await insertSnippetIntoRoot(cache, "response", "responses");
+  await snippetCommand(registeredSnippetQuickFixes["response"], cache);
 }
 
 async function v3addComponentsResponse(cache: Cache) {
-  await insertSnippetIntoComponents(cache, "componentsResponse", "responses");
+  await snippetCommand(registeredSnippetQuickFixes["componentsResponse"], cache);
 }
 
 async function v3addComponentsParameter(cache: Cache) {
-  await insertSnippetIntoComponents(cache, "componentsParameter", "parameters");
+  await snippetCommand(registeredSnippetQuickFixes["componentsParameter"], cache);
 }
 
 async function v3addComponentsSchema(cache: Cache) {
-  await insertSnippetIntoComponents(cache, "componentsSchema", "schemas");
+  await snippetCommand(registeredSnippetQuickFixes["componentsSchema"], cache);
 }
 
 async function v3addSecuritySchemeBasic(cache: Cache) {
-  await insertSnippetIntoComponents(cache, "componentsSecurityBasic", "securitySchemes");
+  await snippetCommand(registeredSnippetQuickFixes["componentsSecurityBasic"], cache);
 }
 
 async function v3addSecuritySchemeApiKey(cache: Cache) {
-  await insertSnippetIntoComponents(cache, "componentsSecurityApiKey", "securitySchemes");
+  await snippetCommand(registeredSnippetQuickFixes["componentsSecurityApiKey"], cache);
 }
 
 async function v3addSecuritySchemeJWT(cache: Cache) {
-  await insertSnippetIntoComponents(cache, "componentsSecurityJwt", "securitySchemes");
+  await snippetCommand(registeredSnippetQuickFixes["componentsSecurityJwt"], cache);
 }
 
 async function v3addSecuritySchemeOauth2Access(cache: Cache) {
-  await insertSnippetIntoComponents(cache, "componentsSecurityOauth2Access", "securitySchemes");
+  await snippetCommand(registeredSnippetQuickFixes["componentsSecurityOauth2Access"], cache);
 }
 
 async function v3addServer(cache: Cache) {
-  await insertSnippetIntoRoot(cache, "server", "servers", "array");
+  await snippetCommand(registeredSnippetQuickFixes["server"], cache);
 }
 
 async function addOperation(cache: Cache, node: any) {
-  if (noActiveOpenApiEditorGuard(cache)) {
-    return;
-  }
-
-  const editor = vscode.window.activeTextEditor;
-  const languageId = editor.document.languageId;
-  if (languageId === "yaml") {
-    const target = node.node.value;
-    let snippet = snippets.operationYaml;
-
-    const eol = editor.document.eol === vscode.EndOfLine.CRLF ? "\r\n" : "\n";
-    await editor.edit((builder) => {
-      builder.insert(editor.document.positionAt(target.endPosition), eol);
-    });
-
-    await editor.insertSnippet(
-      new vscode.SnippetString(`\n${increaseIndent(snippet, 2)}\n`),
-      editor.document.positionAt(target.endPosition + eol.length)
-    );
-  } else {
-    const target = node.node.parent.children[1];
-    let snippet = snippets.operation;
-    snippet = `\n${snippet}`;
-    if (target.children.length > 0) {
-      // append comma at the end of the snippet
-      snippet = `${snippet},`;
-    }
-
-    await editor.insertSnippet(
-      new vscode.SnippetString(snippet),
-      editor.document.positionAt(target.offset + 1)
-    );
-  }
-}
-
-async function insertSnippetAfter(cache: Cache, snippetName: string, pointer: string) {
-  if (noActiveOpenApiEditorGuard(cache)) {
-    return;
-  }
-
-  const editor = vscode.window.activeTextEditor;
-  const languageId = editor.document.languageId;
-  const root = cache.getDocumentAst(editor.document);
-
-  if (!root) {
-    // FIXME display error message?
-    return;
-  }
-
-  if (languageId === "yaml") {
-    let snippet = snippets[`${snippetName}Yaml`];
-    await insertYamlSnippetAfter(editor, <YamlNode>root, snippet, pointer);
-  } else {
-    let snippet = snippets[snippetName];
-    await insertJsonSnippetAfter(editor, <JsonNode>root, snippet, pointer);
-  }
-}
-
-async function insertYamlSnippetAfter(
-  editor: vscode.TextEditor,
-  root: YamlNode,
-  snippet: string,
-  pointer: string
-) {
-  const node = root.find(pointer);
-
-  const eol = editor.document.eol === vscode.EndOfLine.CRLF ? "\r\n" : "\n";
-  await editor.edit((builder) => {
-    builder.insert(editor.document.positionAt(node.node.endPosition), eol);
-  });
-
-  await editor.insertSnippet(
-    new vscode.SnippetString(`${snippet}`),
-    editor.document.positionAt(node.node.endPosition + eol.length)
-  );
-}
-
-async function insertJsonSnippetAfter(
-  editor: vscode.TextEditor,
-  root: JsonNode,
-  snippet: string,
-  pointer: string
-) {
-  const jnode = root.find(pointer).node;
-  const last =
-    jnode.parent.parent.children.indexOf(jnode.parent) == jnode.parent.parent.children.length - 1;
-  let insertPosition: number;
-  if (last) {
-    // inserting snippet after the last node in the object
-    snippet = `,\n${snippet}`;
-    insertPosition = jnode.offset + jnode.length;
-  } else {
-    snippet = `\n${snippet},`;
-    insertPosition = jnode.offset + jnode.length + 1;
-  }
-  await editor.insertSnippet(
-    new vscode.SnippetString(snippet),
-    editor.document.positionAt(insertPosition)
-  );
-}
-
-async function insertYamlSnippetInto(
-  editor: vscode.TextEditor,
-  root: YamlNode,
-  snippet: string,
-  pointer: string
-) {
-  const ynode = root.find(pointer).node;
-
-  await editor.insertSnippet(
-    new vscode.SnippetString(`${snippet}\n`),
-    editor.document.positionAt(ynode.value.startPosition)
-  );
-}
-
-async function insertJsonSnippetInto(
-  editor: vscode.TextEditor,
-  root: JsonNode,
-  snippet: string,
-  pointer: string
-) {
-  const jnode = root.find(pointer).node;
-
-  snippet = `\n${snippet}`;
-  if (jnode.children.length > 0) {
-    // append coma at the end of the snippet
-    snippet = `${snippet},`;
-  }
-
-  await editor.insertSnippet(
-    new vscode.SnippetString(snippet),
-    editor.document.positionAt(jnode.offset + 1)
-  );
-}
-
-async function insertSnippetIntoRoot(
-  cache: Cache,
-  snippetName: string,
-  element: string,
-  container: string = "object"
-) {
-  if (noActiveOpenApiEditorGuard(cache)) {
-    return;
-  }
-
-  const editor = vscode.window.activeTextEditor;
-  const languageId = editor.document.languageId;
-  const root = cache.getDocumentAst(editor.document);
-
-  if (!root) {
-    // FIXME display error message?
-    return;
-  }
-
-  if (languageId === "yaml") {
-    let snippet = snippets[`${snippetName}Yaml`];
-    if (root.find(`/${element}`)) {
-      await insertYamlSnippetInto(editor, <YamlNode>root, snippet, `/${element}`);
-    } else {
-      const target = findInsertionAnchor(root, element);
-      snippet = `${element}:\n${increaseIndent(snippet)}\n`;
-      await insertYamlSnippetAfter(editor, <YamlNode>root, snippet, `/${target}`);
-    }
-  } else {
-    let snippet = snippets[snippetName];
-    if (root.find(`/${element}`)) {
-      await insertJsonSnippetInto(editor, <JsonNode>root, snippet, `/${element}`);
-    } else {
-      if (container === "object") {
-        snippet = `"${element}": {\n${snippet}\n}`;
-      } else {
-        // array container otherwise
-        snippet = `"${element}": [\n${snippet}\n]`;
-      }
-      const target = findInsertionAnchor(root, element);
-      await insertJsonSnippetAfter(editor, <JsonNode>root, snippet, `/${target}`);
-    }
-  }
-}
-
-async function insertSnippetIntoComponents(cache: Cache, snippetName: string, element: string) {
-  if (noActiveOpenApiEditorGuard(cache)) {
-    return;
-  }
-
-  const editor = vscode.window.activeTextEditor;
-  const languageId = editor.document.languageId;
-  const root = cache.getDocumentAst(editor.document);
-
-  if (!root) {
-    // FIXME display error message?
-    return;
-  }
-
-  if (languageId === "yaml") {
-    let snippet = snippets[`${snippetName}Yaml`];
-    if (root.find(`/components/${element}`)) {
-      await insertYamlSnippetInto(editor, <YamlNode>root, snippet, `/components/${element}`);
-    } else if (root.find("/components")) {
-      const position = findComponentsInsertionPosition(root, element);
-      if (position >= 0) {
-        // found where to insert
-        snippet = `\n\t${element}:\n${increaseIndent(snippet, 2)}\n`;
-        await insertYamlSnippetAfter(
-          editor,
-          <YamlNode>root,
-          snippet,
-          `/components/${componentsTags[position]}`
-        );
-      } else {
-        // insert into the 'components'
-        snippet = `${element}:\n${increaseIndent(snippet, 2)}\n`;
-        await insertYamlSnippetInto(editor, <YamlNode>root, snippet, "/components");
-      }
-    } else {
-      snippet = `components:\n\t${element}:\n${increaseIndent(snippet, 2)}\n`;
-      const target = findInsertionAnchor(root, "components");
-      await insertYamlSnippetAfter(editor, <YamlNode>root, snippet, `/${target}`);
-    }
-  } else {
-    let snippet = snippets[snippetName];
-    if (root.find(`/components/${element}`)) {
-      await insertJsonSnippetInto(editor, <JsonNode>root, snippet, `/components/${element}`);
-    } else if (root.find("/components")) {
-      const position = findComponentsInsertionPosition(root, element);
-      if (position >= 0) {
-        // found where to insert
-        snippet = `"${element}": {\n${snippet}\n}`;
-        await insertJsonSnippetAfter(
-          editor,
-          <JsonNode>root,
-          snippet,
-          `/components/${componentsTags[position]}`
-        );
-      } else {
-        // insert into the 'components'
-        snippet = `\t"${element}": {\n\t${snippet}\n\t}`;
-        await insertJsonSnippetInto(editor, <JsonNode>root, snippet, "/components");
-      }
-    } else {
-      snippet = `"components": {\n\t"${element}": {\n\t${snippet}\n\t}\n}`;
-      const target = findInsertionAnchor(root, "components");
-      await insertJsonSnippetAfter(editor, <JsonNode>root, snippet, `/${target}`);
-    }
-  }
-}
-
-function findInsertionAnchor(root: Node, element: string): string {
-  const desiredPosition = topTags.indexOf(element) - 1;
-  let position = desiredPosition;
-  for (; position >= 0; position--) {
-    if (root.find(`/${topTags[position]}`)) {
-      break;
-    }
-  }
-
-  if (position >= 0) {
-    return topTags[position];
-  }
-
-  return null;
-}
-
-function increaseIndent(snippet: string, level = 1) {
-  return snippet
-    .split("\n")
-    .map((line) => "\t".repeat(level) + line)
-    .join("\n");
-}
-
-function findComponentsInsertionPosition(root: Node, element: string) {
-  const desiredPosition = componentsTags.indexOf(element) - 1;
-  let position = desiredPosition;
-  for (; position >= 0; position--) {
-    if (root.find(`/components/${componentsTags[position]}`)) {
-      break;
-    }
-  }
-  return position;
+  const fix = registeredSnippetQuickFixes["operation"];
+  fix.pointer = joinJsonPointer(["paths", node.parent.key]);
+  await snippetCommand(fix, cache);
 }
 
 function noActiveOpenApiEditorGuard(cache: Cache) {
@@ -583,4 +333,87 @@ function noActiveOpenApiEditorGuard(cache: Cache) {
     return true;
   }
   return false;
+}
+
+export async function snippetCommand(fix: Fix, cache: Cache, useEdit?: boolean) {
+  if (noActiveOpenApiEditorGuard(cache)) {
+    return;
+  }
+
+  const editor = vscode.window.activeTextEditor;
+  const document = editor.document;
+  const root = cache.getLastGoodDocumentAst(document);
+
+  if (!root) {
+    // FIXME display error message?
+    return;
+  }
+
+  const bundle = await cache.getDocumentBundle(document);
+  const version = cache.getDocumentVersion(document);
+  const target = findJsonNodeValue(root, fix.pointer);
+
+  const context: FixContext = {
+    editor: editor,
+    edit: null,
+    issues: [],
+    fix: simpleClone(fix),
+    bulk: false,
+    auditContext: null,
+    version: version,
+    bundle: bundle,
+    root: root,
+    target: target,
+    document: document,
+  };
+
+  if (useEdit === true) {
+    context.bulk = true;
+    context.skipConfirmation = true;
+  }
+
+  let finalFix = context.fix["fix"];
+  let pointer = context.fix.pointer;
+  let pointerPrefix = "";
+  while (!find(root, pointer)) {
+    const key = getPointerLastSegment(pointer);
+    pointer = getPointerParent(pointer);
+    const tmpFix = {};
+    if (isArray(key)) {
+      tmpFix[key] = [finalFix];
+      pointerPrefix = "/" + key + "/0" + pointerPrefix;
+    } else {
+      tmpFix[key] = finalFix;
+      pointerPrefix = "/" + key + pointerPrefix;
+    }
+    finalFix = tmpFix as Fix;
+  }
+
+  context.fix["fix"] = finalFix;
+  context.target = findJsonNodeValue(root, pointer);
+
+  if (pointerPrefix.length > 0) {
+    for (const parameter of context.fix.parameters) {
+      parameter.path = pointerPrefix + parameter.path;
+    }
+  }
+
+  switch (fix.type) {
+    case FixType.Insert:
+      fixInsert(context);
+  }
+
+  if (useEdit) {
+    await vscode.workspace.applyEdit(context.edit);
+  } else {
+    const snippetParameters = context.snippetParameters;
+    if (snippetParameters) {
+      await processSnippetParameters(editor, snippetParameters, context.dropBrackets);
+      await editor.insertSnippet(snippetParameters.snippet, snippetParameters.location);
+    }
+  }
+}
+
+function isArray(key: string): boolean {
+  return key === "security" || key === "servers";
 }

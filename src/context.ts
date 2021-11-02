@@ -3,8 +3,8 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
+import { find } from "@xliic/preserving-json-yaml-parser";
 import * as vscode from "vscode";
-import { Node } from "@xliic/openapi-ast-node";
 import { Cache } from "./cache";
 import { OpenApiVersion } from "./types";
 
@@ -35,14 +35,14 @@ export async function updateContext(cache: Cache, document: vscode.TextDocument)
   }
 }
 
-function checkTree(tree: Node) {
+function checkTree(tree: any) {
   setContext("openapiMissingHost", isMissing(tree, "/host"));
   setContext("openapiMissingBasePath", isMissing(tree, "/basePath"));
   setContext("openapiMissingInfo", isMissing(tree, "/info"));
 }
 
-function isMissing(tree: Node, pointer: string): boolean {
-  return !tree.find(pointer);
+function isMissing(tree: any, pointer: string): boolean {
+  return !find(tree, pointer);
 }
 
 function setContext(name: string, value: boolean) {

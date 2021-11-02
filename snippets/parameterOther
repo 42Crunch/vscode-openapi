@@ -1,6 +1,0 @@
-	"${1:name}": {
-		"name":"${1}",
-		"in": "${2|query,header,formData|}",
-		"type": "${3|string,number,integer,boolean,array|}",
-		"description": "${4}"
-	}

@@ -41,7 +41,7 @@
   "main": "./out/extension",
   "scripts": {
     "vscode:prepublish": "npm run build-quickfixes && npm run build-whatsnew && npm run build-preview-redoc && npm run build-preview-swaggerui && npm run build-snippets && npm run compile",
-    "build-snippets": "scripts/build-snippets.js",
+    "build-snippets": "js-yaml snippets/snippets.yaml > src/generated/snippets.json",
     "build-quickfixes": "js-yaml quickfixes/quickfixes.yaml > src/generated/quickfixes.json",
     "build-whatsnew": "scripts/build-whatsnew.js",
     "build-preview-redoc": "webpack --config src-webviews/preview-redoc/webpack.config.js",
@@ -563,7 +563,7 @@
   "dependencies": {
     "@xliic/json-schema-ref-parser": "^9.2.0",
     "@xliic/openapi-ast-node": "^1.7.0",
-    "@xliic/preserving-json-yaml-parser": "^1.5.0",
+    "@xliic/preserving-json-yaml-parser": "^1.6.3",
     "form-data": "^2.3.3",
     "got": "^11.8.2",
     "js-yaml": "^4.1.0",

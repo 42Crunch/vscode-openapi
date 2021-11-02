@@ -1,0 +1,9 @@
+swagger: '2.0'
+externalDocs:
+     url: 'https://xkcd.com/json.html'
+paths: {}
+parameters: {}
+responses: {}
+security: []
+securityDefinitions: {}
+definitions: {}

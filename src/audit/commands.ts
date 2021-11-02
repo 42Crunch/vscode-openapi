@@ -12,12 +12,13 @@ import { updateDiagnostics } from "./diagnostic";
 import { ReportWebView } from "./report";
 import { TextDocument } from "vscode";
 import { findMapping } from "../bundler";
-import { Node } from "@xliic/openapi-ast-node";
 import { AuditContext, Audit, Grades, Issue, ReportedIssue, IssuesByDocument } from "../types";
 
 import { Cache } from "../cache";
 import { getLocationByPointer } from "./util";
-import { stringify } from "@xliic/preserving-json-yaml-parser";
+import { find, stringify } from "@xliic/preserving-json-yaml-parser";
+
+type Node = any;
 
 export function registerSecurityAudit(
   context: vscode.ExtensionContext,
@@ -238,7 +239,7 @@ function findIssueLocation(
   mappings,
   pointer
 ): [string, string] | undefined {
-  const node = root.find(pointer);
+  const node = find(root, pointer);
   if (node) {
     return [mainUri.toString(), pointer];
   } else {

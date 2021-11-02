@@ -1,0 +1,454 @@
+fixes:
+  - problem:
+      - info
+    title: 'OpenAPI: Add ''Info'' Entry'
+    type: insert
+    pointer: ''
+    fix:
+      info:
+        title: API Title
+        version: '1.0'
+    parameters:
+      - name: title
+        path: /info/title
+      - name: version
+        path: /info/version
+  - problem:
+      - host
+    title: 'OpenAPI: Add ''Host'' Entry'
+    type: insert
+    pointer: ''
+    fix:
+      host: api.domain.test
+    parameters:
+      - name: host
+        path: /host
+  - problem:
+      - basePath
+    title: 'OpenAPI: Add ''BasePath'' Entry'
+    type: insert
+    pointer: ''
+    fix:
+      basePath: /api
+    parameters:
+      - name: basePath
+        path: /basePath
+  - problem:
+      - path
+    title: 'OpenAPI: Add ''Path'' Entry'
+    type: insert
+    pointer: /paths
+    fix:
+      /name:
+        get:
+          description: ''
+          parameters: []
+          responses:
+            '200':
+              description: OK
+    parameters:
+      - name: name
+        path: /~1name
+        type: key
+      - name: operation
+        path: /~1name/get
+        type: key
+        values:
+          - get
+          - put
+          - post
+          - delete
+          - options
+          - head
+          - patch
+      - name: description
+        path: /~1name/get/description
+  - problem:
+      - server
+    title: 'OpenAPI: Add ''Server'' Entry'
+    type: insert
+    pointer: /servers
+    fix:
+      url: https://api.server.test/v1
+      description: Server description
+    parameters:
+      - name: url
+        path: /url
+      - name: description
+        path: /description
+  - problem:
+      - security
+    title: 'OpenAPI: Add ''Security'' Entry'
+    type: insert
+    pointer: /security
+    fix:
+      name: []
+    parameters:
+      - name: name
+        path: /name
+        type: key
+  - problem:
+      - response
+    title: 'OpenAPI: Add ''Response'' Entry'
+    type: insert
+    pointer: /responses
+    fix:
+      code:
+        description: ''
+    parameters:
+      - name: code
+        path: /code
+        type: key
+      - name: description
+        path: /code/description
+  - problem:
+      - definitionObject
+    title: 'OpenAPI: Add ''Object'' Definition'
+    type: insert
+    pointer: /definitions
+    fix:
+      name:
+        type: object
+        properties:
+          property:
+            type: integer
+    parameters:
+      - name: name
+        path: /name
+        type: key
+      - name: description
+        path: /name/properties/property
+        type: key
+      - name: type
+        path: /name/properties/property/type
+        values:
+          - integer
+          - number
+          - string
+          - boolean
+  - problem:
+      - parameterBody
+    title: 'OpenAPI: Add ''Body'' Parameter'
+    type: insert
+    pointer: /parameters
+    fix:
+      name:
+        name: name
+        in: body
+        description: ''
+        schema: {}
+    parameters:
+      - name: name
+        path: /name
+        type: key
+      - name: name
+        path: /name/name
+      - name: body description
+        path: /name/description
+  - problem:
+      - parameterOther
+    title: 'OpenAPI: Add ''Query'', ''Header'' Or ''FormData'' Parameter'
+    type: insert
+    pointer: /parameters
+    fix:
+      name:
+        name: name
+        in: query
+        type: string
+        description: ''
+    parameters:
+      - name: name
+        path: /name
+        type: key
+      - name: name
+        path: /name/name
+      - name: in
+        path: /name/in
+        values:
+          - query
+          - header
+          - formData
+      - name: type
+        path: /name/type
+        values:
+          - string
+          - number
+          - integer
+          - boolean
+          - array
+      - name: description
+        path: /name/description
+  - problem:
+      - parameterPath
+    title: 'OpenAPI: Add ''Path'' Parameter'
+    type: insert
+    pointer: /parameters
+    fix:
+      name:
+        name: name
+        in: path
+        required: true
+        type: string
+        description: ''
+    parameters:
+      - name: name
+        path: /name
+        type: key
+      - name: name
+        path: /name/name
+      - name: type
+        path: /name/type
+        values:
+          - string
+          - number
+          - integer
+          - boolean
+          - array
+      - name: description
+        path: /name/description
+  - problem:
+      - securityApiKey
+    title: 'OpenAPI: Add ''ApiKey'' Auth Entry'
+    type: insert
+    pointer: /securityDefinitions
+    fix:
+      name:
+        type: apiKey
+        name: api_key
+        in: query
+    parameters:
+      - name: name
+        path: /name
+        type: key
+      - name: api name
+        path: /name/name
+      - name: in
+        path: /name/in
+        values:
+          - query
+          - header
+  - problem:
+      - securityBasic
+    title: 'OpenAPI: Add ''Basic'' Auth Entry'
+    type: insert
+    pointer: /securityDefinitions
+    fix:
+      name:
+        type: basic
+    parameters:
+      - name: name
+        path: /name
+        type: key
+  - problem:
+      - securityOauth2Access
+    title: 'OpenAPI: add security scheme ''OAuth2 Authorization Code'''
+    type: insert
+    pointer: /securityDefinitions
+    fix:
+      name:
+        type: oauth2
+        flow: accessCode
+        authorizationUrl: https://domain.test/api/oauth/dialog
+        tokenUrl: https://domain.test/api/oauth/token
+        scopes:
+          read: example read scope
+          write: example write scope
+    parameters:
+      - name: name
+        path: /name
+        type: key
+      - name: authorizationUrl
+        path: /name/authorizationUrl
+      - name: tokenUrl
+        path: /name/tokenUrl
+  - problem:
+      - componentsSchema
+    title: 'OpenAPI: Add ''Object'' Schema'
+    type: insert
+    pointer: /components/schemas
+    fix:
+      name:
+        type: object
+        properties:
+          property:
+            type: integer
+    parameters:
+      - name: name
+        path: /name
+        type: key
+      - name: property
+        path: /name/properties/property
+        type: key
+      - name: type
+        path: /name/properties/property/type
+        values:
+          - integer
+          - number
+          - string
+          - boolean
+  - problem:
+      - componentsParameter
+    title: 'OpenAPI: Add Parameter'
+    type: insert
+    pointer: /components/parameters
+    fix:
+      name:
+        name: name
+        in: query
+        required: true
+        description: ''
+    parameters:
+      - name: name
+        path: /name
+        type: key
+      - name: name
+        path: /name/name
+      - name: type
+        path: /name/in
+        values:
+          - query
+          - header
+          - path
+          - cookie
+      - name: required
+        path: /name/required
+        values:
+          - true
+          - false
+      - name: description
+        path: /name/description
+  - problem:
+      - componentsResponse
+    title: 'OpenAPI: Add Response'
+    type: insert
+    pointer: /components/responses
+    fix:
+      name:
+        description: ''
+        content:
+          application/json:
+            schema: {}
+    parameters:
+      - name: name
+        path: /name
+        type: key
+      - name: description
+        path: /name/description
+  - problem:
+      - componentsSecurityApiKey
+    title: 'OpenAPI: Add Security Schema ''API Key'''
+    type: insert
+    pointer: /components/securitySchemes
+    fix:
+      name:
+        type: apiKey
+        name: api_key
+        in: query
+    parameters:
+      - name: name
+        path: /name
+        type: key
+      - name: api key name
+        path: /name/name
+      - name: in
+        path: /name/in
+        values:
+          - query
+          - header
+  - problem:
+      - componentsSecurityApiKey
+    title: 'OpenAPI: Add Security Schema ''API Key'''
+    type: insert
+    pointer: /components/securitySchemes
+    fix:
+      name:
+        type: apiKey
+        name: api_key
+        in: query
+    parameters:
+      - name: name
+        path: /name
+        type: key
+      - name: api key name
+        path: /name/name
+      - name: in
+        path: /name/in
+        values:
+          - query
+          - header
+  - problem:
+      - componentsSecurityBasic
+    title: 'OpenAPI: Add Security Schema ''Basic'''
+    type: insert
+    pointer: /components/securitySchemes
+    fix:
+      name:
+        type: http
+        scheme: basic
+    parameters:
+      - name: name
+        path: /name
+        type: key
+  - problem:
+      - componentsSecurityJwt
+    title: 'OpenAPI: Add Security Schema ''JWT Bearer'''
+    type: insert
+    pointer: /components/securitySchemes
+    fix:
+      name:
+        type: http
+        scheme: bearer
+        bearerFormat: JWT
+    parameters:
+      - name: name
+        path: /name
+        type: key
+  - problem:
+      - componentsSecurityOauth2Access
+    title: 'OpenAPI: add security scheme ''OAuth2 Authorization Code'''
+    type: insert
+    pointer: /components/securitySchemes
+    fix:
+      name:
+        type: oauth2
+        flows:
+          authorizationCode:
+            authorizationUrl: https://domain.test/api/oauth/dialog
+            tokenUrl: https://domain.test/api/oauth/token
+            scopes:
+              read: example read scope
+              write: example write scope
+    parameters:
+      - name: name
+        path: /name
+        type: key
+      - name: authorizationUrl
+        path: /name/flows/authorizationCode/authorizationUrl
+      - name: tokenUrl
+        path: /name/flows/authorizationCode/tokenUrl
+  - problem:
+      - operation
+    title: 'OpenAPI: Add Operation'
+    type: insert
+    pointer: /paths
+    fix:
+      get:
+        description: ''
+        parameters: []
+        responses:
+          '200':
+            description: OK
+    parameters:
+      - name: operation
+        path: /get
+        type: key
+        values:
+          - get
+          - put
+          - post
+          - delete
+          - options
+          - head
+          - patch
+      - name: description
+        path: /get/description
