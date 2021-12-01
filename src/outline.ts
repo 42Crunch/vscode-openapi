@@ -9,7 +9,7 @@ import { Cache } from "./cache";
 import { configuration } from "./configuration";
 import { OpenApiVersion } from "./types";
 
-interface Node {
+export interface Node {
   parent: Node;
   key: string | number;
   value: any;

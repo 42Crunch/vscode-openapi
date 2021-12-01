@@ -17,6 +17,7 @@ import { findJsonNodeValue } from "./json-utils";
 import { fixInsert } from "./audit/quickfix";
 import { getPointerLastSegment, getPointerParent } from "./pointer";
 import { processSnippetParameters } from "./util";
+import { Node, outlines } from "./outline";
 
 const commands = {
   goToLine,
@@ -143,8 +144,26 @@ function copySelectedThreeSecurityOutlineJsonReference(cache: Cache) {
 }
 
 function copySelectedJsonReference(viewId: string) {
-  // FIXME
-  //copyNodeJsonReference(outlines[viewId].selection[0]);
+  copyNodeJsonReference(outlines[viewId].selection[0]);
+}
+
+function copyNodeJsonReference(node: Node) {
+  if (node) {
+    const path = [];
+    for (let current = node; current.key !== undefined; current = current.parent) {
+      path.unshift(current.key);
+    }
+    const pointer = joinJsonPointer(path);
+    // JSON Pointer is allowed to have special chars, but JSON Reference
+    // requires these to be encoded
+    const encoded = pointer
+      .split("/")
+      .map((segment) => encodeURIComponent(segment))
+      .join("/");
+    vscode.env.clipboard.writeText(`#${encoded}`);
+    const disposable = vscode.window.setStatusBarMessage(`Copied Reference: #${encoded}`);
+    setTimeout(() => disposable.dispose(), 1000);
+  }
 }
 
 async function createNew(snippet: string, language: string) {
