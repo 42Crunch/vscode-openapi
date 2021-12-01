@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import * as yaml from "js-yaml";
 import { parserOptions } from "./parser-options";
-import { replace } from "@xliic/openapi-ast-node";
 import {
   InsertReplaceRenameFix,
   FixType,
@@ -11,7 +10,7 @@ import {
 } from "./types";
 import parameterSources from "./audit/quickfix-sources";
 import { parse, Parsed } from "@xliic/preserving-json-yaml-parser";
-import { findJsonNodeValue, getRootAsJsonNodeValue, JsonNodeValue } from "./json-utils";
+import { findJsonNodeValue, getRootAsJsonNodeValue, JsonNodeValue, replace } from "./json-utils";
 import { componentsTags, topTags } from "./audit/quickfix";
 
 export class DocumentIndent {
