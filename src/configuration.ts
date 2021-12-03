@@ -55,6 +55,15 @@ export class Configuration {
   update(section: string, value: any, configurationTarget?: ConfigurationTarget) {
     return workspace.getConfiguration(this.section).update(section, value, configurationTarget);
   }
+
+  track<T>(section: string, callback: Function, defaultValue?: T) {
+    callback(this.get<T>(section, defaultValue));
+    return this.onDidChange((e) => {
+      if (configuration.changed(e, section)) {
+        callback(this.get<T>(section, defaultValue));
+      }
+    });
+  }
 }
 
 export const configuration = new Configuration(configId);

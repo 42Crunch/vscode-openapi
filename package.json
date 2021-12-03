@@ -543,6 +543,12 @@
             "Use ReDoc as a default renderer to preview OpenAPI files"
           ]
         },
+        "openapi.previewUpdateDelay": {
+          "scope": "workbench",
+          "type": "integer",
+          "default": 1000,
+          "description": "Preview update delay (in milliseconds after the last document change)"
+        },
         "openapi.approvedHostnames": {
           "scope": "workbench",
           "type": "array",
