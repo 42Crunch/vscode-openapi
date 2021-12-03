@@ -5,7 +5,7 @@
 
 import * as vscode from "vscode";
 import * as path from "path";
-import { configuration } from "./configuration";
+import { Configuration, configuration } from "./configuration";
 import { Bundle } from "./types";
 import { Cache } from "./cache";
 
@@ -19,8 +19,30 @@ type Previews = {
   swaggerui?: Preview;
 };
 
-export function activate(context: vscode.ExtensionContext, cache: Cache) {
+export function activate(
+  context: vscode.ExtensionContext,
+  cache: Cache,
+  configuration: Configuration
+) {
   const previews: Previews = {};
+
+  let previewUpdateDelay: number;
+
+  configuration.track<number>("previewUpdateDelay", (delay: number) => {
+    previewUpdateDelay = delay;
+  });
+
+  function debounce(func: Function) {
+    let timer: NodeJS.Timeout;
+    return (...args: any) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        func.apply(this, args);
+      }, previewUpdateDelay);
+    };
+  }
+
+  const debouncedPreview = debounce(showPreview);
 
   cache.onDidChange(async (document: vscode.TextDocument) => {
     for (const name of Object.keys(previews)) {
@@ -29,7 +51,7 @@ export function activate(context: vscode.ExtensionContext, cache: Cache) {
       if (preview && preview.documentUri.toString() === uri) {
         const bundle = await cache.getDocumentBundle(document);
         if (bundle && !("errors" in bundle)) {
-          showPreview(context, previews, name, document.uri, bundle);
+          debouncedPreview(context, previews, name, document.uri, bundle);
         }
       }
     }

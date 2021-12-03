@@ -88,7 +88,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   yamlSchemaContributor.activate(context, cache);
   audit.activate(context, cache);
-  preview.activate(context, cache);
+  preview.activate(context, cache, configuration);
 
   if (previousVersion.major < currentVersion.major) {
     createWhatsNewPanel(context);
