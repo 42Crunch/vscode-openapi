@@ -351,7 +351,7 @@ export class ReportWebView {
 
     let lineNo: number;
 
-    const root = ReportWebView.cache.getDocumentAst(editor.document);
+    const root = ReportWebView.cache.getParsedDocument(editor.document);
     if (root) {
       // use pointer by default
       lineNo = getLocationByPointer(editor.document, root, pointer)[0];

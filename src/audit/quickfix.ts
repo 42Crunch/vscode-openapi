@@ -229,7 +229,7 @@ async function quickFixCommand(
   for (const issuePointer of Object.keys(issuesByPointer)) {
     // if fix.pointer exists, append it to diagnostic.pointer
     const pointer = fix.pointer ? `${issuePointer}${fix.pointer}` : issuePointer;
-    const root = cache.getLastGoodDocumentAst(document);
+    const root = cache.getLastGoodParsedDocument(document);
     const target = findJsonNodeValue(root, pointer);
 
     const context: FixContext = {
@@ -313,7 +313,7 @@ export function updateReport(
   });
 
   // update range for all issues (since the fix has potentially changed line numbering in the file)
-  const root = cache.getLastGoodDocumentAst(document);
+  const root = cache.getLastGoodParsedDocument(document);
   const updatedIssues: Issue[] = [];
   for (const issue of audit.issues[uri]) {
     if (fixedIssueIdAndPointers.has(getIssueUniqueId(issue))) {
@@ -495,7 +495,7 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
     );
     const bundle = await this.cache.getDocumentBundle(auditDocument);
     const version = this.cache.getDocumentVersion(auditDocument);
-    const root = this.cache.getDocumentAst(document);
+    const root = this.cache.getParsedDocument(document);
 
     const titles: string[] = [];
     const problems: string[] = [];

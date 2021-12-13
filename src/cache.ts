@@ -7,7 +7,7 @@ import * as vscode from "vscode";
 import { ExternalRefDocumentProvider } from "./external-refs";
 import { ParserOptions } from "./parser-options";
 import { BundleResult, BundlingError, OpenApiVersion } from "./types";
-import { parseToAst } from "./parsers";
+import { parseDocument } from "./parsers";
 import { configuration } from "./configuration";
 import { bundle } from "./bundler";
 import { find, findLocationForJsonPointer, Parsed } from "@xliic/preserving-json-yaml-parser";
@@ -15,8 +15,7 @@ import { find, findLocationForJsonPointer, Parsed } from "@xliic/preserving-json
 interface ParsedDocument {
   documentVersion: number;
   openApiVersion: OpenApiVersion;
-  lastGoodAstRoot?: Parsed;
-  astRoot?: Parsed;
+  lastGoodParsed?: Parsed;
   parsed?: Parsed;
   errors: vscode.Diagnostic[];
 }
@@ -129,40 +128,52 @@ class ParsedDocumentCache implements vscode.Disposable {
     version: OpenApiVersion,
     errors: vscode.Diagnostic[]
   ) {
-    const messages = {
+    const expectedMessages = {
       DuplicateKey: "Duplicate object key",
       InvalidCommentToken: "Comment is not permitted",
     };
+
+    const additionalMessages = ["JS-YAML: Using tabs can lead to unpredictable results"];
+
     // do not show errors for non-openapi documents
     if (!errors || version === OpenApiVersion.Unknown) {
       this.diagnostics.delete(document.uri);
     } else {
-      // only display duplicate key errors, other errors shown by a vs-code json extension
-      const filtered = errors
-        .filter((error) => error.message in messages)
-        .map((error) => ({ ...error, message: messages[error.message] }));
+      // only display selected set of error messages, other parsing
+      // errors will be shown by vs-code and we don't want duplicates
+      const filtered = errors.map((error) => {
+        if (error.message in expectedMessages) {
+          return { ...error, message: expectedMessages[error.message] };
+        } else {
+          for (const message of additionalMessages) {
+            if (error.message.startsWith(message)) {
+              return { ...error, message };
+            }
+          }
+        }
+      });
+
       this.diagnostics.set(document.uri, filtered);
     }
   }
 
-  private parse(document: vscode.TextDocument, previous: ParsedDocument | undefined) {
-    const [openApiVersion, astRoot, errors] = parseToAst(document, this.parserOptions);
+  private parse(
+    document: vscode.TextDocument,
+    previous: ParsedDocument | undefined
+  ): ParsedDocument {
+    const [openApiVersion, parsed, errors] = parseDocument(document, this.parserOptions);
 
-    // set lastGoodAstRoot only if no errors found, in case of errors try to reuse previous value
-    const lastGoodAstRoot = errors ? previous?.lastGoodAstRoot : astRoot;
-
-    // parse if no errors
-    const parsed = astRoot && !errors ? astRoot : undefined;
+    // set lastGoodParsed only if no errors found, in case of errors try to reuse previous value
+    const lastGoodParsed = errors ? previous?.lastGoodParsed : parsed;
 
     this.showErrors(document, openApiVersion, errors);
 
     return {
       openApiVersion,
       documentVersion: document.version,
-      astRoot,
-      lastGoodAstRoot,
+      lastGoodParsed,
       errors,
-      parsed,
+      parsed: errors ? undefined : parsed,
     };
   }
 }
@@ -309,12 +320,12 @@ export class Cache implements vscode.Disposable {
     return document ? this.parsedDocuments.get(document).openApiVersion : OpenApiVersion.Unknown;
   }
 
-  getDocumentAst(document: vscode.TextDocument): Parsed | undefined {
-    return this.parsedDocuments.get(document).astRoot;
+  getParsedDocument(document: vscode.TextDocument): Parsed | undefined {
+    return this.parsedDocuments.get(document).parsed;
   }
 
-  getLastGoodDocumentAst(document: vscode.TextDocument): Parsed | undefined {
-    return this.parsedDocuments.get(document).lastGoodAstRoot;
+  getLastGoodParsedDocument(document: vscode.TextDocument): Parsed | undefined {
+    return this.parsedDocuments.get(document).lastGoodParsed;
   }
 
   async getDocumentBundle(document: vscode.TextDocument): Promise<BundleResult | undefined> {
@@ -412,13 +423,13 @@ export class Cache implements vscode.Disposable {
       const messages = new Map<string, vscode.Diagnostic>();
 
       for (const error of errors) {
-        const parsed = this.parsedDocuments.get(document);
-        if (!parsed.astRoot) {
+        const entry = this.parsedDocuments.get(document);
+        if (!entry.parsed) {
           continue;
         }
-        const node = find(parsed.astRoot, error.pointer);
+        const node = find(entry.parsed, error.pointer);
         if (node) {
-          const { start } = findLocationForJsonPointer(parsed.astRoot, error.pointer).value;
+          const { start } = findLocationForJsonPointer(entry.parsed, error.pointer).value;
           const position = document.positionAt(start);
           const line = document.lineAt(position.line);
           const range = new vscode.Range(

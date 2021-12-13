@@ -261,7 +261,7 @@ async function processIssues(
   const issuesPerDocument: { [uri: string]: ReportedIssue[] } = {};
   const badIssues: ReportedIssue[] = [];
 
-  const root = cache.getLastGoodDocumentAst(document);
+  const root = cache.getLastGoodParsedDocument(document);
 
   for (const issue of issues) {
     const location = findIssueLocation(mainUri, root, mappings, issue.pointer);
@@ -313,7 +313,7 @@ async function auditDocument(
   for (const uri of documentUris) {
     if (!files[uri]) {
       const document = await vscode.workspace.openTextDocument(vscode.Uri.parse(uri));
-      const root = cache.getLastGoodDocumentAst(document);
+      const root = cache.getLastGoodParsedDocument(document);
       files[uri] = [document, root];
     }
   }

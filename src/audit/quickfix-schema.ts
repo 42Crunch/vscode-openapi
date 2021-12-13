@@ -44,7 +44,7 @@ export async function generateSchemaFixCommand(
   if (inline) {
     await insertSchemaInline(editor, issue, fix, genSchema, auditContext, cache);
   } else {
-    const root = cache.getDocumentAst(document);
+    const root = cache.getParsedDocument(document);
     const schemaNames = getSchemaNames(root, version);
     const schemaName = await vscode.window.showInputBox({
       value: getUniqueSchemaName(schemaNames),
@@ -128,7 +128,7 @@ async function insertSchemaInline(
   const version = cache.getDocumentVersion(auditDocument);
 
   const pointer = fix.pointer ? `${issue.pointer}${fix.pointer}` : issue.pointer;
-  const root = cache.getDocumentAst(document);
+  const root = cache.getParsedDocument(document);
   const target = findJsonNodeValue(root, pointer);
 
   const newFix = <InsertReplaceRenameFix>simpleClone(fix);
@@ -187,7 +187,7 @@ async function insertSchemaByRef(
 
   let target: JsonNodeValue;
   let pointer: string;
-  const root = cache.getDocumentAst(document);
+  const root = cache.getParsedDocument(document);
 
   if (version === OpenApiVersion.V2) {
     pointer = "/definitions";

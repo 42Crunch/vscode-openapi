@@ -3,7 +3,7 @@ import { parse } from "@xliic/preserving-json-yaml-parser";
 import { ParserOptions } from "./parser-options";
 import { OpenApiVersion } from "./types";
 
-export function parseToAst(
+export function parseDocument(
   document: vscode.TextDocument,
   parserOptions: ParserOptions
 ): [OpenApiVersion, any, vscode.Diagnostic[]] {
