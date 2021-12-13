@@ -45,7 +45,7 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
   constructor(private context: vscode.ExtensionContext, private cache: Cache) {
     cache.onDidActiveDocumentChange(async (document) => {
       if (cache.getDocumentVersion(document) !== OpenApiVersion.Unknown) {
-        this.root = cache.getLastGoodDocumentAst(document);
+        this.root = cache.getLastGoodParsedDocument(document);
         this.version = cache.getDocumentVersion(document);
       }
     });
@@ -91,7 +91,7 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
         // stat fileUri, if it does not exists an exception is thrown
         await vscode.workspace.fs.stat(otherUri);
         const otherDocument = await vscode.workspace.openTextDocument(otherUri);
-        const root = this.cache.getLastGoodDocumentAst(otherDocument);
+        const root = this.cache.getLastGoodParsedDocument(otherDocument);
         if (root) {
           searchRoot = root;
         }

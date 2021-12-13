@@ -93,7 +93,7 @@ function goToLine(cache: Cache, range: vscode.Range) {
 
 async function copyJsonReference(cache: Cache, range: vscode.Range) {
   const editor = vscode.window.activeTextEditor;
-  const root = cache.getDocumentAst(editor.document);
+  const root = cache.getParsedDocument(editor.document);
   if (root) {
     const [node, path] = findNodeAtOffset(root, editor.document.offsetAt(editor.selection.active));
     const jsonPointer = joinJsonPointer(path);
@@ -361,7 +361,7 @@ export async function snippetCommand(fix: Fix, cache: Cache, useEdit?: boolean) 
 
   const editor = vscode.window.activeTextEditor;
   const document = editor.document;
-  const root = cache.getLastGoodDocumentAst(document);
+  const root = cache.getLastGoodParsedDocument(document);
 
   if (!root) {
     // FIXME display error message?

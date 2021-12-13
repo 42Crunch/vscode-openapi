@@ -61,7 +61,7 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
       const version = this.cache.getDocumentVersion(document);
       if (version !== OpenApiVersion.Unknown) {
         const pointer = this.getRootPointer();
-        const root = cache.getLastGoodDocumentAst(document);
+        const root = cache.getLastGoodParsedDocument(document);
         if (root && pointer) {
           const found = find(root, pointer);
           this.root = {
