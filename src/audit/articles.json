@@ -2717,285 +2717,6 @@
       ]
     }
   },
-  "parameter-array-numerical-format": {
-    "group": "datavalidation",
-    "subgroup": "parameters",
-    "title": {
-      "text": "<h1>Numeric array item has no format defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>One or more arrays containing numeric items in your API do not specify the format of the items.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "One or more arrays containing numeric items in your API do not specify the format of the items.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array accepts items of the type <code>integer</code> but their format is not defined:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"parameters\": [\n        {\n            \"name\": \"ids\",\n            \"in\": \"query\",\n            \"description\": \"IDs to filter by\",\n            \"required\": true,\n            \"type\": \"array\",\n            \"items\": {\n                \"type\": \"integer\"\n            }\n        }\n    ]\n}",
-            "yaml": "parameters:\n  - name: ids\n    in: query\n    description: IDs to filter by\n    required: true\n    type: array\n    items:\n      type: integer\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not specify an enforceable format of numeric values, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Define the <code>format</code> parameter for the numeric array items. This ensures that only parameters of the expected format get passed to the backend.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"parameters\": [\n        {\n            \"name\": \"ids\",\n            \"in\": \"query\",\n            \"description\": \"IDs to filter by\",\n            \"required\": true,\n            \"type\": \"array\",\n            \"items\": {\n                \"type\": \"integer\",\n                \"format\": \"int32\"\n            }\n        }\n    ]\n}",
-            "yaml": "parameters:\n  - name: ids\n    in: query\n    description: IDs to filter by\n    required: true\n    type: array\n    items:\n      type: integer\n      format: int32\n"
-          }
-        }
-      ]
-    }
-  },
-  "parameter-array-numerical-max": {
-    "group": "datavalidation",
-    "subgroup": "parameters",
-    "title": {
-      "text": "<h1>Numeric array item has no maximum defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>One or more arrays containing numeric items do not specify the maximum value of the items.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "One or more arrays containing numeric items do not specify the maximum value of the items.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array accepts items of the type <code>integer</code> but does not specify the maximum value for them:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n  \"parameters\": {\n        \"name\": \"ids\",\n        \"in\": \"query\",\n        \"description\": \"IDs to filter by\",\n        \"required\": true,\n        \"type\": \"array\",\n        \"items\": {\n            \"type\": \"integer\",\n            \"minimum\": 0\n        }\n    }\n}",
-            "yaml": "parameters:\n  name: ids\n  in: query\n  description: IDs to filter by\n  required: true\n  type: array\n  items:\n    type: integer\n    minimum: 0\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not limit the range of accepted values for numeric parameters, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Set both the <code>minimum</code> and <code>maximum</code> parameter values for numeric array items to limit the accepted values to the range that works for your application:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n  \"parameters\": {\n        \"name\": \"ids\",\n        \"in\": \"query\",\n        \"description\": \"IDs to filter by\",\n        \"required\": true,\n        \"type\": \"array\",\n        \"items\": {\n            \"type\": \"integer\",\n            \"minimum\":0,\n            \"maximum\":100\n        }\n    }\n}\n",
-            "yaml": "parameters:\n  name: ids\n  in: query\n  description: IDs to filter by\n  required: true\n  type: array\n  items:\n    type: integer\n    minimum: 0\n    maximum: 100\n"
-          }
-        }
-      ]
-    }
-  },
-  "parameter-array-numerical-min": {
-    "group": "datavalidation",
-    "subgroup": "parameters",
-    "title": {
-      "text": "<h1>Numeric array item has no minimum defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>One or more arrays containing numeric items do not specify the minimum value of the items.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "One or more arrays containing numeric items do not specify the minimum value of the items.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array accepts items of the type <code>integer</code> but does not specify the minimum value for them:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n  \"parameters\": {\n        \"name\": \"ids\",\n        \"in\": \"query\",\n        \"description\": \"IDs to filter by\",\n        \"required\": true,\n        \"type\": \"array\",\n        \"items\": {\n            \"type\": \"integer\",\n            \"maximum\": 100\n        }\n    }\n}",
-            "yaml": "parameters:\n  name: ids\n  in: query\n  description: IDs to filter by\n  required: true\n  type: array\n  items:\n    type: integer\n    maximum: 100\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not limit the range of accepted values for numeric parameters, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Set both the <code>minimum</code> and <code>maximum</code> parameter values for numeric array items to limit the accepted values to the range that works for your application:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n  \"parameters\": {\n        \"name\": \"ids\",\n        \"in\": \"query\",\n        \"description\": \"IDs to filter by\",\n        \"required\": true,\n        \"type\": \"array\",\n        \"items\": {\n            \"type\": \"integer\",\n            \"minimum\":0,\n            \"maximum\":100\n        }\n    }\n}\n",
-            "yaml": "parameters:\n  name: ids\n  in: query\n  description: IDs to filter by\n  required: true\n  type: array\n  items:\n    type: integer\n    minimum: 0\n    maximum: 100\n"
-          }
-        }
-      ]
-    }
-  },
-  "parameter-array-string-loosepattern": {
-    "group": "datavalidation",
-    "subgroup": "parameters",
-    "title": {
-      "text": "<h1>Pattern for string array item is too loose</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>One or more arrays with items of type <code>string</code> in your API have too loosely defined pattern for the strings. The pattern does not actually limit what gets passed to the API.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "One or more arrays with items of type <code>string</code> in your API have too loosely defined pattern for the strings. The pattern does not actually limit what gets passed to the API.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array accepts items of the type <code>string</code> but the pattern of the items is not precise enough:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"parameters\": [\n        {\n            \"name\": \"ids\",\n            \"in\": \"query\",\n            \"description\": \"IDs to filter by\",\n            \"required\": true,\n            \"type\": \"array\",\n            \"items\": {\n                \"type\": \"string\",\n                \"pattern\": \".*\"\n            }\n        }\n    ]\n}",
-            "yaml": "parameters:\n  - name: ids\n    in: query\n    description: IDs to filter by\n    required: true\n    type: array\n    items:\n      type: string\n      pattern: .*\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you define too loose pattern for strings, you do not actually limit what is accepted as the input. This could open your backend server to various attacks, like SQL injections or buffer overflows.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Set a well-defined regular expression that matches your requirements in the <code>pattern</code> field of string array items. This ensures that only arrays of strings matching the set pattern get passed to your API.</p>\n                    <p>For example, the API below only accepts UUIDs that are compliant with <a href=\"https://www.ietf.org/rfc/rfc4122.txt\" target=\"_blank\" rel=\"noopener\">RFC 4122</a>:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"parameters\": [\n        {\n            \"name\": \"ids\",\n            \"in\": \"query\",\n            \"description\": \"IDs to filter by\",\n            \"required\": true,\n            \"type\": \"array\",\n            \"items\": {\n                \"type\": \"string\",\n                \"pattern\": \"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\" \n            }        \n        }  \n\t]\t\t\n}",
-            "yaml": "parameters:\n  - name: ids\n    in: query\n    description: IDs to filter by\n    required: true\n    type: array\n    items:\n      type: string\n      pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\n"
-          }
-        },
-        {
-          "text": "\n                    <p>We recommend that you carefully think what kind of regular expression best matches your needs. Do not simply blindly copy the pattern from the code example. </p>\n                    <p>For more information on regular expressions, see the following:</p>\n                    <ul>\n                        <li>Language-agnostic information on regular expressions at <a href=\"https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html\" target=\"_blank\">Base Definitions page on regular expressions</a></li>\n                        <li><a href=\"https://owasp.org/www-community/OWASP_Validation_Regex_Repository\" target=\"_blank\">OWASP Validation Regex Repository</a>\n                        </li>\n                        <li><a href=\"https://regexr.com/\" target=\"_blank\">RegExr</a>, an online tool for building and testing regular expressions</li>\n                    </ul>\n                "
-        },
-        {
-          "text": "\n                    <p>For examples on some of the common regulars expressions, see the <a href=\"https://apisecurity.io/encyclopedia/content/oasv2/datavalidation/parameters/parameter-array-string-loosepattern.htm\" target=\"_blank\">full article</a>.</p>\n                "
-        }
-      ]
-    }
-  },
-  "parameter-array-string-maxlength": {
-    "group": "datavalidation",
-    "subgroup": "parameters",
-    "title": {
-      "text": "<h1>String array item has no maximum length defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>One or more arrays containing string items do not have the maximum length for the strings specified.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "One or more arrays containing string items do not have the maximum length for the strings specified.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array accepts items of the type <code>string</code> of unlimited length:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"parameters\": {\n        \"name\": \"ids\",\n        \"in\": \"query\",\n        \"description\": \"IDs to filter by\",\n        \"required\": true,\n        \"type\": \"array\",\n        \"items\": {\n            \"type\": \"string\"\n        }\n    }\n}",
-            "yaml": "parameters:\n  name: ids\n  in: query\n  description: IDs to filter by\n  required: true\n  type: array\n  items:\n    type: string\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not limit the length of strings, attackers can send longer strings to your API than what your backend server can handle. This could overload your backend server and make it crash. In some cases, this could cause a buffer overflow and allow for executing arbitrary code. Long strings are also more prone to injection attacks.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                        <h2>Remediation</h2>\n                        <p>Set the <code>maxLength</code> parameter to ensure that only strings of the expected size get passed to your API:</p>\n                    "
-        },
-        {
-          "code": {
-            "json": "{\n    \"parameters\": {\n        \"name\": \"ids\",\n        \"in\": \"query\",\n        \"description\": \"IDs to filter by\",\n        \"required\": true,\n        \"type\": \"array\",\n        \"items\": {\n            \"type\": \"string\",\n            \"maxLength\": 8\n        }\n    }\n}",
-            "yaml": "parameters:\n  name: ids\n  in: query\n  description: IDs to filter by\n  required: true\n  type: array\n  items:\n    type: string\n    maxLength: 8\n"
-          }
-        },
-        {
-          "text": "\n                        <p>We also recommend that you specify a regular expression to further lock down the expected string format.</p>\n                        <p>For more information on regular expressions, see the following:</p>\n                        <ul>\n                            <li>Language-agnostic information on regular expressions at <a href=\"https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html\" target=\"_blank\">Base Definitions page on regular expressions</a></li>\n                            <li><a href=\"https://owasp.org/www-community/OWASP_Validation_Regex_Repository\" target=\"_blank\">OWASP Validation Regex Repository</a>\n                            </li>\n                            <li><a href=\"https://regexr.com/\" target=\"_blank\">RegExr</a>, an online tool for building and testing regular expressions</li>\n                        </ul>\n                        <p>For examples on some of the common regulars expressions, see the <a href=\"https://apisecurity.io/encyclopedia/content/oasv2/datavalidation/parameters/parameter-array-string-maxlength.htm\" target=\"_blank\">full article</a>.</p>\n                    "
-        }
-      ]
-    }
-  },
-  "parameter-array-string-pattern": {
-    "group": "datavalidation",
-    "subgroup": "parameters",
-    "title": {
-      "text": "<h1>String array item has no pattern defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>One or more arrays containing strings do not define any pattern for the accepted strings. This means that they do not limit the values that get passed to the API.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "One or more arrays containing strings do not define any pattern for the accepted strings. This means that they do not limit the values that get passed to the API.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array accepts items of the type <code>string</code> but their pattern is not defined:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"parameters\": [\n        {\n            \"name\": \"ids\",\n            \"in\": \"query\",\n            \"description\": \"IDs to filter by\",\n            \"required\": true,\n            \"type\": \"array\",\n            \"items\": {\n                \"type\": \"string\"\n            }\n        }\n    ]\n}",
-            "yaml": "parameters:\n  - name: ids\n    in: query\n    description: IDs to filter by\n    required: true\n    type: array\n    items:\n      type: string\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings,  any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Set a well-defined regular expression that matches your requirements in the <code>pattern</code> field of string array items. This ensures that only arrays of strings matching the set pattern get passed to your API.</p>\n                    <p>For example, the API below only accepts UUIDs that are compliant with <a href=\"https://www.ietf.org/rfc/rfc4122.txt\" target=\"_blank\" rel=\"noopener\">RFC 4122</a>:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"parameters\": [\n        {\n            \"name\": \"ids\",\n            \"in\": \"query\",\n            \"description\": \"IDs to filter by\",\n            \"required\": true,\n            \"type\": \"array\",\n            \"items\": {\n                \"type\": \"string\",\n                \"pattern\": \"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\" \n            }        \n        }  \n\t]\t\t\n}",
-            "yaml": "parameters:\n  - name: ids\n    in: query\n    description: IDs to filter by\n    required: true\n    type: array\n    items:\n      type: string\n      pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\n"
-          }
-        },
-        {
-          "text": "\n                    <p>We recommend that you carefully think what kind of regular expression best matches your needs. Do not simply blindly copy the pattern from the code example. </p>\n                    <p>For more information on regular expressions, see the following:</p>\n                    <ul>\n                        <li>Language-agnostic information on regular expressions at <a href=\"https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html\" target=\"_blank\">Base Definitions page on regular expressions</a></li>\n                        <li><a href=\"https://owasp.org/www-community/OWASP_Validation_Regex_Repository\" target=\"_blank\">OWASP Validation Regex Repository</a>\n                        </li>\n                        <li><a href=\"https://regexr.com/\" target=\"_blank\">RegExr</a>, an online tool for building and testing regular expressions</li>\n                    </ul>\n                "
-        },
-        {
-          "text": "\n                    <p>For examples on some of the common regulars expressions, see the <a href=\"https://apisecurity.io/encyclopedia/content/oasv2/datavalidation/parameters/parameter-array-string-pattern.htm\" target=\"_blank\">full article</a>.</p>\n                "
-        }
-      ]
-    }
-  },
   "parameter-numerical-format": {
     "group": "datavalidation",
     "subgroup": "parameters",
@@ -3318,6 +3039,59 @@
         },
         {
           "text": "\n                    <p>For examples on some of the common regulars expressions, see the <a href=\"https://apisecurity.io/encyclopedia/content/oasv2/datavalidation/parameters/parameter-string-pattern.htm\" target=\"_blank\">full article</a>.</p>\n                "
+        }
+      ]
+    }
+  },
+  "parameter-string-pattern-incompatible": {
+    "group": "datavalidation",
+    "subgroup": "parameters",
+    "title": {
+      "text": "<h1>Pattern of the string parameter does not match the 'minLength' or 'maxLength' properties</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>Some string parameters in your API define patterns that do not match the properties <code>minLength</code> or <code>maxLength</code> defined for the string.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#parameter-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "Some string parameters in your API define patterns that do not match the properties <code>minLength</code> or <code>maxLength</code> defined for the string.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The string defines a pattern but the maximum length allowed in the pattern is shorter than the required <code>minLength</code> of the same string:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"id\",\n        \"type\": \"string\",\n        \"description\": \"Identifier of the object to be extracted.\",\n        \"pattern\": \"^[a-z]{10,20}$\",\n        \"minLength\": 25\n    }\n}",
+            "yaml": "parameters:\n  in: query\n  name: id\n  type: string\n  description: Identifier of the object to be extracted.\n  pattern: ^[a-z]{10,20}$\n  minLength: 25\n"
+          }
+        },
+        {
+          "text": "\n                    <p>Or the pattern could require longer strings than <code>maxLength</code> allows:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"id\",\n        \"type\": \"string\",\n        \"description\": \"Identifier of the object to be extracted.\",\n        \"pattern\": \"^[a-z]{10,20}$\",\n        \"maxLength\": 5\n    }\n}",
+            "yaml": "parameters:\n  in: query\n  name: id\n  type: string\n  description: Identifier of the object to be extracted.\n  pattern: ^[a-z]{10,20}$\n  maxLength: 5\n"
+          }
+        }
+      ]
+    },
+    "exploit": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If the lengths defined in the pattern conflict with <code>minLength</code> or <code>maxLength</code> and input and output validation is properly enforced, no strings are accepted and API calls inevitably fail.</p>\n                    <p>If API calls are still accepted, this implies that validation for the pattern or string length — or both — is not properly enforced, which is a sign that input validation is not done properly in the backend implementation of the API.</p>\n                "
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the patterns you define for strings do not conflict with  the <code>minLength</code> or <code>maxLength</code> properties.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"id\",\n        \"type\": \"string\",\n        \"description\": \"Identifier of the object to be extracted.\",\n        \"pattern\": \"^[a-z]{25,40}$\",\n        \"minLength\": 25,\n        \"maxLength\": 40\n    }\n}",
+            "yaml": "parameters:\n  in: query\n  name: id\n  type: string\n  description: Identifier of the object to be extracted.\n  pattern: ^[a-z]{25,40}$\n  minLength: 25\n  maxLength: 40\n"
+          }
         }
       ]
     }
@@ -3958,8 +3732,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"array\",\n                        \"items\": {\n                            \"description\": \"Record Ids\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: array\n          items:\n            description: Record Ids\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": { \n                    \"type\": \"array\",\n                    \"items\": {\n                        \"description\": \"Record Ids\"\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: array\n        items:\n          description: Record Ids\n"
           }
         }
       ]
@@ -3978,8 +3752,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"array\",\n                        \"items\": {\n                            \"description\": \"Record Ids\",\n                            \"type\": \"integer\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: array\n          items:\n            description: Record Ids\n            type: integer\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"type\": \"array\",\n                    \"items\": {\n                        \"description\": \"Record Ids\",\n                        \"type\": \"integer\"\n                    }\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: array\n        items:\n          description: Record Ids\n          type: integer\n"
           }
         }
       ]
@@ -4029,285 +3803,6 @@
       ]
     }
   },
-  "response-header-array-numerical-format": {
-    "group": "datavalidation",
-    "subgroup": "responseheader",
-    "title": {
-      "text": "<h1>Array header with numeric items has no format defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>An array header containing numeric items does not specify the format of the items.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "An array header containing numeric items does not specify the format of the items.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The API response returns an array containing <code>integer</code> values in the response header, but does not specify the format of the values:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"array\",\n                        \"items\": {\n                            \"type\": \"integer\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: array\n          items:\n            type: integer\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>Attackers strive to make your APIs behave in an unexpected way to learn more about your system or to cause a data breach. It is unlikely that  the format of numeric items can cause a significant breach, but we highly recommend that you minimize any risks and clearly specify the data that your API produces in each method.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Define the <code>format</code> property for the numeric items in array headers. This provides an extra layer of safety ensuring that your API only returns data formats that you expect it to return.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"array\",\n                        \"items\": {\n                            \"type\": \"integer\",\n                             \"format\": \"int32\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: array\n          items:\n            type: integer\n            format: int32\n"
-          }
-        }
-      ]
-    }
-  },
-  "response-header-array-numerical-max": {
-    "group": "datavalidation",
-    "subgroup": "responseheader",
-    "title": {
-      "text": "<h1>Array header with numeric items has no maximum defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>An array header containing numeric items does not specify the maximum value of the items.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "An array header containing numeric items does not specify the maximum value of the items.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array header accepts items of the type <code>integer</code> but does not specify the maximum value for them:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"array\",\n                        \"items\": {\n                            \"type\": \"integer\",\n                            \"format\": \"int32\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: array\n          items:\n            type: integer\n            format: int32\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>Attackers strive to make your APIs behave in an unexpected way to learn more about your system or to cause a data breach. We highly recommend that you minimize any risks and clearly specify the data that your API produces in each method.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Set both the <code>minimum</code> and <code>maximum</code> values for numeric items. This provides an extra layer of safety ensuring that your API only returns data that you expect it to return.</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"array\",\n                        \"items\": {\n                            \"type\": \"integer\",\n                            \"format\": \"int32\",\n                            \"minimum\": 0,\n                            \"maximum\": 100\n                        }\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: array\n          items:\n            type: integer\n            format: int32\n            minimum: 0\n            maximum: 100\n"
-          }
-        }
-      ]
-    }
-  },
-  "response-header-array-numerical-min": {
-    "group": "datavalidation",
-    "subgroup": "responseheader",
-    "title": {
-      "text": "<h1>Array header with numeric items has no minimum defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>An array header containing numeric items does not specify the minimum value of the items.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "An array header containing numeric items does not specify the minimum value of the items.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array header accepts items of the type <code>integer</code> but does not specify the minimum value for them:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"array\",\n                        \"items\": {\n                            \"type\": \"integer\",\n                            \"format\": \"int32\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: array\n          items:\n            type: integer\n            format: int32\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>Attackers strive to make your APIs behave in an unexpected way to learn more about your system or to cause a data breach. We highly recommend that you minimize any risks and clearly specify the data that your API produces in each method.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Set both the <code>minimum</code> and <code>maximum</code> values for numeric items. This provides an extra layer of safety ensuring that your API only returns data that you expect it to return.</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"array\",\n                        \"items\": {\n                            \"type\": \"integer\",\n                            \"format\": \"int32\",\n                            \"minimum\": 0,\n                            \"maximum\": 100\n                        }\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: array\n          items:\n            type: integer\n            format: int32\n            minimum: 0\n            maximum: 100\n"
-          }
-        }
-      ]
-    }
-  },
-  "response-header-array-string-loosepattern": {
-    "group": "datavalidation",
-    "subgroup": "responseheader",
-    "title": {
-      "text": "<h1>Pattern for string items in an array header is too loose</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>An array header containing string items specifies too loosely defined pattern for the strings. The pattern does not actually limit what can be included in response headers.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "An array header containing string items specifies too loosely defined pattern for the strings. The pattern does not actually limit what can be included in response headers.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array header accepts items of the type <code>string</code> but the pattern of the items is not precise enough:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"array\",\n                        \"items\": {\n                            \"type\": \"string\",\n                            \"pattern\": \".*\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: array\n          items:\n            type: string\n            pattern: .*\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>Your API has been designed to return specific data. If you define too loose pattern for strings, you do not actually limit what can be included in response headers.</p>\n                    <p>Attackers typically want to make the API to change its behavior and return different data than it is supposed to. A particular API failure might leak some other data, such as records or stack trace.</p>\n                    <p>Locking down the pattern of strings in your response headers helps reduce this risk.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Set a well-defined regular expression that matches your requirements in the <code>pattern</code> field of string items in array headers. This ensures that only strings matching the pattern can be included in the response header.</p>\n                    <p>For example, the API below only accepts UUIDs that are compliant with <a href=\"https://www.ietf.org/rfc/rfc4122.txt\" target=\"_blank\" rel=\"noopener\">RFC 4122</a>:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"array\",\n                        \"items\": {\n                            \"type\": \"string\",\n                            \"pattern\": \"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\"\n                        }\n                    }\n                }\n            }\n        }\n\t}\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: array\n          items:\n            type: string\n            pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\n"
-          }
-        },
-        {
-          "text": "\n                    <p>We recommend that you carefully think what kind of regular expression best matches your needs. Do not simply blindly copy the pattern from the code example. </p>\n                    <p>For more information on regular expressions, see the following:</p>\n                    <ul>\n                        <li>Language-agnostic information on regular expressions at <a href=\"https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html\" target=\"_blank\">Base Definitions page on regular expressions</a></li>\n                        <li><a href=\"https://owasp.org/www-community/OWASP_Validation_Regex_Repository\" target=\"_blank\">OWASP Validation Regex Repository</a>\n                        </li>\n                        <li><a href=\"https://regexr.com/\" target=\"_blank\">RegExr</a>, an online tool for building and testing regular expressions</li>\n                    </ul>\n                "
-        },
-        {
-          "text": "\n                    <p>For examples on some of the common regulars expressions, see the <a href=\"https://apisecurity.io/encyclopedia/content/oasv2/datavalidation/responseheader/response-header-array-string-loosepattern.htm\" target=\"_blank\">full article</a>.</p>\n                "
-        }
-      ]
-    }
-  },
-  "response-header-array-string-maxlength": {
-    "group": "datavalidation",
-    "subgroup": "responseheader",
-    "title": {
-      "text": "<h1>Array header with string items has no maximum length defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>An array header containing string items does not define the maximum length for the accepted strings.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "An array header containing string items does not define the maximum length for the accepted strings.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array header accepts items of the type <code>string</code> of unlimited length:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"array\",\n                        \"items\": {\n                            \"type\": \"string\"\n                        } \n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: array\n          items:\n            type: string\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>Attackers strive to make your APIs behave in an unexpected way to learn more about your system or to cause a data breach. We highly recommend that you minimize any risks and clearly specify the data that your API produces in each method.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Set the <code>maxLength</code> property in array headers with string items. This provides an extra layer of safety ensuring that your API only returns data that you expect it to return.</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"array\",\n                        \"items\": {\n                            \"type\": \"string\",\n                            \"maxLength\": 8\n                        } \n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: array\n          items:\n            type: string\n            maxLength: 8\n"
-          }
-        },
-        {
-          "text": "\n                    <p>We also recommend that you specify a regular expression to further lock down the expected string format.</p>\n                    <p>For more information on regular expressions, see the following:</p>\n                    <ul>\n                        <li>Language-agnostic information on regular expressions at <a href=\"https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html\" target=\"_blank\">Base Definitions page on regular expressions</a></li>\n                        <li><a href=\"https://owasp.org/www-community/OWASP_Validation_Regex_Repository\" target=\"_blank\">OWASP Validation Regex Repository</a>\n                        </li>\n                        <li><a href=\"https://regexr.com/\" target=\"_blank\">RegExr</a>, an online tool for building and testing regular expressions</li>\n                    </ul>\n                    <p>For examples on some of the common regulars expressions, see the <a href=\"https://apisecurity.io/encyclopedia/content/oasv2/datavalidation/responseheader/response-header-array-string-maxlength.htm\" target=\"_blank\">full article</a>.</p>\n                "
-        }
-      ]
-    }
-  },
-  "response-header-array-string-pattern": {
-    "group": "datavalidation",
-    "subgroup": "responseheader",
-    "title": {
-      "text": "<h1>Array header with string items has no pattern defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>An array header containing string items does not define any pattern for the accepted strings. This means that it does not limit the values that can be included in the response header.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "An array header containing string items does not define any pattern for the accepted strings. This means that it does not limit the values that can be included in the response header.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. Because no pattern is defined, the array in the header can include strings of any size and value:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"array\",\n                        \"items\": {\n                            \"type\": \"string\"\n                        }\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: array\n          items:\n            type: string\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>Your API has been designed to return specific data. If you define too loose pattern for strings, you do not actually limit what can be included in response headers.</p>\n                    <p>Attackers typically want to make the API to change its behavior and return different data than it is supposed to. A particular API failure might leak some other data, such as records or stack trace.</p>\n                    <p>Locking down the pattern of strings in your response headers helps reduce this risk.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Set a well-defined regular expression that matches your requirements in the <code>pattern</code> field of string items in array headers. This ensures that only strings matching the pattern can be included in the response header.</p>\n                    <p>For example, the API below only accepts UUIDs that are compliant with <a href=\"https://www.ietf.org/rfc/rfc4122.txt\" target=\"_blank\" rel=\"noopener\">RFC 4122</a>:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"array\",\n                        \"items\": {\n                            \"type\": \"string\",\n                            \"pattern\": \"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\"\n                        }\n                    }\n                }\n            }\n        }\n\t}\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: array\n          items:\n            type: string\n            pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\n"
-          }
-        },
-        {
-          "text": "\n                    <p>We recommend that you carefully think what kind of regular expression best matches your needs. Do not simply blindly copy the pattern from the code example. </p>\n                    <p>For more information on regular expressions, see the following:</p>\n                    <ul>\n                        <li>Language-agnostic information on regular expressions at <a href=\"https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html\" target=\"_blank\">Base Definitions page on regular expressions</a></li>\n                        <li><a href=\"https://owasp.org/www-community/OWASP_Validation_Regex_Repository\" target=\"_blank\">OWASP Validation Regex Repository</a>\n                        </li>\n                        <li><a href=\"https://regexr.com/\" target=\"_blank\">RegExr</a>, an online tool for building and testing regular expressions</li>\n                    </ul>\n                "
-        },
-        {
-          "text": "\n                    <p>For examples on some of the common regulars expressions, see the <a href=\"https://apisecurity.io/encyclopedia/content/oasv2/datavalidation/responseheader/response-header-array-string-pattern.htm\" target=\"_blank\">full article</a>.</p>\n                "
-        }
-      ]
-    }
-  },
   "response-header-numerical-format": {
     "group": "datavalidation",
     "subgroup": "responseheader",
@@ -4325,8 +3820,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"integer\"\n                    }\n                }\n            }\n        }\n    }\n}",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: integer\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"type\": \"integer\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: integer\n"
           }
         }
       ]
@@ -4345,8 +3840,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"integer\",\n                        \"format\": \"int32\"\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: integer\n          format: int32\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"type\": \"integer\",\n                    \"format\": \"int32\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: integer\n        format: int32\n"
           }
         }
       ]
@@ -4369,8 +3864,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"integer\",\n                        \"format\": \"int32\"\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: integer\n          format: int32\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"type\": \"integer\",\n                    \"format\": \"int32\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: integer\n        format: int32\n"
           }
         }
       ]
@@ -4389,8 +3884,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"integer\",\n                        \"format\": \"int32\",\n                        \"minimum\":0,\n                        \"maximum\":100\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: integer\n          format: int32\n          minimum: 0\n          maximum: 100\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"type\": \"integer\",\n                    \"format\": \"int32\",\n                    \"minimum\":0,\n                    \"maximum\":100\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: integer\n        format: int32\n        minimum: 0\n        maximum: 100\n"
           }
         }
       ]
@@ -4413,8 +3908,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"integer\",\n                        \"format\": \"int32\"\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: integer\n          format: int32\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"type\": \"integer\",\n                    \"format\": \"int32\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: integer\n        format: int32\n"
           }
         }
       ]
@@ -4433,8 +3928,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"integer\",\n                        \"format\": \"int32\",\n                        \"minimum\":0,\n                        \"maximum\":100\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: integer\n          format: int32\n          minimum: 0\n          maximum: 100\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"type\": \"integer\",\n                    \"format\": \"int32\",\n                    \"minimum\":0,\n                    \"maximum\":100\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: integer\n        format: int32\n        minimum: 0\n        maximum: 100\n"
           }
         }
       ]
@@ -4457,8 +3952,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"integer\",\n                        \"format\": \"int3\"\n                    }\n                }\n            }\n        }\n    }\n}",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: integer\n          format: int3\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"type\": \"integer\",\n                    \"format\": \"int3\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: integer\n        format: int3\n"
           }
         }
       ]
@@ -4477,8 +3972,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"integer\",\n                        \"format\": \"int32\"\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: integer\n          format: int32\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"type\": \"integer\",\n                    \"format\": \"int32\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: integer\n        format: int32\n"
           }
         },
         {
@@ -4504,8 +3999,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"string\",\n                        \"pattern\": \".*\"\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: string\n          pattern: .*\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"type\": \"string\",\n                    \"pattern\": \".*\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: string\n        pattern: .*\n"
           }
         }
       ]
@@ -4524,8 +4019,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"string\",\n                        \"pattern\": \"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\"\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: string\n          pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"type\": \"string\",\n                    \"pattern\": \"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: string\n        pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\n"
           }
         },
         {
@@ -4554,8 +4049,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"string\"\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: string\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"type\": \"string\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: string\n"
           }
         }
       ]
@@ -4574,8 +4069,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"string\",\n                        \"maxLength\": 8\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: string\n          maxLength: 8\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"type\": \"string\",\n                    \"maxLength\": 8\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: string\n        maxLength: 8\n"
           }
         },
         {
@@ -4601,8 +4096,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"string\"\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: string\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"type\": \"string\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: string\n"
           }
         }
       ]
@@ -4621,8 +4116,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"schema\": {\n                        \"type\": \"string\",\n                        \"pattern\": \"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\"\n                    }\n                }\n            }\n        }\n    }\n}\n",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        schema:\n          type: string\n          pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"type\": \"string\",\n                    \"pattern\": \"^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: string\n        pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89AB][0-9a-f]{3}-[0-9a-f]{12}$\n"
           }
         },
         {
@@ -4630,6 +4125,59 @@
         },
         {
           "text": "\n                    <p>For examples on some of the common regulars expressions, see the <a href=\"https://apisecurity.io/encyclopedia/content/oasv2/datavalidation/responseheader/response-header-string-pattern.htm\" target=\"_blank\">full article</a>.</p>\n                "
+        }
+      ]
+    }
+  },
+  "response-header-string-pattern-incompatible": {
+    "group": "datavalidation",
+    "subgroup": "responseheader",
+    "title": {
+      "text": "<h1>Pattern of the string header does not match the 'minLength' or 'maxLength' properties</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>Some string headers in your API define patterns that do not match the properties <code>minLength</code> or <code>maxLength</code> defined for the string.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#headerObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "Some string headers in your API define patterns that do not match the properties <code>minLength</code> or <code>maxLength</code> defined for the string.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The string defines a pattern but the maximum length allowed in the pattern is shorter than the required <code>minLength</code> of the same string:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"type\": \"string\",\n                    \"pattern\": \"^[a-z]{10,20}$\",\n                    \"minLength\": 25\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: string\n        pattern: ^[a-z]{10,20}$\n        minLength: 25\n"
+          }
+        },
+        {
+          "text": "\n                    <p>Or the pattern could require longer strings than <code>maxLength</code> allows:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {\n                    \"type\": \"string\",\n                    \"pattern\": \"^[a-z]{10,20}$\",\n                    \"maxLength\": 5\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: string\n        pattern: ^[a-z]{10,20}$\n        maxLength: 5\n"
+          }
+        }
+      ]
+    },
+    "exploit": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If the lengths defined in the pattern conflict with <code>minLength</code> or <code>maxLength</code> and input and output validation is properly enforced, no strings are accepted and API calls inevitably fail.</p>\n                    <p>If API calls are still accepted, this implies that validation for the pattern or string length — or both — is not properly enforced, which is a sign that input validation is not done properly in the backend implementation of the API.</p>\n                "
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the patterns you define for strings do not conflict with  the <code>minLength</code> or <code>maxLength</code> properties.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-ids\": {                    \n                    \"type\": \"string\",\n                    \"pattern\": \"^[a-z]{25,40}$\",\n                    \"minLength\": 25,\n                    \"maxLength\": 40\n                }\n            }\n        }\n    }\n}\n",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-ids:\n        type: string\n        pattern: ^[a-z]{25,40}$\n        minLength: 25\n        maxLength: 40\n"
+          }
         }
       ]
     }
@@ -4651,8 +4199,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-host\": {\n                    \"schema\": {\n                        \"type\": \"string\",\n                        \"format\": \"host\"\n                    }\n                }\n            }\n        }\n    }\n}",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-host:\n        schema:\n          type: string\n          format: host\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-host\": {\n                    \"type\": \"string\",\n                    \"format\": \"host\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-host:\n        type: string\n        format: host\n"
           }
         }
       ]
@@ -4671,8 +4219,8 @@
         },
         {
           "code": {
-            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-host\": {\n                    \"schema\": {\n                        \"type\": \"string\",\n                        \"format\": \"hostname\"\n                    }\n                }\n            }\n        }\n    }\n}",
-            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-host:\n        schema:\n          type: string\n          format: hostname\n"
+            "json": "{\n    \"responses\": {\n        \"200\": {\n            \"description\": \"OK\",\n            \"headers\": {\n                \"x-host\": {\n                    \"type\": \"string\",\n                    \"format\": \"hostname\"\n                }\n            }\n        }\n    }\n}",
+            "yaml": "responses:\n  \"200\":\n    description: OK\n    headers:\n      x-host:\n        type: string\n        format: hostname\n"
           }
         },
         {
@@ -5031,329 +4579,6 @@
           "code": {
             "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"additionalProperties\": false,\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"favfood\": {\n                            \"type\": \"array\",\n                            \"maxItems\": 3,\n                            \"items\": {\n                                \"type\": \"string\"\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
             "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        additionalProperties: false\n        required:\n          - name\n        properties:\n          name:\n            type: string\n          favfood:\n            type: array\n            maxItems: 3\n            items:\n              type: string\n"
-          }
-        }
-      ]
-    }
-  },
-  "schema-array-numerical-format": {
-    "group": "datavalidation",
-    "subgroup": "schema",
-    "title": {
-      "text": "<h1>Array schema with numeric items has no format defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>An array schema containing numeric items does not specify the format of the items.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "An array schema containing numeric items does not specify the format of the items.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array schema accepts items of the type <code>integer</code> but their format is not defined:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Add a new lock combination\",\n        \"operationId\": \"addCombo\",\n        \"parameters\": [\n            {\n                \"name\": \"lockCombo\",\n                \"in\": \"body\",\n                \"description\": \"Lock combination to add to the list\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"combination\"\n                    ],\n                    \"properties\": {\n                        \"combination\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"integer\"\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  description: Add a new lock combination\n  operationId: addCombo\n  parameters:\n    - name: lockCombo\n      in: body\n      description: Lock combination to add to the list\n      required: true\n      schema:\n        type: object\n        required:\n          - combination\n        properties:\n          combination:\n            type: array\n            items:\n              type: integer\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not specify an enforceable format of numeric values, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                    <p>Using your internal, company-specific formats is not currently supported.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Define the <code>format</code> parameter for numeric items in array schemas. This ensures that only parameters of the expected format get passed to the backend.</p>\n                    <p>Numeric parameters type <code>integer</code> can have the format <code>int32</code> or <code>int64</code>. Numeric parameters type <code>number</code> can have the format <code>float</code> or <code>double</code>.</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Add a new lock combination\",\n        \"operationId\": \"addCombo\",\n        \"parameters\": [\n            {\n                \"name\": \"lockCombo\",\n                \"in\": \"body\",\n                \"description\": \"Lock combination to add to the list\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"combination\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"integer\",\n                                \"minimum\": 0,\n                                \"maximum\": 9,\n                                \"format\": \"int32\"\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  description: Add a new lock combination\n  operationId: addCombo\n  parameters:\n    - name: lockCombo\n      in: body\n      description: Lock combination to add to the list\n      required: true\n      schema:\n        type: object\n        required:\n          - name\n        properties:\n          combination:\n            type: array\n            items:\n              type: integer\n              minimum: 0\n              maximum: 9\n              format: int32\n"
-          }
-        }
-      ]
-    }
-  },
-  "schema-array-numerical-max": {
-    "group": "datavalidation",
-    "subgroup": "schema",
-    "title": {
-      "text": "<h1>Array schema with numeric items has no maximum defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>An array schema containing numeric items does not specify the maximum value of the items.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "An array schema containing numeric items does not specify the maximum value of the items.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array schema accepts items of the type <code>integer</code> but does not specify the maximum value for them:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Add a new lock combination\",\n        \"operationId\": \"addCombo\",\n        \"parameters\": [\n            {\n                \"name\": \"lockCombo\",\n                \"in\": \"body\",\n                \"description\": \"Lock combination to add to the list\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"combination\"\n                    ],\n                    \"properties\": {\n                        \"combination\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"integer\"\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  description: Add a new lock combination\n  operationId: addCombo\n  parameters:\n    - name: lockCombo\n      in: body\n      description: Lock combination to add to the list\n      required: true\n      schema:\n        type: object\n        required:\n          - combination\n        properties:\n          combination:\n            type: array\n            items:\n              type: integer\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not limit the range of accepted values for numeric parameters, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Set both the <code>minimum</code> and <code>maximum</code> values for numeric parameters in arrays to limit the accepted values to the range that works for your application:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Add a new lock combination\",\n        \"operationId\": \"addCombo\",\n        \"parameters\": [\n            {\n                \"name\": \"lockCombo\",\n                \"in\": \"body\",\n                \"description\": \"Lock combination to add to the list\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"combination\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"integer\",\n                                \"minimum\": 0,\n                                \"maximum\": 9,\n                                \"format\": \"int32\"\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  description: Add a new lock combination\n  operationId: addCombo\n  parameters:\n    - name: lockCombo\n      in: body\n      description: Lock combination to add to the list\n      required: true\n      schema:\n        type: object\n        required:\n          - name\n        properties:\n          combination:\n            type: array\n            items:\n              type: integer\n              minimum: 0\n              maximum: 9\n              format: int32\n"
-          }
-        }
-      ]
-    }
-  },
-  "schema-array-numerical-min": {
-    "group": "datavalidation",
-    "subgroup": "schema",
-    "title": {
-      "text": "<h1>Array schema with numeric items has no minimum defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>An array schema containing numeric items does not specify the minimum value of the items.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "An array schema containing numeric items does not specify the minimum value of the items.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array schema accepts items of the type <code>integer</code> but does not specify the minimum value for them:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Add a new lock combination\",\n        \"operationId\": \"addCombo\",\n        \"parameters\": [\n            {\n                \"name\": \"lockCombo\",\n                \"in\": \"body\",\n                \"description\": \"Lock combination to add to the list\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"combination\"\n                    ],\n                    \"properties\": {\n                        \"combination\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"integer\"\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  description: Add a new lock combination\n  operationId: addCombo\n  parameters:\n    - name: lockCombo\n      in: body\n      description: Lock combination to add to the list\n      required: true\n      schema:\n        type: object\n        required:\n          - combination\n        properties:\n          combination:\n            type: array\n            items:\n              type: integer\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not limit the range of accepted values for numeric parameters, attackers can try to send unexpected input to your backend server. This may cause the backend server to fail in an unexpected way and open the door to further attacks.</p>\n                    <p>For example, the backend server could throw an exception and return a stack trace on the error. The trace could contain information on the exact software stack used in the implementation. This enables the attacker to launch an attack on specific vulnerabilities known in that stack.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Set both the <code>minimum</code> and <code>maximum</code> values for numeric parameters in arrays to limit the accepted values to the range that works for your application:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Add a new lock combination\",\n        \"operationId\": \"addCombo\",\n        \"parameters\": [\n            {\n                \"name\": \"lockCombo\",\n                \"in\": \"body\",\n                \"description\": \"Lock combination to add to the list\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"combination\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"integer\",\n                                \"minimum\": 0,\n                                \"maximum\": 9,\n                                \"format\": \"int32\"\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  description: Add a new lock combination\n  operationId: addCombo\n  parameters:\n    - name: lockCombo\n      in: body\n      description: Lock combination to add to the list\n      required: true\n      schema:\n        type: object\n        required:\n          - name\n        properties:\n          combination:\n            type: array\n            items:\n              type: integer\n              minimum: 0\n              maximum: 9\n              format: int32\n"
-          }
-        }
-      ]
-    }
-  },
-  "schema-array-string-loosepattern": {
-    "group": "datavalidation",
-    "subgroup": "schema",
-    "title": {
-      "text": "<h1>Pattern for string items in an array schema is too loose</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>An array schema containing string items specifies too loosely defined pattern for the strings. The pattern does not actually limit what gets passed to the API.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "An array schema containing string items specifies too loosely defined pattern for the strings. The pattern does not actually limit what gets passed to the API.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array accepts items of the type <code>string</code> but the pattern of the items is not precise enough:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"favfood\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"pattern\": \".*\"\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        required:\n          - name\n        properties:\n          name:\n            type: string\n          favfood:\n            type: array\n            items:\n              type: string\n              pattern: .*\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you define too loose pattern for strings, you do not actually limit what is accepted as the input. This could open your backend server to various attacks, like SQL injections or buffer overflows.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Set a well-defined regular expression that matches your requirements in the <code>pattern</code> field of string parameters. This ensures that only strings matching the set pattern get passed to your API.</p>\n                    <p>For example, the API below only accepts UUIDs that are compliant with <a href=\"https://www.ietf.org/rfc/rfc4122.txt\" target=\"_blank\" rel=\"noopener\">RFC 4122</a>:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {   \n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"favfood\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"pattern\": \"^[A-Za-z0-9]{3,10}$\",\n                                \"maxLength\": 10\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        required:\n          - name\n        properties:\n          name:\n            type: string\n          favfood:\n            type: array\n            items:\n              type: string\n              pattern: ^[A-Za-z0-9]{3,10}$\n              maxLength: 10\n"
-          }
-        },
-        {
-          "text": "\n                    <p>We recommend that you carefully think what kind of regular expression best matches your needs. Do not simply blindly copy the pattern from the code example. </p>\n                    <p>For more information on regular expressions, see the following:</p>\n                    <ul>\n                        <li>Language-agnostic information on regular expressions at <a href=\"https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html\" target=\"_blank\">Base Definitions page on regular expressions</a></li>\n                        <li><a href=\"https://owasp.org/www-community/OWASP_Validation_Regex_Repository\" target=\"_blank\">OWASP Validation Regex Repository</a>\n                        </li>\n                        <li><a href=\"https://regexr.com/\" target=\"_blank\">RegExr</a>, an online tool for building and testing regular expressions</li>\n                    </ul>\n                "
-        },
-        {
-          "text": "\n                    <p>For examples on some of the common regulars expressions, see the <a href=\"https://apisecurity.io/encyclopedia/content/oasv2/datavalidation/schema/schema-array-string-loosepattern.htm\" target=\"_blank\">full article</a>.</p>\n                "
-        }
-      ]
-    }
-  },
-  "schema-array-string-maxlength": {
-    "group": "datavalidation",
-    "subgroup": "schema",
-    "title": {
-      "text": "<h1>Array schema with string items has no maximum length defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>An array schema containing string items does not define the maximum length for the accepted strings.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "An array schema containing string items does not define the maximum length for the accepted strings.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The array schema accepts items of the type <code>string</code> of unlimited length:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"favfood\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\"\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        required:\n          - name\n        properties:\n          name:\n            type: string\n          favfood:\n            type: array\n            items:\n              type: string\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not limit the length of strings, attackers can send longer strings to your API than what your backend server can handle. This could overload your backend server and make it crash. In some cases, this could cause a buffer overflow and allow for executing arbitrary code. Long strings are also more prone to injection attacks.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Set the <code>maxLength</code> property in array schemas with string items to ensure that only strings of the expected size get passed to your API:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {   \n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"favfood\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"pattern\": \"^[A-Za-z0-9]{3,10}$\",\n                                \"maxLength\": 10\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        required:\n          - name\n        properties:\n          name:\n            type: string\n          favfood:\n            type: array\n            items:\n              type: string\n              pattern: ^[A-Za-z0-9]{3,10}$\n              maxLength: 10\n"
-          }
-        },
-        {
-          "text": "\n                    <p>We also recommend that you specify a regular expression to further lock down the expected string format.</p>\n                    <p>For more information on regular expressions, see the following:</p>\n                    <ul>\n                        <li>Language-agnostic information on regular expressions at <a href=\"https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html\" target=\"_blank\">Base Definitions page on regular expressions</a></li>\n                        <li><a href=\"https://owasp.org/www-community/OWASP_Validation_Regex_Repository\" target=\"_blank\">OWASP Validation Regex Repository</a>\n                        </li>\n                        <li><a href=\"https://regexr.com/\" target=\"_blank\">RegExr</a>, an online tool for building and testing regular expressions</li>\n                    </ul>\n                    <p>For examples on some of the common regulars expressions, see the <a href=\"https://apisecurity.io/encyclopedia/content/oasv2/datavalidation/schema/schema-array-string-maxlength.htm\" target=\"_blank\">full article</a>.</p>\n                "
-        }
-      ]
-    }
-  },
-  "schema-array-string-pattern": {
-    "group": "datavalidation",
-    "subgroup": "schema",
-    "title": {
-      "text": "<h1>Array schema with string items has no pattern defined</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>An array schema containing string items does not define any pattern for the accepted strings. This means that you do not limit the values that get passed to the API.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#itemsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "An array schema containing string items does not define any pattern for the accepted strings. This means that you do not limit the values that get passed to the API.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. Because no pattern is defined, the array schema can include strings of any size and value:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"favfood\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\"\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        required:\n          - name\n        properties:\n          name:\n            type: string\n          favfood:\n            type: array\n            items:\n              type: string\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not define a pattern for strings,  any string is accepted as the input. This could open your backend server to various attacks, such as SQL injection.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Set a well-defined regular expression that matches your requirements in the <code>pattern</code> field of string parameters. This ensures that only strings matching the set pattern get passed to your API.</p>\n                    <p>For example, the API below only accepts UUIDs that are compliant with <a href=\"https://www.ietf.org/rfc/rfc4122.txt\" target=\"_blank\" rel=\"noopener\">RFC 4122</a>:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {   \n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\"\n                        },\n                        \"favfood\": {\n                            \"type\": \"array\",\n                            \"items\": {\n                                \"type\": \"string\",\n                                \"pattern\": \"^[A-Za-z0-9]{3,10}$\",\n                                \"maxLength\": 10\n                            }\n                        }\n                    }\n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        required:\n          - name\n        properties:\n          name:\n            type: string\n          favfood:\n            type: array\n            items:\n              type: string\n              pattern: ^[A-Za-z0-9]{3,10}$\n              maxLength: 10\n"
-          }
-        },
-        {
-          "text": "\n                    <p>We recommend that you carefully think what kind of regular expression best matches your needs. Do not simply blindly copy the pattern from the code example. </p>\n                    <p>For more information on regular expressions, see the following:</p>\n                    <ul>\n                        <li>Language-agnostic information on regular expressions at <a href=\"https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap09.html\" target=\"_blank\">Base Definitions page on regular expressions</a></li>\n                        <li><a href=\"https://owasp.org/www-community/OWASP_Validation_Regex_Repository\" target=\"_blank\">OWASP Validation Regex Repository</a>\n                        </li>\n                        <li><a href=\"https://regexr.com/\" target=\"_blank\">RegExr</a>, an online tool for building and testing regular expressions</li>\n                    </ul>\n                "
-        },
-        {
-          "text": "\n                    <p>For examples on some of the common regulars expressions, see the <a href=\"https://apisecurity.io/encyclopedia/content/oasv2/datavalidation/schema/schema-array-string-pattern.htm\" target=\"_blank\">full article</a>.</p>\n                "
-        }
-      ]
-    }
-  },
-  "schema-empty": {
-    "group": "datavalidation",
-    "subgroup": "schema",
-    "title": {
-      "text": "<h1>Schema is empty</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The schema is empty. This means that your API accepts any JSON values.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The schema is empty. This means that your API accepts any JSON values.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The method <code>POST</code> accepts a JSON payload in the <code>body</code> but does not specify the <code>schema</code> of the payload:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"pet to add to the system\",\n                \"required\": true,\n                \"schema\": {    \n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: pet to add to the system\n      required: true\n      schema: {}\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not clearly define the schema and you leave properties of a JSON payload empty, you effectively allow attackers to pass in any data. This means that you are opening your backend to various attacks, such as SQL injection.</p>\n                    <p>This also lets attackers to try various unexpected inputs. Unexpected inputs may cause the backend server to crash or behave in an unexpected way. This in turn may cause the server to potentially leak stack trace that can be used for further attacks, or even data.</p>\n                    <p>If no restrictions to the set of properties in the JSON payload are enforced, the API might also accept more fields than expected. The received payloads could be blindly transformed into an object and stored, overwriting sensitive internal data.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure you define schemas for all JSON payloads. Here, a specific JSON object <code>NewPet</code> is defined in <code>#/definitions</code> and referenced as the <code>schema</code> for the API method:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": {\n            \"name\": \"pet\",\n            \"in\": \"body\",\n            \"description\": \"pet to add to the system\",\n            \"required\": true,\n            \"schema\": {\n                \"$ref\": \"#/definitions/NewPet\"\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"description\": \"Pet name\"\n            },\n            \"tag\": {\n                \"type\": \"string\",\n                \"description\": \"Pet tag\"\n            }\n        }\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    name: pet\n    in: body\n    description: pet to add to the system\n    required: true\n    schema:\n      $ref: \"#/definitions/NewPet\"\n# ...\nNewPet:\n  type: object\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      description: Pet name\n    tag:\n      type: string\n      description: Pet tag\n"
           }
         }
       ]
@@ -5817,6 +5042,59 @@
       ]
     }
   },
+  "schema-string-pattern-incompatible": {
+    "group": "datavalidation",
+    "subgroup": "schema",
+    "title": {
+      "text": "<h1>Pattern of the string schema does not match the 'minLength' or 'maxLength' properties</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>Some string parameters in your API define patterns that do not match the properties <code>minLength</code> or <code>maxLength</code> defined for the string.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "Some string parameters in your API define patterns that do not match the properties <code>minLength</code> or <code>maxLength</code> defined for the string.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The string defines a pattern but the maximum length allowed in the pattern is shorter than the required <code>minLength</code> of the same string:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"additionalProperties\": false,\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\",\n                            \"pattern\": \"^[a-z]{3,10}$\",\n                            \"minLength\": 25\n                        }       \n                    }\n                }\n            }\n        ]\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        additionalProperties: false\n        required:\n          - name\n        properties:\n          name:\n            type: string\n            pattern: ^[a-z]{3,10}$\n            minLength: 25\n"
+          }
+        },
+        {
+          "text": "\n                    <p>Or the pattern could require longer strings than <code>maxLength</code> allows:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"additionalProperties\": false,\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\",\n                            \"pattern\": \"^[a-z]{5,10}$\",\n                            \"maxLength\": 3\n                        }       \n                    }\n                }\n            }\n        ]\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        additionalProperties: false\n        required:\n          - name\n        properties:\n          name:\n            type: string\n            pattern: ^[a-z]{5,10}$\n            maxLength: 3\n"
+          }
+        }
+      ]
+    },
+    "exploit": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If the lengths defined in the pattern conflict with <code>minLength</code> or <code>maxLength</code> and input and output validation is properly enforced, no strings are accepted and API calls inevitably fail.</p>\n                    <p>If API calls are still accepted, this implies that validation for the pattern or string length — or both — is not properly enforced, which is a sign that input validation is not done properly in the backend implementation of the API.</p>\n                "
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the patterns you define for strings do not conflict with  the <code>minLength</code> or <code>maxLength</code> properties.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"Pet to add to the store\",\n                \"required\": true,\n                \"schema\": {\n                    \"type\": \"object\",\n                    \"additionalProperties\": false,\n                    \"required\": [\n                        \"name\"\n                    ],\n                    \"properties\": {\n                        \"name\": {\n                            \"type\": \"string\",\n                            \"pattern\": \"^[a-z]{3,10}$\",\n                            \"minLength\": 3,\n                            \"maxLength\": 10\n                        }       \n                    }\n                }\n            }\n        ]\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: Pet to add to the store\n      required: true\n      schema:\n        type: object\n        additionalProperties: false\n        required:\n          - name\n        properties:\n          name:\n            type: string\n            pattern: ^[a-z]{3,10}$\n            minLength: 3\n            maxLength: 10\n"
+          }
+        }
+      ]
+    }
+  },
   "schema-string-unknown-format": {
     "group": "datavalidation",
     "subgroup": "schema",
@@ -6037,43 +5315,6 @@
       ]
     }
   },
-  "semantic-global-securityrequirement-unreferenced": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>Security field references a security scheme not defined in '#/securityDefinitions'</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>A security requirement in the <code>security</code> field contains a reference to a security scheme that is not defined in the API.</p>\n                    <p>The <code>security</code> field specifies what kind of authentication your API requires, either on global level for the whole API or for individual API operations.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#securityDefinitionsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "A security requirement in the <code>security</code> field contains a reference to a security scheme that is not defined in the API.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The <code>security</code> field references an OAuth security scheme, but this scheme has not been defined in <code>securityDefinitions</code>:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"schemes\": [\n        \"https\"\n    ],\n    // ...\n    \"securityDefinitions\": {\n        \"regularSecurity\": {\n            \"type\": \"basic\"\n        }\n    },\n    // ...\n    \"security\": {\n        \"regularSecurity\": [],\n        \"OAuth2\": [ \"readOnly\" ]\n    }\n}",
-            "yaml": "schemes:\n  - https\n# ...\nsecurityDefinitions:\n  regularSecurity:\n    type: basic\n# ...\nsecurity:\n  regularSecurity: []\n  OAuth2:\n    - readOnly\n"
-          }
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all security schemes that the <code>security</code> field references are defined.</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"schemes\": [\n        \"https\"\n    ],\n    // ...\n    \"securityDefinitions\": {\n        \"regularSecurity\": {\n            \"type\": \"basic\"\n        },\n        \"OAuth2\": {\n            \"type\": \"oauth2\",\n            \"flow\": \"accessCode\",\n            \"scopes\": {\n                // ...\n            }\n        }\n    },\n    // ...\n    \"security\": {\n        \"regularSecurity\": [],\n        \"OAuth2\": [ \"readOnly\" ]\n    }\n}",
-            "yaml": "schemes:\n  - https\n# ...\nsecurityDefinitions:\n  regularSecurity:\n    type: basic\n  OAuth2:\n    type: oauth2\n    flow: accessCode\n    scopes:\n      {}\n      # ...\n# ...\nsecurity:\n  regularSecurity: []\n  OAuth2:\n    - readOnly\n"
-          }
-        }
-      ]
-    }
-  },
   "semantic-header-default-invalid": {
     "group": "oasconformance",
     "subgroup": "semantics",
@@ -6270,43 +5511,6 @@
       "sections": [
         {
           "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all operations have only one body parameter.</p>\n                "
-        }
-      ]
-    }
-  },
-  "semantic-operation-securityrequirement-unreferenced": {
-    "group": "oasconformance",
-    "subgroup": "semantics",
-    "title": {
-      "text": "<h1>Security field of the operation references a security scheme not defined in '#/securityDefinitions'</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>A security requirement in the <code>security</code> field contains a reference to a security scheme that is not defined in the API.</p>\n                    <p>The <code>security</code> field specifies what kind of authentication your API requires, either on global level for the whole API or for individual API operations.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#securityDefinitionsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "A security requirement in the <code>security</code> field contains a reference to a security scheme that is not defined in the API.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The <code>security</code> field references an OAuth security scheme, but this scheme has not been defined in <code>securityDefinitions</code>:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"schemes\": [\n        \"https\"\n    ],\n    // ...\n    \"securityDefinitions\": {\n        \"regularSecurity\": {\n            \"type\": \"basic\"\n        }\n    },\n    // ...\n    \"security\": {\n        \"regularSecurity\": [],\n        \"OAuth2\": [ \"readOnly\" ]\n    }\n}",
-            "yaml": "schemes:\n  - https\n# ...\nsecurityDefinitions:\n  regularSecurity:\n    type: basic\n# ...\nsecurity:\n  regularSecurity: []\n  OAuth2:\n    - readOnly\n"
-          }
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all security schemes that the <code>security</code> field references are defined.</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"schemes\": [\n        \"https\"\n    ],\n    // ...\n    \"securityDefinitions\": {\n        \"regularSecurity\": {\n            \"type\": \"basic\"\n        },\n        \"OAuth2\": {\n            \"type\": \"oauth2\",\n            \"flow\": \"accessCode\",\n            \"scopes\": {\n                // ...\n            }\n        }\n    },\n    // ...\n    \"security\": {\n        \"regularSecurity\": [],\n        \"OAuth2\": [ \"readOnly\" ]\n    }\n}",
-            "yaml": "schemes:\n  - https\n# ...\nsecurityDefinitions:\n  regularSecurity:\n    type: basic\n  OAuth2:\n    type: oauth2\n    flow: accessCode\n    scopes:\n      {}\n      # ...\n# ...\nsecurity:\n  regularSecurity: []\n  OAuth2:\n    - readOnly\n"
-          }
         }
       ]
     }
@@ -6566,6 +5770,89 @@
         },
         {
           "text": "\n                    <p>If you need multiple paths, make sure that all paths are considered unique.</p>\n                "
+        }
+      ]
+    }
+  },
+  "semantic-pattern-incompatible": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Pattern conflicts with allowed string length</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>One or more strings in your API define a pattern that conflicts with the allowed length of the string. This could result in a <code>null</code> value for string.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#parameter-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "One or more strings in your API define a pattern that conflicts with the allowed length of the string. This could result in a <code>null</code> value for string.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The string defines a pattern but the maximum length allowed in the pattern is shorter than the required <code>minLength</code> of the same string:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"id\",\n        \"type\": \"string\",\n        \"description\": \"Identifier of the object to be extracted.\",\n        \"pattern\": \"^[a-z]{10,20}$\",\n        \"minLength\": 25\n    }\n}",
+            "yaml": "parameters:\n  in: query\n  name: id\n  type: string\n  description: Identifier of the object to be extracted.\n  pattern: ^[a-z]{10,20}$\n  minLength: 25\n"
+          }
+        },
+        {
+          "text": "\n                    <p>Or the pattern could require longer strings than <code>maxLength</code> allows:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"id\",\n        \"type\": \"string\",\n        \"description\": \"Identifier of the object to be extracted.\",\n        \"pattern\": \"^[a-z]{10,20}$\",\n        \"maxLength\": 5\n    }\n}",
+            "yaml": "parameters:\n  in: query\n  name: id\n  type: string\n  description: Identifier of the object to be extracted.\n  pattern: ^[a-z]{10,20}$\n  maxLength: 5\n"
+          }
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that the patterns you define for strings do not conflict with  the <code>minLength</code> or <code>maxLength</code> properties.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"id\",\n        \"type\": \"string\",\n        \"description\": \"Identifier of the object to be extracted.\",\n        \"pattern\": \"^[a-z]{25,40}$\",\n        \"minLength\": 25,\n        \"maxLength\": 40\n    }\n}",
+            "yaml": "parameters:\n  in: query\n  name: id\n  type: string\n  description: Identifier of the object to be extracted.\n  pattern: ^[a-z]{25,40}$\n  minLength: 25\n  maxLength: 40\n"
+          }
+        }
+      ]
+    }
+  },
+  "semantic-pattern-incorrect-pcre": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Pattern is not a valid PCRE regular expression</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>One or more strings in your API define a pattern that is not a valid Perl Compatible Regular Expressions (PCRE) and does not conform to the PCRE library. </p>\n                    <p>The OpenAPI Specification defines the pattern format as ECMA Script. 42Crunch API Security Platform uses the pattern format PCRE1  compiled with the <code>PCRE_JAVASCRIPT_COMPAT</code> option which uses ECMA Script syntax for constructs where ECMA Script and PCRE would be different, such as the support of <code>\\U</code> and <code>\\u</code> for unicode.</p>\n                    <p>For more details, see <a href=\"https://www.pcre.org/\" target=\"_blank\">PCRE - Perl Compatible Regular Expressions</a>.</p>\n                "
+    },
+    "shortDescription": "One or more strings in your API define a pattern that is not a valid Perl Compatible Regular Expressions (PCRE) and does not conform to the PCRE library. ",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"id\",\n        \"type\": \"string\",\n        \"description\": \"Identifier of the object to be extracted.\",\n        \"pattern\": \"^[a-Z]{10,20}$\",\n        \"minLength\": 10\n    }\n}",
+            "yaml": "parameters:\n  in: query\n  name: id\n  type: string\n  description: Identifier of the object to be extracted.\n  pattern: ^[a-Z]{10,20}$\n  minLength: 10\n"
+          }
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all regular expression in your API are valid PCRE regular expressions.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"parameters\": {\n        \"in\": \"query\",\n        \"name\": \"id\",\n        \"type\": \"string\",\n        \"description\": \"Identifier of the object to be extracted.\",\n        \"pattern\": \"^[a-z]{25,40}$\",\n        \"minLength\": 25,\n        \"maxLength\": 40\n    }\n}",
+            "yaml": "parameters:\n  in: query\n  name: id\n  type: string\n  description: Identifier of the object to be extracted.\n  pattern: ^[a-z]{25,40}$\n  minLength: 25\n  maxLength: 40\n"
+          }
         }
       ]
     }
@@ -11907,50 +11194,6 @@
       ]
     }
   },
-  "v3-schema-empty": {
-    "group": "datavalidation",
-    "subgroup": "schema",
-    "title": {
-      "text": "<h1>Schema is empty</h1>"
-    },
-    "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>The schema is empty. This means that your API accepts any JSON values.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
-    },
-    "shortDescription": "The schema is empty. This means that your API accepts any JSON values.",
-    "example": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The method <code>POST</code> accepts a JSON payload in the <code>body</code> but does not specify the <code>schema</code> of the payload:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"pet to add to the system\",\n                \"required\": true,\n                \"schema\": {    \n                }\n            }\n        ]\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: pet to add to the system\n      required: true\n      schema: {}\n"
-          }
-        }
-      ]
-    },
-    "exploit": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If you do not clearly define the schema and you leave properties of a JSON payload empty, you effectively allow attackers to pass in any data. This means that you are opening your backend to various attacks, such as SQL injection.</p>\n                    <p>This also lets attackers to try various unexpected inputs. Unexpected inputs may cause the backend server to crash or behave in an unexpected way. This in turn may cause the server to potentially leak stack trace that can be used for further attacks, or even data.</p>\n                    <p>If no restrictions to the set of properties in the JSON payload are enforced, the API might also accept more fields than expected. The received payloads could be blindly transformed into an object and stored, overwriting sensitive internal data.</p>\n                "
-        }
-      ]
-    },
-    "remediation": {
-      "sections": [
-        {
-          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure you define schemas for all JSON payloads. Here, a specific JSON object <code>NewPet</code> is defined in <code>#/components/schemas</code> and referenced as the <code>schema</code> for the API method:</p>\n                "
-        },
-        {
-          "code": {
-            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"parameters\": [\n            {\n                \"name\": \"pet\",\n                \"in\": \"body\",\n                \"description\": \"pet to add to the system\",\n                \"required\": true,\n                \"schema\": {\n                    \"$ref\": \"#/components/schemas/NewPet\"\n                }\n            }\n        ]\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"description\": \"Pet name\"\n            },\n            \"tag\": {\n                \"type\": \"string\",\n                \"description\": \"Pet tag\"\n            }\n        }\n    }\n}",
-            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  parameters:\n    - name: pet\n      in: body\n      description: pet to add to the system\n      required: true\n      schema:\n        $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      description: Pet name\n    tag:\n      type: string\n      description: Pet tag\n"
-          }
-        }
-      ]
-    }
-  },
   "v3-schema-notype": {
     "group": "datavalidation",
     "subgroup": "schema",
@@ -12456,6 +11699,59 @@
         },
         {
           "text": "\n                    <p>For examples on some of the common regulars expressions, see the <a href=\"https://apisecurity.io/encyclopedia/content/oasv3/datavalidation/schema/v3-schema-string-pattern.htm\" target=\"_blank\">full article</a>.</p>\n                "
+        }
+      ]
+    }
+  },
+  "v3-schema-string-pattern-incompatible": {
+    "group": "datavalidation",
+    "subgroup": "schema",
+    "title": {
+      "text": "<h1>Pattern of the string schema does not match the 'minLength' or 'maxLength' properties</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>Some string parameters in your API define patterns that do not match the properties <code>minLength</code> or <code>maxLength</code> defined for the string.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "Some string parameters in your API define patterns that do not match the properties <code>minLength</code> or <code>maxLength</code> defined for the string.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The string defines a pattern but the maximum length allowed in the pattern is shorter than the required <code>minLength</code> of the same string:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewPet\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a Pet object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"pattern\": \"^[a-z]{3,10}$\",\n                \"minLength\": 25\n            }       \n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  description: JSON defining a Pet object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      pattern: ^[a-z]{3,10}$\n      minLength: 25\n"
+          }
+        },
+        {
+          "text": "\n                    <p>Or the pattern could require longer strings than <code>maxLength</code> allows:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewPet\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a Pet object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"pattern\": \"^[a-z]{5,10}$\",\n                \"minLength\": 3\n            }       \n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  description: JSON defining a Pet object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      pattern: ^[a-z]{5,10}$\n      minLength: 3\n"
+          }
+        }
+      ]
+    },
+    "exploit": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Possible exploit scenario</h2>\n                    <p>If the lengths defined in the pattern conflict with <code>minLength</code> or <code>maxLength</code> and input and output validation is properly enforced, no strings are accepted and API calls inevitably fail.</p>\n                    <p>If API calls are still accepted, this implies that validation for the pattern or string length — or both — is not properly enforced, which is a sign that input validation is not done properly in the backend implementation of the API.</p>\n                "
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>Make sure that the patterns you define for strings do not conflict with  the <code>minLength</code> or <code>maxLength</code> properties.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewPet\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a Pet object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"pattern\": \"^[a-z]{3,10}$\",\n                \"minLength\": 3,\n                \"maxLength\": 10\n            }       \n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  description: JSON defining a Pet object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      pattern: ^[a-z]{3,10}$\n      minLength: 3\n      maxLength: 10\n"
+          }
         }
       ]
     }
@@ -13118,6 +12414,89 @@
       ]
     }
   },
+  "v3-semantic-pattern-incompatible": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Pattern conflicts with allowed string length</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>One or more strings in your API define a pattern that conflicts with the allowed length of the string. This could result in a <code>null</code> value for string.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#schemaObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "One or more strings in your API define a pattern that conflicts with the allowed length of the string. This could result in a <code>null</code> value for string.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition. The string defines a pattern but the maximum length allowed in the pattern is shorter than the required <code>minLength</code> of the same string:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewPet\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a Pet object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"pattern\": \"^[a-z]{3,10}$\",\n                \"minLength\": 25\n            }       \n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  description: JSON defining a Pet object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      pattern: ^[a-z]{3,10}$\n      minLength: 25\n"
+          }
+        },
+        {
+          "text": "\n                    <p>Or the pattern could require longer strings than <code>maxLength</code> allows:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewPet\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a Pet object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"pattern\": \"^[a-z]{5,10}$\",\n                \"minLength\": 3\n            }       \n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  description: JSON defining a Pet object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      pattern: ^[a-z]{5,10}$\n      minLength: 3\n"
+          }
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>Make sure that the patterns you define for strings do not conflict with  the <code>minLength</code> or <code>maxLength</code> properties.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewPet\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a Pet object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"pattern\": \"^[a-z]{3,10}$\",\n                \"minLength\": 3,\n                \"maxLength\": 10\n            }       \n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  description: JSON defining a Pet object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      pattern: ^[a-z]{3,10}$\n      minLength: 3\n      maxLength: 10\n"
+          }
+        }
+      ]
+    }
+  },
+  "v3-semantic-pattern-incorrect-pcre": {
+    "group": "oasconformance",
+    "subgroup": "semantics",
+    "title": {
+      "text": "<h1>Pattern is not a valid PCRE regular expression</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>One or more strings in your API define a pattern that is not a valid Perl Compatible Regular Expressions (PCRE) and does not conform to the PCRE library. </p>\n                    <p>The OpenAPI Specification defines the pattern format as ECMA Script. 42Crunch API Security Platform uses the pattern format PCRE1  compiled with the <code>PCRE_JAVASCRIPT_COMPAT</code> option which uses ECMA Script syntax for constructs where ECMA Script and PCRE would be different, such as the support of <code>\\U</code> and <code>\\u</code> for unicode.</p>\n                    <p>For more details, see <a href=\"https://www.pcre.org/\" target=\"_blank\">PCRE - Perl Compatible Regular Expressions</a>.</p>\n                "
+    },
+    "shortDescription": "One or more strings in your API define a pattern that is not a valid Perl Compatible Regular Expressions (PCRE) and does not conform to the PCRE library. ",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this type of risk could look in your API definition:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewPet\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a Pet object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"pattern\": \"^[a-Z]{3,10}$\",\n                \"minLength\": 3\n            }       \n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  description: JSON defining a Pet object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      pattern: ^[a-Z]{3,10}$\n      minLength: 3\n"
+          }
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all regular expression in your API are valid PCRE regular expressions.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"post\": {\n        \"description\": \"Creates a new pet in the store\",\n        \"operationId\": \"addPet\",\n        \"requestBody\": {\n            \"description\": \"Pet to add to the store\",\n            \"required\": true,\n            \"content\": {\n                \"application/json\": {\n                    \"schema\": {\n                        \"$ref\": \"#/components/schemas/NewPet\"\n                    }\n                }\n            }\n        }\n    },\n    // ...\n    \"NewPet\": {\n        \"type\": \"object\",\n        \"description\": \"JSON defining a Pet object\",\n        \"additionalProperties\": false,\n        \"required\": [\n            \"name\"\n        ],\n        \"properties\": {\n            \"name\": {\n                \"type\": \"string\",\n                \"pattern\": \"^[a-z]{3,10}$\",\n                \"minLength\": 3,\n                \"maxLength\": 10\n            }       \n        }\n    }\n}",
+            "yaml": "post:\n  description: Creates a new pet in the store\n  operationId: addPet\n  requestBody:\n    description: Pet to add to the store\n    required: true\n    content:\n      application/json:\n        schema:\n          $ref: \"#/components/schemas/NewPet\"\n# ...\nNewPet:\n  type: object\n  description: JSON defining a Pet object\n  additionalProperties: false\n  required:\n    - name\n  properties:\n    name:\n      type: string\n      pattern: ^[a-z]{3,10}$\n      minLength: 3\n      maxLength: 10\n"
+          }
+        }
+      ]
+    }
+  },
   "v3-semantic-property-duplicate-key": {
     "group": "oasconformance",
     "subgroup": "semantics",
@@ -13638,6 +13017,24 @@
             "json": "{\n    \"securitySchemes\": {\n        \"api_key\": {\n            \"type\": \"apiKey\",\n            \"name\": \"API key\",\n            \"in\": \"header\"\n        }\n    }\n}",
             "yaml": "securitySchemes:\n  api_key:\n    type: apiKey\n    name: API key\n    in: header\n"
           }
+        }
+      ]
+    }
+  },
+  "v3-validation-mandatory-category": {
+    "group": "oasconformance",
+    "subgroup": "structure",
+    "title": {
+      "text": "<h1>Mandatory tag category not applied to the API</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>Your organization in 42Crunch Platform has defined one or more tag categories to be mandatory. This means that you must apply at least one tag from each mandatory category to your API in 42Crunch Platform. However, you have not applied tags from all mandatory categories to your API yet.</p>\n                    <p>For more details, see <a href=\"https://docs.42crunch.com/latest/content/concepts/tags.htm\" target=\"_blank\">Tags</a>.</p>\n                "
+    },
+    "shortDescription": "Your organization in 42Crunch Platform has defined one or more tag categories to be mandatory. This means that you must apply at least one tag from each mandatory category to your API in 42Crunch Platform. However, you have not applied tags from all mandatory categories to your API yet.",
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you have applied at least one tag from each mandatory tag category to your API.</p>\n                "
         }
       ]
     }
@@ -15784,6 +15181,43 @@
       ]
     }
   },
+  "validation-global-securityrequirement-unreferenced": {
+    "group": "oasconformance",
+    "subgroup": "structure",
+    "title": {
+      "text": "<h1>Security field references a security scheme not defined in '#/securityDefinitions'</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>A security requirement in the <code>security</code> field contains a reference to a security scheme that is not defined in the API.</p>\n                    <p>The <code>security</code> field specifies what kind of authentication your API requires, either on global level for the whole API or for individual API operations.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#securityDefinitionsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "A security requirement in the <code>security</code> field contains a reference to a security scheme that is not defined in the API.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The <code>security</code> field references an OAuth security scheme, but this scheme has not been defined in <code>securityDefinitions</code>:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"schemes\": [\n        \"https\"\n    ],\n    // ...\n    \"securityDefinitions\": {\n        \"regularSecurity\": {\n            \"type\": \"basic\"\n        }\n    },\n    // ...\n    \"security\": {\n        \"regularSecurity\": [],\n        \"OAuth2\": [ \"readOnly\" ]\n    }\n}",
+            "yaml": "schemes:\n  - https\n# ...\nsecurityDefinitions:\n  regularSecurity:\n    type: basic\n# ...\nsecurity:\n  regularSecurity: []\n  OAuth2:\n    - readOnly\n"
+          }
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all security schemes that the <code>security</code> field references are defined.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"schemes\": [\n        \"https\"\n    ],\n    // ...\n    \"securityDefinitions\": {\n        \"regularSecurity\": {\n            \"type\": \"basic\"\n        },\n        \"OAuth2\": {\n            \"type\": \"oauth2\",\n            \"flow\": \"accessCode\",\n            \"scopes\": {\n                // ...\n            }\n        }\n    },\n    // ...\n    \"security\": {\n        \"regularSecurity\": [],\n        \"OAuth2\": [ \"readOnly\" ]\n    }\n}",
+            "yaml": "schemes:\n  - https\n# ...\nsecurityDefinitions:\n  regularSecurity:\n    type: basic\n  OAuth2:\n    type: oauth2\n    flow: accessCode\n    scopes:\n      {}\n      # ...\n# ...\nsecurity:\n  regularSecurity: []\n  OAuth2:\n    - readOnly\n"
+          }
+        }
+      ]
+    }
+  },
   "validation-header-array-items": {
     "group": "oasconformance",
     "subgroup": "structure",
@@ -15853,6 +15287,61 @@
           "code": {
             "json": "{\n    \"headers\": {\n        \"x-ids\": {\n            \"schema\": {\n                \"type\": \"integer\"\n            }\n        }\n    }\n}",
             "yaml": "headers:\n  x-ids:\n    schema:\n      type: integer\n"
+          }
+        }
+      ]
+    }
+  },
+  "validation-mandatory-category": {
+    "group": "oasconformance",
+    "subgroup": "structure",
+    "title": {
+      "text": "<h1>Mandatory tag category not applied to the API</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>Your organization in 42Crunch Platform has defined one or more tag categories to be mandatory. This means that you must apply at least one tag from each mandatory category to your API in 42Crunch Platform. However, you have not applied tags from all mandatory categories to your API yet.</p>\n                    <p>For more details, see <a href=\"https://docs.42crunch.com/latest/content/concepts/tags.htm\" target=\"_blank\">Tags</a>.</p>\n                "
+    },
+    "shortDescription": "Your organization in 42Crunch Platform has defined one or more tag categories to be mandatory. This means that you must apply at least one tag from each mandatory category to your API in 42Crunch Platform. However, you have not applied tags from all mandatory categories to your API yet.",
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that you have applied at least one tag from each mandatory tag category to your API.</p>\n                "
+        }
+      ]
+    }
+  },
+  "validation-operation-securityrequirement-unreferenced": {
+    "group": "oasconformance",
+    "subgroup": "structure",
+    "title": {
+      "text": "<h1>Security field of the operation references a security scheme not defined in '#/securityDefinitions'</h1>"
+    },
+    "description": {
+      "text": "\n                    <h2>Description</h2>\n                    <p>A security requirement in the <code>security</code> field contains a reference to a security scheme that is not defined in the API.</p>\n                    <p>The <code>security</code> field specifies what kind of authentication your API requires, either on global level for the whole API or for individual API operations.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#securityDefinitionsObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+    },
+    "shortDescription": "A security requirement in the <code>security</code> field contains a reference to a security scheme that is not defined in the API.",
+    "example": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Example</h2>\n                    <p>The following is an example of how this issue could look in your API definition. The <code>security</code> field references an OAuth security scheme, but this scheme has not been defined in <code>securityDefinitions</code>:</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"schemes\": [\n        \"https\"\n    ],\n    // ...\n    \"securityDefinitions\": {\n        \"regularSecurity\": {\n            \"type\": \"basic\"\n        }\n    },\n    // ...\n    \"security\": {\n        \"regularSecurity\": [],\n        \"OAuth2\": [ \"readOnly\" ]\n    }\n}",
+            "yaml": "schemes:\n  - https\n# ...\nsecurityDefinitions:\n  regularSecurity:\n    type: basic\n# ...\nsecurity:\n  regularSecurity: []\n  OAuth2:\n    - readOnly\n"
+          }
+        }
+      ]
+    },
+    "remediation": {
+      "sections": [
+        {
+          "text": "\n                    <h2>Remediation</h2>\n                    <p>Make sure that all security schemes that the <code>security</code> field references are defined.</p>\n                "
+        },
+        {
+          "code": {
+            "json": "{\n    \"schemes\": [\n        \"https\"\n    ],\n    // ...\n    \"securityDefinitions\": {\n        \"regularSecurity\": {\n            \"type\": \"basic\"\n        },\n        \"OAuth2\": {\n            \"type\": \"oauth2\",\n            \"flow\": \"accessCode\",\n            \"scopes\": {\n                // ...\n            }\n        }\n    },\n    // ...\n    \"security\": {\n        \"regularSecurity\": [],\n        \"OAuth2\": [ \"readOnly\" ]\n    }\n}",
+            "yaml": "schemes:\n  - https\n# ...\nsecurityDefinitions:\n  regularSecurity:\n    type: basic\n  OAuth2:\n    type: oauth2\n    flow: accessCode\n    scopes:\n      {}\n      # ...\n# ...\nsecurity:\n  regularSecurity: []\n  OAuth2:\n    - readOnly\n"
           }
         }
       ]
@@ -16989,7 +16478,7 @@
       "text": "<h1>At least one host should be defined</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>You have not defined any hosts in your API definition.</p>\n                    <p>According to the Open API Specification (OAS), the top-level property <code>host</code> is optional and if not present, the host and the port serving the API documentation are used. However, there is no host serving the documentation for the APIs in 42Crunch Platform, so Security Audit cannot infer the host.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swagger-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>You have not defined any hosts in your API definition.</p>\n                    <p>According to the Open API Specification (OAS), the top-level property <code>host</code> is optional and if not present, the host and the port serving the API documentation are used. However, there is no host serving the documentation for the APIs in 42Crunch Platform, so API Security Audit cannot infer the host.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/2.0.md#swagger-object\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
     "shortDescription": "You have not defined any hosts in your API definition.",
     "example": {
@@ -17723,7 +17212,7 @@
       "text": "<h1>Schemes should be defined</h1>"
     },
     "description": {
-      "text": "\n                    <h2>Description</h2>\n                    <p>You have not defined the <code>schemes</code> field in your API.</p>\n                    <p>The Open API Specification (OAS) does not define the <code>schemes</code> field as mandatory and states that when missing, the default scheme  is the same as used to access your API definition itself. However, because API definitions are uploaded to 42Crunch Platform, not retrieved from URLs, Security Audit cannot infer the default scheme.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#serverObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
+      "text": "\n                    <h2>Description</h2>\n                    <p>You have not defined the <code>schemes</code> field in your API.</p>\n                    <p>The Open API Specification (OAS) does not define the <code>schemes</code> field as mandatory and states that when missing, the default scheme  is the same as used to access your API definition itself. However, because API definitions are uploaded to 42Crunch Platform, not retrieved from URLs, API Security Audit cannot infer the default scheme.</p>\n                    <p>For more details, see the <a href=\"https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#serverObject\" target=\"_blank\" rel=\"noopener\">OpenAPI Specification</a>.</p>\n                "
     },
     "shortDescription": "You have not defined the <code>schemes</code> field in your API.",
     "example": {
