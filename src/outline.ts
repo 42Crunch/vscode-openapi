@@ -18,14 +18,19 @@ export interface Node {
 }
 
 function getChildren(node: Node): Node[] {
-  const keys = Array.isArray(node.value) ? Array.from(node.value.keys()) : Object.keys(node.value);
-  return keys.map((key: string | number) => ({
-    parent: node,
-    key,
-    depth: node.depth + 1,
-    value: node.value[key],
-    location: getLocation(node.value, key),
-  }));
+  if (node.value) {
+    const keys = Array.isArray(node.value)
+      ? Array.from(node.value.keys())
+      : Object.keys(node.value);
+    return keys.map((key: string | number) => ({
+      parent: node,
+      key,
+      depth: node.depth + 1,
+      value: node.value[key],
+      location: getLocation(node.value, key),
+    }));
+  }
+  return [];
 }
 
 function getChildrenByName(root: Node, names: string[]): Node[] {
