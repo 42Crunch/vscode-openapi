@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 4.7.0 (December XX, 2021)
+
+* Update KDB articles for Security Audit
+* Fix issue #151 where tabs in YAML OpenAPI file were preventing preview from being shown
+* Fix issues #145 and #146 by allowing to configure preview update interval
+* Autocomplete x-42c custom properties
+* Complete migration to a new YAML/JSON AST parser library
+
 ## Version 4.6.4 (October 11, 2021)
 
 * Update KDB articles for Security Audit
