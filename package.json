@@ -392,6 +392,28 @@
           "title": "Remove filter",
           "when": "view == platformExplorer && viewItem == collectionFilter",
           "group": "inline"
+        },
+        {
+          "command": "openapi.platform.apisFilter",
+          "when": "view == platformExplorer && viewItem == collection",
+          "group": "inline"
+        },
+        {
+          "command": "openapi.platform.apisFilterReset",
+          "title": "Remove filter",
+          "when": "view == platformExplorer && viewItem == apiFilter",
+          "group": "inline"
+        },
+        {
+          "command": "openapi.platform.favoriteApisFilter",
+          "when": "view == platformExplorer && viewItem == favoriteCollection",
+          "group": "inline"
+        },
+        {
+          "command": "openapi.platform.favoriteApisFilterReset",
+          "title": "Remove filter",
+          "when": "view == platformExplorer && viewItem == favoriteApiFilter",
+          "group": "inline"
         }
       ]
     },
@@ -399,6 +421,30 @@
       {
         "command": "openapi.platform.updatePlatformCredentials",
         "title": "42Crunch: Update platform credentials"
+      },
+      {
+        "command": "openapi.platform.favoriteApisFilter",
+        "title": "Filter",
+        "enablement": "view == platformExplorer && viewItem == favoriteCollection",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "openapi.platform.favoriteApisFilterReset",
+        "title": "Remove filter",
+        "enablement": "view == platformExplorer && viewItem == favoriteApiFilter",
+        "icon": "$(close)"
+      },
+      {
+        "command": "openapi.platform.apisFilter",
+        "title": "Filter",
+        "enablement": "view == platformExplorer && viewItem == collection",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "openapi.platform.apisFilterReset",
+        "title": "Remove filter",
+        "enablement": "view == platformExplorer && viewItem == apiFilter",
+        "icon": "$(close)"
       },
       {
         "command": "openapi.platform.collectionsFilter",

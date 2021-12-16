@@ -4,7 +4,7 @@ import { PlatformStore } from "../stores/platform-store";
 import { CollectionData } from "../types";
 import { ApiNode } from "./api";
 import { AbstractExplorerNode, ExplorerNode } from "./base";
-import { LoadMoreApisNode } from "./load-more";
+import { LoadMoreFavoriteApisNode } from "./load-more";
 
 export class FavoriteCollectionsNode extends AbstractExplorerNode {
   constructor(
@@ -50,13 +50,35 @@ export class FavoriteCollectionNode extends AbstractExplorerNode {
   }
 
   async getChildren(): Promise<ExplorerNode[]> {
-    const apis = await this.store.getApis(this.getCollectionId());
+    const apis = await this.store.getApis(
+      this.getCollectionId(),
+      this.store.filters.favorite.get(this.getCollectionId()),
+      this.store.limits.getFavorite(this.getCollectionId())
+    );
     const children = apis.apis.map((api) => new ApiNode(this, this.store, api));
-    const hasMore = apis.hasMore ? [new LoadMoreApisNode(this)] : [];
-    return [...children, ...hasMore];
+    const hasMore = apis.hasMore ? [new LoadMoreFavoriteApisNode(this)] : [];
+
+    const hasFilter = this.store.filters.favorite.has(this.getCollectionId())
+      ? [new FilteredFavoriteApiNode(this, this.store, apis.apis.length)]
+      : [];
+
+    return [...hasFilter, ...children, ...hasMore];
   }
 
   getCollectionId(): string {
     return this.collection.desc.id;
+  }
+}
+
+export class FilteredFavoriteApiNode extends AbstractExplorerNode {
+  readonly parent: FavoriteCollectionNode;
+  constructor(parent: FavoriteCollectionNode, private store: PlatformStore, found: number) {
+    super(parent, `${parent.id}-filter`, `Found ${found}`, vscode.TreeItemCollapsibleState.None);
+    this.icon = "filter";
+    this.contextValue = "favoriteApiFilter";
+  }
+
+  getCollectionId() {
+    return this.parent.getCollectionId();
   }
 }
