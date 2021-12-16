@@ -5,6 +5,7 @@
 * Update KDB articles for Security Audit
 * Fix issue #151 where tabs in YAML OpenAPI file were preventing preview from being shown
 * Fix issues #145 and #146 by allowing to configure preview update interval
+* Fix issue #154 where editing unnamed YAML file resulted in opening new files
 * Autocomplete x-42c custom properties
 * Complete migration to a new YAML/JSON AST parser library
 
