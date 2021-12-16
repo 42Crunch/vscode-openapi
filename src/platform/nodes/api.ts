@@ -2,9 +2,15 @@ import * as vscode from "vscode";
 import { PlatformStore } from "../stores/platform-store";
 import { Api } from "../types";
 import { AbstractExplorerNode, ExplorerNode } from "./base";
+import { CollectionNode } from "./collection";
+import { FavoriteCollectionNode } from "./favorite";
 
 export class ApiNode extends AbstractExplorerNode {
-  constructor(parent: ExplorerNode, private store: PlatformStore, readonly api: Api) {
+  constructor(
+    parent: CollectionNode | FavoriteCollectionNode,
+    private store: PlatformStore,
+    readonly api: Api
+  ) {
     super(
       parent,
       `${parent.id}-${api.desc.id}`,

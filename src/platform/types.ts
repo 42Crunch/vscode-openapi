@@ -169,6 +169,10 @@ export interface CollectionFilter {
   owner: "OWNER" | "ALL";
 }
 
+export interface ApiFilter {
+  name: string;
+}
+
 export interface PlatformConnection {
   apiToken: string;
   userAgent: string;

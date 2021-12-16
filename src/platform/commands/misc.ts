@@ -6,7 +6,12 @@ import { ExplorerNode } from "../nodes/base";
 import { confirmed, getApiId, makePlatformUri } from "../util";
 import { ApiNode } from "../nodes/api";
 import { FavoritesStore } from "../stores/favorites-store";
-import { CollectionNode } from "../nodes/collection";
+import {
+  CollectionNode,
+  CollectionsNode,
+  FilteredApiNode,
+  FilteredCollectionNode,
+} from "../nodes/collection";
 import { FavoriteCollectionNode } from "../nodes/favorite";
 
 export default (
@@ -27,11 +32,6 @@ export default (
       await store.deleteApi(apiId);
       provider.refresh();
     }
-  },
-
-  collectionsFilterReset: async () => {
-    store.setCollectionsFilter(undefined);
-    provider.refresh();
   },
 
   collectionAddToFavorite: async (collection: CollectionNode) => {
@@ -116,16 +116,6 @@ export default (
   },
 
   refreshCollections: async () => {
-    provider.refresh();
-  },
-
-  loadMoreCollections: async () => {
-    store.increaseCollectionsLimit();
-    provider.refresh();
-  },
-
-  loadMoreApis: async (apiId: string) => {
-    store.increaseApiLimit(apiId);
     provider.refresh();
   },
 

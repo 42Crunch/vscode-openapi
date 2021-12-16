@@ -8,7 +8,7 @@ import { FavoriteCollectionsNode } from "./favorite";
 export class RootNode implements ExplorerNode {
   readonly favorite: FavoriteCollectionsNode;
   readonly collections: CollectionsNode;
-  readonly id = undefined;
+  readonly id = "root";
   readonly parent = undefined;
   readonly item: vscode.TreeItem;
 

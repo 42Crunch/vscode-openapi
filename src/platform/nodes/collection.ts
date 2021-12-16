@@ -17,13 +17,16 @@ export class CollectionsNode extends AbstractExplorerNode {
   }
 
   async getChildren(): Promise<ExplorerNode[]> {
-    const view = await this.store.getFilteredCollections();
+    const view = await this.store.getCollections(
+      this.store.filters.collection,
+      this.store.limits.getCollections()
+    );
 
     const children = view.collections.map(
       (collection) => new CollectionNode(this.store, this, collection)
     );
 
-    const hasFilter = this.store.getCollectionsFilter()
+    const hasFilter = this.store.filters.collection
       ? [new FilteredCollectionNode(this, this.store, view.collections.length)]
       : [];
 
@@ -34,7 +37,8 @@ export class CollectionsNode extends AbstractExplorerNode {
 }
 
 export class FilteredCollectionNode extends AbstractExplorerNode {
-  constructor(parent: CollectionsNode, store: PlatformStore, found: number) {
+  readonly parent: CollectionsNode;
+  constructor(parent: CollectionsNode, private store: PlatformStore, found: number) {
     super(parent, `${parent.id}-filter`, `Found ${found}`, vscode.TreeItemCollapsibleState.None);
     this.icon = "filter";
     this.contextValue = "collectionFilter";
@@ -44,7 +48,7 @@ export class FilteredCollectionNode extends AbstractExplorerNode {
 export class CollectionNode extends AbstractExplorerNode {
   constructor(
     private store: PlatformStore,
-    parent: ExplorerNode,
+    parent: CollectionsNode,
     readonly collection: CollectionData
   ) {
     super(
@@ -61,13 +65,35 @@ export class CollectionNode extends AbstractExplorerNode {
   }
 
   async getChildren(): Promise<ExplorerNode[]> {
-    const apis = await this.store.getApis(this.getCollectionId());
+    const apis = await this.store.getApis(
+      this.getCollectionId(),
+      this.store.filters.api.get(this.getCollectionId()),
+      this.store.limits.getApis(this.getCollectionId())
+    );
     const children = apis.apis.map((api) => new ApiNode(this, this.store, api));
     const hasMore = apis.hasMore ? [new LoadMoreApisNode(this)] : [];
-    return [...children, ...hasMore];
+
+    const hasFilter = this.store.filters.api.has(this.getCollectionId())
+      ? [new FilteredApiNode(this, this.store, apis.apis.length)]
+      : [];
+
+    return [...hasFilter, ...children, ...hasMore];
   }
 
   public getCollectionId(): string {
     return this.collection.desc.id;
+  }
+}
+
+export class FilteredApiNode extends AbstractExplorerNode {
+  readonly parent: CollectionNode;
+  constructor(parent: CollectionNode, private store: PlatformStore, found: number) {
+    super(parent, `${parent.id}-filter`, `Found ${found}`, vscode.TreeItemCollapsibleState.None);
+    this.icon = "filter";
+    this.contextValue = "apiFilter";
+  }
+
+  getCollectionId() {
+    return this.parent.getCollectionId();
   }
 }

@@ -12,7 +12,14 @@ import {
   readCollectionUsers,
   updateApi,
 } from "../api";
-import { Api, CollectionData, CollectionFilter, PlatformContext, UserData } from "../types";
+import {
+  Api,
+  ApiFilter,
+  CollectionData,
+  CollectionFilter,
+  PlatformContext,
+  UserData,
+} from "../types";
 
 export interface CollectionsView {
   collections: CollectionData[];
@@ -24,50 +31,88 @@ export interface ApisView {
   hasMore: boolean;
 }
 
-const PAGE_SIZE = 100;
+const COLLECTION_PAGE_SIZE = 5;
+const APIS_PAGE_SIZE = 5;
+
+export class Limits {
+  private collections: number;
+  private apis: Map<string, number>;
+  private favorite: Map<string, number>;
+
+  constructor() {
+    this.collections = COLLECTION_PAGE_SIZE;
+    this.apis = new Map();
+    this.favorite = new Map();
+  }
+
+  getCollections() {
+    return this.collections;
+  }
+
+  increaseCollections() {
+    this.collections = this.collections + COLLECTION_PAGE_SIZE;
+  }
+
+  getApis(collectionId: string) {
+    return this.apis.get(collectionId) ?? APIS_PAGE_SIZE;
+  }
+
+  increaseApis(collectionId: string) {
+    this.apis.set(collectionId, (this.apis.get(collectionId) ?? APIS_PAGE_SIZE) + APIS_PAGE_SIZE);
+  }
+
+  getFavorite(collectionId: string) {
+    return this.favorite.get(collectionId) ?? APIS_PAGE_SIZE;
+  }
+
+  increaseFavorite(collectionId: string) {
+    this.favorite.set(
+      collectionId,
+      (this.favorite.get(collectionId) ?? APIS_PAGE_SIZE) + APIS_PAGE_SIZE
+    );
+  }
+
+  reset() {
+    this.collections = COLLECTION_PAGE_SIZE;
+    this.apis = new Map();
+    this.favorite = new Map();
+  }
+}
+
+export class Filters {
+  collection: CollectionFilter | undefined = undefined;
+  readonly api: Map<string, ApiFilter> = new Map();
+  readonly favorite: Map<string, ApiFilter> = new Map();
+}
 
 export class PlatformStore {
-  private apiLimits = new Map<string, number>();
   private apiLastAssessment = new Map<string, Date>();
-  private collectionLimit = PAGE_SIZE;
-  private filter: CollectionFilter | undefined = undefined;
+  readonly limits = new Limits();
+  readonly filters = new Filters();
 
   constructor(private context: PlatformContext) {}
 
-  async getFilteredCollections(): Promise<CollectionsView> {
-    const response = await listCollections(
-      this.filter,
-      this.context.connection,
-      this.context.logger
-    );
+  async getCollections(
+    filter: CollectionFilter | undefined,
+    limit: number
+  ): Promise<CollectionsView> {
+    const response = await listCollections(filter, this.context.connection, this.context.logger);
 
     const filtered = response.list.filter((collection) => {
-      if (this.filter) {
-        return this.filter.name
-          ? collection.desc.name.toLowerCase().includes(this.filter.name.toLowerCase())
+      if (filter) {
+        return filter.name
+          ? collection.desc.name.toLowerCase().includes(filter.name.toLowerCase())
           : true;
       }
       return true;
     });
 
-    const hasMore = filtered.length > this.collectionLimit;
+    const hasMore = filtered.length > limit;
 
     return {
       hasMore,
-      collections: filtered.slice(0, this.collectionLimit),
+      collections: filtered.slice(0, limit),
     };
-  }
-
-  setCollectionsFilter(filter: CollectionFilter): void {
-    this.filter = filter;
-  }
-
-  getCollectionsFilter(): CollectionFilter | undefined {
-    return this.filter;
-  }
-
-  increaseCollectionsLimit() {
-    this.collectionLimit = this.collectionLimit + PAGE_SIZE;
   }
 
   async getAllCollections(): Promise<CollectionData[]> {
@@ -118,26 +163,30 @@ export class PlatformStore {
     await deleteApi(apiId, this.context.connection, this.context.logger);
   }
 
-  increaseApiLimit(apiId: string) {
-    const limit = this.apiLimits.get(apiId) ?? PAGE_SIZE;
-    this.apiLimits.set(apiId, limit + PAGE_SIZE);
-  }
-
-  async getApis(collectionId: string): Promise<ApisView> {
+  async getApis(
+    collectionId: string,
+    filter: ApiFilter | undefined,
+    limit: number
+  ): Promise<ApisView> {
     const response = await listApis(collectionId, this.context.connection, this.context.logger);
-    const limit = this.apiLimits.get(collectionId) ?? PAGE_SIZE;
 
-    const hasMore = response.list.length > limit;
+    const filtered = response.list.filter((api) => {
+      if (filter) {
+        return filter.name ? api.desc.name.toLowerCase().includes(filter.name.toLowerCase()) : true;
+      }
+      return true;
+    });
+
+    const hasMore = filtered.length > limit;
 
     return {
       hasMore,
-      apis: response.list.slice(0, limit),
+      apis: filtered.slice(0, limit),
     };
   }
 
   async getApi(apiId: string): Promise<Api> {
     const api = await readApi(apiId, this.context.connection, this.context.logger, true);
-
     return api;
   }
 
