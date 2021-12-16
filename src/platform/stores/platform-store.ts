@@ -31,8 +31,8 @@ export interface ApisView {
   hasMore: boolean;
 }
 
-const COLLECTION_PAGE_SIZE = 5;
-const APIS_PAGE_SIZE = 5;
+const COLLECTION_PAGE_SIZE = 100;
+const APIS_PAGE_SIZE = 100;
 
 export class Limits {
   private collections: number;
