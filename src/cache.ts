@@ -428,7 +428,7 @@ export class Cache implements vscode.Disposable {
           continue;
         }
         const node = find(entry.parsed, error.pointer);
-        if (node) {
+        if (node !== undefined) {
           const { start } = findLocationForJsonPointer(entry.parsed, error.pointer).value;
           const position = document.positionAt(start);
           const line = document.lineAt(position.line);
