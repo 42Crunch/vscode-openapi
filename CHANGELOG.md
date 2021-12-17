@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 4.7.0 (December XX, 2021)
+## Version 4.7.1 (December 17, 2021)
 
 * Update KDB articles for Security Audit
 * Fix issue #151 where tabs in YAML OpenAPI file were preventing preview from being shown
