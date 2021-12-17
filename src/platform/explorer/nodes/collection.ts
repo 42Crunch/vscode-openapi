@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import { PlatformStore } from "../stores/platform-store";
-import { CollectionData } from "../types";
+import { PlatformStore } from "../../stores/platform-store";
+import { CollectionData } from "../../types";
 import { ApiNode } from "./api";
 import { AbstractExplorerNode, ExplorerNode } from "./base";
 import { LoadMoreApisNode, LoadMoreCollectionsNode } from "./load-more";

@@ -2,17 +2,17 @@ import * as vscode from "vscode";
 
 import { PlatformStore } from "../stores/platform-store";
 import { CollectionsProvider } from "../explorer/provider";
-import { ExplorerNode } from "../nodes/base";
+import { ExplorerNode } from "../explorer/nodes/base";
 import { confirmed, getApiId, makePlatformUri } from "../util";
-import { ApiNode } from "../nodes/api";
+import { ApiNode } from "../explorer/nodes/api";
 import { FavoritesStore } from "../stores/favorites-store";
 import {
   CollectionNode,
   CollectionsNode,
   FilteredApiNode,
   FilteredCollectionNode,
-} from "../nodes/collection";
-import { FavoriteCollectionNode } from "../nodes/favorite";
+} from "../explorer/nodes/collection";
+import { FavoriteCollectionNode } from "../explorer/nodes/favorite";
 
 export default (
   store: PlatformStore,
