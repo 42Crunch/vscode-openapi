@@ -6,7 +6,7 @@
 import * as vscode from "vscode";
 import * as semver from "semver";
 import { configuration, Configuration } from "./configuration";
-import { extensionQualifiedId } from "./types";
+import { AuditContext, extensionQualifiedId } from "./types";
 import { parserOptions } from "./parser-options";
 import { registerOutlines } from "./outline";
 import { JsonSchemaDefinitionProvider, YamlSchemaDefinitionProvider } from "./reference";
@@ -25,8 +25,9 @@ import { Cache } from "./cache";
 import * as yamlSchemaContributor from "./yaml-schema-contributor";
 import * as audit from "./audit/activate";
 import * as preview from "./preview";
+import * as platform from "./platform/activate";
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   const versionProperty = "openapiVersion";
   const openapiExtension = vscode.extensions.getExtension(extensionQualifiedId);
   const currentVersion = semver.parse(openapiExtension.packageJSON.version);
@@ -87,8 +88,17 @@ export function activate(context: vscode.ExtensionContext) {
   vscode.workspace.onDidChangeTextDocument((e) => cache.onDocumentChanged(e));
 
   yamlSchemaContributor.activate(context, cache);
-  audit.activate(context, cache);
+
+  const auditContext: AuditContext = {
+    auditsByMainDocument: {},
+    auditsByDocument: {},
+    decorations: {},
+    diagnostics: vscode.languages.createDiagnosticCollection("audits"),
+  };
+
+  audit.activate(context, auditContext, cache);
   preview.activate(context, cache, configuration);
+  await platform.activate(context, auditContext, cache);
 
   if (previousVersion.major < currentVersion.major) {
     createWhatsNewPanel(context);

@@ -61,7 +61,7 @@ export async function audit(
   text: string,
   apiToken: string,
   progress: vscode.Progress<any>
-): Promise<[Grades, ReportedIssue[]]> {
+): Promise<any> {
   let result = await submitAudit(text, apiToken);
 
   if (result.status === "IN_PROGRESS") {
@@ -83,100 +83,8 @@ export async function audit(
   }
 
   if (result.status === "PROCESSED") {
-    return [readSummary(result.report), readAssessment(result.report)];
+    return result.report;
   }
 
   throw new Error("Failed to retrieve audit result");
-}
-
-function readSummary(assessment): Grades {
-  const grades = {
-    datavalidation: {
-      value: Math.round(assessment.data ? assessment.data.score : 0),
-      max: 70,
-    },
-    security: {
-      value: Math.round(assessment.security ? assessment.security.score : 0),
-      max: 30,
-    },
-    oasconformance: {
-      value: 0,
-      max: 0,
-    },
-    all: 0,
-    errors: false,
-    invalid: false,
-  };
-
-  if (assessment.semanticErrors || assessment.validationErrors) {
-    grades.errors = true;
-  }
-
-  if (assessment.openapiState === "fileInvalid") {
-    grades.invalid = true;
-  }
-
-  grades.all = grades.datavalidation.value + grades.security.value + grades.oasconformance.value;
-
-  return grades;
-}
-
-function readAssessment(assessment): ReportedIssue[] {
-  let issues: ReportedIssue[] = [];
-  const jsonPointerIndex = assessment.index;
-
-  function transformScore(score: number): string {
-    const rounded = Math.abs(Math.round(score));
-    if (score === 0) {
-      return "0";
-    } else if (rounded >= 1) {
-      return rounded.toString();
-    }
-    return "less than 1";
-  }
-
-  function transformIssues(issues, defaultCriticality: number = 5): ReportedIssue[] {
-    const result = [];
-    for (const id of Object.keys(issues)) {
-      const issue = issues[id];
-      for (const subIssue of issue.issues) {
-        result.push({
-          id,
-          description: subIssue.specificDescription
-            ? subIssue.specificDescription
-            : issue.description,
-          pointer: jsonPointerIndex[subIssue.pointer],
-          score: subIssue.score ? Math.abs(subIssue.score) : 0,
-          displayScore: transformScore(subIssue.score ? subIssue.score : 0),
-          criticality: issue.criticality ? issue.criticality : defaultCriticality,
-        });
-      }
-    }
-
-    return result;
-  }
-
-  if (assessment.data) {
-    issues = issues.concat(transformIssues(assessment.data.issues));
-  }
-
-  if (assessment.security) {
-    issues = issues.concat(transformIssues(assessment.security.issues));
-  }
-
-  if (assessment.warnings) {
-    issues = issues.concat(transformIssues(assessment.warnings.issues, 1));
-  }
-
-  if (assessment.semanticErrors) {
-    issues = issues.concat(transformIssues(assessment.semanticErrors.issues));
-  }
-
-  if (assessment.validationErrors) {
-    issues = issues.concat(transformIssues(assessment.validationErrors.issues));
-  }
-
-  issues.sort((a, b) => b.score - a.score);
-
-  return issues;
 }

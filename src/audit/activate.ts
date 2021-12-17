@@ -15,16 +15,14 @@ import { registerQuickfixes } from "./quickfix";
 import { Cache } from "../cache";
 import { setDecorations } from "./decoration";
 
-export function activate(context: vscode.ExtensionContext, cache: Cache) {
-  const auditContext: AuditContext = {
-    auditsByMainDocument: {},
-    auditsByDocument: {},
-    decorations: {},
-    diagnostics: vscode.languages.createDiagnosticCollection("audits"),
-  };
+export function activate(
+  context: vscode.ExtensionContext,
+  auditContext: AuditContext,
+  cache: Cache
+) {
   const pendingAudits: { [uri: string]: boolean } = {};
 
-  vscode.window.onDidChangeActiveTextEditor((editor) => {
+  function update(editor: vscode.TextEditor) {
     if (editor) {
       setDecorations(editor, auditContext);
       const uri = editor.document.uri.toString();
@@ -44,7 +42,9 @@ export function activate(context: vscode.ExtensionContext, cache: Cache) {
         }
       }
     }
-  });
+  }
+
+  vscode.window.onDidChangeActiveTextEditor((editor) => update(editor));
 
   registerSecurityAudit(context, cache, auditContext, pendingAudits);
   registerFocusSecurityAudit(context, cache, auditContext);

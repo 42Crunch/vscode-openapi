@@ -327,7 +327,7 @@ export function updateReport(
   audit.issues[uri] = updatedIssues;
 
   // rebuild diagnostics and decorations and refresh report
-  updateDiagnostics(auditContext.diagnostics, audit.filename, audit.issues, editor);
+  updateDiagnostics(auditContext.diagnostics, audit.filename, audit.issues);
   updateDecorations(auditContext.decorations, audit.summary.documentUri, audit.issues);
   setDecorations(editor, auditContext);
   ReportWebView.showIfVisible(audit);
