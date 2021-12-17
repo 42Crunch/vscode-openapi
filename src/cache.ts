@@ -141,17 +141,19 @@ class ParsedDocumentCache implements vscode.Disposable {
     } else {
       // only display selected set of error messages, other parsing
       // errors will be shown by vs-code and we don't want duplicates
-      const filtered = errors.map((error) => {
-        if (error.message in expectedMessages) {
-          return { ...error, message: expectedMessages[error.message] };
-        } else {
-          for (const message of additionalMessages) {
-            if (error.message.startsWith(message)) {
-              return { ...error, message };
+      const filtered = errors
+        .map((error) => {
+          if (error.message in expectedMessages) {
+            return { ...error, message: expectedMessages[error.message] };
+          } else {
+            for (const message of additionalMessages) {
+              if (error.message.startsWith(message)) {
+                return { ...error, message };
+              }
             }
           }
-        }
-      });
+        })
+        .filter((error) => error !== undefined);
 
       this.diagnostics.set(document.uri, filtered);
     }
