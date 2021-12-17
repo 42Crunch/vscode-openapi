@@ -42,7 +42,7 @@ function checkTree(tree: any) {
 }
 
 function isMissing(tree: any, pointer: string): boolean {
-  return !find(tree, pointer);
+  return find(tree, pointer) === undefined;
 }
 
 function setContext(name: string, value: boolean) {

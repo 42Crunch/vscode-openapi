@@ -106,7 +106,7 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
       line.charAt(position.character) == '"' || line.charAt(position.character) == "'"
         ? line.charAt(position.character)
         : '"';
-    if (targetNode) {
+    if (targetNode !== undefined) {
       // don't include trailing quote when completing YAML and
       // there are already quotes in line
       let trailingQuote = quoteChar;

@@ -240,7 +240,7 @@ function findIssueLocation(
   pointer
 ): [string, string] | undefined {
   const node = find(root, pointer);
-  if (node) {
+  if (node !== undefined) {
     return [mainUri.toString(), pointer];
   } else {
     const mapping = findMapping(mappings, pointer);

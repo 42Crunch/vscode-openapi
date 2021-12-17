@@ -53,7 +53,7 @@ export async function refToLocation(
 
     if (root) {
       const target = find(root, pointer);
-      if (target) {
+      if (target !== undefined) {
         const { start, end } = findLocationForJsonPointer(root, pointer).value;
         return new vscode.Location(
           refDocument.uri,

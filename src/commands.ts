@@ -394,7 +394,7 @@ export async function snippetCommand(fix: Fix, cache: Cache, useEdit?: boolean) 
   let finalFix = context.fix["fix"];
   let pointer = context.fix.pointer;
   let pointerPrefix = "";
-  while (!find(root, pointer)) {
+  while (find(root, pointer) === undefined) {
     const key = getPointerLastSegment(pointer);
     pointer = getPointerParent(pointer);
     const tmpFix = {};
