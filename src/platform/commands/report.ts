@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 
 import { PlatformStore } from "../stores/platform-store";
 import { Cache } from "../../cache";
-import { AuditNode } from "../nodes/api";
+import { AuditNode } from "../explorer/nodes/api";
 import { refreshAuditReport } from "../audit";
 import { AuditContext } from "../../types";
 import { makePlatformUri } from "../util";

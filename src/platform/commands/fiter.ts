@@ -7,9 +7,9 @@ import {
   CollectionsNode,
   FilteredApiNode,
   FilteredCollectionNode,
-} from "../nodes/collection";
+} from "../explorer/nodes/collection";
 import { ApiFilter, CollectionFilter } from "../types";
-import { FavoriteCollectionNode, FilteredFavoriteApiNode } from "../nodes/favorite";
+import { FavoriteCollectionNode, FilteredFavoriteApiNode } from "../explorer/nodes/favorite";
 
 export default (store: PlatformStore, provider: CollectionsProvider) => ({
   apisFilter: (collection: CollectionNode) => apisFilter(store, provider, collection),

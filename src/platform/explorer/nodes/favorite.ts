@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { FavoritesStore } from "../stores/favorites-store";
-import { PlatformStore } from "../stores/platform-store";
-import { CollectionData } from "../types";
+import { FavoritesStore } from "../../stores/favorites-store";
+import { PlatformStore } from "../../stores/platform-store";
+import { CollectionData } from "../../types";
 import { ApiNode } from "./api";
 import { AbstractExplorerNode, ExplorerNode } from "./base";
 import { LoadMoreFavoriteApisNode } from "./load-more";

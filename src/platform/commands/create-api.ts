@@ -3,9 +3,9 @@ import { stringify } from "@xliic/preserving-json-yaml-parser";
 
 import { PlatformStore } from "../stores/platform-store";
 import { CollectionsProvider } from "../explorer/provider";
-import { ExplorerNode } from "../nodes/base";
-import { ApiNode } from "../nodes/api";
-import { CollectionNode } from "../nodes/collection";
+import { ExplorerNode } from "../explorer/nodes/base";
+import { ApiNode } from "../explorer/nodes/api";
+import { CollectionNode } from "../explorer/nodes/collection";
 import { Cache } from "../../cache";
 import got from "got";
 import { ImportedUrlStore } from "../stores/imported-url-store";

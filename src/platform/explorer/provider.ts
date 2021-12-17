@@ -2,8 +2,8 @@ import * as vscode from "vscode";
 import { PlatformStore } from "../stores/platform-store";
 import { FavoritesStore } from "../stores/favorites-store";
 import { makeIcon } from "../util";
-import { RootNode } from "../nodes/root";
-import { ExplorerNode } from "../nodes/base";
+import { RootNode } from "./nodes/root";
+import { ExplorerNode } from "./nodes/base";
 
 export class CollectionsProvider implements vscode.TreeDataProvider<ExplorerNode> {
   private _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();

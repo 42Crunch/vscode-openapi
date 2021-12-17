@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import { FavoritesStore } from "../stores/favorites-store";
-import { PlatformStore } from "../stores/platform-store";
+import { FavoritesStore } from "../../stores/favorites-store";
+import { PlatformStore } from "../../stores/platform-store";
 import { ExplorerNode } from "./base";
 import { CollectionsNode } from "./collection";
 import { FavoriteCollectionsNode } from "./favorite";

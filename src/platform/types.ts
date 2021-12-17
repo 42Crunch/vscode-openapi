@@ -5,7 +5,7 @@
 import * as vscode from "vscode";
 
 import { CollectionsProvider } from "./explorer/provider";
-import { ExplorerNode } from "./nodes/base";
+import { ExplorerNode } from "./explorer/nodes/base";
 
 export const platformUriScheme = "openapi-42crunch";
 export const MAX_NAME_LEN = 2048;
