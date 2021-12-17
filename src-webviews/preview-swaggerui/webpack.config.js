@@ -1,17 +1,18 @@
-const path = require('path');
-const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
+const path = require("path");
+const webpack = require("webpack");
 
 module.exports = {
-  entry: path.resolve(__dirname, 'index.tsx'),
+  target: "web",
+  entry: path.resolve(__dirname, "index.tsx"),
   module: {
     rules: [
       {
         test: /\.tsx?$/,
         use: [
           {
-            loader: 'ts-loader',
+            loader: "ts-loader",
             options: {
-              configFile: path.resolve(__dirname, 'tsconfig.json'),
+              configFile: path.resolve(__dirname, "tsconfig.json"),
             },
           },
         ],
@@ -19,19 +20,22 @@ module.exports = {
       },
       {
         test: /\.css$/i,
-        use: ['style-loader', 'css-loader'],
+        use: ["style-loader", "css-loader"],
       },
     ],
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    fallback: { stream: require.resolve("stream-browserify") },
+    extensions: [".tsx", ".ts", ".js"],
   },
-  mode: 'production',
+  mode: "production",
   output: {
-    filename: 'index.js',
-    path: path.resolve(__dirname, '..', '..', 'webview', 'generated', 'preview', 'swaggerui'),
+    filename: "index.js",
+    path: path.resolve(__dirname, "..", "..", "webview", "generated", "preview", "swaggerui"),
   },
   plugins: [
-    new NodePolyfillPlugin()
-  ]
+    new webpack.ProvidePlugin({
+      Buffer: ["buffer", "Buffer"],
+    }),
+  ],
 };

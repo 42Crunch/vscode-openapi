@@ -4,7 +4,7 @@
   "displayName": "OpenAPI (Swagger) Editor",
   "description": "OpenAPI extension for Visual Studio Code",
   "license": "AGPL-3.0-only",
-  "version": "4.7.1",
+  "version": "4.8.0",
   "publisher": "42Crunch",
   "repository": {
     "type": "git",
@@ -24,13 +24,14 @@
     "api"
   ],
   "engines": {
-    "vscode": "^1.46.0"
+    "vscode": "^1.61.0"
   },
   "extensionDependencies": [
     "redhat.vscode-yaml"
   ],
   "activationEvents": [
-    "*"
+    "*",
+    "onFileSystem:openapi-42crunch"
   ],
   "capabilities": {
     "untrustedWorkspaces": {
@@ -60,10 +61,27 @@
           "id": "openapi-explorer",
           "title": "OpenAPI",
           "icon": "resources/icons/icon_api.svg"
+        },
+        {
+          "id": "42crunch-platform",
+          "title": "42Crunch",
+          "icon": "resources/icon_42crunch_platform.svg"
         }
       ]
     },
     "views": {
+      "42crunch-platform": [
+        {
+          "id": "platformExplorer",
+          "name": "Platform",
+          "when": "openapi.platform.credentials == present"
+        },
+        {
+          "id": "platformWelcome",
+          "name": "",
+          "when": "openapi.platform.credentials == missing"
+        }
+      ],
       "openapi-explorer": [
         {
           "id": "openapiTwoSpecOutline",
@@ -146,18 +164,27 @@
       {
         "view": "openapiNotSelectedOutline",
         "contents": "No OpenAPI file selected.\n[New OpenAPI file](command:openapi.createNewThreeYaml)"
+      },
+      {
+        "view": "platformWelcome",
+        "contents": "Please enter 42Crunch Platform credentials.\n[Configure](command:openapi.platform.updatePlatformCredentials)"
       }
     ],
     "menus": {
       "editor/title": [
         {
-          "when": "openapiTwoEnabled || openapiThreeEnabled",
+          "when": "openapiTwoEnabled && resourceScheme =~ /^untitled$|^file$/ || openapiThreeEnabled && resourceScheme =~ /^untitled$|^file$/",
           "command": "openapi.securityAudit",
           "group": "navigation"
         },
         {
           "when": "openapiTwoEnabled || openapiThreeEnabled",
           "command": "openapi.preview",
+          "group": "navigation"
+        },
+        {
+          "when": "resourceScheme == openapi-42crunch",
+          "command": "openapi.platform.editorReloadApiFromUrl",
           "group": "navigation"
         }
       ],
@@ -297,6 +324,11 @@
         {
           "command": "openapi.copySelectedThreeSecurityOutlineJsonReference",
           "when": "!openapiErrors && view == openapiThreeSecurityOutline"
+        },
+        {
+          "command": "openapi.platform.refreshCollections",
+          "when": "view == platformExplorer",
+          "group": "navigation"
         }
       ],
       "view/item/context": [
@@ -309,10 +341,188 @@
           "command": "openapi.addOperation",
           "group": "inline",
           "when": "!openapiErrors && view == openapiThreePathOutline && viewItem == path"
+        },
+        {
+          "command": "openapi.platform.createCollection",
+          "when": "view == platformExplorer && viewItem == collections"
+        },
+        {
+          "command": "openapi.platform.deleteCollection",
+          "when": "view == platformExplorer && viewItem == collection"
+        },
+        {
+          "command": "openapi.platform.collectionAddToFavorite",
+          "when": "view == platformExplorer && viewItem == collection"
+        },
+        {
+          "command": "openapi.platform.collectionRemoveFromFavorite",
+          "when": "view == platformExplorer && viewItem == favoriteCollection"
+        },
+        {
+          "command": "openapi.platform.deleteApi",
+          "when": "view == platformExplorer && viewItem == api"
+        },
+        {
+          "command": "openapi.platform.apiRename",
+          "when": "view == platformExplorer && viewItem == api"
+        },
+        {
+          "command": "openapi.platform.collectionRename",
+          "when": "view == platformExplorer && viewItem =~ /^collection$|^favoriteCollection$/"
+        },
+        {
+          "command": "openapi.platform.createApi",
+          "when": "view == platformExplorer && viewItem =~ /^collection$|^favoriteCollection$/"
+        },
+        {
+          "command": "openapi.platform.createApiFromUrl",
+          "when": "view == platformExplorer && viewItem =~ /^collection$|^favoriteCollection$/"
+        },
+        {
+          "command": "openapi.platform.openInWebUI",
+          "when": "view == platformExplorer && viewItem =~ /^collection$|^api$|^favoriteCollection$/"
+        },
+        {
+          "command": "openapi.platform.collectionsFilter",
+          "when": "view == platformExplorer && viewItem == collections",
+          "group": "inline"
+        },
+        {
+          "command": "openapi.platform.collectionsFilterReset",
+          "title": "Remove filter",
+          "when": "view == platformExplorer && viewItem == collectionFilter",
+          "group": "inline"
+        },
+        {
+          "command": "openapi.platform.apisFilter",
+          "when": "view == platformExplorer && viewItem == collection",
+          "group": "inline"
+        },
+        {
+          "command": "openapi.platform.apisFilterReset",
+          "title": "Remove filter",
+          "when": "view == platformExplorer && viewItem == apiFilter",
+          "group": "inline"
+        },
+        {
+          "command": "openapi.platform.favoriteApisFilter",
+          "when": "view == platformExplorer && viewItem == favoriteCollection",
+          "group": "inline"
+        },
+        {
+          "command": "openapi.platform.favoriteApisFilterReset",
+          "title": "Remove filter",
+          "when": "view == platformExplorer && viewItem == favoriteApiFilter",
+          "group": "inline"
         }
       ]
     },
     "commands": [
+      {
+        "command": "openapi.platform.updatePlatformCredentials",
+        "title": "42Crunch: Update platform credentials"
+      },
+      {
+        "command": "openapi.platform.favoriteApisFilter",
+        "title": "Filter",
+        "enablement": "view == platformExplorer && viewItem == favoriteCollection",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "openapi.platform.favoriteApisFilterReset",
+        "title": "Remove filter",
+        "enablement": "view == platformExplorer && viewItem == favoriteApiFilter",
+        "icon": "$(close)"
+      },
+      {
+        "command": "openapi.platform.apisFilter",
+        "title": "Filter",
+        "enablement": "view == platformExplorer && viewItem == collection",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "openapi.platform.apisFilterReset",
+        "title": "Remove filter",
+        "enablement": "view == platformExplorer && viewItem == apiFilter",
+        "icon": "$(close)"
+      },
+      {
+        "command": "openapi.platform.collectionsFilter",
+        "title": "Filter",
+        "enablement": "view == platformExplorer && viewItem == collections",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "openapi.platform.collectionsFilterReset",
+        "title": "Remove filter",
+        "enablement": "view == platformExplorer && viewItem == collectionFilter",
+        "icon": "$(close)"
+      },
+      {
+        "command": "openapi.platform.refreshCollections",
+        "title": "Refresh",
+        "enablement": "view == platformExplorer",
+        "icon": {
+          "light": "resources/light/refresh.svg",
+          "dark": "resources/dark/refresh.svg"
+        }
+      },
+      {
+        "command": "openapi.platform.deleteCollection",
+        "enablement": "view == platformExplorer && viewItem == collection",
+        "title": "Delete"
+      },
+      {
+        "command": "openapi.platform.collectionAddToFavorite",
+        "enablement": "view == platformExplorer && viewItem == collection",
+        "title": "Add to My Favorite Collections"
+      },
+      {
+        "command": "openapi.platform.collectionRemoveFromFavorite",
+        "enablement": "view == platformExplorer && viewItem == favoriteCollection",
+        "title": "Remove from Favorite"
+      },
+      {
+        "command": "openapi.platform.deleteApi",
+        "title": "Delete",
+        "enablement": "view == platformExplorer && viewItem == api"
+      },
+      {
+        "command": "openapi.platform.createCollection",
+        "title": "Create new collection",
+        "enablement": "view == platformExplorer && viewItem == collections"
+      },
+      {
+        "command": "openapi.platform.apiRename",
+        "title": "Rename",
+        "enablement": "view == platformExplorer && viewItem == api"
+      },
+      {
+        "command": "openapi.platform.collectionRename",
+        "title": "Rename",
+        "enablement": "view == platformExplorer && viewItem =~ /^collection$|^favoriteCollection$/"
+      },
+      {
+        "command": "openapi.platform.createApi",
+        "enablement": "view == platformExplorer && viewItem =~ /^collection$|^favoriteCollection$/",
+        "title": "Import API"
+      },
+      {
+        "command": "openapi.platform.createApiFromUrl",
+        "enablement": "view == platformExplorer && viewItem =~ /^collection$|^favoriteCollection$/",
+        "title": "Import API from URL"
+      },
+      {
+        "command": "openapi.platform.editorReloadApiFromUrl",
+        "enablement": "resourceScheme == openapi-42crunch",
+        "title": "Reload API from URL",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "openapi.platform.openInWebUI",
+        "enablement": "view == platformExplorer && viewItem =~ /^collection$|^api$|^favoriteCollection$/",
+        "title": "Open in Web UI"
+      },
       {
         "command": "openapi.v3addServer",
         "title": "OpenAPI: add server"
@@ -518,6 +728,12 @@
       "type": "object",
       "title": "OpenAPI",
       "properties": {
+        "openapi.platformUrl": {
+          "scope": "workbench",
+          "type": "string",
+          "default": "https://platform.42crunch.com",
+          "description": "42Crunch platform URL"
+        },
         "openapi.securityAuditToken": {
           "scope": "workbench",
           "type": "string",
@@ -572,7 +788,7 @@
     "@xliic/preserving-json-yaml-parser": "^1.7.3",
     "form-data": "^2.3.3",
     "got": "^11.8.2",
-    "js-yaml": "^4.1.0",
+    "js-yaml": "4.1.0",
     "jsonc-parser": "^3.0.0",
     "semver": "^6.3.0",
     "yaml-language-server-parser": "^0.1.2"
@@ -582,11 +798,13 @@
     "@types/js-yaml": "^4.0.3",
     "@types/mocha": "^8.2.1",
     "@types/node": "^14.14.31",
-    "@types/react": "^16.9.48",
+    "@types/react": "^17.0.2",
     "@types/semver": "^6.2.0",
-    "@types/vscode": "1.46.0",
+    "@types/vscode": "1.61.0",
     "@typescript-eslint/eslint-plugin": "^3.0.2",
     "@typescript-eslint/parser": "^3.0.2",
+    "browser": "^0.2.6",
+    "buffer": "^6.0.3",
     "css-loader": "^5.2.4",
     "eslint": "^7.1.0",
     "esm": "^3.2.25",
@@ -595,18 +813,21 @@
     "marked": "^0.7.0",
     "mobx": "^6.1.7",
     "mocha": "^8.3.0",
-    "node-polyfill-webpack-plugin": "^1.0.3",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "redoc": "2.0.0-rc.50",
+    "path-browserify": "^1.0.1",
+    "process": "^0.11.10",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "redoc": "2.0.0-rc.59",
+    "stream-browserify": "^3.0.0",
     "style-loader": "^1.2.1",
     "styled-components": "^5.1.1",
-    "swagger-ui-react": "^3.48.0",
+    "swagger-ui-react": "^4.1.3",
     "to-arraybuffer": "^1.0.1",
     "ts-loader": "^8.0.3",
+    "tty-browserify": "^0.0.1",
     "typescript": "^4.3.0",
     "vscode-test": "^1.5.1",
-    "webpack": "^5.24.2",
-    "webpack-cli": "^4.5.0"
+    "webpack": "^5.65.0",
+    "webpack-cli": "^4.9.1"
   }
 }
