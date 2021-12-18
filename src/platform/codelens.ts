@@ -10,7 +10,7 @@ export class CodelensProvider implements vscode.CodeLensProvider {
     document: vscode.TextDocument,
     token: vscode.CancellationToken
   ): Promise<vscode.CodeLens[]> {
-    const apiId = getApiId(document.uri);
+    const apiId = getApiId(document.uri)!;
     const api = await this.store.getApi(apiId);
     const collection = await this.store.getCollection(api.desc.cid);
 

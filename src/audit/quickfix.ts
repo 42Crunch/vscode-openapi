@@ -3,6 +3,8 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
+// @ts-nocheck
+
 import * as vscode from "vscode";
 import * as quickfixes from "../generated/quickfixes.json";
 import {
@@ -115,7 +117,7 @@ export function fixInsert(context: FixContext) {
     context.snippetParameters.location = position;
   } else {
     const edit = getWorkspaceEdit(context);
-    context.snippetParameters = null;
+    context.snippetParameters = undefined;
     if (context.dropBrackets) {
       dropBracketsOnEdit(context.editor, context.dropBrackets, edit);
     }
@@ -182,7 +184,7 @@ function transformInsertToReplaceIfExists(context: FixContext): boolean {
         context.target = findJsonNodeValue(
           context.root,
           `${context.target.pointer}/${insertingKey}`
-        );
+        )!;
         context.fix = {
           problem: fix.problem,
           title: fix.title,
@@ -497,6 +499,10 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
     const version = this.cache.getDocumentVersion(auditDocument);
     const root = this.cache.getParsedDocument(document);
 
+    if (!root || !bundle) {
+      return [];
+    }
+
     const titles: string[] = [];
     const problems: string[] = [];
     const parameters = [];
@@ -505,15 +511,11 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
     const issuesByPointer = getIssuesByPointers(issues);
 
     // Only AuditDiagnostic with fixes in registeredQuickFixes
-    const diagnostics: AuditDiagnostic[] = <AuditDiagnostic[]>context.diagnostics.filter(
-      (diagnostic) => {
-        return (
-          diagnostic["id"] &&
-          diagnostic["pointer"] !== undefined &&
-          registeredQuickFixes[diagnostic["id"]]
-        );
-      }
-    );
+    const diagnostics = (<AuditDiagnostic[]>context.diagnostics).filter((diagnostic) => {
+      return (
+        diagnostic.id && diagnostic.pointer !== undefined && registeredQuickFixes[diagnostic.id]
+      );
+    });
 
     for (const diagnostic of diagnostics) {
       const fix = registeredQuickFixes[diagnostic.id];

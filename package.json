@@ -30,7 +30,13 @@
     "redhat.vscode-yaml"
   ],
   "activationEvents": [
-    "*",
+    "onLanguage:yaml",
+    "onLanguage:json",
+    "onLanguage:jsonc",
+    "onCommand:openapi.createNewThree",
+    "onCommand:openapi.createNewTwo",
+    "onCommand:openapi.createNewThreeYaml",
+    "onCommand:openapi.createNewTwoYaml",
     "onFileSystem:openapi-42crunch"
   ],
   "capabilities": {
@@ -785,10 +791,10 @@
   },
   "dependencies": {
     "@xliic/json-schema-ref-parser": "^9.2.0",
-    "@xliic/preserving-json-yaml-parser": "^1.7.3",
+    "@xliic/preserving-json-yaml-parser": "^1.8.0",
     "form-data": "^2.3.3",
     "got": "^11.8.2",
-    "js-yaml": "4.1.0",
+    "js-yaml": "^4.1.0",
     "jsonc-parser": "^3.0.0",
     "semver": "^6.3.0",
     "yaml-language-server-parser": "^0.1.2"
@@ -825,7 +831,7 @@
     "to-arraybuffer": "^1.0.1",
     "ts-loader": "^8.0.3",
     "tty-browserify": "^0.0.1",
-    "typescript": "^4.3.0",
+    "typescript": "^4.5.4",
     "vscode-test": "^1.5.1",
     "webpack": "^5.65.0",
     "webpack-cli": "^4.9.1"

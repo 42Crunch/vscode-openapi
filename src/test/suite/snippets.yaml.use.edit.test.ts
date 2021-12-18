@@ -44,6 +44,7 @@ const selectors = {
 };
 
 suite("Snippets For YAML with Edit", () => {
+  //@ts-ignore passing null to Cache should be okay in the context of the test
   const cache = new Cache(parserOptions, Object.values(selectors), null);
 
   test("Version 3 Spaces 2", async () => {

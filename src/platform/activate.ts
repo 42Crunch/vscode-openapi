@@ -14,10 +14,7 @@ import { PlatformStore } from "./stores/platform-store";
 import { FavoritesStore } from "./stores/favorites-store";
 import { ImportedUrlStore } from "./stores/imported-url-store";
 import { PlatformFS } from "./fs-provider";
-import { getApiId, isPlatformUri } from "./util";
-import { parseAuditReport, updateAuditContext } from "../audit/audit";
-import { setDecorations, updateDecorations } from "../audit/decoration";
-import { updateDiagnostics } from "../audit/diagnostic";
+import { isPlatformUri } from "./util";
 import { CodelensProvider } from "./codelens";
 import { refreshAuditReport } from "./audit";
 
@@ -27,15 +24,11 @@ export async function activate(
   cache: Cache
 ) {
   const platformUrl = configuration.get<string>("platformUrl");
-  const platformToken = await context.secrets.get("platformApiToken");
+  const platformToken = undefined; // await context.secrets.get("platformApiToken");
 
   const platformContext: PlatformContext = {
     context,
     memento: context.workspaceState,
-    explorer: {
-      tree: undefined,
-      provider: undefined,
-    },
     connection: {
       platformUrl: platformUrl,
       apiToken: platformToken,
@@ -63,13 +56,10 @@ export async function activate(
     })
   );
 
-  platformContext.explorer.provider = new CollectionsProvider(
-    store,
-    favoriteCollections,
-    context.extensionUri
-  );
-  platformContext.explorer.tree = vscode.window.createTreeView("platformExplorer", {
-    treeDataProvider: platformContext.explorer.provider,
+  const provider = new CollectionsProvider(store, favoriteCollections, context.extensionUri);
+
+  const tree = vscode.window.createTreeView("platformExplorer", {
+    treeDataProvider: provider,
   });
 
   await vscode.commands.executeCommand(
@@ -103,7 +93,9 @@ export async function activate(
     store,
     favoriteCollections,
     importedUrls,
-    cache
+    cache,
+    provider,
+    tree
   );
 
   vscode.languages.registerCodeLensProvider(

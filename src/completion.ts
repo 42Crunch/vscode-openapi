@@ -5,7 +5,8 @@ import { OpenApiVersion } from "./types";
 import path from "path";
 import { Cache } from "./cache";
 
-const targetMapping = {
+const targetMapping: { [key in OpenApiVersion]: any } = {
+  [OpenApiVersion.Unknown]: undefined,
   [OpenApiVersion.V2]: {
     schema: "/definitions",
     items: "/definitions",
@@ -41,10 +42,10 @@ function findTarget(
 
 export class CompletionItemProvider implements vscode.CompletionItemProvider {
   root: any;
-  version: OpenApiVersion;
+  version: OpenApiVersion = OpenApiVersion.Unknown;
   constructor(private context: vscode.ExtensionContext, private cache: Cache) {
-    cache.onDidActiveDocumentChange(async (document) => {
-      if (cache.getDocumentVersion(document) !== OpenApiVersion.Unknown) {
+    cache.onDidActiveDocumentChange(async (document: vscode.TextDocument | undefined) => {
+      if (document && cache.getDocumentVersion(document) !== OpenApiVersion.Unknown) {
         this.root = cache.getLastGoodParsedDocument(document);
         this.version = cache.getDocumentVersion(document);
       }
@@ -72,7 +73,18 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
     // which could happen in case of incomplete yaml node with
     // bunch of spaces at the end;
     // look for the node at the end of the root node range
-    const [node, nodePath] = findNodeAtOffset(this.root, offset > end ? end : offset);
+    let [node, nodePath] = findNodeAtOffset(this.root, offset > end ? end : offset);
+    if (document.languageId === "yaml") {
+      // workaround implicit null issue for the YAML like this ```$ref:```
+      const [betterNode, betterNodePath] = findNodeAtOffset(
+        this.root,
+        offset > end ? end - 1 : offset - 1
+      );
+      if (betterNode && betterNode.hasOwnProperty("$ref") && betterNode["$ref"] === null) {
+        node = betterNode;
+        nodePath = betterNodePath;
+      }
+    }
 
     let searchRoot = this.root;
     let fileRef = "";
@@ -117,8 +129,7 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
           trailingQuote = "";
         }
       }
-      const completions = targetNode.getChildren().map((child) => {
-        const key = child.getKey();
+      const completions = Object.keys(targetNode).map((key: string) => {
         return new vscode.CompletionItem(
           `${leadingSpace}${quoteChar}${fileRef}#${target}/${key}${trailingQuote}`
         );

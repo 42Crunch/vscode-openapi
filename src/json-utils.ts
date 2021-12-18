@@ -54,7 +54,7 @@ export class JsonNodeValue {
   public getFirstChild() {
     const children = this.getChildren(true);
     if (children.length === 0) {
-      return null;
+      return undefined;
     }
     return children[0];
   }
@@ -62,7 +62,7 @@ export class JsonNodeValue {
   public getLastChild() {
     const children = this.getChildren(true);
     if (children.length === 0) {
-      return null;
+      return undefined;
     }
     return children[children.length - 1];
   }
@@ -79,91 +79,114 @@ export class JsonNodeValue {
     return !this.isObject() && !this.isArray();
   }
 
-  public getParent(root: Parsed): JsonNodeValue {
+  public getParent(root: Parsed): JsonNodeValue | undefined {
     if (this.pointer !== "") {
       const parentPointer = getPointerParent(this.pointer);
       return new JsonNodeValue(find(root, parentPointer), parentPointer);
     }
-    return null;
+    return undefined;
   }
 
-  public getRange(root: Parsed): [number, number] {
+  public getRange(root: Parsed): [number, number] | undefined {
     const myKey = this.getKey();
     const parent = this.getParent(root);
-    for (const key of Object.keys(parent.value)) {
-      if (key === myKey && this.value === parent.value[key]) {
-        const container = parent.value as Container;
-        const loc = getPreservedLocation(container, key);
-        return [loc.key ? loc.key.start : loc.value.start, loc.value.end];
+    if (parent) {
+      for (const key of Object.keys(parent.value)) {
+        if (key === myKey && this.value === parent.value[key]) {
+          const container = parent.value as Container;
+          const loc = getPreservedLocation(container, key);
+          if (loc) {
+            return [loc.key ? loc.key.start : loc.value.start, loc.value.end];
+          } else {
+            return undefined;
+          }
+        }
       }
     }
-    return null;
+
+    return undefined;
   }
 
-  public getKeyRange(root: Parsed): [number, number] {
+  public getKeyRange(root: Parsed): [number, number] | undefined {
     const myKey = this.getKey();
     const parent = this.getParent(root);
-    for (const key of Object.keys(parent.value)) {
-      if (key === myKey && this.value === parent.value[key]) {
-        const container = parent.value as Container;
-        const loc = getPreservedLocation(container, key);
-        return loc.key ? [loc.key.start, loc.key.end] : null;
+    if (parent) {
+      for (const key of Object.keys(parent.value)) {
+        if (key === myKey && this.value === parent.value[key]) {
+          const container = parent.value as Container;
+          const loc = getPreservedLocation(container, key);
+          if (loc) {
+            return loc.key ? [loc.key.start, loc.key.end] : undefined;
+          } else {
+            return undefined;
+          }
+        }
       }
     }
-    return null;
+    return undefined;
   }
 
-  public getValueRange(root: Parsed): [number, number] {
+  public getValueRange(root: Parsed): [number, number] | undefined {
     const myKey = this.getKey();
     const parent = this.getParent(root);
-    for (const key of Object.keys(parent.value)) {
-      if (key === myKey && this.value === parent.value[key]) {
-        const container = parent.value as Container;
-        const loc = getPreservedLocation(container, key);
-        return [loc.value.start, loc.value.end];
+    if (parent) {
+      for (const key of Object.keys(parent.value)) {
+        if (key === myKey && this.value === parent.value[key]) {
+          const container = parent.value as Container;
+          const loc = getPreservedLocation(container, key);
+          if (loc) {
+            return [loc.value.start, loc.value.end];
+          } else {
+            return undefined;
+          }
+        }
       }
     }
-    return null;
+    return undefined;
   }
 
-  public next(root: Parsed): JsonNodeValue {
+  public next(root: Parsed): JsonNodeValue | undefined {
     const myKey = this.getKey();
     const parent = this.getParent(root);
-    const keys = getKeys(parent.value, true);
-    for (let i = 0; i < keys.length - 1; i++) {
-      if (myKey === keys[i] && this.value === parent.value[keys[i]]) {
-        return new JsonNodeValue(
-          parent.value[keys[i + 1]],
-          getPointerChild(parent.pointer, keys[i + 1])
-        );
+    if (parent) {
+      const keys = getKeys(parent.value, true);
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (myKey === keys[i] && this.value === parent.value[keys[i]]) {
+          return new JsonNodeValue(
+            parent.value[keys[i + 1]],
+            getPointerChild(parent.pointer, keys[i + 1])
+          );
+        }
       }
     }
-    return null;
+    return undefined;
   }
 
-  public prev(root: Parsed): JsonNodeValue {
+  public prev(root: Parsed): JsonNodeValue | undefined {
     const myKey = this.getKey();
     const parent = this.getParent(root);
-    const keys = getKeys(parent.value, true);
-    for (let i = 1; i < keys.length; i++) {
-      if (myKey === keys[i] && this.value === parent.value[keys[i]]) {
-        return new JsonNodeValue(
-          parent.value[keys[i - 1]],
-          getPointerChild(parent.pointer, keys[i - 1])
-        );
+    if (parent) {
+      const keys = getKeys(parent.value, true);
+      for (let i = 1; i < keys.length; i++) {
+        if (myKey === keys[i] && this.value === parent.value[keys[i]]) {
+          return new JsonNodeValue(
+            parent.value[keys[i - 1]],
+            getPointerChild(parent.pointer, keys[i - 1])
+          );
+        }
       }
     }
-    return null;
+    return undefined;
   }
 }
 
-export function getRootAsJsonNodeValue(root: Parsed): JsonNodeValue {
-  return root ? new JsonNodeValue(root, "") : null;
+export function getRootAsJsonNodeValue(root: Parsed): JsonNodeValue | undefined {
+  return root ? new JsonNodeValue(root, "") : undefined;
 }
 
-export function findJsonNodeValue(root: Parsed, pointer: string): JsonNodeValue {
+export function findJsonNodeValue(root: Parsed, pointer: string): JsonNodeValue | undefined {
   const value = find(root, pointer);
-  return value === undefined ? null : new JsonNodeValue(value, pointer);
+  return value === undefined ? undefined : new JsonNodeValue(value, pointer);
 }
 
 function getKeys(value: any, keepOrder?: boolean): any[] {
@@ -177,8 +200,8 @@ function getKeys(value: any, keepOrder?: boolean): any[] {
 function comparator(container: Container) {
   return function (key1: string | number, key2: string | number) {
     return (
-      getOffset(getPreservedLocation(container, key1)) -
-      getOffset(getPreservedLocation(container, key2))
+      getOffset(getPreservedLocation(container, key1)!) -
+      getOffset(getPreservedLocation(container, key2)!)
     );
   };
 }
@@ -226,14 +249,14 @@ function replaceTextRanges(text: string, replacements: TextReplacement[]): strin
 
 export function replace(text: string, languageId: string, replacements: Replacement[]) {
   const [root, errors] = parse(text, languageId, parserOptions);
-  if (errors.length) {
+  if (errors.length || root === undefined) {
     throw new Error(`Unable to parse text to perform replacement in JSON/YAML in: ${text}`);
   }
 
   const textReplacements: TextReplacement[] = replacements.map((replacement) => {
-    const target = findJsonNodeValue(root, replacement.pointer);
+    const target = findJsonNodeValue(root, replacement.pointer)!;
     const range = replacement.replaceKey ? target.getKeyRange(root) : target.getValueRange(root);
-    return { range, value: replacement.value };
+    return { range: range!, value: replacement.value };
   });
 
   return replaceTextRanges(text, textReplacements);

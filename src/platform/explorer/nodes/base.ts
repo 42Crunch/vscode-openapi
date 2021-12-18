@@ -6,13 +6,13 @@ export interface ExplorerNode {
   readonly item: vscode.TreeItem;
   readonly icon?: { dark: string; light: string } | string | undefined;
   readonly contextValue?: string;
-  getChildren?(): Promise<ExplorerNode[]>;
+  getChildren(): Promise<ExplorerNode[]>;
 }
 
 export abstract class AbstractExplorerNode implements ExplorerNode {
-  readonly item: vscode.TreeItem | undefined;
+  readonly item: vscode.TreeItem;
   icon: { dark: string; light: string } | string | undefined;
-  contextValue: string;
+  contextValue: string | undefined;
 
   constructor(
     readonly parent: ExplorerNode,
@@ -21,5 +21,9 @@ export abstract class AbstractExplorerNode implements ExplorerNode {
     collapsible: vscode.TreeItemCollapsibleState
   ) {
     this.item = new vscode.TreeItem(title, collapsible);
+  }
+
+  async getChildren(): Promise<ExplorerNode[]> {
+    return [];
   }
 }

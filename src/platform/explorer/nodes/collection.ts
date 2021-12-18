@@ -37,8 +37,7 @@ export class CollectionsNode extends AbstractExplorerNode {
 }
 
 export class FilteredCollectionNode extends AbstractExplorerNode {
-  readonly parent: CollectionsNode;
-  constructor(parent: CollectionsNode, private store: PlatformStore, found: number) {
+  constructor(readonly parent: CollectionsNode, private store: PlatformStore, found: number) {
     super(parent, `${parent.id}-filter`, `Found ${found}`, vscode.TreeItemCollapsibleState.None);
     this.icon = "filter";
     this.contextValue = "collectionFilter";
@@ -86,8 +85,7 @@ export class CollectionNode extends AbstractExplorerNode {
 }
 
 export class FilteredApiNode extends AbstractExplorerNode {
-  readonly parent: CollectionNode;
-  constructor(parent: CollectionNode, private store: PlatformStore, found: number) {
+  constructor(readonly parent: CollectionNode, private store: PlatformStore, found: number) {
     super(parent, `${parent.id}-filter`, `Found ${found}`, vscode.TreeItemCollapsibleState.None);
     this.icon = "filter";
     this.contextValue = "apiFilter";

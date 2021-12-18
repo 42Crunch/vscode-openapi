@@ -71,8 +71,11 @@ export class FavoriteCollectionNode extends AbstractExplorerNode {
 }
 
 export class FilteredFavoriteApiNode extends AbstractExplorerNode {
-  readonly parent: FavoriteCollectionNode;
-  constructor(parent: FavoriteCollectionNode, private store: PlatformStore, found: number) {
+  constructor(
+    readonly parent: FavoriteCollectionNode,
+    private store: PlatformStore,
+    found: number
+  ) {
     super(parent, `${parent.id}-filter`, `Found ${found}`, vscode.TreeItemCollapsibleState.None);
     this.icon = "filter";
     this.contextValue = "favoriteApiFilter";

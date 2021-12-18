@@ -11,7 +11,7 @@ export function getLocationByPointer(
   // to return documentUri of current/main document
   // depending on pointer == ""?
 
-  let location: Location;
+  let location: Location | undefined;
   if (pointer == "") {
     // if pointer == "" return location for well known node
     // which is depending on OAS version is either "/swagger" or "/openapi

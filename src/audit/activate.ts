@@ -10,7 +10,7 @@ import {
   registerFocusSecurityAuditById,
 } from "./commands";
 import { ReportWebView } from "./report";
-import { AuditContext } from "../types";
+import { AuditContext, PendingAudits } from "../types";
 import { registerQuickfixes } from "./quickfix";
 import { Cache } from "../cache";
 import { setDecorations } from "./decoration";
@@ -20,9 +20,9 @@ export function activate(
   auditContext: AuditContext,
   cache: Cache
 ) {
-  const pendingAudits: { [uri: string]: boolean } = {};
+  const pendingAudits: PendingAudits = {};
 
-  function update(editor: vscode.TextEditor) {
+  function update(editor: vscode.TextEditor | undefined) {
     if (editor) {
       setDecorations(editor, auditContext);
       const uri = editor.document.uri.toString();

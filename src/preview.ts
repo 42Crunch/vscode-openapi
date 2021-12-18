@@ -5,7 +5,7 @@
 
 import * as vscode from "vscode";
 import * as path from "path";
-import { Configuration, configuration } from "./configuration";
+import { Configuration } from "./configuration";
 import { Bundle } from "./types";
 import { Cache } from "./cache";
 
@@ -13,6 +13,8 @@ type Preview = {
   panel: vscode.WebviewPanel;
   documentUri: vscode.Uri;
 };
+
+type PreviewType = keyof Previews;
 
 type Previews = {
   redoc?: Preview;
@@ -37,7 +39,7 @@ export function activate(
     return (...args: any) => {
       clearTimeout(timer);
       timer = setTimeout(() => {
-        func.apply(this, args);
+        func.apply(null, args);
       }, previewUpdateDelay);
     };
   }
@@ -45,8 +47,9 @@ export function activate(
   const debouncedPreview = debounce(showPreview);
 
   cache.onDidChange(async (document: vscode.TextDocument) => {
-    for (const name of Object.keys(previews)) {
-      const preview: Preview = previews[name];
+    const names: PreviewType[] = ["swaggerui", "redoc"];
+    for (const name of names) {
+      const preview: Preview = previews[name]!;
       const uri = document.uri.toString();
       if (preview && preview.documentUri.toString() === uri) {
         const bundle = await cache.getDocumentBundle(document);
@@ -76,7 +79,7 @@ export function activate(
         context,
         cache,
         previews,
-        configuration.get<string>("defaultPreviewRenderer"),
+        configuration.get<string>("defaultPreviewRenderer") as PreviewType,
         textEditor.document
       )
   );
@@ -86,7 +89,7 @@ async function startPreview(
   context: vscode.ExtensionContext,
   cache: Cache,
   previews: Previews,
-  renderer: string,
+  renderer: PreviewType,
   document: vscode.TextDocument
 ) {
   const bundle = await cache.getDocumentBundle(document);
@@ -101,12 +104,13 @@ async function startPreview(
 async function showPreview(
   context: vscode.ExtensionContext,
   previews: Previews,
-  name: string,
+  name: PreviewType,
   documentUri: vscode.Uri,
   bundle: Bundle
 ) {
-  if (previews[name]) {
-    const panel = previews[name].panel;
+  const preview = previews[name];
+  if (preview) {
+    const panel = preview.panel;
     panel.webview.postMessage({ command: "preview", text: JSON.stringify(bundle.value) });
     previews[name] = { panel, documentUri };
     return;
@@ -118,7 +122,7 @@ async function showPreview(
 
   panel.onDidDispose(
     () => {
-      previews[name] = null;
+      previews[name] = undefined;
     },
     undefined,
     context.subscriptions

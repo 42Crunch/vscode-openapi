@@ -9,7 +9,7 @@ import { AuditDiagnostic } from "../types";
 export function updateDiagnostics(
   diagnostics: vscode.DiagnosticCollection,
   filename: string,
-  issues
+  issues: any
 ): vscode.DiagnosticCollection {
   for (const uri of Object.keys(issues)) {
     diagnostics.set(vscode.Uri.parse(uri), createDiagnosticsForUri(filename, uri, issues[uri]));
@@ -17,8 +17,12 @@ export function updateDiagnostics(
   return diagnostics;
 }
 
-export function createDiagnosticsForUri(filename: string, uri: string, issues): AuditDiagnostic[] {
-  const criticalityToSeverity = {
+export function createDiagnosticsForUri(
+  filename: string,
+  uri: string,
+  issues: any
+): AuditDiagnostic[] {
+  const criticalityToSeverity: any = {
     1: vscode.DiagnosticSeverity.Hint,
     2: vscode.DiagnosticSeverity.Information,
     3: vscode.DiagnosticSeverity.Warning,
@@ -27,7 +31,7 @@ export function createDiagnosticsForUri(filename: string, uri: string, issues): 
   };
 
   return issues.map(
-    (issue): AuditDiagnostic => ({
+    (issue: any): AuditDiagnostic => ({
       source: `audit of ${filename}`,
       id: issue.id,
       pointer: issue.pointer,

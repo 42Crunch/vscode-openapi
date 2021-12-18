@@ -76,7 +76,7 @@ async function splitReportByDocument(
   mainDocument: vscode.TextDocument,
   report: any,
   cache: Cache,
-  mappings
+  mappings: MappingNode
 ): Promise<[Grades, IssuesByDocument, { [uri: string]: vscode.TextDocument }, ReportedIssue[]]> {
   const grades = readSummary(report);
   const reportedIssues = readAssessment(report);
@@ -88,7 +88,7 @@ async function splitReportByDocument(
     reportedIssues
   );
 
-  const files: { [uri: string]: [vscode.TextDocument, Parsed] } = {
+  const files: { [uri: string]: [vscode.TextDocument, Parsed | undefined] } = {
     [mainDocument.uri.toString()]: [mainDocument, mainRoot],
   };
 
@@ -115,7 +115,7 @@ async function splitReportByDocument(
     });
   }
 
-  const documents = {};
+  const documents: { [key: string]: vscode.TextDocument } = {};
   for (const [uri, [document, root]] of Object.entries(files)) {
     documents[uri] = document;
   }
@@ -126,9 +126,9 @@ async function splitReportByDocument(
 function processIssues(
   document: vscode.TextDocument,
   cache: Cache,
-  mappings,
+  mappings: MappingNode,
   issues: ReportedIssue[]
-): [Parsed, string[], { [uri: string]: ReportedIssue[] }, ReportedIssue[]] {
+): [Parsed | undefined, string[], { [uri: string]: ReportedIssue[] }, ReportedIssue[]] {
   const mainUri = document.uri;
   const documentUris: { [uri: string]: boolean } = { [mainUri.toString()]: true };
   const issuesPerDocument: { [uri: string]: ReportedIssue[] } = {};
@@ -162,7 +162,7 @@ function processIssues(
   return [root, Object.keys(documentUris), issuesPerDocument, badIssues];
 }
 
-function readAssessment(assessment): ReportedIssue[] {
+function readAssessment(assessment: any): ReportedIssue[] {
   let issues: ReportedIssue[] = [];
   const jsonPointerIndex = assessment.index;
 
@@ -176,7 +176,7 @@ function readAssessment(assessment): ReportedIssue[] {
     return "less than 1";
   }
 
-  function transformIssues(issues, defaultCriticality: number = 5): ReportedIssue[] {
+  function transformIssues(issues: any, defaultCriticality: number = 5): ReportedIssue[] {
     const result = [];
     for (const id of Object.keys(issues)) {
       const issue = issues[id];
@@ -222,7 +222,7 @@ function readAssessment(assessment): ReportedIssue[] {
   return issues;
 }
 
-function readSummary(assessment): Grades {
+function readSummary(assessment: any): Grades {
   const grades = {
     datavalidation: {
       value: Math.round(assessment.data ? assessment.data.score : 0),
@@ -256,16 +256,16 @@ function readSummary(assessment): Grades {
 
 function findIssueLocation(
   mainUri: vscode.Uri,
-  root: Parsed,
-  mappings,
-  pointer
+  root: Parsed | undefined,
+  mappings: MappingNode,
+  pointer: string
 ): [string, string] | undefined {
   const node = find(root, pointer);
   if (node !== undefined) {
     return [mainUri.toString(), pointer];
   } else {
     const mapping = findMapping(mappings, pointer);
-    if (mapping.hash) {
+    if (mapping && mapping.hash) {
       return [mapping.uri, mapping.hash];
     }
   }

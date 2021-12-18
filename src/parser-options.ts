@@ -8,7 +8,7 @@ import { Configuration } from "./configuration";
 import { ParserOptions as Options } from "@xliic/preserving-json-yaml-parser";
 
 export class ParserOptions implements Options {
-  configuration: Configuration;
+  configuration?: Configuration;
   yaml: { customTags?: { [tag: string]: "scalar" | "sequence" | "mapping" } };
 
   constructor() {
@@ -31,7 +31,7 @@ export class ParserOptions implements Options {
   }
 
   onConfigurationChanged(e: vscode.ConfigurationChangeEvent) {
-    if (this.configuration.changed(e, "customTags")) {
+    if (this.configuration && this.configuration.changed(e, "customTags")) {
       const customTags = this.configuration.get<string[]>("customTags");
       this.yaml = {
         customTags: this.buildCustomTags(customTags),
@@ -40,12 +40,12 @@ export class ParserOptions implements Options {
   }
 
   buildCustomTags(customTags: string[]): { [tag: string]: "scalar" | "sequence" | "mapping" } {
-    const tags = {};
+    const tags: { [tag: string]: "scalar" | "sequence" | "mapping" } = {};
 
     for (const tag of customTags) {
       let [name, type] = tag.split(" ");
       type = type ? type.toLowerCase() : "scalar";
-      if (["mapping", "scalar", "sequence"].includes(type)) {
+      if (type === "mapping" || type === "scalar" || type === "sequence") {
         tags[name] = type;
       }
     }

@@ -7,12 +7,12 @@ import * as vscode from "vscode";
 import got from "got";
 import { configuration } from "./configuration";
 
-export const INTERNAL_SCHEMES = {
+export const INTERNAL_SCHEMES: { [key: string]: string } = {
   http: "openapi-internal-http",
   https: "openapi-internal-https",
 };
 
-const CONTENT_TYPES = {
+const CONTENT_TYPES: { [key: string]: string } = {
   "application/json": "json",
   "application/x-yaml": "yaml",
   "text/yaml": "yaml",
@@ -45,7 +45,7 @@ export function fromInternalUri(uri: vscode.Uri): vscode.Uri {
   return uri;
 }
 
-function getLanguageId(uri: string, contentType: string): string | undefined {
+function getLanguageId(uri: string, contentType: string | undefined): string | undefined {
   const fromContentType = contentType && CONTENT_TYPES[contentType.toLowerCase()];
   if (fromContentType) {
     return fromContentType;
@@ -86,7 +86,10 @@ export class ExternalRefDocumentProvider implements vscode.TextDocumentContentPr
     const { body, headers } = await got(actualUri.toString());
 
     const languageId = getLanguageId(actualUri.toString(), headers["content-type"]);
-    this.cache[actualUri.toString()] = languageId;
+
+    if (languageId) {
+      this.cache[actualUri.toString()] = languageId;
+    }
 
     try {
       if (languageId === "json") {
@@ -112,11 +115,11 @@ export class ApproveHostnameAction implements vscode.CodeActionProvider {
     const result: vscode.CodeAction[] = [];
     for (const diagnostic of context.diagnostics) {
       if (diagnostic.code === "rejected" && "rejectedHost" in diagnostic) {
-        const hostname = diagnostic["rejectedHost"];
+        const hostname = (diagnostic as any)["rejectedHost"];
         const title = `Add "${hostname}" to the list of approved hostnames`;
         const action = new vscode.CodeAction(title, vscode.CodeActionKind.QuickFix);
         action.command = {
-          arguments: [diagnostic["rejectedHost"]],
+          arguments: [(diagnostic as any)["rejectedHost"]],
           command: "openapi.addApprovedHost",
           title,
         };

@@ -6,7 +6,11 @@ import { OpenApiVersion } from "./types";
 
 export function activate(context: vscode.ExtensionContext, cache: Cache) {
   const yamlExtension = vscode.extensions.getExtension("redhat.vscode-yaml");
-  provideYamlSchemas(context, cache, yamlExtension);
+  if (yamlExtension) {
+    provideYamlSchemas(context, cache, yamlExtension);
+  } else {
+    // TODO log
+  }
 }
 
 export async function provideYamlSchemas(

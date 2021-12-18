@@ -1,3 +1,4 @@
+// @ts-nocheck FixContext is improperly initialized, but it should be ok for the test
 import assert from "assert";
 import { withRandomFileEditor } from "../utils";
 import { getFixAsJsonString, getFixAsYamlString, safeParse } from "../../util";

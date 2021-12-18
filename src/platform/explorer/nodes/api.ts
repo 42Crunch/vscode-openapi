@@ -48,10 +48,7 @@ export class AuditNode extends AbstractExplorerNode {
 }
 
 export class OasNode extends AbstractExplorerNode {
-  readonly id: string;
   readonly icon: { dark: string; light: string } | string;
-  readonly item: vscode.TreeItem;
-  readonly contextValue: string;
 
   constructor(parent: ExplorerNode, private store: PlatformStore, private api: Api) {
     super(parent, `${parent.id}-spec}`, "OpenAPI definition", vscode.TreeItemCollapsibleState.None);

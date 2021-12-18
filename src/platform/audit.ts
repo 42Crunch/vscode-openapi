@@ -16,11 +16,11 @@ export async function refreshAuditReport(
 ): Promise<Audit | undefined> {
   if (isPlatformUri(document.uri)) {
     const uri = document.uri.toString();
-    const apiId = getApiId(document.uri);
+    const apiId = getApiId(document.uri)!;
     const report = await store.getAuditReport(apiId);
 
     const audit = await parseAuditReport(cache, document, report, {
-      value: { uri, hash: null },
+      value: { uri, hash: "" },
       children: {},
     });
 

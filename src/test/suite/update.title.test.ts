@@ -3,7 +3,7 @@ import { updateTitle } from "../../audit/quickfix";
 
 suite("Update Title", () => {
   test("Title 1", () => {
-    const titles = [];
+    const titles: any = [];
     updateTitle(titles, "Create 'a' property");
     updateTitle(titles, "Create 'b' property");
     updateTitle(titles, "Create 'c' property");
@@ -11,7 +11,7 @@ suite("Update Title", () => {
   });
 
   test("Title 2", () => {
-    const titles = [];
+    const titles: any = [];
     updateTitle(titles, "Create 'a' property");
     updateTitle(titles, "Create 'b' property");
     updateTitle(titles, "Create '403' response");
@@ -20,7 +20,7 @@ suite("Update Title", () => {
   });
 
   test("Title 3", () => {
-    const titles = [];
+    const titles: any = [];
     updateTitle(titles, "Create 'a' property");
     updateTitle(titles, "Create 'b' property");
     updateTitle(titles, "Set 'required' property to true");
@@ -33,7 +33,7 @@ suite("Update Title", () => {
   });
 
   test("Title 4", () => {
-    const titles = [];
+    const titles: any = [];
     updateTitle(titles, "Create 'a' property");
     updateTitle(titles, "Bla bla bla bla");
     updateTitle(titles, "Set smth");
@@ -42,21 +42,21 @@ suite("Update Title", () => {
   });
 
   test("Title 5", () => {
-    const titles = [];
+    const titles: any = [];
     updateTitle(titles, "Create 'a', 'b' properties");
     updateTitle(titles, "Create 'c' property");
     assert.strictEqual("Create 'a', 'b', 'c' properties", titles.join(", "));
   });
 
   test("Title 6", () => {
-    const titles = [];
+    const titles: any = [];
     updateTitle(titles, "Create 'a' property");
     updateTitle(titles, "Create 'b', 'c' properties");
     assert.strictEqual("Create 'a', 'b', 'c' properties", titles.join(", "));
   });
 
   test("Title 7", () => {
-    const titles = [];
+    const titles: any = [];
     updateTitle(titles, "Create 'a', 'b' properties");
     updateTitle(titles, "Create 'c', 'd' properties");
     assert.strictEqual("Create 'a', 'b', 'c', 'd' properties", titles.join(", "));

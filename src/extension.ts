@@ -29,8 +29,8 @@ import * as platform from "./platform/activate";
 
 export async function activate(context: vscode.ExtensionContext) {
   const versionProperty = "openapiVersion";
-  const openapiExtension = vscode.extensions.getExtension(extensionQualifiedId);
-  const currentVersion = semver.parse(openapiExtension.packageJSON.version);
+  const openapiExtension = vscode.extensions.getExtension(extensionQualifiedId)!;
+  const currentVersion = semver.parse(openapiExtension.packageJSON.version)!;
   const previousVersion = context.globalState.get<string>(versionProperty)
     ? semver.parse(context.globalState.get<string>(versionProperty))
     : semver.parse("0.0.1");
@@ -100,7 +100,7 @@ export async function activate(context: vscode.ExtensionContext) {
   preview.activate(context, cache, configuration);
   await platform.activate(context, auditContext, cache);
 
-  if (previousVersion.major < currentVersion.major) {
+  if (previousVersion!.major < currentVersion.major) {
     createWhatsNewPanel(context);
   }
 

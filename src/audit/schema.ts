@@ -1,3 +1,4 @@
+// @ts-nocheck
 interface ArraySchema {
   type: string;
   items: any;

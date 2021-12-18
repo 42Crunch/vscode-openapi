@@ -1,3 +1,4 @@
+// @ts-nocheck
 import * as vscode from "vscode";
 import * as yaml from "js-yaml";
 import { parserOptions } from "./parser-options";
@@ -221,7 +222,7 @@ export function insertJsonNode(context: FixContext, value: string): [string, vsc
     anchor = target.getLastChild();
   }
 
-  if (anchor === null) {
+  if (anchor === undefined) {
     [start, end] = target.getValueRange(root);
     const text = getText(document, start, end);
     end = start + 1;
@@ -271,7 +272,7 @@ export function insertYamlNode(context: FixContext, value: string): [string, vsc
     anchor = target.getLastChild();
   }
 
-  if (anchor === null) {
+  if (anchor === undefined) {
     if (target.getChildren().length === 0) {
       [start, end] = target.getValueRange(root);
       context.dropBrackets = [start, end];
@@ -521,14 +522,14 @@ function findInsertionAnchor(
   element: string,
   tags: string[],
   prefix: string
-): JsonNodeValue {
+): JsonNodeValue | undefined {
   for (let position = tags.indexOf(element) - 1; position >= 0; position--) {
     const anchor = findJsonNodeValue(root, `${prefix}/${tags[position]}`);
     if (anchor) {
       return anchor;
     }
   }
-  return null;
+  return undefined;
 }
 
 function keepInsertionOrder(context: FixContext): boolean {
@@ -538,7 +539,7 @@ function keepInsertionOrder(context: FixContext): boolean {
   );
 }
 
-function getAnchor(context: FixContext): JsonNodeValue {
+function getAnchor(context: FixContext): JsonNodeValue | undefined {
   const { root, version, target, fix } = context;
   const keys = Object.keys(fix["fix"]);
   if (keys.length === 1) {
@@ -549,5 +550,5 @@ function getAnchor(context: FixContext): JsonNodeValue {
       return findInsertionAnchor(root, key, componentsTags, "/components");
     }
   }
-  return null;
+  return undefined;
 }

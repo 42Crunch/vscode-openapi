@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 
 import { PlatformStore } from "../stores/platform-store";
 import { Cache } from "../../cache";
-import { AuditNode } from "../explorer/nodes/api";
 import { refreshAuditReport } from "../audit";
 import { AuditContext } from "../../types";
 import { makePlatformUri } from "../util";
@@ -25,7 +24,9 @@ export default (
         const uri = makePlatformUri(apiId);
         const document = await vscode.workspace.openTextDocument(uri);
         const audit = await refreshAuditReport(store, cache, auditContext, document);
-        ReportWebView.show(context.extensionPath, audit, cache);
+        if (audit) {
+          ReportWebView.show(context.extensionPath, audit, cache);
+        }
       }
     );
   },
