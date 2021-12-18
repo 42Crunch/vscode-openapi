@@ -18,7 +18,7 @@ export function setDecorations(editor: vscode.TextEditor, auditContext: AuditCon
 export function updateDecorations(
   decorations: DocumentDecorations,
   mainUri: string,
-  issues
+  issues: any
 ): DocumentDecorations {
   const mainFilename = basename(vscode.Uri.parse(mainUri).fsPath);
 
@@ -32,11 +32,11 @@ export function updateDecorations(
 function createDecoration(
   mainUri: string,
   mainFilename: string,
-  issues
+  issues: any
 ): vscode.DecorationOptions[] {
   const options: vscode.DecorationOptions[] = [];
 
-  const issueLines = {};
+  const issueLines: any = {};
 
   for (let i = 0; i < issues.length; i++) {
     const issue = issues[i];
@@ -48,12 +48,12 @@ function createDecoration(
 
   // sort
   for (const lineNo of Object.keys(issueLines)) {
-    issueLines[lineNo].sort((a, b) => a.issue.score - b.issue.score);
+    issueLines[lineNo].sort((a: any, b: any) => a.issue.score - b.issue.score);
   }
 
   for (const lineNo of Object.keys(issueLines)) {
     const lineNoInt = parseInt(lineNo, 10);
-    const issueIds = issueLines[lineNo].map(({ issue, issueId }) => issueId);
+    const issueIds = issueLines[lineNo].map((line: any) => line.issueId);
     const base64Uri = Buffer.from(mainUri).toString("base64");
 
     const params = {

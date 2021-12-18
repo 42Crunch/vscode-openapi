@@ -109,10 +109,13 @@ export default (
     const name = await vscode.window.showInputBox({
       prompt: "New Collection name",
     });
-    const collection = await store.createCollection(name);
-    const collectionNode = new CollectionNode(store, provider.root.collections, collection);
-    provider.refresh();
-    tree.reveal(collectionNode, { focus: true });
+
+    if (name) {
+      const collection = await store.createCollection(name);
+      const collectionNode = new CollectionNode(store, provider.root.collections, collection);
+      provider.refresh();
+      tree.reveal(collectionNode, { focus: true });
+    }
   },
 
   refreshCollections: async () => {

@@ -18,7 +18,7 @@ export interface Mapping {
 }
 
 export interface MappingNode {
-  value: Mapping;
+  value: Mapping | undefined;
   children: {
     [key: string]: MappingNode;
   };
@@ -91,6 +91,10 @@ export interface DocumentDecorations {
 
 export interface DocumentAudits {
   [uri: string]: Audit;
+}
+
+export interface PendingAudits {
+  [uri: string]: boolean;
 }
 
 export interface Audit {

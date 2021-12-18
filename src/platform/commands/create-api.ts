@@ -102,7 +102,7 @@ async function reloadApiFromUrl(
   edit: vscode.TextEditorEdit
 ) {
   // TODO check for dirty status of the document, and confirm contents to be overwritten
-  const apiId = getApiId(editor.document.uri);
+  const apiId = getApiId(editor.document.uri)!;
   const old = importedUrls.getUrl(apiId);
 
   const uri = await vscode.window.showInputBox({
@@ -110,17 +110,19 @@ async function reloadApiFromUrl(
     value: old,
   });
 
-  const { body, headers } = await got(uri);
+  if (uri) {
+    const { body, headers } = await got(uri);
 
-  const parsed = JSON.parse(body);
+    const parsed = JSON.parse(body);
 
-  const text = JSON.stringify(parsed, null, 2);
+    const text = JSON.stringify(parsed, null, 2);
 
-  const range = editor.document.validateRange(new vscode.Range(0, 0, Number.MAX_SAFE_INTEGER, 0));
+    const range = editor.document.validateRange(new vscode.Range(0, 0, Number.MAX_SAFE_INTEGER, 0));
 
-  editor.edit((edit) => {
-    edit.replace(range, text);
-  });
+    editor.edit((edit) => {
+      edit.replace(range, text);
+    });
+  }
 }
 
 function mangle(name: string) {

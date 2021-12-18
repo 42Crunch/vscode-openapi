@@ -1,3 +1,5 @@
+// @ts-nocheck FixContext is improperly initialized, but it should be ok for the test
+
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
@@ -192,9 +194,13 @@ export function assertStrictNodesEqual(node1: JsonNodeValue, node2: JsonNodeValu
   assert.strictEqual(node1.pointer, node2.pointer);
 }
 
-export function assertStrictNodeEqual(node: JsonNodeValue, value: any, pointer: string) {
-  assert.strictEqual(node.value, value);
-  assert.strictEqual(node.pointer, pointer);
+export function assertStrictNodeEqual(
+  node: JsonNodeValue | undefined,
+  value: any,
+  pointer: string
+) {
+  assert.strictEqual(node!.value, value);
+  assert.strictEqual(node!.pointer, pointer);
 }
 
 export function ignoreJsonTextFeatures(text: string): string {
@@ -209,7 +215,7 @@ export function assertTagsOrder(root: Parsed) {
   const asc = function (a: number, b: number) {
     return a - b;
   };
-  const children = getRootAsJsonNodeValue(root).getChildren(true);
+  const children = getRootAsJsonNodeValue(root)!.getChildren(true);
   const ids = children.map((child) => topTags.indexOf(child.getKey()));
   const idsSorted = [...ids].sort(asc);
   assert.notStrictEqual(idsSorted[0], -1);

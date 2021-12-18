@@ -9,9 +9,11 @@ import { ImportedUrlStore } from "./stores/imported-url-store";
 import misc from "./commands/misc";
 import util from "./commands/util";
 import createApi from "./commands/create-api";
-import filter from "./commands/fiter";
+import filter from "./commands/filter";
 import report from "./commands/report";
 import { AuditContext } from "../types";
+import { CollectionsProvider } from "./explorer/provider";
+import { ExplorerNode } from "./explorer/nodes/base";
 
 export function registerCommands(
   context: vscode.ExtensionContext,
@@ -20,15 +22,15 @@ export function registerCommands(
   store: PlatformStore,
   favorites: FavoritesStore,
   importedUrls: ImportedUrlStore,
-  cache: Cache
+  cache: Cache,
+  provider: CollectionsProvider,
+  tree: vscode.TreeView<ExplorerNode>
 ): vscode.Disposable[] {
-  const { explorer } = platformContext;
-
-  const commands = {};
-  Object.assign(commands, misc(store, favorites, explorer.provider, explorer.tree));
+  const commands: any = {};
+  Object.assign(commands, misc(store, favorites, provider, tree));
   Object.assign(commands, util(context, platformContext));
-  Object.assign(commands, createApi(store, importedUrls, explorer.provider, explorer.tree, cache));
-  Object.assign(commands, filter(store, explorer.provider));
+  Object.assign(commands, createApi(store, importedUrls, provider, tree, cache));
+  Object.assign(commands, filter(store, provider));
   Object.assign(commands, report(store, context, auditContext, cache));
 
   return Object.keys(commands).map((name) => {

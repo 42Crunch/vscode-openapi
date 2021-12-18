@@ -4,8 +4,11 @@
 */
 import * as vscode from "vscode";
 import parser from "@xliic/json-schema-ref-parser";
+// @ts-ignore
 import Pointer from "@xliic/json-schema-ref-parser/lib/pointer";
+// @ts-ignore
 import $Ref from "@xliic/json-schema-ref-parser/lib/ref";
+// @ts-ignore
 import { ResolverError } from "@xliic/json-schema-ref-parser/lib/util/errors";
 
 import { parseJsonPointer, joinJsonPointer } from "./pointer";
@@ -50,7 +53,7 @@ function refToUri(ref: string) {
   try {
     const uri = vscode.Uri.parse(ref, true);
     return toInternalUri(uri);
-  } catch (err) {
+  } catch (err: any) {
     throw new ResolverError({
       message: `Failed to decode $ref: "${ref}: ${err.message}"`,
     });
@@ -84,10 +87,10 @@ const resolver = (
 ) => {
   return {
     order: 10,
-    canRead: (file) => {
+    canRead: (file: any) => {
       return true;
     },
-    read: async (file) => {
+    read: async (file: any) => {
       // file.url is already resolved uri, provided by json-schema-ref-parser
       const uri = refToUri(file.url);
 
@@ -101,7 +104,7 @@ const resolver = (
         }
         state.documents.add(document);
         return documentParser(document);
-      } catch (err) {
+      } catch (err: any) {
         throw new ResolverError(
           { message: `Error reading file "${file.url}: ${err.message}"` },
           file.url
@@ -145,7 +148,7 @@ function set(target: any, path: string[], value: any) {
 
 function hooks(document: vscode.TextDocument, state: BundlerState) {
   return {
-    onRemap: (entry) => {
+    onRemap: (entry: any) => {
       const uri = toInternalUri(vscode.Uri.parse(entry.file)).toString();
       const hashPath = Pointer.parse(entry.hash);
 
@@ -179,10 +182,14 @@ function hooks(document: vscode.TextDocument, state: BundlerState) {
         const grandparentKey = path[path.length - 2];
         const destinations = destinationMap[state.version];
 
+        // @ts-ignore
         const destination = destinations[parentKey]
-          ? destinations[parentKey]
-          : destinations[grandparentKey]
-          ? destinations[grandparentKey]
+          ? // @ts-ignore
+            destinations[parentKey]
+          : // @ts-ignore
+          destinations[grandparentKey]
+          ? // @ts-ignore
+            destinations[grandparentKey]
           : null;
         if (destination) {
           const ref = entry.$ref.$ref;
@@ -213,7 +220,7 @@ export async function bundle(
   const state: BundlerState = {
     version,
     parsed: cloned,
-    mapping: { value: { uri: document.uri.toString(), hash: null }, children: {} },
+    mapping: { value: { uri: document.uri.toString(), hash: "" }, children: {} },
     documents: new Set<vscode.TextDocument>(),
   };
 
@@ -238,7 +245,7 @@ export async function bundle(
       mapping: state.mapping,
       documents: state.documents,
     };
-  } catch (errors) {
+  } catch (errors: any) {
     if (!errors.errors) {
       throw new Error(`Unexpected exception while bundling: ${errors}`);
     }
@@ -284,7 +291,7 @@ function insertMapping(root: MappingNode, path: string[], value: Mapping) {
   let current = root;
   for (const segment of path) {
     if (!current.children[segment]) {
-      current.children[segment] = { value: null, children: {} };
+      current.children[segment] = { value: undefined, children: {} };
     }
     current = current.children[segment];
   }
@@ -292,12 +299,16 @@ function insertMapping(root: MappingNode, path: string[], value: Mapping) {
   current.value = value;
 }
 
-export function findMapping(root: MappingNode, pointer: string): Mapping {
+export function findMapping(root: MappingNode, pointer: string): Mapping | undefined {
   const path = parseJsonPointer(pointer);
   let current = root;
   let i = 0;
   for (; i < path.length && current.children[path[i]]; i++) {
     current = current.children[path[i]];
+  }
+
+  if (!current.value) {
+    return undefined;
   }
 
   const { uri, hash } = current.value;

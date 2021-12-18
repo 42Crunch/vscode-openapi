@@ -1,3 +1,4 @@
+//@ts-nocheck too many issues with possible unknowns in this test
 import assert from "assert";
 import { findJsonNodeValue, getRootAsJsonNodeValue } from "../../json-utils";
 import { safeParse } from "../../util";
@@ -17,11 +18,11 @@ suite("Parser API", () => {
     assertStrictNodeEqual(findJsonNodeValue(root, "/b/1"), 2, "/b/1");
     assertStrictNodeEqual(findJsonNodeValue(root, "/b/2"), true, "/b/2");
 
-    assert.ok(findJsonNodeValue(root, "/a").isObject());
-    assert.ok(findJsonNodeValue(root, "/b").isArray());
-    assert.ok(findJsonNodeValue(root, "/a/a1").isScalar());
+    assert.ok(findJsonNodeValue(root, "/a")!.isObject());
+    assert.ok(findJsonNodeValue(root, "/b")!.isArray());
+    assert.ok(findJsonNodeValue(root, "/a/a1")!.isScalar());
 
-    const children = getRootAsJsonNodeValue(root).getChildren(true);
+    const children = getRootAsJsonNodeValue(root)!.getChildren(true);
     assert.ok(children.length === 2);
 
     assertStrictNodesEqual(children[0].next(root).prev(root), children[0]);
@@ -53,7 +54,7 @@ suite("Parser API", () => {
     assert.deepStrictEqual(findJsonNodeValue(root, "/a/a1").getValueRange(root), [13, 18]);
     assert.deepStrictEqual(findJsonNodeValue(root, "/a/a1").getRange(root), [7, 18]);
 
-    assert.strictEqual(findJsonNodeValue(root, "/b/2").getKeyRange(root), null);
+    assert.strictEqual(findJsonNodeValue(root, "/b/2").getKeyRange(root), undefined);
     assert.deepStrictEqual(findJsonNodeValue(root, "/b/2").getValueRange(root), [49, 53]);
     assert.deepStrictEqual(findJsonNodeValue(root, "/b/2").getRange(root), [49, 53]);
   });
@@ -107,7 +108,7 @@ suite("Parser API", () => {
     assert.deepStrictEqual(findJsonNodeValue(root, "/a/a1").getValueRange(root), [9, 12]);
     assert.deepStrictEqual(findJsonNodeValue(root, "/a/a1").getRange(root), [5, 12]);
 
-    assert.strictEqual(findJsonNodeValue(root, "/b/2").getKeyRange(root), null);
+    assert.strictEqual(findJsonNodeValue(root, "/b/2").getKeyRange(root), undefined);
     assert.deepStrictEqual(findJsonNodeValue(root, "/b/2").getValueRange(root), [39, 43]);
     assert.deepStrictEqual(findJsonNodeValue(root, "/b/2").getRange(root), [39, 43]);
   });

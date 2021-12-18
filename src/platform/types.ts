@@ -165,26 +165,22 @@ export interface Mapping {
 }
 
 export interface CollectionFilter {
-  name: string;
+  name: string | undefined;
   owner: "OWNER" | "ALL";
 }
 
 export interface ApiFilter {
-  name: string;
+  name: string | undefined;
 }
 
 export interface PlatformConnection {
-  apiToken: string;
+  apiToken: string | undefined;
   userAgent: string;
   referer: string;
   platformUrl: string;
 }
 
 export interface PlatformContext {
-  explorer: {
-    provider: CollectionsProvider;
-    tree: vscode.TreeView<ExplorerNode>;
-  };
   memento: vscode.Memento;
   context: any;
   logger: Logger;

@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { posix } from "path";
 import * as vscode from "vscode";
 import { findMapping } from "../bundler";
@@ -57,7 +58,7 @@ function mostUsedByName(
 
 function relativeReference(base: vscode.Uri, mapping: Mapping) {
   const target = vscode.Uri.parse(mapping.uri);
-  const hash = mapping.hash === null || mapping.hash === "#" ? "" : mapping.hash;
+  const hash = mapping.hash === "#" ? "" : mapping.hash;
   if (base.scheme !== target.scheme || base.authority !== target.authority) {
     return `${mapping.uri}${hash}`;
   }

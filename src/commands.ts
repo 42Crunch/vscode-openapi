@@ -2,7 +2,7 @@
  Copyright (c) 42Crunch Ltd. All rights reserved.
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
-
+// @ts-nocheck
 import * as vscode from "vscode";
 import {
   find,
@@ -19,7 +19,7 @@ import { getPointerLastSegment, getPointerParent } from "./pointer";
 import { processSnippetParameters } from "./util";
 import { Node, outlines } from "./outline";
 
-const commands = {
+const commands: { [key: string]: Function } = {
   goToLine,
   copyJsonReference,
   createNewTwo,
@@ -77,7 +77,7 @@ function registerCommand(name: string, cache: Cache, handler: Function): vscode.
   const wrapped = async function (...args: any[]) {
     try {
       await handler(cache, ...args);
-    } catch (e) {
+    } catch (e: any) {
       vscode.window.showErrorMessage(`Failed to execute command: ${e.message}`);
     }
   };
@@ -87,19 +87,26 @@ function registerCommand(name: string, cache: Cache, handler: Function): vscode.
 
 function goToLine(cache: Cache, range: vscode.Range) {
   const editor = vscode.window.activeTextEditor;
-  editor.selection = new vscode.Selection(range.start, range.start);
-  editor.revealRange(editor.selection, vscode.TextEditorRevealType.AtTop);
+  if (editor) {
+    editor.selection = new vscode.Selection(range.start, range.start);
+    editor.revealRange(editor.selection, vscode.TextEditorRevealType.AtTop);
+  }
 }
 
 async function copyJsonReference(cache: Cache, range: vscode.Range) {
   const editor = vscode.window.activeTextEditor;
-  const root = cache.getParsedDocument(editor.document);
-  if (root) {
-    const [node, path] = findNodeAtOffset(root, editor.document.offsetAt(editor.selection.active));
-    const jsonPointer = joinJsonPointer(path);
-    vscode.env.clipboard.writeText(`#${jsonPointer}`);
-    const disposable = vscode.window.setStatusBarMessage(`Copied Reference: #${jsonPointer}`);
-    setTimeout(() => disposable.dispose(), 1000);
+  if (editor) {
+    const root = cache.getParsedDocument(editor.document);
+    if (root) {
+      const [node, path] = findNodeAtOffset(
+        root,
+        editor.document.offsetAt(editor.selection.active)
+      );
+      const jsonPointer = joinJsonPointer(path);
+      vscode.env.clipboard.writeText(`#${jsonPointer}`);
+      const disposable = vscode.window.setStatusBarMessage(`Copied Reference: #${jsonPointer}`);
+      setTimeout(() => disposable.dispose(), 1000);
+    }
   }
 }
 
@@ -172,7 +179,9 @@ async function createNew(snippet: string, language: string) {
   });
   await vscode.window.showTextDocument(document);
   const editor = vscode.window.activeTextEditor;
-  await editor.insertSnippet(new vscode.SnippetString(snippet), editor.document.positionAt(0));
+  if (editor) {
+    await editor.insertSnippet(new vscode.SnippetString(snippet), editor.document.positionAt(0));
+  }
 }
 
 async function createNewTwo(cache: Cache) {
@@ -345,9 +354,8 @@ async function addOperation(cache: Cache, node: any) {
 }
 
 function noActiveOpenApiEditorGuard(cache: Cache) {
-  if (
-    cache.getDocumentVersion(vscode.window.activeTextEditor?.document) === OpenApiVersion.Unknown
-  ) {
+  const document = vscode.window.activeTextEditor?.document;
+  if (!document || cache.getDocumentVersion(document) === OpenApiVersion.Unknown) {
     vscode.window.showErrorMessage(`Can't run the command, no active editor with OpenAPI file`);
     return true;
   }
@@ -355,11 +363,12 @@ function noActiveOpenApiEditorGuard(cache: Cache) {
 }
 
 export async function snippetCommand(fix: Fix, cache: Cache, useEdit?: boolean) {
-  if (noActiveOpenApiEditorGuard(cache)) {
+  const editor = vscode.window.activeTextEditor;
+
+  if (noActiveOpenApiEditorGuard(cache) || !editor) {
     return;
   }
 
-  const editor = vscode.window.activeTextEditor;
   const document = editor.document;
   const root = cache.getLastGoodParsedDocument(document);
 
@@ -370,7 +379,7 @@ export async function snippetCommand(fix: Fix, cache: Cache, useEdit?: boolean) 
 
   const bundle = await cache.getDocumentBundle(document);
   const version = cache.getDocumentVersion(document);
-  const target = findJsonNodeValue(root, fix.pointer);
+  const target = findJsonNodeValue(root, fix.pointer!);
 
   const context: FixContext = {
     editor: editor,

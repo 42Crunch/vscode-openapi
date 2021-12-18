@@ -41,10 +41,7 @@ export class CollectionsProvider implements vscode.TreeDataProvider<ExplorerNode
 
   async getChildren(node?: ExplorerNode): Promise<ExplorerNode[]> {
     if (node) {
-      if ("getChildren" in node) {
-        return node.getChildren();
-      }
-      return [];
+      return node.getChildren();
     }
     return this.root.getChildren();
   }

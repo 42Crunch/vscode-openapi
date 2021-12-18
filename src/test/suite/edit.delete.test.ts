@@ -1,3 +1,4 @@
+// @ts-nocheck FixContext is improperly initialized, but it should be ok for the test
 import assert from "assert";
 import * as vscode from "vscode";
 import { readFileSync } from "fs";

@@ -32,10 +32,10 @@ export class PlatformFS implements vscode.FileSystemProvider {
   }
 
   async readFile(uri: vscode.Uri): Promise<Uint8Array> {
-    const apiId = getApiId(uri);
+    const apiId = getApiId(uri)!;
     const api = await this.store.getApi(apiId);
     // parse and format json, TODO use preserving parser
-    const buffer = Buffer.from(api.desc.specfile, "base64");
+    const buffer = Buffer.from(api.desc.specfile!, "base64");
     const parsed = JSON.parse(buffer.toString("utf-8"));
     const text = JSON.stringify(parsed, null, 2);
     return Buffer.from(text, "utf-8");
@@ -49,7 +49,7 @@ export class PlatformFS implements vscode.FileSystemProvider {
     if (!(await confirmed("Are you sure you want to update remote API?"))) {
       throw new Error("API Update has been cancelled.");
     }
-    const apiId = getApiId(uri);
+    const apiId = getApiId(uri)!;
 
     await vscode.window.withProgress<void>(
       {

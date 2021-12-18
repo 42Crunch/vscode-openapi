@@ -128,7 +128,7 @@ class ParsedDocumentCache implements vscode.Disposable {
     version: OpenApiVersion,
     errors: vscode.Diagnostic[]
   ) {
-    const expectedMessages = {
+    const expectedMessages: any = {
       DuplicateKey: "Duplicate object key",
       InvalidCommentToken: "Comment is not permitted",
     };
@@ -153,7 +153,7 @@ class ParsedDocumentCache implements vscode.Disposable {
             }
           }
         })
-        .filter((error) => error !== undefined);
+        .filter((error) => error !== undefined) as vscode.Diagnostic[];
 
       this.diagnostics.set(document.uri, filtered);
     }
@@ -166,7 +166,7 @@ class ParsedDocumentCache implements vscode.Disposable {
     const [openApiVersion, parsed, errors] = parseDocument(document, this.parserOptions);
 
     // set lastGoodParsed only if no errors found, in case of errors try to reuse previous value
-    const lastGoodParsed = errors ? previous?.lastGoodParsed : parsed;
+    const lastGoodParsed = errors.length == 0 ? parsed : previous?.lastGoodParsed;
 
     this.showErrors(document, openApiVersion, errors);
 
@@ -175,7 +175,7 @@ class ParsedDocumentCache implements vscode.Disposable {
       documentVersion: document.version,
       lastGoodParsed,
       errors,
-      parsed: errors ? undefined : parsed,
+      parsed: errors.length == 0 ? parsed : undefined,
     };
   }
 }
@@ -430,9 +430,9 @@ export class Cache implements vscode.Disposable {
           continue;
         }
         const node = find(entry.parsed, error.pointer);
-        if (node !== undefined) {
-          const { start } = findLocationForJsonPointer(entry.parsed, error.pointer).value;
-          const position = document.positionAt(start);
+        const location = findLocationForJsonPointer(entry.parsed, error.pointer);
+        if (node !== undefined && location !== undefined) {
+          const position = document.positionAt(location.value.start);
           const line = document.lineAt(position.line);
           const range = new vscode.Range(
             new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),

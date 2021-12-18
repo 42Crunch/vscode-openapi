@@ -14,7 +14,7 @@ export function parseDocument(
       document.languageId == "yaml"
     )
   ) {
-    return [OpenApiVersion.Unknown, null, null];
+    return [OpenApiVersion.Unknown, null, []];
   }
 
   const [node, errors] = parse(document.getText(), document.languageId, parserOptions);
@@ -32,7 +32,7 @@ export function parseDocument(
     };
   });
 
-  return [version, node, messages.length > 0 ? messages : null];
+  return [version, node, messages.length > 0 ? messages : []];
 }
 
 export function getOpenApiVersion(root: any): OpenApiVersion {

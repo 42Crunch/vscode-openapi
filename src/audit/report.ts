@@ -25,13 +25,13 @@ function articleById(id: string, filename: string) {
       ? "yaml"
       : "json";
 
-  function partToText(part) {
+  function partToText(part: any) {
     if (!part || !part.sections) {
       return "";
     }
 
     return part.sections
-      .map((section) => {
+      .map((section: any) => {
         if (section.text) {
           return section.text;
         }
@@ -43,6 +43,7 @@ function articleById(id: string, filename: string) {
       .join("");
   }
 
+  //@ts-ignore
   const article = articles[id] || fallbackArticle;
 
   return [
@@ -139,7 +140,7 @@ function getHtml(
   </html>`;
 }
 
-function getIssueHtml(uri: string, filename: string, issue) {
+function getIssueHtml(uri: string, filename: string, issue: any) {
   const criticalityNames = {
     5: "Critical",
     4: "High",
@@ -148,6 +149,7 @@ function getIssueHtml(uri: string, filename: string, issue) {
     1: "Info",
   };
 
+  // @ts-ignore
   const criticality = criticalityNames[issue.criticality];
   const scoreImpact = issue.displayScore !== "0" ? `Score impact: ${issue.displayScore}` : "";
   const article = articleById(issue.id, filename);
@@ -205,12 +207,12 @@ function getSummary(summary: Summary) {
 
 export class ReportWebView {
   public static currentPanel: ReportWebView | undefined;
-  public static cache: Cache | undefined;
+  public static cache: Cache;
 
   readonly _panel: vscode.WebviewPanel;
   private readonly _extensionPath: string;
   private _disposables: vscode.Disposable[] = [];
-  private currentAuditUri: string;
+  private currentAuditUri?: string;
 
   public static readonly viewType = "apisecurityReport";
 
@@ -239,7 +241,7 @@ export class ReportWebView {
       uri,
       ids
     );
-    ReportWebView.currentPanel.currentAuditUri = null;
+    ReportWebView.currentPanel.currentAuditUri = undefined;
     if (!ReportWebView.currentPanel._panel.visible) {
       ReportWebView.currentPanel._panel.reveal();
     }
@@ -259,7 +261,7 @@ export class ReportWebView {
 
   static showNoReport(context: vscode.ExtensionContext) {
     if (ReportWebView.currentPanel && ReportWebView.currentPanel._panel.visible) {
-      ReportWebView.currentPanel.currentAuditUri = null;
+      ReportWebView.currentPanel.currentAuditUri = undefined;
       const webview = ReportWebView.currentPanel._panel.webview;
 
       const image = webview.asWebviewUri(
@@ -334,7 +336,7 @@ export class ReportWebView {
   }
 
   private async focusLine(uri: string, pointer: string, line: string) {
-    let editor: vscode.TextEditor;
+    let editor: vscode.TextEditor | undefined = undefined;
 
     // check if document is already open
     for (const visibleEditor of vscode.window.visibleTextEditors) {
@@ -443,7 +445,7 @@ export class ReportWebView {
       styleUrl,
       bootstrapUrl,
       scriptUrl,
-      null,
+      "",
       issuesHtml,
       audit.summary.documentUri,
       this._extensionPath

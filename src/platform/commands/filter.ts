@@ -87,7 +87,7 @@ async function apisFilter(
       filter.name = name;
       store.filters.api.set(collection.getCollectionId(), filter);
     } else {
-      store.filters.api.set(collection.getCollectionId(), undefined);
+      store.filters.api.delete(collection.getCollectionId());
     }
     provider.refresh();
   }
@@ -109,7 +109,7 @@ async function favoriteApisFilter(
       filter.name = name;
       store.filters.favorite.set(collection.getCollectionId(), filter);
     } else {
-      store.filters.favorite.set(collection.getCollectionId(), undefined);
+      store.filters.favorite.delete(collection.getCollectionId());
     }
     provider.refresh();
   }

@@ -15,7 +15,7 @@ export class RootNode implements ExplorerNode {
   constructor(private store: PlatformStore, private favorites: FavoritesStore) {
     this.favorite = new FavoriteCollectionsNode(this, this.store, this.favorites);
     this.collections = new CollectionsNode(this, this.store);
-    this.item = null;
+    this.item = {};
   }
 
   async getChildren(): Promise<ExplorerNode[]> {

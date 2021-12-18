@@ -10,7 +10,7 @@ import { updateDiagnostics } from "./diagnostic";
 
 import { ReportWebView } from "./report";
 
-import { AuditContext, Audit } from "../types";
+import { AuditContext, Audit, PendingAudits } from "../types";
 
 import { Cache } from "../cache";
 import { stringify } from "@xliic/preserving-json-yaml-parser";
@@ -20,7 +20,7 @@ export function registerSecurityAudit(
   context: vscode.ExtensionContext,
   cache: Cache,
   auditContext: AuditContext,
-  pendingAudits
+  pendingAudits: PendingAudits
 ) {
   return vscode.commands.registerTextEditorCommand(
     "openapi.securityAudit",
@@ -152,7 +152,7 @@ async function securityAudit(
       try {
         const report = await audit(stringify(bundle.value), apiToken.trim(), progress);
         return parseAuditReport(cache, textEditor.document, report, bundle.mapping);
-      } catch (e) {
+      } catch (e: any) {
         if (e?.response?.statusCode === 429) {
           vscode.window.showErrorMessage(
             "Too many requests. You can run up to 3 security audits per minute, please try again later."

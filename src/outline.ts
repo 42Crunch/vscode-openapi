@@ -10,11 +10,11 @@ import { configuration } from "./configuration";
 import { OpenApiVersion } from "./types";
 
 export interface Node {
-  parent: Node;
-  key: string | number;
+  parent: Node | undefined;
+  key: string | number | undefined;
   value: any;
   depth: number;
-  location: Location;
+  location?: Location;
 }
 
 function getChildren(node: Node): Node[] {
@@ -57,38 +57,32 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
   private _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
   readonly onDidChangeTreeData: vscode.Event<void> = this._onDidChangeTreeData.event;
 
-  root: Node;
+  root?: Node;
   maxDepth: number = 1;
   sort: boolean;
 
   constructor(private context: vscode.ExtensionContext, private cache: Cache) {
     cache.onDidActiveDocumentChange(async (document) => {
-      const version = this.cache.getDocumentVersion(document);
-      if (version !== OpenApiVersion.Unknown) {
-        const pointer = this.getRootPointer();
-        const root = cache.getLastGoodParsedDocument(document);
-        if (root && pointer) {
-          const found = find(root, pointer);
-          this.root = {
-            parent: undefined,
-            key: undefined,
-            depth: 0,
-            value: found,
-            location: undefined,
-          };
-        } else if (root) {
-          this.root = {
-            parent: undefined,
-            key: undefined,
-            depth: 0,
-            value: root,
-            location: undefined,
-          };
-        } else {
-          this.root = null;
+      if (document) {
+        const version = this.cache.getDocumentVersion(document);
+        if (version !== OpenApiVersion.Unknown) {
+          const pointer = this.getRootPointer();
+          const root = cache.getLastGoodParsedDocument(document);
+          if (root) {
+            const found = find(root, pointer);
+            this.root = {
+              parent: undefined,
+              key: undefined,
+              depth: 0,
+              value: found,
+              location: undefined,
+            };
+          } else {
+            this.root = undefined;
+          }
         }
+        this._onDidChangeTreeData.fire();
       }
-      this._onDidChangeTreeData.fire();
     });
 
     this.sort = configuration.get<boolean>("sortOutlines");
@@ -103,7 +97,7 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
   }
 
   getRootPointer(): string {
-    return null;
+    return "";
   }
 
   getChildren(node?: Node): Thenable<Node[]> {
@@ -163,7 +157,7 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
 
   getCommand(node: Node): vscode.Command | undefined {
     const editor = vscode.window?.activeTextEditor;
-    if (editor && node) {
+    if (editor && node && node.location) {
       const { start, end } = node.location.value;
       return {
         command: "openapi.goToLine",
@@ -176,8 +170,8 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
     return undefined;
   }
 
-  getContextValue(node: Node) {
-    return null;
+  getContextValue(node: Node): string | undefined {
+    return undefined;
   }
 }
 
@@ -215,7 +209,7 @@ export class PathOutlineProvider extends OutlineProvider {
   }
 
   getLabel(node: Node): string {
-    if ((node.depth === 4 || node.depth === 5) && node.parent.key == "parameters") {
+    if ((node.depth === 4 || node.depth === 5) && node.parent && node.parent.key == "parameters") {
       // return label for a parameter
       const label = node.value["$ref"] || node.value["name"];
       if (!label) {
@@ -230,7 +224,7 @@ export class PathOutlineProvider extends OutlineProvider {
     if (node.depth === 2) {
       return "path";
     }
-    return null;
+    return undefined;
   }
 }
 
@@ -303,14 +297,14 @@ export class GeneralTwoOutlineProvider extends OutlineProvider {
       "externalDocs",
     ];
 
-    return Promise.resolve(getChildrenByName(this.root, targets));
+    return Promise.resolve(getChildrenByName(this.root!, targets));
   }
 }
 
 export class GeneralThreeOutlineProvider extends OutlineProvider {
   getChildren(node?: Node): Thenable<Node[]> {
     const targets = ["openapi", "info", "tags", "externalDocs"];
-    return Promise.resolve(getChildrenByName(this.root, targets));
+    return Promise.resolve(getChildrenByName(this.root!, targets));
   }
 }
 

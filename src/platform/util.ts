@@ -17,7 +17,7 @@ export function makePlatformUri(apiId: string) {
   return vscode.Uri.parse(`${platformUriScheme}://42crunch.com/apis/${apiId}.json`);
 }
 
-export function getApiId(uri: vscode.Uri): string {
+export function getApiId(uri: vscode.Uri): string | undefined {
   if (isPlatformUri(uri)) {
     const apiId = path.basename(uri.fsPath, ".json");
     return apiId;
