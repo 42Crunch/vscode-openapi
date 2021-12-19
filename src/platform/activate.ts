@@ -24,7 +24,13 @@ export async function activate(
   cache: Cache
 ) {
   const platformUrl = configuration.get<string>("platformUrl");
-  const platformToken = undefined; // await context.secrets.get("platformApiToken");
+
+  let platformToken = undefined;
+  try {
+    platformToken = await context.secrets.get("platformApiToken");
+  } catch (ex: any) {
+    // ignore
+  }
 
   const platformContext: PlatformContext = {
     context,
