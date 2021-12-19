@@ -791,7 +791,7 @@
   },
   "dependencies": {
     "@xliic/json-schema-ref-parser": "^9.2.0",
-    "@xliic/preserving-json-yaml-parser": "^1.8.0",
+    "@xliic/preserving-json-yaml-parser": "^1.9.0",
     "form-data": "^2.3.3",
     "got": "^11.8.2",
     "js-yaml": "^4.1.0",
