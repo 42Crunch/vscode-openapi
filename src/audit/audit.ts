@@ -136,6 +136,10 @@ function processIssues(
 
   const root = cache.getLastGoodParsedDocument(document);
 
+  if (root === undefined) {
+    throw new Error("Failed to parse current document");
+  }
+
   for (const issue of issues) {
     const location = findIssueLocation(mainUri, root, mappings, issue.pointer);
     if (location) {
@@ -256,7 +260,7 @@ function readSummary(assessment: any): Grades {
 
 function findIssueLocation(
   mainUri: vscode.Uri,
-  root: Parsed | undefined,
+  root: Parsed,
   mappings: MappingNode,
   pointer: string
 ): [string, string] | undefined {
