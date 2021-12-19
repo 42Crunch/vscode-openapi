@@ -136,7 +136,7 @@ class ParsedDocumentCache implements vscode.Disposable {
     const additionalMessages = ["JS-YAML: Using tabs can lead to unpredictable results"];
 
     // do not show errors for non-openapi documents
-    if (!errors || version === OpenApiVersion.Unknown) {
+    if (errors.length === 0 || version === OpenApiVersion.Unknown) {
       this.diagnostics.delete(document.uri);
     } else {
       // only display selected set of error messages, other parsing
@@ -232,7 +232,7 @@ class BundledDocumentCache implements vscode.Disposable {
   private async bundle(document: vscode.TextDocument): Promise<BundleResult | undefined> {
     const approvedHosts = configuration.get<string[]>("approvedHostnames");
     const parsed = this.documentParser(document);
-    if (!parsed.errors && parsed.parsed) {
+    if (parsed.errors.length === 0 && parsed.parsed) {
       return await bundle(
         document,
         parsed.openApiVersion,
