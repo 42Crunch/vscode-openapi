@@ -4,9 +4,7 @@
 */
 
 import got, { HTTPError, Method, OptionsOfJSONResponseBody } from "got";
-import FormData from "form-data";
 import {
-  ApiErrors,
   Api,
   ListCollectionsResponse,
   ListApisResponse,
@@ -16,44 +14,6 @@ import {
   CollectionFilter,
   UserData,
 } from "./types";
-
-function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function handleHttpError(err: any, options: PlatformConnection): ApiErrors {
-  if (
-    err instanceof HTTPError &&
-    err?.response?.statusCode === 409 &&
-    (<any>err?.response?.body)?.message === "limit reached"
-  ) {
-    return {
-      errors: {
-        remote: {
-          statusCode: err.response.statusCode,
-          error: err.response.body,
-          description: `You have reached your maximum number of APIs. Please sign into ${options.platformUrl} and upgrade your account.`,
-        },
-      },
-    };
-  } else if (
-    err instanceof HTTPError &&
-    err?.response?.statusCode === 404 &&
-    (<any>err?.response?.body)?.message === "no result" &&
-    (<any>err?.response?.body)?.code === 5
-  ) {
-    return {
-      errors: {
-        remote: {
-          statusCode: err.response.statusCode,
-          error: err.response.body,
-          description: `API does not exist, check that ID of your mapped API is correct.`,
-        },
-      },
-    };
-  }
-  throw err;
-}
 
 function gotOptions(
   method: Method,
@@ -72,8 +32,6 @@ function gotOptions(
     headers: {
       Accept: "application/json",
       "X-API-KEY": options.apiToken,
-      "User-Agent": options.userAgent,
-      Referer: options.referer,
     },
     hooks: {
       afterResponse: [logRequest],
