@@ -1,3 +1,4 @@
+import { parse, stringify } from "@xliic/preserving-json-yaml-parser";
 import * as vscode from "vscode";
 
 import { PlatformStore } from "./stores/platform-store";
@@ -34,10 +35,14 @@ export class PlatformFS implements vscode.FileSystemProvider {
   async readFile(uri: vscode.Uri): Promise<Uint8Array> {
     const apiId = getApiId(uri)!;
     const api = await this.store.getApi(apiId);
-    // parse and format json, TODO use preserving parser
+    // parse and format json
     const buffer = Buffer.from(api.desc.specfile!, "base64");
-    const parsed = JSON.parse(buffer.toString("utf-8"));
-    const text = JSON.stringify(parsed, null, 2);
+    const [parsed, errors] = parse(buffer.toString("utf-8"), "json", {});
+    if (errors.length > 0) {
+      // failed to parse JSON, show it as is without formatting
+      return buffer;
+    }
+    const text = stringify(parsed, 2);
     return Buffer.from(text, "utf-8");
   }
 
@@ -66,9 +71,12 @@ export class PlatformFS implements vscode.FileSystemProvider {
           throw new Error("Can't find TextDocument to save.");
         }
 
-        const parsed = JSON.parse(found[0].getText());
+        const [parsed, errors] = parse(found[0].getText(), "json", {});
+        if (errors.length > 0) {
+          throw new Error("Document contains JSON parsing erorrs, please fix it before saving");
+        }
 
-        const text = JSON.stringify(parsed, null, 2);
+        const text = stringify(parsed);
 
         await this.store.updateApi(apiId, Buffer.from(text));
       }

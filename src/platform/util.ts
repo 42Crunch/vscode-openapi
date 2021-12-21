@@ -2,8 +2,6 @@ import path from "path";
 import * as vscode from "vscode";
 import { platformUriScheme } from "./types";
 
-export const uriScheme = "openapi";
-
 export async function confirmed(prompt: string) {
   const confirmation = await vscode.window.showInformationMessage(prompt, "Yes", "Cancel");
   return confirmation && confirmation === "Yes";
