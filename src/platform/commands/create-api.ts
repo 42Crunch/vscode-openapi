@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { stringify } from "@xliic/preserving-json-yaml-parser";
+import { stringify, parse } from "@xliic/preserving-json-yaml-parser";
 
 import { PlatformStore } from "../stores/platform-store";
 import { CollectionsProvider } from "../explorer/provider";
@@ -51,7 +51,9 @@ async function createApi(
     // TODO handle bundling errors
     const bundle = await cache.getDocumentBundle(document);
     if (!bundle || "errors" in bundle) {
-      return;
+      throw new Error(
+        "Unable to import API, please check the file you're trying to import for errors"
+      );
     }
 
     const title = mangle(bundle?.value?.info?.title ?? "OpenAPI");
@@ -82,9 +84,15 @@ async function createApiFromUrl(
   if (uri) {
     const { body, headers } = await got(uri);
 
-    const parsed = JSON.parse(body);
+    const [parsed, errors] = parse(body, "json", {});
 
-    const title = mangle(parsed?.info?.title ?? "OpenAPI");
+    if (errors.length > 0) {
+      throw new Error(
+        "Unable to import API, please check the file you're trying to import for errors"
+      );
+    }
+
+    const title = mangle((parsed as any)?.info?.title ?? "OpenAPI");
 
     const api = await store.createApi(collection.getCollectionId(), title, body);
     importedUrls.setUrl(api.desc.id, uri);
@@ -113,9 +121,15 @@ async function reloadApiFromUrl(
   if (uri) {
     const { body, headers } = await got(uri);
 
-    const parsed = JSON.parse(body);
+    const [parsed, errors] = parse(body, "json", {});
 
-    const text = JSON.stringify(parsed, null, 2);
+    if (errors.length > 0) {
+      throw new Error(
+        "Unable to import API, please check the file you're trying to import for errors"
+      );
+    }
+
+    const text = stringify(parsed, 2);
 
     const range = editor.document.validateRange(new vscode.Range(0, 0, Number.MAX_SAFE_INTEGER, 0));
 

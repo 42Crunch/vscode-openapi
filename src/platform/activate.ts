@@ -50,7 +50,7 @@ export async function activate(
   };
 
   const store = new PlatformStore(platformContext);
-  const favoriteCollections = new FavoritesStore(context);
+  const favoriteCollections = new FavoritesStore(context, platformContext);
   const importedUrls = new ImportedUrlStore(context);
 
   const platformFs = new PlatformFS(store);
