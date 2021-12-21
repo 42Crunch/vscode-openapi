@@ -127,7 +127,7 @@ export function pathEquals(path1: string, path2: string): boolean {
   return path1 === path2;
 }
 
-export function closeAllEditors(): Thenable<any> {
+export function closeAllEditors(): Promise<any> {
   return vscode.commands.executeCommand("workbench.action.closeAllEditors");
 }
 
@@ -167,8 +167,8 @@ export function loadYaml(filename) {
 export function withRandomFileEditor(
   initialContents: string,
   languageId: string,
-  run: (editor: TextEditor, doc: TextDocument) => Thenable<void>
-): Thenable<boolean> {
+  run: (editor: TextEditor, doc: TextDocument) => Promise<void>
+): Promise<boolean> {
   return workspace
     .openTextDocument({ language: languageId, content: initialContents })
     .then((doc) => {

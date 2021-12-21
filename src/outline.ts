@@ -100,7 +100,7 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
     return "";
   }
 
-  getChildren(node?: Node): Thenable<Node[]> {
+  getChildren(node?: Node): Promise<Node[]> {
     if (!this.root) {
       return Promise.resolve([]);
     }
@@ -284,7 +284,7 @@ export class ResponsesOutlineProvider extends OutlineProvider {
 }
 
 export class GeneralTwoOutlineProvider extends OutlineProvider {
-  getChildren(node?: Node): Thenable<Node[]> {
+  getChildren(node?: Node): Promise<Node[]> {
     const targets = [
       "swagger",
       "host",
@@ -302,7 +302,7 @@ export class GeneralTwoOutlineProvider extends OutlineProvider {
 }
 
 export class GeneralThreeOutlineProvider extends OutlineProvider {
-  getChildren(node?: Node): Thenable<Node[]> {
+  getChildren(node?: Node): Promise<Node[]> {
     const targets = ["openapi", "info", "tags", "externalDocs"];
     return Promise.resolve(getChildrenByName(this.root!, targets));
   }
@@ -313,7 +313,7 @@ export class OperationIdOutlineProvider extends OutlineProvider {
     return "/paths";
   }
 
-  getChildren(node?: Node): Thenable<Node[]> {
+  getChildren(node?: Node): Promise<Node[]> {
     if (!this.root) {
       return Promise.resolve([]);
     }
