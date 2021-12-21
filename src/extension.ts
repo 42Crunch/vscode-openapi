@@ -59,7 +59,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const completionProvider = new CompletionItemProvider(context, cache);
   for (const selector of Object.values(selectors)) {
-    vscode.languages.registerCompletionItemProvider(selector, completionProvider, "#");
+    vscode.languages.registerCompletionItemProvider(selector, completionProvider, "#", "'", '"');
   }
 
   const jsonSchemaDefinitionProvider = new JsonSchemaDefinitionProvider(cache, externalRefProvider);
