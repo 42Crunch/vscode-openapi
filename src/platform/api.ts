@@ -44,12 +44,18 @@ export async function listCollections(
   options: PlatformConnection,
   logger: Logger
 ): Promise<ListCollectionsResponse> {
-  const listOption = filter?.owner ?? "ALL";
-  const { body } = await got(
-    `api/v2/collections?listOption=${listOption}&perPage=0`,
-    gotOptions("GET", options, logger)
-  );
-  return <ListCollectionsResponse>body;
+  try {
+    const listOption = filter?.owner ?? "ALL";
+    const { body } = await got(
+      `api/v2/collections?listOption=${listOption}&perPage=0`,
+      gotOptions("GET", options, logger)
+    );
+    return <ListCollectionsResponse>body;
+  } catch (ex: any) {
+    throw new Error(
+      "Unable to list collections, please check your 42Crunch credentials: " + ex.message
+    );
+  }
 }
 
 export async function listApis(
