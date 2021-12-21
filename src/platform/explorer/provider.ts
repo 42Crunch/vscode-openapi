@@ -27,7 +27,7 @@ export class CollectionsProvider implements vscode.TreeDataProvider<ExplorerNode
     this._onDidChangeTreeData.fire();
   }
 
-  getTreeItem(node: ExplorerNode): vscode.TreeItem | Thenable<vscode.TreeItem> {
+  getTreeItem(node: ExplorerNode): vscode.TreeItem | Promise<vscode.TreeItem> {
     const item = node.item;
     if (item) {
       item.id = node.id;
