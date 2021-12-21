@@ -1,12 +1,15 @@
 import { ExtensionContext } from "vscode";
-
-const FAVORITE_KEY = "openapi-42crunch.favorite";
+import { PlatformContext } from "../types";
 
 export class FavoritesStore {
-  constructor(private context: ExtensionContext) {}
+  constructor(private context: ExtensionContext, private platform: PlatformContext) {}
+
+  key(): string {
+    return `openapi-42crunch.favorite-${this.platform.connection.platformUrl}`;
+  }
 
   getFavoriteCollectionIds(): string[] {
-    const favorite = this.context.globalState.get<string[]>(FAVORITE_KEY);
+    const favorite = this.context.globalState.get<string[]>(this.key());
     if (!favorite) {
       return [];
     }
@@ -18,11 +21,11 @@ export class FavoritesStore {
     if (!favorite.includes(id)) {
       favorite.push(id);
     }
-    this.context.globalState.update(FAVORITE_KEY, favorite);
+    this.context.globalState.update(this.key(), favorite);
   }
 
   removeFavoriteCollection(id: string): void {
     const favorite = this.getFavoriteCollectionIds().filter((existng) => existng !== id);
-    this.context.globalState.update(FAVORITE_KEY, favorite);
+    this.context.globalState.update(this.key(), favorite);
   }
 }
