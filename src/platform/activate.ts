@@ -29,7 +29,8 @@ export async function activate(
   try {
     platformToken = await context.secrets.get("platformApiToken");
   } catch (ex: any) {
-    // ignore
+    // secrets.get() sometimes throws an exception when running tests
+    // ignore it
   }
 
   const platformContext: PlatformContext = {
@@ -38,8 +39,6 @@ export async function activate(
     connection: {
       platformUrl: platformUrl,
       apiToken: platformToken,
-      userAgent: "foo",
-      referer: "bar",
     },
     logger: {
       fatal: (message: string) => null,
@@ -107,7 +106,7 @@ export async function activate(
   vscode.languages.registerCodeLensProvider(
     [
       { scheme: platformUriScheme, language: "json" },
-      { scheme: platformUriScheme, language: "jsoc" },
+      { scheme: platformUriScheme, language: "jsonc" },
     ],
     new CodelensProvider(store)
   );

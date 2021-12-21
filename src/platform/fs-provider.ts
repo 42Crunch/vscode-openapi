@@ -75,7 +75,7 @@ export class PlatformFS implements vscode.FileSystemProvider {
     );
   }
 
-  delete(uri: vscode.Uri, options: { recursive: boolean }): void | Thenable<void> {
+  delete(uri: vscode.Uri, options: { recursive: boolean }): void | Promise<void> {
     throw new Error("Method not implemented.");
   }
 
@@ -83,17 +83,17 @@ export class PlatformFS implements vscode.FileSystemProvider {
     oldUri: vscode.Uri,
     newUri: vscode.Uri,
     options: { overwrite: boolean }
-  ): void | Thenable<void> {
+  ): void | Promise<void> {
     throw new Error("Method not implemented.");
   }
 
   readDirectory(
     uri: vscode.Uri
-  ): [string, vscode.FileType][] | Thenable<[string, vscode.FileType][]> {
+  ): [string, vscode.FileType][] | Promise<[string, vscode.FileType][]> {
     throw new Error("Method not implemented.");
   }
 
-  createDirectory(uri: vscode.Uri): void | Thenable<void> {
+  createDirectory(uri: vscode.Uri): void | Promise<void> {
     throw new Error("Method not implemented.");
   }
 }

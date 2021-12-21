@@ -4,9 +4,6 @@
 */
 import * as vscode from "vscode";
 
-import { CollectionsProvider } from "./explorer/provider";
-import { ExplorerNode } from "./explorer/nodes/base";
-
 export const platformUriScheme = "openapi-42crunch";
 export const MAX_NAME_LEN = 2048;
 export const ASSESSMENT_MAX_WAIT = 60000;
@@ -71,99 +68,6 @@ export interface UserData {
   write: boolean;
 }
 
-// GOOD ABOVE
-
-export interface ApiStatus {
-  isAssessmentProcessed: boolean;
-  lastAssessment: Date;
-  isScanProcessed: boolean;
-  lastScan: Date;
-}
-
-export interface ApiResponse {
-  desc: {
-    id: string;
-    name: string;
-    technicalName: string;
-  };
-}
-
-export interface ApiCollectionResponse {
-  list: ApiResponse[];
-}
-
-export interface JsonMapping {
-  file: string;
-  hash: string;
-}
-
-export interface MappingTreeNode {
-  value: JsonMapping;
-  children: {
-    [key: string]: MappingTreeNode;
-  };
-}
-
-export interface RemoteApiError {
-  statusCode: number | null;
-  error: any;
-  description: string | null;
-}
-
-export interface ApiErrors {
-  errors: {
-    parsing?: string;
-    bundling?: string;
-    remote?: {
-      statusCode: number | null;
-      error: any;
-      description: string | null;
-    };
-  };
-}
-
-export interface Issue {
-  id: string;
-  description: string;
-  pointer: string;
-  score: number;
-  displayScore: string;
-  criticality: number;
-  file?: string;
-  line?: number;
-  severity: string;
-}
-
-export interface AuditApi extends Api {
-  score: number;
-  failures: string[];
-  issues: Issue[];
-}
-
-export type FileAuditMap = Map<string, AuditApi | ApiErrors>;
-
-export interface AuditResult {
-  files: FileAuditMap;
-  failures: number;
-}
-
-export type SeverityEnum = "critical" | "high" | "medium" | "low" | "info";
-
-export interface Score {
-  data?: number;
-  security?: number;
-  overall?: number;
-}
-
-export interface SeverityPerCategory {
-  data?: SeverityEnum;
-  security?: SeverityEnum;
-}
-
-export interface Mapping {
-  [k: string]: string;
-}
-
 export interface CollectionFilter {
   name: string | undefined;
   owner: "OWNER" | "ALL";
@@ -175,8 +79,6 @@ export interface ApiFilter {
 
 export interface PlatformConnection {
   apiToken: string | undefined;
-  userAgent: string;
-  referer: string;
   platformUrl: string;
 }
 
