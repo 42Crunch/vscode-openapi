@@ -271,8 +271,9 @@ function processErrors(errors: any[]): Map<string, [BundlingError]> {
 
     const errors = result.get(error.source);
 
+    const filteredErrorPath = error.path.filter((segment: any) => segment !== null);
     const bundlingError: BundlingError = {
-      pointer: joinJsonPointer([...error.path, "$ref"]),
+      pointer: joinJsonPointer([...filteredErrorPath, "$ref"]),
       message: error.message,
       code: error.code,
     };
