@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 4.8.0 (January 4, 2022)
+
+* Add optional integration with 42Crunch Platform
+* Fix issue #156 where a file with external $refs was failing to generate preview
+* Improve autocompletion for $refs in YAML files
+
 ## Version 4.7.1 (December 17, 2021)
 
 * Update KDB articles for Security Audit

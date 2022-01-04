@@ -1,6 +1,6 @@
 # OpenAPI extension for Visual Studio Code
 
-This [Visual Studio Code](https://code.visualstudio.com/) (VS Code) [extension](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) adds rich support for the [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification) (OAS) (formerly known as Swagger Specification) in JSON or YAML format. The features include, for example, SwaggerUI and ReDoc preview,IntelliSense, linting, schema enforcement, code navigation, definition links, snippets, static security analysis, and more! 
+This [Visual Studio Code](https://code.visualstudio.com/) (VS Code) [extension](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) adds rich support for the [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification) (OAS) (formerly known as Swagger Specification) in JSON or YAML format. The features include, for example, SwaggerUI and ReDoc preview,IntelliSense, linting, schema enforcement, code navigation, definition links, snippets, static security analysis, and more!
 
 The extension also integrates with [API Contract Security Audit](https://docs.42crunch.com/latest/content/concepts/api_contract_security_audit.htm) by 42Crunch, so that you can check the quality of your API definition directly in VS Code.
 
@@ -24,6 +24,7 @@ Both OAS v2 and v3 are supported.
     - [Fix issues](#fix-issues)
       - [Individual fixes](#individual-fixes)
       - [Bulk fixes](#bulk-fixes)
+  - [Integration with 42Crunch Platform](#integration-with-42crunch-platform)
   - [Known issues](#known-issues)
   - [Feedback](#feedback)
 
@@ -35,13 +36,13 @@ After installing the plugin, open any JSON or YAML file that contains an OpenAPI
 
 ## Use the extension while editing your API
 
-OpenAPI extension makes it easier and faster to navigate your OpenAPI definitions, especially when they get longer. 
+OpenAPI extension makes it easier and faster to navigate your OpenAPI definitions, especially when they get longer.
 
 You can home in on elements in the OpenAPI explorer view, or jump directly to the target of a reference in the API. You can also add new elements to your API directly in the OpenAPI explorer directly where they are needed. Filling in the details is quicker with IntelliSense support for OpenAPI elements.
 
 ### Create new OpenAPI files
 
-1. Press **Ctrl+Shift+P** on Windows or Linux, or **Cmd+Shift+P** on a Mac.   
+1. Press **Ctrl+Shift+P** on Windows or Linux, or **Cmd+Shift+P** on a Mac.
 2. In the command prompt, start typing `new openapi`, and click the corresponding command to create either an OAS v2 or v3 template file.
 3. Use the OpenAPI explorer to populate the template with new paths and other elements as needed.
 4. Save the file to your disk to fully enable IntelliSense.
@@ -49,6 +50,7 @@ You can home in on elements in the OpenAPI explorer view, or jump directly to th
 ![Create new OpenAPI file from a template](https://github.com/42Crunch/vscode-openapi/blob/master/images/New%20OpenAPI%20file.gif?raw=true)
 
 ### Navigate API definition
+
 1. Open an OpenAPI file.
 2. Click the OpenAPI button to switch to the OpenAPI explorer view.
 3. Expand the sections and elements in the file as needed, and click the ones you want to jump to in the editor.
@@ -56,6 +58,7 @@ You can home in on elements in the OpenAPI explorer view, or jump directly to th
 ![Navigation inside the OpenAPI file](https://github.com/42Crunch/vscode-openapi/blob/master/images/Naviation.gif?raw=true)
 
 ### Add new elements in the OpenAPI explorer
+
 1. In OpenAPI explorer pane, go to the section where you want to add a new element, and click the **...** menu.
 2. Click the item you want to add from the dropdown list.
 
@@ -78,10 +81,10 @@ Use Go to Definition to locate the targets of references easily. To jump to view
 ### Sort entries in the navigation pane
 
 By default, entries in the OpenAPI Explorer pane are sorted alphabetically. If you want to instead have them sorted in the order they are in the OpenAPI file, change the corresponding setting:
+
 1. On the **File** menu, click **Preferences > Settings**.
 2. Expand the **Extensions** section and click **OpenAPI**.
 3. Clear the checkbox **Alphabetically sort contents of OpenAPI explorer outlines**.
-
 
 ### Preview OpenAPI documentation
 
@@ -92,6 +95,7 @@ You can get a documentation-style preview of the API you are editing by clicking
 Our extension supports two popular OpenAPI documentation generators: [SwaggerUI](https://swagger.io/tools/swagger-ui/) and [ReDoc](https://github.com/Redocly/redoc).
 
 To change the default OpenAPI Preview rendering engine:
+
 1. On the **File** menu, click **Preferences > Settings**.
 2. Expand the **Extensions** section and click **OpenAPI**.
 3. Pick the option of your choice from the **Default Preview Rendered** dropdown list.
@@ -117,21 +121,22 @@ After the audit finishes, you get the audit report directly in the VS Code view,
 ![Details for specific issues](https://github.com/42Crunch/vscode-openapi/blob/master/images/Details%20for%20specific%20issues.gif?raw=true)
 
 3. For a quick overall look, check the counts in the Status Bar. The different icons match the severity of the issue:
-  - Error: critical or high 
-  - Warning: medium
-  - Info: low
-  
+
+- Error: critical or high
+- Warning: medium
+- Info: low
+
 ![List of API Sec Issues](https://github.com/42Crunch/vscode-openapi/blob/master/images/List%20of%20API%20Sec%20Issues.gif?raw=true)
 
 4. Click the icons in the Status Bar to open the PROBLEMS panel and scroll through the issue titles. The issues are ordered from most to least severe, so it is easy for fix the worst offenders first. Note that recommendations are not listed in the PROBLEMS panel.
 5. Click on an issue in the PROBLEMS panel to jump to view it inline in your API definition.
-
 
 ### Fix issues
 
 Many of the issues reported by the Security Audit have Fixes associated with them. These are code snippets that you can get inserted into the OpenAPI file and then customize with the appropriate value.
 
 #### Individual fixes
+
 1. Perform the Security Audit by clicking the **42c** button.
 2. When you click some of the error lines in your OpenAPI file, you will see the QuickFix icon show up on the left of the line.
 3. Click the icon and select the QuickFix to apply.
@@ -142,10 +147,17 @@ Many of the issues reported by the Security Audit have Fixes associated with the
 #### Bulk fixes
 
 If your OpenAPI file contains multiple similar issues - for example, a parameter with the same name is missing the pattern definition - you can fix all such occurrences in one go:
+
 1. Fix the first occurrence and supply the proper values in the code snippet.
 2. Go to the next occurrence and use the bulk QuickFix. This bulk QuickFix will reuse the values that you used previously for the parameter with the same name.
 
 ![Bulk Fixes in VSCode](/images/VSCode_OpenAPI_bulk_security_fixes.gif)
+
+## Integration with 42Crunch Platform
+
+This extension features optional integration with [42Crunch Platform](https://platform.42crunch.com/). To enable it please configure your credentials by running `42Crunch: Update platform credentials` command from the command palette.
+
+Please be aware that there is a [known issue](https://github.com/microsoft/vscode/issues/136787) in VS Code that affects it ability to connect to certain TLS endpoints. If you see error message saying that "certificate has expired" please add `"http.systemCertificates": false` to your `settings.json`.
 
 ## Known issues
 
