@@ -30,7 +30,8 @@
     "redhat.vscode-yaml"
   ],
   "activationEvents": [
-    "*"
+    "*",
+    "onFileSystem:openapi-42crunch"
   ],
   "capabilities": {
     "untrustedWorkspaces": {

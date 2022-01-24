@@ -60,10 +60,14 @@ export function registerFocusSecurityAudit(
   auditContext: AuditContext
 ) {
   return vscode.commands.registerCommand("openapi.focusSecurityAudit", async (documentUri) => {
-    const audit = auditContext.auditsByMainDocument[documentUri];
-    if (audit) {
-      const articles = await getArticles();
-      ReportWebView.show(context.extensionPath, articles, audit, cache);
+    try {
+      const audit = auditContext.auditsByMainDocument[documentUri];
+      if (audit) {
+        const articles = await getArticles();
+        ReportWebView.show(context.extensionPath, articles, audit, cache);
+      }
+    } catch (e) {
+      vscode.window.showErrorMessage(`Unexpected error: ${e}`);
     }
   });
 }
@@ -75,12 +79,16 @@ export function registerFocusSecurityAuditById(
   return vscode.commands.registerTextEditorCommand(
     "openapi.focusSecurityAuditById",
     async (textEditor, edit, params) => {
-      const documentUri = textEditor.document.uri.toString();
-      const uri = Buffer.from(params.uri, "base64").toString("utf8");
-      const audit = auditContext.auditsByMainDocument[uri];
-      if (audit && audit.issues[documentUri]) {
-        const articles = await getArticles();
-        ReportWebView.showIds(context.extensionPath, articles, audit, documentUri, params.ids);
+      try {
+        const documentUri = textEditor.document.uri.toString();
+        const uri = Buffer.from(params.uri, "base64").toString("utf8");
+        const audit = auditContext.auditsByMainDocument[uri];
+        if (audit && audit.issues[documentUri]) {
+          const articles = await getArticles();
+          ReportWebView.showIds(context.extensionPath, articles, audit, documentUri, params.ids);
+        }
+      } catch (e) {
+        vscode.window.showErrorMessage(`Unexpected error: ${e}`);
       }
     }
   );
