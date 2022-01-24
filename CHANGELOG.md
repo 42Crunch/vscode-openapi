@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.8.2 (January 24, 2022)
+* Fix incorrect schemas for 42Crunch extensions
+* Fix issue with setting platform-related properties on extension activation
+* KDB articles moved online
+
 ## Version 4.8.0 (January 4, 2022)
 
 * Add optional integration with 42Crunch Platform
