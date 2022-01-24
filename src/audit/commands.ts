@@ -4,7 +4,7 @@
 */
 import * as vscode from "vscode";
 
-import { audit, requestToken } from "./client";
+import { audit, getArticles, requestToken } from "./client";
 import { setDecorations, updateDecorations } from "./decoration";
 import { updateDiagnostics } from "./diagnostic";
 
@@ -38,12 +38,12 @@ export function registerSecurityAudit(
       try {
         const audit = await securityAudit(cache, textEditor);
         if (audit) {
+          const articles = await getArticles();
           updateAuditContext(auditContext, uri, audit);
           updateDecorations(auditContext.decorations, audit.summary.documentUri, audit.issues);
           updateDiagnostics(auditContext.diagnostics, audit.filename, audit.issues);
           setDecorations(textEditor, auditContext);
-
-          ReportWebView.show(context.extensionPath, audit, cache);
+          ReportWebView.show(context.extensionPath, articles, audit, cache);
         }
         delete pendingAudits[uri];
       } catch (e) {
@@ -59,10 +59,11 @@ export function registerFocusSecurityAudit(
   cache: Cache,
   auditContext: AuditContext
 ) {
-  return vscode.commands.registerCommand("openapi.focusSecurityAudit", (documentUri) => {
+  return vscode.commands.registerCommand("openapi.focusSecurityAudit", async (documentUri) => {
     const audit = auditContext.auditsByMainDocument[documentUri];
     if (audit) {
-      ReportWebView.show(context.extensionPath, audit, cache);
+      const articles = await getArticles();
+      ReportWebView.show(context.extensionPath, articles, audit, cache);
     }
   });
 }
@@ -73,12 +74,13 @@ export function registerFocusSecurityAuditById(
 ) {
   return vscode.commands.registerTextEditorCommand(
     "openapi.focusSecurityAuditById",
-    (textEditor, edit, params) => {
+    async (textEditor, edit, params) => {
       const documentUri = textEditor.document.uri.toString();
       const uri = Buffer.from(params.uri, "base64").toString("utf8");
       const audit = auditContext.auditsByMainDocument[uri];
       if (audit && audit.issues[documentUri]) {
-        ReportWebView.showIds(context.extensionPath, audit, documentUri, params.ids);
+        const articles = await getArticles();
+        ReportWebView.showIds(context.extensionPath, articles, audit, documentUri, params.ids);
       }
     }
   );

@@ -6,10 +6,25 @@
 import * as vscode from "vscode";
 import got from "got";
 import FormData from "form-data";
-import { Grades, ReportedIssue } from "../types";
 
 const ASSESS_URL = "https://stateless.42crunch.com/api/v1/anon/assess/vscode";
 const TOKEN_URL = "https://stateless.42crunch.com/api/v1/anon/token";
+const ARTICLES_URL = "https://platform.42crunch.com/kdb/audit-with-yaml.json";
+let cachedArticles: any = null;
+
+export async function getArticles(): Promise<any> {
+  if (cachedArticles !== null) {
+    return cachedArticles;
+  }
+  try {
+    const response = await got(ARTICLES_URL);
+    const articles = JSON.parse(response.body);
+    cachedArticles = articles;
+    return articles;
+  } catch (error) {
+    throw new Error(`Failed to read articles.json: ${error}`);
+  }
+}
 
 async function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));

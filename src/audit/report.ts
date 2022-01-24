@@ -9,7 +9,6 @@ import { Cache } from "../cache";
 import { fromInternalUri } from "../external-refs";
 import { Audit, Summary } from "../types";
 
-import articles from "./articles.json";
 import { getLocationByPointer } from "./util";
 
 const fallbackArticle = {
@@ -19,7 +18,7 @@ const fallbackArticle = {
   },
 };
 
-function articleById(id: string, filename: string) {
+function articleById(id: string, filename: string, articles: any) {
   const exampleLanguage =
     filename.toLowerCase().endsWith(".yaml") || filename.toLowerCase().endsWith("yml")
       ? "yaml"
@@ -140,7 +139,7 @@ function getHtml(
   </html>`;
 }
 
-function getIssueHtml(uri: string, filename: string, issue: any) {
+function getIssueHtml(uri: string, filename: string, issue: any, articles: any) {
   const criticalityNames = {
     5: "Critical",
     4: "High",
@@ -152,7 +151,7 @@ function getIssueHtml(uri: string, filename: string, issue: any) {
   // @ts-ignore
   const criticality = criticalityNames[issue.criticality];
   const scoreImpact = issue.displayScore !== "0" ? `Score impact: ${issue.displayScore}` : "";
-  const article = articleById(issue.id, filename);
+  const article = articleById(issue.id, filename, articles);
   const lineNo = issue.lineNo + 1;
   const base64Uri = Buffer.from(uri).toString("base64");
 
@@ -213,14 +212,15 @@ export class ReportWebView {
   private readonly _extensionPath: string;
   private _disposables: vscode.Disposable[] = [];
   private currentAuditUri?: string;
+  private articles: any;
 
   public static readonly viewType = "apisecurityReport";
 
-  public static show(extensionPath: string, audit: Audit, cache: Cache) {
+  public static show(extensionPath: string, articles: any, audit: Audit, cache: Cache) {
     ReportWebView.cache = cache;
 
     if (!ReportWebView.currentPanel) {
-      ReportWebView.currentPanel = new ReportWebView(extensionPath);
+      ReportWebView.currentPanel = new ReportWebView(extensionPath, articles);
     }
 
     ReportWebView.currentPanel.currentAuditUri = audit.summary.documentUri;
@@ -231,11 +231,18 @@ export class ReportWebView {
     }
   }
 
-  public static showIds(extensionPath: string, audit: Audit, uri: string, ids: any[]) {
+  public static showIds(
+    extensionPath: string,
+    articles: any,
+    audit: Audit,
+    uri: string,
+    ids: any[]
+  ) {
     if (!ReportWebView.currentPanel) {
-      ReportWebView.currentPanel = new ReportWebView(extensionPath);
+      ReportWebView.currentPanel = new ReportWebView(extensionPath, articles);
     }
     ReportWebView.currentPanel._updateIds(
+      articles,
       audit,
       ReportWebView.currentPanel._panel.webview,
       uri,
@@ -284,8 +291,9 @@ export class ReportWebView {
     }
   }
 
-  private constructor(extensionPath: string) {
+  private constructor(extensionPath: string, articles: any) {
     this._extensionPath = extensionPath;
+    this.articles = articles;
 
     this._panel = vscode.window.createWebviewPanel(
       ReportWebView.viewType,
@@ -397,10 +405,12 @@ export class ReportWebView {
       .map(([uri, issues]) => {
         const publicUri = fromInternalUri(vscode.Uri.parse(uri));
         if (publicUri.scheme === "http" || publicUri.scheme === "https") {
-          return issues.map((issue) => getIssueHtml(uri, publicUri.toString(), issue));
+          return issues.map((issue) =>
+            getIssueHtml(uri, publicUri.toString(), issue, this.articles)
+          );
         }
         const filename = path.relative(mainDir, publicUri.fsPath);
-        return issues.map((issue) => getIssueHtml(uri, filename, issue));
+        return issues.map((issue) => getIssueHtml(uri, filename, issue, this.articles));
       })
       .reduce((acc, val) => acc.concat(val), []);
 
@@ -421,7 +431,13 @@ export class ReportWebView {
     );
   }
 
-  private _updateIds(audit: Audit, webview: vscode.Webview, uri: string, ids: any[]) {
+  private _updateIds(
+    articles: any,
+    audit: Audit,
+    webview: vscode.Webview,
+    uri: string,
+    ids: any[]
+  ) {
     const scriptUrl = webview.asWebviewUri(
       vscode.Uri.file(path.join(this._extensionPath, "webview", "main.js"))
     );
@@ -438,7 +454,9 @@ export class ReportWebView {
 
     const issues = ids.map((id) => audit.issues[uri][id]);
 
-    const issuesHtml = issues.map((issue) => getIssueHtml(uri, filename, issue)).join("\n");
+    const issuesHtml = issues
+      .map((issue) => getIssueHtml(uri, filename, issue, articles))
+      .join("\n");
 
     this._panel.webview.html = getHtml(
       webview,

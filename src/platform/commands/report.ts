@@ -6,6 +6,7 @@ import { refreshAuditReport } from "../audit";
 import { AuditContext } from "../../types";
 import { makePlatformUri } from "../util";
 import { ReportWebView } from "../../audit/report";
+import { getArticles } from "../../audit/client";
 
 export default (
   store: PlatformStore,
@@ -25,7 +26,8 @@ export default (
         const document = await vscode.workspace.openTextDocument(uri);
         const audit = await refreshAuditReport(store, cache, auditContext, document);
         if (audit) {
-          ReportWebView.show(context.extensionPath, audit, cache);
+          const articles = await getArticles();
+          ReportWebView.show(context.extensionPath, articles, audit, cache);
         }
       }
     );
