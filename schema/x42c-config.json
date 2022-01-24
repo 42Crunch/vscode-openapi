@@ -1,86 +1,162 @@
 [
-	{
-	  "paths": [
-		"openapi-2.0.json#/properties",
-		"openapi-3.0-2019-04-02.json#/properties"
-	  ],
-	  "schemas": {
-		"x-42c-local-strategy": {
-			"$ref": "#/definitions/X42cLocalStrategy"
-		},
-		"x-42c-request-strategies": {
-			"$ref": "#/definitions/X42cRequestStrategies"
-		},
-		"x-42c-response-strategies": {
-			"$ref": "#/definitions/X42cResponseStrategies"
-		},
-		"x-42c-no-authentication": {
-			"$ref": "#/definitions/X42cNoAuthentication"
-		},
-		"x-42c-sensitivity": {
-			"$ref": "#/definitions/X42cSensitivity"
-		}
-	  }
-	},
-	{
-	  "paths": [  
-		"openapi-2.0.json#/definitions/pathItem/properties",
-		"openapi-3.0-2019-04-02.json#/definitions/PathItem/properties"
-	  ],
-	  "schemas": {
-		"x-42c-local-strategy": {
-			"$ref": "#/definitions/X42cLocalStrategy"
-		}
-	  }		
-	},
-	{
-		"paths": [
-			"openapi-2.0.json#/definitions/operation/properties",
-			"openapi-3.0-2019-04-02.json#/definitions/Operation/properties"
-		],
-		"schemas": {
-			"x-42c-local-strategy": {
-				"$ref": "#/definitions/X42cLocalStrategy"
-			},
-			"x-42c-no-authentication": {
-				"$ref": "#/definitions/X42cNoAuthentication"
-			},
-			"x-42c-sensitivity": {
-				"$ref": "#/definitions/X42cSensitivity"
-			}
-		}		
-	},
-	{
-		"paths": [
-			"openapi-3.0-2019-04-02.json#/definitions/Responses/properties"
-		],
-		"schemas": {
-			"x-42c-local-strategy": {
-				"$ref": "#/definitions/X42cLocalStrategy"
-			}
-		}
-	},
-	{
-		"paths": [
-			"openapi-2.0.json#/definitions/response/properties",
-			"openapi-3.0-2019-04-02.json#/definitions/Response/properties"
-		],
-		"schemas": {
-			"x-42c-local-strategy": {
-				"$ref": "#/definitions/X42cLocalStrategy"
-			}
-		}
-	},
-	{
-		"paths": [
-			"openapi-2.0.json#/definitions/responses"
-		],
-		"schemas": {
-			"properties": {
-                "x-42c-local-strategy": {
-                    "$ref": "#/definitions/X42cLocalStrategy"
-                }
-            }
-		}
-	}
+  {
+    "paths": [
+      "openapi-2.0.json#/definitions/pathItem/properties",
+      "openapi-3.0-2019-04-02.json#/definitions/PathItem/properties",
+      "openapi-2.0.json#/definitions/operation/properties",
+      "openapi-3.0-2019-04-02.json#/definitions/Operation/properties",
+      "openapi-2.0.json#/definitions/response/properties",
+      "openapi-3.0-2019-04-02.json#/definitions/Response/properties",
+      "openapi-2.0.json#/definitions/responses",
+      "openapi-3.0-2019-04-02.json#/definitions/Responses/properties"
+    ],
+    "schemas": {
+      "x-42c-local-strategy": {
+        "target": "#/definitions/X42cLocalStrategy"
+      }
+    }
+  },
+  {
+    "paths": [
+      "openapi-2.0.json#/definitions/paths",
+      "openapi-3.0-2019-04-02.json#/definitions/Paths",
+      "openapi-2.0.json#/definitions/responses",
+      "openapi-3.0-2019-04-02.json#/definitions/Components/properties/responses"
+    ],
+    "schemas": {
+      "properties": {
+        "x-42c-local-strategy": {
+          "target": "#/definitions/X42cLocalStrategy"
+        }
+      }
+    }
+  },
+  {
+    "paths": ["openapi-2.0.json#/properties", "openapi-3.0-2019-04-02.json#/properties"],
+    "schemas": {
+      "x-42c-request-strategies": {
+        "target": "#/definitions/X42cRequestStrategies"
+      },
+      "x-42c-response-strategies": {
+        "target": "#/definitions/X42cResponseStrategies"
+      }
+    }
+  },
+  {
+    "paths": [
+      "openapi-2.0.json#/properties",
+      "openapi-3.0-2019-04-02.json#/properties",
+      "openapi-2.0.json#/definitions/operation/properties",
+      "openapi-3.0-2019-04-02.json#/definitions/Operation/properties"
+    ],
+    "schemas": {
+      "x-42c-no-authentication": {
+        "target": "#/definitions/X42cNoAuthentication"
+      }
+    }
+  },
+  {
+    "paths": [
+      "openapi-2.0.json#/properties",
+      "openapi-3.0-2019-04-02.json#/properties",
+      "openapi-2.0.json#/definitions/operation/properties",
+      "openapi-3.0-2019-04-02.json#/definitions/Operation/properties"
+    ],
+    "schemas": {
+      "x-42c-mtls": {
+        "target": "#/definitions/X42cMTLS"
+      }
+    }
+  },
+  {
+    "paths": [
+      "openapi-2.0.json#/definitions/operation/properties",
+      "openapi-3.0-2019-04-02.json#/definitions/Operation/properties"
+    ],
+    "schemas": {
+      "x-42c-sensitivity": {
+        "target": "#/definitions/X42cSensitivity"
+      }
+    }
+  },
+  {
+    "paths": [
+      "openapi-2.0.json#/definitions/schema/properties",
+      "openapi-2.0.json#/definitions/bodyParameter/properties",
+      "openapi-2.0.json#/definitions/headerParameterSubSchema/properties",
+      "openapi-2.0.json#/definitions/formDataParameterSubSchema/properties",
+      "openapi-2.0.json#/definitions/queryParameterSubSchema/properties",
+      "openapi-2.0.json#/definitions/pathParameterSubSchema/properties",
+      "openapi-3.0-2019-04-02.json#/definitions/Schema/properties"
+    ],
+    "schemas": {
+      "x-42c-sensitivity-data": {
+        "target": "#/definitions/X42cSensitivityData"
+      }
+    }
+  },
+  {
+    "paths": ["openapi-2.0.json#/properties", "openapi-3.0-2019-04-02.json#/properties"],
+    "schemas": {
+      "x-42c-skipIssues": {
+        "target": "#/definitions/X42cSkipIssues"
+      }
+    }
+  },
+  {
+    "paths": [
+      "openapi-2.0.json#/definitions/response/properties",
+      "openapi-3.0-2019-04-02.json#/definitions/Response/properties"
+    ],
+    "schemas": {
+      "x-42c-weight-content": {
+        "target": "#/definitions/X42cWeightContent"
+      },
+      "x-42c-weight-headers": {
+        "target": "#/definitions/X42cWeightHeader"
+      },
+      "x-42c-weight-success": {
+        "target": "#/definitions/X42cWeightSuccess"
+      },
+      "x-42c-weight-fail": {
+        "target": "#/definitions/X42cWeightFail"
+      }
+    }
+  },
+  {
+    "paths": [
+      "openapi-2.0.json#/definitions/operation/properties",
+      "openapi-3.0-2019-04-02.json#/definitions/Operation/properties"
+    ],
+    "schemas": {
+      "x-42c-weight-input": {
+        "target": "#/definitions/X42cWeightInput"
+      },
+      "x-42c-weight-output": {
+        "target": "#/definitions/X42cWeightOutput"
+      },
+      "x-42c-weight-parameters": {
+        "target": "#/definitions/X42cWeightParameters"
+      },
+      "x-42c-weight-requestBody": {
+        "target": "#/definitions/X42cWeightRequestBody"
+      }
+    }
+  },
+  {
+    "paths": [
+      "openapi-2.0.json#/definitions/schema/properties",
+      "openapi-2.0.json#/definitions/bodyParameter/properties",
+      "openapi-2.0.json#/definitions/headerParameterSubSchema/properties",
+      "openapi-2.0.json#/definitions/formDataParameterSubSchema/properties",
+      "openapi-2.0.json#/definitions/queryParameterSubSchema/properties",
+      "openapi-2.0.json#/definitions/pathParameterSubSchema/properties",
+      "openapi-3.0-2019-04-02.json#/definitions/Schema/properties"
+    ],
+    "schemas": {
+      "x-42c-sample": {
+        "target": "#/definitions/X42cSample"
+      }
+    }
+  }
 ]

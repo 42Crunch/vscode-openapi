@@ -19,6 +19,7 @@ for (const conf of x42Config) {
       const schema = path.startsWith("openapi-2.0.json") ? schemasV2 : schemasV3;
       const targetSchema = getJsonByPointer(schema, pointer);
       if (targetSchema) {
+        unescapeRefKeys(conf.schemas);
         Object.assign(targetSchema, conf.schemas);
       } else {
         console.error("ERROR: Target schema not found " + path + " (" + pointer + ")");
@@ -60,6 +61,33 @@ function unescape(str) {
 
 function writeFileSync(file, obj) {
   fs.writeFileSync("schema/generated/" + file, JSON.stringify(obj, null, 4));
+}
+
+function unescapeRefKeys(obj) {
+  const type = getType(obj);
+  if (type === "object") {
+    for (const key of Object.keys(obj)) {
+      if (key === "target") {
+        obj["$ref"] = obj[key];
+        delete obj[key];
+        unescapeRefKeys(obj["$ref"]);
+      } else {
+        unescapeRefKeys(obj[key]);
+      }
+    }
+  } else if (type === "array") {
+    for (let i = 0; i < obj.length; i++) {
+      unescapeRefKeys(obj[i]);
+    }
+  }
+}
+
+function getType(value) {
+  const type = typeof value;
+  if (type === "object") {
+    return value === null ? "null" : value instanceof Array ? "array" : type;
+  }
+  return type;
 }
 
 writeFileSync("openapi.json", schemasRoot);

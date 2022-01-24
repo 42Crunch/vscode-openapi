@@ -1,158 +1,1023 @@
 {
-	"id":"https://spec.openapis.org/oas/3.0/schema/2019-04-02",
-	"$schema":"http://json-schema.org/draft-04/schema#",
-	"description":"Validation schema for OpenAPI Specification Extensions",
-	"title":"Validation schema for OpenAPI Specification Extensions",
-	"type":"object",
-	"definitions":{
-		"X42cSensitivityData":{
-			"type":"integer",
-			"minimum":1,
-			"maximum":5,
-			"default":3
-		},
-		"X42cSample":{
-			"type":"null"
-		},
-		"X42cLocalStrategy":{
-			"type":"object",
-			"properties":{
-				"x-42c-strategy":{
-					"type":"object",
-					"properties":{
-						"protections":{
-							"type":"array",
-							"items":{
-								"anyOf":[
-									{
-										"$ref":"#/definitions/X42cJwtValidation"
-									},
-									{
-										"$ref":"#/definitions/X42cJwtValidationEc"
-									},
-									{
-										"$ref":"#/definitions/X42cJwtValidationHmac"
-									},
-									{
-										"$ref":"#/definitions/X42cJwtVvalidationRsa"
-									}
-								]
-							}
-						}
-					}
-				}
-			}
-		},
-		"X42cRequestStrategies":{
-			"type":"object",
-			"properties":{
-				"operations":{
-					"type":"array",
-					"items":{
-						"type":"string",
-						"enum":[
-							"get",
-							"put",
-							"post",
-							"delete",
-							"options",
-							"head",
-							"patch",
-							"trace"
-						]
-					}
-				},
-				"x-42c-strategy":{
-					"type":"object",
-					"properties":{
-						"protections":{
-							"type":"array"
-						}
-					}
-				}
-			}
-		},
-		"X42cResponseStrategies":{
-			"type":"object",
-			"properties":{
-				"responses":{
-					"type":"array",
-					"items":{
-						"type":"string",
-						"pattern":"^([1-5](?:\\d{2}|XX)|default)$"
-					}
-				},
-				"x-42c-strategy":{
-					"type":"object",
-					"properties":{
-						"protections":{
-							"type":"array"
-						}
-					}
-				}
-			}
-		},
-		"X42cNoAuthentication":{
-			"type":"boolean",
-			"default":false
-		},
-		"X42cSensitivity":{
-			"type":"integer",
-			"minimum":1,
-			"maximum":5,
-			"default":3
-		},
-		"X42cJwtValidation":{
-			"allOf":[
-				{
-					"$ref":"#/definitions/X42cJwtCore"
-				},
-				{
-					"type":"object",
-					"properties":{
-						"authorized.algorithms":{
-							"type":"array"
-						}
-					}
-				}
-			]
-		},
-		"X42cJwtValidationEc":{
-			"$ref":"#/definitions/X42cJwtCore"
-		},
-		"X42cJwtValidationHmac":{
-			"$ref":"#/definitions/X42cJwtCore"
-		},
-		"X42cJwtVvalidationRsa":{
-			"$ref":"#/definitions/X42cJwtCore"
-		},
-		"X42cJwtCore":{
-			"type":"object",
-			"properties":{
-				"header.name":{
-					"type":"string"
-				},
-				"jwk.envvar":{
-					"type":"string",
-					"default":"JWK"
-				},
-				"forward.jwt":{
-					"type":"boolean",
-					"default":true
-				},
-				"lifetime":{
-					"type":"integer",
-					"default":5
-				},
-				"drift":{
-					"type":"integer",
-					"default":10
-				},
-				"jti.timeout":{
-					"type":"integer",
-					"default":86400
-				}
-			}
-		}
-	}
+  "id": "https://spec.openapis.org/oas/3.0/schema/2019-04-02",
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Validation schema for OpenAPI Specification Extensions",
+  "title": "Validation schema for OpenAPI Specification Extensions",
+  "type": "object",
+  "definitions": {
+    "X42cLocalStrategy": {
+      "type": "object",
+      "properties": {
+        "x-42c-strategy": {
+          "$ref": "#/definitions/X42cStrategy"
+        }
+      }
+    },
+    "X42cRequestStrategies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "operations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["get", "put", "post", "delete", "options", "head", "patch", "trace"]
+            }
+          },
+          "x-42c-strategy": {
+            "$ref": "#/definitions/X42cStrategy"
+          }
+        }
+      }
+    },
+    "X42cResponseStrategies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "responses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^([1-5](?:\\d{2}|XX)|default)$"
+            }
+          },
+          "x-42c-strategy": {
+            "$ref": "#/definitions/X42cStrategy"
+          }
+        }
+      }
+    },
+    "X42cStrategy": {
+      "type": "object",
+      "properties": {
+        "protections": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/X42cDeactivateAllowList"
+              },
+              {
+                "$ref": "#/definitions/X42cRequestAllowList"
+              },
+              {
+                "$ref": "#/definitions/X42cResponseAllowList"
+              },
+              {
+                "$ref": "#/definitions/X42cAccessControlBasedOnIPAddressRange"
+              },
+              {
+                "$ref": "#/definitions/X42cSetClientIp"
+              },
+              {
+                "$ref": "#/definitions/X42cJwtValidation"
+              },
+              {
+                "$ref": "#/definitions/X42cJwtValidationEc"
+              },
+              {
+                "$ref": "#/definitions/X42cJwtValidationHmac"
+              },
+              {
+                "$ref": "#/definitions/X42cJwtVvalidationRsa"
+              },
+              {
+                "$ref": "#/definitions/X42cJwtValidationRsaNoSigCheck"
+              },
+              {
+                "$ref": "#/definitions/X42cJwtValidationNoSigCheck"
+              },
+              {
+                "$ref": "#/definitions/X42cRateLimitingByIPAddress"
+              },
+              {
+                "$ref": "#/definitions/X42cRateLimitingByKey"
+              },
+              {
+                "$ref": "#/definitions/X42cSecurityHeaders"
+              },
+              {
+                "$ref": "#/definitions/X42cForwardClientCertificate"
+              },
+              {
+                "$ref": "#/definitions/X42cIpAllowList"
+              },
+              {
+                "$ref": "#/definitions/X42cJwsValidation"
+              },
+              {
+                "$ref": "#/definitions/X42cRequestBola"
+              },
+              {
+                "$ref": "#/definitions/X42cResponseBola"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "X42cNoAuthentication": {
+      "type": "boolean",
+      "default": false
+    },
+    "X42cMTLS": {
+      "type": "boolean",
+      "default": false
+    },
+    "X42cSensitivity": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "default": 3
+    },
+    "X42cSensitivityData": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "default": 3
+    },
+    "X42cSkipIssues": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "X42cWeightContent": {
+      "type": "integer",
+      "default": 80,
+      "maximum": 100,
+      "minimum": 0
+    },
+    "X42cWeightHeader": {
+      "type": "integer",
+      "default": 20,
+      "maximum": 100,
+      "minimum": 0
+    },
+    "X42cWeightSuccess": {
+      "type": "integer",
+      "default": 70,
+      "maximum": 100,
+      "minimum": 0
+    },
+    "X42cWeightFail": {
+      "type": "integer",
+      "default": 30,
+      "maximum": 100,
+      "minimum": 0
+    },
+    "X42cWeightInput": {
+      "type": "integer",
+      "default": 80,
+      "maximum": 100,
+      "minimum": 0
+    },
+    "X42cWeightOutput": {
+      "type": "integer",
+      "default": 20,
+      "maximum": 100,
+      "minimum": 0
+    },
+    "X42cWeightParameters": {
+      "type": "integer",
+      "default": 50,
+      "maximum": 100,
+      "minimum": 0
+    },
+    "X42cWeightRequestBody": {
+      "type": "integer",
+      "default": 50,
+      "maximum": 100,
+      "minimum": 0
+    },
+    "X42cSample": {
+      "type": "null"
+    },
+    "X42cDeactivateAllowList": {
+      "type": "object",
+      "required": ["x-42c-deactivate-allowlist"],
+      "properties": {
+        "x-42c-deactivate-allowlist": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cRequestAllowList": {
+      "type": "object",
+      "required": ["x-42c-request-allowlist_0.1"],
+      "properties": {
+        "x-42c-request-allowlist_0.1": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cResponseAllowList": {
+      "type": "object",
+      "required": ["x-42c-response-allowlist_0.1"],
+      "properties": {
+        "x-42c-response-allowlist_0.1": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cAccessControlBasedOnIPAddressRange": {
+      "type": "object",
+      "required": ["x-42c-access-control-based-on-ip-range_0.1"],
+      "properties": {
+        "x-42c-access-control-based-on-ip-range_0.1": {
+          "type": "object",
+          "required": ["ip.range.list"],
+          "properties": {
+            "ip.range.list": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 1,
+              "maxItems": 10,
+              "additionalItems": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cSetClientIp": {
+      "type": "object",
+      "required": ["x-42c-set-client-ip_0.1"],
+      "properties": {
+        "x-42c-set-client-ip_0.1": {
+          "type": "object",
+          "required": ["ip.header.name", "ip.header.mandatory"],
+          "properties": {
+            "ip.header.name": {
+              "type": "string",
+              "enum": ["X-Forwarded-For", "X-REAL-IP", "true_client_ip"]
+            },
+            "ip.header.mandatory": {
+              "type": "boolean",
+              "default": true
+            },
+            "remote.ip.allowlist": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 10,
+                "maxLength": 255
+              },
+              "maxItems": 10
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cJwtValidation": {
+      "type": "object",
+      "required": ["x-42c-jwt-validation_0.1"],
+      "properties": {
+        "x-42c-jwt-validation_0.1": {
+          "type": "object",
+          "required": ["header.name", "authorized.algorithms"],
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "default": "JWK"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "default": true
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "default": 5
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "default": 10
+            },
+            "authorized.algorithms": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "HS256",
+                  "HS384",
+                  "HS512",
+                  "RS256",
+                  "RS384",
+                  "RS512",
+                  "PS256",
+                  "PS384",
+                  "PS512",
+                  "ES256",
+                  "ES384",
+                  "ES512"
+                ]
+              }
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "default": 86400
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "claims.schema": {
+              "type": "object",
+              "default": {}
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "default": {}
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cJwtValidationEc": {
+      "type": "object",
+      "required": ["x-42c-jwt-validation-ec_0.1"],
+      "properties": {
+        "x-42c-jwt-validation-ec_0.1": {
+          "type": "object",
+          "required": ["header.name"],
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "default": "JWK"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "default": true
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "default": 5
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "default": 10
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "default": 86400
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "claims.schema": {
+              "type": "object",
+              "default": {}
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "default": {}
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cJwtValidationHmac": {
+      "type": "object",
+      "required": ["x-42c-jwt-validation-hmac_0.1"],
+      "properties": {
+        "x-42c-jwt-validation-hmac_0.1": {
+          "type": "object",
+          "required": ["header.name"],
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "default": "JWK"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "default": true
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "default": 5
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "default": 10
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "default": 86400
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "claims.schema": {
+              "type": "object",
+              "default": {}
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "default": {}
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cJwtVvalidationRsa": {
+      "type": "object",
+      "required": ["x-42c-jwt-validation-rsa_0.1"],
+      "properties": {
+        "x-42c-jwt-validation-rsa_0.1": {
+          "type": "object",
+          "required": ["header.name"],
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "default": "JWK"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "default": true
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "default": 5
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "default": 10
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "default": 86400
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "claims.schema": {
+              "type": "object",
+              "default": {}
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "default": {}
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cJwtValidationRsaNoSigCheck": {
+      "type": "object",
+      "required": ["x-42c-jwt-validation-rsa-no-sig-check_0.1"],
+      "properties": {
+        "x-42c-jwt-validation-rsa-no-sig-check_0.1": {
+          "type": "object",
+          "required": ["header.name"],
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "default": true
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "default": 5
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "default": 10
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "default": 86400
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "claims.schema": {
+              "type": "object",
+              "default": {}
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "default": {}
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cJwtValidationNoSigCheck": {
+      "type": "object",
+      "required": ["x-42c-jwt-validation-no-sig-check_0.1"],
+      "properties": {
+        "x-42c-jwt-validation-no-sig-check_0.1": {
+          "type": "object",
+          "required": ["header.name", "authorized.algorithms"],
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "default": true
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "default": 5
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "default": 10
+            },
+            "authorized.algorithms": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "HS256",
+                  "HS384",
+                  "HS512",
+                  "RS256",
+                  "RS384",
+                  "RS512",
+                  "PS256",
+                  "PS384",
+                  "PS512",
+                  "ES256",
+                  "ES384",
+                  "ES512"
+                ]
+              }
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "default": 86400
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "claims.schema": {
+              "type": "object",
+              "default": {}
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "default": {}
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cRateLimitingByIPAddress": {
+      "type": "object",
+      "required": ["x-42c-request-limiter-based-on-ip_0.1"],
+      "properties": {
+        "x-42c-request-limiter-based-on-ip_0.1": {
+          "type": "object",
+          "required": ["window", "hits"],
+          "properties": {
+            "hits": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 999999999
+            },
+            "window": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 999999999
+            },
+            "burst.enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "burst.hits": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 999999999,
+              "default": 5
+            },
+            "burst.window": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 999999999,
+              "default": 2
+            },
+            "cache.name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255,
+              "pattern": "^[a-zA-Z0-9_]{1,255}$",
+              "default": "default"
+            },
+            "cache.type": {
+              "type": "string",
+              "enum": ["MEMORY"],
+              "default": "MEMORY"
+            },
+            "add.retry_after": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cRateLimitingByKey": {
+      "type": "object",
+      "required": ["x-42c-request-limiter_0.1"],
+      "properties": {
+        "x-42c-request-limiter_0.1": {
+          "type": "object",
+          "required": ["window", "hits", "key"],
+          "properties": {
+            "hits": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 999999999
+            },
+            "window": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 999999999
+            },
+            "burst.enabled": {
+              "type": "boolean",
+              "default": false
+            },
+            "burst.hits": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 999999999,
+              "default": 5
+            },
+            "burst.window": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 999999999,
+              "default": 2
+            },
+            "cache.name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255,
+              "pattern": "^[a-zA-Z0-9_]{1,255}$",
+              "default": "default"
+            },
+            "cache.type": {
+              "type": "string",
+              "enum": ["MEMORY"],
+              "default": "MEMORY"
+            },
+            "key": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 255,
+              "pattern": "^[a-zA-Z0-9_]{1,255}$"
+            },
+            "add.retry_after": {
+              "type": "boolean"
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cSecurityHeaders": {
+      "type": "object",
+      "required": ["x-42c-security-headers_0.1"],
+      "properties": {
+        "x-42c-security-headers_0.1": {
+          "type": "object",
+          "properties": {
+            "hsts.max_age": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 999999999,
+              "default": 3600
+            },
+            "csp.policy": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1000,
+              "default": "default-src: 'self'; upgrade-insecure-requests; referrer no-referrer"
+            },
+            "mode": {
+              "type": "string",
+              "enum": ["add-only", "add-replace"],
+              "default": "add-only"
+            },
+            "remove.headers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "minItems": 0,
+              "maxItems": 99,
+              "default": ["X-Powered-By", "X-AspNet-Version", "X-AspNetMvc-Version"],
+              "additionalItems": false
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cForwardClientCertificate": {
+      "type": "object",
+      "required": ["x-42c-forward-client-certificate_0.1"],
+      "properties": {
+        "x-42c-forward-client-certificate_0.1": {
+          "type": "object",
+          "required": ["backend.header.name"],
+          "properties": {
+            "backend.header.name": {
+              "type": "string",
+              "pattern": "",
+              "minLength": 1,
+              "maxLength": 9999
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cIpAllowList": {
+      "type": "object",
+      "required": ["x-42c-ip-allowlist_0.1"],
+      "properties": {
+        "x-42c-ip-allowlist_0.1": {
+          "type": "object",
+          "required": ["ip.allow.list"],
+          "properties": {
+            "ip.allow.list": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}",
+                "minLength": 7,
+                "maxLength": 15
+              }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cJwsValidation": {
+      "type": "object",
+      "required": ["x-42c-jws-validation_0.1"],
+      "properties": {
+        "x-42c-jws-validation_0.1": {
+          "type": "object",
+          "required": ["header.name", "authorized.algorithms"],
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "jp.signed.data": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "default": "JWK"
+            },
+            "authorized.algorithms": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "HS256",
+                  "HS384",
+                  "HS512",
+                  "RS256",
+                  "RS384",
+                  "RS512",
+                  "PS256",
+                  "PS384",
+                  "PS512",
+                  "ES256",
+                  "ES384",
+                  "ES512"
+                ]
+              }
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "default": {}
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cRequestBola": {
+      "type": "object",
+      "required": ["x-42c-request-bola_0.1"],
+      "properties": {
+        "x-42c-request-bola_0.1": {
+          "type": "object",
+          "properties": {
+            "id.location": {
+              "type": "string"
+            },
+            "cache.name": {
+              "type": "string",
+              "default": "default"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cResponseBola": {
+      "type": "object",
+      "required": ["x-42c-response-bola_0.1"],
+      "properties": {
+        "x-42c-response-bola_0.1": {
+          "type": "object",
+          "required": ["id.location.jpointer"],
+          "properties": {
+            "load.identifiers": {
+              "type": "boolean",
+              "default": false
+            },
+            "id.location.jpointer": {
+              "type": "string"
+            },
+            "cache.name": {
+              "type": "string",
+              "default": "default"
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
 }
