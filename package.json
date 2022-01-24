@@ -30,15 +30,7 @@
     "redhat.vscode-yaml"
   ],
   "activationEvents": [
-    "onLanguage:yaml",
-    "onLanguage:json",
-    "onLanguage:jsonc",
-    "onCommand:openapi.createNewThree",
-    "onCommand:openapi.createNewTwo",
-    "onCommand:openapi.createNewThreeYaml",
-    "onCommand:openapi.createNewTwoYaml",
-    "onCommand:openapi.platform.updatePlatformCredentials",
-    "onFileSystem:openapi-42crunch"
+    "*"
   ],
   "capabilities": {
     "untrustedWorkspaces": {
@@ -82,11 +74,6 @@
           "id": "platformExplorer",
           "name": "Platform",
           "when": "openapi.platform.credentials == present"
-        },
-        {
-          "id": "platformWelcome",
-          "name": "",
-          "when": "openapi.platform.credentials == missing"
         }
       ],
       "openapi-explorer": [
