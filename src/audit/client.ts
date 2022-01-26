@@ -10,20 +10,32 @@ import FormData from "form-data";
 const ASSESS_URL = "https://stateless.42crunch.com/api/v1/anon/assess/vscode";
 const TOKEN_URL = "https://stateless.42crunch.com/api/v1/anon/token";
 const ARTICLES_URL = "https://platform.42crunch.com/kdb/audit-with-yaml.json";
-let cachedArticles: any = null;
+
+let cachedArticles: Promise<any> | undefined = undefined;
 
 export async function getArticles(): Promise<any> {
-  if (cachedArticles !== null) {
-    return cachedArticles;
+  if (cachedArticles === undefined) {
+    cachedArticles = downloadArticles();
   }
-  try {
-    const response = await got(ARTICLES_URL);
-    const articles = JSON.parse(response.body);
-    cachedArticles = articles;
-    return articles;
-  } catch (error) {
-    throw new Error(`Failed to read articles.json: ${error}`);
-  }
+  return cachedArticles;
+}
+
+async function downloadArticles(): Promise<any> {
+  return vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: "Loading API Contract Security Audit KDB Articles...",
+      cancellable: false,
+    },
+    async (progress, cancellationToken): Promise<any> => {
+      try {
+        const response = await got(ARTICLES_URL);
+        return JSON.parse(response.body);
+      } catch (error) {
+        throw new Error(`Failed to read articles.json: ${error}`);
+      }
+    }
+  );
 }
 
 async function delay(ms: number) {

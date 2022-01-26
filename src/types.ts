@@ -99,6 +99,11 @@ export interface PendingAudits {
 
 export interface Audit {
   filename: string;
+  files: {
+    [uri: string]: {
+      relative: string;
+    };
+  };
   summary: Summary;
   issues: IssuesByDocument;
 }

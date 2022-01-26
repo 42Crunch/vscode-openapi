@@ -24,7 +24,7 @@ import {
 } from "../types";
 import { updateDiagnostics } from "./diagnostic";
 import { updateDecorations, setDecorations } from "./decoration";
-import { ReportWebView } from "./report";
+import { AuditReportWebView } from "./report";
 import {
   deleteJsonNode,
   deleteYamlNode,
@@ -290,14 +290,15 @@ async function quickFixCommand(
   }
 
   // update diagnostics
-  updateReport(editor, issues, auditContext, cache);
+  updateReport(editor, issues, auditContext, cache, reportWebView);
 }
 
 export function updateReport(
   editor: vscode.TextEditor,
   issues: Issue[],
   auditContext: AuditContext,
-  cache: Cache
+  cache: Cache,
+  reportWebView: AuditReportWebView
 ): void {
   const document = editor.document;
   const uri = document.uri.toString();
@@ -332,13 +333,14 @@ export function updateReport(
   updateDiagnostics(auditContext.diagnostics, audit.filename, audit.issues);
   updateDecorations(auditContext.decorations, audit.summary.documentUri, audit.issues);
   setDecorations(editor, auditContext);
-  ReportWebView.showIfVisible(audit);
+  reportWebView.showIfVisible(audit);
 }
 
 export function registerQuickfixes(
   context: vscode.ExtensionContext,
   cache: Cache,
-  auditContext: AuditContext
+  auditContext: AuditContext,
+  reportWebView: AuditReportWebView
 ) {
   vscode.commands.registerTextEditorCommand(
     "openapi.simpleQuickFix",
@@ -348,7 +350,16 @@ export function registerQuickfixes(
   vscode.commands.registerTextEditorCommand(
     "openapi.generateSchemaQuickFix",
     async (editor, edit, issue, fix, examples, inline) =>
-      generateSchemaFixCommand(editor, issue, fix, examples, inline, auditContext, cache)
+      generateSchemaFixCommand(
+        editor,
+        issue,
+        fix,
+        examples,
+        inline,
+        auditContext,
+        cache,
+        reportWebView
+      )
   );
 
   vscode.languages.registerCodeActionsProvider("yaml", new AuditCodeActions(auditContext, cache), {

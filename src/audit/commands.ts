@@ -8,7 +8,7 @@ import { audit, getArticles, requestToken } from "./client";
 import { setDecorations, updateDecorations } from "./decoration";
 import { updateDiagnostics } from "./diagnostic";
 
-import { ReportWebView } from "./report";
+import { AuditReportWebView } from "./report";
 
 import { AuditContext, Audit, PendingAudits } from "../types";
 
@@ -20,7 +20,8 @@ export function registerSecurityAudit(
   context: vscode.ExtensionContext,
   cache: Cache,
   auditContext: AuditContext,
-  pendingAudits: PendingAudits
+  pendingAudits: PendingAudits,
+  reportWebView: AuditReportWebView
 ) {
   return vscode.commands.registerTextEditorCommand(
     "openapi.securityAudit",
@@ -36,14 +37,14 @@ export function registerSecurityAudit(
       pendingAudits[uri] = true;
 
       try {
+        reportWebView.prefetchKdb();
         const audit = await securityAudit(cache, textEditor);
         if (audit) {
-          const articles = await getArticles();
           updateAuditContext(auditContext, uri, audit);
           updateDecorations(auditContext.decorations, audit.summary.documentUri, audit.issues);
           updateDiagnostics(auditContext.diagnostics, audit.filename, audit.issues);
           setDecorations(textEditor, auditContext);
-          ReportWebView.show(context.extensionPath, articles, audit, cache);
+          reportWebView.show(audit);
         }
         delete pendingAudits[uri];
       } catch (e) {
@@ -57,14 +58,14 @@ export function registerSecurityAudit(
 export function registerFocusSecurityAudit(
   context: vscode.ExtensionContext,
   cache: Cache,
-  auditContext: AuditContext
+  auditContext: AuditContext,
+  reportWebView: AuditReportWebView
 ) {
   return vscode.commands.registerCommand("openapi.focusSecurityAudit", async (documentUri) => {
     try {
       const audit = auditContext.auditsByMainDocument[documentUri];
       if (audit) {
-        const articles = await getArticles();
-        ReportWebView.show(context.extensionPath, articles, audit, cache);
+        reportWebView.show(audit);
       }
     } catch (e) {
       vscode.window.showErrorMessage(`Unexpected error: ${e}`);
@@ -74,7 +75,8 @@ export function registerFocusSecurityAudit(
 
 export function registerFocusSecurityAuditById(
   context: vscode.ExtensionContext,
-  auditContext: AuditContext
+  auditContext: AuditContext,
+  reportWebView: AuditReportWebView
 ) {
   return vscode.commands.registerTextEditorCommand(
     "openapi.focusSecurityAuditById",
@@ -84,8 +86,7 @@ export function registerFocusSecurityAuditById(
         const uri = Buffer.from(params.uri, "base64").toString("utf8");
         const audit = auditContext.auditsByMainDocument[uri];
         if (audit && audit.issues[documentUri]) {
-          const articles = await getArticles();
-          ReportWebView.showIds(context.extensionPath, articles, audit, documentUri, params.ids);
+          reportWebView.showIds(audit, documentUri, params.ids);
         }
       } catch (e) {
         vscode.window.showErrorMessage(`Unexpected error: ${e}`);

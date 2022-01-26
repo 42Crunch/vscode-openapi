@@ -26,7 +26,8 @@ export async function generateSchemaFixCommand(
   genFrom: JsonNodeValue,
   inline: boolean,
   auditContext: AuditContext,
-  cache: Cache
+  cache: Cache,
+  reportWebView: ReportWebView
 ) {
   const document = editor.document;
   const uri = document.uri.toString();
@@ -57,7 +58,7 @@ export async function generateSchemaFixCommand(
       await insertSchemaByRef(schemaName, editor, issue, fix, genSchema, auditContext, cache);
     }
   }
-  updateReport(editor, [issue], auditContext, cache);
+  updateReport(editor, [issue], auditContext, cache, reportWebView);
 }
 
 export function createGenerateSchemaAction(

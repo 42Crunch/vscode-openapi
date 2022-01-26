@@ -21,6 +21,7 @@ import { updateContext } from "./context";
 import { registerCommands } from "./commands";
 import { create as createWhatsNewPanel } from "./whatsnew";
 import { Cache } from "./cache";
+import { AuditReportWebView } from "./audit/report";
 
 import * as yamlSchemaContributor from "./yaml-schema-contributor";
 import * as audit from "./audit/activate";
@@ -92,9 +93,10 @@ export async function activate(context: vscode.ExtensionContext) {
     diagnostics: vscode.languages.createDiagnosticCollection("audits"),
   };
 
-  audit.activate(context, auditContext, cache);
+  const reportWebView = new AuditReportWebView(context.extensionPath, cache);
+  audit.activate(context, auditContext, cache, reportWebView);
   preview.activate(context, cache, configuration);
-  await platform.activate(context, auditContext, cache);
+  await platform.activate(context, auditContext, cache, reportWebView);
 
   if (previousVersion!.major < currentVersion.major) {
     createWhatsNewPanel(context);

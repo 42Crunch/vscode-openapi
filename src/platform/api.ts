@@ -122,6 +122,20 @@ export async function readAuditReport(
   return JSON.parse(text);
 }
 
+export async function readScanReport(
+  apiId: string,
+  options: PlatformConnection,
+  logger: Logger
+): Promise<any> {
+  const { body } = <any>await got(`api/v1/apis/${apiId}/scanreport`, {
+    ...gotOptions("GET", options, logger),
+    searchParams: { medium: 1 },
+  });
+
+  const text = Buffer.from(body.data, "base64").toString("utf-8");
+  return JSON.parse(text);
+}
+
 export async function deleteApi(apiId: string, options: PlatformConnection, logger: Logger) {
   await got(`api/v1/apis/${apiId}`, gotOptions("DELETE", options, logger));
 }

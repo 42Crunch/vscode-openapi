@@ -17,11 +17,14 @@ import { PlatformFS } from "./fs-provider";
 import { isPlatformUri } from "./util";
 import { CodelensProvider } from "./codelens";
 import { refreshAuditReport } from "./audit";
+import { AuditReportWebView } from "../audit/report";
+import { ScanReportWebView } from "./scan-report";
 
 export async function activate(
   context: vscode.ExtensionContext,
   auditContext: AuditContext,
-  cache: Cache
+  cache: Cache,
+  reportWebView: AuditReportWebView
 ) {
   const platformUrl = configuration.get<string>("platformUrl");
 
@@ -32,6 +35,8 @@ export async function activate(
     // secrets.get() sometimes throws an exception when running tests
     // ignore it
   }
+
+  const scanReportView = new ScanReportWebView(context.extensionPath);
 
   const platformContext: PlatformContext = {
     context,
@@ -100,7 +105,9 @@ export async function activate(
     importedUrls,
     cache,
     provider,
-    tree
+    tree,
+    reportWebView,
+    scanReportView
   );
 
   vscode.languages.registerCodeLensProvider(

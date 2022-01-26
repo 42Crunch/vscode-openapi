@@ -9,7 +9,7 @@ import {
   registerFocusSecurityAudit,
   registerFocusSecurityAuditById,
 } from "./commands";
-import { ReportWebView } from "./report";
+import { AuditReportWebView } from "./report";
 import { AuditContext, PendingAudits } from "../types";
 import { registerQuickfixes } from "./quickfix";
 import { Cache } from "../cache";
@@ -18,7 +18,8 @@ import { setDecorations } from "./decoration";
 export function activate(
   context: vscode.ExtensionContext,
   auditContext: AuditContext,
-  cache: Cache
+  cache: Cache,
+  reportWebView: AuditReportWebView
 ) {
   const pendingAudits: PendingAudits = {};
 
@@ -27,7 +28,7 @@ export function activate(
       setDecorations(editor, auditContext);
       const uri = editor.document.uri.toString();
       if (auditContext.auditsByMainDocument[uri]) {
-        ReportWebView.showIfVisible(auditContext.auditsByMainDocument[uri]);
+        reportWebView.showIfVisible(auditContext.auditsByMainDocument[uri]);
       } else {
         let subdocument = false;
         for (const audit of Object.values(auditContext.auditsByMainDocument)) {
@@ -38,7 +39,7 @@ export function activate(
         // display no report only if the current document is not a
         // part of any multi-document run
         if (!subdocument) {
-          ReportWebView.showNoReport(context);
+          reportWebView.showNoReport();
         }
       }
     }
@@ -46,8 +47,8 @@ export function activate(
 
   vscode.window.onDidChangeActiveTextEditor((editor) => update(editor));
 
-  registerSecurityAudit(context, cache, auditContext, pendingAudits);
-  registerFocusSecurityAudit(context, cache, auditContext);
-  registerFocusSecurityAuditById(context, auditContext);
-  registerQuickfixes(context, cache, auditContext);
+  registerSecurityAudit(context, cache, auditContext, pendingAudits, reportWebView);
+  registerFocusSecurityAudit(context, cache, auditContext, reportWebView);
+  registerFocusSecurityAuditById(context, auditContext, reportWebView);
+  registerQuickfixes(context, cache, auditContext, reportWebView);
 }

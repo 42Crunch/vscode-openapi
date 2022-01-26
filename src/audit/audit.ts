@@ -1,4 +1,4 @@
-import { basename } from "path";
+import path, { basename } from "path";
 import * as vscode from "vscode";
 import { Parsed, find } from "@xliic/preserving-json-yaml-parser";
 
@@ -14,6 +14,7 @@ import {
   ReportedIssue,
 } from "../types";
 import { getLocationByPointer } from "./util";
+import { fromInternalUri } from "../external-refs";
 
 export function updateAuditContext(context: AuditContext, uri: string, audit: Audit) {
   context.auditsByMainDocument[uri] = audit;
@@ -59,6 +60,18 @@ export async function parseAuditReport(
 
   const filename = basename(document.fileName);
 
+  const files: Audit["files"] = {};
+  const mainPath = document.uri.fsPath;
+  const mainDir = path.dirname(mainPath);
+  for (const uri of Object.keys(documents)) {
+    const publicUri = fromInternalUri(vscode.Uri.parse(uri));
+    if (publicUri.scheme === "http" || publicUri.scheme === "https") {
+      files[uri] = { relative: publicUri.toString() };
+    } else {
+      files[uri] = { relative: path.relative(mainDir, publicUri.fsPath) };
+    }
+  }
+
   const result = {
     summary: {
       ...grades,
@@ -67,6 +80,7 @@ export async function parseAuditReport(
     },
     issues,
     filename,
+    files,
   };
 
   return result;

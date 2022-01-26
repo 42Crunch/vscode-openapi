@@ -10,6 +10,7 @@ import {
   readAuditReport,
   readCollection,
   readCollectionUsers,
+  readScanReport,
   updateApi,
 } from "../api";
 import {
@@ -228,6 +229,10 @@ export class PlatformStore {
       now = Date.now();
     }
     throw new Error(`Timed out while waiting for the assessment report for API ID: ${apiId}`);
+  }
+
+  async getScanReport(apiId: string): Promise<any> {
+    return readScanReport(apiId, this.context.connection, this.context.logger);
   }
 
   refresh(): void {}
