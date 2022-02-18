@@ -34,8 +34,7 @@ async function createApi(
   collection: CollectionNode
 ) {
   const uri = await vscode.window.showOpenDialog({
-    openLabel: "Import API",
-    title: "title",
+    title: "Import API",
     canSelectFiles: true,
     canSelectFolders: false,
     canSelectMany: false,

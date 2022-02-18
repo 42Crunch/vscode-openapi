@@ -719,6 +719,11 @@
         "command": "openapi.copySelectedThreeSecurityOutlineJsonReference",
         "title": "OpenAPI: copy JSON Pointer",
         "enablement": "openapiThreeSecurityOutlineSelected"
+      },
+      {
+        "command": "openapi.platform.editorLoadAuditReportFromFile",
+        "title": "42Crunch: Load Security Audit report from file",
+        "enablement": "openapiTwoEnabled || openapiThreeEnabled"
       }
     ],
     "keybindings": [

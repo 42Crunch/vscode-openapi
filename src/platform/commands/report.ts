@@ -7,6 +7,9 @@ import { AuditContext } from "../../types";
 import { makePlatformUri } from "../util";
 import { AuditReportWebView } from "../../audit/report";
 import { ScanReportWebView } from "../scan-report";
+import { parseAuditReport, updateAuditContext } from "../../audit/audit";
+import { setDecorations, updateDecorations } from "../../audit/decoration";
+import { updateDiagnostics } from "../../audit/diagnostic";
 
 export default (
   store: PlatformStore,
@@ -36,6 +39,40 @@ export default (
         }
       }
     );
+  },
+
+  editorLoadAuditReportFromFile: async (editor: vscode.TextEditor, edit: vscode.TextEditorEdit) => {
+    const selection = await vscode.window.showOpenDialog({
+      title: "Load Security Audit report",
+      canSelectFiles: true,
+      canSelectFolders: false,
+      canSelectMany: false,
+      // TODO use language filter from extension.ts
+      filters: {
+        OpenAPI: ["json", "yaml", "yml"],
+      },
+    });
+
+    if (selection) {
+      const text = await vscode.workspace.fs.readFile(selection[0]);
+      const report = JSON.parse(Buffer.from(text).toString("utf-8"));
+      if (report?.aid && report?.tid && report.data?.assessmentVersion) {
+        const uri = editor.document.uri.toString();
+        const audit = await parseAuditReport(cache, editor.document, report.data, {
+          value: { uri, hash: "" },
+          children: {},
+        });
+        updateAuditContext(auditContext, uri, audit);
+        updateDecorations(auditContext.decorations, audit.summary.documentUri, audit.issues);
+        updateDiagnostics(auditContext.diagnostics, audit.filename, audit.issues);
+        setDecorations(editor, auditContext);
+        reportWebView.show(audit);
+      } else {
+        vscode.window.showErrorMessage(
+          "Can't find 42Crunch Security Audit report in the selected file"
+        );
+      }
+    }
   },
 
   openScanReport: async (apiId: string) => {
