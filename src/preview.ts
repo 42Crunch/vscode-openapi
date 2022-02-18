@@ -161,7 +161,7 @@ function buildWebviewPanel(
 
     const index = panel.webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(context.extensionPath, "webview", "generated", "preview", name, "index.js")
+        path.join(context.extensionPath, "webview", "generated", "preview", name, "main.js")
       )
     );
     panel.webview.html = getWebviewContent(panel.webview, index);

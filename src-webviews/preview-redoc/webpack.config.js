@@ -29,16 +29,13 @@ module.exports = {
       https: false,
       http: false,
       os: false,
+      url: require.resolve("url"),
       path: require.resolve("path-browserify"),
       tty: require.resolve("tty-browserify"),
     },
     extensions: [".tsx", ".ts", ".js"],
   },
   mode: "production",
-  output: {
-    filename: "index.js",
-    path: path.resolve(__dirname, "..", "..", "webview", "generated", "preview", "redoc"),
-  },
   plugins: [
     new webpack.ProvidePlugin({
       process: require.resolve("process/browser"),

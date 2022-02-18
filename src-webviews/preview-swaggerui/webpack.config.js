@@ -29,10 +29,6 @@ module.exports = {
     extensions: [".tsx", ".ts", ".js"],
   },
   mode: "production",
-  output: {
-    filename: "index.js",
-    path: path.resolve(__dirname, "..", "..", "webview", "generated", "preview", "swaggerui"),
-  },
   plugins: [
     new webpack.ProvidePlugin({
       Buffer: ["buffer", "Buffer"],

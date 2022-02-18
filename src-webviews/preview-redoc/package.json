@@ -1,0 +1,20 @@
+{
+  "name": "preview-redoc",
+  "version": "0.0.0",
+  "scripts": {
+    "build": "webpack --config webpack.config.js"
+  },
+  "devDependencies": {
+    "buffer": "^6.0.3",
+    "css-loader": "^6.6.0",
+    "path-browserify": "^1.0.1",
+    "process": "^0.11.10",
+    "redoc": "2.0.0-rc.63",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.2.6",
+    "tty-browserify": "^0.0.1",
+    "url": "^0.11.0",
+    "webpack": "^5.69.1",
+    "webpack-cli": "^4.9.2"
+  }
+}
