@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 4.9.0 (Feburary 21, 2022)
+* Update webapp for displaying Security Audit reports
+
 ## Version 4.8.2 (January 24, 2022)
 * Fix incorrect schemas for 42Crunch extensions
 * Fix issue with setting platform-related properties on extension activation
