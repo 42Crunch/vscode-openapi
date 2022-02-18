@@ -65,10 +65,9 @@ export class AuditReportWebView {
   }
 
   public async showNoReport() {
-    if (!this.panel) {
-      this.panel = this.createPanel(await this.getKdb());
+    if (this.panel && this.panel.visible) {
+      this.panel.webview.postMessage({ command: "showNoReport" });
     }
-    this.panel.webview.postMessage({ command: "showNoReport" });
   }
 
   private async focusLine(uri: string, pointer: string, line: string) {
