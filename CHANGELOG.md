@@ -3,6 +3,7 @@
 ## Version 4.9.0 (Feburary 21, 2022)
 * Update webapp for displaying Security Audit reports
 * Update preview to use the latest versions of SwaggerUI and Redoc
+* Add command to load Security Audit report from file
 
 ## Version 4.8.2 (January 24, 2022)
 * Fix incorrect schemas for 42Crunch extensions
