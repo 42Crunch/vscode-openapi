@@ -43,6 +43,7 @@ export const reportSlice = createSlice({
   reducers: {
     showFullReport: (state, action: PayloadAction<any>) => {
       state.display = "full";
+      state.summary = action.payload.summary;
       state.all = state.selected = flattenIssues(action.payload);
     },
     showPartialReport: (
@@ -52,6 +53,7 @@ export const reportSlice = createSlice({
       const issues = flattenIssues(action.payload.report);
       const ids = action.payload.ids.map((id) => `${action.payload.uri}-${id}`);
       state.display = "partial";
+      state.summary = action.payload.report.summary;
       state.all = issues;
       state.selected = issues.filter((issue) => ids.includes(issue.key));
     },
@@ -61,6 +63,7 @@ export const reportSlice = createSlice({
     },
     showNoReport: (state) => {
       state.display = "no-report";
+      state.summary = initialState.summary;
       state.all = [];
       state.selected = [];
     },
