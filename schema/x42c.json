@@ -75,13 +75,25 @@
                 "$ref": "#/definitions/X42cJwtValidation"
               },
               {
+                "$ref": "#/definitions/X42cJwtValidationV2"
+              },
+              {
                 "$ref": "#/definitions/X42cJwtValidationEc"
+              },
+              {
+                "$ref": "#/definitions/X42cJwtValidationEcV2"
               },
               {
                 "$ref": "#/definitions/X42cJwtValidationHmac"
               },
               {
+                "$ref": "#/definitions/X42cJwtValidationHmacV2"
+              },
+              {
                 "$ref": "#/definitions/X42cJwtVvalidationRsa"
+              },
+              {
+                "$ref": "#/definitions/X42cJwtVvalidationRsaV2"
               },
               {
                 "$ref": "#/definitions/X42cJwtValidationRsaNoSigCheck"
@@ -370,6 +382,107 @@
       },
       "additionalProperties": false
     },
+    "X42cJwtValidationV2": {
+      "type": "object",
+      "required": ["x-42c-jwt-validation_0.2"],
+      "properties": {
+        "x-42c-jwt-validation_0.2": {
+          "type": "object",
+          "required": ["header.name", "authorized.algorithms"],
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "allow.basic.value": {
+              "type": "boolean",
+              "default": false
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "default": "JWK"
+            },
+            "jwks.uri": {
+              "schema": {
+                "type": "string",
+                "pattern": "((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\\+\\$,\\w]+@)[A-Za-z0-9.-]+)((?:\\/[\\+~%/.\\w-_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[.\\!/\\w]*))?)",
+                "minLength": 1,
+                "maxLength": 500,
+                "default": ""
+              }
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "default": true
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "default": 5
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "default": 10
+            },
+            "authorized.algorithms": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "HS256",
+                  "HS384",
+                  "HS512",
+                  "RS256",
+                  "RS384",
+                  "RS512",
+                  "PS256",
+                  "PS384",
+                  "PS512",
+                  "ES256",
+                  "ES384",
+                  "ES512"
+                ]
+              }
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "default": 86400
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "claims.schema": {
+              "type": "object",
+              "default": {}
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "default": {}
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "X42cJwtValidationEc": {
       "type": "object",
       "required": ["x-42c-jwt-validation-ec_0.1"],
@@ -389,6 +502,87 @@
               "minLength": 1,
               "maxLength": 100,
               "default": "JWK"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "default": true
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "default": 5
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "default": 10
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "default": 86400
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "claims.schema": {
+              "type": "object",
+              "default": {}
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "default": {}
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cJwtValidationEcV2": {
+      "type": "object",
+      "required": ["x-42c-jwt-validation-ec_0.2"],
+      "properties": {
+        "x-42c-jwt-validation-ec_0.2": {
+          "type": "object",
+          "required": ["header.name"],
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "allow.basic.value": {
+              "type": "boolean",
+              "default": false
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "default": "JWK"
+            },
+            "jwks.uri": {
+              "schema": {
+                "type": "string",
+                "pattern": "((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\\+\\$,\\w]+@)[A-Za-z0-9.-]+)((?:\\/[\\+~%/.\\w-_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[.\\!/\\w]*))?)",
+                "minLength": 1,
+                "maxLength": 500,
+                "default": ""
+              }
             },
             "forward.jwt": {
               "type": "boolean",
@@ -506,6 +700,87 @@
       },
       "additionalProperties": false
     },
+    "X42cJwtValidationHmacV2": {
+      "type": "object",
+      "required": ["x-42c-jwt-validation-hmac_0.2"],
+      "properties": {
+        "x-42c-jwt-validation-hmac_0.2": {
+          "type": "object",
+          "required": ["header.name"],
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "allow.basic.value": {
+              "type": "boolean",
+              "default": false
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "default": "JWK"
+            },
+            "jwks.uri": {
+              "schema": {
+                "type": "string",
+                "pattern": "((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\\+\\$,\\w]+@)[A-Za-z0-9.-]+)((?:\\/[\\+~%/.\\w-_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[.\\!/\\w]*))?)",
+                "minLength": 1,
+                "maxLength": 500,
+                "default": ""
+              }
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "default": true
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "default": 5
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "default": 10
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "default": 86400
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "claims.schema": {
+              "type": "object",
+              "default": {}
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "default": {}
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
     "X42cJwtVvalidationRsa": {
       "type": "object",
       "required": ["x-42c-jwt-validation-rsa_0.1"],
@@ -525,6 +800,87 @@
               "minLength": 1,
               "maxLength": 100,
               "default": "JWK"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "default": true
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "default": 5
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "default": 10
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "default": 86400
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "claims.schema": {
+              "type": "object",
+              "default": {}
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "default": {}
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "X42cJwtVvalidationRsaV2": {
+      "type": "object",
+      "required": ["x-42c-jwt-validation-rsa_0.2"],
+      "properties": {
+        "x-42c-jwt-validation-rsa_0.2": {
+          "type": "object",
+          "required": ["header.name"],
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100
+            },
+            "allow.basic.value": {
+              "type": "boolean",
+              "default": false
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "default": "JWK"
+            },
+            "jwks.uri": {
+              "schema": {
+                "type": "string",
+                "pattern": "((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\\+\\$,\\w]+@)[A-Za-z0-9.-]+)((?:\\/[\\+~%/.\\w-_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[.\\!/\\w]*))?)",
+                "minLength": 1,
+                "maxLength": 500,
+                "default": ""
+              }
             },
             "forward.jwt": {
               "type": "boolean",
