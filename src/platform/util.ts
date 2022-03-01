@@ -1,6 +1,6 @@
 import path from "path";
 import * as vscode from "vscode";
-import { platformUriScheme } from "./types";
+import { NamingConvention, platformUriScheme } from "./types";
 
 export async function confirmed(prompt: string) {
   const confirmation = await vscode.window.showInformationMessage(prompt, "Yes", "Cancel");
@@ -37,5 +37,19 @@ export function makeIcon(
   return {
     light: vscode.Uri.parse(extensionUri.toString() + `/resources/light/${icon.light}.svg`),
     dark: vscode.Uri.parse(extensionUri.toString() + `/resources/dark/${icon.dark}.svg`),
+  };
+}
+
+export function createNamingConventionInputBoxOptions(convention: NamingConvention) {
+  const example = convention.example;
+  const pattern = convention.pattern;
+  const description = convention.description;
+  return {
+    prompt: `Example: ${example}`,
+    validateInput: (input: string): string | undefined => {
+      if (!input.match(pattern)) {
+        return `The input does not match the expected pattern "${description}" defined in your organization. Example of the expected value: "${example}"`;
+      }
+    },
   };
 }

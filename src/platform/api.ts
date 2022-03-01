@@ -3,7 +3,8 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import got, { HTTPError, Method, OptionsOfJSONResponseBody } from "got";
+import got, { Method, OptionsOfJSONResponseBody } from "got";
+import { NamingConvention } from "./types";
 import {
   Api,
   ListCollectionsResponse,
@@ -215,4 +216,36 @@ export async function deleteCollection(
   logger: Logger
 ) {
   await got(`api/v1/collections/${collectionId}`, gotOptions("DELETE", options, logger));
+}
+
+export async function getApiNamingConvention(
+  options: PlatformConnection,
+  logger: Logger
+): Promise<NamingConvention> {
+  return { pattern: "^[\\w _.-]{1,64}$", description: "api-pattern", example: "foobar-api" };
+  /*
+  const { body } = await got(
+    `api/v1/organizations/me/settings/apiNamingConvention`,
+    gotOptions("GET", options, logger)
+  );
+  return <NamingConvention>body;
+  */
+}
+
+export async function getCollectionNamingConvention(
+  options: PlatformConnection,
+  logger: Logger
+): Promise<NamingConvention> {
+  return {
+    pattern: "^[\\w _.\\/:-]{1,16}$",
+    description: "coll-pattern",
+    example: "foo-collection",
+  };
+  /*
+  const { body } = await got(
+    `api/v1/organizations/me/settings/collectionNamingConvention`,
+    gotOptions("GET", options, logger)
+  );
+  return <NamingConvention>body;
+  */
 }

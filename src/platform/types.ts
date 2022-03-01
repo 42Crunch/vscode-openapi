@@ -106,3 +106,9 @@ export interface Logger {
   info(message: string): void;
   debug(message: string): void;
 }
+
+export interface NamingConvention {
+  pattern: string;
+  description: string;
+  example: string;
+}

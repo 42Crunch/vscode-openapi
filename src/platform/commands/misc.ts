@@ -3,15 +3,15 @@ import * as vscode from "vscode";
 import { PlatformStore } from "../stores/platform-store";
 import { CollectionsProvider } from "../explorer/provider";
 import { ExplorerNode } from "../explorer/nodes/base";
-import { confirmed, getApiId, makePlatformUri } from "../util";
+import {
+  confirmed,
+  createNamingConventionInputBoxOptions,
+  getApiId,
+  makePlatformUri,
+} from "../util";
 import { ApiNode } from "../explorer/nodes/api";
 import { FavoritesStore } from "../stores/favorites-store";
-import {
-  CollectionNode,
-  CollectionsNode,
-  FilteredApiNode,
-  FilteredCollectionNode,
-} from "../explorer/nodes/collection";
+import { CollectionNode } from "../explorer/nodes/collection";
 import { FavoriteCollectionNode } from "../explorer/nodes/favorite";
 
 export default (
@@ -47,14 +47,11 @@ export default (
   },
 
   collectionRename: async (collection: CollectionNode | FavoriteCollectionNode) => {
+    const convention = await store.getCollectionNamingConvention();
     const name = await vscode.window.showInputBox({
-      prompt: "New collection name",
+      title: "Rename collecton",
       value: collection.collection.desc.name,
-      validateInput: (input) => {
-        if (!input.match(/^[A-Za-z0-9_\-\.\ ]+$/)) {
-          return "Invalid name, only alphanumerical characters are allowed";
-        }
-      },
+      ...createNamingConventionInputBoxOptions(convention),
     });
     if (name) {
       await store.collectionRename(collection.getCollectionId(), name);
@@ -63,15 +60,13 @@ export default (
   },
 
   apiRename: async (api: ApiNode) => {
+    const convention = await store.getCollectionNamingConvention();
     const name = await vscode.window.showInputBox({
-      prompt: "New API name",
+      title: "Rename API",
       value: api.api.desc.name,
-      validateInput: (input) => {
-        if (!input.match(/^[A-Za-z0-9_\-\.\ ]+$/)) {
-          return "Invalid name, only alphanumerical characters are allowed";
-        }
-      },
+      ...createNamingConventionInputBoxOptions(convention),
     });
+
     if (name) {
       await store.apiRename(api.getApiId(), name);
       provider.refresh();
@@ -106,8 +101,11 @@ export default (
   },
 
   createCollection: async () => {
+    const convention = await store.getCollectionNamingConvention();
     const name = await vscode.window.showInputBox({
-      prompt: "New Collection name",
+      title: "Create new collection",
+      placeHolder: "New collection name",
+      ...createNamingConventionInputBoxOptions(convention),
     });
 
     if (name) {
