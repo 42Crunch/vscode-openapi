@@ -40,16 +40,28 @@ export function makeIcon(
   };
 }
 
-export function createNamingConventionInputBoxOptions(convention: NamingConvention) {
-  const example = convention.example;
-  const pattern = convention.pattern;
-  const description = convention.description;
+function createNamingConventionInputBoxOptions(
+  convention: NamingConvention,
+  defaultPattern: string
+) {
+  const { pattern, description, example } = convention;
+  const prompt = example !== "" ? `Example: ${example}` : undefined;
   return {
-    prompt: `Example: ${example}`,
+    prompt,
     validateInput: (input: string): string | undefined => {
-      if (!input.match(pattern)) {
+      if (pattern !== "" && !input.match(pattern)) {
         return `The input does not match the expected pattern "${description}" defined in your organization. Example of the expected value: "${example}"`;
+      }
+      if (!input.match(defaultPattern)) {
+        return `The input does not match the expected pattern "${defaultPattern}"`;
       }
     },
   };
+}
+
+export function createApiNamingConventionInputBoxOptions(convention: NamingConvention) {
+  return createNamingConventionInputBoxOptions(convention, "^[\\w _.-]{1,64}$");
+}
+export function createCollectionNamingConventionInputBoxOptions(convention: NamingConvention) {
+  return createNamingConventionInputBoxOptions(convention, "^[\\w _.\\/:-]{1,2048}$");
 }

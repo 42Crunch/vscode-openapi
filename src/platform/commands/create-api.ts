@@ -9,7 +9,7 @@ import { CollectionNode } from "../explorer/nodes/collection";
 import { Cache } from "../../cache";
 import got from "got";
 import { ImportedUrlStore } from "../stores/imported-url-store";
-import { createNamingConventionInputBoxOptions, getApiId } from "../util";
+import { createApiNamingConventionInputBoxOptions, getApiId } from "../util";
 import { MAX_NAME_LEN } from "../types";
 
 export default (
@@ -59,7 +59,7 @@ async function createApi(
     const name = await vscode.window.showInputBox({
       title: "Import API into a collection",
       value: mangle(bundle?.value?.info?.title ?? "OpenAPI"),
-      ...createNamingConventionInputBoxOptions(convention),
+      ...createApiNamingConventionInputBoxOptions(convention),
     });
 
     if (name) {
@@ -99,7 +99,7 @@ async function createApiFromUrl(
     const name = await vscode.window.showInputBox({
       title: "Import API into a collection",
       value: mangle((parsed as any)?.info?.title ?? "OpenAPI"),
-      ...createNamingConventionInputBoxOptions(convention),
+      ...createApiNamingConventionInputBoxOptions(convention),
     });
 
     if (name) {

@@ -222,30 +222,20 @@ export async function getApiNamingConvention(
   options: PlatformConnection,
   logger: Logger
 ): Promise<NamingConvention> {
-  return { pattern: "^[\\w _.-]{1,64}$", description: "api-pattern", example: "foobar-api" };
-  /*
   const { body } = await got(
     `api/v1/organizations/me/settings/apiNamingConvention`,
     gotOptions("GET", options, logger)
   );
   return <NamingConvention>body;
-  */
 }
 
 export async function getCollectionNamingConvention(
   options: PlatformConnection,
   logger: Logger
 ): Promise<NamingConvention> {
-  return {
-    pattern: "^[\\w _.\\/:-]{1,16}$",
-    description: "coll-pattern",
-    example: "foo-collection",
-  };
-  /*
   const { body } = await got(
     `api/v1/organizations/me/settings/collectionNamingConvention`,
     gotOptions("GET", options, logger)
   );
   return <NamingConvention>body;
-  */
 }

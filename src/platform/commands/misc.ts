@@ -5,7 +5,7 @@ import { CollectionsProvider } from "../explorer/provider";
 import { ExplorerNode } from "../explorer/nodes/base";
 import {
   confirmed,
-  createNamingConventionInputBoxOptions,
+  createCollectionNamingConventionInputBoxOptions,
   getApiId,
   makePlatformUri,
 } from "../util";
@@ -51,7 +51,7 @@ export default (
     const name = await vscode.window.showInputBox({
       title: "Rename collecton",
       value: collection.collection.desc.name,
-      ...createNamingConventionInputBoxOptions(convention),
+      ...createCollectionNamingConventionInputBoxOptions(convention),
     });
     if (name) {
       await store.collectionRename(collection.getCollectionId(), name);
@@ -64,7 +64,7 @@ export default (
     const name = await vscode.window.showInputBox({
       title: "Rename API",
       value: api.api.desc.name,
-      ...createNamingConventionInputBoxOptions(convention),
+      ...createCollectionNamingConventionInputBoxOptions(convention),
     });
 
     if (name) {
@@ -105,7 +105,7 @@ export default (
     const name = await vscode.window.showInputBox({
       title: "Create new collection",
       placeHolder: "New collection name",
-      ...createNamingConventionInputBoxOptions(convention),
+      ...createCollectionNamingConventionInputBoxOptions(convention),
     });
 
     if (name) {
