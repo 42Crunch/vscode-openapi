@@ -4,6 +4,8 @@ import {
   createCollection,
   deleteApi,
   deleteCollection,
+  getApiNamingConvention,
+  getCollectionNamingConvention,
   listApis,
   listCollections,
   readApi,
@@ -18,6 +20,7 @@ import {
   ApiFilter,
   CollectionData,
   CollectionFilter,
+  NamingConvention,
   PlatformContext,
   UserData,
 } from "../types";
@@ -92,6 +95,14 @@ export class PlatformStore {
   readonly filters = new Filters();
 
   constructor(private context: PlatformContext) {}
+
+  async getCollectionNamingConvention(): Promise<NamingConvention> {
+    return getCollectionNamingConvention(this.context.connection, this.context.logger);
+  }
+
+  async getApiNamingConvention(): Promise<NamingConvention> {
+    return getApiNamingConvention(this.context.connection, this.context.logger);
+  }
 
   async getCollections(
     filter: CollectionFilter | undefined,

@@ -9,7 +9,7 @@ import { CollectionNode } from "../explorer/nodes/collection";
 import { Cache } from "../../cache";
 import got from "got";
 import { ImportedUrlStore } from "../stores/imported-url-store";
-import { getApiId } from "../util";
+import { createApiNamingConventionInputBoxOptions, getApiId } from "../util";
 import { MAX_NAME_LEN } from "../types";
 
 export default (
@@ -55,16 +55,20 @@ async function createApi(
       );
     }
 
-    const title = mangle(bundle?.value?.info?.title ?? "OpenAPI");
+    const convention = await store.getApiNamingConvention();
+    const name = await vscode.window.showInputBox({
+      title: "Import API into a collection",
+      value: mangle(bundle?.value?.info?.title ?? "OpenAPI"),
+      ...createApiNamingConventionInputBoxOptions(convention),
+    });
 
-    const json = stringify(bundle.value);
-
-    const api = await store.createApi(collection.getCollectionId(), title, json);
-
-    const apiNode = new ApiNode(collection, store, api);
-
-    provider.refresh();
-    tree.reveal(apiNode, { focus: true });
+    if (name) {
+      const json = stringify(bundle.value);
+      const api = await store.createApi(collection.getCollectionId(), name, json);
+      const apiNode = new ApiNode(collection, store, api);
+      provider.refresh();
+      tree.reveal(apiNode, { focus: true });
+    }
   }
 }
 
@@ -91,14 +95,20 @@ async function createApiFromUrl(
       );
     }
 
-    const title = mangle((parsed as any)?.info?.title ?? "OpenAPI");
+    const convention = await store.getApiNamingConvention();
+    const name = await vscode.window.showInputBox({
+      title: "Import API into a collection",
+      value: mangle((parsed as any)?.info?.title ?? "OpenAPI"),
+      ...createApiNamingConventionInputBoxOptions(convention),
+    });
 
-    const api = await store.createApi(collection.getCollectionId(), title, body);
-    importedUrls.setUrl(api.desc.id, uri);
-    const apiNode = new ApiNode(collection, store, api);
-
-    provider.refresh();
-    tree.reveal(apiNode, { focus: true });
+    if (name) {
+      const api = await store.createApi(collection.getCollectionId(), name, body);
+      importedUrls.setUrl(api.desc.id, uri);
+      const apiNode = new ApiNode(collection, store, api);
+      provider.refresh();
+      tree.reveal(apiNode, { focus: true });
+    }
   }
 }
 

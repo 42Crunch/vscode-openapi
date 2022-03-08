@@ -12,7 +12,7 @@ export class CollectionsProvider implements vscode.TreeDataProvider<ExplorerNode
   public readonly root: RootNode;
 
   constructor(
-    store: PlatformStore,
+    private store: PlatformStore,
     favoritesStore: FavoritesStore,
     private extensionUri: vscode.Uri
   ) {
