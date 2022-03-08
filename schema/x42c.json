@@ -193,7 +193,8 @@
       "minimum": 0
     },
     "X42cSample": {
-      "type": "null"
+      "additionalProperties": true,
+      "additionalItems": true
     },
     "X42cDeactivateAllowList": {
       "type": "object",
