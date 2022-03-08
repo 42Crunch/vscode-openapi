@@ -1,7 +1,10 @@
 # Changelog
 
-## Version 4.9.2 (March 2, 2022)
+## Version 4.9.3 (March 8, 2022)
+* Check 42Crunch platform naming conventions in 42Crunch platform integration component
+* Fix x-42c-sample schema definition
 
+## Version 4.9.2 (March 2, 2022)
 * Updated schema with 42Crunch extensions definitions
 
 ## Version 4.9.1 (Feburary 23, 2022)
