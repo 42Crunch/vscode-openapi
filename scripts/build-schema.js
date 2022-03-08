@@ -9,6 +9,42 @@ const schemasRoot = JSON.parse(fs.readFileSync("schema/openapi.json", "utf8"));
 const schemasV2 = JSON.parse(fs.readFileSync("schema/openapi-2.0.json", "utf8"));
 const schemasV3 = JSON.parse(fs.readFileSync("schema/openapi-3.0-2019-04-02.json", "utf8"));
 
+const refs = new Set();
+collectRefs("target", x42Config, refs);
+collectRefs("$ref", x42Defs, refs);
+
+const defs = new Set();
+for (const key of Object.keys(x42Defs.definitions)) {
+  defs.add(key);
+}
+
+for (const def of defs) {
+  if (!refs.has(def)) {
+    console.error("ERROR: Extension " + def + " is not used");
+  }
+}
+
+function collectRefs(keyToFind, obj, refs) {
+  const type = getType(obj);
+  if (type === "object") {
+    for (const key of Object.keys(obj)) {
+      if (key === keyToFind) {
+        refs.add(getLastPointerPart(obj[key]));
+      }
+      collectRefs(keyToFind, obj[key], refs);
+    }
+  } else if (type === "array") {
+    for (let i = 0; i < obj.length; i++) {
+      collectRefs(keyToFind, obj[i], refs);
+    }
+  }
+}
+
+function getLastPointerPart(jsonPath) {
+  const items = jsonPath.split("/");
+  return items[items.length - 1];
+}
+
 Object.assign(schemasV2.definitions, x42Defs.definitions);
 Object.assign(schemasV3.definitions, x42Defs.definitions);
 

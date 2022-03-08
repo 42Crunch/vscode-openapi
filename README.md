@@ -24,6 +24,7 @@ Both OAS v2 and v3 are supported.
     - [Fix issues](#fix-issues)
       - [Individual fixes](#individual-fixes)
       - [Bulk fixes](#bulk-fixes)
+  - [Miscellaneous commands](#miscellaneous-commands)
   - [Integration with 42Crunch Platform](#integration-with-42crunch-platform)
   - [Known issues](#known-issues)
   - [Feedback](#feedback)
@@ -152,6 +153,10 @@ If your OpenAPI file contains multiple similar issues - for example, a parameter
 2. Go to the next occurrence and use the bulk QuickFix. This bulk QuickFix will reuse the values that you used previously for the parameter with the same name.
 
 ![Bulk Fixes in VSCode](/images/VSCode_OpenAPI_bulk_security_fixes.gif)
+
+## Miscellaneous commands
+
+- You can load results of Security Audit from a file for a currently open OpenAPI file by running command `42Crunch: Load Security Audit report from file` from the command palette
 
 ## Integration with 42Crunch Platform
 
