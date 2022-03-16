@@ -14,7 +14,7 @@
     "react-dom": "^17.0.2",
     "stream-browserify": "^3.0.0",
     "style-loader": "^3.3.1",
-    "swagger-ui-react": "^4.5.2",
+    "swagger-ui-react": "^4.6.2",
     "ts-loader": "^9.2.6",
     "tty-browserify": "^0.0.1",
     "url": "^0.11.0",
