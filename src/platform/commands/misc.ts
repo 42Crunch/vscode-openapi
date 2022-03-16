@@ -49,7 +49,7 @@ export default (
   collectionRename: async (collection: CollectionNode | FavoriteCollectionNode) => {
     const convention = await store.getCollectionNamingConvention();
     const name = await vscode.window.showInputBox({
-      title: "Rename collecton",
+      title: "Rename collection",
       value: collection.collection.desc.name,
       ...createCollectionNamingConventionInputBoxOptions(convention),
     });
