@@ -46,14 +46,14 @@ export class AuditReportWebView {
 
   public async show(report: Audit) {
     if (!this.panel) {
-      this.panel = this.createPanel(await this.getKdb());
+      this.panel = await this.createPanel(await this.getKdb());
     }
     this.panel.webview.postMessage({ command: "showFullReport", report });
   }
 
   public async showIds(report: Audit, uri: string, ids: any[]) {
     if (!this.panel) {
-      this.panel = this.createPanel(await this.getKdb());
+      this.panel = await this.createPanel(await this.getKdb());
     }
     this.panel.webview.postMessage({ command: "showPartialReport", report, uri, ids });
   }
@@ -113,7 +113,7 @@ export class AuditReportWebView {
     }
   }
 
-  private createPanel(kdb: any): vscode.WebviewPanel {
+  private createPanel(kdb: any): Promise<vscode.WebviewPanel> {
     const panel = vscode.window.createWebviewPanel(
       "security-audit-report",
       "Security Audit Report",
@@ -134,26 +134,6 @@ export class AuditReportWebView {
       this.style
     );
 
-    panel.webview.onDidReceiveMessage(
-      (message) => {
-        switch (message.command) {
-          case "copyIssueId":
-            vscode.env.clipboard.writeText(message.id);
-            const disposable = vscode.window.setStatusBarMessage(`Copied ID: ${message.id}`);
-            setTimeout(() => disposable.dispose(), 1000);
-            return;
-          case "goToLine":
-            this.focusLine(message.uri, message.pointer, message.line);
-            return;
-          case "openLink":
-            vscode.env.openExternal(vscode.Uri.parse(message.href));
-            return;
-        }
-      },
-      null,
-      this._disposables
-    );
-
     vscode.window.onDidChangeActiveColorTheme(
       (event) => {
         const kind = event.kind === vscode.ColorThemeKind.Light ? "light" : "dark";
@@ -165,7 +145,30 @@ export class AuditReportWebView {
 
     panel.onDidDispose(() => this.dispose(), null, this._disposables);
 
-    return panel;
+    return new Promise((resolve, reject) => {
+      panel.webview.onDidReceiveMessage(
+        (message) => {
+          switch (message.command) {
+            case "started":
+              resolve(panel);
+              return;
+            case "copyIssueId":
+              vscode.env.clipboard.writeText(message.id);
+              const disposable = vscode.window.setStatusBarMessage(`Copied ID: ${message.id}`);
+              setTimeout(() => disposable.dispose(), 1000);
+              return;
+            case "goToLine":
+              this.focusLine(message.uri, message.pointer, message.line);
+              return;
+            case "openLink":
+              vscode.env.openExternal(vscode.Uri.parse(message.href));
+              return;
+          }
+        },
+        null,
+        this._disposables
+      );
+    });
   }
 
   private getHtml(cspSource: string, kdb: any, script: vscode.Uri, style: string): string {
@@ -199,11 +202,10 @@ export class AuditReportWebView {
     <script src="${script}"></script>
     <script>
     window.addEventListener("DOMContentLoaded", (event) => {
-      console.log('content loaded');
       const kdb = JSON.parse(document.getElementById("kdb").textContent);
       const vscode = acquireVsCodeApi();
       window.renderAuditReport(vscode, kdb, {kind: "${themeKind}"});
-      console.log("all done");
+      vscode.postMessage({command: "started"});
     });
     </script>
     </body>
