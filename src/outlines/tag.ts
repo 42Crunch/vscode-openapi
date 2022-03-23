@@ -39,6 +39,8 @@ interface TagOperation {
 
 type TagNode = TagName | TagOperation;
 
+const HTTP_METHODS = ["get", "put", "post", "delete", "options", "head", "patch", "trace"];
+
 export class TagOutlineProvider implements vscode.TreeDataProvider<TagNode> {
   private _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
   readonly onDidChangeTreeData: vscode.Event<void> = this._onDidChangeTreeData.event;
@@ -56,6 +58,9 @@ export class TagOutlineProvider implements vscode.TreeDataProvider<TagNode> {
             if (paths && typeof paths === "object") {
               for (const [path, pathitem] of Object.entries(paths)) {
                 for (const [method, operation] of Object.entries(<object>pathitem)) {
+                  if (!HTTP_METHODS.includes(method)) {
+                    break;
+                  }
                   const tags = operation["tags"];
                   const name = getUniqueName(path, method, operation);
                   const location = getLocation(<Container>pathitem, method)!;
