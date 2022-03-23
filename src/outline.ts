@@ -7,6 +7,7 @@ import { find, getLocation, Location } from "@xliic/preserving-json-yaml-parser"
 import * as vscode from "vscode";
 import { Cache } from "./cache";
 import { configuration } from "./configuration";
+import { TagOutlineProvider } from "./outlines/tag";
 import { OpenApiVersion } from "./types";
 
 export interface Node {
@@ -337,7 +338,7 @@ export class OperationIdOutlineProvider extends OutlineProvider {
   }
 }
 
-function registerOutlineTreeView(id: string, provider: vscode.TreeDataProvider<Node>): void {
+function registerOutlineTreeView(id: string, provider: vscode.TreeDataProvider<any>): void {
   outlines[id] = vscode.window.createTreeView(id, {
     treeDataProvider: provider,
   });
@@ -354,6 +355,8 @@ export function registerOutlines(
   // OpenAPI v2 outlines
   registerOutlineTreeView("openapiTwoSpecOutline", new GeneralTwoOutlineProvider(context, cache));
   registerOutlineTreeView("openapiTwoPathOutline", new PathOutlineProvider(context, cache));
+  registerOutlineTreeView("openapiTwoTagsOutline", new TagOutlineProvider(context, cache));
+
   registerOutlineTreeView(
     "openapiTwoOperationIdOutline",
     new OperationIdOutlineProvider(context, cache)
@@ -379,6 +382,7 @@ export function registerOutlines(
 
   // OpenAPI v3 outlines
   registerOutlineTreeView("openapiThreePathOutline", new PathOutlineProvider(context, cache));
+  registerOutlineTreeView("openapiThreeTagsOutline", new TagOutlineProvider(context, cache));
   registerOutlineTreeView(
     "openapiThreeOperationIdOutline",
     new OperationIdOutlineProvider(context, cache)

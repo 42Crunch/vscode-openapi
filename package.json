@@ -4,7 +4,7 @@
   "displayName": "OpenAPI (Swagger) Editor",
   "description": "OpenAPI extension for Visual Studio Code",
   "license": "AGPL-3.0-only",
-  "version": "4.9.3",
+  "version": "4.10",
   "publisher": "42Crunch",
   "repository": {
     "type": "git",
@@ -91,6 +91,11 @@
           "when": "openapiTwoEnabled"
         },
         {
+          "id": "openapiTwoTagsOutline",
+          "name": "Tags",
+          "when": "openapiTwoEnabled"
+        },
+        {
           "id": "openapiTwoOperationIdOutline",
           "name": "Operation ID",
           "when": "openapiTwoEnabled"
@@ -128,6 +133,11 @@
         {
           "id": "openapiThreePathOutline",
           "name": "Paths",
+          "when": "openapiThreeEnabled"
+        },
+        {
+          "id": "openapiThreeTagsOutline",
+          "name": "Tags",
           "when": "openapiThreeEnabled"
         },
         {
@@ -820,6 +830,6 @@
     "marked": "^4.0.10",
     "mkdirp": "^0.5.5",
     "mocha": "^9.2.0",
-    "typescript": "^4.5.5"
+    "typescript": "^4.6"
   }
 }
