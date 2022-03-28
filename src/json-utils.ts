@@ -1,6 +1,5 @@
 import { getType } from "./audit/schema";
-import { Container, Location, Parsed } from "@xliic/preserving-json-yaml-parser/lib/types";
-import { getPreservedLocation } from "@xliic/preserving-json-yaml-parser/lib/preserve";
+import { Container, Location, Parsed, getLocation } from "@xliic/preserving-json-yaml-parser";
 import { find, parse } from "@xliic/preserving-json-yaml-parser";
 import { getPointerChild, getPointerLastSegment, getPointerParent } from "./pointer";
 import { parserOptions } from "./parser-options";
@@ -94,7 +93,7 @@ export class JsonNodeValue {
       for (const key of Object.keys(parent.value)) {
         if (key === myKey && this.value === parent.value[key]) {
           const container = parent.value as Container;
-          const loc = getPreservedLocation(container, key);
+          const loc = getLocation(container, key);
           if (loc) {
             return [loc.key ? loc.key.start : loc.value.start, loc.value.end];
           } else {
@@ -114,7 +113,7 @@ export class JsonNodeValue {
       for (const key of Object.keys(parent.value)) {
         if (key === myKey && this.value === parent.value[key]) {
           const container = parent.value as Container;
-          const loc = getPreservedLocation(container, key);
+          const loc = getLocation(container, key);
           if (loc) {
             return loc.key ? [loc.key.start, loc.key.end] : undefined;
           } else {
@@ -133,7 +132,7 @@ export class JsonNodeValue {
       for (const key of Object.keys(parent.value)) {
         if (key === myKey && this.value === parent.value[key]) {
           const container = parent.value as Container;
-          const loc = getPreservedLocation(container, key);
+          const loc = getLocation(container, key);
           if (loc) {
             return [loc.value.start, loc.value.end];
           } else {
@@ -199,10 +198,7 @@ function getKeys(value: any, keepOrder?: boolean): any[] {
 
 function comparator(container: Container) {
   return function (key1: string | number, key2: string | number) {
-    return (
-      getOffset(getPreservedLocation(container, key1)!) -
-      getOffset(getPreservedLocation(container, key2)!)
-    );
+    return getOffset(getLocation(container, key1)!) - getOffset(getLocation(container, key2)!);
   };
 }
 

@@ -1,4 +1,4 @@
-import { Parsed } from "@xliic/preserving-json-yaml-parser";
+import { Parsed, Path } from "@xliic/preserving-json-yaml-parser";
 import * as vscode from "vscode";
 import { JsonNodeValue } from "./json-utils";
 
@@ -118,6 +118,14 @@ export interface AuditContext {
 export interface AuditDiagnostic extends vscode.Diagnostic {
   id: string;
   pointer: string;
+}
+
+export interface DataDictionaryDiagnostic extends vscode.Diagnostic {
+  id: string;
+  format: string;
+  node: object;
+  property: string;
+  path: Path;
 }
 
 export enum FixType {

@@ -3,7 +3,7 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import { find, getLocation, Location } from "@xliic/preserving-json-yaml-parser";
+import { find, getLocation, Location, Path } from "@xliic/preserving-json-yaml-parser";
 import * as vscode from "vscode";
 import { Cache } from "./cache";
 import { configuration } from "./configuration";
@@ -16,6 +16,7 @@ export interface Node {
   value: any;
   depth: number;
   location?: Location;
+  path: Path;
 }
 
 function getChildren(node: Node): Node[] {
@@ -29,6 +30,7 @@ function getChildren(node: Node): Node[] {
       depth: node.depth + 1,
       value: node.value[key],
       location: getLocation(node.value, key),
+      path: [...node.path, key],
     }));
   }
   return [];
@@ -45,6 +47,7 @@ function getChildrenByName(root: Node, names: string[]): Node[] {
           value: root.value[key],
           depth: root.depth + 1,
           location: getLocation(root.value, key),
+          path: [...root.path, key],
         });
       }
     }
@@ -59,6 +62,7 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
   readonly onDidChangeTreeData: vscode.Event<void> = this._onDidChangeTreeData.event;
 
   root?: Node;
+  documentUri?: string;
   maxDepth: number = 1;
   sort: boolean;
 
@@ -67,6 +71,7 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
       if (document) {
         const version = this.cache.getDocumentVersion(document);
         if (version !== OpenApiVersion.Unknown) {
+          this.documentUri = document.uri.toString();
           const pointer = this.getRootPointer();
           const root = cache.getLastGoodParsedDocument(document);
           if (root) {
@@ -77,6 +82,7 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
               depth: 0,
               value: found,
               location: undefined,
+              path: [],
             };
           } else {
             this.root = undefined;
@@ -164,6 +170,7 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
         command: "openapi.goToLine",
         title: "",
         arguments: [
+          this.documentUri,
           new vscode.Range(editor.document.positionAt(start), editor.document.positionAt(end)),
         ],
       };
@@ -224,6 +231,8 @@ export class PathOutlineProvider extends OutlineProvider {
   getContextValue(node: Node) {
     if (node.depth === 1) {
       return "path";
+    } else if (node.depth === 2) {
+      return "operation";
     }
     return undefined;
   }

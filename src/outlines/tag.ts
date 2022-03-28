@@ -4,7 +4,7 @@
 */
 
 import { find, getLocation, Location } from "@xliic/preserving-json-yaml-parser";
-import { Container } from "@xliic/preserving-json-yaml-parser/lib/types";
+import { Container } from "@xliic/preserving-json-yaml-parser";
 import * as vscode from "vscode";
 import { Cache } from "../cache";
 import { OpenApiVersion } from "../types";
@@ -44,6 +44,7 @@ const HTTP_METHODS = ["get", "put", "post", "delete", "options", "head", "patch"
 export class TagOutlineProvider implements vscode.TreeDataProvider<TagNode> {
   private _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
   readonly onDidChangeTreeData: vscode.Event<void> = this._onDidChangeTreeData.event;
+  documentUri?: string;
   tags: { [tag: string]: TagName } = {};
 
   constructor(private context: vscode.ExtensionContext, private cache: Cache) {
@@ -52,6 +53,7 @@ export class TagOutlineProvider implements vscode.TreeDataProvider<TagNode> {
         this.tags = {};
         const version = this.cache.getDocumentVersion(document);
         if (version !== OpenApiVersion.Unknown) {
+          this.documentUri = document.uri.toString();
           const root = cache.getLastGoodParsedDocument(document);
           if (root) {
             const paths = find(root, "/paths");
@@ -110,9 +112,7 @@ export class TagOutlineProvider implements vscode.TreeDataProvider<TagNode> {
 
     item.tooltip = `${node.name.method.toUpperCase()} ${node.name.path}`;
 
-    if (vscode.window?.activeTextEditor) {
-      item.command = getCommand(vscode.window.activeTextEditor, node);
-    }
+    item.command = getCommand(this.documentUri, node);
 
     return item;
   }
@@ -182,12 +182,17 @@ function getUniqueName(path: string, method: string, operation: any): UniqueOper
   };
 }
 
-function getCommand(editor: vscode.TextEditor, operation: TagOperation): vscode.Command {
+function getCommand(uri: string | undefined, operation: TagOperation): vscode.Command {
   const { start, end } = operation.location.key!;
+  const [editor] = vscode.window.visibleTextEditors.filter(
+    (editor) => editor.document.uri.toString() === uri
+  );
+
   return {
     command: "openapi.goToLine",
     title: "",
     arguments: [
+      uri,
       new vscode.Range(editor.document.positionAt(start), editor.document.positionAt(end)),
     ],
   };

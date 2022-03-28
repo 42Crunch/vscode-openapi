@@ -117,6 +117,7 @@ export default (
   },
 
   refreshCollections: async () => {
+    await store.refresh();
     provider.refresh();
   },
 

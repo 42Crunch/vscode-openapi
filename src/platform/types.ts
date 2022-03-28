@@ -20,7 +20,6 @@ export interface ListApisResponse {
 export interface Api {
   desc: ApiDescriptor;
   assessment: AssessSummary;
-  scan: ScanSummary;
 }
 
 export interface ApiDescriptor {
@@ -44,15 +43,6 @@ export interface AssessSummary {
   numCriticals: number;
   releasable: boolean;
   oasVersion: string;
-}
-
-export interface ScanSummary {
-  last: string;
-  isProcessed: boolean;
-  numLows: number;
-  numMediums: number;
-  numHighs: number;
-  state: string;
 }
 
 export interface CollectionData {

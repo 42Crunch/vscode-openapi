@@ -1,0 +1,155 @@
+import Card from "react-bootstrap/Card";
+import Badge from "react-bootstrap/Badge";
+import styled from "styled-components";
+import * as dayjs from "dayjs";
+
+import CollapsibleCaret from "@xliic/web-ui/CollapsibleCaret";
+import {
+  DataFormatEnum,
+  DataFormatInteger,
+  DataFormatString,
+  FlattenedDataFormat,
+} from "@xliic/common/data-dictionary";
+
+import collapsible from "../../hooks/collapsible";
+
+export default function FormatCard({ format }: { format: FlattenedDataFormat }) {
+  const [isOpen, toggle] = collapsible();
+
+  return (
+    <Card key={`${format.dictionaryId}-${format.name}`} style={{ margin: "1em" }}>
+      <Card.Body>
+        <CollapsibleCardTitle onClick={toggle}>
+          <FormatName>{format.name}</FormatName>
+          {format.pii === "yes" && <Gdpr bg="secondary">GDPR</Gdpr>}
+          <CollapsibleCaret isOpen={isOpen} />
+        </CollapsibleCardTitle>
+        <CardSubtitle>
+          Last updated on {dayjs.unix(format.lastUpdate).format("DD MMM YYYY")}
+        </CardSubtitle>
+        {isOpen && (
+          <>
+            <Description>{format.description}</Description>
+            <Properties>
+              {renderCommonProperties(format)}
+              {renderFormatSpecificProperties(format)}
+            </Properties>
+          </>
+        )}
+      </Card.Body>
+    </Card>
+  );
+}
+
+function renderCommonProperties(format: FlattenedDataFormat) {
+  return (
+    <>
+      <Property label="Name" value={format.name} />
+      <Property label="Type" value={format.type} />
+      <Property label="Read only" value={`${format.readOnly}`} />
+      <Property label="Write only" value={`${format.writeOnly}`} />
+      <Property label="Nullable" value={`${format.writeOnly}`} />
+      <Property label="GDPR-PII" value={format.pii} />
+      <Property label="Object Identifier" value={format.objectIdentifier} />
+      <Property label="Example" value={`${format.example}`} />
+    </>
+  );
+}
+
+function renderFormatSpecificProperties(format: FlattenedDataFormat) {
+  if (format.type === "integer") {
+    return <IntegerFormat format={format} />;
+  } else if ("enum" in format) {
+    return <EnumFormat format={format} />;
+  }
+  return <StringFormat format={format} />;
+}
+
+function StringFormat({ format }: { format: DataFormatString }) {
+  return (
+    <>
+      <Property label="Pattern" value={format.pattern} />
+      <Property label="Min length" value={`${format.minLength}`} />
+      <Property label="Max length" value={`${format.maxLength}`} />
+    </>
+  );
+}
+
+function EnumFormat({ format }: { format: DataFormatEnum }) {
+  return (
+    <>
+      <Property label="Enum" value={format.enum.join(", ")} />
+      <Property label="Default" value={format.default} />
+    </>
+  );
+}
+
+function IntegerFormat({ format }: { format: DataFormatInteger }) {
+  return (
+    <>
+      <Property label="Minimum" value={format.minimum} />
+      <Property label="Maximum" value={format.maximum} />
+      <Property label="Exclusive minimum" value={`${format.exclusiveMinimum}`} />
+      <Property label="Exclusive maximum" value={`${format.exclusiveMaximum}`} />
+    </>
+  );
+}
+
+function Property({ label, value }: { label: string; value: any }) {
+  return (
+    <PropertyItem>
+      <PropertyLabel>{label}</PropertyLabel>
+      <PropertyValue>{value}</PropertyValue>
+    </PropertyItem>
+  );
+}
+
+const CollapsibleCardTitle = styled(Card.Title)`
+  display: flex;
+  cursor: pointer;
+`;
+
+const CardSubtitle = styled(Card.Subtitle)`
+  color: gray;
+  font-size: 0.75rem;
+  padding-bottom: 1rem;
+`;
+
+const Gdpr = styled(Badge)`
+  margin-right: 0.5rem;
+`;
+
+const FormatName = styled.div`
+  flex: 1;
+`;
+
+const Description = styled.div`
+  border-bottom: 1px solid gray;
+  padding-bottom: 1rem;
+`;
+
+const Properties = styled.ul`
+  display: inline-block;
+  padding-left: 0;
+`;
+
+const PropertyItem = styled.li`
+  list-style: none;
+  display: flex;
+  align-items: center;
+  padding: 6px;
+`;
+
+const PropertyLabel = styled.div`
+  width: 120px;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  margin-right: 1rem;
+`;
+
+const PropertyValue = styled.div`
+  font-size: 0.85rem;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  text-overflow: ellipsis;
+`;

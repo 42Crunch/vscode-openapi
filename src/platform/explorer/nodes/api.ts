@@ -22,12 +22,7 @@ export class ApiNode extends AbstractExplorerNode {
   }
 
   async getChildren(): Promise<ExplorerNode[]> {
-    // FIXME const scanNode = this.api.scan.isProcessed ? [new ScanNode(this, this.store, this.api)] : [];
-    return [
-      new OasNode(this, this.store, this.api),
-      new AuditNode(this, this.store, this.api),
-      // FIXME ...scanNode,
-    ];
+    return [new OasNode(this, this.store, this.api), new AuditNode(this, this.store, this.api)];
   }
 
   getApiId(): string {
@@ -46,23 +41,6 @@ export class AuditNode extends AbstractExplorerNode {
     this.icon = api.assessment.isValid ? "verified" : "unverified";
     this.item.command = {
       command: "openapi.platform.openAuditReport",
-      title: "",
-      arguments: [api.desc.id],
-    };
-  }
-}
-
-export class ScanNode extends AbstractExplorerNode {
-  constructor(parent: ExplorerNode, private store: PlatformStore, private api: Api) {
-    super(
-      parent,
-      `${parent.id}-scan}`,
-      `Conformance Scan: ${api.scan.numHighs + api.scan.numMediums + api.scan.numLows} issues`,
-      vscode.TreeItemCollapsibleState.None
-    );
-    this.icon = "checklist";
-    this.item.command = {
-      command: "openapi.platform.openScanReport",
       title: "",
       arguments: [api.desc.id],
     };

@@ -27,6 +27,7 @@ import * as yamlSchemaContributor from "./yaml-schema-contributor";
 import * as audit from "./audit/activate";
 import * as preview from "./preview";
 import * as platform from "./platform/activate";
+//import * as tryit from "./tryit/activate";
 
 export async function activate(context: vscode.ExtensionContext) {
   const versionProperty = "openapiVersion";
@@ -96,6 +97,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const reportWebView = new AuditReportWebView(context.extensionPath, cache);
   audit.activate(context, auditContext, cache, reportWebView);
   preview.activate(context, cache, configuration);
+  //tryit.activate(context, cache, configuration);
   await platform.activate(context, auditContext, cache, reportWebView);
 
   if (previousVersion!.major < currentVersion.major) {

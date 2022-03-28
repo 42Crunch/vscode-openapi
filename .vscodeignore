@@ -15,3 +15,5 @@ out/test/**
 .prettierrc.yaml
 scripts/**
 snippets/**
+packages/**
+webview/generated/scan/**

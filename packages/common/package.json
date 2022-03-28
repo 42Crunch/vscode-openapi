@@ -1,0 +1,8 @@
+{
+  "name": "@xliic/common",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "build": "tsc --project tsconfig.esm.json; tsc --project tsconfig.cjs.json"
+  }
+}

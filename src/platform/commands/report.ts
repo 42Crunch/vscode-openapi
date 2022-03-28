@@ -6,7 +6,6 @@ import { refreshAuditReport } from "../audit";
 import { AuditContext } from "../../types";
 import { makePlatformUri } from "../util";
 import { AuditReportWebView } from "../../audit/report";
-import { ScanReportWebView } from "../scan-report";
 import { parseAuditReport, updateAuditContext } from "../../audit/audit";
 import { setDecorations, updateDecorations } from "../../audit/decoration";
 import { updateDiagnostics } from "../../audit/diagnostic";
@@ -16,8 +15,7 @@ export default (
   context: vscode.ExtensionContext,
   auditContext: AuditContext,
   cache: Cache,
-  reportWebView: AuditReportWebView,
-  scanReportView: ScanReportWebView
+  reportWebView: AuditReportWebView
 ) => ({
   openAuditReport: async (apiId: string) => {
     await vscode.window.withProgress<void>(
@@ -73,23 +71,5 @@ export default (
         );
       }
     }
-  },
-
-  openScanReport: async (apiId: string) => {
-    await vscode.window.withProgress<void>(
-      {
-        title: `Loading Conformance Scan Report for API ${apiId}`,
-        cancellable: false,
-        location: vscode.ProgressLocation.Notification,
-      },
-      async () => {
-        try {
-          const scanReport = await store.getScanReport(apiId);
-          scanReportView.show(scanReport);
-        } catch (e) {
-          vscode.window.showErrorMessage(`Unexpected error: ${e}`);
-        }
-      }
-    );
   },
 });

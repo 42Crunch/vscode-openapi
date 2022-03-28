@@ -16,6 +16,8 @@ import {
   UserData,
 } from "./types";
 
+import { DataDictionary, DataFormats } from "@xliic/common/data-dictionary";
+
 function gotOptions(
   method: Method,
   options: PlatformConnection,
@@ -123,20 +125,6 @@ export async function readAuditReport(
   return JSON.parse(text);
 }
 
-export async function readScanReport(
-  apiId: string,
-  options: PlatformConnection,
-  logger: Logger
-): Promise<any> {
-  const { body } = <any>await got(`api/v1/apis/${apiId}/scanreport`, {
-    ...gotOptions("GET", options, logger),
-    searchParams: { medium: 1 },
-  });
-
-  const text = Buffer.from(body.data, "base64").toString("utf-8");
-  return JSON.parse(text);
-}
-
 export async function deleteApi(apiId: string, options: PlatformConnection, logger: Logger) {
   await got(`api/v1/apis/${apiId}`, gotOptions("DELETE", options, logger));
 }
@@ -234,8 +222,42 @@ export async function getCollectionNamingConvention(
   logger: Logger
 ): Promise<NamingConvention> {
   const { body } = await got(
-    `api/v1/organizations/me/settings/collectionNamingConvention`,
+    "api/v1/organizations/me/settings/collectionNamingConvention",
     gotOptions("GET", options, logger)
   );
   return <NamingConvention>body;
+}
+
+export async function getDataDictionaries(
+  options: PlatformConnection,
+  logger: Logger
+): Promise<DataDictionary[]> {
+  const {
+    body: { list },
+  } = await got("api/v2/dataDictionaries", gotOptions("GET", options, logger));
+  return (list == null ? [] : list) as DataDictionary[];
+}
+
+export async function getDataDictionaryFormats(
+  dictionaryId: string,
+  options: PlatformConnection,
+  logger: Logger
+): Promise<DataFormats> {
+  const {
+    body: { formats },
+  } = await got(
+    `api/v2/dataDictionaries/${dictionaryId}/formats`,
+    gotOptions("GET", options, logger)
+  );
+
+  const props = ["maxLength", "minLength"];
+  for (const value of Object.values<any>(formats)) {
+    for (const prop of props) {
+      if (value.hasOwnProperty(prop)) {
+        value[prop] = parseInt(value[prop], 10);
+      }
+    }
+  }
+
+  return formats as DataFormats;
 }

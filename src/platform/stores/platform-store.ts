@@ -1,3 +1,5 @@
+import { DataFormat, FullDataDictionary } from "@xliic/common/data-dictionary";
+
 import {
   collectionUpdate,
   createApi,
@@ -6,13 +8,14 @@ import {
   deleteCollection,
   getApiNamingConvention,
   getCollectionNamingConvention,
+  getDataDictionaries,
+  getDataDictionaryFormats,
   listApis,
   listCollections,
   readApi,
   readAuditReport,
   readCollection,
   readCollectionUsers,
-  readScanReport,
   updateApi,
 } from "../api";
 import {
@@ -33,6 +36,12 @@ export interface CollectionsView {
 export interface ApisView {
   apis: Api[];
   hasMore: boolean;
+}
+
+export interface DataDictionaryFormat {
+  name: string;
+  description: string;
+  format: DataFormat;
 }
 
 const COLLECTION_PAGE_SIZE = 100;
@@ -93,6 +102,7 @@ export class PlatformStore {
   private apiLastAssessment = new Map<string, Date>();
   readonly limits = new Limits();
   readonly filters = new Filters();
+  private formats?: DataDictionaryFormat[];
 
   constructor(private context: PlatformContext) {}
 
@@ -242,11 +252,52 @@ export class PlatformStore {
     throw new Error(`Timed out while waiting for the assessment report for API ID: ${apiId}`);
   }
 
-  async getScanReport(apiId: string): Promise<any> {
-    return readScanReport(apiId, this.context.connection, this.context.logger);
+  async getDataDictionaries(): Promise<FullDataDictionary[]> {
+    const dictionaries = await getDataDictionaries(this.context.connection, this.context.logger);
+    const result = [];
+    for (const dictionary of dictionaries) {
+      const formats = await getDataDictionaryFormats(
+        dictionary.id,
+        this.context.connection,
+        this.context.logger
+      );
+      result.push({
+        id: dictionary.id,
+        name: dictionary.name,
+        description: dictionary.description,
+        formats,
+      });
+    }
+
+    return result;
   }
 
-  refresh(): void {}
+  async getDataDictionaryFormats(): Promise<DataDictionaryFormat[]> {
+    if (!this.formats) {
+      const dictionaries = await getDataDictionaries(this.context.connection, this.context.logger);
+      const result: DataDictionaryFormat[] = [];
+      for (const dictionary of dictionaries) {
+        const formats = await getDataDictionaryFormats(
+          dictionary.id,
+          this.context.connection,
+          this.context.logger
+        );
+        for (const format of Object.values<DataFormat>(formats)) {
+          result.push({
+            name: `o:${dictionary.name}:${format.name}`,
+            description: format.description,
+            format: format,
+          });
+        }
+      }
+      this.formats = result;
+    }
+    return this.formats;
+  }
+
+  async refresh(): Promise<void> {
+    this.formats = undefined;
+  }
 }
 
 function delay(ms: number) {

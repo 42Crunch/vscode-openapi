@@ -208,6 +208,9 @@
       "additionalProperties": true,
       "additionalItems": true
     },
+    "X42cFormat": {
+      "type": "string"
+    },
     "X42cDeactivateAllowList": {
       "type": "object",
       "required": ["x-42c-deactivate-allowlist"],

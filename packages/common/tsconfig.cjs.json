@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.base",
+  "compilerOptions": {
+    "module": "commonjs",
+    "outDir": "dist/cjs",
+    "rootDir": "src",
+    "declaration": true,
+    "composite": true
+  }
+}

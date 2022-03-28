@@ -85,8 +85,11 @@ function registerCommand(name: string, cache: Cache, handler: Function): vscode.
   return vscode.commands.registerCommand(`openapi.${name}`, wrapped);
 }
 
-function goToLine(cache: Cache, range: vscode.Range) {
-  const editor = vscode.window.activeTextEditor;
+function goToLine(cache: Cache, uri: string | null, range: vscode.Range) {
+  const [editor] =
+    uri === null
+      ? [vscode.window.activeTextEditor]
+      : vscode.window.visibleTextEditors.filter((editor) => editor.document.uri.toString() === uri);
   if (editor) {
     editor.selection = new vscode.Selection(range.start, range.start);
     editor.revealRange(editor.selection, vscode.TextEditorRevealType.AtTop);

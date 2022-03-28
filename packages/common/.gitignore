@@ -1,0 +1,4 @@
+node_modules
+dist
+.vscode-test
+.DS_Store
