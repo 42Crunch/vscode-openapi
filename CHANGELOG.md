@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 4.9.4 (TBD)
+* Fix issue #169 where rendering of 'application/xml' schemas in SwaggerUI preview would fail
+
 ## Version 4.9.3 (March 16, 2022)
 * Check 42Crunch platform naming conventions in 42Crunch platform integration component
 * Fix x-42c-sample schema definition
