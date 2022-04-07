@@ -25,13 +25,17 @@ module.exports = {
     ],
   },
   resolve: {
-    fallback: { stream: require.resolve("stream-browserify") },
+    fallback: {
+      stream: require.resolve("stream-browserify"),
+      process: require.resolve("process/browser"),
+    },
     extensions: [".tsx", ".ts", ".js"],
   },
   mode: "production",
   plugins: [
     new webpack.ProvidePlugin({
       Buffer: ["buffer", "Buffer"],
+      process: require.resolve("process/browser"),
     }),
   ],
 };
