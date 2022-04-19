@@ -1,7 +1,8 @@
 # Changelog
 
-## Version 4.9.4 (TBD)
+## Version 4.9.4 (April 19, 2022)
 * Fix issue #169 where rendering of 'application/xml' schemas in SwaggerUI preview would fail
+* Update quickfixes to use new keys in Audit KDB
 
 ## Version 4.9.3 (March 16, 2022)
 * Check 42Crunch platform naming conventions in 42Crunch platform integration component
