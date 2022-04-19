@@ -16,8 +16,10 @@ fixes:
   - problem:
       - parameter-array-maxitems
       - response-header-array-maxitems
-      - schema-array-maxitems
-      - v3-schema-array-maxitems
+      - schema-request-array-maxitems
+      - v3-schema-request-array-maxitems
+      - schema-response-array-maxitems
+      - v3-schema-response-array-maxitems
     title: Add 'maxItems' property
     type: insert
     fix:
@@ -31,8 +33,8 @@ fixes:
   - problem:
       - parameter-numerical-format
       - response-header-numerical-format
-      - schema-numerical-format
-      - v3-schema-numerical-format
+      - schema-request-numerical-format
+      - v3-schema-request-numerical-format
     title: Add 'format' property
     type: insert
     fix:
@@ -50,8 +52,8 @@ fixes:
   - problem:
       - parameter-numerical-max
       - response-header-numerical-max
-      - schema-numerical-max
-      - v3-schema-numerical-max
+      - schema-request-numerical-max
+      - v3-schema-request-numerical-max
     title: Add 'maximum' property
     type: insert
     fix:
@@ -64,8 +66,8 @@ fixes:
   - problem:
       - parameter-numerical-min
       - response-header-numerical-min
-      - schema-numerical-min
-      - v3-schema-numerical-min
+      - schema-request-numerical-min
+      - v3-schema-request-numerical-min
     title: Add 'minimum' property
     type: insert
     fix:
@@ -74,7 +76,6 @@ fixes:
       - name: minimum
         path: /minimum
         source: mostUsedByName
-
 
   # FIXME implement replace value in the existing property
   #  - problem:
@@ -91,8 +92,10 @@ fixes:
   - problem:
       - parameter-string-maxlength
       - response-header-string-maxlength
-      - schema-string-maxlength
-      - v3-schema-string-maxlength
+      - schema-request-string-maxlength
+      - v3-schema-request-string-maxlength
+      - schema-response-string-maxlength
+      - v3-schema-response-string-maxlength
     title: Add 'maxLength' property
     type: insert
     fix:
@@ -105,8 +108,10 @@ fixes:
   - problem:
       - parameter-string-pattern
       - response-header-string-pattern
-      - schema-string-pattern
-      - v3-schema-string-pattern
+      - schema-request-string-pattern
+      - v3-schema-request-string-pattern
+      - schema-response-string-pattern
+      - v3-schema-response-string-pattern
     title: Add 'pattern' property
     type: insert
     fix:
@@ -132,12 +137,12 @@ fixes:
     title: Add '200' response
     type: insert
     fix:
-      '200':
+      "200":
         description: OK
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/'
+              $ref: "#/components/schemas/"
     parameters:
       - name: description
         path: /200/description
@@ -153,12 +158,12 @@ fixes:
     title: Add '202' response
     type: insert
     fix:
-      '202':
+      "202":
         description: Accepted
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/'
+              $ref: "#/components/schemas/"
     parameters:
       - name: description
         path: /202/description
@@ -168,7 +173,6 @@ fixes:
       - name: schema
         path: /202/content/application~1json/schema/$ref
         source: schemaRefByResponseCode
-
 
   - problem:
       - v3-response-post-2xx
@@ -182,7 +186,7 @@ fixes:
     title: Add '204' response
     type: insert
     fix:
-      '204':
+      "204":
         description: Created
     parameters:
       - name: description
@@ -194,14 +198,14 @@ fixes:
     title: Add '200' or '202' response
     type: insert
     fix:
-      '200':
+      "200":
         description: OK
     parameters:
       - name: code
         path: /200
         values:
-          - '200'
-          - '202'
+          - "200"
+          - "202"
         type: key
       - name: description
         path: /200/description
@@ -211,12 +215,12 @@ fixes:
     title: Add '401' response
     type: insert
     fix:
-      '401':
+      "401":
         description: Unauthorized
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/'
+              $ref: "#/components/schemas/"
     parameters:
       - name: description
         path: /401/description
@@ -232,12 +236,12 @@ fixes:
     title: Add '403' response
     type: insert
     fix:
-      '403':
+      "403":
         description: Forbidden
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/'
+              $ref: "#/components/schemas/"
     parameters:
       - name: description
         path: /403/description
@@ -253,12 +257,12 @@ fixes:
     title: Add '404' response
     type: insert
     fix:
-      '404':
+      "404":
         description: Not Found
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/'
+              $ref: "#/components/schemas/"
     parameters:
       - name: description
         path: /404/description
@@ -269,18 +273,17 @@ fixes:
         path: /404/content/application~1json/schema/$ref
         source: schemaRefByResponseCode
 
-
   - problem:
       - v3-response-429
     title: Add '429' response
     type: insert
     fix:
-      '429':
+      "429":
         description: Too Many Requests
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/'
+              $ref: "#/components/schemas/"
     parameters:
       - name: description
         path: /429/description
@@ -296,12 +299,12 @@ fixes:
     title: Add 'default' response
     type: insert
     fix:
-      'default':
+      "default":
         description: Default
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/'
+              $ref: "#/components/schemas/"
     parameters:
       - name: description
         path: /default/description
@@ -324,10 +327,10 @@ fixes:
     title: Add '200' response
     type: insert
     fix:
-      '200':
+      "200":
         description: OK
         schema:
-          $ref: '#/definitions/'
+          $ref: "#/definitions/"
     parameters:
       - name: description
         path: /200/description
@@ -340,10 +343,10 @@ fixes:
     title: Add '202' response
     type: insert
     fix:
-      '202':
+      "202":
         description: Accepted
         schema:
-          $ref: '#/definitions/'
+          $ref: "#/definitions/"
     parameters:
       - name: description
         path: /202/description
@@ -356,10 +359,10 @@ fixes:
     title: Add '401' response
     type: insert
     fix:
-      '401':
+      "401":
         description: Unauthorized
         schema:
-          $ref: '#/definitions/'
+          $ref: "#/definitions/"
     parameters:
       - name: description
         path: /401/description
@@ -372,10 +375,10 @@ fixes:
     title: Add '403' response
     type: insert
     fix:
-      '403':
+      "403":
         description: Forbidden
         schema:
-          $ref: '#/definitions/'
+          $ref: "#/definitions/"
     parameters:
       - name: description
         path: /403/description
@@ -388,10 +391,10 @@ fixes:
     title: Add '404' response
     type: insert
     fix:
-      '404':
+      "404":
         description: Not Found
         schema:
-          $ref: '#/definitions/'
+          $ref: "#/definitions/"
     parameters:
       - name: description
         path: /404/description
@@ -404,10 +407,10 @@ fixes:
     title: Add '429' response
     type: insert
     fix:
-      '429':
+      "429":
         description: Too Many Requests
         schema:
-          $ref: '#/definitions/'
+          $ref: "#/definitions/"
     parameters:
       - name: description
         path: /429/description
@@ -420,10 +423,10 @@ fixes:
     title: Add 'default' response
     type: insert
     fix:
-      'default':
+      "default":
         description: Default
         schema:
-          $ref: '#/definitions/'
+          $ref: "#/definitions/"
     parameters:
       - name: description
         path: /default/description
@@ -451,7 +454,7 @@ fixes:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/'
+            $ref: "#/components/schemas/"
     parameters:
       - name: contentType
         path: /content/application~1json
@@ -466,7 +469,7 @@ fixes:
     type: insert
     fix:
       schema:
-        $ref: '#/definitions/'
+        $ref: "#/definitions/"
     parameters:
       - name: schema
         path: /schema/$ref
@@ -485,8 +488,10 @@ fixes:
     pointer: /readOnly
 
   - problem:
-      - v3-schema-notype
-      - schema-notype
+      - v3-schema-request-notype
+      - schema-request-notype
+      - v3-schema-response-notype
+      - schema-response-notype
     title: Add 'type' property
     type: insert
     fix:
@@ -542,7 +547,8 @@ fixes:
       required: true
 
   - problem:
-      - v3-mediatype-schema-undefined
+      - v3-mediatype-request-schema-undefined
+      - v3-mediatype-response-schema-undefined
     title: Create response schema
     type: insert
     fix:

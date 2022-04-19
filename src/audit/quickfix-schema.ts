@@ -389,7 +389,7 @@ function getSchemaV2Examples(pointer: string, problem: string[], root: Parsed): 
 }
 
 function getSchemaV2Example(pointer: string, problem: string[], root: Parsed): any {
-  if (hasId("schema-notype", problem)) {
+  if (hasId("schema-request-notype", problem) || hasId("schema-response-notype", problem)) {
     const target = findJsonNodeValue(root, pointer);
     if (target && target.isObject() && target.getKey() === "schema") {
       const children = target.getChildren();
@@ -406,7 +406,10 @@ function getSchemaV2Example(pointer: string, problem: string[], root: Parsed): a
 
 function getSchemaV3Examples(pointer: string, problem: string[], root: Parsed): any {
   // FIXME doesn't handle $ref in the examples
-  if (hasId("v3-mediatype-schema-undefined", problem)) {
+  if (
+    hasId("v3-mediatype-request-schema-undefined", problem) ||
+    hasId("v3-mediatype-response-schema-undefined", problem)
+  ) {
     const target = findJsonNodeValue(root, pointer);
     if (target && target.isObject() && target.getKey() === "application/json") {
       let schema: JsonNodeValue = null;
@@ -436,7 +439,7 @@ function getSchemaV3Examples(pointer: string, problem: string[], root: Parsed): 
 }
 
 function getSchemaV3Example(pointer: string, problem: string[], root: Parsed): any {
-  if (hasId("v3-schema-notype", problem)) {
+  if (hasId("v3-schema-request-notype", problem) || hasId("v3-schema-response-notype", problem)) {
     const target = findJsonNodeValue(root, pointer);
     if (target && target.isObject() && target.getKey() === "schema") {
       const children = target.getChildren();
