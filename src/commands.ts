@@ -349,7 +349,7 @@ async function v3addServer(cache: Cache) {
 
 async function addOperation(cache: Cache, node: any) {
   const fix = registeredSnippetQuickFixes["operation"];
-  fix.pointer = joinJsonPointer(["paths", node.parent.key]);
+  fix.pointer = joinJsonPointer(["paths", node.key]);
   await snippetCommand(fix, cache);
 }
 

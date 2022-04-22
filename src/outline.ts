@@ -222,7 +222,7 @@ export class PathOutlineProvider extends OutlineProvider {
   }
 
   getContextValue(node: Node) {
-    if (node.depth === 2) {
+    if (node.depth === 1) {
       return "path";
     }
     return undefined;
