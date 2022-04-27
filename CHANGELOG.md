@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 4.9.4 (April 27, 2022)
+## Version 4.9.5 (April 27, 2022)
 * Remove scan command from platform integration
 
 ## Version 4.9.4 (April 19, 2022)
