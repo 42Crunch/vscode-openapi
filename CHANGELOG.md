@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 4.9.4 (April 27, 2022)
+* Remove scan command from platform integration
+
 ## Version 4.9.4 (April 19, 2022)
 * Fix issue #169 where rendering of 'application/xml' schemas in SwaggerUI preview would fail
 * Update quickfixes to use new keys in Audit KDB
