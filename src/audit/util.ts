@@ -1,5 +1,12 @@
 import * as vscode from "vscode";
-import { findLocationForJsonPointer, Location } from "@xliic/preserving-json-yaml-parser";
+import {
+  findLocationForJsonPointer,
+  getLocation,
+  getRootRange,
+  Location,
+  Parsed,
+  parseJsonPointer,
+} from "@xliic/preserving-json-yaml-parser";
 
 export function getLocationByPointer(
   document: vscode.TextDocument,
@@ -21,7 +28,7 @@ export function getLocationByPointer(
       location = findLocationForJsonPointer(root, "/swagger");
     }
   } else {
-    location = findLocationForJsonPointer(root, pointer);
+    location = findLocationForJsonPointerResolvingRefs(root, pointer)[0];
   }
 
   if (location) {
@@ -36,4 +43,36 @@ export function getLocationByPointer(
   } else {
     throw new Error(`Unable to locate node: ${pointer}`);
   }
+}
+
+function findLocationForJsonPointerResolvingRefs(
+  root: Parsed,
+  jsonPointer: string
+): [Location | undefined, any] {
+  const path = parseJsonPointer(jsonPointer);
+  if (path.length === 0) {
+    // special case "" pointing to the root
+    const range = getRootRange(root);
+    return [{ value: range }, root];
+  }
+
+  let current: any = root;
+  let i = 0;
+  while (i < path.length - 1 && current) {
+    if (current[path[i]] !== undefined) {
+      current = current[path[i]];
+      i++;
+    } else if (current.hasOwnProperty("$ref")) {
+      current = findLocationForJsonPointerResolvingRefs(root, current["$ref"])[1];
+    }
+  }
+
+  if (current != undefined && current[path[i]] === undefined && current.hasOwnProperty("$ref")) {
+    current = findLocationForJsonPointerResolvingRefs(root, current["$ref"])[1];
+  }
+
+  if (current !== undefined) {
+    return [getLocation(current, path[i]), current[path[i]]];
+  }
+  return [undefined, undefined];
 }
