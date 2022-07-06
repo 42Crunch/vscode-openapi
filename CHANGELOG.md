@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 4.11.0 (July 7, 2022)
+* Add data-dictionary to the platform integration
+
 ## Version 4.9.5 (April 27, 2022)
 * Remove scan command from platform integration
 
