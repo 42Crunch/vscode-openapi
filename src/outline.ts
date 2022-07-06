@@ -165,7 +165,7 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
   getCommand(node: Node): vscode.Command | undefined {
     const editor = vscode.window?.activeTextEditor;
     if (editor && node && node.location) {
-      const { start, end } = node.location.value;
+      const { start, end } = node.location.key ? node.location.key : node.location.value;
       return {
         command: "openapi.goToLine",
         title: "",
