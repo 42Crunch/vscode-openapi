@@ -35,6 +35,7 @@ function gotOptions(
     headers: {
       Accept: "application/json",
       "X-API-KEY": options.apiToken,
+      "X-42C-IDE": "true",
     },
     hooks: {
       afterResponse: [logRequest],
