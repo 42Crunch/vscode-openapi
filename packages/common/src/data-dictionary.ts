@@ -10,6 +10,7 @@ interface BasicDataFormat {
   name: string;
   type: "string" | "integer";
   description: string;
+  format?: string;
 
   readOnly: boolean;
   writeOnly: boolean;
@@ -19,6 +20,8 @@ interface BasicDataFormat {
   objectIdentifier: YesNo;
 
   example: string | number;
+
+  sensitivity: string;
 
   lastUpdate: number;
   lastChangeBy?: string;

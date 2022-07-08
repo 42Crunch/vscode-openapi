@@ -42,15 +42,27 @@ export default function FormatCard({ format }: { format: FlattenedDataFormat }) 
 }
 
 function renderCommonProperties(format: FlattenedDataFormat) {
+  const sensitivity = {
+    "1": "Not Sensitive",
+    "2": "Low",
+    "3": "Medium",
+    "4": "High",
+    "5": "Critical",
+  };
+
+  const sensitivityLabel: any = (sensitivity as any)[format.sensitivity] || "Unknown";
+
   return (
     <>
       <Property label="Name" value={format.name} />
       <Property label="Type" value={format.type} />
+      {format.format && <Property label="Format" value={format.format} />}
       <Property label="Read only" value={`${format.readOnly}`} />
       <Property label="Write only" value={`${format.writeOnly}`} />
       <Property label="Nullable" value={`${format.writeOnly}`} />
       <Property label="GDPR-PII" value={format.pii} />
       <Property label="Object Identifier" value={format.objectIdentifier} />
+      <Property label="Sensitivity" value={sensitivityLabel} />
       <Property label="Example" value={`${format.example}`} />
     </>
   );

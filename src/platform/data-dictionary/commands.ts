@@ -135,6 +135,7 @@ export default (
 
 const schemaProps = [
   "type",
+  "format",
   "readOnly",
   "writeOnly",
   "nullable",
