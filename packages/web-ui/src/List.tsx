@@ -38,6 +38,7 @@ const Item = styled.li`
   border-bottom: 1px solid lightgray;
   cursor: pointer;
   padding-left: 0.25rem;
+  overflow: hidden;
 `;
 
 const SelectedItem = styled(Item)`

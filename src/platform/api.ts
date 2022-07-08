@@ -251,8 +251,21 @@ export async function getDataDictionaryFormats(
     gotOptions("GET", options, logger)
   );
 
-  const props = ["maxLength", "minLength"];
+  if (formats === null) {
+    return {};
+  }
+
+  const stringProps = ["maxLength", "minLength"];
+  const integerProps = ["minimum", "maximum", "default", "example"];
+
   for (const value of Object.values<any>(formats)) {
+    const type = value["type"];
+    let props: string[] = [];
+    if (type === "integer") {
+      props = integerProps;
+    } else if (type === "string") {
+      props = stringProps;
+    }
     for (const prop of props) {
       if (value.hasOwnProperty(prop)) {
         value[prop] = parseInt(value[prop], 10);
