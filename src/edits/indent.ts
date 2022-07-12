@@ -49,11 +49,6 @@ export function indent(
     targetIndent.indent,
     documentIndent.char
   );
-  if (document.languageId === "yaml") {
-    // strip spaces from the first line when inserting YAML
-    // because YAML editor automatically adds indent for the first line
-    return reindented.replace(SPACES_AT_THE_START_SINGLE_LINE, "");
-  }
   return reindented;
 }
 
@@ -69,7 +64,7 @@ export function indentText(
   // with X characters per document indent, resulting in text
   // indented according to the document indent
   const textWithDocumentIndent = text.replace(SPACES_AT_THE_START_MULTILINE, (match: string) =>
-    indentChar.repeat(documentIndent)
+    indentChar.repeat(documentIndent * match.length)
   );
 
   // now prepend X indent chars to the beginning of each string
@@ -82,6 +77,5 @@ export function indentText(
   return textAtTargetIndent;
 }
 
-const SPACES_AT_THE_START_SINGLE_LINE = new RegExp("^\\s+", "g");
 const SPACES_AT_THE_START_MULTILINE = new RegExp("^\\s+", "mg");
 const START_OF_THE_STRING = new RegExp("^", "mg");

@@ -8,12 +8,15 @@ import {
   getOperation,
   getOperationParameters,
   getParametersMap,
-  ResolvedOasParameter,
-  OasParameter,
-  OasRequestBody,
+  OasSecurityScheme,
 } from "@xliic/common/oas30";
-import { deref } from "@xliic/common/jsonpointer";
-import { OperationBodies, OperationValues, ParameterValues } from "@xliic/common/messages/tryit";
+import {
+  TryitOperationValues,
+  TryitParameterValues,
+  TryitSecurity,
+  TryitSecurityValue,
+  TryitSecurityValues,
+} from "@xliic/common/messages/tryit";
 import { HttpMethod } from "@xliic/common/http";
 
 export function getParameters(
@@ -28,8 +31,29 @@ export function getParameters(
   return result;
 }
 
-export function generateParameterValues(parameters: OperationParametersMap): ParameterValues {
-  const values: ParameterValues = {
+export function getSecurity(
+  oas: BundledOpenApiSpec,
+  path: string,
+  method: HttpMethod
+): TryitSecurity {
+  const operation = getOperation(oas, path, method);
+  const requirements = operation?.security ?? oas.security ?? [];
+  const result: TryitSecurity = [];
+  for (const requirement of requirements) {
+    const resolved: Record<string, OasSecurityScheme> = {};
+    for (const schemeName of Object.keys(requirement)) {
+      resolved[schemeName] = oas?.components?.securitySchemes?.[schemeName]!;
+    }
+    result.push(resolved);
+  }
+  return result;
+}
+
+export function generateParameterValues(
+  oas: BundledOpenApiSpec,
+  parameters: OperationParametersMap
+): TryitParameterValues {
+  const values: TryitParameterValues = {
     query: {},
     header: {},
     path: {},
@@ -41,7 +65,19 @@ export function generateParameterValues(parameters: OperationParametersMap): Par
     for (const name of Object.keys(parameters[location])) {
       const parameter = parameters[location][name];
       if (parameter.schema) {
-        values[location][name] = jsf.generate(parameter.schema as any);
+        jsf.option("useExamplesValue", true);
+        jsf.option("failOnInvalidFormat", false);
+        jsf.option("maxItems", 100);
+        jsf.option("maxLength", 4096);
+        try {
+          values[location][name] = jsf.generate({
+            ...parameter.schema,
+            components: oas.components,
+          } as any);
+        } catch (e) {
+          values[location][name] = "";
+          // FIXME: show error in UI
+        }
       } else {
         values[location][name] = "";
       }
@@ -51,64 +87,50 @@ export function generateParameterValues(parameters: OperationParametersMap): Par
   return values;
 }
 
-export function generateDefaultBodies(
-  oas: BundledOpenApiSpec,
-  path: string,
-  method: HttpMethod
-): OperationBodies {
-  const requestBody = deref(oas, getOperation(oas, path, method)?.requestBody);
-  if (!requestBody) {
-    return {};
-  }
-
-  const result: OperationBodies = {};
-  for (const [contentType, body] of Object.entries(requestBody.content)) {
-    if (contentType === "application/json") {
-      const schema = deref(oas, body?.schema);
-      if (schema) {
-        result[contentType] = jsf.generate(schema as any);
-      } else {
-        result[contentType] = "";
-      }
-    } else {
-      result[contentType] = "";
+export function generateSecurityValues(security: TryitSecurity): TryitSecurityValues {
+  const result: TryitSecurityValues = [];
+  for (const requirement of security) {
+    const resolved: Record<string, TryitSecurityValue> = {};
+    for (const [name, scheme] of Object.entries(requirement)) {
+      resolved[name] = generateSecurityValue(scheme);
     }
+    result.push(resolved);
   }
   return result;
 }
 
-export function generateBody(
-  oas: BundledOpenApiSpec,
-  requestBody: OasRequestBody | undefined,
-  mediaType: string
-): unknown {
-  if (!requestBody || !requestBody.content?.[mediaType]) {
-    return;
+export function generateSecurityValue(security: OasSecurityScheme): TryitSecurityValue {
+  if (security.type === "http" && /^basic$/i.test(security.scheme)) {
+    return { username: "", password: "" };
   }
-
-  const mto = requestBody.content[mediaType];
-
-  if (mediaType === "application/json") {
-    const schema = deref(oas, mto?.schema);
-    return jsf.generate(schema as any);
-  } else if (mediaType === "text/plain") {
-    return "";
-  }
+  return "";
 }
 
-export function wrapFormDefaults(values: OperationValues): Record<string, any> {
+export function wrapFormDefaults(values: TryitOperationValues): Record<string, any> {
   const parameters: Record<string, any> = { query: {}, header: {}, path: {}, cookie: {} };
   const locations = Object.keys(values.parameters) as OasParameterLocation[];
   for (const location of locations) {
     for (const name of Object.keys(values.parameters[location])) {
+      const escapedName = escapeFieldName(name);
       const value = values.parameters[location][name];
-      parameters[location][name] = Array.isArray(value) ? wrap(value) : value;
+      parameters[location][escapedName] = Array.isArray(value) ? wrap(value) : value;
     }
   }
+  const security: TryitSecurityValues = [];
+  for (const requirement of values.security) {
+    const wrapped: Record<string, TryitSecurityValue> = {};
+    for (const [name, value] of Object.entries(requirement)) {
+      wrapped[escapeFieldName(name)] = value;
+    }
+    security.push(wrapped);
+  }
+
   return {
     parameters,
     body: values.body,
     server: values.server,
+    security,
+    securityIndex: values.securityIndex,
   };
 }
 
@@ -116,29 +138,54 @@ export function unwrapFormDefaults(
   oas: BundledOpenApiSpec,
   parameters: OperationParametersMap,
   values: Record<string, any>
-): OperationValues {
+): TryitOperationValues {
   return {
     parameters: unwrapFormParameters(oas, parameters, values.parameters),
     body: values.body,
     server: values.server,
+    security: unwrapFormSecurity(values.security),
+    securityIndex: values.securityIndex,
   };
 }
 
-export function unwrapFormParameters(
+function unwrapFormSecurity(values: Record<string, any>[]): TryitSecurityValues {
+  const result: TryitSecurityValues = [];
+  for (const requirement of values) {
+    const unwrapped: Record<string, TryitSecurityValue> = {};
+    for (const [name, value] of Object.entries(requirement as Record<string, TryitSecurityValue>)) {
+      unwrapped[unescapeFieldName(name)] = value;
+    }
+    result.push(unwrapped);
+  }
+  return result;
+}
+
+function unwrapFormParameters(
   oas: BundledOpenApiSpec,
   parameters: OperationParametersMap,
   values: Record<string, any>
-): ParameterValues {
-  const result: ParameterValues = { query: {}, header: {}, path: {}, cookie: {} };
+): TryitParameterValues {
+  const result: TryitParameterValues = { query: {}, header: {}, path: {}, cookie: {} };
   const locations = Object.keys(values) as OasParameterLocation[];
   for (const location of locations) {
     for (const name of Object.keys(values[location])) {
+      const unescapedName = unescapeFieldName(name);
       const value = values[location][name];
-      const parameter = parameters[location][name];
-      result[location][name] = Array.isArray(value) ? unwrap(value) : value;
+      result[location][unescapedName] = Array.isArray(value) ? unwrap(value) : value;
     }
   }
   return result;
+}
+
+export function parseHttpsHostname(url: string): [boolean, string] {
+  try {
+    const urlObj = new URL(url);
+    const isHttps = urlObj.protocol === "https:";
+    const hostname = urlObj.hostname.toLowerCase();
+    return [isHttps, hostname];
+  } catch (e) {
+    return [false, ""];
+  }
 }
 
 // arrays must be wrapped for react form hook
@@ -148,4 +195,14 @@ function wrap(array: unknown[]): unknown {
 
 function unwrap(array: unknown[]): unknown {
   return array.map((element) => (element as any)["value"]);
+}
+
+export function escapeFieldName(name: string): string {
+  // escape field name for react form hook, dots and numbers at the start of the name are not allowed
+  return "n-" + encodeURIComponent(name).replace(/\./g, "%2E");
+}
+
+function unescapeFieldName(name: string): string {
+  // remove n- prefix and decode field name
+  return decodeURIComponent(name.substring(2, name.length));
 }

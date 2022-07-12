@@ -1,14 +1,12 @@
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 import { resolve } from "path";
 import react from "@vitejs/plugin-react";
 import svgrPlugin from "vite-plugin-svgr";
 
 export default defineConfig({
   plugins: [react(), svgrPlugin({ svgrOptions: { icon: true } })],
-  resolve: {
-    alias: {
-      "react/jsx-runtime": "react/jsx-runtime.js",
-    },
+  optimizeDeps: {
+    include: ["react/jsx-runtime"],
   },
   build: {
     minify: true,
@@ -19,4 +17,10 @@ export default defineConfig({
       formats: ["iife"],
     },
   },
+  server: {
+    hmr: {
+      host: "localhost",
+    },
+  },
+  test: {},
 });

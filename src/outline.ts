@@ -163,7 +163,10 @@ abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
   }
 
   getCommand(node: Node): vscode.Command | undefined {
-    const editor = vscode.window?.activeTextEditor;
+    const [editor] = vscode.window.visibleTextEditors.filter(
+      (editor) => editor.document.uri.toString() === this.documentUri
+    );
+
     if (editor && node && node.location) {
       const { start, end } = node.location.key ? node.location.key : node.location.value;
       return {
@@ -192,25 +195,9 @@ export class PathOutlineProvider extends OutlineProvider {
 
   filterChildren(node: Node, children: Node[]) {
     const depth = node.depth;
-    const key = node.key;
     if (depth === 2) {
       return children.filter((child) => {
-        return [
-          "get",
-          "put",
-          "post",
-          "delete",
-          "options",
-          "head",
-          "patch",
-          "trace",
-          "parameters",
-        ].includes(String(child.key));
-      });
-    } else if (depth === 3 && key !== "parameters") {
-      return children.filter((child) => {
-        const key = child.key;
-        return key === "responses" || key === "parameters";
+        return ["responses", "parameters", "requestBody"].includes(String(child.key));
       });
     }
     return children;

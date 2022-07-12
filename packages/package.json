@@ -8,11 +8,10 @@
     "web-icons",
     "web-theme/dist",
     "web-ui/dist",
-    "common/dist/esm",
-    "preview-swaggerui",
-    "preview-redoc"
+    "common/dist/esm"
   ],
   "scripts": {
+    "postinstall": "cd preview-redoc && npm install && cd ../preview-swaggerui && npm install",
     "build": "npm run build-data-dictionary && npm run build-scan && npm run build-audit && npm run build-swaggerui && npm run build-redoc",
     "build-data-dictionary": "cd data-dictionary && npm run build && mkdirp ../../webview/generated/data-dictionary && cpy --flat dist/* ../../webview/generated/data-dictionary",
     "build-scan": "cd scan && npm run build && mkdirp ../../webview/generated/scan && cpy --flat dist/* ../../webview/generated/scan",

@@ -4,9 +4,8 @@ import FloatingLabel from "react-bootstrap/FloatingLabel";
 
 import type { BundledOpenApiSpec, OasRequestBody } from "@xliic/common/oas30";
 
-import Section from "./Section";
 import { useEffect, useState } from "react";
-import { generateBody } from "../util";
+import { createBody, serializeToFormText, parseFromFormText } from "../../core/form/body";
 
 export default function RequestBody({
   oas,
@@ -17,6 +16,7 @@ export default function RequestBody({
 }) {
   const { control } = useFormContext();
 
+  // FIXME create json body if requestBody is not defined
   if (requestBody === undefined) {
     return null;
   }
@@ -42,23 +42,22 @@ export default function RequestBody({
   const bodyMediaTypeValue = useWatch({
     control,
     name: "body.mediaType",
-  });
+  }) as string;
 
   // update body when media type changes
   useEffect(() => {
-    const body = generateBody(oas, requestBody, bodyMediaTypeValue);
-    setBodyText(convertDataToForm(bodyMediaTypeValue, body));
+    const body = createBody(oas, bodyMediaTypeValue, requestBody?.content?.[bodyMediaTypeValue]);
+    setBodyText(serializeToFormText(body));
   }, [bodyMediaTypeValue]);
 
   // update body text when defaults change
   useEffect(() => {
     const body = control._defaultValues.body;
-    setBodyText(convertDataToForm(body.mediaType, body.value));
+    setBodyText(serializeToFormText(body));
   }, [control._defaultValues]);
 
   return (
     <>
-      <Section>request body</Section>
       <FloatingLabel className="m-1" label="media type">
         <Form.Select
           onChange={bodyMediaType.onChange}
@@ -76,7 +75,7 @@ export default function RequestBody({
           className={error ? "is-invalid" : undefined}
           rows={10}
           onChange={(e) => {
-            bodyValue.onChange(convertFormToData(bodyMediaType.value, e.target.value));
+            bodyValue.onChange(parseFromFormText(bodyMediaType.value, e.target.value));
             setBodyText(e.target.value);
           }}
           onBlur={bodyValue.onBlur}
@@ -87,26 +86,6 @@ export default function RequestBody({
       </div>
     </>
   );
-}
-
-function convertDataToForm(mediaType: string, value: any): string {
-  if (mediaType === "application/json") {
-    return JSON.stringify(value, null, 2);
-  }
-  // text/plain
-  return value;
-}
-
-function convertFormToData(mediaType: string, value: string): string | Error {
-  if (mediaType === "application/json") {
-    try {
-      return JSON.parse(value);
-    } catch (e) {
-      return new Error(`failed to convert: ${e}`);
-    }
-  }
-  // text/plain
-  return value;
 }
 
 function validate(value: any): any {

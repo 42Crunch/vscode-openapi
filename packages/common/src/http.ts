@@ -15,7 +15,12 @@ export interface HttpRequest {
   url: string;
   method: HttpMethod;
   headers: Record<string, string>;
-  body?: any;
+  body?: unknown;
+  config: {
+    https: {
+      rejectUnauthorized: boolean;
+    };
+  };
 }
 
 export interface HttpResponse {

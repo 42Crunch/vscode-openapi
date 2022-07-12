@@ -6,6 +6,7 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import { Message } from "@xliic/common/message";
+import { VsCodeColorMap } from "@xliic/common/theme";
 
 export abstract class WebView<Request extends Message, Response extends Message> {
   private style: vscode.Uri;
@@ -84,11 +85,19 @@ export abstract class WebView<Request extends Message, Response extends Message>
       }
     );
 
-    panel.webview.html = this.getHtml(
-      panel.webview.cspSource,
-      panel.webview.asWebviewUri(this.script),
-      panel.webview.asWebviewUri(this.style)
-    );
+    if (process.env["XLIIC_WEB_VIEW_DEV_MODE"] === "true") {
+      panel.webview.html = this.getDevHtml(
+        panel.webview.cspSource,
+        panel.webview.asWebviewUri(this.script),
+        panel.webview.asWebviewUri(this.style)
+      );
+    } else {
+      panel.webview.html = this.getHtml(
+        panel.webview.cspSource,
+        panel.webview.asWebviewUri(this.script),
+        panel.webview.asWebviewUri(this.style)
+      );
+    }
 
     return new Promise((resolve, reject) => {
       panel.webview.onDidReceiveMessage((message: any) => {
@@ -97,6 +106,40 @@ export abstract class WebView<Request extends Message, Response extends Message>
         }
       });
     });
+  }
+
+  private getDevHtml(cspSource: string, script: vscode.Uri, style: vscode.Uri): string {
+    return `<!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta http-equiv="Content-Security-Policy"  content="default-src 'none';  img-src ${cspSource} https: data:; script-src ${cspSource} http://localhost:3000/ 'unsafe-inline'; style-src ${cspSource} http://localhost:3000/ 'unsafe-inline'; connect-src http: https: ws:">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <base href="http://localhost:3000/">
+      <script type="module" src="/@vite/client"></script>
+      <script type="module">
+      import RefreshRuntime from "/@react-refresh"
+      RefreshRuntime.injectIntoGlobalHook(window)
+      window.$RefreshReg$ = () => {}
+      window.$RefreshSig$ = () => (type) => type
+      window.__vite_plugin_react_preamble_installed__ = true
+      </script>
+      <style>
+        ${customCssProperties()}
+      </style>
+    </head>
+    <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx?t=${Date.now()}"></script>
+    <script>
+      window.addEventListener("DOMContentLoaded", (event) => {
+        const vscode = acquireVsCodeApi();
+        window.renderWebView(vscode);
+        vscode.postMessage({command: "started"});
+      });
+    </script>
+    </body>
+    </html>`;
   }
 
   private getHtml(cspSource: string, script: vscode.Uri, style: vscode.Uri): string {
@@ -108,36 +151,7 @@ export abstract class WebView<Request extends Message, Response extends Message>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link href="${style}" rel="stylesheet">
       <style>
-        :root {
-          --xliic-foreground: var(
-            --xliic-custom-foreground,
-            var(--vscode-editor-foreground)
-          );
-          --xliic-background: var(
-            --xliic-custom-background,
-            var(--vscode-editor-background)
-          );
-          --xliic-button-background: var(
-            --xliic-custom-button-background,
-            var(--vscode-button-background)
-          );
-          --xliic-button-foreground: var(
-            --xliic-custom-button-foreground,
-            var(--vscode-button-foreground)
-          );
-          --xliic-button-hoverBackground: var(
-            --xliic-custom-button-hoverBackground,
-            var(--vscode-button-hoverBackground)
-          );
-        }
-        #root .btn-primary {
-          --bs-btn-bg: var(--xliic-button-background);
-          --bs-btn-hover-bg: var(--xliic-button-hoverBackground);
-          --bs-btn-color: var(--xliic-button-foreground);
-          --bs-btn-hover-color: var(--xliic-button-foreground);
-          --bs-btn-border-color: var(--xliic-button-background);
-          --bs-btn-hover-border-color: var(--xliic-button-hoverBackground);
-        }
+        ${customCssProperties()}
       </style>
     </head>
     <body>
@@ -153,4 +167,50 @@ export abstract class WebView<Request extends Message, Response extends Message>
     </body>
     </html>`;
   }
+}
+
+function customCssProperties(): string {
+  const vscodeColorMap: VsCodeColorMap = {
+    foreground: "--vscode-foreground",
+    background: "--vscode-editor-background",
+    disabledForeground: "--vscode-disabledForeground",
+    border: "--vscode-editorGroup-border",
+    focusBorder: "--vscode-focusBorder",
+    buttonBorder: "--vscode-button-border",
+    buttonBackground: "--vscode-button-background",
+    buttonForeground: "--vscode-button-foreground",
+    buttonHoverBackground: "--vscode-button-hoverBackground",
+    buttonSecondaryBackground: "--vscode-button-secondaryBackground",
+    buttonSecondaryForeground: "--vscode-button-secondaryForeground",
+    buttonSecondaryHoverBackground: "--vscode-button-secondaryHoverBackground",
+    inputBackground: "--vscode-input-background",
+    inputForeground: "--vscode-input-foreground",
+    inputBorder: "--vscode-input-border",
+    tabBorder: "--vscode-tab-border",
+    tabActiveBackground: "--vscode-tab-activeBackground",
+    tabActiveForeground: "--vscode-tab-activeForeground",
+    tabInactiveBackground: "--vscode-tab-inactiveBackground",
+    tabInactiveForeground: "--vscode-tab-inactiveForeground",
+    dropdownBackground: "--vscode-dropdown-background",
+    dropdownBorder: "--vscode-dropdown-border",
+    dropdownForeground: "--vscode-dropdown-foreground",
+    checkboxBackground: "--vscode-checkbox-background",
+    checkboxBorder: "--vscode-checkbox-border",
+    checkboxForeground: "--vscode-checkbox-foreground",
+    errorForeground: "--vscode-errorForeground",
+    errorBackground: "--vscode-inputValidation-errorBackground",
+    errorBorder: "--vscode-inputValidation-errorBorder",
+  };
+
+  const props = Object.entries(vscodeColorMap)
+    .map(([name, vscode]) => {
+      return createColorProperty(name, vscode);
+    })
+    .join("\n");
+
+  return `:root { ${props} }`;
+}
+
+function createColorProperty(name: string, vscode: string): string {
+  return `--xliic-${name}: var(--xliic-custom-${name}, var(${vscode}));`;
 }

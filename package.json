@@ -4,7 +4,7 @@
   "displayName": "OpenAPI (Swagger) Editor",
   "description": "OpenAPI extension for Visual Studio Code",
   "license": "AGPL-3.0-only",
-  "version": "4.11.4",
+  "version": "4.12.0",
   "publisher": "42Crunch",
   "repository": {
     "type": "git",
@@ -789,6 +789,15 @@
           },
           "default": [],
           "description": "List of hostnames approved for resolving external http:// and https:// references"
+        },
+        "openapi.tryit.insecureSslHostnames": {
+          "scope": "workbench",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "List of hostnames TryIt is allowed to connect ignoring SSL certificate errors"
         }
       }
     },
@@ -805,7 +814,7 @@
   "dependencies": {
     "@xliic/json-schema-ref-parser": "^9.3.0",
     "@xliic/preserving-json-yaml-parser": "^1.9.3",
-    "form-data": "^2.3.3",
+    "form-data": "^2.5.1",
     "got": "^11.8.2",
     "js-yaml": "^4.1.0",
     "jsonc-parser": "^3.0.0",
@@ -829,6 +838,6 @@
     "marked": "^4.0.10",
     "mkdirp": "^1.0.4",
     "mocha": "^9.2.0",
-    "typescript": "^4.6"
+    "typescript": "^4.7"
   }
 }

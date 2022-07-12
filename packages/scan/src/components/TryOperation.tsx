@@ -1,21 +1,20 @@
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { sendRequest } from "../store/oasSlice";
 
-import Operation from "./Operation";
-import { HttpMethod, HttpRequest } from "@xliic/common/http";
-import { OperationValues } from "@xliic/common/messages/tryit";
+import Operation from "./operation/Operation";
 
 import { getParameters, wrapFormDefaults, unwrapFormDefaults } from "../util";
+import { makeHttpRequest } from "../core/http";
 
 export default function TryOperation() {
   const dispatch = useAppDispatch();
-  const { path, method, oas, defaultValues } = useAppSelector((state) => state.oas);
+  const { path, method, oas, defaultValues, tryitConfig } = useAppSelector((state) => state.oas);
 
   const parameters = getParameters(oas, path!, method!);
 
-  const tryOperation = (data: Record<string, any>) => {
+  const tryOperation = async (data: Record<string, any>) => {
     const values = unwrapFormDefaults(oas, parameters, data);
-    const httpRequest = makeHttpRequest(method!, path!, values);
+    const httpRequest = await makeHttpRequest(tryitConfig, oas, method!, path!, values);
     dispatch(sendRequest({ defaultValues: values, request: httpRequest }));
   };
 
@@ -23,53 +22,13 @@ export default function TryOperation() {
     <>
       <Operation
         oas={oas}
+        config={tryitConfig}
         path={path!}
         method={method!}
         defaultValues={wrapFormDefaults(defaultValues!)}
         onSubmit={tryOperation}
-        buttonText="Try It"
+        buttonText="Send"
       />
     </>
   );
-}
-
-function makeHttpRequest(method: HttpMethod, path: string, values: OperationValues): HttpRequest {
-  const url = makeUrl(values.server, path, values?.parameters?.path);
-
-  const headers: Record<string, string> = {};
-  let body: unknown | undefined = undefined;
-
-  if (values.body) {
-    headers["content-type"] = values.body.mediaType;
-    headers["accept"] = values.body.mediaType;
-    if (values.body.mediaType === "application/json") {
-      body = JSON.stringify(values.body.value);
-    } else {
-      body = values.body.value;
-    }
-  }
-
-  // FIXME add query string handling
-  // FIXME add cookie params handling
-
-  return {
-    method,
-    url,
-    headers: { ...headers, ...(values.parameters?.header as HttpRequest["headers"]) },
-    body,
-  };
-}
-
-function makeUrl(host: string, path: string, pathParameters?: Record<string, any>): string {
-  const trimmedHost = host.endsWith("/") ? host.slice(0, -1) : host;
-  const substitutedPath = pathParameters ? substitutePathParams(path, pathParameters) : path;
-  return trimmedHost + substitutedPath;
-}
-
-function substitutePathParams(path: string, pathParameters: Record<string, any>) {
-  let substituted = path;
-  for (const [name, value] of Object.entries(pathParameters)) {
-    substituted = substituted.replaceAll(`{${name}}`, value as string);
-  }
-  return substituted;
 }

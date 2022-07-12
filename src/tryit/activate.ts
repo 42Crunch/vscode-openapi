@@ -20,6 +20,8 @@ type TryIt = {
   path: string;
   method: HttpMethod;
   versions: BundleDocumentVersions;
+  preferredMediaType?: string;
+  preferredBodyValue?: unknown;
 };
 
 const selectors = {
@@ -40,19 +42,25 @@ export function activate(
     previewUpdateDelay = delay;
   });
 
-  function debounce(func: Function) {
-    let timer: NodeJS.Timeout;
-    return (...args: any) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        func.apply(null, args);
-      }, previewUpdateDelay);
+  const wrap = <T extends Array<unknown>, U>(fn: (...args: T) => U) => {
+    return (...args: T): U => fn(...args);
+  };
+
+  function debounce<A extends unknown[], R>(fn: (...args: A) => R) {
+    return (...args: A): Promise<R> => {
+      let timer: NodeJS.Timeout;
+      return new Promise((resolve) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          resolve(fn(...args));
+        }, previewUpdateDelay);
+      });
     };
   }
 
   const debouncedTryIt = debounce(showTryIt);
 
-  const view = new TryItWebView(context.extensionPath);
+  const view = new TryItWebView(context.extensionPath, cache);
 
   cache.onDidChange(async (document: vscode.TextDocument) => {
     const uri = document.uri.toString();
@@ -62,7 +70,7 @@ export function activate(
         const versions = getBundleVersions(bundle);
         if (isBundleVersionsDifferent(versions, tryIt.versions)) {
           tryIt.versions = versions;
-          debouncedTryIt(view, bundle, tryIt.path, tryIt.method);
+          debouncedTryIt(view, document, bundle, tryIt.path, tryIt.method);
         }
       }
     }
@@ -76,6 +84,27 @@ export function activate(
     }
   );
 
+  vscode.commands.registerCommand(
+    "openapi.tryOperationWithExample",
+    async (
+      uri: vscode.Uri,
+      path: string,
+      method: HttpMethod,
+      preferredMediaType: string,
+      preferredBodyValue: unknown
+    ) => {
+      tryIt = {
+        documentUri: uri,
+        path,
+        method,
+        versions: {},
+        preferredMediaType,
+        preferredBodyValue,
+      };
+      startTryIt(view, cache, tryIt);
+    }
+  );
+
   const tryItCodeLensProvider = new TryItCodelensProvider(cache);
   for (const selector of Object.values(selectors)) {
     vscode.languages.registerCodeLensProvider(selector, tryItCodeLensProvider);
@@ -85,24 +114,49 @@ export function activate(
 async function startTryIt(view: TryItWebView, cache: Cache, tryIt: TryIt) {
   const document = await vscode.workspace.openTextDocument(tryIt.documentUri);
   const bundle = await cache.getDocumentBundle(document);
+
   if (!bundle || "errors" in bundle) {
     vscode.commands.executeCommand("workbench.action.problems.focus");
     vscode.window.showErrorMessage("Failed to try it, check OpenAPI file for errors.");
   } else {
     tryIt.versions = getBundleVersions(bundle);
     await view.show();
-    showTryIt(view, bundle, tryIt.path, tryIt.method);
+    showTryIt(
+      view,
+      document,
+      bundle,
+      tryIt.path,
+      tryIt.method,
+      tryIt.preferredMediaType,
+      tryIt.preferredBodyValue
+    );
   }
 }
 
-async function showTryIt(view: TryItWebView, bundle: Bundle, path: string, method: HttpMethod) {
+async function showTryIt(
+  view: TryItWebView,
+  document: vscode.TextDocument,
+  bundle: Bundle,
+  path: string,
+  method: HttpMethod,
+  preferredMediaType?: string,
+  preferredBodyValue?: unknown
+) {
   if (view.isActive()) {
     const oas = extractSingleOperation(method as HttpMethod, path as string, bundle.value);
     await view.show();
-    view.sendTryOperation({
+    const insecureSslHostnames =
+      vscode.workspace.getConfiguration("openapi").get<string[]>("tryit.insecureSslHostnames") ||
+      [];
+    view.sendTryOperation(document, {
       oas,
       path,
       method,
+      preferredMediaType,
+      preferredBodyValue,
+      config: {
+        insecureSslHostnames,
+      },
     });
   }
 }
@@ -135,16 +189,23 @@ function getBundleVersions(bundle: Bundle) {
 function extractSingleOperation(method: HttpMethod, path: string, oas: any): BundledOpenApiSpec {
   const visited = new Set<string>();
   crawl(oas, oas["paths"][path][method], visited);
+  if (oas["paths"][path]["parameters"]) {
+    crawl(oas, oas["paths"][path]["parameters"], visited);
+  }
   const cloned: any = simpleClone(oas);
   delete cloned["paths"];
-  delete cloned["components"]["schemas"];
+  delete cloned["components"];
+  // copy single path and path parameters
   cloned["paths"] = { [path]: { [method]: oas["paths"][path][method] } };
   if (oas["paths"][path]["parameters"]) {
     cloned["paths"][path]["parameters"] = oas["paths"][path]["parameters"];
   }
+  // copy security schemes
+  if (oas?.["components"]?.["securitySchemes"]) {
+    cloned["components"] = { securitySchemes: oas["components"]["securitySchemes"] };
+  }
   copyByPointer(oas, cloned, Array.from(visited));
   return cloned as BundledOpenApiSpec;
-  //console.log("cloned", cloned, getPath(spec, ""));
 }
 
 function crawl(root: any, current: any, visited: Set<string>) {
@@ -155,9 +216,11 @@ function crawl(root: any, current: any, visited: Set<string>) {
   for (const [key, value] of Object.entries(current)) {
     if (key === "$ref") {
       const path = (<string>value).substring(1, (<string>value).length);
-      visited.add(path);
-      const ref = resolveRef(root, path);
-      crawl(root, ref, visited);
+      if (!visited.has(path)) {
+        visited.add(path);
+        const ref = resolveRef(root, path);
+        crawl(root, ref, visited);
+      }
     } else {
       crawl(root, value, visited);
     }

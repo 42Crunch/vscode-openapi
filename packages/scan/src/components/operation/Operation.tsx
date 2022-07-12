@@ -1,21 +1,22 @@
 import styled from "styled-components";
-import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import Badge from "react-bootstrap/Badge";
+
 import { useEffect } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 
-import Parameters from "./Parameters";
-import Servers from "./Servers";
-import RequestBody from "./RequestBody";
+import Servers from "../Servers";
 
 import { HttpMethod } from "@xliic/common/http";
+import { TryitConfig } from "@xliic/common/messages/tryit";
 import { BundledOpenApiSpec, getOperation, OasRequestBody } from "@xliic/common/oas30";
 import { deref } from "@xliic/common/jsonpointer";
-import { getParameters } from "../util";
+import { getParameters, getSecurity } from "../../util";
+import OperationHeader from "./OperationHeader";
+import OperationTabs from "./OperationTabs";
 
-function Operation({
+export default function Operation({
   oas,
+  config,
   path,
   method,
   defaultValues,
@@ -23,6 +24,7 @@ function Operation({
   buttonText,
 }: {
   oas: BundledOpenApiSpec;
+  config: TryitConfig;
   path: string;
   method: HttpMethod;
   defaultValues: Record<string, any>;
@@ -31,33 +33,42 @@ function Operation({
 }) {
   const parameters = getParameters(oas, path, method);
   const operation = getOperation(oas, path, method);
+  const security = getSecurity(oas, path, method);
+
   const requestBody = deref<OasRequestBody>(oas, operation?.requestBody);
 
   const methods = useForm({
-    mode: "onBlur",
+    reValidateMode: "onChange",
     defaultValues,
   });
 
-  const { handleSubmit, reset } = methods;
+  const { handleSubmit, reset, formState } = methods;
 
   useEffect(() => {
     reset(defaultValues);
   }, [defaultValues]);
 
+  const hasErrors = Object.keys(formState.errors || {}).length > 0;
+
   return (
     <Container>
       <FormProvider {...methods}>
         <Form>
-          <h5 className="m-2">
-            <Badge>{method.toUpperCase()}</Badge>
-            <code> {path}</code>
-          </h5>
-          <Servers name="server" servers={oas?.servers} />
-          <Parameters oas={oas} parameters={parameters} />
-          <RequestBody oas={oas} requestBody={requestBody} />
-          <Button variant="primary" className="m-1" onClick={handleSubmit(onSubmit)}>
-            {buttonText}
-          </Button>
+          <OperationHeader
+            method={method}
+            path={path}
+            onSubmit={handleSubmit(onSubmit)}
+            buttonText={buttonText}
+            submitDisabled={formState.isSubmitSuccessful || hasErrors}
+          />
+          <Servers servers={oas?.servers || []} />
+          <OperationTabs
+            oas={oas}
+            config={config}
+            requestBody={requestBody}
+            parameters={parameters}
+            security={security}
+          />
         </Form>
       </FormProvider>
     </Container>
@@ -65,5 +76,3 @@ function Operation({
 }
 
 const Container = styled.div``;
-
-export default Operation;

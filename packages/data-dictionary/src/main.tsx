@@ -1,5 +1,5 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 
 import { ThemeRequests } from "@xliic/common/messages/theme";
@@ -23,14 +23,12 @@ const requestHandlers: Record<WebAppRequest["command"], Function> = {
 
 function renderWebView(host: HostApplication, theme: ThemeState) {
   const store = initStore(host, theme);
-
-  ReactDOM.render(
+  createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
       <Provider store={store}>
         <App />
       </Provider>
-    </React.StrictMode>,
-    document.getElementById("root")
+    </React.StrictMode>
   );
 
   window.addEventListener("message", (event) => {

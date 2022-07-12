@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { useAppSelector } from "../store/hooks";
 import ThemeStyles from "@xliic/web-theme/ThemeStyles";
-import Response from "./Response";
+import Response from "./response/Response";
 import Error from "./Error";
 import ScanOperation from "./ScanOperation";
 import TryOperation from "./TryOperation";

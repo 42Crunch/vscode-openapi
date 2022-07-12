@@ -5,10 +5,8 @@ import svgrPlugin from "vite-plugin-svgr";
 
 export default defineConfig({
   plugins: [react(), svgrPlugin({ svgrOptions: { icon: true } })],
-  resolve: {
-    alias: {
-      "react/jsx-runtime": "react/jsx-runtime.js",
-    },
+  optimizeDeps: {
+    include: ["react/jsx-runtime"],
   },
   build: {
     minify: true,
@@ -17,6 +15,11 @@ export default defineConfig({
       entry: resolve(__dirname, "src/main.tsx"),
       fileName: (format) => "index.js",
       formats: ["iife"],
+    },
+  },
+  server: {
+    hmr: {
+      host: "localhost",
     },
   },
 });

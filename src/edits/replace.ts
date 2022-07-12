@@ -43,6 +43,10 @@ export function replaceObject(
     document.positionAt(location.end)
   );
 
-  const reindented = indent(document, range.start, replacement);
+  // reindent replacement to the target indentation level
+  // remove spaces at the first line, as the insertion starts
+  // at the start of the value, which is already properly indented
+  const reindented = indent(document, range.start, replacement).replace(/^\\s+/g, "");
+
   return vscode.TextEdit.replace(range, reindented);
 }

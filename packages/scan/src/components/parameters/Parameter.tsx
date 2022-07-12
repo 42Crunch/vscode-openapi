@@ -14,7 +14,7 @@ export default function Parameter({
   parameter: ResolvedOasParameter;
   schema: OasSchema;
 }) {
-  const { control } = useFormContext();
+  const { control, setError, clearErrors } = useFormContext();
 
   const {
     field,
@@ -24,7 +24,7 @@ export default function Parameter({
     name,
     control,
     rules: {
-      validate: (value) => validate(schema, value),
+      //validate: (value) => validate(schema, value),
     },
   });
 
@@ -36,13 +36,18 @@ export default function Parameter({
 
   return (
     <>
-      <FloatingLabel className="m-1" label={parameter.name}>
+      <FloatingLabel label={parameter.name}>
         <Form.Control
           type="text"
           className={error ? "is-invalid" : undefined}
           onChange={(e) => {
-            field.onChange(convertFormToData(schema, e.target.value));
             setValue(e.target.value);
+            try {
+              field.onChange(convertFormToData(schema, e.target.value));
+              clearErrors(name);
+            } catch (e: any) {
+              setError(name, { message: `${e}` });
+            }
           }}
           onBlur={field.onBlur}
           value={value}
@@ -97,23 +102,29 @@ function convertFormToData(schema: OasSchema, value: any): any {
   if (type === "object" || type === "array") {
     return convertToObjectOrArray(value);
   }
-  return new Error(`failed to convert, unsupported type: ${type}`);
+  throw new Error(`failed to convert, unsupported type: ${type}`);
 }
 
-function convertToInteger(value: string): number | Error {
+function convertToInteger(value: string): number {
   const converted = Number.parseInt(value, 10);
-  return isNaN(converted) ? new Error("failed to convert to 'integer'") : converted;
+  if (isNaN(converted)) {
+    throw new Error("failed to convert to 'integer'");
+  }
+  return converted;
 }
 
-function convertToNumber(value: string): number | Error {
+function convertToNumber(value: string): number {
   const converted = Number.parseFloat(value);
-  return isNaN(converted) ? new Error("failed to convert to 'number'") : converted;
+  if (isNaN(converted)) {
+    throw new Error("failed to convert to 'number'");
+  }
+  return converted;
 }
 
-function convertToObjectOrArray(value: string): number | Error {
+function convertToObjectOrArray(value: string): number {
   try {
     return JSON.parse(value);
   } catch (e) {
-    return new Error(`failed to convert: ${e}`);
+    throw new Error(`failed to convert: ${e}`);
   }
 }
