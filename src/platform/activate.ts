@@ -107,7 +107,9 @@ export async function activate(
     });
   }
 
-  activateLinter(cache, platformContext, store, dataDictionaryDiagnostics);
+  if (platformUrl && platformToken) {
+    activateLinter(cache, platformContext, store, dataDictionaryDiagnostics);
+  }
 
   const disposable1 = vscode.workspace.onDidSaveTextDocument((document) =>
     refreshAuditReport(store, cache, auditContext, document)
