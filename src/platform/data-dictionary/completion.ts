@@ -22,7 +22,8 @@ export class DataDictionaryCompletionProvider implements vscode.CompletionItemPr
       return undefined;
     }
 
-    const quote = document.languageId === "yaml" ? "" : '"';
+    const hasQuote = line.charAt(position.character) === '"';
+    const quote = document.languageId === "yaml" ? "" : hasQuote ? "" : '"';
     const formats = await this.store.getDataDictionaryFormats();
 
     const completions = formats.map(

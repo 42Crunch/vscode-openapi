@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.11.4 (July 18, 2022)
+
+- Miscelaneous improvements in data-dictionary linter
+
 ## Version 4.11.3 (July 14, 2022)
 
 - Activate data-dictionary linter only when platform intergration is enabled

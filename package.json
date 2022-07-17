@@ -4,7 +4,7 @@
   "displayName": "OpenAPI (Swagger) Editor",
   "description": "OpenAPI extension for Visual Studio Code",
   "license": "AGPL-3.0-only",
-  "version": "4.11.3",
+  "version": "4.11.4",
   "publisher": "42Crunch",
   "repository": {
     "type": "git",
@@ -427,6 +427,11 @@
       {
         "command": "openapi.platform.updatePlatformCredentials",
         "title": "42Crunch: Update platform credentials"
+      },
+      {
+        "command": "openapi.platform.editorDataDictionaryBulkUpdateProperties",
+        "title": "42Crunch: Update Data Dictionary properties everywhere in the document",
+        "enablement": "openapi.platform.credentials == present"
       },
       {
         "command": "openapi.platform.favoriteApisFilter",

@@ -7,6 +7,7 @@ import * as vscode from "vscode";
 import { Cache } from "../../cache";
 import { PlatformStore } from "../stores/platform-store";
 import { DataDictionaryDiagnostic } from "../../types";
+import { joinJsonPointer } from "@xliic/preserving-json-yaml-parser";
 
 export class DataDictionaryCodeActions implements vscode.CodeActionProvider {
   public static readonly providedCodeActionKinds = [vscode.CodeActionKind.QuickFix];
@@ -23,6 +24,7 @@ export class DataDictionaryCodeActions implements vscode.CodeActionProvider {
   ): vscode.ProviderResult<vscode.CodeAction[]> {
     const diagnostics = this.collection.get(document.uri) || [];
     const actions: vscode.CodeAction[] = [];
+    const addMissingPropertiesSet = new Set<string>();
     for (const diagnostic of diagnostics as DataDictionaryDiagnostic[]) {
       if (
         diagnostic.range.contains(range) &&
@@ -50,16 +52,6 @@ export class DataDictionaryCodeActions implements vscode.CodeActionProvider {
           arguments: [diagnostic.format, diagnostic.node, diagnostic.path],
         };
         actions.push(action2);
-
-        const action3 = new vscode.CodeAction(
-          `Update Data Dictionary properties everywhere in the document`,
-          vscode.CodeActionKind.QuickFix
-        );
-        action3.command = {
-          command: "openapi.platform.editorDataDictionaryBulkUpdateProperties",
-          title: `Update Data Dictionary properties everywhere in the document`,
-        };
-        actions.push(action3);
       }
       if (
         diagnostic.range.contains(range) &&
@@ -75,6 +67,22 @@ export class DataDictionaryCodeActions implements vscode.CodeActionProvider {
           arguments: [diagnostic.format, diagnostic.node, diagnostic.property, diagnostic.path],
         };
         actions.push(action);
+
+        const pointer = joinJsonPointer(diagnostic.path);
+        if (!addMissingPropertiesSet.has(pointer)) {
+          addMissingPropertiesSet.add(pointer);
+          const action2 = new vscode.CodeAction(
+            `Update "${diagnostic.path.slice(-1)}" with all Data Dictionary properties`,
+            vscode.CodeActionKind.QuickFix
+          );
+          action2.command = {
+            command: "openapi.platform.editorDataDictionaryUpdateAllProperties",
+            title: `Update "${diagnostic.path.slice(-1)}" with all Data Dictionary properties`,
+            arguments: [diagnostic.format, diagnostic.node, diagnostic.path],
+          };
+          action2.isPreferred = true;
+          actions.push(action2);
+        }
       }
     }
 

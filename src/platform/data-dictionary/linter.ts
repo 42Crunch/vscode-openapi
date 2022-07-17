@@ -182,7 +182,7 @@ function checkFormat(
             id: "data-dictionary-format-property-missing",
             message: `Missing "${prop}" property defined in Data Dictionary`,
             range: valueRange,
-            severity: vscode.DiagnosticSeverity.Hint,
+            severity: vscode.DiagnosticSeverity.Information,
             source: "vscode-openapi",
             path,
             node: container,
