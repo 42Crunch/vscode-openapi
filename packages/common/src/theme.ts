@@ -28,6 +28,10 @@ export const ThemeColors = {
   errorForeground: "--xliic-errorForeground",
   errorBackground: "--xliic-errorBackground",
   errorBorder: "--xliic-errorBorder",
+  sidebarBackground: "--xliic-sidebarBackground",
+  listActiveSelectionBackground: "--xliic-listActiveSelectionBackground",
+  listActiveSelectionForeground: "--xliic-listActiveSelectionForeground",
+  listHoverBackground: "--xliic-listHoverBackground",
 } as const;
 
 export type VsCodeColorMap = Record<keyof typeof ThemeColors, string>;

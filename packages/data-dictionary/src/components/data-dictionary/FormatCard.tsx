@@ -3,6 +3,7 @@ import Badge from "react-bootstrap/Badge";
 import styled from "styled-components";
 import * as dayjs from "dayjs";
 
+import { ThemeColors } from "@xliic/common/theme";
 import CollapsibleCaret from "@xliic/web-ui/CollapsibleCaret";
 import {
   DataFormatEnum,
@@ -17,7 +18,7 @@ export default function FormatCard({ format }: { format: FlattenedDataFormat }) 
   const [isOpen, toggle] = collapsible();
 
   return (
-    <Card key={`${format.dictionaryId}-${format.name}`} style={{ margin: "1em" }}>
+    <StyledCard key={`${format.dictionaryId}-${format.name}`} style={{ margin: "1em" }}>
       <Card.Body>
         <CollapsibleCardTitle onClick={toggle}>
           <FormatName>{format.name}</FormatName>
@@ -37,7 +38,7 @@ export default function FormatCard({ format }: { format: FlattenedDataFormat }) 
           </>
         )}
       </Card.Body>
-    </Card>
+    </StyledCard>
   );
 }
 
@@ -103,6 +104,7 @@ function IntegerFormat({ format }: { format: DataFormatInteger }) {
       <Property label="Maximum" value={format.maximum} />
       <Property label="Exclusive minimum" value={`${format.exclusiveMinimum}`} />
       <Property label="Exclusive maximum" value={`${format.exclusiveMaximum}`} />
+      <Property label="Multiple Of" value={`${format.multipleOf}`} />
     </>
   );
 }
@@ -116,13 +118,17 @@ function Property({ label, value }: { label: string; value: any }) {
   );
 }
 
+const StyledCard = styled(Card)`
+  background-color: var(${ThemeColors.background});
+  border-color: var(${ThemeColors.border});
+`;
+
 const CollapsibleCardTitle = styled(Card.Title)`
   display: flex;
   cursor: pointer;
 `;
 
 const CardSubtitle = styled(Card.Subtitle)`
-  color: gray;
   font-size: 0.75rem;
   padding-bottom: 1rem;
 `;
@@ -136,7 +142,7 @@ const FormatName = styled.div`
 `;
 
 const Description = styled.div`
-  border-bottom: 1px solid gray;
+  border-bottom: 1px solid var(${ThemeColors.border});
   padding-bottom: 1rem;
 `;
 
