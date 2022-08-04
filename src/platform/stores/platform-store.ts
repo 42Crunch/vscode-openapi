@@ -39,6 +39,8 @@ export interface ApisView {
 }
 
 export interface DataDictionaryFormat {
+  id: string;
+  dictionary: string;
   name: string;
   description: string;
   format: DataFormat;
@@ -283,11 +285,24 @@ export class PlatformStore {
           this.context.logger
         );
         for (const format of Object.values<DataFormat>(formats)) {
-          result.push({
-            name: `o:${dictionary.name}:${format.name}`,
-            description: format.description,
-            format: format,
-          });
+          // entries from a standard dictionary do not have a o: prefix
+          if (dictionary.name === "standard") {
+            result.push({
+              id: `o:${dictionary.name}:${format.name}`,
+              name: format.name,
+              description: format.description,
+              format: format,
+              dictionary: dictionary.name,
+            });
+          } else {
+            result.push({
+              id: `o:${dictionary.name}:${format.name}`,
+              name: `o:${dictionary.name}:${format.name}`,
+              description: format.description,
+              format: format,
+              dictionary: dictionary.name,
+            });
+          }
         }
       }
       this.formats = result;

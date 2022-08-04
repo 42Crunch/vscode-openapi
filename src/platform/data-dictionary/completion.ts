@@ -18,7 +18,7 @@ export class DataDictionaryCompletionProvider implements vscode.CompletionItemPr
     context: vscode.CompletionContext
   ) {
     const line = document.lineAt(position).text;
-    if (!line.includes("x-42c-format")) {
+    if (!line.includes("format")) {
       return undefined;
     }
 

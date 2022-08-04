@@ -47,6 +47,7 @@ export default (
           updated[name] = (found.format as any)[name];
         }
       }
+      updated["x-42c-format"] = found.id;
 
       let text = "";
       if (editor.document.languageId === "yaml") {
@@ -75,8 +76,13 @@ export default (
     const formats = await store.getDataDictionaryFormats();
     const found = formats.filter((f) => f.name === format).pop();
 
+    let updated: any;
     if (parsed !== undefined && found !== undefined) {
-      const updated: any = { ...node, [property]: (found.format as any)[property] };
+      if (property === "x-42c-format") {
+        updated = { ...node, "x-42c-format": found.id };
+      } else {
+        updated = { ...node, [property]: (found.format as any)[property] };
+      }
 
       let text = "";
       if (editor.document.languageId === "yaml") {
@@ -108,7 +114,7 @@ export default (
       formats.set(format.name, format);
     }
 
-    const addMissingProperties = new Map<string, DataFormat>();
+    const addMissingProperties = new Map<string, DataDictionaryFormat>();
     const edits: vscode.TextEdit[] = [];
     const diagnostics = dataDictionaryDiagnostics.get(document.uri) || [];
     // find all nodes with missing properties
@@ -121,7 +127,7 @@ export default (
         format &&
         !addMissingProperties.has(pointer)
       ) {
-        addMissingProperties.set(pointer, format.format);
+        addMissingProperties.set(pointer, format);
       }
     }
 
@@ -132,10 +138,11 @@ export default (
         const updated: any = { ...node };
         for (const name of schemaProps) {
           delete updated[name];
-          if ((format as any)[name] !== undefined) {
-            updated[name] = (format as any)[name];
+          if ((format.format as any)[name] !== undefined) {
+            updated[name] = (format.format as any)[name];
           }
         }
+        updated["x-42c-format"] = format.id;
         let text = "";
         if (editor.document.languageId === "yaml") {
           text = yaml.dump(updated, { indent: 2 }).trimEnd();
@@ -156,9 +163,6 @@ export default (
 const schemaProps = [
   "type",
   "format",
-  "readOnly",
-  "writeOnly",
-  "nullable",
   "example",
   "pattern",
   "minLength",

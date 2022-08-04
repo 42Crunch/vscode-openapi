@@ -156,9 +156,6 @@
     "schemas": {
       "x-42c-sample": {
         "target": "#/definitions/X42cSample"
-      },
-      "x-42c-format": {
-        "target": "#/definitions/X42cFormat"
       }
     }
   }

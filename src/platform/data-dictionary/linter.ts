@@ -78,23 +78,13 @@ function lint(
       text: string | undefined,
       location: Location | undefined
     ): void {
-      if (key === "x-42c-format" && typeof value === "string" && location?.key !== undefined) {
-        const keyRange = new vscode.Range(
-          document.positionAt(location.key.start),
-          document.positionAt(location.key.end)
-        );
-        const valueRange = new vscode.Range(
-          document.positionAt(location.value.start),
-          document.positionAt(location.value.end)
-        );
+      if (key === "format" && typeof value === "string") {
         diagnostics.push(
           ...checkFormat(
             document,
             parsed,
             formats,
             value,
-            keyRange,
-            valueRange,
             parent,
             path.slice(1) // remove fakeroot
           )
@@ -107,9 +97,6 @@ function lint(
 
 const schemaProps = [
   "type",
-  "readOnly",
-  "writeOnly",
-  "nullable",
   "example",
   "pattern",
   "minLength",
@@ -128,38 +115,75 @@ function checkFormat(
   root: Parsed,
   formats: Map<string, DataDictionaryFormat>,
   format: string,
-  keyRange: vscode.Range,
-  valueRange: vscode.Range,
   container: any,
   path: Path
 ): vscode.Diagnostic[] {
   const diagnostics: vscode.Diagnostic[] = [];
+
   if (!formats.has(format)) {
-    diagnostics.push({
-      message: `Data Dictionary format '${format}' is not defined`,
-      range: valueRange,
-      severity: vscode.DiagnosticSeverity.Error,
-      source: "vscode-openapi",
-    });
-    return diagnostics;
+    const range = getValueRange(document, container, "format");
+    if (range !== undefined) {
+      diagnostics.push({
+        message: `Data Dictionary format '${format}' is not defined`,
+        range,
+        severity: vscode.DiagnosticSeverity.Error,
+        source: "vscode-openapi",
+      });
+      return diagnostics;
+    }
   }
 
-  const dataFormat = formats.get(format)!.format;
+  const { format: dataFormat, id: formatId } = formats.get(format)!;
+  // check x-42c-format
+  if (container.hasOwnProperty("x-42c-format")) {
+    if (container["x-42c-format"] !== formatId) {
+      const range = getValueRange(document, container, "x-42c-format");
+      if (range !== undefined) {
+        // check if its the same as format it
+        const diagnostic: DataDictionaryDiagnostic = {
+          id: "data-dictionary-format-property-mismatch",
+          message: `Data Dictionary requires value of '${formatId}'`,
+          range,
+          severity: vscode.DiagnosticSeverity.Error,
+          source: "vscode-openapi",
+          path,
+          node: container,
+          property: "x-42c-format",
+          format,
+        };
+        diagnostics.push(diagnostic);
+      }
+    }
+  } else {
+    // no x42c-format
+    const range = getParentKeyRange(document, root, path);
+    if (range) {
+      const diagnostic: DataDictionaryDiagnostic = {
+        id: "data-dictionary-format-property-missing",
+        message: `Missing "x-42c-format" property required for data dictionary`,
+        range,
+        severity: vscode.DiagnosticSeverity.Information,
+        source: "vscode-openapi",
+        path,
+        node: container,
+        property: "x-42c-format",
+        format,
+      };
+      diagnostics.push(diagnostic);
+    }
+  }
+
   for (const prop of schemaProps) {
     if (dataFormat.hasOwnProperty(prop)) {
       if (container.hasOwnProperty(prop)) {
         // properties differ
         if (container[prop] !== (dataFormat as any)[prop]) {
-          const location = getLocation(container, prop);
-          if (location !== undefined) {
-            const valueRange = new vscode.Range(
-              document.positionAt(location.value.start),
-              document.positionAt(location.value.end)
-            );
+          const range = getValueRange(document, container, prop);
+          if (range !== undefined) {
             const diagnostic: DataDictionaryDiagnostic = {
               id: "data-dictionary-format-property-mismatch",
               message: `Data Dictionary requires value of '${(dataFormat as any)[prop]}'`,
-              range: valueRange,
+              range,
               severity: vscode.DiagnosticSeverity.Error,
               source: "vscode-openapi",
               path,
@@ -172,16 +196,12 @@ function checkFormat(
         }
       } else {
         // property is missing
-        const location = findLocationForPath(root, path);
-        if (location !== undefined) {
-          const valueRange = new vscode.Range(
-            document.positionAt(location.key!.start),
-            document.positionAt(location.key!.end)
-          );
+        const range = getParentKeyRange(document, root, path);
+        if (range !== undefined) {
           const diagnostic: DataDictionaryDiagnostic = {
             id: "data-dictionary-format-property-missing",
             message: `Missing "${prop}" property defined in Data Dictionary`,
-            range: valueRange,
+            range,
             severity: vscode.DiagnosticSeverity.Information,
             source: "vscode-openapi",
             path,
@@ -196,4 +216,32 @@ function checkFormat(
   }
 
   return diagnostics;
+}
+
+function getValueRange(
+  document: vscode.TextDocument,
+  container: any,
+  key: string
+): vscode.Range | undefined {
+  const location = getLocation(container, key);
+  if (location !== undefined) {
+    return new vscode.Range(
+      document.positionAt(location.value.start),
+      document.positionAt(location.value.end)
+    );
+  }
+}
+
+function getParentKeyRange(
+  document: vscode.TextDocument,
+  root: Parsed,
+  path: Path
+): vscode.Range | undefined {
+  const location = findLocationForPath(root, path);
+  if (location !== undefined && location.key !== undefined) {
+    return new vscode.Range(
+      document.positionAt(location.key.start),
+      document.positionAt(location.key.end)
+    );
+  }
 }
