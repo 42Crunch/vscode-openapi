@@ -119,15 +119,15 @@ export default (
     const diagnostics = dataDictionaryDiagnostics.get(document.uri) || [];
     // find all nodes with missing properties
     for (const diagnostic of diagnostics as DataDictionaryDiagnostic[]) {
-      const format = formats.get(diagnostic.format);
-      const pointer = joinJsonPointer(diagnostic.path);
       if (
-        (diagnostic["id"] === "data-dictionary-format-property-mismatch" ||
-          diagnostic["id"] === "data-dictionary-format-property-missing") &&
-        format &&
-        !addMissingProperties.has(pointer)
+        diagnostic["id"] === "data-dictionary-format-property-mismatch" ||
+        diagnostic["id"] === "data-dictionary-format-property-missing"
       ) {
-        addMissingProperties.set(pointer, format);
+        const format = formats.get(diagnostic.format);
+        const pointer = joinJsonPointer(diagnostic.path);
+        if (format && !addMissingProperties.has(pointer)) {
+          addMissingProperties.set(pointer, format);
+        }
       }
     }
 
