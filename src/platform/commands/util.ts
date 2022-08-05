@@ -51,7 +51,7 @@ export default (context: vscode.ExtensionContext, platformContext: PlatformConte
     }
 
     const UUID_REGEX =
-      /^(ide_)?[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      /^(ide_|api_)?[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     const token = await vscode.window.showInputBox({
       prompt: "Enter 42Crunch API token",
       placeHolder: "API Token",
