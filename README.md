@@ -19,6 +19,7 @@ Both OAS v2 and v3 are supported.
     - [Jump to a reference](#jump-to-a-reference)
     - [Sort entries in the navigation pane](#sort-entries-in-the-navigation-pane)
     - [Preview OpenAPI documentation](#preview-openapi-documentation)
+    - [Execute individual operations with "Try it"](#execute-operations-with-try-it-beta)
   - [Use the extension to audit the security of your API](#use-the-extension-to-audit-the-security-of-your-api)
     - [Navigate the issues in the audit report](#navigate-the-issues-in-the-audit-report)
     - [Fix issues](#fix-issues)
@@ -103,6 +104,22 @@ To change the default OpenAPI Preview rendering engine:
 
 ![OpenAPI Preview Pane](images/Change_OpenAPI_Preview_engine.jpg)
 
+### Execute operations with "Try it" (beta)
+
+You can execute individual operations defined in your OpenAPI file with "Try it".
+
+To invoke operaton click on "Try it" code lens, which is displayed right below the "get", "post", "put", and so on, or in the examples section if operation contains examples.
+
+If you click on "Try it" lens next to a particular example, it will be used as the payload for the request. Otherwise payload will be generated based on the request JSON Schema, or the first example available.
+
+![TryIt view](images/tryit.png)
+
+Try it is a new feature, and has number of limitations:
+
+- Only OpenAPI 3.x is supported. Try it is not available in Swagger/OpenAPI 2.0 files.
+- Sending files is not supported
+- Try it works best with small textual responses, such as JSON. Binary/image responses will be shown as text
+
 ## Use the extension to audit the security of your API
 
 You can use OpenAPI extension to check the quality of your API as you work on it. You can run the audit directly from VS Code by clicking the **42C** button in the upper right corner.
@@ -161,8 +178,6 @@ If your OpenAPI file contains multiple similar issues - for example, a parameter
 ## Integration with 42Crunch Platform
 
 This extension features optional integration with [42Crunch Platform](https://platform.42crunch.com/). To enable it please configure your credentials by running `42Crunch: Update platform credentials` command from the command palette.
-
-Please be aware that there is a [known issue](https://github.com/microsoft/vscode/issues/136787) in VS Code that affects it ability to connect to certain TLS endpoints. If you see error message saying that "certificate has expired" please add `"http.systemCertificates": false` to your `settings.json`.
 
 ## Known issues
 
