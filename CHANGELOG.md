@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.12 (August 11, 2022)
+
+- Add TryIt feature to allow sending HTTP requests directly from the extension
+
 ## Version 4.11.4 (July 18, 2022)
 
 - Miscelaneous improvements in data-dictionary linter
