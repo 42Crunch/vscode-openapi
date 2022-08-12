@@ -340,7 +340,7 @@ export class Cache implements vscode.Disposable {
   }
 
   async onDocumentChanged(event: vscode.TextDocumentChangeEvent) {
-    if (vscode.languages.match(this.documentSelector, event.document) > 0) {
+    if (isSupportedDocument(this.documentSelector, event.document)) {
       this.onChange(event.document);
     } else {
       this._didChange.fire(event.document);
@@ -349,8 +349,8 @@ export class Cache implements vscode.Disposable {
 
   async onActiveEditorChanged(editor: vscode.TextEditor | undefined) {
     this._didActiveDocumentChange.fire(editor?.document);
-    if (editor?.document && vscode.languages.match(this.documentSelector, editor.document) > 0) {
-      this.onChange(editor.document);
+    if (isSupportedDocument(this.documentSelector, editor?.document)) {
+      this.onChange(editor!.document);
     }
   }
 
@@ -465,6 +465,7 @@ export class Cache implements vscode.Disposable {
     }
   }
 }
+
 function getBundleDocumentByUri(
   bundle: BundleResult,
   uri: string
@@ -478,4 +479,15 @@ function getBundleDocumentByUri(
       return document;
     }
   }
+}
+
+function isSupportedDocument(
+  selector: vscode.DocumentSelector,
+  document?: vscode.TextDocument
+): boolean {
+  return (
+    document !== undefined &&
+    vscode.languages.match(selector, document) > 0 &&
+    document.uri.scheme !== "git"
+  );
 }
