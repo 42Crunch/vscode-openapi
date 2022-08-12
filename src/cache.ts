@@ -209,9 +209,14 @@ class BundledDocumentCache implements vscode.Disposable {
   // given the 'document' update all known bundles which this
   // document is a part of
   async update(document: vscode.TextDocument): Promise<MaybeBundledDocument[]> {
-    const affected = this.getAffectedDocuments(document);
+    const rebundle = this.getAffectedDocuments(document);
+    // check if this document is an OpenAPI document and must be re-bundled itself
+    const parsed = this.documentParser(document);
+    if (parsed.openApiVersion !== OpenApiVersion.Unknown) {
+      rebundle.add(document);
+    }
     const results = [];
-    for (const document of affected) {
+    for (const document of rebundle) {
       const bundle = await this.bundle(document);
       if (bundle) {
         this.cache.set(document.uri.toString(), { document, bundle });
@@ -240,7 +245,7 @@ class BundledDocumentCache implements vscode.Disposable {
   }
 
   private getAffectedDocuments(document: vscode.TextDocument): Set<vscode.TextDocument> {
-    const affected = new Set<vscode.TextDocument>([document]);
+    const affected = new Set<vscode.TextDocument>();
     // check all cache entries which have bundles and see if
     // document belongs to a bundle, if so re-bundle the relevant
     // cache entry
@@ -375,10 +380,17 @@ export class Cache implements vscode.Disposable {
       } else if ("errors" in bundle) {
         // produced bundling result, but encountered errors when bundling
         for (const [uri, errors] of bundle.errors.entries()) {
-          bundlingErrors.set(
-            document,
-            bundlingErrors.has(document) ? [...bundlingErrors.get(document)!, ...errors] : errors
-          );
+          const documentWithError = getBundleDocumentByUri(bundle, uri);
+          if (documentWithError) {
+            bundlingErrors.set(
+              documentWithError,
+              bundlingErrors.has(documentWithError)
+                ? [...bundlingErrors.get(documentWithError)!, ...errors]
+                : errors
+            );
+          } else {
+            console.error("Failed to find document containing the bundling error:", uri);
+          }
         }
       } else {
         // successfully bundled
@@ -450,6 +462,20 @@ export class Cache implements vscode.Disposable {
       }
 
       this.diagnostics.set(document.uri, [...messages.values()]);
+    }
+  }
+}
+function getBundleDocumentByUri(
+  bundle: BundleResult,
+  uri: string
+): vscode.TextDocument | undefined {
+  if (bundle.document.uri.toString() === uri) {
+    return bundle.document;
+  }
+
+  for (const document of bundle.documents) {
+    if (document.uri.toString() === uri) {
+      return document;
     }
   }
 }
