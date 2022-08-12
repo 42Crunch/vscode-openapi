@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.13 (August 12, 2022)
+
+- Fix performance degradation when editing large documents, #178
+
 ## Version 4.12 (August 11, 2022)
 
 - Add TryIt feature to allow sending HTTP requests directly from the extension
