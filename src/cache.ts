@@ -31,27 +31,22 @@ interface MaybeBundledDocument {
 }
 
 class Throttle {
-  private lastUpdate = new Map<string, number>();
+  private tasks = new Map<string, NodeJS.Timeout>();
 
-  constructor(private limit: number) {}
+  constructor(private delay: number) {}
 
-  throttle(key: string, delay: number): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      setTimeout(() => {
-        this.lastUpdate.set(key, Date.now());
-        resolve();
-      }, delay);
-    });
-  }
-
-  delay(key: string): number {
-    if (this.lastUpdate.has(key)) {
-      return 0;
+  throttle(key: string, callback: () => void): void {
+    const existing = this.tasks.get(key);
+    if (existing) {
+      clearTimeout(existing);
     }
 
-    const now = Date.now();
-    const elapsed = now - this.lastUpdate.get(key)!;
-    return this.limit > elapsed ? this.limit - elapsed : 0;
+    const timeout = setTimeout(() => {
+      this.tasks.delete(key);
+      callback();
+    }, this.delay);
+
+    this.tasks.set(key, timeout);
   }
 }
 
@@ -340,40 +335,32 @@ export class Cache implements vscode.Disposable {
   }
 
   async onDocumentChanged(event: vscode.TextDocumentChangeEvent) {
-    if (vscode.languages.match(this.documentSelector, event.document) === 0) {
-      this._didChange.fire(event.document);
-    } else {
+    if (vscode.languages.match(this.documentSelector, event.document) > 0) {
       this.onChange(event.document);
+    } else {
+      this._didChange.fire(event.document);
     }
   }
 
   async onActiveEditorChanged(editor: vscode.TextEditor | undefined) {
-    if (!editor?.document || vscode.languages.match(this.documentSelector, editor.document) === 0) {
-      this._didActiveDocumentChange.fire(editor?.document);
-    } else {
+    this._didActiveDocumentChange.fire(editor?.document);
+    if (editor?.document && vscode.languages.match(this.documentSelector, editor.document) > 0) {
       this.onChange(editor.document);
     }
   }
 
   private async onChange(document: vscode.TextDocument): Promise<void> {
-    const delay = this.throttle.delay(document.uri.toString());
-    if (delay > 0) {
-      // going to throttle, the document must be already in cache
-      // so emit onActiveEditorChanged before throttling
+    this.throttle.throttle(document.uri.toString(), async () => {
+      const updated = await this.bundledDocuments.update(document);
+      const aggregated = this.aggregateErrors(updated);
+      this.showErrors(aggregated.successes, aggregated.failures, aggregated.errors);
       if (vscode.window?.activeTextEditor?.document === document) {
         this._didActiveDocumentChange.fire(document);
       }
-    }
-    await this.throttle.throttle(document.uri.toString(), delay);
-    const updated = await this.bundledDocuments.update(document);
-    const aggregated = this.aggregateErrors(updated);
-    this.showErrors(aggregated.successes, aggregated.failures, aggregated.errors);
-    for (const { document } of updated) {
-      this._didChange.fire(document);
-      if (vscode.window?.activeTextEditor?.document === document) {
-        this._didActiveDocumentChange.fire(document);
+      for (const { document } of updated) {
+        this._didChange.fire(document);
       }
-    }
+    });
   }
 
   private aggregateErrors(results: MaybeBundledDocument[]) {
