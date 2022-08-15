@@ -108,7 +108,7 @@ To change the default OpenAPI Preview rendering engine:
 
 With "Try it" you can invoke operations defined in your OpenAPI directy from VS Code.
 
-To do it click on "Try it" code lens which is displayed right below the HTTP verb ("get", "post", etc) of your operation, and also or in the examples section of it.
+To do it click on "Try it" code lens which is displayed right below the HTTP verb ("get", "post", etc) of your operation and in the examples section.
 
 When using "Try it" from the examples, the value of the example will be used as the payload for the request. Otherwise payload will be generated based on the request JSON Schema, or the first example available.
 
