@@ -19,7 +19,7 @@ Both OAS v2 and v3 are supported.
     - [Jump to a reference](#jump-to-a-reference)
     - [Sort entries in the navigation pane](#sort-entries-in-the-navigation-pane)
     - [Preview OpenAPI documentation](#preview-openapi-documentation)
-    - [Execute individual operations with "Try it"](#execute-operations-with-try-it-beta)
+    - [Execute operations with "Try it"](#execute-operations-with-try-it-beta)
   - [Use the extension to audit the security of your API](#use-the-extension-to-audit-the-security-of-your-api)
     - [Navigate the issues in the audit report](#navigate-the-issues-in-the-audit-report)
     - [Fix issues](#fix-issues)
