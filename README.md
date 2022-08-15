@@ -106,11 +106,12 @@ To change the default OpenAPI Preview rendering engine:
 
 ### Execute operations with "Try it" (beta)
 
-You can execute individual operations defined in your OpenAPI file with "Try it".
+With "Try it" you can invoke operations defined in your OpenAPI directy from VS Code.
 
-To invoke operaton click on "Try it" code lens, which is displayed right below the "get", "post", "put", and so on, or in the examples section if operation contains examples.
+To do it click on "Try it" code lens which is displayed right below the HTTP verb ("get", "post", etc)
+or your operation, and also or in the examples section of it.
 
-If you click on "Try it" lens next to a particular example, it will be used as the payload for the request. Otherwise payload will be generated based on the request JSON Schema, or the first example available.
+When using "Try it" from the examples, the value of the example will be used as the payload for the request. Otherwise payload will be generated based on the request JSON Schema, or the first example available.
 
 ![TryIt view](images/tryit.png)
 
@@ -119,6 +120,13 @@ Try it is a new feature, and has number of limitations:
 - Only OpenAPI 3.x is supported. Try it is not available in Swagger/OpenAPI 2.0 files.
 - Sending files is not supported
 - Try it works best with small textual responses, such as JSON. Binary/image responses will be shown as text
+
+### Generate JSON Schema using based on the response content
+
+"Try it" can be used to generate JSON Schema based on the body of the response. To do it, select
+"Tools" tab in the TryIt response view and click "Generate schema" button.
+
+![TryIt response tools](images/tryit-schema.png)
 
 ## Use the extension to audit the security of your API
 
