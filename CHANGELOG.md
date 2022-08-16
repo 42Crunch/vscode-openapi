@@ -1,8 +1,10 @@
 # Changelog
 
-## Version 4.13 (August 12, 2022)
+## Version 4.13 (August 16, 2022)
 
 - Fix performance degradation when editing large documents, #178
+- Fix attempt to resolve $ref's in staged git changes, #179
+- Stop trying to resolve $ref's in non-OpenAPI documents unless the document is referred by other OpenAPI document, #171
 
 ## Version 4.12 (August 11, 2022)
 
