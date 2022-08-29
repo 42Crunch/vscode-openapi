@@ -121,16 +121,23 @@ function checkFormat(
   const diagnostics: vscode.Diagnostic[] = [];
 
   if (!formats.has(format)) {
-    const range = getValueRange(document, container, "format");
-    if (range !== undefined) {
-      diagnostics.push({
-        message: `Data Dictionary format '${format}' is not defined`,
-        range,
-        severity: vscode.DiagnosticSeverity.Error,
-        source: "vscode-openapi",
-      });
-      return diagnostics;
-    }
+    // FIXME in the current version of Data Dictionary we don't error on missng
+    // Data Dictionary entries, to reduce number of error messages reported
+    // for the standard formats, as on the backend we don't yet add 'standard'
+    // dictionary to everyone
+
+    return diagnostics;
+
+    // const range = getValueRange(document, container, "format");
+    // if (range !== undefined) {
+    //   diagnostics.push({
+    //     message: `Data Dictionary format '${format}' is not defined`,
+    //     range,
+    //     severity: vscode.DiagnosticSeverity.Error,
+    //     source: "vscode-openapi",
+    //   });
+    //   return diagnostics;
+    // }
   }
 
   const { format: dataFormat, id: formatId } = formats.get(format)!;
