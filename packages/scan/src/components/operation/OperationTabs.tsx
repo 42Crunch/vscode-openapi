@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import RequestBody from "./RequestBody";
 
 import { BundledOpenApiSpec, OasRequestBody, OperationParametersMap } from "@xliic/common/oas30";
-import { ThemeColors } from "@xliic/common/theme";
+import { ThemeColorVariables } from "@xliic/common/theme";
 import { TryitSecurity, TryitConfig } from "@xliic/common/messages/tryit";
 
 import ParameterGroup from "../parameters/ParameterGroup";
@@ -113,7 +113,7 @@ const TabList = styled(Tabs.List)`
   margin: 0.25rem;
   display: flex;
   :after {
-    border-bottom: 1px solid var(${ThemeColors.tabBorder});
+    border-bottom: 1px solid var(${ThemeColorVariables.tabBorder});
     content: "";
     flex: 1;
   }
@@ -121,14 +121,14 @@ const TabList = styled(Tabs.List)`
 
 const TabButton = styled(Tabs.Trigger)`
   border-radius: 0.375rem 0.375rem 0 0;
-  border: 1px solid var(${ThemeColors.tabBorder});
+  border: 1px solid var(${ThemeColorVariables.tabBorder});
   padding: 0.25rem 1rem;
-  color: var(${ThemeColors.tabInactiveForeground});
-  background-color: var(${ThemeColors.tabInactiveBackground});
+  color: var(${ThemeColorVariables.tabInactiveForeground});
+  background-color: var(${ThemeColorVariables.tabInactiveBackground});
 
   &[data-state="active"] {
-    color: var(${ThemeColors.tabActiveForeground});
-    background-color: var(${ThemeColors.tabActiveBackground});
+    color: var(${ThemeColorVariables.tabActiveForeground});
+    background-color: var(${ThemeColorVariables.tabActiveBackground});
     border-bottom: 1px transparent solid;
   }
 `;

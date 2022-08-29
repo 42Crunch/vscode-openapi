@@ -1,4 +1,44 @@
-export const ThemeColors = {
+export const ThemeColorNames = [
+  "foreground",
+  "disabledForeground",
+  "background",
+  "border",
+  "focusBorder",
+  "buttonBorder",
+  "buttonBackground",
+  "buttonForeground",
+  "buttonHoverBackground",
+  "buttonSecondaryBackground",
+  "buttonSecondaryForeground",
+  "buttonSecondaryHoverBackground",
+  "inputBackground",
+  "inputForeground",
+  "inputBorder",
+  "tabBorder",
+  "tabActiveBackground",
+  "tabActiveForeground",
+  "tabInactiveBackground",
+  "tabInactiveForeground",
+  "dropdownBackground",
+  "dropdownBorder",
+  "dropdownForeground",
+  "checkboxBackground",
+  "checkboxBorder",
+  "checkboxForeground",
+  "errorForeground",
+  "errorBackground",
+  "errorBorder",
+  "sidebarBackground",
+  "listActiveSelectionBackground",
+  "listActiveSelectionForeground",
+  "listHoverBackground",
+] as const;
+
+export type ThemeColorName = typeof ThemeColorNames[number];
+
+export type ThemeColorValues = Record<ThemeColorName, string>;
+
+export const ThemeColorVariables: ThemeColorValues = {
   foreground: "--xliic-foreground",
   disabledForeground: "--xliic-disabledForeground",
   background: "--xliic-background",
@@ -34,4 +74,4 @@ export const ThemeColors = {
   listHoverBackground: "--xliic-listHoverBackground",
 } as const;
 
-export type VsCodeColorMap = Record<keyof typeof ThemeColors, string>;
+export type VsCodeColorMap = ThemeColorValues;

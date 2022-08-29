@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import Button from "react-bootstrap/Button";
-import { ThemeColors } from "@xliic/common/theme";
+import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { goBack } from "../store/oasSlice";
@@ -28,7 +28,7 @@ export default function Error() {
 }
 
 const Message = styled.div`
-  border: 1px solid var(${ThemeColors.border});
+  border: 1px solid var(${ThemeColorVariables.border});
   border-radius: 0.375rem;
   margin-right: 0.25rem;
   display: flex;
@@ -47,9 +47,9 @@ const Header = styled.div`
 `;
 
 const ErrorText = styled.div`
-  border: 1px solid var(${ThemeColors.errorBorder});
-  color: var(${ThemeColors.errorForeground});
-  background-color: var(${ThemeColors.errorBackground});
+  border: 1px solid var(${ThemeColorVariables.errorBorder});
+  color: var(${ThemeColorVariables.errorForeground});
+  background-color: var(${ThemeColorVariables.errorBackground});
   border-radius: 0.375rem;
   margin-top: 1rem;
   margin-bottom: 1rem;

@@ -1,10 +1,10 @@
 import { ThemeState } from "./index";
-import { ThemeColors } from "@xliic/common/theme";
+import { ThemeColorVariables, ThemeColorValues, ThemeColorNames } from "@xliic/common/theme";
 
 export default function ThemeStyles({ theme }: { theme: ThemeState }) {
   return (
     <style>
-      {customProps(theme)}
+      {customProps(theme.theme)}
       {defaultStyles()}
       {bootstrapColorOverrides()}
     </style>
@@ -21,15 +21,13 @@ function defaultStyles(): string {
     }`;
 }
 
-function customProps(theme: ThemeState): string {
+function customProps(theme?: ThemeColorValues): string {
   const vars: string[] = [];
 
-  if (theme.foreground !== undefined) {
-    vars.push(`--xliic-custom-foreground: ${theme.foreground};`);
-  }
-
-  if (theme.background !== undefined) {
-    vars.push(`--xliic-custom-background: ${theme.background};`);
+  if (theme !== undefined) {
+    for (const name of ThemeColorNames) {
+      vars.push(`${ThemeColorVariables[name]}-custom: ${theme[name]};`);
+    }
   }
 
   return `:root {
@@ -39,51 +37,51 @@ function customProps(theme: ThemeState): string {
 
 function bootstrapColorOverrides(): string {
   return `#root .btn-primary {
-    --bs-btn-color: var(${ThemeColors.buttonForeground});
-    --bs-btn-bg: var(${ThemeColors.buttonBackground});
-    --bs-btn-border-color: var(${ThemeColors.buttonBorder});
-    --bs-btn-hover-color: var(${ThemeColors.buttonForeground});
-    --bs-btn-hover-bg: var(${ThemeColors.buttonHoverBackground});
-    --bs-btn-hover-border-color: var(${ThemeColors.buttonHoverBackground});
-    --bs-btn-disabled-color: var(${ThemeColors.disabledForeground});
-    --bs-btn-disabled-bg: var(${ThemeColors.buttonBackground});
-    --bs-btn-disabled-border-color: var(${ThemeColors.buttonBorder});
+    --bs-btn-color: var(${ThemeColorVariables.buttonForeground});
+    --bs-btn-bg: var(${ThemeColorVariables.buttonBackground});
+    --bs-btn-border-color: var(${ThemeColorVariables.buttonBorder});
+    --bs-btn-hover-color: var(${ThemeColorVariables.buttonForeground});
+    --bs-btn-hover-bg: var(${ThemeColorVariables.buttonHoverBackground});
+    --bs-btn-hover-border-color: var(${ThemeColorVariables.buttonHoverBackground});
+    --bs-btn-disabled-color: var(${ThemeColorVariables.disabledForeground});
+    --bs-btn-disabled-bg: var(${ThemeColorVariables.buttonBackground});
+    --bs-btn-disabled-border-color: var(${ThemeColorVariables.buttonBorder});
   }
 
   #root .btn-secondary {
-    --bs-btn-color: var(${ThemeColors.buttonSecondaryForeground});
-    --bs-btn-bg: var(${ThemeColors.buttonSecondaryBackground});
-    --bs-btn-border-color: var(${ThemeColors.buttonBorder});
-    --bs-btn-hover-color: var(${ThemeColors.buttonSecondaryForeground});
-    --bs-btn-hover-bg: var(${ThemeColors.buttonSecondaryHoverBackground});
-    --bs-btn-hover-border-color: var(${ThemeColors.buttonSecondaryHoverBackground});
-    --bs-btn-disabled-color: var(${ThemeColors.buttonSecondaryForeground});
-    --bs-btn-disabled-bg: var(${ThemeColors.buttonSecondaryBackground});
-    --bs-btn-disabled-border-color: var(${ThemeColors.buttonBorder});
+    --bs-btn-color: var(${ThemeColorVariables.buttonSecondaryForeground});
+    --bs-btn-bg: var(${ThemeColorVariables.buttonSecondaryBackground});
+    --bs-btn-border-color: var(${ThemeColorVariables.buttonBorder});
+    --bs-btn-hover-color: var(${ThemeColorVariables.buttonSecondaryForeground});
+    --bs-btn-hover-bg: var(${ThemeColorVariables.buttonSecondaryHoverBackground});
+    --bs-btn-hover-border-color: var(${ThemeColorVariables.buttonSecondaryHoverBackground});
+    --bs-btn-disabled-color: var(${ThemeColorVariables.buttonSecondaryForeground});
+    --bs-btn-disabled-bg: var(${ThemeColorVariables.buttonSecondaryBackground});
+    --bs-btn-disabled-border-color: var(${ThemeColorVariables.buttonBorder});
   }
 
   #root .dropdown-menu {
-    --bs-dropdown-border-color: var(${ThemeColors.dropdownBorder});
-    --bs-dropdown-bg: var(${ThemeColors.dropdownBackground});
-    --bs-dropdown-link-color: var(${ThemeColors.dropdownForeground});
+    --bs-dropdown-border-color: var(${ThemeColorVariables.dropdownBorder});
+    --bs-dropdown-bg: var(${ThemeColorVariables.dropdownBackground});
+    --bs-dropdown-link-color: var(${ThemeColorVariables.dropdownForeground});
   }
 
   #root .form-control, #root .form-select {
-    color: var(${ThemeColors.inputForeground});
-    background-color: var(${ThemeColors.inputBackground});
-    border: 1px solid var(${ThemeColors.border});
+    color: var(${ThemeColorVariables.inputForeground});
+    background-color: var(${ThemeColorVariables.inputBackground});
+    border: 1px solid var(${ThemeColorVariables.border});
   }
 
   #root .form-control:focus, #root .form-select:focus {
-    box-shadow: 0 0 0 0.25rem var(${ThemeColors.focusBorder});
+    box-shadow: 0 0 0 0.25rem var(${ThemeColorVariables.focusBorder});
   }
 
   #root .invalid-feedback {
-    color: var(${ThemeColors.errorForeground});
+    color: var(${ThemeColorVariables.errorForeground});
   }
 
   #root :focus-visible {
-    outline-color: var(${ThemeColors.focusBorder});
+    outline-color: var(${ThemeColorVariables.focusBorder});
     outline-width: medium;
     outline-style: solid;
   }

@@ -1,4 +1,5 @@
 import { AngleUp, AngleDown } from "@xliic/web-icons";
+import { ThemeColorVariables } from "@xliic/common/theme";
 
 export default function CollapsibleCaret({ isOpen }: { isOpen: boolean }) {
   if (isOpen) {
@@ -8,7 +9,7 @@ export default function CollapsibleCaret({ isOpen }: { isOpen: boolean }) {
           width: 24,
           height: 24,
           marginRight: 8,
-          fill: "var(--xliic-foreground)",
+          fill: `var(${ThemeColorVariables.foreground})`,
         }}
       />
     );
@@ -19,7 +20,7 @@ export default function CollapsibleCaret({ isOpen }: { isOpen: boolean }) {
         width: 24,
         height: 24,
         marginRight: 8,
-        fill: "var(--xliic-foreground)",
+        fill: `var(${ThemeColorVariables.foreground})`,
       }}
     />
   );

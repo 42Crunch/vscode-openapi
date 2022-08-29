@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { ThemeState } from "../themeSlice";
 import logo from "./icons/logo-light.svg";
 import logoDark from "./icons/logo-dark.svg";
 
@@ -8,7 +7,7 @@ export default function Footer({
   themeKind,
 }: {
   openLink: any;
-  themeKind: ThemeState["kind"];
+  themeKind: "light" | "dark";
 }) {
   const [isOpen, setOpen] = useState(false);
 

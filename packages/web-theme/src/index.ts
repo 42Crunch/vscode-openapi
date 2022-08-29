@@ -1,27 +1,20 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { ChangeThemePayload } from "@xliic/common/messages/theme";
 
 export interface ThemeState {
-  kind: "light" | "dark";
-  foreground?: string;
-  background?: string;
+  theme?: ChangeThemePayload;
 }
 
 const initialState: ThemeState = {
-  kind: "light",
+  theme: undefined,
 };
 
 export const slice = createSlice({
   name: "theme",
   initialState,
   reducers: {
-    changeTheme: (state, action: PayloadAction<ThemeState>) => {
-      state.kind = action.payload.kind;
-      if (action.payload.foreground !== undefined) {
-        state.foreground = action.payload.foreground;
-      }
-      if (action.payload.background !== undefined) {
-        state.background = action.payload.background;
-      }
+    changeTheme: (state, action: PayloadAction<ChangeThemePayload>) => {
+      state.theme = action.payload;
     },
   },
 });

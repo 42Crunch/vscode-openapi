@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import Button from "react-bootstrap/Button";
 import { HttpMethod } from "@xliic/common/http";
-import { ThemeColors } from "@xliic/common/theme";
+import { ThemeColorVariables } from "@xliic/common/theme";
 
 export default function OperationHeader({
   method,
@@ -39,16 +39,16 @@ const Path = styled.div`
 `;
 
 const Method = styled.div`
-  background-color: var(${ThemeColors.buttonSecondaryBackground});
-  color: var(${ThemeColors.buttonSecondaryForeground});
+  background-color: var(${ThemeColorVariables.buttonSecondaryBackground});
+  color: var(${ThemeColorVariables.buttonSecondaryForeground});
   display: flex;
   align-items: center;
   padding: 0 1rem;
-  border-right: 1px solid var(${ThemeColors.border});
+  border-right: 1px solid var(${ThemeColorVariables.border});
 `;
 
 const Operation = styled.div`
-  border: 1px solid var(${ThemeColors.border});
+  border: 1px solid var(${ThemeColorVariables.border});
   border-radius: 0.375rem;
   margin-right: 0.25rem;
   display: flex;

@@ -1,14 +1,13 @@
 import { useState } from "react";
 import logo from "./icons/logo-light.svg";
 import logoDark from "./icons/logo-dark.svg";
-import { ThemeState } from "../themeSlice";
 
 export default function Header({
   openLink,
   themeKind,
 }: {
   openLink: any;
-  themeKind: ThemeState["kind"];
+  themeKind: "light" | "dark";
 }) {
   const [isOpen, setOpen] = useState(false);
 

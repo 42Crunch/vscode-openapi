@@ -3,7 +3,7 @@ import Badge from "react-bootstrap/Badge";
 import styled from "styled-components";
 import * as dayjs from "dayjs";
 
-import { ThemeColors } from "@xliic/common/theme";
+import { ThemeColorVariables } from "@xliic/common/theme";
 import CollapsibleCaret from "@xliic/web-ui/CollapsibleCaret";
 import {
   DataFormatEnum,
@@ -119,8 +119,8 @@ function Property({ label, value }: { label: string; value: any }) {
 }
 
 const StyledCard = styled(Card)`
-  background-color: var(${ThemeColors.background});
-  border-color: var(${ThemeColors.border});
+  background-color: var(${ThemeColorVariables.background});
+  border-color: var(${ThemeColorVariables.border});
 `;
 
 const CollapsibleCardTitle = styled(Card.Title)`
@@ -142,7 +142,7 @@ const FormatName = styled.div`
 `;
 
 const Description = styled.div`
-  border-bottom: 1px solid var(${ThemeColors.border});
+  border-bottom: 1px solid var(${ThemeColorVariables.border});
   padding-bottom: 1rem;
 `;
 

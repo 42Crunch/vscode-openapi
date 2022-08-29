@@ -5,7 +5,7 @@ import FormatCard from "./data-dictionary/FormatCard";
 import Alert from "react-bootstrap/Alert";
 import List from "@xliic/web-ui/List";
 import ThemeStyles from "@xliic/web-theme/ThemeStyles";
-import { ThemeColors } from "@xliic/common/theme";
+import { ThemeColorVariables } from "@xliic/common/theme";
 
 function App() {
   const theme = useAppSelector((state) => state.theme);
@@ -61,14 +61,14 @@ const Header = styled.h3`
 
 const Container = styled.div`
   display: flex;
-  background-color: var(${ThemeColors.background});
+  background-color: var(${ThemeColorVariables.background});
   height: 100vh;
 `;
 
 const Sidebar = styled.div`
   padding: 8px 16px 20px;
   width: 400px;
-  background-color: var(${ThemeColors.sidebarBackground});
+  background-color: var(${ThemeColorVariables.sidebarBackground});
 `;
 
 const Content = styled.div`

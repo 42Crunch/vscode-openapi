@@ -6,8 +6,8 @@
     <title>Security Audit Report</title>
     <style>
       :root {
-        --xliic-foreground: var(--xliic-custom-foreground, var(--vscode-editor-foreground));
-        --xliic-background: var(--xliic-custom-background, var(--vscode-editor-background));
+        --xliic-foreground: var(--xliic-foreground-custom, var(--vscode-editor-foreground));
+        --xliic-background: var(--xliic-background-custom, var(--vscode-editor-background));
       }
     </style>
   </head>
@@ -18,17 +18,17 @@
       window.addEventListener("DOMContentLoaded", async (event) => {
         const host = { postMessage: (message) => console.log("postMessage", message) };
         window.renderWebView(host, { kind: "light" });
-        const dictionaries = await (await fetch("/dictionaries.json")).json();
-        window.postMessage({ command: "loadDictionaries", dictionaries });
+        //const dictionaries = await (await fetch("/dictionaries.json")).json();
+        //window.postMessage({ command: "loadDictionaries", dictionaries });
 
-        /*
         window.postMessage({
           command: "changeTheme",
-          kind: "dark",
-          background: "lemonchiffon",
-          foreground: "maroon",
+          payload: {
+            kind: "dark",
+            background: "lemonchiffon",
+            foreground: "maroon",
+          },
         });
-        */
       });
     </script>
   </body>

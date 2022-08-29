@@ -1,8 +1,6 @@
-import styled from "styled-components";
-import { useFormContext, Controller, useController } from "react-hook-form";
+import { useFormContext, useController } from "react-hook-form";
 import FloatingLabel from "react-bootstrap/FloatingLabel";
 import Form from "react-bootstrap/Form";
-import { ThemeColors } from "@xliic/common/theme";
 
 import type { OasServer } from "@xliic/common/oas30";
 
@@ -42,13 +40,3 @@ function validate(value: any): any {
     return "Server is required";
   }
 }
-
-const Error = styled.div`
-  border: 1px solid var(${ThemeColors.errorBorder});
-  color: var(${ThemeColors.errorForeground});
-  background-color: var(${ThemeColors.errorBackground});
-  border-radius: 0.375rem;
-  margin-right: 0.25rem;
-  margin-left: 0.25rem;
-  padding: 0.75rem;
-`;

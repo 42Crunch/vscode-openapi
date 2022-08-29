@@ -6,7 +6,12 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import { Message } from "@xliic/common/message";
-import { VsCodeColorMap } from "@xliic/common/theme";
+import {
+  VsCodeColorMap,
+  ThemeColorName,
+  ThemeColorNames,
+  ThemeColorVariables,
+} from "@xliic/common/theme";
 
 export abstract class WebView<Request extends Message, Response extends Message> {
   private style: vscode.Uri;
@@ -150,7 +155,7 @@ export abstract class WebView<Request extends Message, Response extends Message>
       <meta http-equiv="Content-Security-Policy"  content="default-src 'none';  img-src ${cspSource} https: data:; script-src ${cspSource} 'unsafe-inline'; style-src ${cspSource}  'unsafe-inline'; connect-src http: https:">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <link href="${style}" rel="stylesheet">
-      <style>
+      <style type="text/css">
         ${customCssProperties()}
       </style>
     </head>
@@ -206,15 +211,15 @@ function customCssProperties(): string {
     listHoverBackground: "--vscode-list-hoverBackground",
   };
 
-  const props = Object.entries(vscodeColorMap)
-    .map(([name, vscode]) => {
-      return createColorProperty(name, vscode);
-    })
-    .join("\n");
+  const props = ThemeColorNames.map((name) => createColorProperty(name, vscodeColorMap[name])).join(
+    "\n"
+  );
 
   return `:root { ${props} }`;
 }
 
-function createColorProperty(name: string, vscode: string): string {
-  return `--xliic-${name}: var(--xliic-custom-${name}, var(${vscode}));`;
+function createColorProperty(name: ThemeColorName, vsCodeVariable: string): string {
+  const variable = ThemeColorVariables[name];
+  const customVariable = ThemeColorVariables[name] + "-custom";
+  return `${variable}: var(${customVariable}, var(${vsCodeVariable}));`;
 }

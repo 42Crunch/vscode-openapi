@@ -1,3 +1,5 @@
+import ThemeStyles from "@xliic/web-theme/ThemeStyles";
+
 import Header from "./Header";
 import Summary from "./Summary";
 import Footer from "./Footer";
@@ -23,25 +25,20 @@ function App() {
   const hostCopyIssueId = (id: string) => dispatch(copyIssueId(id));
   const hostOpenLink = (href: string) => dispatch(openLink(href));
 
-  const cssVars = [];
-  if (theme.foreground !== undefined) {
-    cssVars.push(`--audit-custom-foreground: ${theme.foreground};`);
-  }
-  if (theme.background !== undefined) {
-    cssVars.push(`--audit-custom-background: ${theme.background};`);
-  }
-  const style = `:root { ${cssVars.join("\n")} }
-   body {
-     background-color: var(--audit-background);
-     color: var(--audit-foreground);
-     }
-  `;
+  const themeKind = theme?.theme?.kind === "dark" ? "dark" : "light";
 
   return (
     <>
-      <style>{style}</style>
-      <div className={theme.kind === "dark" ? "vscode-dark" : ""}>
-        {display !== "no-report" && <Header openLink={hostOpenLink} themeKind={theme.kind} />}
+      <ThemeStyles theme={theme} />
+      <style type="text/css">
+        {`body {
+            background-color: var(--xliic-background);
+            color: var(--xliic-foreground);
+            margin: 0 10px !important;
+        }`}
+      </style>
+      <div className={themeKind === "dark" ? "vscode-dark" : ""}>
+        {display !== "no-report" && <Header openLink={hostOpenLink} themeKind={themeKind} />}
         {display === "full" && <Summary openLink={hostOpenLink} />}
         {display === "no-report" && <NoReport />}
         {display === "loading" && <Loading />}
@@ -59,7 +56,7 @@ function App() {
         {display === "partial" && (
           <GoToFullReport goToFullReport={() => dispatch(goToFullReport())} />
         )}
-        {display !== "no-report" && <Footer openLink={hostOpenLink} themeKind={theme.kind} />}
+        {display !== "no-report" && <Footer openLink={hostOpenLink} themeKind={themeKind} />}
       </div>
     </>
   );

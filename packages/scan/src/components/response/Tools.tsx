@@ -3,7 +3,7 @@ import { HttpResponse } from "@xliic/common/http";
 import Button from "react-bootstrap/Button";
 import { createSchema } from "../../store/oasSlice";
 import { useAppDispatch } from "../../store/hooks";
-import { ThemeColors } from "@xliic/common/theme";
+import { ThemeColorVariables } from "@xliic/common/theme";
 
 export default function Tools({ response }: { response: HttpResponse }) {
   const dispatch = useAppDispatch();
@@ -35,7 +35,7 @@ const Container = styled.div`
 `;
 
 const Entry = styled.div.attrs((props: any) => ({
-  color: props["aria-disabled"] ? `var(${ThemeColors.disabledForeground})` : "inherit",
+  color: props["aria-disabled"] ? `var(${ThemeColorVariables.disabledForeground})` : "inherit",
 }))`
   color: ${(props) => props.color};
 `;

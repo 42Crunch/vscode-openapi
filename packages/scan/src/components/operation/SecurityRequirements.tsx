@@ -1,7 +1,3 @@
-import { useFormContext, useController } from "react-hook-form";
-import FloatingLabel from "react-bootstrap/FloatingLabel";
-import Form from "react-bootstrap/Form";
-
 import type { OasSecurityScheme } from "@xliic/common/oas30";
 import { escapeFieldName } from "../../util";
 import { SecurityHttpBasic } from "./SecurityHttpBasic";

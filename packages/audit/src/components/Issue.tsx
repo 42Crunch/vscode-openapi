@@ -1,3 +1,5 @@
+import { ThemeColorVariables } from "@xliic/common/theme";
+
 import Article from "./Article";
 import { Issue as IssueType } from "../types";
 import { ReactComponent as ChevronUp } from "./icons/chevron-up.svg";
@@ -28,28 +30,28 @@ export default function Issue({
       : "json";
   return (
     <div className="c_roundedbox_section">
-      <h1 onClick={toggle} style={{ cursor: "pointer" }}>
+      <h2 onClick={toggle} style={{ cursor: "pointer" }}>
         {isOpen ? (
           <ChevronUp
             style={{
-              width: 24,
-              height: 24,
-              marginRight: 8,
-              fill: "var(--audit-foreground)",
+              width: 16,
+              height: 16,
+              marginRight: 6,
+              fill: `var(${ThemeColorVariables.foreground})`,
             }}
           />
         ) : (
           <ChevronDown
             style={{
-              width: 24,
-              height: 24,
-              marginRight: 8,
-              fill: "var(--audit-foreground)",
+              width: 16,
+              height: 16,
+              marginRight: 6,
+              fill: `var(${ThemeColorVariables.foreground})`,
             }}
           />
         )}
         {issue.description}
-      </h1>
+      </h2>
 
       <p>
         <small>

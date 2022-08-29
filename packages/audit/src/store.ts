@@ -1,7 +1,7 @@
 import { configureStore, StateFromReducersMapObject } from "@reduxjs/toolkit";
 import kdbReducer, { KdbState } from "./kdbSlice";
 import reportReducer from "./reportSlice";
-import themeReducer, { ThemeState } from "./themeSlice";
+import themeReducer, { ThemeState } from "@xliic/web-theme";
 import { HostApplication } from "./types";
 
 const reducer = {

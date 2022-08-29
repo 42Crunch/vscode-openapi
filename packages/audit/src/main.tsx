@@ -4,7 +4,7 @@ import { Provider } from "react-redux";
 
 import { initStore } from "./store";
 import { showFullReport, showPartialReport, showNoReport } from "./reportSlice";
-import { changeTheme, ThemeState } from "./themeSlice";
+import { changeTheme, ThemeState } from "@xliic/web-theme";
 import { KdbState } from "./kdbSlice";
 import { HostApplication } from "./types";
 
@@ -41,13 +41,7 @@ function renderAuditReport(host: HostApplication, kdb: KdbState, theme: ThemeSta
         store.dispatch(showNoReport());
         break;
       case "changeTheme":
-        store.dispatch(
-          changeTheme({
-            kind: message.kind,
-            foreground: message.foreground,
-            background: message.background,
-          })
-        );
+        store.dispatch(changeTheme(message));
         break;
     }
   });

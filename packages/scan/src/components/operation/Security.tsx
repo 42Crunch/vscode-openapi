@@ -1,13 +1,10 @@
-import styled from "styled-components";
-
 import FloatingLabel from "react-bootstrap/FloatingLabel";
 import Form from "react-bootstrap/Form";
 
 import { BundledOpenApiSpec, OasSecurityScheme } from "@xliic/common/oas30";
 
-import { ThemeColors } from "@xliic/common/theme";
 import { TryitSecurity } from "@xliic/common/messages/tryit";
-import { useFormContext, useController, useWatch, useFieldArray } from "react-hook-form";
+import { useFormContext, useController, useFieldArray } from "react-hook-form";
 import SecurityRequirements from "./SecurityRequirements";
 
 export default function Security({
@@ -21,17 +18,14 @@ export default function Security({
     return null;
   }
 
-  const {
-    control,
-    formState: { errors },
-  } = useFormContext();
+  const { control, formState } = useFormContext();
 
   const { field: securityIndex } = useController({
     name: "securityIndex",
     control,
   });
 
-  const { fields, append, prepend, remove, swap, move, insert } = useFieldArray({
+  const { fields } = useFieldArray({
     control,
     name: "security",
   });

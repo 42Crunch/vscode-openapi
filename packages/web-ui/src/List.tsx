@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { ThemeColors } from "@xliic/common/theme";
+import { ThemeColorVariables } from "@xliic/common/theme";
 
 export default function List({
   items,
@@ -36,13 +36,13 @@ const Item = styled.li`
   align-items: center;
   list-style: none;
   height: 41px;
-  border-bottom: 1px solid var(${ThemeColors.border});
+  border-bottom: 1px solid var(${ThemeColorVariables.border});
   cursor: pointer;
   padding-left: 0.25rem;
   overflow: hidden;
 `;
 
 const SelectedItem = styled(Item)`
-  background-color: var(${ThemeColors.listActiveSelectionBackground});
-  color: var(${ThemeColors.listActiveSelectionForeground});
+  background-color: var(${ThemeColorVariables.listActiveSelectionBackground});
+  color: var(${ThemeColorVariables.listActiveSelectionForeground});
 `;

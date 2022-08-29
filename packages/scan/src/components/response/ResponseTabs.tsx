@@ -10,7 +10,7 @@ import { goBack } from "../../store/oasSlice";
 
 import { HttpResponse } from "@xliic/common/http";
 
-import { ThemeColors } from "@xliic/common/theme";
+import { ThemeColorVariables } from "@xliic/common/theme";
 import ResponseStatus from "./ResponseStatus";
 import Headers from "./Headers";
 import Body from "./Body";
@@ -74,7 +74,7 @@ export default function ResponseTabs({ response }: { response: HttpResponse }) {
 
 const StyledResponseStatus = styled(ResponseStatus)`
   flex: 1;
-  border-bottom: 1px solid var(${ThemeColors.tabBorder});
+  border-bottom: 1px solid var(${ThemeColorVariables.tabBorder});
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -88,14 +88,14 @@ const TabList = styled(Tabs.List)`
 
 const TabButton = styled(Tabs.Trigger)`
   border-radius: 0.375rem 0.375rem 0 0;
-  border: 1px solid var(${ThemeColors.tabBorder});
+  border: 1px solid var(${ThemeColorVariables.tabBorder});
   padding: 0.25rem 1rem;
-  color: var(${ThemeColors.tabInactiveForeground});
-  background-color: var(${ThemeColors.tabInactiveBackground});
+  color: var(${ThemeColorVariables.tabInactiveForeground});
+  background-color: var(${ThemeColorVariables.tabInactiveBackground});
 
   &[data-state="active"] {
-    color: var(${ThemeColors.tabActiveForeground});
-    background-color: var(${ThemeColors.tabActiveBackground});
+    color: var(${ThemeColorVariables.tabActiveForeground});
+    background-color: var(${ThemeColorVariables.tabActiveBackground});
     border-bottom: 1px transparent solid;
   }
 `;

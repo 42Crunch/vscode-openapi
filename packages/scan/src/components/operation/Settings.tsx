@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import * as Checkbox from "@radix-ui/react-checkbox";
 import { TryitConfig } from "@xliic/common/messages/tryit";
-import { ThemeColors } from "@xliic/common/theme";
+import { ThemeColorVariables } from "@xliic/common/theme";
 import { Check } from "@xliic/web-icons";
 import { useFormContext, useWatch } from "react-hook-form";
 
@@ -57,15 +57,15 @@ const StyledCheckbox = styled(Checkbox.Root)`
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(${ThemeColors.checkboxBackground});
+  background-color: var(${ThemeColorVariables.checkboxBackground});
   border-radius: 4px;
-  border-color: var(${ThemeColors.checkboxBorder});
+  border-color: var(${ThemeColorVariables.checkboxBorder});
   border-width: 1px;
   border-style: solid;
 `;
 
 const StyledIndicator = styled(Checkbox.Indicator)`
-  fill: var(${ThemeColors.checkboxForeground});
+  fill: var(${ThemeColorVariables.checkboxForeground});
 `;
 
 const Container = styled.div`

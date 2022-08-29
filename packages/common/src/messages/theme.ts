@@ -1,7 +1,7 @@
-export interface ChangeThemePayload {
+import { ThemeColorValues } from "../theme";
+
+export interface ChangeThemePayload extends ThemeColorValues {
   kind: "light" | "dark";
-  foreground?: string;
-  background?: string;
 }
 
 export interface ThemeUpdate {
