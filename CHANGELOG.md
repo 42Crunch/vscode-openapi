@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.14 (September 1, 2022)
+
+- Update Data Dictionary to use "format" attribute instead of x-42c-format
+- Update Security Audit report
+
 ## Version 4.13 (August 16, 2022)
 
 - Fix performance degradation when editing large documents, #178
