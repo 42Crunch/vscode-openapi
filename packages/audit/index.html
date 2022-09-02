@@ -6,8 +6,8 @@
     <title>Security Audit Report</title>
     <style>
       :root {
-        --audit-foreground: var(--audit-custom-foreground, var(--vscode-editor-foreground));
-        --audit-background: var(--audit-custom-background, var(--vscode-editor-background));
+        --xliic-foreground: var(--xliic-foreground-custom, var(--vscode-editor-foreground));
+        --xliic-background: var(--xliic-background-custom, var(--vscode-editor-background));
       }
     </style>
   </head>
@@ -21,18 +21,20 @@
 
         const host = { postMessage: (message) => console.log("pm", message) };
 
-        window.renderAuditReport(host, kdb, { kind: "light" });
+        window.renderAuditReport(host, kdb, {
+          theme: { kind: "light", background: "goldenrod", foreground: "lime" },
+        });
 
-        window.postMessage({ command: "showFullReport", report: audit });
+        //window.postMessage({ command: "showFullReport", report: audit });
 
-        /*
         window.postMessage({
           command: "changeTheme",
-          kind: "dark",
-          background: "lemonchiffon",
-          foreground: "maroon",
+          payload: {
+            kind: "dark",
+            background: "lemonchiffon",
+            foreground: "maroon",
+          },
         });
-        */
 
         //window.postMessage({ command: "showNoReport" });
       });
