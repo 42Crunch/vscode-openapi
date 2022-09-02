@@ -41,7 +41,7 @@ function renderAuditReport(host: HostApplication, kdb: KdbState, theme: ThemeSta
         store.dispatch(showNoReport());
         break;
       case "changeTheme":
-        store.dispatch(changeTheme(message));
+        store.dispatch(changeTheme(message.payload));
         break;
     }
   });
