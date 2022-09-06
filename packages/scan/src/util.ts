@@ -93,7 +93,9 @@ export function generateSecurityValues(security: TryitSecurity): TryitSecurityVa
   for (const requirement of security) {
     const resolved: Record<string, TryitSecurityValue> = {};
     for (const [name, scheme] of Object.entries(requirement)) {
-      resolved[name] = generateSecurityValue(scheme);
+      if (scheme) {
+        resolved[name] = generateSecurityValue(scheme);
+      }
     }
     result.push(resolved);
   }
@@ -101,7 +103,7 @@ export function generateSecurityValues(security: TryitSecurity): TryitSecurityVa
 }
 
 export function generateSecurityValue(security: OasSecurityScheme): TryitSecurityValue {
-  if (security.type === "http" && /^basic$/i.test(security.scheme)) {
+  if (security?.type === "http" && /^basic$/i.test(security?.scheme)) {
     return { username: "", password: "" };
   }
   return "";

@@ -26,8 +26,8 @@ export default function Servers({ servers }: { servers: OasServer[] }) {
         ref={ref}
         className={error ? "is-invalid" : undefined}
       >
-        {servers.map((server) => (
-          <option key={server.url}>{server.url}</option>
+        {servers.map((server, index) => (
+          <option key={`${server?.url}-${index}`}>{server?.url}</option>
         ))}
       </Form.Select>
       {error && <div className="invalid-feedback">{error.message}</div>}
