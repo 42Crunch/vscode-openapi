@@ -12,7 +12,6 @@ import { Cache } from "../../cache";
 import { replaceObject } from "../../edits/replace";
 import { DataDictionaryFormat, PlatformStore } from "../stores/platform-store";
 import { DataDictionaryDiagnostic } from "../../types";
-import { DataFormat } from "../../../packages/common/src/data-dictionary";
 
 export default (
   cache: Cache,
@@ -162,7 +161,6 @@ export default (
 
 const schemaProps = [
   "type",
-  "format",
   "example",
   "pattern",
   "minLength",
