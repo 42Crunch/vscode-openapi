@@ -16,7 +16,8 @@ import { visitObject } from "@xliic/preserving-json-yaml-parser/lib/visit/object
 
 import { Cache } from "../../cache";
 import { DataDictionaryFormat, PlatformStore } from "../stores/platform-store";
-import { DataDictionaryDiagnostic } from "../../types";
+import { DataDictionaryDiagnostic, OpenApiVersion } from "../../types";
+import { getOpenApiVersion } from "../../parsers";
 
 export function activate(
   cache: Cache,
@@ -34,7 +35,7 @@ export function activate(
       formatMap.set(format.name, format);
     }
     const parsed = cache.getParsedDocument(document);
-    if (parsed !== undefined) {
+    if (parsed !== undefined && getOpenApiVersion(parsed) !== OpenApiVersion.Unknown) {
       lint(collection, formatMap, document, parsed);
     }
   });
