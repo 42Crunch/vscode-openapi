@@ -31,12 +31,12 @@ export class DataDictionaryCodeActions implements vscode.CodeActionProvider {
         diagnostic["id"] === "data-dictionary-format-property-mismatch"
       ) {
         const action = new vscode.CodeAction(
-          `Update "${diagnostic.property}" with Data Dictionary value`,
+          `Update "${diagnostic.property}" with a Data Dictionary value`,
           vscode.CodeActionKind.QuickFix
         );
         action.command = {
           command: "openapi.platform.editorDataDictionaryUpdateProperty",
-          title: `Update "${diagnostic.property}" with Data Dictionary value`,
+          title: `Update "${diagnostic.property}" with a Data Dictionary value`,
           arguments: [diagnostic.format, diagnostic.node, diagnostic.property, diagnostic.path],
         };
         action.isPreferred = true;
