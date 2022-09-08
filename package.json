@@ -798,6 +798,22 @@
           },
           "default": [],
           "description": "List of hostnames TryIt is allowed to connect ignoring SSL certificate errors"
+        },
+        "openapi.dataDictionaryPreAuditFix": {
+          "scope": "workbench",
+          "type": "string",
+          "description": "Update document to match Data Dictionary definitions before runing Security Audit",
+          "default": "ask",
+          "enum": [
+            "ask",
+            "always",
+            "never"
+          ],
+          "enumDescriptions": [
+            "Ask before updating",
+            "Always update, don't ask for confirmation",
+            "Never update, don't ask for confirmation"
+          ]
         }
       }
     },

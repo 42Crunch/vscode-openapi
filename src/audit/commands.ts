@@ -148,6 +148,15 @@ async function securityAudit(
     apiToken = token;
   }
 
+  const proceed = await vscode.commands.executeCommand(
+    "openapi.platform.dataDictionaryPreAuditBulkUpdateProperties",
+    textEditor.document.uri
+  );
+
+  if (!proceed) {
+    return;
+  }
+
   return vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
