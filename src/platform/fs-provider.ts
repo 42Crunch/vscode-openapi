@@ -51,9 +51,19 @@ export class PlatformFS implements vscode.FileSystemProvider {
     content: Uint8Array,
     options: { create: boolean; overwrite: boolean }
   ): Promise<void> {
+    const proceed = await vscode.commands.executeCommand(
+      "openapi.platform.dataDictionaryPreAuditBulkUpdateProperties",
+      uri
+    );
+
+    if (proceed === false) {
+      return;
+    }
+
     if (!(await confirmed("Are you sure you want to update remote API?"))) {
       throw new Error("API Update has been cancelled.");
     }
+
     const apiId = getApiId(uri)!;
 
     await vscode.window.withProgress<void>(
