@@ -77,7 +77,7 @@ export default function Issue({
               e.stopPropagation();
             }}
           >
-            {issue.filename}:{issue.lineNo}
+            {issue.filename}:{issue.lineNo + 1}
           </a>
           . Severity: {criticalityNames[issue.criticality]}. {scoreImpact}
         </small>
