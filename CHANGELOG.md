@@ -1,9 +1,10 @@
 # Changelog
 
-## Version 4.14 (September 1, 2022)
+## Version 4.14 (September 9, 2022)
 
 - Update Data Dictionary to use "format" attribute instead of x-42c-format
 - Update Security Audit report
+- Offer to update OpenAPI document using information from Data Dictionary prior to running Security Audit
 
 ## Version 4.13 (August 16, 2022)
 
