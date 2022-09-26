@@ -12,23 +12,28 @@ import {
   TryitOperationValues,
   TryitParameterValues,
   TryitSecurityValues,
+  TryitSecurityValue,
 } from "@xliic/common/messages/tryit";
 
 import { parseHttpsHostname } from "../../util";
+import { EnvData } from "@xliic/common/messages/env";
+import { replaceEnv } from "@xliic/common/messages/env";
 
 export async function makeHttpRequest(
   config: TryitConfig,
   oas: BundledOpenApiSpec,
   method: HttpMethod,
   path: string,
-  values: TryitOperationValues
+  values: TryitOperationValues,
+  env: EnvData
 ): Promise<HttpRequest> {
   const parameters = makeSwaggerClientParameters(values.parameters);
   const servers = pickServer(oas.servers!, values.server);
   const securities = makeSecurities(
     oas?.components?.securitySchemes || {},
     values.security,
-    values.securityIndex
+    values.securityIndex,
+    env
   );
   const operationId = `${method}-${path}`;
 
@@ -89,7 +94,8 @@ function makeSwaggerClientParameters(parameters: TryitParameterValues): Record<s
 function makeSecurities(
   schemes: Record<string, OasSecurityScheme>,
   values: TryitSecurityValues,
-  index: number
+  index: number,
+  env: EnvData
 ): any {
   const value = values[index];
   if (!value) {
@@ -99,11 +105,20 @@ function makeSecurities(
   const result: any = {};
   for (const name of Object.keys(value)) {
     const scheme = schemes[name];
+    const securityValue = maybeGetSecret(value[name], env);
     if (scheme?.type === "oauth2" || scheme?.type === "openIdConnect") {
-      result[name] = { token: { access_token: value[name] } };
+      result[name] = { token: { access_token: securityValue } };
     } else {
-      result[name] = value[name];
+      result[name] = securityValue;
     }
   }
   return { authorized: result };
+}
+
+function maybeGetSecret(value: TryitSecurityValue, env: EnvData) {
+  if (typeof value === "string") {
+    return replaceEnv(value, env);
+  }
+
+  return value;
 }

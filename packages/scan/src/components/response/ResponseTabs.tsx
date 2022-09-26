@@ -6,7 +6,7 @@ import Button from "react-bootstrap/Button";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 
-import { goBack } from "../../store/oasSlice";
+import { goBack } from "../../features/router/slice";
 
 import { HttpResponse } from "@xliic/common/http";
 

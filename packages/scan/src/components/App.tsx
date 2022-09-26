@@ -6,20 +6,25 @@ import Error from "./Error";
 import ScanOperation from "./ScanOperation";
 import TryOperation from "./TryOperation";
 import ScanReport from "./ScanReport";
-import { OasState } from "../store/oasSlice";
+import Env from "../features/env/Env";
+import ScanResponse from "../features/scan/Response";
 
-const routes: Record<OasState["page"], JSX.Element> = {
+import { PageName } from "../features/router/slice";
+
+const routes: Record<PageName, JSX.Element> = {
   scanOperation: <ScanOperation />,
   tryOperation: <TryOperation />,
   scanReport: <ScanReport />,
+  scanResponse: <ScanResponse />,
   response: <Response />,
   error: <Error />,
+  env: <Env />,
   loading: <div>Loading...</div>,
 };
 
 function App() {
   const theme = useAppSelector((state) => state.theme);
-  const { page } = useAppSelector((state) => state.oas);
+  const { page } = useAppSelector((state) => state.route);
 
   return (
     <>

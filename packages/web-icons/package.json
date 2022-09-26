@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "convert": "svgr --icon --jsx-runtime automatic --typescript --out-dir src icons",
+    "convert": "svgr --icon --jsx-runtime classic --typescript --out-dir src icons",
     "build": "tsc"
   }
 }

@@ -1,19 +1,22 @@
 import { ExtensionContext } from "vscode";
-import { PlatformContext } from "../types";
+import { PlatformStore } from "./platform-store";
 
 export class FavoritesStore {
-  constructor(private context: ExtensionContext, private platform: PlatformContext) {}
+  constructor(private context: ExtensionContext, private store: PlatformStore) {}
 
   key(): string {
-    return `openapi-42crunch.favorite-${this.platform.connection.platformUrl}`;
+    return `openapi-42crunch.favorite-${this.store.getConnection().platformUrl}`;
   }
 
   getFavoriteCollectionIds(): string[] {
-    const favorite = this.context.globalState.get<string[]>(this.key());
-    if (!favorite) {
-      return [];
+    if (this.store.hasConnection()) {
+      const favorite = this.context.globalState.get<string[]>(this.key());
+      if (!favorite) {
+        return [];
+      }
+      return favorite;
     }
-    return favorite;
+    return [];
   }
 
   addFavoriteCollection(id: string): void {

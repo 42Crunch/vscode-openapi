@@ -106,7 +106,7 @@ To change the default OpenAPI Preview rendering engine:
 
 ### Execute operations with "Try it" (beta)
 
-With "Try it" you can invoke operations defined in your OpenAPI directy from VS Code.
+With "Try it" you can invoke operations defined in your OpenAPI directly from VS Code.
 
 To do it click on "Try it" code lens which is displayed right below the HTTP verb ("get", "post", etc) of your operation and in the examples section.
 

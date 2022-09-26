@@ -5,12 +5,20 @@ import {
 } from "@reduxjs/toolkit";
 import logger from "redux-logger";
 
-import themeReducer, { ThemeState } from "@xliic/web-theme";
-import oasSlice from "./oasSlice";
+import theme, { ThemeState } from "@xliic/web-theme";
+import route from "../features/router/slice";
+import tryit from "../features/tryit/slice";
+import scan from "../features/scan/slice";
+import env from "../features/env/slice";
+import prefs from "../features/prefs/slice";
 
 const reducer = {
-  theme: themeReducer,
-  oas: oasSlice,
+  theme,
+  tryit,
+  scan,
+  route,
+  env,
+  prefs,
 };
 
 export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme: ThemeState) =>

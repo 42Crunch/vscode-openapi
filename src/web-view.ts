@@ -209,6 +209,7 @@ function customCssProperties(): string {
     listActiveSelectionBackground: "--vscode-list-activeSelectionBackground",
     listActiveSelectionForeground: "--vscode-list-activeSelectionForeground",
     listHoverBackground: "--vscode-list-hoverBackground",
+    contrastActiveBorder: "--vscode-contrastActiveBorder",
   };
 
   const props = ThemeColorNames.map((name) => createColorProperty(name, vscodeColorMap[name])).join(

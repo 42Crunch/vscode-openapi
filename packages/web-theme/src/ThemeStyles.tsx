@@ -1,3 +1,4 @@
+import * as React from "react";
 import { ThemeState } from "./index";
 import { ThemeColorVariables, ThemeColorValues, ThemeColorNames } from "@xliic/common/theme";
 

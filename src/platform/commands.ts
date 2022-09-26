@@ -35,7 +35,7 @@ export function registerCommands(
 ): vscode.Disposable[] {
   const commands: any = {};
   Object.assign(commands, misc(store, favorites, provider, tree));
-  Object.assign(commands, util(context, platformContext));
+  Object.assign(commands, util(context, store));
   Object.assign(commands, createApi(store, importedUrls, provider, tree, cache));
   Object.assign(commands, filter(store, provider));
   Object.assign(commands, report(store, context, auditContext, cache, reportWebView));

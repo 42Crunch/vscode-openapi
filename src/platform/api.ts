@@ -3,8 +3,8 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import got, { Method, OptionsOfJSONResponseBody } from "got";
-import { NamingConvention } from "./types";
+import got, { Method, OptionsOfJSONResponseBody, HTTPError } from "got";
+import { NamingConvention, SearchCollectionsResponse } from "./types";
 import {
   Api,
   ListCollectionsResponse,
@@ -60,6 +60,20 @@ export async function listCollections(
       "Unable to list collections, please check your 42Crunch credentials: " + ex.message
     );
   }
+}
+
+export async function searchCollections(
+  collectionName: string,
+  options: PlatformConnection,
+  logger: Logger
+): Promise<SearchCollectionsResponse> {
+  const params = { collectionName };
+  const { body } = <any>await got(`api/v1/search/collections`, {
+    ...gotOptions("GET", options, logger),
+    searchParams: params,
+  });
+
+  return <SearchCollectionsResponse>body;
 }
 
 export async function listApis(
@@ -235,7 +249,7 @@ export async function getDataDictionaries(
 ): Promise<DataDictionary[]> {
   const {
     body: { list },
-  } = await got("api/v2/dataDictionaries", gotOptions("GET", options, logger));
+  } = await got<any>("api/v2/dataDictionaries", gotOptions("GET", options, logger));
   return (list == null ? [] : list) as DataDictionary[];
 }
 
@@ -246,7 +260,7 @@ export async function getDataDictionaryFormats(
 ): Promise<DataFormats> {
   const {
     body: { formats },
-  } = await got(
+  } = await got<any>(
     `api/v2/dataDictionaries/${dictionaryId}/formats`,
     gotOptions("GET", options, logger)
   );
@@ -274,4 +288,118 @@ export async function getDataDictionaryFormats(
   }
 
   return formats as DataFormats;
+}
+
+export async function createDefaultScanConfig(
+  apiId: string,
+  options: PlatformConnection,
+  logger: Logger
+): Promise<any> {
+  const { body } = <any>await got(`api/v2/apis/${apiId}/scanConfigurations/default`, {
+    ...gotOptions("POST", options, logger),
+    json: {
+      name: "default",
+    },
+  });
+  console.log("body", body);
+  return body.id;
+}
+
+export async function listScanConfigs(
+  apiId: string,
+  options: PlatformConnection,
+  logger: Logger
+): Promise<any> {
+  const { body } = <any>await got(`api/v2/apis/${apiId}/scanConfigurations`, {
+    ...gotOptions("GET", options, logger),
+  });
+  return body.list;
+}
+
+export async function readScanConfig(
+  configId: string,
+  options: PlatformConnection,
+  logger: Logger
+): Promise<any> {
+  const { body } = <any>await got(`api/v2/scanConfigurations/${configId}`, {
+    ...gotOptions("GET", options, logger),
+  });
+  return body;
+}
+
+export async function createScanConfig(
+  apiId: string,
+  name: string,
+  config: unknown,
+  options: PlatformConnection,
+  logger: Logger
+): Promise<any> {
+  const scanConfiguration = Buffer.from(JSON.stringify(config)).toString("base64");
+  const { body } = <any>await got(`api/v2/apis/${apiId}/scanConfigurations`, {
+    ...gotOptions("POST", options, logger),
+    json: {
+      name,
+      scanConfiguration,
+    },
+  });
+  return body.id;
+}
+
+export async function listScanReports(
+  apiId: string,
+  options: PlatformConnection,
+  logger: Logger
+): Promise<any> {
+  const { body } = <any>await got(`api/v2/apis/${apiId}/scanReports`, {
+    ...gotOptions("GET", options, logger),
+  });
+  return body.list;
+}
+
+export async function readScanReport(
+  reportId: string,
+  options: PlatformConnection,
+  logger: Logger
+): Promise<any> {
+  const { body } = <any>await got(`api/v2/scanReports/${reportId}`, {
+    ...gotOptions("GET", options, logger),
+  });
+  return body.data;
+}
+
+export async function readTechnicalCollection(
+  technicalName: string,
+  options: PlatformConnection,
+  logger: Logger
+): Promise<any> {
+  try {
+    const response = await got(`api/v1/collections/technicalName`, {
+      ...gotOptions("POST", options, logger),
+      json: { technicalName },
+    });
+    const body: { id: string } = <any>response.body;
+    return body.id;
+  } catch (err) {
+    if (err instanceof HTTPError && err?.response?.statusCode === 404) {
+      return null;
+    }
+    throw err;
+  }
+}
+
+export async function createTechnicalCollection(
+  technicalName: string,
+  name: string,
+  options: PlatformConnection,
+  logger: Logger
+): Promise<any> {
+  const { body } = <any>await got("api/v1/collections", {
+    ...gotOptions("POST", options, logger),
+    json: {
+      technicalName: technicalName,
+      name: name,
+      source: "default",
+    },
+  });
+  return body.desc.id;
 }

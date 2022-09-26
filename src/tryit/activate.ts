@@ -5,6 +5,7 @@
 
 import * as vscode from "vscode";
 import { parseJsonPointer, Path, simpleClone } from "@xliic/preserving-json-yaml-parser";
+import { Preferences } from "@xliic/common/messages/prefs";
 import { Bundle } from "../types";
 import { Cache } from "../cache";
 import { HttpMethod } from "@xliic/common/http";
@@ -33,7 +34,10 @@ const selectors = {
 export function activate(
   context: vscode.ExtensionContext,
   cache: Cache,
-  configuration: Configuration
+  configuration: Configuration,
+  memento: vscode.Memento,
+  secret: vscode.SecretStorage,
+  prefs: Record<string, Preferences>
 ) {
   let tryIt: TryIt | null = null;
   let previewUpdateDelay: number;
@@ -60,7 +64,7 @@ export function activate(
 
   const debouncedTryIt = debounce(showTryIt);
 
-  const view = new TryItWebView(context.extensionPath, cache);
+  const view = new TryItWebView(context.extensionPath, cache, memento, secret, prefs);
 
   cache.onDidChange(async (document: vscode.TextDocument) => {
     const uri = document.uri.toString();

@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { HttpResponse } from "@xliic/common/http";
 import Button from "react-bootstrap/Button";
-import { createSchema } from "../../store/oasSlice";
+import { createSchema } from "../../features/tryit/slice";
 import { useAppDispatch } from "../../store/hooks";
 import { ThemeColorVariables } from "@xliic/common/theme";
 

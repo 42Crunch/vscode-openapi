@@ -2,35 +2,30 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 
-import { ThemeRequests } from "@xliic/common/messages/theme";
-import { ScanRequest } from "@xliic/common/messages/scan";
-import { TryItRequest } from "@xliic/common/messages/tryit";
-
 import App from "./components/App";
 
 import { initStore } from "./store/store";
 import { changeTheme, ThemeState } from "@xliic/web-theme";
-import {
-  showResponse,
-  showError,
-  scanOperation,
-  tryOperation,
-  showScanReport,
-} from "./store/oasSlice";
+import { showResponse, showError, tryOperation } from "./features/tryit/slice";
+import { scanOperation, showScanReport, showScanResponse } from "./features/scan/slice";
+import { loadEnv } from "./features/env/slice";
+import { loadPrefs } from "./features/prefs/slice";
+
+import { WebAppRequest, HostApplication } from "./types";
 import createListener from "./store/listener";
-import { HostApplication } from "./types";
 
 import "bootstrap/dist/css/bootstrap.min.css";
-
-type WebAppRequest = ThemeRequests | ScanRequest | TryItRequest;
 
 const requestHandlers: Record<WebAppRequest["command"], Function> = {
   changeTheme,
   scanOperation,
   tryOperation,
   showResponse,
+  showScanResponse,
   showError,
   showScanReport,
+  loadEnv,
+  loadPrefs,
 };
 
 function renderWebView(host: HostApplication, theme: ThemeState) {
@@ -46,11 +41,15 @@ function renderWebView(host: HostApplication, theme: ThemeState) {
 
   window.addEventListener("message", (event) => {
     const { command, payload } = event.data as WebAppRequest;
-    const handler = requestHandlers[command];
-    if (handler) {
-      store.dispatch(handler(payload));
+    if (command) {
+      const handler = requestHandlers[command];
+      if (handler) {
+        store.dispatch(handler(payload));
+      } else {
+        console.error(`Unable to find handler for command: ${command}`);
+      }
     } else {
-      throw new Error(`Unable to find handler for command: ${command}`);
+      console.error("Received message with unknown command", event.data);
     }
   });
 }

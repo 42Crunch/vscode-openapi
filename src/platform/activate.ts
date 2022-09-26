@@ -4,8 +4,9 @@
 */
 
 import * as vscode from "vscode";
+import { Preferences } from "@xliic/common/messages/prefs";
 import { Cache } from "../cache";
-import { configuration } from "../configuration";
+import { Configuration, configuration } from "../configuration";
 import { CollectionsProvider } from "./explorer/provider";
 import { PlatformContext, platformUriScheme } from "./types";
 import { AuditContext } from "../types";
@@ -22,43 +23,27 @@ import { DataDictionaryWebView } from "./data-dictionary/view";
 import { DataDictionaryCompletionProvider } from "./data-dictionary/completion";
 import { DataDictionaryCodeActions } from "./data-dictionary/code-actions";
 import { activate as activateLinter } from "./data-dictionary/linter";
+import { activate as activateScan } from "./scan/activate";
 
 export async function activate(
   context: vscode.ExtensionContext,
   auditContext: AuditContext,
   cache: Cache,
-  reportWebView: AuditReportWebView
+  configuration: Configuration,
+  store: PlatformStore,
+  reportWebView: AuditReportWebView,
+  memento: vscode.Memento,
+  secrets: vscode.SecretStorage,
+  prefs: Record<string, Preferences>
 ) {
-  const platformUrl = configuration.get<string>("platformUrl");
-
-  let platformToken = undefined;
-  try {
-    platformToken = await context.secrets.get("platformApiToken");
-  } catch (ex: any) {
-    // secrets.get() sometimes throws an exception when running tests
-    // ignore it
-  }
-
   const dataDictionaryView = new DataDictionaryWebView(context.extensionPath);
 
   const platformContext: PlatformContext = {
     context,
-    memento: context.workspaceState,
-    connection: {
-      platformUrl: platformUrl,
-      apiToken: platformToken,
-    },
-    logger: {
-      fatal: (message: string) => null,
-      error: (message: string) => null,
-      warning: (message: string) => null,
-      info: (message: string) => null,
-      debug: (message: string) => null,
-    },
+    memento,
   };
 
-  const store = new PlatformStore(platformContext);
-  const favoriteCollections = new FavoritesStore(context, platformContext);
+  const favoriteCollections = new FavoritesStore(context, store);
   const importedUrls = new ImportedUrlStore(context);
 
   const platformFs = new PlatformFS(store);
@@ -75,10 +60,12 @@ export async function activate(
     treeDataProvider: provider,
   });
 
-  await vscode.commands.executeCommand(
-    "setContext",
-    "openapi.platform.credentials",
-    platformUrl && platformToken ? "present" : "missing"
+  store.onConnectionDidChange(({ connected }) =>
+    vscode.commands.executeCommand(
+      "setContext",
+      "openapi.platform.credentials",
+      connected ? "present" : "missing"
+    )
   );
 
   // TODO unsubscribe?
@@ -107,9 +94,8 @@ export async function activate(
     });
   }
 
-  if (platformUrl && platformToken) {
-    activateLinter(cache, platformContext, store, dataDictionaryDiagnostics);
-  }
+  activateScan(context, platformContext, cache, configuration, store, memento, secrets, prefs);
+  activateLinter(cache, platformContext, store, dataDictionaryDiagnostics);
 
   const disposable1 = vscode.workspace.onDidSaveTextDocument((document) =>
     refreshAuditReport(store, cache, auditContext, document)

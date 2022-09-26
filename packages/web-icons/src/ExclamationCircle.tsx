@@ -1,3 +1,4 @@
+import * as React from "react";
 import { SVGProps } from "react";
 
 const SvgExclamationCircle = (props: SVGProps<SVGSVGElement>) => (

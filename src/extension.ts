@@ -28,6 +28,9 @@ import * as audit from "./audit/activate";
 import * as preview from "./preview";
 import * as platform from "./platform/activate";
 import * as tryit from "./tryit/activate";
+import { PlatformStore } from "./platform/stores/platform-store";
+import { Logger } from "./platform/types";
+import { getPlatformCredentials } from "./credentials";
 
 export async function activate(context: vscode.ExtensionContext) {
   const versionProperty = "openapiVersion";
@@ -94,11 +97,33 @@ export async function activate(context: vscode.ExtensionContext) {
     diagnostics: vscode.languages.createDiagnosticCollection("audits"),
   };
 
+  const logger: Logger = {
+    fatal: (message: string) => null,
+    error: (message: string) => null,
+    warning: (message: string) => null,
+    info: (message: string) => null,
+    debug: (message: string) => null,
+  };
+
+  const platformStore = new PlatformStore(logger);
+
+  const prefs = {};
+
   const reportWebView = new AuditReportWebView(context.extensionPath, cache);
-  audit.activate(context, auditContext, cache, reportWebView);
+  audit.activate(context, auditContext, cache, reportWebView, platformStore);
   preview.activate(context, cache, configuration);
-  tryit.activate(context, cache, configuration);
-  await platform.activate(context, auditContext, cache, reportWebView);
+  tryit.activate(context, cache, configuration, context.workspaceState, context.secrets, prefs);
+  await platform.activate(
+    context,
+    auditContext,
+    cache,
+    configuration,
+    platformStore,
+    reportWebView,
+    context.workspaceState,
+    context.secrets,
+    prefs
+  );
 
   if (previousVersion!.major < currentVersion.major) {
     createWhatsNewPanel(context);
@@ -110,6 +135,14 @@ export async function activate(context: vscode.ExtensionContext) {
   if (vscode.window.activeTextEditor) {
     cache.onActiveEditorChanged(vscode.window.activeTextEditor);
   }
+
+  platformStore.setCredentials(await getPlatformCredentials(configuration, context.secrets));
+
+  configuration.onDidChange(async (e: vscode.ConfigurationChangeEvent) => {
+    if (configuration.changed(e, "platformUrl") || configuration.changed(e, "platformServices")) {
+      platformStore.setCredentials(await getPlatformCredentials(configuration, context.secrets));
+    }
+  });
 }
 
 export function deactivate() {}

@@ -22,7 +22,7 @@ export default function OperationTabs({
   security,
 }: {
   oas: BundledOpenApiSpec;
-  config: TryitConfig;
+  config?: TryitConfig;
   requestBody?: OasRequestBody;
   parameters: OperationParametersMap;
   security: TryitSecurity;
@@ -64,13 +64,16 @@ export default function OperationTabs({
       content: <ParameterGroup oas={oas} group={parameters.cookie} />,
       enabled: hasParameters(parameters.cookie),
     },
-    {
+  ];
+
+  if (config) {
+    tabs.push({
       id: "settings",
       title: "Settings",
       content: <Settings config={config} />,
       enabled: true,
-    },
-  ];
+    });
+  }
 
   const activeId = tabs.filter((tab) => tab.enabled)?.[0]?.id;
 

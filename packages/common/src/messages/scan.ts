@@ -20,13 +20,13 @@ export interface OasWithOperationAndConfig {
   oas: BundledOpenApiSpec;
   path: string;
   method: HttpMethod;
-  config: ScanConfig;
+  config: unknown;
 }
 
-export interface ScanConfigForOperation {
-  path: string;
-  method: HttpMethod;
-  config: ScanConfig;
+export interface ScanRunConfig {
+  config: unknown;
+  env: Record<string, string>;
+  oas: BundledOpenApiSpec;
 }
 
 export interface ErrorMessage {
@@ -34,13 +34,22 @@ export interface ErrorMessage {
 }
 
 // requests to scan web app
-type ScanOperationMessage = { command: "scanOperation"; payload: OasWithOperationAndConfig };
-type ShowErrorMessage = { command: "showError"; payload: ErrorMessage };
-type ShowScanReportMessage = { command: "showScanReport"; payload: any };
-type ScanRequest = ScanOperationMessage | ShowErrorMessage | ShowScanReportMessage;
+export type ScanOperationMessage = { command: "scanOperation"; payload: OasWithOperationAndConfig };
+export type ShowErrorMessage = { command: "showError"; payload: ErrorMessage };
+export type ShowScanReportMessage = { command: "showScanReport"; payload: any };
+export type ShowResponseMessage = { command: "showScanResponse"; payload: HttpResponse };
+
+type ScanRequest =
+  | ScanOperationMessage
+  | ShowErrorMessage
+  | ShowScanReportMessage
+  | ShowResponseMessage;
 
 // responses sent from web app to the vs code extension
-type RunScanMessage = { command: "updateScanConfig"; payload: ScanConfigForOperation };
-type ScanResponse = RunScanMessage;
+type RunScanMessage = { command: "runScan"; payload: ScanRunConfig };
+type SendHttpRequestMessage = { command: "sendScanRequest"; payload: HttpRequest };
+type SendCurlRequestMessage = { command: "sendCurlRequest"; payload: string };
+
+type ScanResponse = RunScanMessage | SendHttpRequestMessage | SendCurlRequestMessage;
 
 export type { ScanRequest, ScanResponse };

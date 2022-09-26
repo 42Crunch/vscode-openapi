@@ -1,3 +1,4 @@
+import { Event, EventEmitter } from "vscode";
 import { DataFormat, FullDataDictionary } from "@xliic/common/data-dictionary";
 
 import {
@@ -17,14 +18,24 @@ import {
   readCollection,
   readCollectionUsers,
   updateApi,
+  createDefaultScanConfig,
+  readScanConfig,
+  listScanConfigs,
+  createScanConfig,
+  listScanReports,
+  readScanReport,
+  readTechnicalCollection,
+  createTechnicalCollection,
+  searchCollections,
 } from "../api";
 import {
   Api,
   ApiFilter,
   CollectionData,
   CollectionFilter,
+  Logger,
   NamingConvention,
-  PlatformContext,
+  PlatformConnection,
   UserData,
 } from "../types";
 
@@ -100,27 +111,62 @@ export class Filters {
   readonly favorite: Map<string, ApiFilter> = new Map();
 }
 
+export type PlatformConnectionEvent = {
+  connected: boolean;
+};
+
 export class PlatformStore {
   private apiLastAssessment = new Map<string, Date>();
+  private connection: PlatformConnection | undefined = undefined;
   readonly limits = new Limits();
   readonly filters = new Filters();
   private formats?: DataDictionaryFormat[];
+  private _onConnectionDidChange = new EventEmitter<PlatformConnectionEvent>();
 
-  constructor(private context: PlatformContext) {}
+  constructor(private logger: Logger) {}
+
+  get onConnectionDidChange(): Event<PlatformConnectionEvent> {
+    return this._onConnectionDidChange.event;
+  }
+
+  async setCredentials(credentials?: PlatformConnection) {
+    if (
+      this.connection?.apiToken !== credentials?.apiToken ||
+      this.connection?.platformUrl !== credentials?.platformUrl ||
+      this.connection?.services !== credentials?.services
+    ) {
+      this.connection = credentials;
+      await this.refresh();
+      this._onConnectionDidChange.fire({ connected: this.hasConnection() });
+    }
+  }
+
+  hasConnection(): boolean {
+    return (
+      this.connection !== undefined && !!this.connection.platformUrl && !!this.connection.apiToken
+    );
+  }
+
+  getConnection(): PlatformConnection {
+    if (this.connection === undefined) {
+      throw new Error(`Platform connection has not been configured`);
+    }
+    return this.connection;
+  }
 
   async getCollectionNamingConvention(): Promise<NamingConvention> {
-    return getCollectionNamingConvention(this.context.connection, this.context.logger);
+    return getCollectionNamingConvention(this.getConnection(), this.logger);
   }
 
   async getApiNamingConvention(): Promise<NamingConvention> {
-    return getApiNamingConvention(this.context.connection, this.context.logger);
+    return getApiNamingConvention(this.getConnection(), this.logger);
   }
 
   async getCollections(
     filter: CollectionFilter | undefined,
     limit: number
   ): Promise<CollectionsView> {
-    const response = await listCollections(filter, this.context.connection, this.context.logger);
+    const response = await listCollections(filter, this.getConnection(), this.logger);
 
     const filtered = response.list.filter((collection) => {
       if (filter) {
@@ -139,26 +185,30 @@ export class PlatformStore {
     };
   }
 
+  async searchCollections(name: string) {
+    return searchCollections(name, this.getConnection(), this.logger);
+  }
+
   async getAllCollections(): Promise<CollectionData[]> {
     const response = await listCollections(
       { name: undefined, owner: "ALL" },
-      this.context.connection,
-      this.context.logger
+      this.getConnection(),
+      this.logger
     );
     return response.list;
   }
 
   async createCollection(name: string): Promise<CollectionData> {
-    const collection = await createCollection(name, this.context.connection, this.context.logger);
+    const collection = await createCollection(name, this.getConnection(), this.logger);
     return collection;
   }
 
   async collectionRename(collectionId: string, name: string) {
-    await collectionUpdate(collectionId, name, this.context.connection, this.context.logger);
+    await collectionUpdate(collectionId, name, this.getConnection(), this.logger);
   }
 
   async apiRename(apiId: string, name: string): Promise<void> {
-    await updateApi(apiId, { name }, this.context.connection, this.context.logger);
+    await updateApi(apiId, { name }, this.getConnection(), this.logger);
   }
 
   async createApi(collectionId: string, name: string, json: string): Promise<Api> {
@@ -166,25 +216,31 @@ export class PlatformStore {
       collectionId,
       name,
       Buffer.from(json),
-      this.context.connection,
-      this.context.logger
+      this.getConnection(),
+      this.logger
     );
     return api;
   }
 
+  async createTempApi(json: string): Promise<Api> {
+    const collectionId = await this.findOrCreateTempCollection();
+    const apiName = `tmp-${Date.now()}`;
+    return createApi(collectionId, apiName, Buffer.from(json), this.getConnection(), this.logger);
+  }
+
   async updateApi(apiId: string, content: Buffer): Promise<void> {
-    const api = await readApi(apiId, this.context.connection, this.context.logger, false);
+    const api = await readApi(apiId, this.getConnection(), this.logger, false);
     const last = api?.assessment?.last ? new Date(api.assessment.last) : new Date(0);
     this.apiLastAssessment.set(apiId, last);
-    await updateApi(apiId, { specfile: content }, this.context.connection, this.context.logger);
+    await updateApi(apiId, { specfile: content }, this.getConnection(), this.logger);
   }
 
   async deleteCollection(collectionId: string): Promise<void> {
-    await deleteCollection(collectionId, this.context.connection, this.context.logger);
+    await deleteCollection(collectionId, this.getConnection(), this.logger);
   }
 
   async deleteApi(apiId: string): Promise<void> {
-    await deleteApi(apiId, this.context.connection, this.context.logger);
+    await deleteApi(apiId, this.getConnection(), this.logger);
   }
 
   async getApis(
@@ -192,7 +248,7 @@ export class PlatformStore {
     filter: ApiFilter | undefined,
     limit: number
   ): Promise<ApisView> {
-    const response = await listApis(collectionId, this.context.connection, this.context.logger);
+    const response = await listApis(collectionId, this.getConnection(), this.logger);
 
     const filtered = response.list.filter((api) => {
       if (filter) {
@@ -210,25 +266,17 @@ export class PlatformStore {
   }
 
   async getApi(apiId: string): Promise<Api> {
-    const api = await readApi(apiId, this.context.connection, this.context.logger, true);
+    const api = await readApi(apiId, this.getConnection(), this.logger, true);
     return api;
   }
 
   async getCollection(collectionId: string): Promise<CollectionData> {
-    const collection = await readCollection(
-      collectionId,
-      this.context.connection,
-      this.context.logger
-    );
+    const collection = await readCollection(collectionId, this.getConnection(), this.logger);
     return collection;
   }
 
   async getCollectionUsers(collectionId: string): Promise<UserData[]> {
-    const collection = await readCollectionUsers(
-      collectionId,
-      this.context.connection,
-      this.context.logger
-    );
+    const collection = await readCollectionUsers(collectionId, this.getConnection(), this.logger);
     return collection;
   }
 
@@ -241,11 +289,11 @@ export class PlatformStore {
     const last = this.apiLastAssessment.get(apiId) ?? new Date(0);
 
     while (now - start < ASSESSMENT_MAX_WAIT) {
-      const api = await readApi(apiId, this.context.connection, this.context.logger, false);
+      const api = await readApi(apiId, this.getConnection(), this.logger, false);
       const current = new Date(api.assessment.last);
       const ready = api.assessment.isProcessed && current.getTime() > last.getTime();
       if (ready) {
-        const report = await readAuditReport(apiId, this.context.connection, this.context.logger);
+        const report = await readAuditReport(apiId, this.getConnection(), this.logger);
         return report;
       }
       await delay(ASSESSMENT_RETRY);
@@ -255,13 +303,13 @@ export class PlatformStore {
   }
 
   async getDataDictionaries(): Promise<FullDataDictionary[]> {
-    const dictionaries = await getDataDictionaries(this.context.connection, this.context.logger);
+    const dictionaries = await getDataDictionaries(this.getConnection(), this.logger);
     const result = [];
     for (const dictionary of dictionaries) {
       const formats = await getDataDictionaryFormats(
         dictionary.id,
-        this.context.connection,
-        this.context.logger
+        this.getConnection(),
+        this.logger
       );
       result.push({
         id: dictionary.id,
@@ -276,13 +324,13 @@ export class PlatformStore {
 
   async getDataDictionaryFormats(): Promise<DataDictionaryFormat[]> {
     if (!this.formats) {
-      const dictionaries = await getDataDictionaries(this.context.connection, this.context.logger);
+      const dictionaries = await getDataDictionaries(this.getConnection(), this.logger);
       const result: DataDictionaryFormat[] = [];
       for (const dictionary of dictionaries) {
         const formats = await getDataDictionaryFormats(
           dictionary.id,
-          this.context.connection,
-          this.context.logger
+          this.getConnection(),
+          this.logger
         );
         for (const format of Object.values<DataFormat>(formats)) {
           // entries from a standard dictionary do not have a o: prefix
@@ -312,6 +360,61 @@ export class PlatformStore {
 
   async refresh(): Promise<void> {
     this.formats = undefined;
+  }
+
+  async createDefaultScanConfig(apiId: string): Promise<any> {
+    const configId = await createDefaultScanConfig(apiId, this.getConnection(), this.logger);
+    return configId;
+  }
+
+  async readScanConfig(configId: string): Promise<any> {
+    const config = await readScanConfig(configId, this.getConnection(), this.logger);
+    return config;
+  }
+
+  async createScanConfig(apiId: string, name: string, config: unknown) {
+    return createScanConfig(apiId, name, config, this.getConnection(), this.logger);
+  }
+
+  async getScanConfigs(apiId: string): Promise<any> {
+    const MAX_WAIT = 30000;
+    const RETRY = 1000;
+    const start = Date.now();
+    const deadline = start + MAX_WAIT;
+    while (Date.now() < deadline) {
+      const configs = await listScanConfigs(apiId, this.getConnection(), this.logger);
+      if (configs.length > 0) {
+        return configs;
+      }
+      await delay(RETRY);
+    }
+    throw new Error(`Timed out while waiting for the scan config for API ID: ${apiId}`);
+  }
+
+  async listScanReports(apiId: string): Promise<any> {
+    return listScanReports(apiId, this.getConnection(), this.logger);
+  }
+
+  async readScanReport(reportId: string): Promise<any> {
+    return readScanReport(reportId, this.getConnection(), this.logger);
+  }
+
+  async readTechnicalCollection(technicalName: string): Promise<any> {
+    return readTechnicalCollection(technicalName, this.getConnection(), this.logger);
+  }
+
+  async createTechnicalCollection(technicalName: string, name: string): Promise<any> {
+    return createTechnicalCollection(technicalName, name, this.getConnection(), this.logger);
+  }
+
+  async findOrCreateTempCollection(): Promise<string> {
+    const collectionName = "VS Code Temp Collection";
+    const collections = await this.searchCollections(collectionName);
+    if (collections.list.length === 0) {
+      const collection = await this.createCollection(collectionName);
+      return collection.desc.id;
+    }
+    return collections.list[0].id;
   }
 }
 

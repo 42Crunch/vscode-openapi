@@ -20,10 +20,6 @@ export interface ErrorMessage {
   sslError: boolean;
 }
 
-export interface CurlCommand {
-  curl: string;
-}
-
 export type TryitParameterValues = Record<OasParameterLocation, Record<string, unknown>>;
 
 export type TryitOperationBodies = Record<string, any>;
@@ -57,12 +53,7 @@ export type TryItRequest = TryOperationMessage | ShowResponseMessage | ShowError
 
 // webapp to vs code responses
 type SendHttpRequestMessage = { command: "sendRequest"; payload: HttpRequest };
-type SendCurlCommandMessage = { command: "sendCurl"; payload: CurlCommand };
 type CreateSchemaCommandMessage = { command: "createSchema"; payload: any };
 type SaveConfigMessage = { command: "saveConfig"; payload: TryitConfig };
 
-export type TryItResponse =
-  | SendHttpRequestMessage
-  | SendCurlCommandMessage
-  | CreateSchemaCommandMessage
-  | SaveConfigMessage;
+export type TryItResponse = SendHttpRequestMessage | CreateSchemaCommandMessage | SaveConfigMessage;

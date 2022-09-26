@@ -27,7 +27,7 @@ export default (
     dataDictionaryView.sendShowDictionaries(formats);
   },
 
-  dataDictionaryPreAuditBulkUpdateProperties: async (documentUri: vscode.Uri) => {
+  dataDictionaryPreAuditBulkUpdateProperties: async (documentUri: vscode.Uri): Promise<boolean> => {
     const hasDiagnostics = dataDictionaryDiagnostics.has(documentUri);
     if (hasDiagnostics) {
       const fix = await shouldFixDataDictionaryErrros();
@@ -36,8 +36,16 @@ export default (
       } else if (fix === "skip") {
         return true;
       }
-      const editor = await vscode.window.showTextDocument(documentUri);
-      await editorBulkUpdate(store, cache, dataDictionaryDiagnostics, editor);
+      for (const editor of vscode.window.visibleTextEditors) {
+        if (editor.document.uri.toString() === documentUri.toString()) {
+          await documentBulkUpdate(store, cache, dataDictionaryDiagnostics, editor.document);
+          return true;
+        }
+        // no document updated
+        vscode.window.showInformationMessage(
+          `Failed to update contents of the ${documentUri} with Data Dictionary properties`
+        );
+      }
     }
     return true;
   },
@@ -115,7 +123,7 @@ export default (
   editorDataDictionaryBulkUpdateProperties: async (
     editor: vscode.TextEditor,
     edit: vscode.TextEditorEdit
-  ) => editorBulkUpdate(store, cache, dataDictionaryDiagnostics, editor),
+  ) => documentBulkUpdate(store, cache, dataDictionaryDiagnostics, editor.document),
 });
 
 const schemaProps = [
@@ -147,7 +155,7 @@ async function shouldFixDataDictionaryErrros(): Promise<"fix" | "skip" | "cancel
     if (choice === undefined) {
       return "cancel";
     } else if (choice.id === "always" || choice.id === "never") {
-      configuration.update("dataDictionaryPreAuditFix", choice.id);
+      await configuration.update("dataDictionaryPreAuditFix", choice.id);
     }
     if (choice.id === "fix") {
       return "fix";
@@ -161,14 +169,13 @@ async function shouldFixDataDictionaryErrros(): Promise<"fix" | "skip" | "cancel
   return config === "always" ? "fix" : "skip";
 }
 
-async function editorBulkUpdate(
+async function documentBulkUpdate(
   store: PlatformStore,
   cache: Cache,
   dataDictionaryDiagnostics: vscode.DiagnosticCollection,
-  editor: vscode.TextEditor
+  document: vscode.TextDocument
 ) {
-  const document = editor.document;
-  const parsed = cache.getParsedDocument(editor.document);
+  const parsed = cache.getParsedDocument(document);
 
   if (parsed === undefined) {
     return;
@@ -208,12 +215,12 @@ async function editorBulkUpdate(
       }
       updated["x-42c-format"] = format.id;
       let text = "";
-      if (editor.document.languageId === "yaml") {
+      if (document.languageId === "yaml") {
         text = yaml.dump(updated, { indent: 2 }).trimEnd();
       } else {
         text = JSON.stringify(updated, null, 1);
       }
-      const edit = replaceObject(editor.document, parsed, parseJsonPointer(pointer), text);
+      const edit = replaceObject(document, parsed, parseJsonPointer(pointer), text);
       edits.push(edit);
     }
   }

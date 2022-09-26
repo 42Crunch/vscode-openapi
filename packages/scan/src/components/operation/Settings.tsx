@@ -5,7 +5,8 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { Check } from "@xliic/web-icons";
 import { useFormContext, useWatch } from "react-hook-form";
 
-import { saveConfig } from "../../store/oasSlice";
+import { saveConfig } from "../../features/tryit/slice";
+
 import { useAppDispatch } from "../../store/hooks";
 import { parseHttpsHostname } from "../../util";
 

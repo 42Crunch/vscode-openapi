@@ -14,12 +14,14 @@ import { AuditContext, PendingAudits } from "../types";
 import { registerQuickfixes } from "./quickfix";
 import { Cache } from "../cache";
 import { setDecorations } from "./decoration";
+import { PlatformStore } from "../platform/stores/platform-store";
 
 export function activate(
   context: vscode.ExtensionContext,
   auditContext: AuditContext,
   cache: Cache,
-  reportWebView: AuditReportWebView
+  reportWebView: AuditReportWebView,
+  store: PlatformStore
 ) {
   const pendingAudits: PendingAudits = {};
 
@@ -47,7 +49,7 @@ export function activate(
 
   vscode.window.onDidChangeActiveTextEditor((editor) => update(editor));
 
-  registerSecurityAudit(context, cache, auditContext, pendingAudits, reportWebView);
+  registerSecurityAudit(context, cache, auditContext, pendingAudits, reportWebView, store);
   registerFocusSecurityAudit(context, cache, auditContext, reportWebView);
   registerFocusSecurityAuditById(context, auditContext, reportWebView);
   registerQuickfixes(context, cache, auditContext, reportWebView);

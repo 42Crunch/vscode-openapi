@@ -32,6 +32,7 @@ export const ThemeColorNames = [
   "listActiveSelectionBackground",
   "listActiveSelectionForeground",
   "listHoverBackground",
+  "contrastActiveBorder",
 ] as const;
 
 export type ThemeColorName = typeof ThemeColorNames[number];
@@ -72,6 +73,7 @@ export const ThemeColorVariables: ThemeColorValues = {
   listActiveSelectionBackground: "--xliic-listActiveSelectionBackground",
   listActiveSelectionForeground: "--xliic-listActiveSelectionForeground",
   listHoverBackground: "--xliic-listHoverBackground",
+  contrastActiveBorder: "--xliic-contrastActiveBorder",
 } as const;
 
 export type VsCodeColorMap = ThemeColorValues;

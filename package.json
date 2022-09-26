@@ -750,6 +750,18 @@
           "default": "https://platform.42crunch.com",
           "description": "42Crunch platform URL"
         },
+        "openapi.platformServices": {
+          "scope": "workbench",
+          "type": "string",
+          "default": "",
+          "description": "42Crunch platform Services in hostname:port format"
+        },
+        "openapi.platformConformanceScanImage": {
+          "scope": "workbench",
+          "type": "string",
+          "default": "42crunch/scand-agent:v2.0.0-beta",
+          "description": "Docker image for 42Crunch Conformance Scan"
+        },
         "openapi.securityAuditToken": {
           "scope": "workbench",
           "type": "string",
@@ -802,7 +814,7 @@
         "openapi.dataDictionaryPreAuditFix": {
           "scope": "workbench",
           "type": "string",
-          "description": "Update document to match Data Dictionary definitions before runing Security Audit",
+          "description": "Update document to match Data Dictionary definitions before running Security Audit",
           "default": "ask",
           "enum": [
             "ask",
@@ -854,6 +866,6 @@
     "marked": "^4.0.10",
     "mkdirp": "^1.0.4",
     "mocha": "^9.2.0",
-    "typescript": "^4.7"
+    "typescript": "4.7.4"
   }
 }

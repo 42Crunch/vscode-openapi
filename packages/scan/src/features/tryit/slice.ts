@@ -1,14 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { WritableDraft } from "immer/dist/internal";
-
 import { BundledOpenApiSpec, getOperation } from "@xliic/common/oas30";
 import {
-  ScanConfig,
-  OasWithOperationAndConfig,
-  ScanConfigForOperation,
-} from "@xliic/common/messages/scan";
-import {
-  CurlCommand,
   OasWithOperation,
   TryitOperationValues,
   TryitConfig,
@@ -20,10 +12,8 @@ import {
   generateSecurityValues,
   getParameters,
   getSecurity,
-} from "../util";
-import { createDefaultBody } from "../core/form/body";
-
-type PageName = "loading" | "scanOperation" | "scanReport" | "tryOperation" | "response" | "error";
+} from "../../util";
+import { createDefaultBody } from "../../core/form/body";
 
 type ConfigSslIgnoreAdd = {
   type: "configSslIgnoreAdd";
@@ -38,8 +28,6 @@ type ConfigSslIgnoreRemove = {
 type ConfigUpdatePayload = ConfigSslIgnoreAdd | ConfigSslIgnoreRemove;
 
 export interface OasState {
-  page: PageName;
-  history: PageName[];
   oas: BundledOpenApiSpec;
   path?: string;
   method?: HttpMethod;
@@ -49,15 +37,11 @@ export interface OasState {
   };
   defaultValues?: TryitOperationValues;
   tryitConfig: TryitConfig;
-  scanConfig?: ScanConfig;
   response?: HttpResponse;
   error?: ErrorMessage;
-  scanReport: any;
 }
 
 const initialState: OasState = {
-  page: "loading",
-  history: [],
   oas: {
     openapi: "3.0.0",
     info: { title: "", version: "0.0" },
@@ -68,28 +52,17 @@ const initialState: OasState = {
   },
   response: undefined,
   error: undefined,
-  scanReport: undefined,
 };
 
-export const parametersSlice = createSlice({
+export const slice = createSlice({
   name: "oas",
   initialState,
   reducers: {
-    scanOperation: (state, action: PayloadAction<OasWithOperationAndConfig>) => {
-      const { oas, path, method, config } = action.payload;
-      state.oas = oas;
-      state.path = path;
-      state.method = method;
-      state.scanConfig = config;
-      goTo(state, "scanOperation");
-    },
-
     tryOperation: (state, action: PayloadAction<OasWithOperation>) => {
       const { oas, path, method, preferredMediaType, preferredBodyValue, config } = action.payload;
       state.oas = oas;
       state.path = path;
       state.method = method;
-      state.scanConfig = undefined;
       // excersise a bit of caution, config is user-editable, let's make sure it has all expected values
       state.tryitConfig.insecureSslHostnames = config?.insecureSslHostnames || [];
 
@@ -110,28 +83,14 @@ export const parametersSlice = createSlice({
         securityIndex: 0,
         body,
       };
-      goTo(state, "tryOperation");
-    },
-
-    showScanReport: (state, action: PayloadAction<any>) => {
-      state.scanReport = action.payload;
-      goTo(state, "scanReport");
     },
 
     showResponse: (state, action: PayloadAction<HttpResponse>) => {
       state.response = action.payload;
-      goTo(state, "response");
     },
 
     showError: (state, action: PayloadAction<ErrorMessage>) => {
       state.error = action.payload;
-      goTo(state, "error");
-    },
-
-    goBack: (state) => {
-      if (state.history.length > 0) {
-        state.page = state.history.pop()!;
-      }
     },
 
     // for listeners
@@ -141,10 +100,7 @@ export const parametersSlice = createSlice({
     ) => {
       state.defaultValues = action.payload.defaultValues;
     },
-
     createSchema: (state, action: PayloadAction<{ response: any }>) => {},
-    sendRequestCurl: (state, action: PayloadAction<CurlCommand>) => {},
-    updateScanConfig: (state, action: PayloadAction<ScanConfigForOperation>) => {},
     saveConfig: (state, action: PayloadAction<ConfigUpdatePayload>) => {
       if (action.payload.type === "configSslIgnoreAdd") {
         state.tryitConfig.insecureSslHostnames.push(action.payload.hostname);
@@ -157,23 +113,7 @@ export const parametersSlice = createSlice({
   },
 });
 
-function goTo(state: WritableDraft<OasState>, page: PageName) {
-  state.history.push(state.page);
-  state.page = page;
-}
+export const { tryOperation, showResponse, showError, sendRequest, createSchema, saveConfig } =
+  slice.actions;
 
-export const {
-  scanOperation,
-  tryOperation,
-  showResponse,
-  showError,
-  goBack,
-  sendRequest,
-  sendRequestCurl,
-  updateScanConfig,
-  showScanReport,
-  createSchema,
-  saveConfig,
-} = parametersSlice.actions;
-
-export default parametersSlice.reducer;
+export default slice.reducer;

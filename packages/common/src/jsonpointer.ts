@@ -65,7 +65,7 @@ export function find(target: unknown, pointer: string | string[]): unknown | und
 }
 
 export function deref<T>(oas: BundledOpenApiSpec, maybeRef: RefOr<T> | undefined): T | undefined {
-  if (maybeRef === undefined) {
+  if (maybeRef === undefined || maybeRef === null) {
     return undefined;
   }
   if ("$ref" in maybeRef) {

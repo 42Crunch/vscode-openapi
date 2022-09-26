@@ -24,7 +24,7 @@ export default function Operation({
   buttonText,
 }: {
   oas: BundledOpenApiSpec;
-  config: TryitConfig;
+  config?: TryitConfig;
   path: string;
   method: HttpMethod;
   defaultValues: Record<string, any>;

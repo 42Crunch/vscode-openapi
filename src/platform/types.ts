@@ -13,6 +13,10 @@ export interface ListCollectionsResponse {
   list: CollectionData[];
 }
 
+export interface SearchCollectionsResponse {
+  list: { id: string }[];
+}
+
 export interface ListApisResponse {
   list: Api[];
 }
@@ -80,13 +84,12 @@ export interface ApiFilter {
 export interface PlatformConnection {
   apiToken: string | undefined;
   platformUrl: string;
+  services: string;
 }
 
 export interface PlatformContext {
   memento: vscode.Memento;
   context: any;
-  logger: Logger;
-  connection: PlatformConnection;
 }
 
 export interface Logger {

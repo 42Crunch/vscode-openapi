@@ -42,7 +42,10 @@ export function getSecurity(
   for (const requirement of requirements) {
     const resolved: Record<string, OasSecurityScheme> = {};
     for (const schemeName of Object.keys(requirement)) {
-      resolved[schemeName] = oas?.components?.securitySchemes?.[schemeName]!;
+      // check if the requsted security scheme is defined in the OAS
+      if (oas?.components?.securitySchemes?.[schemeName]) {
+        resolved[schemeName] = oas?.components?.securitySchemes?.[schemeName]!;
+      }
     }
     result.push(resolved);
   }

@@ -26,13 +26,18 @@ export class DataDictionaryCompletionProvider implements vscode.CompletionItemPr
     const quote = document.languageId === "yaml" ? "" : hasQuote ? "" : '"';
     const formats = await this.store.getDataDictionaryFormats();
 
-    const completions = formats.map(
-      (format) =>
-        new vscode.CompletionItem(
-          { label: `${quote}${format.name}${quote}`, description: format.description },
-          vscode.CompletionItemKind.Value
-        )
-    );
+    const completions = formats.map((format) => {
+      const item = new vscode.CompletionItem(
+        {
+          label: `${quote}${format.name}${quote}`,
+
+          description: format.description,
+        },
+        vscode.CompletionItemKind.Value
+      );
+      item.range = document.getWordRangeAtPosition(position, /[\w-_:]+/);
+      return item;
+    });
 
     return completions;
   }

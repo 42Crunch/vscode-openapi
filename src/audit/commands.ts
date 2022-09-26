@@ -4,28 +4,45 @@
 */
 import * as vscode from "vscode";
 
-import { audit, getArticles, requestToken } from "./client";
+import { audit } from "./client";
 import { setDecorations, updateDecorations } from "./decoration";
 import { updateDiagnostics } from "./diagnostic";
 
 import { AuditReportWebView } from "./report";
 
-import { AuditContext, Audit, PendingAudits } from "../types";
+import { AuditContext, Audit, PendingAudits, BundleResult, Bundle } from "../types";
 
 import { Cache } from "../cache";
 import { stringify } from "@xliic/preserving-json-yaml-parser";
 import { parseAuditReport, updateAuditContext } from "./audit";
+import { configureCredentials, getPlatformCredentials, hasCredentials } from "../credentials";
+import { PlatformStore } from "../platform/stores/platform-store";
+import { Configuration, configuration } from "../configuration";
 
 export function registerSecurityAudit(
   context: vscode.ExtensionContext,
   cache: Cache,
   auditContext: AuditContext,
   pendingAudits: PendingAudits,
-  reportWebView: AuditReportWebView
+  reportWebView: AuditReportWebView,
+  store: PlatformStore
 ) {
   return vscode.commands.registerTextEditorCommand(
     "openapi.securityAudit",
     async (textEditor: vscode.TextEditor, edit) => {
+      const credentials = await hasCredentials(configuration, context.secrets);
+      if (credentials === undefined) {
+        // try asking for credentials if not found
+        const configured = await configureCredentials(configuration, context.secrets);
+        if (configured === "platform") {
+          // update platform connection if platform credentials have been provided
+          store.setCredentials(await getPlatformCredentials(configuration, context.secrets));
+        } else if (configured === undefined) {
+          // or don't do audit if no credentials been supplied
+          return;
+        }
+      }
+
       const uri = textEditor.document.uri.toString();
 
       if (pendingAudits[uri]) {
@@ -38,7 +55,7 @@ export function registerSecurityAudit(
 
       try {
         reportWebView.prefetchKdb();
-        const audit = await securityAudit(cache, textEditor);
+        const audit = await securityAudit(cache, configuration, context.secrets, store, textEditor);
         if (audit) {
           updateAuditContext(auditContext, uri, audit);
           updateDecorations(auditContext.decorations, audit.summary.documentUri, audit.issues);
@@ -97,57 +114,11 @@ export function registerFocusSecurityAuditById(
 
 async function securityAudit(
   cache: Cache,
+  configuration: Configuration,
+  secrets: vscode.SecretStorage,
+  store: PlatformStore,
   textEditor: vscode.TextEditor
 ): Promise<Audit | undefined> {
-  const configuration = vscode.workspace.getConfiguration("openapi");
-  let apiToken = <string>configuration.get("securityAuditToken");
-
-  if (!apiToken) {
-    const email = await vscode.window.showInputBox({
-      prompt:
-        "Security Audit from 42Crunch runs ~200 checks for security best practices in your API. VS Code needs an API key to use the service. Enter your email to receive the token.",
-      placeHolder: "email address",
-      validateInput: (value) =>
-        value.indexOf("@") > 0 && value.indexOf("@") < value.length - 1
-          ? null
-          : "Please enter valid email address",
-    });
-
-    if (!email) {
-      return;
-    }
-
-    const tokenRequestResult = await vscode.window.withProgress(
-      { location: vscode.ProgressLocation.Notification, title: "Requesting token" },
-      async (progress, token) => {
-        try {
-          return await requestToken(email);
-        } catch (e) {
-          vscode.window.showErrorMessage("Unexpected error when trying to request token: " + e);
-        }
-      }
-    );
-
-    if (!tokenRequestResult || tokenRequestResult.status !== "success") {
-      return;
-    }
-
-    const token = await vscode.window.showInputBox({
-      prompt:
-        "API token has been sent. If you don't get the mail within a couple minutes, check your spam folder and that the address is correct. Paste the token above.",
-      ignoreFocusOut: true,
-      placeHolder: "token",
-    });
-
-    if (!token) {
-      return;
-    }
-
-    const configuration = vscode.workspace.getConfiguration();
-    configuration.update("openapi.securityAuditToken", token, vscode.ConfigurationTarget.Global);
-    apiToken = token;
-  }
-
   const proceed = await vscode.commands.executeCommand(
     "openapi.platform.dataDictionaryPreAuditBulkUpdateProperties",
     textEditor.document.uri
@@ -169,22 +140,68 @@ async function securityAudit(
         vscode.commands.executeCommand("workbench.action.problems.focus");
         throw new Error("Failed to bundle for audit, check OpenAPI file for errors.");
       }
-      try {
-        const report = await audit(stringify(bundle.value), apiToken.trim(), progress);
-        return parseAuditReport(cache, textEditor.document, report, bundle.mapping);
-      } catch (e: any) {
-        if (e?.response?.statusCode === 429) {
-          vscode.window.showErrorMessage(
-            "Too many requests. You can run up to 3 security audits per minute, please try again later."
-          );
-        } else if (e?.response?.statusCode === 403) {
-          vscode.window.showErrorMessage(
-            "Authentication failed. Please paste the token that you received in email to Preferences > Settings > Extensions > OpenAPI > Security Audit Token. If you want to receive a new token instead, clear that setting altogether and initiate a new security audit for one of your OpenAPI files."
-          );
-        } else {
-          vscode.window.showErrorMessage("Unexpected error when trying to audit API: " + e);
-        }
+
+      const credentials = await hasCredentials(configuration, secrets);
+      // prefer anond credentials for now
+      if (credentials === "anond") {
+        return runAnondAudit(textEditor.document, bundle, cache, configuration, progress);
+      } else if (credentials === "platform") {
+        return runPlatformAudit(textEditor.document, bundle, cache, store);
       }
     }
   );
+}
+
+async function runAnondAudit(
+  document: vscode.TextDocument,
+  bundle: Bundle,
+  cache: Cache,
+  configuration: Configuration,
+  progress: vscode.Progress<any>
+): Promise<Audit | undefined> {
+  const apiToken = <string>configuration.get("securityAuditToken");
+  try {
+    const report = await audit(stringify(bundle.value), apiToken.trim(), progress);
+    return parseAuditReport(cache, document, report, bundle.mapping);
+  } catch (e: any) {
+    if (e?.response?.statusCode === 429) {
+      vscode.window.showErrorMessage(
+        "Too many requests. You can run up to 3 security audits per minute, please try again later."
+      );
+    } else if (e?.response?.statusCode === 403) {
+      vscode.window.showErrorMessage(
+        "Authentication failed. Please paste the token that you received in email to Preferences > Settings > Extensions > OpenAPI > Security Audit Token. If you want to receive a new token instead, clear that setting altogether and initiate a new security audit for one of your OpenAPI files."
+      );
+    } else {
+      vscode.window.showErrorMessage("Unexpected error when trying to audit API: " + e);
+    }
+  }
+}
+
+async function runPlatformAudit(
+  document: vscode.TextDocument,
+  bundle: Bundle,
+  cache: Cache,
+  store: PlatformStore
+): Promise<Audit | undefined> {
+  try {
+    const api = await store.createTempApi(stringify(bundle.value));
+    const report = await store.getAuditReport(api.desc.id);
+    await store.deleteApi(api.desc.id);
+    return parseAuditReport(cache, document, report, bundle.mapping);
+  } catch (ex: any) {
+    if (
+      ex?.response?.statusCode === 409 &&
+      ex?.response?.body?.code === 109 &&
+      ex?.response?.body?.message === "limit reached"
+    ) {
+      vscode.window.showErrorMessage(
+        "You have reached your maximum number of APIs. Please contact support@42crunch.com to upgrade your account."
+      );
+    } else {
+      vscode.window.showErrorMessage(
+        "Unexpected error when trying to audit API using the platform: " + ex
+      );
+    }
+  }
 }

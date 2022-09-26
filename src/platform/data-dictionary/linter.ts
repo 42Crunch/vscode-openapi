@@ -24,21 +24,44 @@ export function activate(
   platformContext: PlatformContext,
   store: PlatformStore,
   collection: vscode.DiagnosticCollection
-): void {
-  cache.onDidActiveDocumentChange(async (document) => {
-    if (document === undefined) {
-      return;
-    }
-    const formats = await store.getDataDictionaryFormats();
-    const formatMap = new Map<string, DataDictionaryFormat>();
-    for (const format of formats) {
-      formatMap.set(format.name, format);
-    }
-    const parsed = cache.getParsedDocument(document);
-    if (parsed !== undefined && getOpenApiVersion(parsed) !== OpenApiVersion.Unknown) {
-      lint(collection, formatMap, document, parsed);
+) {
+  let disposable: vscode.Disposable | undefined = new vscode.Disposable(() => null);
+
+  store.onConnectionDidChange(({ connected }) => {
+    disposable?.dispose();
+    if (connected) {
+      disposable = cache.onDidActiveDocumentChange(async (document) =>
+        lintDocument(document, cache, store, collection)
+      );
+      if (vscode.window.activeTextEditor) {
+        lintDocument(vscode.window.activeTextEditor.document, cache, store, collection);
+      }
+    } else {
+      disposable = undefined;
     }
   });
+
+  return new vscode.Disposable(() => disposable?.dispose());
+}
+
+async function lintDocument(
+  document: vscode.TextDocument | undefined,
+  cache: Cache,
+  store: PlatformStore,
+  collection: vscode.DiagnosticCollection
+) {
+  if (document === undefined) {
+    return;
+  }
+  const formats = await store.getDataDictionaryFormats();
+  const formatMap = new Map<string, DataDictionaryFormat>();
+  for (const format of formats) {
+    formatMap.set(format.name, format);
+  }
+  const parsed = cache.getParsedDocument(document);
+  if (parsed !== undefined && getOpenApiVersion(parsed) !== OpenApiVersion.Unknown) {
+    lint(collection, formatMap, document, parsed);
+  }
 }
 
 function lint(

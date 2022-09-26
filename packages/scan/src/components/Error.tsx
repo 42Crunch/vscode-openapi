@@ -3,11 +3,11 @@ import Button from "react-bootstrap/Button";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { goBack } from "../store/oasSlice";
+import { goBack } from "../features/router/slice";
 
 export default function Error() {
   const dispatch = useAppDispatch();
-  const error = useAppSelector((state) => state.oas.error!);
+  const error = useAppSelector((state) => state.tryit.error!);
 
   return (
     <Container>

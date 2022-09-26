@@ -14,6 +14,7 @@ export default function SecurityRequirements({
   if (!schema) {
     return null;
   }
+
   return (
     <>
       {Object.keys(schema).map((key) => {
