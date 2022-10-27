@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.15 (October 28, 2022)
+
+- Add support for single operation Conformance Scan
+
 ## Version 4.14 (September 9, 2022)
 
 - Update Data Dictionary to use "format" attribute instead of x-42c-format
