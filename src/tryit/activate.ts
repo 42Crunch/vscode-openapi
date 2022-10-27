@@ -5,7 +5,7 @@
 
 import * as vscode from "vscode";
 import { parseJsonPointer, Path, simpleClone } from "@xliic/preserving-json-yaml-parser";
-import { Preferences } from "@xliic/common/messages/prefs";
+import { Preferences } from "@xliic/common/prefs";
 import { Bundle } from "../types";
 import { Cache } from "../cache";
 import { HttpMethod } from "@xliic/common/http";
@@ -13,6 +13,7 @@ import { BundledOpenApiSpec } from "@xliic/common/oas30";
 import { TryItWebView } from "./view";
 import { TryItCodelensProvider } from "./lens";
 import { Configuration } from "../configuration";
+import { EnvStore } from "../envstore";
 
 type BundleDocumentVersions = Record<string, number>;
 
@@ -35,8 +36,7 @@ export function activate(
   context: vscode.ExtensionContext,
   cache: Cache,
   configuration: Configuration,
-  memento: vscode.Memento,
-  secret: vscode.SecretStorage,
+  envStore: EnvStore,
   prefs: Record<string, Preferences>
 ) {
   let tryIt: TryIt | null = null;
@@ -64,7 +64,7 @@ export function activate(
 
   const debouncedTryIt = debounce(showTryIt);
 
-  const view = new TryItWebView(context.extensionPath, cache, memento, secret, prefs);
+  const view = new TryItWebView(context.extensionPath, cache, envStore, prefs);
 
   cache.onDidChange(async (document: vscode.TextDocument) => {
     const uri = document.uri.toString();
@@ -125,7 +125,8 @@ async function startTryIt(view: TryItWebView, cache: Cache, tryIt: TryIt) {
   } else {
     tryIt.versions = getBundleVersions(bundle);
     await view.show();
-    showTryIt(
+    await view.sendColorTheme(vscode.window.activeColorTheme);
+    await showTryIt(
       view,
       document,
       bundle,

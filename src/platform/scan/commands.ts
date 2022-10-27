@@ -9,7 +9,7 @@ import { parseJsonPointer, Path, simpleClone, stringify } from "@xliic/preservin
 import { Cache } from "../../cache";
 import { PlatformStore } from "../stores/platform-store";
 import { HttpMethod } from "@xliic/common/http";
-import { BundledOpenApiSpec } from "@xliic/common/oas30";
+import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
 import { ScanWebView } from "./view";
 
 export default (
@@ -45,6 +45,15 @@ export default (
     }
   );
 };
+
+// snippet from scan-report webapp
+// vscode.commands.registerCommand(
+//   "openapi.platform.showScanReport",
+//   async (report: SingleOperationScanReport) => {
+//     await view.show();
+//     await view.sendShowScanReport(report);
+//   }
+// );
 
 async function editorRunSingleOperationScan(
   editor: vscode.TextEditor,
@@ -86,8 +95,10 @@ async function editorRunSingleOperationScan(
 
     if (config !== undefined) {
       await view.show();
-      view.sendScanOperation(editor.document, {
-        oas: oas as BundledOpenApiSpec,
+      await view.sendColorTheme(vscode.window.activeColorTheme);
+      await view.sendScanOperation(editor.document, {
+        documentUrl: editor.document.uri.toString(),
+        oas: oas as BundledSwaggerOrOasSpec,
         rawOas: rawOas,
         path: path as string,
         method: method as HttpMethod,
@@ -97,7 +108,11 @@ async function editorRunSingleOperationScan(
   }
 }
 
-function extractSingleOperation(method: HttpMethod, path: string, oas: any): BundledOpenApiSpec {
+function extractSingleOperation(
+  method: HttpMethod,
+  path: string,
+  oas: any
+): BundledSwaggerOrOasSpec {
   const visited = new Set<string>();
   crawl(oas, oas["paths"][path][method], visited);
   if (oas["paths"][path]["parameters"]) {
@@ -116,10 +131,10 @@ function extractSingleOperation(method: HttpMethod, path: string, oas: any): Bun
     cloned["components"] = { securitySchemes: oas["components"]["securitySchemes"] };
   }
   copyByPointer(oas, cloned, Array.from(visited));
-  return cloned as BundledOpenApiSpec;
+  return cloned as BundledSwaggerOrOasSpec;
 }
 
-function extractSinglePath(path: string, oas: any): BundledOpenApiSpec {
+function extractSinglePath(path: string, oas: any): BundledSwaggerOrOasSpec {
   const visited = new Set<string>();
   crawl(oas, oas["paths"][path], visited);
   if (oas["paths"][path]["parameters"]) {
@@ -136,7 +151,7 @@ function extractSinglePath(path: string, oas: any): BundledOpenApiSpec {
     cloned["components"] = { securitySchemes: oas["components"]["securitySchemes"] };
   }
   copyByPointer(oas, cloned, Array.from(visited));
-  return cloned as BundledOpenApiSpec;
+  return cloned as BundledSwaggerOrOasSpec;
 }
 
 function crawl(root: any, current: any, visited: Set<string>) {

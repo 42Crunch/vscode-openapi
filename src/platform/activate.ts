@@ -4,7 +4,7 @@
 */
 
 import * as vscode from "vscode";
-import { Preferences } from "@xliic/common/messages/prefs";
+import { Preferences } from "@xliic/common/prefs";
 import { Cache } from "../cache";
 import { Configuration, configuration } from "../configuration";
 import { CollectionsProvider } from "./explorer/provider";
@@ -18,12 +18,14 @@ import { PlatformFS } from "./fs-provider";
 import { isPlatformUri } from "./util";
 import { CodelensProvider } from "./codelens";
 import { refreshAuditReport } from "./audit";
-import { AuditReportWebView } from "../audit/report";
+import { AuditWebView } from "../audit/view";
 import { DataDictionaryWebView } from "./data-dictionary/view";
 import { DataDictionaryCompletionProvider } from "./data-dictionary/completion";
 import { DataDictionaryCodeActions } from "./data-dictionary/code-actions";
 import { activate as activateLinter } from "./data-dictionary/linter";
 import { activate as activateScan } from "./scan/activate";
+
+import { EnvStore } from "../envstore";
 
 export async function activate(
   context: vscode.ExtensionContext,
@@ -31,9 +33,9 @@ export async function activate(
   cache: Cache,
   configuration: Configuration,
   store: PlatformStore,
-  reportWebView: AuditReportWebView,
+  reportWebView: AuditWebView,
   memento: vscode.Memento,
-  secrets: vscode.SecretStorage,
+  envStore: EnvStore,
   prefs: Record<string, Preferences>
 ) {
   const dataDictionaryView = new DataDictionaryWebView(context.extensionPath);
@@ -94,7 +96,7 @@ export async function activate(
     });
   }
 
-  activateScan(context, platformContext, cache, configuration, store, memento, secrets, prefs);
+  activateScan(context, platformContext, cache, configuration, store, envStore, prefs);
   activateLinter(cache, platformContext, store, dataDictionaryDiagnostics);
 
   const disposable1 = vscode.workspace.onDidSaveTextDocument((document) =>

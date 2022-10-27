@@ -33,11 +33,20 @@ export const ThemeColorNames = [
   "listActiveSelectionForeground",
   "listHoverBackground",
   "contrastActiveBorder",
+  "linkForeground",
+  "linkActiveForeground",
+  "computedOne",
+  "computedTwo",
+  "badgeForeground",
+  "badgeBackground",
+  "notificationsForeground",
+  "notificationsBackground",
+  "notificationsBorder",
 ] as const;
 
-export type ThemeColorName = typeof ThemeColorNames[number];
+export type ThemeColorName = (typeof ThemeColorNames)[number];
 
-export type ThemeColorValues = Record<ThemeColorName, string>;
+export type ThemeColorValues = Partial<Record<ThemeColorName, string>>;
 
 export const ThemeColorVariables: ThemeColorValues = {
   foreground: "--xliic-foreground",
@@ -74,6 +83,22 @@ export const ThemeColorVariables: ThemeColorValues = {
   listActiveSelectionForeground: "--xliic-listActiveSelectionForeground",
   listHoverBackground: "--xliic-listHoverBackground",
   contrastActiveBorder: "--xliic-contrastActiveBorder",
+  linkForeground: "--xliic-linkForeground",
+  linkActiveForeground: "--xliic-linkActiveForeground",
+  computedOne: "--xliic-computedOne",
+  computedTwo: "--xliic-computedTwo",
+  badgeForeground: "--xliic-badgeForeground",
+  badgeBackground: "--xliic-badgeBackground",
+  notificationsForeground: "--xliic-notificationsForeground",
+  notificationsBackground: "--xliic-notificationsBackground",
+  notificationsBorder: "--xliic-notificationsBorder",
 } as const;
 
 export type VsCodeColorMap = ThemeColorValues;
+
+export type ChangeThemePayload = {
+  kind: "light" | "dark" | "highContrast";
+  theme?: ThemeColorValues;
+};
+
+export type ChangeThemeMessage = { command: "changeTheme"; payload: ChangeThemePayload };

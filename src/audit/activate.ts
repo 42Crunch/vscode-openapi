@@ -9,7 +9,7 @@ import {
   registerFocusSecurityAudit,
   registerFocusSecurityAuditById,
 } from "./commands";
-import { AuditReportWebView } from "./report";
+import { AuditWebView } from "./view";
 import { AuditContext, PendingAudits } from "../types";
 import { registerQuickfixes } from "./quickfix";
 import { Cache } from "../cache";
@@ -20,7 +20,7 @@ export function activate(
   context: vscode.ExtensionContext,
   auditContext: AuditContext,
   cache: Cache,
-  reportWebView: AuditReportWebView,
+  reportWebView: AuditWebView,
   store: PlatformStore
 ) {
   const pendingAudits: PendingAudits = {};

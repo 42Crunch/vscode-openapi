@@ -12,23 +12,33 @@ export function insert(
   document: vscode.TextDocument,
   root: Parsed,
   path: Path,
-  insertion: string
+  insertion: string,
+  emptyParentNode: boolean
 ): vscode.TextEdit {
   const location = findLocationForPath(root, path);
   if (location === undefined) {
     throw new Error(`Unable to replace, node at JSON Pointer ${path} is not found`);
   }
 
-  // FIXME will not work with empty object, ie, foo: {}
   const insertionPosition = findInsertionPosition(document, location);
   const indentPosition = findIndentPosition(document, location);
   const reindented = indent(document, indentPosition, insertion);
 
-  return vscode.TextEdit.insert(insertionPosition, formatInsertion(document, reindented));
+  return vscode.TextEdit.insert(
+    insertionPosition,
+    formatInsertion(document, reindented, emptyParentNode)
+  );
 }
 
-function formatInsertion(document: vscode.TextDocument, insertion: string): string {
+function formatInsertion(
+  document: vscode.TextDocument,
+  insertion: string,
+  emptyParentNode: boolean
+): string {
   if (document.languageId === "yaml") {
+    return `\n${insertion}`;
+  }
+  if (emptyParentNode) {
     return `\n${insertion}`;
   }
   return `,\n${insertion}`;

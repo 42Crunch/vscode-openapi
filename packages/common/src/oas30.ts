@@ -1,8 +1,8 @@
 import { HttpMethod, HttpMethods } from "./http";
-import { deref } from "./jsonpointer";
+import { deref, RefOr } from "./ref";
 
 export interface OpenApiSpec {
-  openapi: string;
+  openapi: "3.0.0" | "3.0.1" | "3.0.2" | "3.0.3";
   info: OasInfo;
   tags?: OasTag[];
   servers?: OasServer[];
@@ -143,7 +143,7 @@ export interface OasResponses {
 }
 
 export interface OasResponse {
-  description?: string;
+  description: string;
   headers?: { [name: string]: RefOr<OasHeader> };
   content?: { [mime: string]: OasMediaType };
   links?: { [name: string]: RefOr<OasLink> };
@@ -168,10 +168,10 @@ export interface OasLink {
 export interface OasSecurityScheme {
   type: "apiKey" | "http" | "oauth2" | "openIdConnect";
   description?: string;
-  name?: string;
-  in?: "query" | "header" | "cookie";
+  name: string;
+  in: "query" | "header" | "cookie";
   scheme: string;
-  bearerFormat: string;
+  bearerFormat?: string;
   flows: {
     implicit?: {
       refreshUrl?: string;
@@ -265,12 +265,6 @@ export type OasParameterStyle =
   | "pipeDelimited"
   | "deepObject";
 
-export interface OasRef {
-  $ref: string;
-}
-
-export type RefOr<T> = OasRef | T;
-
 // utility functions and types
 
 export interface BundledOpenApiSpec extends OpenApiSpec {
@@ -301,6 +295,8 @@ export type OperationParametersMap = Record<
   OasParameterLocation,
   Record<string, ResolvedOasParameter>
 >;
+
+export type ResolvedOasOperationSecurity = Record<string, OasSecurityScheme>[];
 
 export function getOperation(
   oas: BundledOpenApiSpec,
@@ -382,3 +378,14 @@ export type OasVaueType =
 //   }
 //   return { type: "object" };
 // }
+
+export function getServerUrls(oas: OpenApiSpec): string[] {
+  const servers = (oas.servers ?? [])
+    .filter((server) => server.url !== undefined && server.url !== "")
+    .map((server) => server.url);
+
+  if (servers.length > 0) {
+    return servers;
+  }
+  return ["http://localhost/"];
+}

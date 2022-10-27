@@ -6,26 +6,28 @@
 import got, { RequestError } from "got";
 import FormData from "form-data";
 
-import { HttpRequest, HttpResponse } from "@xliic/common/http";
-import { ErrorMessage, TryItRequest } from "@xliic/common/messages/tryit";
+import { HttpRequest, HttpResponse, HttpError } from "@xliic/common/http";
+import { ShowHttpResponseMessage, ShowHttpErrorMessage } from "@xliic/common/http";
 
-export async function executeHttpRequest(payload: HttpRequest): Promise<TryItRequest> {
+export async function executeHttpRequest(
+  payload: HttpRequest
+): Promise<ShowHttpResponseMessage | ShowHttpErrorMessage> {
   try {
     const response = await executeHttpRequestRaw(payload);
     return {
-      command: "showResponse",
+      command: "showHttpResponse",
       payload: response,
     };
   } catch (e) {
     return {
-      command: "showError",
-      payload: e as ErrorMessage,
+      command: "showHttpError",
+      payload: e as HttpError,
     };
   }
 }
 
 export async function executeHttpRequestRaw(payload: HttpRequest): Promise<HttpResponse> {
-  const { url, method, headers, body, config } = payload;
+  const { id, url, method, headers, body, config } = payload;
 
   const restoredBody = restoreBody(body, getContentType(headers));
 
@@ -59,6 +61,7 @@ export async function executeHttpRequestRaw(payload: HttpRequest): Promise<HttpR
     }
 
     return {
+      id,
       statusCode: response.statusCode,
       statusMessage: response.statusMessage,
       body: response.body,
@@ -69,6 +72,7 @@ export async function executeHttpRequestRaw(payload: HttpRequest): Promise<HttpR
     const { code, message } = e as RequestError;
     const sslError = isSslError(code);
     throw {
+      id,
       code,
       message,
       sslError,

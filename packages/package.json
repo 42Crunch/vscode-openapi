@@ -2,26 +2,19 @@
   "name": "@xliic/packages",
   "private": true,
   "workspaces": [
-    "audit",
-    "data-dictionary",
-    "scan",
-    "web-icons",
-    "web-theme/dist",
-    "web-ui/dist",
+    "web",
     "common/dist/esm"
   ],
   "scripts": {
     "postinstall": "cd preview-redoc && npm install && cd ../preview-swaggerui && npm install",
-    "build": "npm run build-data-dictionary && npm run build-scan && npm run build-audit && npm run build-swaggerui && npm run build-redoc",
-    "build-data-dictionary": "cd data-dictionary && npm run build && mkdirp ../../webview/generated/data-dictionary && cpy --flat dist/* ../../webview/generated/data-dictionary",
-    "build-scan": "cd scan && npm run build && mkdirp ../../webview/generated/scan && cpy --flat dist/* ../../webview/generated/scan",
-    "build-audit": "cd audit && npm run build && mkdirp ../../webview/generated/audit && cpy --flat dist/* ../../webview/generated/audit",
-    "build-swaggerui": "cd preview-swaggerui && npm run build && mkdirp ../../webview/generated/preview/swaggerui && cpy --flat dist/* ../../webview/generated/preview/swaggerui",
-    "build-redoc": "cd preview-redoc && npm run build && mkdirp ../../webview/generated/preview/redoc && cpy --flat dist/* ../../webview/generated/preview/redoc"
+    "build": "npm run build-web && npm run build-swaggerui && npm run build-redoc",
+    "build-web": "cd web && npm run build && mkdirp ../../webview/generated/web && ncp dist ../../webview/generated/web",
+    "build-swaggerui": "cd preview-swaggerui && npm run build && mkdirp ../../webview/generated/preview/swaggerui && ncp dist ../../webview/generated/preview/swaggerui",
+    "build-redoc": "cd preview-redoc && npm run build && mkdirp ../../webview/generated/preview/redoc && ncp dist ../../webview/generated/preview/redoc"
   },
   "devDependencies": {
-    "@svgr/cli": "^6.5.1",
-    "cpy-cli": "^4.1.0",
-    "mkdirp": "^1.0.4"
+    "ncp": "^2.0.0",
+    "mkdirp": "^1.0.4",
+    "type-fest": "^3.5.6"
   }
 }

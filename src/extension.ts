@@ -21,16 +21,18 @@ import { updateContext } from "./context";
 import { registerCommands } from "./commands";
 import { create as createWhatsNewPanel } from "./whatsnew";
 import { Cache } from "./cache";
-import { AuditReportWebView } from "./audit/report";
+import { AuditWebView } from "./audit/view";
 
 import * as yamlSchemaContributor from "./yaml-schema-contributor";
 import * as audit from "./audit/activate";
 import * as preview from "./preview";
 import * as platform from "./platform/activate";
 import * as tryit from "./tryit/activate";
+import * as environment from "./environment/activate";
 import { PlatformStore } from "./platform/stores/platform-store";
 import { Logger } from "./platform/types";
 import { getPlatformCredentials } from "./credentials";
+import { EnvStore } from "./envstore";
 
 export async function activate(context: vscode.ExtensionContext) {
   const versionProperty = "openapiVersion";
@@ -107,12 +109,16 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const platformStore = new PlatformStore(logger);
 
+  const envStore = new EnvStore(context.workspaceState, context.secrets);
+
   const prefs = {};
 
-  const reportWebView = new AuditReportWebView(context.extensionPath, cache);
+  const reportWebView = new AuditWebView(context.extensionPath, cache);
   audit.activate(context, auditContext, cache, reportWebView, platformStore);
   preview.activate(context, cache, configuration);
-  tryit.activate(context, cache, configuration, context.workspaceState, context.secrets, prefs);
+  tryit.activate(context, cache, configuration, envStore, prefs);
+  environment.activate(context, envStore);
+
   await platform.activate(
     context,
     auditContext,
@@ -121,7 +127,7 @@ export async function activate(context: vscode.ExtensionContext) {
     platformStore,
     reportWebView,
     context.workspaceState,
-    context.secrets,
+    envStore,
     prefs
   );
 

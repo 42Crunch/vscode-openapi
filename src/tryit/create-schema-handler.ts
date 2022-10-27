@@ -5,26 +5,43 @@
 
 import * as vscode from "vscode";
 import * as yaml from "js-yaml";
-import { findLocationForPath, Location } from "@xliic/preserving-json-yaml-parser";
+import { findLocationForPath } from "@xliic/preserving-json-yaml-parser";
 
 import { insert } from "../edits/insert";
 import { generateSchema } from "../audit/schema";
 import { Cache } from "../cache";
+import { getOpenApiVersion } from "../parsers";
+import { OpenApiVersion } from "../types";
 
 export async function executeCreateSchemaRequest(
   document: vscode.TextDocument,
   cache: Cache,
   payload: any
 ): Promise<void> {
-  const parsed = cache.getParsedDocument(document);
-  if (!parsed) {
+  const parsed = cache.getParsedDocument(document) as any;
+  const version = getOpenApiVersion(parsed);
+
+  if (version === OpenApiVersion.Unknown) {
     return;
   }
 
+  const path = version === OpenApiVersion.V3 ? ["components", "schemas"] : ["definitions"];
+
+  let emptyInsertionLocation = Object.keys(parsed).length === 0;
+  let traversed = 0;
+  let current = parsed;
+  for (const name of path) {
+    if (current[name] !== undefined) {
+      current = current[name];
+      emptyInsertionLocation = Object.keys(current).length === 0;
+      traversed++;
+    }
+  }
+
+  const schemaNames = new Set<string>(traversed == path.length ? Object.keys(current) : []);
+
   // focus the document
   await vscode.workspace.openTextDocument(document.uri);
-
-  const schemaNames = new Set<string>(Object.keys((parsed as any)?.["components"]?.["schemas"]));
 
   const schemaName = await vscode.window.showInputBox({
     value: getUniqueSchemaName(schemaNames),
@@ -36,7 +53,13 @@ export async function executeCreateSchemaRequest(
     return;
   }
 
-  const schema = { [schemaName]: generateSchema(payload) };
+  let schema: any = { [schemaName]: generateSchema(payload) };
+  const schemaInsertLocation = path.slice(0, traversed);
+  const wrap = path.slice(traversed, path.length).reverse();
+
+  for (const name of wrap) {
+    schema = { [name]: schema };
+  }
 
   let text = "";
   if (document.languageId === "yaml") {
@@ -47,7 +70,7 @@ export async function executeCreateSchemaRequest(
     text = text.replace(new RegExp("^\\s", "mg"), "");
   }
 
-  const edit = insert(document, parsed, ["components", "schemas"], text);
+  const edit = insert(document, parsed, schemaInsertLocation, text, emptyInsertionLocation);
 
   const workspaceEdit = new vscode.WorkspaceEdit();
   workspaceEdit.set(document.uri, [edit]);
@@ -58,7 +81,7 @@ export async function executeCreateSchemaRequest(
     return;
   }
 
-  const location2 = findLocationForPath(parsed2, ["components", "schemas", schemaName]);
+  const location2 = findLocationForPath(parsed2, [...path, schemaName]);
   const start = document.positionAt(location2!.key!.start);
   const end = document.positionAt(location2!.value.end);
 

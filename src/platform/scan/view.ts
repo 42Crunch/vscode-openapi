@@ -8,40 +8,39 @@ import * as vscode from "vscode";
 import {
   ScanRunConfig,
   OasWithOperationAndConfig,
-  ScanRequest,
-  ScanResponse,
   ShowScanReportMessage,
-  ErrorMessage,
-  ShowResponseMessage,
-  ShowErrorMessage,
-} from "@xliic/common/messages/scan";
+  SingleOperationScanReport,
+  DocumentAndJsonPointer,
+} from "@xliic/common/scan";
 
-import { EnvRequest, EnvResponse, NamedEnvironment, replaceEnv } from "@xliic/common/messages/env";
-import { Preferences, PrefRequest, PrefResponse } from "@xliic/common/messages/prefs";
+import { NamedEnvironment, replaceEnv } from "@xliic/common/env";
+import { Preferences } from "@xliic/common/prefs";
+import { Webapp } from "@xliic/common/webapp/scan";
 
-import { HttpRequest } from "@xliic/common/http";
+import {
+  ShowHttpResponseMessage,
+  ShowHttpErrorMessage,
+  HttpRequest,
+  HttpError,
+} from "@xliic/common/http";
 
 import { WebView } from "../../web-view";
 import { Cache } from "../../cache";
 import { PlatformStore } from "../stores/platform-store";
-import { executeHttpRequestRaw } from "../../tryit/http-handler";
-import { stringify } from "@xliic/preserving-json-yaml-parser";
 import { Configuration } from "../../configuration";
-import { loadEnv, saveEnv } from "./env";
+import { EnvStore } from "../../envstore";
+import { executeHttpRequestRaw } from "../../tryit/http-handler";
+import { getLocationByPointer } from "../../audit/util";
 
-export class ScanWebView extends WebView<
-  ScanRequest | EnvRequest | PrefRequest,
-  ScanResponse | EnvResponse | PrefResponse
-> {
+export class ScanWebView extends WebView<Webapp> {
   private document?: vscode.TextDocument;
 
-  responseHandlers = {
+  hostHandlers: Webapp["hostHandlers"] = {
     runScan: async (config: ScanRunConfig): Promise<ShowScanReportMessage> => {
       try {
         return await runScan(
           this.store,
-          this.memento,
-          this.secret,
+          this.envStore,
           config,
           this.configuration.get<string>("platformConformanceScanImage")
         );
@@ -61,33 +60,58 @@ export class ScanWebView extends WebView<
       }
     },
 
-    sendScanRequest: async (
+    sendHttpRequest: async (
       request: HttpRequest
-    ): Promise<ShowResponseMessage | ShowErrorMessage> => {
+    ): Promise<ShowHttpResponseMessage | ShowHttpErrorMessage> => {
       try {
         const response = await executeHttpRequestRaw(request);
         return {
-          command: "showScanResponse",
+          command: "showHttpResponse",
           payload: response,
         };
       } catch (e) {
         return {
-          command: "showError",
-          payload: e as ErrorMessage,
+          command: "showHttpError",
+          payload: e as HttpError,
         };
       }
     },
 
     sendCurlRequest: async (curl: string): Promise<void> => {
-      return runCurl(curl);
-    },
-
-    saveEnv: async (env: NamedEnvironment) => {
-      await saveEnv(this.memento, this.secret, env);
+      return copyCurl(curl);
     },
 
     savePrefs: async (prefs: Preferences) => {
       this.prefs[this.document!.uri.toString()] = prefs;
+    },
+
+    showEnvWindow: async () => {
+      vscode.commands.executeCommand("openapi.showEnvironment");
+    },
+
+    showJsonPointer: async (payload: DocumentAndJsonPointer) => {
+      let editor: vscode.TextEditor | undefined = undefined;
+
+      // check if document is already open
+      for (const visibleEditor of vscode.window.visibleTextEditors) {
+        if (visibleEditor.document.uri.toString() == payload.document) {
+          editor = visibleEditor;
+        }
+      }
+
+      if (!editor) {
+        // if not already open, load and show it
+        const document = await vscode.workspace.openTextDocument(
+          vscode.Uri.parse(payload.document)
+        );
+        editor = await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+      }
+
+      const root = this.cache.getParsedDocument(editor.document);
+      const lineNo = getLocationByPointer(editor.document, root, payload.jsonPointer)[0];
+      const textLine = editor.document.lineAt(lineNo);
+      editor.selection = new vscode.Selection(lineNo, 0, lineNo, 0);
+      editor.revealRange(textLine.range, vscode.TextEditorRevealType.AtTop);
     },
   };
 
@@ -96,17 +120,29 @@ export class ScanWebView extends WebView<
     private cache: Cache,
     private configuration: Configuration,
     private store: PlatformStore,
-    private memento: vscode.Memento,
-    private secret: vscode.SecretStorage,
+    private envStore: EnvStore,
     private prefs: Record<string, Preferences>
   ) {
-    super(extensionPath, "scan", "Scan", vscode.ViewColumn.Two);
+    super(extensionPath, "scan", "Scan", vscode.ViewColumn.Two, false);
+    envStore.onEnvironmentDidChange((env) => {
+      if (this.isActive()) {
+        this.sendRequest({
+          command: "loadEnv",
+          payload: { default: undefined, secrets: undefined, [env.name]: env.environment },
+        });
+      }
+    });
+
+    vscode.window.onDidChangeActiveColorTheme((e) => {
+      if (this.isActive()) {
+        this.sendColorTheme(e);
+      }
+    });
   }
 
   async sendScanOperation(document: vscode.TextDocument, payload: OasWithOperationAndConfig) {
     this.document = document;
-    const env = await loadEnv(this.memento, this.secret);
-    this.sendRequest({ command: "loadEnv", payload: env });
+    this.sendRequest({ command: "loadEnv", payload: await this.envStore.all() });
     const prefs = this.prefs[this.document.uri.toString()];
     if (prefs) {
       this.sendRequest({ command: "loadPrefs", payload: prefs });
@@ -117,8 +153,7 @@ export class ScanWebView extends WebView<
 
 async function runScan(
   store: PlatformStore,
-  memento: vscode.Memento,
-  secret: vscode.SecretStorage,
+  envStore: EnvStore,
   config: ScanRunConfig,
   scandImage: string
 ): Promise<ShowScanReportMessage> {
@@ -144,11 +179,9 @@ async function runScan(
 
   const terminal = findOrCreateTerminal();
 
-  const envData = await loadEnv(memento, secret);
-
   const env: Record<string, string> = {};
   for (const [name, value] of Object.entries(config.env)) {
-    env[name] = replaceEnv(value, envData);
+    env[name] = replaceEnv(value, await envStore.all());
   }
 
   env["SCAN_TOKEN"] = token;
@@ -170,14 +203,14 @@ async function runScan(
 
   return {
     command: "showScanReport",
-    payload: parsed,
+    // FIXME path and method are ignored by the UI, fix message to make 'em optionals
+    payload: {
+      path: "/",
+      method: "get",
+      report: parsed,
+      security: undefined,
+    },
   };
-}
-
-async function runCurl(curl: string) {
-  const terminal = findOrCreateTerminal();
-  terminal.sendText(curl);
-  terminal.show();
 }
 
 async function waitForReport(
@@ -210,4 +243,16 @@ function findOrCreateTerminal() {
     }
   }
   return vscode.window.createTerminal({ name });
+}
+
+async function runCurl(curl: string) {
+  const terminal = findOrCreateTerminal();
+  terminal.sendText(curl);
+  terminal.show();
+}
+
+async function copyCurl(curl: string) {
+  vscode.env.clipboard.writeText(curl);
+  const disposable = vscode.window.setStatusBarMessage(`Curl command copied to the clipboard`);
+  setTimeout(() => disposable.dispose(), 1000);
 }

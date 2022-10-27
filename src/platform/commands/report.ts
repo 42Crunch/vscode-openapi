@@ -5,7 +5,7 @@ import { Cache } from "../../cache";
 import { refreshAuditReport } from "../audit";
 import { AuditContext } from "../../types";
 import { makePlatformUri } from "../util";
-import { AuditReportWebView } from "../../audit/report";
+import { AuditWebView } from "../../audit/view";
 import { parseAuditReport, updateAuditContext } from "../../audit/audit";
 import { setDecorations, updateDecorations } from "../../audit/decoration";
 import { updateDiagnostics } from "../../audit/diagnostic";
@@ -15,7 +15,7 @@ export default (
   context: vscode.ExtensionContext,
   auditContext: AuditContext,
   cache: Cache,
-  reportWebView: AuditReportWebView
+  reportWebView: AuditWebView
 ) => ({
   openAuditReport: async (apiId: string) => {
     await vscode.window.withProgress<void>(
@@ -30,7 +30,7 @@ export default (
           const document = await vscode.workspace.openTextDocument(uri);
           const audit = await refreshAuditReport(store, cache, auditContext, document);
           if (audit) {
-            reportWebView.show(audit);
+            await reportWebView.showReport(audit);
           }
         } catch (e) {
           vscode.window.showErrorMessage(`Unexpected error: ${e}`);
@@ -64,7 +64,7 @@ export default (
         updateDecorations(auditContext.decorations, audit.summary.documentUri, audit.issues);
         updateDiagnostics(auditContext.diagnostics, audit.filename, audit.issues);
         setDecorations(editor, auditContext);
-        reportWebView.show(audit);
+        await reportWebView.showReport(audit);
       } else {
         vscode.window.showErrorMessage(
           "Can't find 42Crunch Security Audit report in the selected file"

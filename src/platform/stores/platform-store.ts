@@ -415,7 +415,7 @@ export class PlatformStore {
   }
 
   async findOrCreateTempCollection(): Promise<string> {
-    const collectionName = "VS Code Temp Collection";
+    const collectionName = "IDE Temp Collection";
     const collections = await this.searchCollections(collectionName);
     if (collections.list.length === 0) {
       const collection = await this.createCollection(collectionName);

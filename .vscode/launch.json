@@ -4,7 +4,7 @@
     {
       "type": "extensionHost",
       "request": "launch",
-      "name": "Launch",
+      "name": "Launch Dev Webapps",
       "runtimeExecutable": "${execPath}",
       "args": ["--extensionDevelopmentPath=${workspaceRoot}"],
       "outFiles": ["${workspaceRoot}/out/**/*.js"],
@@ -14,6 +14,21 @@
       },
       "env": {
         "XLIIC_WEB_VIEW_DEV_MODE": "true"
+      }
+    },
+    {
+      "type": "extensionHost",
+      "request": "launch",
+      "name": "Launch Prod Webapps",
+      "runtimeExecutable": "${execPath}",
+      "args": ["--extensionDevelopmentPath=${workspaceRoot}"],
+      "outFiles": ["${workspaceRoot}/out/**/*.js"],
+      "preLaunchTask": {
+        "type": "npm",
+        "script": "watch"
+      },
+      "env": {
+        "XLIIC_WEB_VIEW_DEV_MODE": "false"
       }
     },
     {
@@ -36,7 +51,7 @@
       "program": "scripts/build-snippets.js",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
-      "type": "pwa-node"
+      "type": "node"
     }
   ]
 }

@@ -23,7 +23,7 @@ interface BasicDataFormat {
 
   sensitivity: string;
 
-  lastUpdate: number;
+  lastUpdate: string;
   lastChangeBy?: string;
 }
 
@@ -60,3 +60,8 @@ export type FlattenedDataFormat = DataFormat & {
 export interface FullDataDictionary extends DataDictionary {
   formats: DataFormats;
 }
+
+export type ShowDictionaryMessage = {
+  command: "showDictionary";
+  payload: FullDataDictionary[];
+};

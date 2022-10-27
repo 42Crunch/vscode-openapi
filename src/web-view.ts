@@ -5,7 +5,8 @@
 
 import * as path from "path";
 import * as vscode from "vscode";
-import { Message } from "@xliic/common/message";
+import { Message, Webapp } from "@xliic/common/message";
+import { ChangeThemePayload } from "@xliic/common/theme";
 import {
   VsCodeColorMap,
   ThemeColorName,
@@ -13,34 +14,24 @@ import {
   ThemeColorVariables,
 } from "@xliic/common/theme";
 
-export abstract class WebView<Request extends Message, Response extends Message> {
-  private style: vscode.Uri;
-  private script: vscode.Uri;
+export abstract class WebView<W extends Webapp<Message, Message>> {
   private panel?: vscode.WebviewPanel;
-  abstract responseHandlers: Record<
-    Response["command"],
-    (response: any) => Promise<Request | void>
-  >;
+
+  abstract hostHandlers: W["hostHandlers"];
 
   constructor(
-    extensionPath: string,
+    private extensionPath: string,
     private viewId: string,
     private viewTitle: string,
-    private column: vscode.ViewColumn
-  ) {
-    this.script = vscode.Uri.file(
-      path.join(extensionPath, "webview", "generated", viewId, "index.js")
-    );
-    this.style = vscode.Uri.file(
-      path.join(extensionPath, "webview", "generated", viewId, "style.css")
-    );
-  }
+    private column: vscode.ViewColumn,
+    private needsStyle: boolean
+  ) {}
 
   isActive(): boolean {
     return this.panel !== undefined;
   }
 
-  protected async sendRequest(request: Request): Promise<void> {
+  protected async sendRequest(request: W["consumes"]): Promise<void> {
     if (this.panel) {
       await this.panel!.webview.postMessage(request);
     } else {
@@ -48,8 +39,17 @@ export abstract class WebView<Request extends Message, Response extends Message>
     }
   }
 
-  async handleResponse(response: Response): Promise<void> {
-    const handler = this.responseHandlers[response.command as Response["command"]];
+  async sendColorTheme(theme: vscode.ColorTheme) {
+    const kindMap: Record<vscode.ColorThemeKind, ChangeThemePayload["kind"]> = {
+      [vscode.ColorThemeKind.Light]: "light",
+      [vscode.ColorThemeKind.Dark]: "dark",
+      [vscode.ColorThemeKind.HighContrast]: "highContrast",
+    };
+    this.sendRequest({ command: "changeTheme", payload: { kind: kindMap[theme.kind] } });
+  }
+
+  async handleResponse(response: W["produces"]): Promise<void> {
+    const handler = this.hostHandlers[response.command as W["produces"]["command"]];
 
     if (handler) {
       const request = await handler(response.payload);
@@ -68,7 +68,7 @@ export abstract class WebView<Request extends Message, Response extends Message>
       const panel = await this.createPanel();
       panel.onDidDispose(() => (this.panel = undefined));
       panel.webview.onDidReceiveMessage(async (message) => {
-        this.handleResponse(message as Response);
+        this.handleResponse(message as W["produces"]);
       });
       this.panel = panel;
     } else if (!this.panel.visible) {
@@ -91,17 +91,9 @@ export abstract class WebView<Request extends Message, Response extends Message>
     );
 
     if (process.env["XLIIC_WEB_VIEW_DEV_MODE"] === "true") {
-      panel.webview.html = this.getDevHtml(
-        panel.webview.cspSource,
-        panel.webview.asWebviewUri(this.script),
-        panel.webview.asWebviewUri(this.style)
-      );
+      panel.webview.html = this.getDevHtml(panel);
     } else {
-      panel.webview.html = this.getHtml(
-        panel.webview.cspSource,
-        panel.webview.asWebviewUri(this.script),
-        panel.webview.asWebviewUri(this.style)
-      );
+      panel.webview.html = this.getProdHtml(panel);
     }
 
     return new Promise((resolve, reject) => {
@@ -113,15 +105,14 @@ export abstract class WebView<Request extends Message, Response extends Message>
     });
   }
 
-  private getDevHtml(cspSource: string, script: vscode.Uri, style: vscode.Uri): string {
+  private getDevHtml(panel: vscode.WebviewPanel): string {
     return `<!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="UTF-8">
-      <meta http-equiv="Content-Security-Policy"  content="default-src 'none';  img-src ${cspSource} https: data:; script-src ${cspSource} http://localhost:3000/ 'unsafe-inline'; style-src ${cspSource} http://localhost:3000/ 'unsafe-inline'; connect-src http: https: ws:">
+      <meta http-equiv="Content-Security-Policy"  content="default-src 'none';  img-src https: data: http://localhost:3000/; script-src http://localhost:3000/ 'unsafe-inline'; style-src http://localhost:3000/ 'unsafe-inline'; connect-src http: https: ws:">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <base href="http://localhost:3000/">
-      <script type="module" src="/@vite/client"></script>
       <script type="module">
       import RefreshRuntime from "/@react-refresh"
       RefreshRuntime.injectIntoGlobalHook(window)
@@ -129,13 +120,14 @@ export abstract class WebView<Request extends Message, Response extends Message>
       window.$RefreshSig$ = () => (type) => type
       window.__vite_plugin_react_preamble_installed__ = true
       </script>
+      <script type="module" src="/@vite/client"></script>
       <style>
         ${customCssProperties()}
       </style>
     </head>
     <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx?t=${Date.now()}"></script>
+    <script type="module" src="/src/app/${this.viewId}/index.tsx"></script>
     <script>
       window.addEventListener("DOMContentLoaded", (event) => {
         const vscode = acquireVsCodeApi();
@@ -147,21 +139,31 @@ export abstract class WebView<Request extends Message, Response extends Message>
     </html>`;
   }
 
-  private getHtml(cspSource: string, script: vscode.Uri, style: vscode.Uri): string {
+  private getProdHtml(panel: vscode.WebviewPanel): string {
+    const cspSource = panel.webview.cspSource;
+    const script = panel.webview.asWebviewUri(
+      vscode.Uri.file(
+        path.join(this.extensionPath, "webview", "generated", "web", `${this.viewId}.js`)
+      )
+    );
+    const style = panel.webview.asWebviewUri(
+      vscode.Uri.file(path.join(this.extensionPath, "webview", "generated", "web", "style.css"))
+    );
+    const styleHref = this.needsStyle ? `<link href="${style}" rel="stylesheet">` : "";
     return `<!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="UTF-8">
       <meta http-equiv="Content-Security-Policy"  content="default-src 'none';  img-src ${cspSource} https: data:; script-src ${cspSource} 'unsafe-inline'; style-src ${cspSource}  'unsafe-inline'; connect-src http: https:">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <link href="${style}" rel="stylesheet">
+      ${styleHref}
       <style type="text/css">
         ${customCssProperties()}
       </style>
     </head>
     <body>
     <div id="root"></div>  
-    <script src="${script}"></script>
+    <script type="module" src="${script}"></script>
     <script>
       window.addEventListener("DOMContentLoaded", (event) => {
         const vscode = acquireVsCodeApi();
@@ -175,52 +177,62 @@ export abstract class WebView<Request extends Message, Response extends Message>
 }
 
 function customCssProperties(): string {
-  const vscodeColorMap: VsCodeColorMap = {
-    foreground: "--vscode-foreground",
-    background: "--vscode-editor-background",
-    disabledForeground: "--vscode-disabledForeground",
-    border: "--vscode-editorGroup-border",
-    focusBorder: "--vscode-focusBorder",
-    buttonBorder: "--vscode-button-border",
-    buttonBackground: "--vscode-button-background",
-    buttonForeground: "--vscode-button-foreground",
-    buttonHoverBackground: "--vscode-button-hoverBackground",
-    buttonSecondaryBackground: "--vscode-button-secondaryBackground",
-    buttonSecondaryForeground: "--vscode-button-secondaryForeground",
-    buttonSecondaryHoverBackground: "--vscode-button-secondaryHoverBackground",
-    inputBackground: "--vscode-input-background",
-    inputForeground: "--vscode-input-foreground",
-    inputBorder: "--vscode-input-border",
-    tabBorder: "--vscode-tab-border",
-    tabActiveBackground: "--vscode-tab-activeBackground",
-    tabActiveForeground: "--vscode-tab-activeForeground",
-    tabInactiveBackground: "--vscode-tab-inactiveBackground",
-    tabInactiveForeground: "--vscode-tab-inactiveForeground",
-    dropdownBackground: "--vscode-dropdown-background",
-    dropdownBorder: "--vscode-dropdown-border",
-    dropdownForeground: "--vscode-dropdown-foreground",
-    checkboxBackground: "--vscode-checkbox-background",
-    checkboxBorder: "--vscode-checkbox-border",
-    checkboxForeground: "--vscode-checkbox-foreground",
-    errorForeground: "--vscode-errorForeground",
-    errorBackground: "--vscode-inputValidation-errorBackground",
-    errorBorder: "--vscode-inputValidation-errorBorder",
-    sidebarBackground: "--vscode-sideBar-background",
-    listActiveSelectionBackground: "--vscode-list-activeSelectionBackground",
-    listActiveSelectionForeground: "--vscode-list-activeSelectionForeground",
-    listHoverBackground: "--vscode-list-hoverBackground",
-    contrastActiveBorder: "--vscode-contrastActiveBorder",
-  };
-
-  const props = ThemeColorNames.map((name) => createColorProperty(name, vscodeColorMap[name])).join(
-    "\n"
-  );
-
+  const props = ThemeColorNames.map((name) => createColorProperty(name)).join("\n");
   return `:root { ${props} }`;
 }
 
-function createColorProperty(name: ThemeColorName, vsCodeVariable: string): string {
-  const variable = ThemeColorVariables[name];
-  const customVariable = ThemeColorVariables[name] + "-custom";
-  return `${variable}: var(${customVariable}, var(${vsCodeVariable}));`;
+function createColorProperty(name: ThemeColorName): string {
+  if (vscodeColorMap[name] !== undefined) {
+    const xliicVarName = ThemeColorVariables[name];
+    const vscodeVarName = vscodeColorMap[name];
+    return `${xliicVarName}: var(${vscodeVarName});`;
+  }
+
+  return "";
 }
+
+const vscodeColorMap: VsCodeColorMap = {
+  foreground: "--vscode-foreground",
+  background: "--vscode-editor-background",
+  disabledForeground: "--vscode-disabledForeground",
+  border: "--vscode-editorGroup-border",
+  focusBorder: "--vscode-focusBorder",
+  buttonBorder: "--vscode-button-border",
+  buttonBackground: "--vscode-button-background",
+  buttonForeground: "--vscode-button-foreground",
+  buttonHoverBackground: "--vscode-button-hoverBackground",
+  buttonSecondaryBackground: "--vscode-button-secondaryBackground",
+  buttonSecondaryForeground: "--vscode-button-secondaryForeground",
+  buttonSecondaryHoverBackground: "--vscode-button-secondaryHoverBackground",
+  inputBackground: "--vscode-input-background",
+  inputForeground: "--vscode-input-foreground",
+  inputBorder: "--vscode-input-border",
+  tabBorder: "--vscode-tab-border",
+  tabActiveBackground: "--vscode-tab-activeBackground",
+  tabActiveForeground: "--vscode-tab-activeForeground",
+  tabInactiveBackground: "--vscode-tab-inactiveBackground",
+  tabInactiveForeground: "--vscode-tab-inactiveForeground",
+  dropdownBackground: "--vscode-dropdown-background",
+  dropdownBorder: "--vscode-dropdown-border",
+  dropdownForeground: "--vscode-dropdown-foreground",
+  checkboxBackground: "--vscode-checkbox-background",
+  checkboxBorder: "--vscode-checkbox-border",
+  checkboxForeground: "--vscode-checkbox-foreground",
+  errorForeground: "--vscode-errorForeground",
+  errorBackground: "--vscode-inputValidation-errorBackground",
+  errorBorder: "--vscode-inputValidation-errorBorder",
+  sidebarBackground: "--vscode-sideBar-background",
+  listActiveSelectionBackground: "--vscode-list-activeSelectionBackground",
+  listActiveSelectionForeground: "--vscode-list-activeSelectionForeground",
+  listHoverBackground: "--vscode-list-hoverBackground",
+  contrastActiveBorder: "--vscode-contrastActiveBorder",
+  linkForeground: "--vscode-textLink-foreground",
+  linkActiveForeground: "--vscode-textLink-activeForeground",
+  computedOne: undefined,
+  computedTwo: undefined,
+  badgeForeground: "--vscode-badge-foreground",
+  badgeBackground: "--vscode-badge-background",
+  notificationsForeground: "--vscode-notifications-foreground",
+  notificationsBackground: "--vscode-notifications-background",
+  notificationsBorder: "--vscode-notifications-border",
+};

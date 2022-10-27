@@ -1,6 +1,0 @@
-tsconfig.tsbuildinfo
-node_modules
-dist
-!dist/package.json
-.vscode-test
-.DS_Store

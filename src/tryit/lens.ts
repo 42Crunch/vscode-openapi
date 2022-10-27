@@ -1,7 +1,13 @@
 import * as vscode from "vscode";
 import { Cache } from "../cache";
-import { BundledOpenApiSpec, getOperations, OasOperation } from "@xliic/common/oas30";
-import { deref } from "@xliic/common/jsonpointer";
+import {
+  BundledOpenApiSpec,
+  getOperations as getOpenApiOperations,
+  OasOperation,
+} from "@xliic/common/oas30";
+import { getOperations as getSwaggerOperations } from "@xliic/common/swagger";
+import { BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/common/openapi";
+import { deref } from "@xliic/common/ref";
 import { getLocation } from "@xliic/preserving-json-yaml-parser";
 import { getOpenApiVersion } from "../parsers";
 import { OpenApiVersion } from "../types";
@@ -17,16 +23,20 @@ export class TryItCodelensProvider implements vscode.CodeLensProvider {
     const result: vscode.CodeLens[] = [];
     const parsed = this.cache.getParsedDocument(document);
     const version = getOpenApiVersion(parsed);
-    // TODO support Swagger 2.0
-    if (parsed && version === OpenApiVersion.V3) {
-      const oas = parsed as unknown as BundledOpenApiSpec;
-      const operations = getOperations(oas);
+    if (parsed && version !== OpenApiVersion.Unknown) {
+      const oas = parsed as unknown as BundledSwaggerOrOasSpec;
+      const operations = isOpenapi(oas) ? getOpenApiOperations(oas) : getSwaggerOperations(oas);
       for (const [path, method, operation] of operations) {
         const tryOperationLens = operationLens(document, oas, path, method);
         if (tryOperationLens) {
           result.push(tryOperationLens);
         }
-        result.push(...operationExamplesLens(document, oas, path, method, operation));
+        // TODO examples in swagger
+        if (isOpenapi(oas)) {
+          result.push(
+            ...operationExamplesLens(document, oas, path, method, operation as OasOperation)
+          );
+        }
       }
     }
 
@@ -36,7 +46,7 @@ export class TryItCodelensProvider implements vscode.CodeLensProvider {
 
 function operationLens(
   document: vscode.TextDocument,
-  oas: BundledOpenApiSpec,
+  oas: BundledSwaggerOrOasSpec,
   path: string,
   method: string
 ): vscode.CodeLens | undefined {

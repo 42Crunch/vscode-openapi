@@ -3,13 +3,8 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import type { BundledOpenApiSpec, RefOr } from "./oas30";
-
 export type PathSegment = string;
 export type Path = PathSegment[];
-
-const SLASHES = /\//g;
-const TILDES = /~/g;
 
 export function parseJsonPointer(pointer: string): Path {
   const hasExcape = /~/;
@@ -34,8 +29,8 @@ export function parseJsonPointer(pointer: string): Path {
   return pointer.split("/").slice(1).map(untilde).map(decodeURIComponent);
 }
 
-export function findByPath(target: unknown, path: Path): any | undefined {
-  let current: any = target;
+export function findByPath(document: unknown, path: Path): any | undefined {
+  let current: any = document;
   for (const segment of path) {
     if (typeof current === "object" && current !== null) {
       if (Array.isArray(current)) {
@@ -57,20 +52,9 @@ export function findByPath(target: unknown, path: Path): any | undefined {
   return current;
 }
 
-export function find(target: unknown, pointer: string | string[]): unknown | undefined {
+export function find(document: unknown, pointer: string | string[]): unknown | undefined {
   if (Array.isArray(pointer)) {
-    return findByPath(target, pointer);
+    return findByPath(document, pointer);
   }
-  return findByPath(target, parseJsonPointer(pointer));
-}
-
-export function deref<T>(oas: BundledOpenApiSpec, maybeRef: RefOr<T> | undefined): T | undefined {
-  if (maybeRef === undefined || maybeRef === null) {
-    return undefined;
-  }
-  if ("$ref" in maybeRef) {
-    const refTarget = find(oas, maybeRef.$ref);
-    return refTarget as T;
-  }
-  return maybeRef;
+  return findByPath(document, parseJsonPointer(pointer));
 }

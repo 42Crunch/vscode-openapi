@@ -16,7 +16,7 @@ import dataDictionary from "./data-dictionary/commands";
 import { AuditContext } from "../types";
 import { CollectionsProvider } from "./explorer/provider";
 import { ExplorerNode } from "./explorer/nodes/base";
-import { AuditReportWebView } from "../audit/report";
+import { AuditWebView } from "../audit/view";
 import { DataDictionaryWebView } from "./data-dictionary/view";
 
 export function registerCommands(
@@ -29,7 +29,7 @@ export function registerCommands(
   cache: Cache,
   provider: CollectionsProvider,
   tree: vscode.TreeView<ExplorerNode>,
-  reportWebView: AuditReportWebView,
+  reportWebView: AuditWebView,
   dataDictionaryView: DataDictionaryWebView,
   dataDictionaryDiagnostics: vscode.DiagnosticCollection
 ): vscode.Disposable[] {
