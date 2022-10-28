@@ -122,7 +122,7 @@ async function runScan(
   config: ScanRunConfig,
   scandImage: string
 ): Promise<ShowScanReportMessage> {
-  const api = await store.createTempApi(stringify(config.oas));
+  const api = await store.createTempApi(config.rawOas);
 
   const audit = await store.getAuditReport(api.desc.id);
   if (audit?.openapiState !== "valid") {

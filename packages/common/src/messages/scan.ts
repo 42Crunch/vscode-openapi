@@ -18,6 +18,7 @@ export interface ScanConfig {
 
 export interface OasWithOperationAndConfig {
   oas: BundledOpenApiSpec;
+  rawOas: string;
   path: string;
   method: HttpMethod;
   config: unknown;
@@ -26,7 +27,7 @@ export interface OasWithOperationAndConfig {
 export interface ScanRunConfig {
   config: unknown;
   env: Record<string, string>;
-  oas: BundledOpenApiSpec;
+  rawOas: string;
 }
 
 export interface ErrorMessage {

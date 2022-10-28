@@ -45,7 +45,7 @@ export default function createListener(host: HostApplication) {
         payload: {
           config: action.payload.scanConfigRaw,
           env: action.payload.env,
-          oas: action.payload.oas,
+          rawOas: action.payload.rawOas,
         },
       });
     },

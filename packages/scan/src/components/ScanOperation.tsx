@@ -12,7 +12,9 @@ import { BundledOpenApiSpec } from "@xliic/common/oas30";
 
 export default function ScanOperation() {
   const dispatch = useAppDispatch();
-  const { path, method, oas, defaultValues, scanConfigRaw } = useAppSelector((state) => state.scan);
+  const { path, method, oas, rawOas, defaultValues, scanConfigRaw } = useAppSelector(
+    (state) => state.scan
+  );
 
   const prefs = useAppSelector((state) => state.prefs);
 
@@ -45,7 +47,7 @@ export default function ScanOperation() {
         defaultValues: values,
         scanConfigRaw: updatedScanConfig,
         env,
-        oas,
+        rawOas,
       })
     );
   };

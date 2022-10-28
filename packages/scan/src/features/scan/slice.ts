@@ -9,6 +9,7 @@ import { generateParameterValuesForScan, readRawScanConfig } from "./util-scan";
 
 export interface OasState {
   oas: BundledOpenApiSpec;
+  rawOas: string;
   path?: string;
   method?: HttpMethod;
   example?: {
@@ -30,6 +31,7 @@ const initialState: OasState = {
     info: { title: "", version: "0.0" },
     paths: {},
   },
+  rawOas: "",
   scanReport: undefined,
   prefs: {
     scanServer: "",
@@ -43,8 +45,9 @@ export const slice = createSlice({
   initialState,
   reducers: {
     scanOperation: (state, action: PayloadAction<OasWithOperationAndConfig>) => {
-      const { oas, path, method, config } = action.payload;
+      const { oas, rawOas, path, method, config } = action.payload;
       state.oas = oas;
+      state.rawOas = rawOas;
       state.path = path;
       state.method = method;
 
@@ -76,7 +79,7 @@ export const slice = createSlice({
         defaultValues: TryitOperationValues;
         scanConfigRaw: unknown;
         env: Record<string, string>;
-        oas: BundledOpenApiSpec;
+        rawOas: string;
       }>
     ) => {
       state.defaultValues = action.payload.defaultValues;

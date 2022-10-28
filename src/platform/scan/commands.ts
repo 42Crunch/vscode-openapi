@@ -62,8 +62,9 @@ async function editorRunSingleOperationScan(
     // extracting the entire path here, 'cause scan will generate requests
     // for all possible HTTP Verbs and test the responses against the OAS
     const oas = extractSinglePath(path as string, bundle.value);
+    const rawOas = stringify(oas);
 
-    const api = await store.createTempApi(stringify(oas));
+    const api = await store.createTempApi(rawOas);
 
     const audit = await store.getAuditReport(api.desc.id);
     if (audit?.openapiState !== "valid") {
@@ -87,6 +88,7 @@ async function editorRunSingleOperationScan(
       await view.show();
       view.sendScanOperation(editor.document, {
         oas: oas as BundledOpenApiSpec,
+        rawOas: rawOas,
         path: path as string,
         method: method as HttpMethod,
         config,
