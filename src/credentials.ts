@@ -124,11 +124,7 @@ async function configureAnondUser(configuration: Configuration): Promise<boolean
     return false;
   }
 
-  await configuration.update(
-    "openapi.securityAuditToken",
-    token,
-    vscode.ConfigurationTarget.Global
-  );
+  await configuration.update("securityAuditToken", token, vscode.ConfigurationTarget.Global);
 
   return true;
 }
