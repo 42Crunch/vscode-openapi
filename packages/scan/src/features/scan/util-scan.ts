@@ -18,6 +18,7 @@ import {
   TryitSecurityValues,
 } from "@xliic/common/messages/tryit";
 import { HttpMethod } from "@xliic/common/http";
+import { find } from "@xliic/common/jsonpointer";
 
 export function generateParameterValuesForScan(
   oas: BundledOpenApiSpec,
@@ -34,9 +35,11 @@ export function generateParameterValuesForScan(
 }
 
 export function readRawScanConfig(config: unknown, path: string, method: HttpMethod): ScanConfig {
-  const requestConfig = (config as any)["playbook"]["paths"][path][method]["happyPaths"][0][
-    "requests"
-  ][0]["request"]["requestDetails"];
+  const requestConfig = getRequestConfig(
+    config,
+    (config as any)["playbook"]["paths"][path][method]["happyPaths"][0]["requests"][0]
+  );
+
   return {
     parameters: {
       query: requestConfig.queryParameters,
@@ -56,9 +59,11 @@ export function updateScanConfig(
   values: TryitOperationValues
 ): [unknown, Record<string, string>] {
   const mutableConfig = JSON.parse(JSON.stringify(config));
-  const target = (mutableConfig as any)["playbook"]["paths"][path][method]["happyPaths"][0][
-    "requests"
-  ][0]["request"]["requestDetails"];
+
+  const target = getRequestConfig(
+    mutableConfig,
+    (mutableConfig as any)["playbook"]["paths"][path][method]["happyPaths"][0]["requests"][0]
+  );
 
   if (
     values.server.toLowerCase().startsWith("https://localhost") ||
@@ -87,6 +92,14 @@ export function updateScanConfig(
   const security = generateSecurityEnv(values.security, values.securityIndex);
 
   return [mutableConfig, security];
+}
+
+function getRequestConfig(config: any, request: any) {
+  if (request["$ref"]) {
+    return (find(config, request["$ref"]) as any)["request"]["requestDetails"];
+  } else {
+    return request["request"]["requestDetails"];
+  }
 }
 
 function generateSecurityEnv(
