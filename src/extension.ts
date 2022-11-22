@@ -78,6 +78,8 @@ export async function activate(context: vscode.ExtensionContext) {
     parserOptions
   );
 
+  vscode.window.registerWebviewViewProvider("calicoColors.colorsView", new FooProvider());
+
   vscode.languages.registerDefinitionProvider(selectors.json, jsonSchemaDefinitionProvider);
   vscode.languages.registerDefinitionProvider(selectors.jsonc, jsonSchemaDefinitionProvider);
   vscode.languages.registerDefinitionProvider(selectors.yaml, yamlSchemaDefinitionProvider);
@@ -176,3 +178,13 @@ export async function activate(context: vscode.ExtensionContext) {
 }
 
 export function deactivate() {}
+
+class FooProvider implements vscode.WebviewViewProvider {
+  resolveWebviewView(
+    webviewView: vscode.WebviewView,
+    context: vscode.WebviewViewResolveContext<unknown>,
+    token: vscode.CancellationToken
+  ): void | Thenable<void> {
+    webviewView.webview.html = "<body>foo bar</body>";
+  }
+}

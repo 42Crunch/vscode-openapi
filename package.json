@@ -79,6 +79,11 @@
       ],
       "openapi-explorer": [
         {
+          "type": "webview",
+          "id": "calicoColors.colorsView",
+          "name": "Calico Colors"
+        },
+        {
           "id": "openapiTwoSpecOutline",
           "name": "General",
           "when": "openapiTwoEnabled"
@@ -332,7 +337,7 @@
         },
         {
           "command": "openapi.platform.refreshCollections",
-          "when": "view == platformExplorer",
+          "when": "view == platformExplorer || view == openapiThreePathOutline",
           "group": "navigation"
         }
       ],
