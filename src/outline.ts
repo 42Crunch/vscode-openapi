@@ -57,6 +57,124 @@ function getChildrenByName(root: Node, names: string[]): Node[] {
 
 export const outlines: { [id: string]: vscode.TreeView<Node> } = {};
 
+export class ThreeOutlineProvider implements vscode.TreeDataProvider<Node> {
+  private _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
+  readonly onDidChangeTreeData: vscode.Event<void> = this._onDidChangeTreeData.event;
+
+  root?: Node;
+  documentUri?: string;
+  maxDepth: number = 1;
+  sort: boolean;
+
+  constructor(private context: vscode.ExtensionContext, private cache: Cache) {
+    cache.onDidActiveDocumentChange(async (document) => {
+      if (document) {
+        const version = this.cache.getDocumentVersion(document);
+        if (version !== OpenApiVersion.Unknown) {
+          this.documentUri = document.uri.toString();
+          const root = cache.getLastGoodParsedDocument(document);
+          if (root) {
+            this.root = {
+              parent: undefined,
+              key: undefined,
+              depth: 0,
+              value: root,
+              location: undefined,
+              path: [],
+            };
+          } else {
+            this.root = undefined;
+          }
+        }
+        this._onDidChangeTreeData.fire();
+      }
+    });
+
+    this.sort = configuration.get<boolean>("sortOutlines");
+    configuration.onDidChange(this.onConfigurationChanged, this);
+  }
+
+  onConfigurationChanged(e: vscode.ConfigurationChangeEvent) {
+    if (configuration.changed(e, "sortOutlines")) {
+      this.sort = configuration.get<boolean>("sortOutlines");
+      this._onDidChangeTreeData.fire();
+    }
+  }
+
+  getTreeItem(element: Node): vscode.TreeItem | Thenable<vscode.TreeItem> {
+    //const label = this.getLabel(node);
+    //const collapsible = this.getCollapsible(node);
+    const treeItem = new vscode.TreeItem(
+      { label: `${element.key}` },
+      vscode.TreeItemCollapsibleState.Collapsed
+    );
+    //treeItem.command = this.getCommand(node);
+    //treeItem.contextValue = this.getContextValue(node);
+    return treeItem;
+  }
+  getChildren(element?: Node | undefined): vscode.ProviderResult<Node[]> {
+    if (element === undefined) {
+      return [
+        {
+          parent: undefined,
+          key: "GENERAL",
+          value: undefined,
+          depth: 0,
+          path: [],
+        },
+        {
+          parent: undefined,
+          key: "PATHS",
+          value: undefined,
+          depth: 0,
+          path: [],
+        },
+        {
+          parent: undefined,
+          key: "OPERATION ID",
+          value: undefined,
+          depth: 0,
+          path: [],
+        },
+        {
+          parent: undefined,
+          key: "SERVERS",
+          value: undefined,
+          depth: 0,
+          path: [],
+        },
+        {
+          parent: undefined,
+          key: "COMPONENTS",
+          value: undefined,
+          depth: 0,
+          path: [],
+        },
+        {
+          parent: undefined,
+          key: "SECURITY",
+          value: undefined,
+          depth: 0,
+          path: [],
+        },
+      ];
+    }
+    if (element.key === "PATHS") {
+      return getChildren({ value: find(this.root!.value, "/paths"), path: [] } as unknown as Node);
+    }
+  }
+  getParent?(element: Node): vscode.ProviderResult<Node> {
+    throw new Error("Method not implemented.");
+  }
+  resolveTreeItem?(
+    item: vscode.TreeItem,
+    element: Node,
+    token: vscode.CancellationToken
+  ): vscode.ProviderResult<vscode.TreeItem> {
+    throw new Error("Method not implemented.");
+  }
+}
+
 abstract class OutlineProvider implements vscode.TreeDataProvider<Node> {
   private _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
   readonly onDidChangeTreeData: vscode.Event<void> = this._onDidChangeTreeData.event;
@@ -348,55 +466,61 @@ export function registerOutlines(
   context: vscode.ExtensionContext,
   cache: Cache
 ): vscode.Disposable[] {
-  // OpenAPI v2 outlines
-  registerOutlineTreeView("openapiTwoSpecOutline", new GeneralTwoOutlineProvider(context, cache));
-  registerOutlineTreeView("openapiTwoPathOutline", new PathOutlineProvider(context, cache));
-  registerOutlineTreeView("openapiTwoTagsOutline", new TagOutlineProvider(context, cache));
+  vscode.window.createTreeView("openapiThreeOutline", {
+    treeDataProvider: new ThreeOutlineProvider(context, cache),
+    showCollapseAll: true,
+  });
+  return [];
 
-  registerOutlineTreeView(
-    "openapiTwoOperationIdOutline",
-    new OperationIdOutlineProvider(context, cache)
-  );
+  // // OpenAPI v2 outlines
+  // registerOutlineTreeView("openapiTwoSpecOutline", new GeneralTwoOutlineProvider(context, cache));
+  // registerOutlineTreeView("openapiTwoPathOutline", new PathOutlineProvider(context, cache));
+  // registerOutlineTreeView("openapiTwoTagsOutline", new TagOutlineProvider(context, cache));
 
-  registerOutlineTreeView(
-    "openapiTwoDefinitionOutline",
-    new DefinitionOutlineProvider(context, cache)
-  );
-  registerOutlineTreeView("openapiTwoSecurityOutline", new SecurityOutlineProvider(context, cache));
-  registerOutlineTreeView(
-    "openapiTwoSecurityDefinitionOutline",
-    new SecurityDefinitionOutlineProvider(context, cache)
-  );
-  registerOutlineTreeView(
-    "openapiTwoParametersOutline",
-    new ParametersOutlineProvider(context, cache)
-  );
-  registerOutlineTreeView(
-    "openapiTwoResponsesOutline",
-    new ResponsesOutlineProvider(context, cache)
-  );
+  // registerOutlineTreeView(
+  //   "openapiTwoOperationIdOutline",
+  //   new OperationIdOutlineProvider(context, cache)
+  // );
 
-  // OpenAPI v3 outlines
-  registerOutlineTreeView("openapiThreePathOutline", new PathOutlineProvider(context, cache));
-  registerOutlineTreeView("openapiThreeTagsOutline", new TagOutlineProvider(context, cache));
-  registerOutlineTreeView(
-    "openapiThreeOperationIdOutline",
-    new OperationIdOutlineProvider(context, cache)
-  );
+  // registerOutlineTreeView(
+  //   "openapiTwoDefinitionOutline",
+  //   new DefinitionOutlineProvider(context, cache)
+  // );
+  // registerOutlineTreeView("openapiTwoSecurityOutline", new SecurityOutlineProvider(context, cache));
+  // registerOutlineTreeView(
+  //   "openapiTwoSecurityDefinitionOutline",
+  //   new SecurityDefinitionOutlineProvider(context, cache)
+  // );
+  // registerOutlineTreeView(
+  //   "openapiTwoParametersOutline",
+  //   new ParametersOutlineProvider(context, cache)
+  // );
+  // registerOutlineTreeView(
+  //   "openapiTwoResponsesOutline",
+  //   new ResponsesOutlineProvider(context, cache)
+  // );
 
-  registerOutlineTreeView(
-    "openapiThreeSpecOutline",
-    new GeneralThreeOutlineProvider(context, cache)
-  );
-  registerOutlineTreeView(
-    "openapiThreeComponentsOutline",
-    new ComponentsOutlineProvider(context, cache)
-  );
-  registerOutlineTreeView(
-    "openapiThreeSecurityOutline",
-    new SecurityOutlineProvider(context, cache)
-  );
-  registerOutlineTreeView("openapiThreeServersOutline", new ServersOutlineProvider(context, cache));
+  // // OpenAPI v3 outlines
+  // registerOutlineTreeView("openapiThreePathOutline", new PathOutlineProvider(context, cache));
+  // registerOutlineTreeView("openapiThreeTagsOutline", new TagOutlineProvider(context, cache));
+  // registerOutlineTreeView(
+  //   "openapiThreeOperationIdOutline",
+  //   new OperationIdOutlineProvider(context, cache)
+  // );
 
-  return Object.values(outlines);
+  // registerOutlineTreeView(
+  //   "openapiThreeSpecOutline",
+  //   new GeneralThreeOutlineProvider(context, cache)
+  // );
+  // registerOutlineTreeView(
+  //   "openapiThreeComponentsOutline",
+  //   new ComponentsOutlineProvider(context, cache)
+  // );
+  // registerOutlineTreeView(
+  //   "openapiThreeSecurityOutline",
+  //   new SecurityOutlineProvider(context, cache)
+  // );
+  // registerOutlineTreeView("openapiThreeServersOutline", new ServersOutlineProvider(context, cache));
+
+  // return Object.values(outlines);
 }

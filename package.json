@@ -79,88 +79,8 @@
       ],
       "openapi-explorer": [
         {
-          "type": "webview",
-          "id": "calicoColors.colorsView",
-          "name": "Calico Colors"
-        },
-        {
-          "id": "openapiTwoSpecOutline",
-          "name": "General",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiTwoPathOutline",
-          "name": "Paths",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiTwoTagsOutline",
-          "name": "Tags",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiTwoOperationIdOutline",
-          "name": "Operation ID",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiTwoParametersOutline",
-          "name": "Parameters",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiTwoResponsesOutline",
-          "name": "Responses",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiTwoDefinitionOutline",
-          "name": "Definitions",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiTwoSecurityOutline",
-          "name": "Security",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiTwoSecurityDefinitionOutline",
-          "name": "Security Definitions",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiThreeSpecOutline",
-          "name": "General",
-          "when": "openapiThreeEnabled"
-        },
-        {
-          "id": "openapiThreePathOutline",
-          "name": "Paths",
-          "when": "openapiThreeEnabled"
-        },
-        {
-          "id": "openapiThreeTagsOutline",
-          "name": "Tags",
-          "when": "openapiThreeEnabled"
-        },
-        {
-          "id": "openapiThreeOperationIdOutline",
-          "name": "Operation ID",
-          "when": "openapiThreeEnabled"
-        },
-        {
-          "id": "openapiThreeServersOutline",
-          "name": "Servers",
-          "when": "openapiThreeEnabled"
-        },
-        {
-          "id": "openapiThreeComponentsOutline",
-          "name": "Components",
-          "when": "openapiThreeEnabled"
-        },
-        {
-          "id": "openapiThreeSecurityOutline",
-          "name": "Security",
+          "id": "openapiThreeOutline",
+          "name": "3.0.x",
           "when": "openapiThreeEnabled"
         },
         {
@@ -339,6 +259,11 @@
           "command": "openapi.platform.refreshCollections",
           "when": "view == platformExplorer || view == openapiThreePathOutline",
           "group": "navigation"
+        },
+        {
+          "command": "openapi.searchOutline",
+          "when": "view == platformExplorer || view == openapiThreeOutline",
+          "group": "navigation"
         }
       ],
       "view/item/context": [
@@ -485,6 +410,11 @@
           "light": "resources/light/refresh.svg",
           "dark": "resources/dark/refresh.svg"
         }
+      },
+      {
+        "command": "openapi.searchOutline",
+        "title": "Search",
+        "icon": "$(search-view-icon)"
       },
       {
         "command": "openapi.platform.deleteCollection",
