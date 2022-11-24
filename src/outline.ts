@@ -123,6 +123,7 @@ export class ThreeOutlineProvider implements vscode.TreeDataProvider<Node> {
       SERVERS: "server.svg",
       COMPONENTS: "gear.svg",
       GENERAL: "bars.svg",
+      TAGS: "tags.svg",
       SECURITY: "shield-check.svg",
       schemas: "sitemap.svg",
       responses: "arrow-right-from-bracket.svg",
@@ -156,6 +157,13 @@ export class ThreeOutlineProvider implements vscode.TreeDataProvider<Node> {
         {
           parent: undefined,
           key: "PATHS",
+          value: undefined,
+          depth: 0,
+          path: [],
+        },
+        {
+          parent: undefined,
+          key: "TAGS",
           value: undefined,
           depth: 0,
           path: [],
