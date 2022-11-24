@@ -9,6 +9,7 @@ import { Cache } from "./cache";
 import { configuration } from "./configuration";
 import { TagOutlineProvider } from "./outlines/tag";
 import { OpenApiVersion } from "./types";
+import * as path from "path";
 
 export interface Node {
   parent: Node | undefined;
@@ -110,8 +111,38 @@ export class ThreeOutlineProvider implements vscode.TreeDataProvider<Node> {
     );
     //treeItem.command = this.getCommand(node);
     //treeItem.contextValue = this.getContextValue(node);
+    treeItem.iconPath = this.getIcon(`${element.key}`);
+
     return treeItem;
   }
+
+  getIcon(key: string) {
+    const icons: any = {
+      PATHS: "code.svg",
+      "OPERATION ID": "id-card.svg",
+      SERVERS: "server.svg",
+      COMPONENTS: "gear.svg",
+      GENERAL: "bars.svg",
+      SECURITY: "shield-check.svg",
+      schemas: "sitemap.svg",
+      responses: "arrow-right-from-bracket.svg",
+      requestBodies: "arrow-right-to-bracket.svg",
+      parameters: "sliders.svg",
+      headers: "line-columns.svg",
+      securitySchemes: "shield-halved.svg",
+      links: "link-simple.svg",
+      callbacks: "phone-arrow-up-right.svg",
+      examples: "message-code.svg",
+    };
+
+    if (icons[key] !== undefined) {
+      return {
+        light: this.context.asAbsolutePath(path.join("resources", "icons", icons[key])),
+        dark: this.context.asAbsolutePath(path.join("resources", "icons", icons[key])),
+      };
+    }
+  }
+
   getChildren(element?: Node | undefined): vscode.ProviderResult<Node[]> {
     if (element === undefined) {
       return [
@@ -159,8 +190,77 @@ export class ThreeOutlineProvider implements vscode.TreeDataProvider<Node> {
         },
       ];
     }
+
     if (element.key === "PATHS") {
       return getChildren({ value: find(this.root!.value, "/paths"), path: [] } as unknown as Node);
+    }
+
+    if (element.key === "COMPONENTS") {
+      return [
+        {
+          parent: undefined,
+          key: "schemas",
+          value: undefined,
+          depth: 0,
+          path: [],
+        },
+        {
+          parent: undefined,
+          key: "responses",
+          value: undefined,
+          depth: 0,
+          path: [],
+        },
+        {
+          parent: undefined,
+          key: "parameters",
+          value: undefined,
+          depth: 0,
+          path: [],
+        },
+        {
+          parent: undefined,
+          key: "examples",
+          value: undefined,
+          depth: 0,
+          path: [],
+        },
+        {
+          parent: undefined,
+          key: "requestBodies",
+          value: undefined,
+          depth: 0,
+          path: [],
+        },
+        {
+          parent: undefined,
+          key: "headers",
+          value: undefined,
+          depth: 0,
+          path: [],
+        },
+        {
+          parent: undefined,
+          key: "securitySchemes",
+          value: undefined,
+          depth: 0,
+          path: [],
+        },
+        {
+          parent: undefined,
+          key: "links",
+          value: undefined,
+          depth: 0,
+          path: [],
+        },
+        {
+          parent: undefined,
+          key: "callbacks",
+          value: undefined,
+          depth: 0,
+          path: [],
+        },
+      ];
     }
   }
   getParent?(element: Node): vscode.ProviderResult<Node> {
