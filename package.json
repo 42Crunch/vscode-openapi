@@ -4,7 +4,7 @@
   "displayName": "OpenAPI (Swagger) Editor",
   "description": "OpenAPI extension for Visual Studio Code",
   "license": "AGPL-3.0-only",
-  "version": "4.15.9",
+  "version": "4.15.10",
   "publisher": "42Crunch",
   "repository": {
     "type": "git",
@@ -759,7 +759,7 @@
         "openapi.platformConformanceScanImage": {
           "scope": "workbench",
           "type": "string",
-          "default": "42crunch/scand-agent:v2.0.0-beta",
+          "default": "42crunch/scand-agent:v2.0.0-rc",
           "description": "Docker image for 42Crunch Conformance Scan"
         },
         "openapi.securityAuditToken": {
