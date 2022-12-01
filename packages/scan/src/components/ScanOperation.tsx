@@ -102,5 +102,11 @@ function getPreferredServer(
   if (preferredServer !== undefined && preferredServer !== "" && exists) {
     return preferredServer;
   }
-  return defaultServer;
+
+  const exists2 = oas.servers?.some((server) => server.url === defaultServer);
+  if (defaultServer !== undefined && defaultServer !== "" && exists2) {
+    return defaultServer;
+  }
+
+  return oas.servers && oas.servers.length > 0 ? oas.servers[0].url : "";
 }
