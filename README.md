@@ -189,6 +189,7 @@ This extension features optional integration with [42Crunch Platform](https://pl
 ## Known issues
 
 - For new files, IntelliSense does not work until you save the file. File extension must be `.json` or `.yaml`.
+- When running 42 Crunch Conformance Scan on a host with incorrect clock, the scan can fail with the message `cannot send the scan report : rpc error: code = InvalidArgument desc = invalid input`, to resolve the issue make sure your clock is correctly set.
 
 ## Feedback
 
