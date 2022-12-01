@@ -65,15 +65,13 @@ export function updateScanConfig(
     (mutableConfig as any)["playbook"]["paths"][path][method]["happyPaths"][0]["requests"][0]
   );
 
-  if (
+  const host =
     values.server.toLowerCase().startsWith("https://localhost") ||
     values.server.toLowerCase().startsWith("http://localhost")
-  ) {
-    target.host = values.server.replace(/localhost/i, "host.docker.internal");
-  } else {
-    target.host = values.server;
-  }
+      ? values.server.replace(/localhost/i, "host.docker.internal")
+      : values.server;
 
+  target.host = host;
   target.path = path;
   target.method = method;
   if (target.requestBody && values.body?.value !== undefined) {
@@ -88,6 +86,11 @@ export function updateScanConfig(
   mutableConfig["playbook"]["paths"][path] = {
     [method]: mutableConfig["playbook"]["paths"][path][method],
   };
+
+  // update environment.host if present
+  if (mutableConfig?.environment?.host !== undefined) {
+    mutableConfig.environment.host = host;
+  }
 
   const security = generateSecurityEnv(values.security, values.securityIndex);
 
