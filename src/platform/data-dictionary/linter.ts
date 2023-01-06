@@ -175,7 +175,7 @@ function checkFormat(
           id: "data-dictionary-format-property-mismatch",
           message: `Data Dictionary requires value of '${formatId}'`,
           range,
-          severity: vscode.DiagnosticSeverity.Error,
+          severity: vscode.DiagnosticSeverity.Warning,
           source: "vscode-openapi",
           path,
           node: container,
@@ -208,14 +208,14 @@ function checkFormat(
     if (dataFormat.hasOwnProperty(prop)) {
       if (container.hasOwnProperty(prop)) {
         // properties differ
-        if (container[prop] !== (dataFormat as any)[prop]) {
+        if (isPropertyMismatch(prop, container[prop], (dataFormat as any)[prop])) {
           const range = getValueRange(document, container, prop);
           if (range !== undefined) {
             const diagnostic: DataDictionaryDiagnostic = {
               id: "data-dictionary-format-property-mismatch",
               message: `Data Dictionary requires value of '${(dataFormat as any)[prop]}'`,
               range,
-              severity: vscode.DiagnosticSeverity.Error,
+              severity: vscode.DiagnosticSeverity.Warning,
               source: "vscode-openapi",
               path,
               node: container,
@@ -247,6 +247,21 @@ function checkFormat(
   }
 
   return diagnostics;
+}
+
+function isPropertyMismatch(name: string, formatValue: unknown[], currentValue: unknown): boolean {
+  if (name === "enum" && Array.isArray(currentValue)) {
+    if (currentValue.length !== formatValue.length) {
+      return true;
+    }
+    for (const element of currentValue) {
+      if (!formatValue.includes(element)) {
+        return true;
+      }
+    }
+    return false;
+  }
+  return currentValue !== formatValue;
 }
 
 function getValueRange(
