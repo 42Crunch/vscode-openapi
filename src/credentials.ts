@@ -115,7 +115,7 @@ async function configureAnondUser(configuration: Configuration): Promise<boolean
 
   const token = await vscode.window.showInputBox({
     prompt:
-      "API token has been sent. If you don't get the mail within a couple minutes, check your spam folder and that the address is correct. Paste the token above.",
+      "The token has been sent. If you don't get the mail within a couple minutes, check your spam folder and that the address is correct. Paste the token above.",
     ignoreFocusOut: true,
     placeHolder: "token",
   });
@@ -163,12 +163,12 @@ export async function configurePlatformUser(
   const UUID_REGEX =
     /^(ide_|api_)?[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   const token = await vscode.window.showInputBox({
-    prompt: "Enter 42Crunch API token",
-    placeHolder: "API Token",
+    prompt: "Enter 42Crunch IDE token",
+    placeHolder: "IDE Token",
     ignoreFocusOut: true,
     validateInput: (input) => {
       if (!input || !input.match(UUID_REGEX)) {
-        return "Must be a valid API Token";
+        return "Must be a valid IDE Token";
       }
     },
   });
