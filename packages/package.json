@@ -20,7 +20,7 @@
     "build-redoc": "cd preview-redoc && npm run build && mkdirp ../../webview/generated/preview/redoc && cpy --flat dist/* ../../webview/generated/preview/redoc"
   },
   "devDependencies": {
-    "@svgr/cli": "^6.2.1",
+    "@svgr/cli": "^6.5.1",
     "cpy-cli": "^4.1.0",
     "mkdirp": "^1.0.4"
   }
