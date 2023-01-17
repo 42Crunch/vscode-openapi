@@ -92,7 +92,11 @@ export function updateScanConfig(
     mutableConfig.environment.host = host;
   }
 
-  const security = generateSecurityEnv(values.security, values.securityIndex);
+  const security = generateSecurityEnv(
+    values.security,
+    values.securityIndex,
+    mutableConfig?.environment
+  );
 
   return [mutableConfig, security];
 }
@@ -107,18 +111,29 @@ function getRequestConfig(config: any, request: any) {
 
 function generateSecurityEnv(
   security: TryitSecurityValues,
-  selectedIndex: number
+  selectedIndex: number,
+  environmentConfig: any
 ): Record<string, string> {
   const result: Record<string, string> = {};
   const selected = security[selectedIndex];
   if (selected) {
     for (const [name, value] of Object.entries(selected)) {
-      if (typeof value === "string") {
-        result[`SECURITY_${name}`] = value;
+      // FIXME only supporting tokens for now, no 'basic' auth support
+      const envVarName = extractEnvVariableName(environmentConfig, name);
+      if (typeof value === "string" && envVarName !== undefined) {
+        result[envVarName] = value;
       }
     }
   }
   return result;
+}
+
+function extractEnvVariableName(environmentConfig: any, name: string): string | undefined {
+  const value = environmentConfig?.[name];
+  const match = value?.match(/env\('(.+)'\)/);
+  if (Array.isArray(match)) {
+    return match[1];
+  }
 }
 
 /*
