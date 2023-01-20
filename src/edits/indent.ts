@@ -17,6 +17,10 @@ export function getIndentAt(
   const line = document.lineAt(position.line);
   const indent = line.firstNonWhitespaceCharacterIndex;
   const char = line.text.charAt(0);
+  if (line.text.substring(line.firstNonWhitespaceCharacterIndex).startsWith("- ")) {
+    // increase indent by two for array items
+    return { indent: indent + 2, char };
+  }
   return { indent, char };
 }
 
