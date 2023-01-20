@@ -42,13 +42,15 @@ export class DataDictionaryCodeActions implements vscode.CodeActionProvider {
         action.isPreferred = true;
         actions.push(action);
 
+        const containerName = diagnostic.path.slice(-2).join("/");
+
         const action2 = new vscode.CodeAction(
-          `Update "${diagnostic.path.slice(-1)}" with all Data Dictionary properties`,
+          `Update "${containerName}" with all Data Dictionary properties`,
           vscode.CodeActionKind.QuickFix
         );
         action2.command = {
           command: "openapi.platform.editorDataDictionaryUpdateAllProperties",
-          title: `Update "${diagnostic.path.slice(-1)}" with all Data Dictionary properties`,
+          title: `Update "${containerName}" with all Data Dictionary properties`,
           arguments: [diagnostic.format, diagnostic.node, diagnostic.path],
         };
         actions.push(action2);
@@ -71,13 +73,14 @@ export class DataDictionaryCodeActions implements vscode.CodeActionProvider {
         const pointer = joinJsonPointer(diagnostic.path);
         if (!addMissingPropertiesSet.has(pointer)) {
           addMissingPropertiesSet.add(pointer);
+          const containerName = diagnostic.path.slice(-2).join("/");
           const action2 = new vscode.CodeAction(
-            `Update "${diagnostic.path.slice(-1)}" with all Data Dictionary properties`,
+            `Update "${containerName}" with all Data Dictionary properties`,
             vscode.CodeActionKind.QuickFix
           );
           action2.command = {
             command: "openapi.platform.editorDataDictionaryUpdateAllProperties",
-            title: `Update "${diagnostic.path.slice(-1)}" with all Data Dictionary properties`,
+            title: `Update "${containerName}" with all Data Dictionary properties`,
             arguments: [diagnostic.format, diagnostic.node, diagnostic.path],
           };
           action2.isPreferred = true;
