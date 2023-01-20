@@ -36,13 +36,19 @@ function App() {
     .filter((format) => format.dictionaryId === selected)
     .map((format) => <FormatCard format={format} key={`${format.dictionaryId}-${format.name}`} />);
 
+  const standardDictionary = dictionaries.filter((dicttionary) => dicttionary.id === "standard");
+  const userDictionaries = dictionaries.filter((dicttionary) => dicttionary.id !== "standard");
+
   return (
     <>
       <ThemeStyles theme={theme} />
       <Container>
         <Sidebar>
           <Header>Data Dictionaries</Header>
-          <List selected={selected} setSelected={setSelected} items={dictionaries} />
+          <Subheader>Organization standard dictionary</Subheader>
+          <List selected={selected} setSelected={setSelected} items={standardDictionary} />
+          <Subheader>Organization named dictionaries</Subheader>
+          <List selected={selected} setSelected={setSelected} items={userDictionaries} />
         </Sidebar>
         <Content>{cards}</Content>
       </Container>
@@ -53,6 +59,16 @@ function App() {
 const Header = styled.h3`
   font-weight: 500;
   font-size: 24px;
+  line-height: 33px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const Subheader = styled.h5`
+  margin: 0;
+  font-weight: 400;
+  font-size: 14px;
   line-height: 33px;
   white-space: nowrap;
   overflow: hidden;
