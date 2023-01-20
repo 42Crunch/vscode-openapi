@@ -304,6 +304,11 @@ export class PlatformStore {
 
   async getDataDictionaries(): Promise<FullDataDictionary[]> {
     const dictionaries = await getDataDictionaries(this.getConnection(), this.logger);
+    dictionaries.push({
+      id: "standard",
+      name: "standard",
+      description: " Default standard formats",
+    });
     const result = [];
     for (const dictionary of dictionaries) {
       const formats = await getDataDictionaryFormats(
@@ -334,9 +339,9 @@ export class PlatformStore {
         );
         for (const format of Object.values<DataFormat>(formats)) {
           // entries from a standard dictionary do not have a o: prefix
-          if (dictionary.name === "standard") {
+          if (dictionary.id === "standard") {
             result.push({
-              id: `o:${dictionary.name}:${format.name}`,
+              id: `o:${format.name}`,
               name: format.name,
               description: format.description,
               format: format,
