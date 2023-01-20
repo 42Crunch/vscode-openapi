@@ -205,6 +205,13 @@ function checkFormat(
   }
 
   for (const prop of schemaProps) {
+    // regardless of the format, if object already has 'example' or 'x-42c-sample'
+    // dont report missing property or a mismatch
+    if (prop === "example") {
+      if (container.hasOwnProperty("example") || container.hasOwnProperty("x-42c-sample")) {
+        continue;
+      }
+    }
     if (dataFormat.hasOwnProperty(prop)) {
       if (container.hasOwnProperty(prop)) {
         // properties differ
@@ -284,10 +291,19 @@ function getParentKeyRange(
   path: Path
 ): vscode.Range | undefined {
   const location = findLocationForPath(root, path);
-  if (location !== undefined && location.key !== undefined) {
-    return new vscode.Range(
-      document.positionAt(location.key.start),
-      document.positionAt(location.key.end)
-    );
+  if (location !== undefined) {
+    if (location.key !== undefined) {
+      return new vscode.Range(
+        document.positionAt(location.key.start),
+        document.positionAt(location.key.end)
+      );
+    } else {
+      // if no key range is available, lets take the first line of the value
+      const line = document.lineAt(document.positionAt(location.value.start));
+      return new vscode.Range(
+        new vscode.Position(line.lineNumber, line.firstNonWhitespaceCharacterIndex),
+        line.range.end
+      );
+    }
   }
 }

@@ -9,10 +9,12 @@ import { configuration } from "../../configuration";
 import { DataDictionaryWebView } from "./view";
 import { PlatformContext } from "../types";
 import { find, joinJsonPointer, parseJsonPointer, Path } from "@xliic/preserving-json-yaml-parser";
+import { DataFormat } from "@xliic/common/data-dictionary";
 import { Cache } from "../../cache";
 import { replaceObject } from "../../edits/replace";
 import { DataDictionaryFormat, PlatformStore } from "../stores/platform-store";
-import { DataDictionaryDiagnostic } from "../../types";
+import { DataDictionaryDiagnostic, OpenApiVersion } from "../../types";
+import { getOpenApiVersion } from "../../parsers";
 
 export default (
   cache: Cache,
@@ -63,11 +65,11 @@ export default (
     const found = formats.filter((f) => f.name === format).pop();
 
     if (parsed !== undefined && found !== undefined) {
+      const version = getOpenApiVersion(parsed);
+
       const updated: any = { ...node };
       for (const name of schemaProps) {
-        if ((found.format as any)[name] !== undefined) {
-          updated[name] = (found.format as any)[name];
-        }
+        updatePropertyOfExistingObject(version, updated, name, found.format);
       }
       updated["x-42c-format"] = found.id;
 
@@ -95,15 +97,16 @@ export default (
   ) => {
     const document = editor.document;
     const parsed = cache.getParsedDocument(editor.document);
+    const version = getOpenApiVersion(parsed);
     const formats = await store.getDataDictionaryFormats();
     const found = formats.filter((f) => f.name === format).pop();
 
-    let updated: any;
+    const updated: any = { ...node };
     if (parsed !== undefined && found !== undefined) {
       if (property === "x-42c-format") {
-        updated = { ...node, "x-42c-format": found.id };
+        updated["x-42c-format"] = found.id;
       } else {
-        updated = { ...node, [property]: (found.format as any)[property] };
+        updatePropertyOfExistingObject(version, updated, property, found.format);
       }
 
       let text = "";
@@ -181,6 +184,8 @@ async function documentBulkUpdate(
     return;
   }
 
+  const version = getOpenApiVersion(parsed);
+
   const formats: Map<string, DataDictionaryFormat> = new Map();
   for (const format of await store.getDataDictionaryFormats()) {
     formats.set(format.name, format);
@@ -209,9 +214,7 @@ async function documentBulkUpdate(
     if (node) {
       const updated: any = { ...node };
       for (const name of schemaProps) {
-        if ((format.format as any)[name] !== undefined) {
-          updated[name] = (format.format as any)[name];
-        }
+        updatePropertyOfExistingObject(version, updated, name, format.format);
       }
       updated["x-42c-format"] = format.id;
       let text = "";
@@ -228,4 +231,34 @@ async function documentBulkUpdate(
   const workspaceEdit = new vscode.WorkspaceEdit();
   workspaceEdit.set(document.uri, edits);
   await vscode.workspace.applyEdit(workspaceEdit);
+}
+
+function updatePropertyOfExistingObject(
+  version: OpenApiVersion,
+  existing: any,
+  name: string,
+  format: DataFormat
+) {
+  const value = (format as any)[name];
+
+  // skip properties not defined in the format
+  if (value === undefined) {
+    return;
+  }
+
+  if (name !== "example") {
+    existing[name] = value;
+    return;
+  }
+
+  // dont update already existing examples
+  if (existing.hasOwnProperty("example") || existing.hasOwnProperty("x-42c-sample")) {
+    return;
+  }
+
+  // use 'x-42c-sample' for Swagger2.0 parameter objects
+  if (version === OpenApiVersion.V2 && existing.hasOwnProperty("in")) {
+    existing["x-42c-sample"] = value;
+    return;
+  }
 }
