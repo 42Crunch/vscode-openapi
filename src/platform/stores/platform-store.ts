@@ -51,7 +51,6 @@ export interface ApisView {
 
 export interface DataDictionaryFormat {
   id: string;
-  dictionary: string;
   name: string;
   description: string;
   format: DataFormat;
@@ -307,7 +306,7 @@ export class PlatformStore {
     dictionaries.push({
       id: "standard",
       name: "standard",
-      description: " Default standard formats",
+      description: "Default standard formats",
     });
     const result = [];
     for (const dictionary of dictionaries) {
@@ -330,6 +329,11 @@ export class PlatformStore {
   async getDataDictionaryFormats(): Promise<DataDictionaryFormat[]> {
     if (!this.formats) {
       const dictionaries = await getDataDictionaries(this.getConnection(), this.logger);
+      dictionaries.push({
+        id: "standard",
+        name: "standard",
+        description: "Default standard formats",
+      });
       const result: DataDictionaryFormat[] = [];
       for (const dictionary of dictionaries) {
         const formats = await getDataDictionaryFormats(
@@ -345,7 +349,6 @@ export class PlatformStore {
               name: format.name,
               description: format.description,
               format: format,
-              dictionary: dictionary.name,
             });
           } else {
             result.push({
@@ -353,7 +356,6 @@ export class PlatformStore {
               name: `o:${dictionary.name}:${format.name}`,
               description: format.description,
               format: format,
-              dictionary: dictionary.name,
             });
           }
         }

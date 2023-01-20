@@ -30,7 +30,6 @@ export class DataDictionaryCompletionProvider implements vscode.CompletionItemPr
       const item = new vscode.CompletionItem(
         {
           label: `${quote}${format.name}${quote}`,
-
           description: format.description,
         },
         vscode.CompletionItemKind.Value
