@@ -69,7 +69,7 @@ export default (
 
       const updated: any = { ...node };
       for (const name of schemaProps) {
-        updatePropertyOfExistingObject(version, updated, name, found.format);
+        updatePropertyOfExistingObject(version, nodePath, updated, name, found.format);
       }
       updated["x-42c-format"] = found.id;
 
@@ -106,7 +106,7 @@ export default (
       if (property === "x-42c-format") {
         updated["x-42c-format"] = found.id;
       } else {
-        updatePropertyOfExistingObject(version, updated, property, found.format);
+        updatePropertyOfExistingObject(version, nodePath, updated, property, found.format);
       }
 
       let text = "";
@@ -214,7 +214,13 @@ async function documentBulkUpdate(
     if (node) {
       const updated: any = { ...node };
       for (const name of schemaProps) {
-        updatePropertyOfExistingObject(version, updated, name, format.format);
+        updatePropertyOfExistingObject(
+          version,
+          parseJsonPointer(pointer),
+          updated,
+          name,
+          format.format
+        );
       }
       updated["x-42c-format"] = format.id;
       let text = "";
@@ -235,6 +241,7 @@ async function documentBulkUpdate(
 
 function updatePropertyOfExistingObject(
   version: OpenApiVersion,
+  path: Path,
   existing: any,
   name: string,
   format: DataFormat
@@ -251,14 +258,21 @@ function updatePropertyOfExistingObject(
     return;
   }
 
+  // property name is 'example'
+
   // dont update already existing examples
   if (existing.hasOwnProperty("example") || existing.hasOwnProperty("x-42c-sample")) {
     return;
   }
 
   // use 'x-42c-sample' for Swagger2.0 parameter objects
-  if (version === OpenApiVersion.V2 && existing.hasOwnProperty("in")) {
+  if (
+    version === OpenApiVersion.V2 &&
+    !(path.includes("schema") || path.includes("definitions") || path.includes("x-42c-schemas"))
+  ) {
     existing["x-42c-sample"] = value;
     return;
   }
+
+  existing["example"] = value;
 }
