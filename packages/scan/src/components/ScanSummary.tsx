@@ -9,11 +9,15 @@ export default function ScanSummary({
   summary: any;
   happyPathExpected: boolean;
 }) {
-  const happyPaths = summary?.happyPathRequests?.executed ?? 0;
+  const happyPaths =
+    summary?.happyPathRequests?.executed ?? summary?.happyPathsTested?.executed ?? 0;
   const conformanceTests = summary?.conformanceTestRequests?.executed ?? 0;
-  const unexpected = summary?.conformanceTestRequests?.unexpectedResponses ?? 0;
-  const expected = summary?.conformanceTestRequests?.expectedResponses ?? 0;
+  const expected =
+    summary?.conformanceTestRequests?.expectedResponses ??
+    summary?.conformanceTestRequests?.responses?.expected?.conformant ??
+    0;
   const totalTests = conformanceTests + happyPaths;
+  const unexpected = totalTests - expected;
 
   return (
     <Summary>
