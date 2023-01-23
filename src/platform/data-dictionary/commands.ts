@@ -30,8 +30,8 @@ export default (
   },
 
   dataDictionaryPreAuditBulkUpdateProperties: async (documentUri: vscode.Uri): Promise<boolean> => {
-    const hasDiagnostics = dataDictionaryDiagnostics.has(documentUri);
-    if (hasDiagnostics) {
+    const diagnostics = dataDictionaryDiagnostics.get(documentUri);
+    if (diagnostics !== undefined && diagnostics.length > 0) {
       const fix = await shouldFixDataDictionaryErrros();
       if (fix === "cancel") {
         return false;
