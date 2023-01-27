@@ -32,7 +32,7 @@ export default function Summary({ openLink }: { openLink: any }) {
         Security audit score: <span>{summary.all}&nbsp;/&nbsp;100</span>
       </h1>
       <div className="progress-bar-holder">
-        <div className="progress-bar bar-red" style={{ width: summary.all }}></div>
+        <div className="progress-bar bar-red" style={{ width: `${summary.all}%` }}></div>
       </div>
       <h3>
         Security:{" "}
