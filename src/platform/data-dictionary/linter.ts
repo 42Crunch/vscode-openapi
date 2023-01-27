@@ -102,7 +102,13 @@ function lint(
       text: string | undefined,
       location: Location | undefined
     ): void {
-      if (key === "format" && typeof value === "string") {
+      if (
+        key === "format" &&
+        typeof value === "string" &&
+        !path.includes("example") &&
+        !path.includes("examples") &&
+        !path.includes("x-42c-sample")
+      ) {
         diagnostics.push(
           ...checkFormat(
             document,
