@@ -200,7 +200,9 @@ async function runPlatformAudit(
       );
     } else {
       vscode.window.showErrorMessage(
-        "Unexpected error when trying to audit API using the platform: " + ex
+        `Unexpected error when trying to audit API using the platform: ${ex} ${
+          ex?.response?.body ? JSON.stringify(ex.response.body) : ""
+        }`
       );
     }
   }
