@@ -135,7 +135,7 @@ async function securityAudit(
       cancellable: false,
     },
     async (progress, cancellationToken): Promise<Audit | undefined> => {
-      const bundle = await cache.getDocumentBundle(textEditor.document);
+      const bundle = await cache.getDocumentBundle(textEditor.document, { rebundle: true });
       if (!bundle || "errors" in bundle) {
         vscode.commands.executeCommand("workbench.action.problems.focus");
         throw new Error("Failed to bundle for audit, check OpenAPI file for errors.");
