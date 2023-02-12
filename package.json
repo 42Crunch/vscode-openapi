@@ -843,7 +843,7 @@
     "@xliic/json-schema-ref-parser": "^9.3.0",
     "@xliic/preserving-json-yaml-parser": "^1.9.3",
     "form-data": "^2.5.1",
-    "got": "^11.8.2",
+    "got": "^12.5.3",
     "js-yaml": "^4.1.0",
     "jsonc-parser": "^3.0.0",
     "semver": "^6.3.0",
