@@ -8,7 +8,7 @@ import { Preferences } from "@xliic/common/prefs";
 import { Cache } from "../cache";
 import { Configuration, configuration } from "../configuration";
 import { CollectionsProvider } from "./explorer/provider";
-import { PlatformContext, platformUriScheme } from "./types";
+import { Logger, PlatformContext, platformUriScheme } from "./types";
 import { AuditContext } from "../types";
 import { registerCommands } from "./commands";
 import { PlatformStore } from "./stores/platform-store";
@@ -32,11 +32,13 @@ export async function activate(
   auditContext: AuditContext,
   cache: Cache,
   configuration: Configuration,
+  secrets: vscode.SecretStorage,
   store: PlatformStore,
   reportWebView: AuditWebView,
   memento: vscode.Memento,
   envStore: EnvStore,
-  prefs: Record<string, Preferences>
+  prefs: Record<string, Preferences>,
+  logger: Logger
 ) {
   const dataDictionaryView = new DataDictionaryWebView(context.extensionPath);
 
@@ -101,10 +103,12 @@ export async function activate(
     platformContext,
     cache,
     configuration,
+    secrets,
     store,
     envStore,
     prefs,
-    reportWebView
+    reportWebView,
+    logger
   );
   activateLinter(cache, platformContext, store, dataDictionaryDiagnostics);
 

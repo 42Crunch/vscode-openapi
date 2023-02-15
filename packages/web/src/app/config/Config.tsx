@@ -12,8 +12,8 @@ import PlatformConnection from "./PlatformConnection";
 import Scan from "./Scan";
 
 const platformSettings = [
-  { id: "platform-connection", label: "Platform connection" },
-  { id: "platform-scan", label: "Scan" },
+  { id: "platform-connection", label: "Platform Connection" },
+  { id: "platform-scan", label: "Conformance Scan" },
 ];
 
 export default function Config() {
@@ -38,7 +38,7 @@ function ConfigForm({ values }: { values: ConfigData }) {
   });
 
   const {
-    formState: { isDirty, isValid },
+    formState: { isDirty, isValid, isValidating },
   } = methods;
 
   function onSubmit(values: ConfigData) {
@@ -46,10 +46,10 @@ function ConfigForm({ values }: { values: ConfigData }) {
   }
 
   useEffect(() => {
-    if (isDirty && isValid) {
+    if (isDirty && isValid && !isValidating) {
       methods.handleSubmit(onSubmit)();
     }
-  }, [isDirty, isValid]);
+  }, [isDirty, isValid, isValidating]);
 
   return (
     <Container>

@@ -9,11 +9,14 @@ import {
   ScanRunConfig,
   OasWithOperationAndConfig,
   ShowScanReportMessage,
+  ScandManagerConnection,
 } from "@xliic/common/scan";
 
 import { replaceEnv } from "@xliic/common/env";
 import { Preferences } from "@xliic/common/prefs";
 import { Webapp } from "@xliic/common/webapp/scan";
+import { Config } from "@xliic/common/config";
+import { GeneralError, ShowGeneralErrorMessage } from "@xliic/common/error";
 
 import {
   ShowHttpResponseMessage,
@@ -29,6 +32,10 @@ import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
 import { executeHttpRequestRaw } from "../../tryit/http-handler";
 import { getLocationByPointer } from "../../audit/util";
+import * as managerApi from "../api-scand-manager";
+import { ScandManagerJobStatus } from "../api-scand-manager";
+import { Logger } from "../types";
+import { loadConfig } from "../../util/config";
 
 export class ScanWebView extends WebView<Webapp> {
   private isNewApi: boolean = false;
@@ -38,9 +45,11 @@ export class ScanWebView extends WebView<Webapp> {
     extensionPath: string,
     private cache: Cache,
     private configuration: Configuration,
+    private secrets: vscode.SecretStorage,
     private store: PlatformStore,
     private envStore: EnvStore,
-    private prefs: Record<string, Preferences>
+    private prefs: Record<string, Preferences>,
+    private logger: Logger
   ) {
     super(extensionPath, "scan", "Scan", vscode.ViewColumn.Two, false);
     envStore.onEnvironmentDidChange((env) => {
@@ -60,13 +69,18 @@ export class ScanWebView extends WebView<Webapp> {
   }
 
   hostHandlers: Webapp["hostHandlers"] = {
-    runScan: async (config: ScanRunConfig): Promise<ShowScanReportMessage> => {
+    runScan: async (
+      scanConfig: ScanRunConfig
+    ): Promise<ShowScanReportMessage | ShowGeneralErrorMessage> => {
       try {
+        const config = await loadConfig(this.configuration, this.secrets);
+
         return await runScan(
           this.store,
           this.envStore,
+          scanConfig,
           config,
-          this.configuration.get<string>("platformConformanceScanImage"),
+          this.logger,
           this.isNewApi
         );
       } catch (ex: any) {
@@ -166,12 +180,19 @@ export class ScanWebView extends WebView<Webapp> {
 async function runScan(
   store: PlatformStore,
   envStore: EnvStore,
-  config: ScanRunConfig,
-  scandImage: string,
+  scanConfig: ScanRunConfig,
+  config: Config,
+  logger: Logger,
   isNewApi: boolean
-): Promise<ShowScanReportMessage> {
-  const api = await store.createTempApi(config.rawOas);
+): Promise<ShowScanReportMessage | ShowGeneralErrorMessage> {
+  // const useScandMgr = scanOption == "scand";
+  // if (useScandMgr && !store.getConnection().scandManagerUrl) {
+  //   throw new Error(
+  //     "Scand manager URL is not set. Please set the URL in settings and try running the Scan again."
+  //   );
+  // }
 
+  const api = await store.createTempApi(scanConfig.rawOas);
   const audit = await store.getAuditReport(api.desc.id);
   if (audit?.openapiState !== "valid") {
     await store.deleteApi(api.desc.id);
@@ -181,9 +202,9 @@ async function runScan(
   }
 
   if (isNewApi) {
-    await store.createScanConfigNew(api.desc.id, "updated", config.config);
+    await store.createScanConfigNew(api.desc.id, "updated", scanConfig.config);
   } else {
-    await store.createScanConfig(api.desc.id, "updated", config.config);
+    await store.createScanConfig(api.desc.id, "updated", scanConfig.config);
   }
 
   const configs = await store.getScanConfigs(api.desc.id);
@@ -194,26 +215,33 @@ async function runScan(
 
   const token = isNewApi ? c.token : c.scanConfigurationToken;
 
-  const services = store.getConnection().services;
+  const failure =
+    config.scanRuntime === "docker"
+      ? await runScanWithDocker(envStore, scanConfig, config, token)
+      : await runScanWithScandManager(envStore, scanConfig, config, logger, token);
 
-  const terminal = findOrCreateTerminal();
+  if (failure !== undefined) {
+    // cleanup
+    try {
+      await store.deleteApi(api.desc.id);
+    } catch (ex) {
+      console.log(`Failed to cleanup temp api ${api.desc.id}: ${ex}`);
+    }
 
-  const env: Record<string, string> = {};
-  for (const [name, value] of Object.entries(config.env)) {
-    env[name] = replaceEnv(value, await envStore.all());
+    return {
+      command: "showGeneralError",
+      payload: failure,
+    };
   }
 
-  env["SCAN_TOKEN"] = token;
-  env["PLATFORM_SERVICE"] = services;
-
-  const envString = Object.entries(env)
-    .map(([key, value]) => `-e ${key}='${value}'`)
-    .join(" ");
-
-  terminal.sendText(`docker run --rm ${envString} ${scandImage}`);
-  terminal.show();
-
   const reportId = await waitForReport(store, api.desc.id, 10000, isNewApi);
+
+  if (reportId === undefined) {
+    return {
+      command: "showGeneralError",
+      payload: { message: "Failed to load scan report from the platform" },
+    };
+  }
 
   const report = isNewApi
     ? await store.readScanReportNew(reportId!)
@@ -235,6 +263,89 @@ async function runScan(
   };
 }
 
+async function runScanWithDocker(
+  envStore: EnvStore,
+  scanConfig: ScanRunConfig,
+  config: Config,
+  token: string
+) {
+  const terminal = findOrCreateTerminal();
+
+  const env: Record<string, string> = {};
+  for (const [name, value] of Object.entries(scanConfig.env)) {
+    env[name] = replaceEnv(value, await envStore.all());
+  }
+
+  const services =
+    config.platformServices.source === "auto"
+      ? config.platformServices.auto
+      : config.platformServices.manual;
+
+  env["SCAN_TOKEN"] = token;
+  env["PLATFORM_SERVICE"] = services!;
+
+  const envString = Object.entries(env)
+    .map(([key, value]) => `-e ${key}='${value}'`)
+    .join(" ");
+
+  terminal.sendText(`docker run --rm ${envString} ${config.scanImage}`);
+  terminal.show();
+}
+
+async function runScanWithScandManager(
+  envStore: EnvStore,
+  scanConfig: ScanRunConfig,
+  config: Config,
+  logger: Logger,
+  token: string
+): Promise<GeneralError | undefined> {
+  const env: Record<string, string> = {};
+
+  for (const [name, value] of Object.entries(scanConfig.env)) {
+    env[name] = replaceEnv(value, await envStore.all());
+  }
+
+  let job: ScandManagerJobStatus | undefined = undefined;
+
+  const services =
+    config.platformServices.source === "auto"
+      ? config.platformServices.auto
+      : config.platformServices.manual;
+
+  try {
+    job = await managerApi.createJob(
+      token,
+      services!,
+      config.scanImage,
+      env,
+      config.scandManager,
+      logger
+    );
+  } catch (ex) {
+    return {
+      message: `Failed to create scand-manager job: ${ex}`,
+    };
+  }
+
+  if (job.status === "failed" || job.status === "unknown") {
+    // TODO introduce settings whether delete failed jobs or not
+    return {
+      message: `Failed to create scand-manager job ${job.name}, received unexpected status: ${job.status}`,
+    };
+  }
+
+  const error = await waitForScandJob(job.name, config.scandManager, logger, 30000);
+
+  if (error) {
+    return error;
+  }
+
+  // job has completed, remove it
+  await managerApi.deleteJobStatus(job.name, config.scandManager, logger);
+
+  return undefined;
+}
+
 async function waitForReport(
   store: PlatformStore,
   apiId: string,
@@ -249,13 +360,45 @@ async function waitForReport(
     }
     console.log("Waiting for report to become available");
     await delay(1000);
+    currentDelay = currentDelay + 1000;
   }
   console.log("Failed to read report");
   return undefined;
 }
 
+async function waitForScandJob(
+  name: string,
+  manager: ScandManagerConnection,
+  logger: Logger,
+  maxDelay: number
+): Promise<GeneralError | undefined> {
+  let currentDelay = 0;
+  while (currentDelay < maxDelay) {
+    const status = await managerApi.readJobStatus(name, manager, logger);
+    // Status unknown may mean the job is not finished, keep waiting
+    if (status.status === "succeeded") {
+      return undefined;
+    } else if (status.status === "failed") {
+      const log = await managerApi.readJobLog(name, manager, logger);
+      return { message: `Scand-manager job ${name} has failed`, details: log };
+    }
+    console.log("Waiting for scand job to become available");
+    await delay(1000);
+    currentDelay = currentDelay + 1000;
+  }
+  return { message: `Timed out waiting for scand-manager job ${name} to complete` };
+}
+
 async function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function throwKbError(store: PlatformStore, apiId: string, name: string, status: string) {
+  await store.deleteApi(apiId);
+  await store.deleteJobStatus(name);
+  // Status unknown causes logs request error 400 (Bad Request)
+  const reason = status === "unknown" ? undefined : await store.readJobLog(name);
+  throw new Error("Job " + name + " status " + status + (reason ? ": " + reason : ""));
 }
 
 function findOrCreateTerminal() {

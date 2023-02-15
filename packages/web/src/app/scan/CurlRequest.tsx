@@ -43,9 +43,7 @@ export default function CurlRequest({
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    dispatch(
-                      sendCurlRequest(secretCurl.replace("host.docker.internal", "localhost"))
-                    );
+                    dispatch(sendCurlRequest(secretCurl));
                   }}
                 />
               </span>
@@ -58,7 +56,7 @@ export default function CurlRequest({
             </Tooltip.Portal>
           </Tooltip.Root>
         </Tooltip.Provider>
-        {curl.replace("host.docker.internal", "localhost")}
+        {curl}
       </Code>
       <Buttons>
         <ProgressButton
@@ -147,13 +145,6 @@ function extract(curl: string, id: string): HttpRequest {
       const [headerName, headerValue] = value.split(": ", 2);
       result.headers[headerName] = headerValue;
     }
-  }
-
-  if (
-    result.url.startsWith("http://host.docker.internal") ||
-    result.url.startsWith("https://host.docker.internal")
-  ) {
-    result.url = result.url.replace("host.docker.internal", "localhost");
   }
 
   return result;

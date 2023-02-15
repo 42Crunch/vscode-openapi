@@ -30,9 +30,9 @@ export interface OasState {
   defaultValues?: TryitOperationValues;
   scanConfig?: ScanConfig;
   scanConfigRaw?: unknown;
-  scanReport: ScanReportJSONSchema | undefined;
+  scanReport?: ScanReportJSONSchema;
   response?: HttpResponse;
-  error: GeneralError | undefined;
+  error?: GeneralError;
   prefs: Preferences;
   responses: Record<string, HttpResponse>;
   waitings: Record<string, boolean>;
@@ -120,8 +120,9 @@ export const slice = createSlice({
       }>
     ) => {
       state.defaultValues = action.payload.defaultValues;
-      // clear potentially set scan report
+      // clear potentially set scan report and the error
       state.scanReport = undefined;
+      state.error = undefined;
       state.waiting = true;
     },
 

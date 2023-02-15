@@ -6,6 +6,7 @@ import {
   useFeatureDispatch,
   useFeatureSelector,
   testOverlordConnection,
+  testScandManagerConnection,
 } from "../../features/config/slice";
 import { Banner, ErrorBanner } from "../../components/Banner";
 import { ConnectionTestResult } from "../../../../common/src/config";
@@ -15,17 +16,23 @@ import Select from "../../components/Select";
 export default function Scan() {
   const dispatch = useFeatureDispatch();
   const {
-    overlordConnectionTestResult: testResult,
-    waitingForOverlordConnectionTest: waitingForTest,
+    overlordConnectionTestResult: overlordTestResult,
+    waitingForOverlordConnectionTest: waitingForOverlordTest,
+    scandManagerConnectionTestResult: scandManagerTestResult,
+    waitingForScandManagerConnectionTest: waitingForScandManagerTest,
   } = useFeatureSelector((state) => state.config);
 
   const source = useWatch({ name: "platformServices.source" });
+  const scanRuntime = useWatch({ name: "scanRuntime" });
+  const scanAuth = useWatch({ name: "scandManager.auth" });
 
   return (
     <>
       <Title>Scan connection parameters</Title>
       <Container>
         <div>
+          <Input label="Scand Agent Image" name="scanImage" />
+
           <Select
             name="platformServices.source"
             options={[
@@ -44,7 +51,7 @@ export default function Scan() {
           <div>
             <NormalProgressButton
               label="Test connection"
-              waiting={waitingForTest}
+              waiting={waitingForOverlordTest}
               onClick={(e) => {
                 dispatch(testOverlordConnection());
                 e.preventDefault();
@@ -53,7 +60,48 @@ export default function Scan() {
             />
           </div>
         </div>
-        <div>{makeBanner(testResult)}</div>
+        <div>{makeBanner(overlordTestResult)}</div>
+      </Container>
+      <Container>
+        <div>
+          <Select
+            name="scanRuntime"
+            options={[
+              { value: "docker", label: "docker" },
+              { value: "scand-manager", label: "scand-manager" },
+            ]}
+          />
+          {scanRuntime === "scand-manager" && (
+            <>
+              <Input label="Scand Manager URL" name="scandManager.url" />
+              <Select
+                name="scandManager.auth"
+                options={[
+                  { value: "none", label: "no authentication" },
+                  { value: "header", label: "header authentication" },
+                ]}
+              />
+              {scanAuth === "header" && (
+                <>
+                  <Input label="Header Name" name="scandManager.header.name" />
+                  <Input label="Header Value" name="scandManager.header.value" />
+                </>
+              )}
+              <div>
+                <NormalProgressButton
+                  label="Test connection"
+                  waiting={waitingForScandManagerTest}
+                  onClick={(e) => {
+                    dispatch(testScandManagerConnection());
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                />
+              </div>
+            </>
+          )}
+        </div>
+        <div>{makeBanner(scandManagerTestResult)}</div>
       </Container>
     </>
   );

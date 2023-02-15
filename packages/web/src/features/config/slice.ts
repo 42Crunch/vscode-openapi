@@ -10,6 +10,8 @@ export interface ConfigState {
   waitingForPlatformConnectionTest: boolean;
   overlordConnectionTestResult?: ConnectionTestResult;
   waitingForOverlordConnectionTest: boolean;
+  scandManagerConnectionTestResult?: ConnectionTestResult;
+  waitingForScandManagerConnectionTest: boolean;
 }
 
 const initialState: ConfigState = {
@@ -23,11 +25,23 @@ const initialState: ConfigState = {
       manual: undefined,
       auto: "services.42crunch.com:8001",
     },
+    scandManager: {
+      url: "",
+      auth: "none",
+      header: {
+        name: "",
+        value: "",
+      },
+    },
+    scanRuntime: "docker",
+    scanImage: "",
   },
   platformConnectionTestResult: undefined,
   waitingForPlatformConnectionTest: false,
   overlordConnectionTestResult: undefined,
   waitingForOverlordConnectionTest: false,
+  scandManagerConnectionTestResult: undefined,
+  waitingForScandManagerConnectionTest: false,
 };
 
 export const slice = createSlice({
@@ -44,20 +58,17 @@ export const slice = createSlice({
       state.data = action.payload;
       state.platformConnectionTestResult = undefined;
       state.overlordConnectionTestResult = undefined;
-    },
-
-    showPlatformConnectionTest: (state, action: PayloadAction<ConnectionTestResult>) => {
-      state.platformConnectionTestResult = action.payload;
-      state.waitingForPlatformConnectionTest = false;
-    },
-
-    showConfigWindow: (state, action: PayloadAction<undefined>) => {
-      // hook for a listener
+      state.scandManagerConnectionTestResult = undefined;
     },
 
     testPlatformConnection: (state, action: PayloadAction<undefined>) => {
       state.waitingForPlatformConnectionTest = true;
       // hook for a listener
+    },
+
+    showPlatformConnectionTest: (state, action: PayloadAction<ConnectionTestResult>) => {
+      state.platformConnectionTestResult = action.payload;
+      state.waitingForPlatformConnectionTest = false;
     },
 
     testOverlordConnection: (state, action: PayloadAction<undefined>) => {
@@ -68,6 +79,20 @@ export const slice = createSlice({
     showOverlordConnectionTest: (state, action: PayloadAction<ConnectionTestResult>) => {
       state.overlordConnectionTestResult = action.payload;
       state.waitingForOverlordConnectionTest = false;
+    },
+
+    testScandManagerConnection: (state, action: PayloadAction<undefined>) => {
+      state.waitingForScandManagerConnectionTest = true;
+      // hook for a listener
+    },
+
+    showScandManagerConnectionTest: (state, action: PayloadAction<ConnectionTestResult>) => {
+      state.scandManagerConnectionTestResult = action.payload;
+      state.waitingForScandManagerConnectionTest = false;
+    },
+
+    showConfigWindow: (state, action: PayloadAction<undefined>) => {
+      // hook for a listener
     },
   },
 });
@@ -80,6 +105,8 @@ export const {
   showPlatformConnectionTest,
   testOverlordConnection,
   showOverlordConnectionTest,
+  testScandManagerConnection,
+  showScandManagerConnectionTest,
 } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<

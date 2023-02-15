@@ -14,25 +14,25 @@ export interface ScandConfiguration {
 
 export type ScanParameterLocation = "query" | "header" | "path" | "cookie" | "body" | "formData";
 
-export interface ScanConfig {
+export type ScanConfig = {
   parameters: Record<ScanParameterLocation, Record<string, unknown>>;
   requestBody?: unknown;
   host: string;
-}
+};
 
-export interface OasWithOperationAndConfig {
+export type OasWithOperationAndConfig = {
   oas: BundledSwaggerOrOasSpec;
   rawOas: string;
   path: string;
   method: HttpMethod;
   config: unknown;
-}
+};
 
-export interface ScanRunConfig {
+export type ScanRunConfig = {
   config: unknown;
   env: Record<string, string>;
   rawOas: string;
-}
+};
 
 export interface SingleOperationScanReport {
   report: ScanReportJSONSchema;
@@ -55,4 +55,20 @@ export type RunScanMessage = { command: "runScan"; payload: ScanRunConfig };
 export type ShowJsonPointerMessage = {
   command: "showJsonPointer";
   payload: string;
+};
+
+export type ScandManagerConnection = {
+  url: string;
+  auth: "none" | "header";
+  header: {
+    name: string;
+    value: string;
+  };
+};
+
+export type ScanRuntime = {
+  kind: "docker" | "scand-manager";
+  image: string;
+  services: string;
+  scandManager: ScandManagerConnection;
 };

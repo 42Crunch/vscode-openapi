@@ -118,6 +118,7 @@ export type PlatformConnectionEvent = {
 };
 
 export class PlatformStore {
+  [x: string]: any;
   private apiLastAssessment = new Map<string, Date>();
   private connection: PlatformConnection | undefined = undefined;
   readonly limits = new Limits();

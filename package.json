@@ -749,6 +749,44 @@
           "default": "https://platform.42crunch.com",
           "description": "42Crunch platform URL"
         },
+        "openapi.platformConformanceScanRuntime": {
+          "scope": "workbench",
+          "type": "string",
+          "default": "docker",
+          "enum": [
+            "docker",
+            "scand-manager"
+          ],
+          "enumDescriptions": [
+            "Use Docker to execute 42Crunch API Conformance Scan",
+            "Use Scand-Manager to execute 42Crunch API Conformance Scan"
+          ]
+        },
+        "openapi.platformScandManager": {
+          "scope": "workbench",
+          "type": "object",
+          "description": "Scand-manager connection details",
+          "properties": {
+            "url": {
+              "type": "string"
+            },
+            "auth": {
+              "type": "string",
+              "enum": [
+                "none",
+                "header"
+              ]
+            }
+          },
+          "required": [
+            "url",
+            "auth"
+          ],
+          "default": {
+            "url": "",
+            "auth": "none"
+          }
+        },
         "openapi.platformServices": {
           "scope": "workbench",
           "type": "string",

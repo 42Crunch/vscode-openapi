@@ -6,6 +6,8 @@ import {
   ShowPlatformConnectionTestMessage,
   TestOverlordConnectionMessage,
   ShowOverlordConnectionTestMessage,
+  TestScandManagerConnectionMessage,
+  ShowScandManagerConnectionTestMessage,
 } from "../config";
 import { ChangeThemeMessage } from "../theme";
 
@@ -14,7 +16,11 @@ export type Webapp = App<
   | ChangeThemeMessage
   | LoadConfigMessage
   | ShowPlatformConnectionTestMessage
-  | ShowOverlordConnectionTestMessage,
+  | ShowOverlordConnectionTestMessage
+  | ShowScandManagerConnectionTestMessage,
   // produces
-  SaveConfigMessage | TestPlatformConnectionMessage | TestOverlordConnectionMessage
+  | SaveConfigMessage
+  | TestPlatformConnectionMessage
+  | TestOverlordConnectionMessage
+  | TestScandManagerConnectionMessage
 >;

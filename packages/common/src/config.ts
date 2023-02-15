@@ -1,12 +1,17 @@
+import { ScandManagerConnection } from "./scan";
+
 export type Config = {
   insecureSslHostnames: string[];
   platformUrl: string;
-  platformApiToken: string | undefined;
+  platformApiToken: string;
   platformServices: {
     source: "auto" | "manual";
     manual: string | undefined;
     auto: string;
   };
+  scandManager: ScandManagerConnection;
+  scanRuntime: "docker" | "scand-manager";
+  scanImage: string;
 };
 
 export type ConnectionTestResult = { success: true } | { success: false; message: string };
@@ -27,5 +32,13 @@ export type TestOverlordConnectionMessage = {
 };
 export type ShowOverlordConnectionTestMessage = {
   command: "showOverlordConnectionTest";
+  payload: ConnectionTestResult;
+};
+export type TestScandManagerConnectionMessage = {
+  command: "testScandManagerConnection";
+  payload: undefined;
+};
+export type ShowScandManagerConnectionTestMessage = {
+  command: "showScandManagerConnectionTest";
   payload: ConnectionTestResult;
 };

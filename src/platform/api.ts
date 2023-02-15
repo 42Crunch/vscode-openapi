@@ -3,7 +3,7 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import got, { Method, OptionsOfJSONResponseBody, HTTPError } from "got";
+import got, { Method, OptionsOfJSONResponseBody, HTTPError, OptionsOfTextResponseBody } from "got";
 import { NamingConvention, SearchCollectionsResponse } from "./types";
 import {
   Api,
@@ -439,7 +439,7 @@ export async function testConnection(
   try {
     await got("api/v2/collections?page=1&perPage=1", gotOptions("GET", options, logger));
     return { success: true };
-  } catch (ex: any) {
-    return { success: false, message: ex.message };
+  } catch (ex) {
+    return { success: false, message: `${ex}` };
   }
 }

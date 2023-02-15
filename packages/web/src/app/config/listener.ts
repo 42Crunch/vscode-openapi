@@ -9,6 +9,7 @@ import {
   saveConfig,
   testPlatformConnection,
   testOverlordConnection,
+  testScandManagerConnection,
 } from "../../features/config/slice";
 import { startListeners } from "../webapp";
 
@@ -56,6 +57,22 @@ export function createListener(host: Webapp["host"]) {
           });
           host.postMessage({
             command: "testOverlordConnection",
+            payload: undefined,
+          });
+        },
+      }),
+
+    testScandManagerConnection: () =>
+      startAppListening({
+        actionCreator: testScandManagerConnection,
+        effect: async (action, listenerApi) => {
+          const state = listenerApi.getState();
+          host.postMessage({
+            command: "saveConfig",
+            payload: state.config.data,
+          });
+          host.postMessage({
+            command: "testScandManagerConnection",
             payload: undefined,
           });
         },

@@ -15,6 +15,7 @@ import { SecretsForSecurity } from "@xliic/common/prefs";
 import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import Section from "../../components/Section";
 import ScanReport from "./ScanReport";
+import GeneralError from "./GeneralError";
 
 export default function ScanOperation() {
   const dispatch = useAppDispatch();
@@ -91,6 +92,7 @@ export default function ScanOperation() {
         </Section>
       </FormProvider>
       {scanReport && <ScanReport />}
+      <GeneralError />
     </>
   );
 }

@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { Preferences } from "@xliic/common/prefs";
 import { Cache } from "../../cache";
 import { PlatformStore } from "../stores/platform-store";
-import { PlatformContext } from "../types";
+import { Logger, PlatformContext } from "../types";
 
 import { ScanCodelensProvider } from "./lens";
 import commands from "./commands";
@@ -22,13 +22,24 @@ export function activate(
   platformContext: PlatformContext,
   cache: Cache,
   configuration: Configuration,
+  secrets: vscode.SecretStorage,
   store: PlatformStore,
   envStore: EnvStore,
   prefs: Record<string, Preferences>,
-  auditView: AuditWebView
+  auditView: AuditWebView,
+  logger: Logger
 ): vscode.Disposable {
   let disposables: vscode.Disposable[] = [];
-  const view = new ScanWebView(context.extensionPath, cache, configuration, store, envStore, prefs);
+  const view = new ScanWebView(
+    context.extensionPath,
+    cache,
+    configuration,
+    secrets,
+    store,
+    envStore,
+    prefs,
+    logger
+  );
 
   const scanCodelensProvider = new ScanCodelensProvider(cache);
 

@@ -11,7 +11,9 @@ import { Config, ConnectionTestResult } from "@xliic/common/config";
 import { Configuration } from "../../configuration";
 import { WebView } from "../../web-view";
 import { PlatformStore } from "../../platform/stores/platform-store";
-import { deriveServices } from "../../credentials";
+import * as scandManagerApi from "../../platform/api-scand-manager";
+import { Logger } from "../../platform/types";
+import { loadConfig, saveConfig } from "../../util/config";
 
 export class ConfigWebView extends WebView<Webapp> {
   private config?: Config;
@@ -19,7 +21,8 @@ export class ConfigWebView extends WebView<Webapp> {
     extensionPath: string,
     private configuration: Configuration,
     private secrets: vscode.SecretStorage,
-    private platform: PlatformStore
+    private platform: PlatformStore,
+    private logger: Logger
   ) {
     super(extensionPath, "config", "Settings", vscode.ViewColumn.One, false);
 
@@ -33,9 +36,7 @@ export class ConfigWebView extends WebView<Webapp> {
   hostHandlers: Webapp["hostHandlers"] = {
     saveConfig: async (config: Config) => {
       this.config = config;
-      // vscode.workspace
-      //   .getConfiguration("openapi")
-      //   .update("tryit.insecureSslHostnames", config.insecureSslHostnames);
+      await saveConfig(config, this.configuration, this.secrets);
     },
 
     testOverlordConnection: async () => {
@@ -77,6 +78,23 @@ export class ConfigWebView extends WebView<Webapp> {
 
       return { command: "showPlatformConnectionTest", payload: result };
     },
+
+    testScandManagerConnection: async () => {
+      const scandManager = this.config?.scandManager;
+      if (scandManager === undefined || scandManager.url === "") {
+        return {
+          command: "showScandManagerConnectionTest",
+          payload: { success: false, message: "no scand manager confguration" },
+        };
+      }
+
+      const result = await scandManagerApi.testConnection(scandManager, this.logger);
+
+      return {
+        command: "showScandManagerConnectionTest",
+        payload: result,
+      };
+    },
   };
 
   async sendLoadConfig() {
@@ -86,29 +104,6 @@ export class ConfigWebView extends WebView<Webapp> {
       payload: config,
     });
   }
-}
-
-async function loadConfig(
-  configuration: Configuration,
-  secrets: vscode.SecretStorage
-): Promise<Config> {
-  const platformUrl = configuration.get<string>("platformUrl")!;
-  const apiToken = await secrets.get("platformApiToken");
-  const insecureSslHostnames = configuration.get<string[]>("tryit.insecureSslHostnames")!;
-  const servicesManual = configuration.get<string>("platformServices");
-  const servicesAutomatic = deriveServices(platformUrl);
-  const servicesSource = servicesManual === "" ? "auto" : "manual";
-
-  return {
-    platformUrl,
-    platformApiToken: apiToken,
-    insecureSslHostnames,
-    platformServices: {
-      source: servicesSource,
-      manual: servicesManual,
-      auto: servicesAutomatic,
-    },
-  };
 }
 
 function http2Ping(url: string): Promise<ConnectionTestResult> {

@@ -119,18 +119,20 @@ export async function activate(context: vscode.ExtensionContext) {
   preview.activate(context, cache, configuration);
   tryit.activate(context, cache, configuration, envStore, prefs);
   environment.activate(context, envStore);
-  config.activate(context, configuration, context.secrets, platformStore);
+  config.activate(context, configuration, context.secrets, platformStore, logger);
 
   await platform.activate(
     context,
     auditContext,
     cache,
     configuration,
+    context.secrets,
     platformStore,
     reportWebView,
     context.workspaceState,
     envStore,
-    prefs
+    prefs,
+    logger
   );
 
   if (previousVersion!.major < currentVersion.major) {
@@ -147,7 +149,13 @@ export async function activate(context: vscode.ExtensionContext) {
   platformStore.setCredentials(await getPlatformCredentials(configuration, context.secrets));
 
   configuration.onDidChange(async (e: vscode.ConfigurationChangeEvent) => {
-    if (configuration.changed(e, "platformUrl") || configuration.changed(e, "platformServices")) {
+    if (
+      configuration.changed(e, "platformUrl") ||
+      configuration.changed(e, "platformServices") ||
+      configuration.changed(e, "scandManagerUrl") ||
+      configuration.changed(e, "scandManagerHeaderName") ||
+      configuration.changed(e, "scandManagerHeaderValue")
+    ) {
       platformStore.setCredentials(await getPlatformCredentials(configuration, context.secrets));
     }
   });

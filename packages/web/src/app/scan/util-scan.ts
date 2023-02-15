@@ -53,11 +53,7 @@ export function updateScanConfig(
     (mutableConfig as any)["playbook"]["paths"][path][method]["happyPaths"][0]["requests"][0]
   );
 
-  const host =
-    values.server.toLowerCase().startsWith("https://localhost") ||
-    values.server.toLowerCase().startsWith("http://localhost")
-      ? values.server.replace(/localhost/i, "host.docker.internal")
-      : values.server;
+  const host = values.server;
 
   target.host = host.endsWith("/") ? host.slice(0, -1) : host;
 

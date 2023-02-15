@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { requestToken } from "./audit/client";
 import { Configuration } from "./configuration";
 import { PlatformConnection } from "./platform/types";
+import { deriveServices } from "./util/config";
 
 export async function hasCredentials(
   configuration: Configuration,
@@ -35,18 +36,18 @@ export async function getPlatformCredentials(
     // favour services specified in the configuration, else try
     // to derive services from the platformUrl
     if (services) {
-      return { platformUrl, services, apiToken };
+      return {
+        platformUrl,
+        services,
+        apiToken,
+      };
     }
-    return { platformUrl, services: deriveServices(platformUrl), apiToken };
+    return {
+      platformUrl,
+      services: deriveServices(platformUrl),
+      apiToken,
+    };
   }
-}
-
-export function deriveServices(platformUrl: string): string {
-  const platformHost = vscode.Uri.parse(platformUrl).authority;
-  if (platformHost.toLowerCase().startsWith("platform")) {
-    return platformHost.replace(/^platform/i, "services") + ":8001";
-  }
-  return "services." + platformHost + ":8001";
 }
 
 export async function configureCredentials(

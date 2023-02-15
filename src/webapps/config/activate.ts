@@ -7,14 +7,16 @@ import * as vscode from "vscode";
 import { Configuration } from "../../configuration";
 import { ConfigWebView } from "./view";
 import { PlatformStore } from "../../platform/stores/platform-store";
+import { Logger } from "../../platform/types";
 
 export function activate(
   context: vscode.ExtensionContext,
   configuration: Configuration,
   secrets: vscode.SecretStorage,
-  platform: PlatformStore
+  platform: PlatformStore,
+  logger: Logger
 ) {
-  const view = new ConfigWebView(context.extensionPath, configuration, secrets, platform);
+  const view = new ConfigWebView(context.extensionPath, configuration, secrets, platform, logger);
 
   vscode.commands.registerCommand("openapi.showConfiguration", async () => {
     await view.show();

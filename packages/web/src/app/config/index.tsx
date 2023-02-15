@@ -14,6 +14,7 @@ import {
   loadConfig,
   showPlatformConnectionTest,
   showOverlordConnectionTest,
+  showScandManagerConnectionTest,
 } from "../../features/config/slice";
 import Config from "./Config";
 
@@ -22,6 +23,7 @@ const messageHandlers: Webapp["webappHandlers"] = {
   loadConfig,
   showPlatformConnectionTest,
   showOverlordConnectionTest,
+  showScandManagerConnectionTest,
 };
 
 function App() {
