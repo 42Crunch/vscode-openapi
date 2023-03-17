@@ -34,6 +34,7 @@ import { getLocationByPointer } from "../../audit/util";
 
 export class ScanWebView extends WebView<Webapp> {
   private document?: vscode.TextDocument;
+  private isNewApi: boolean = false;
 
   hostHandlers: Webapp["hostHandlers"] = {
     runScan: async (config: ScanRunConfig): Promise<ShowScanReportMessage> => {
@@ -42,7 +43,8 @@ export class ScanWebView extends WebView<Webapp> {
           this.store,
           this.envStore,
           config,
-          this.configuration.get<string>("platformConformanceScanImage")
+          this.configuration.get<string>("platformConformanceScanImage"),
+          this.isNewApi
         );
       } catch (ex: any) {
         if (
@@ -149,13 +151,18 @@ export class ScanWebView extends WebView<Webapp> {
     }
     return this.sendRequest({ command: "scanOperation", payload });
   }
+
+  setNewApi() {
+    this.isNewApi = true;
+  }
 }
 
 async function runScan(
   store: PlatformStore,
   envStore: EnvStore,
   config: ScanRunConfig,
-  scandImage: string
+  scandImage: string,
+  isNewApi: boolean
 ): Promise<ShowScanReportMessage> {
   const api = await store.createTempApi(config.rawOas);
 
@@ -167,13 +174,19 @@ async function runScan(
     );
   }
 
-  await store.createScanConfig(api.desc.id, "updated", config.config);
+  if (isNewApi) {
+    await store.createScanConfigNew(api.desc.id, "updated", config.config);
+  } else {
+    await store.createScanConfig(api.desc.id, "updated", config.config);
+  }
 
   const configs = await store.getScanConfigs(api.desc.id);
 
-  const c = await store.readScanConfig(configs[0].scanConfigurationId);
+  const c = isNewApi
+    ? await store.readScanConfig(configs[0].configuration.id)
+    : await store.readScanConfig(configs[0].scanConfigurationId);
 
-  const token = c.scanConfigurationToken;
+  const token = isNewApi ? c.token : c.scanConfigurationToken;
 
   const services = store.getConnection().services;
 
@@ -194,9 +207,12 @@ async function runScan(
   terminal.sendText(`docker run --rm ${envString} ${scandImage}`);
   terminal.show();
 
-  const reportId = await waitForReport(store, api.desc.id, 10000);
+  const reportId = await waitForReport(store, api.desc.id, 10000, isNewApi);
 
-  const report = await store.readScanReport(reportId!);
+  const report = isNewApi
+    ? await store.readScanReportNew(reportId!)
+    : await store.readScanReport(reportId!);
+
   const parsed = JSON.parse(Buffer.from(report, "base64").toString("utf-8"));
 
   await store.deleteApi(api.desc.id);
@@ -216,13 +232,14 @@ async function runScan(
 async function waitForReport(
   store: PlatformStore,
   apiId: string,
-  maxDelay: number
+  maxDelay: number,
+  isNewApi: boolean
 ): Promise<string | undefined> {
   let currentDelay = 0;
   while (currentDelay < maxDelay) {
     const reports = await store.listScanReports(apiId);
     if (reports.length > 0) {
-      return reports[0].taskId;
+      return isNewApi ? reports[0].report.taskId : reports[0].taskId;
     }
     console.log("Waiting for report to become available");
     await delay(1000);

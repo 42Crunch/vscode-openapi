@@ -81,13 +81,24 @@ async function editorRunSingleOperationScan(
 
     const configs = await store.getScanConfigs(api.desc.id);
 
-    const c = await store.readScanConfig(configs[0].scanConfigurationId);
+    const isNewApi = configs[0].configuration !== undefined;
 
-    const config = JSON.parse(Buffer.from(c.scanConfiguration, "base64").toString("utf-8"));
+    const c = isNewApi
+      ? await store.readScanConfig(configs[0].configuration.id)
+      : await store.readScanConfig(configs[0].scanConfigurationId);
+
+    const config = isNewApi
+      ? JSON.parse(Buffer.from(c.file, "base64").toString("utf-8"))
+      : JSON.parse(Buffer.from(c.scanConfiguration, "base64").toString("utf-8"));
 
     await store.deleteApi(api.desc.id);
 
     if (config !== undefined) {
+      if (isNewApi) {
+        view.setNewApi();
+      }
+      await view.show();
+      await view.sendColorTheme(vscode.window.activeColorTheme);
       await view.sendScanOperation(editor.document, {
         documentUrl: editor.document.uri.toString(),
         oas: oas as BundledSwaggerOrOasSpec,

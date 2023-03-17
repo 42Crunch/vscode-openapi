@@ -345,6 +345,24 @@ export async function createScanConfig(
   return body.id;
 }
 
+export async function createScanConfigNew(
+  apiId: string,
+  name: string,
+  config: unknown,
+  options: PlatformConnection,
+  logger: Logger
+): Promise<any> {
+  const scanConfiguration = Buffer.from(JSON.stringify(config)).toString("base64");
+  const { body } = <any>await got(`api/v2/apis/${apiId}/scanConfigurations`, {
+    ...gotOptions("POST", options, logger),
+    json: {
+      name,
+      file: scanConfiguration,
+    },
+  });
+  return body.id;
+}
+
 export async function listScanReports(
   apiId: string,
   options: PlatformConnection,
@@ -365,6 +383,17 @@ export async function readScanReport(
     ...gotOptions("GET", options, logger),
   });
   return body.data;
+}
+
+export async function readScanReportNew(
+  reportId: string,
+  options: PlatformConnection,
+  logger: Logger
+): Promise<any> {
+  const { body } = <any>await got(`api/v2/scanReports/${reportId}`, {
+    ...gotOptions("GET", options, logger),
+  });
+  return body.file;
 }
 
 export async function readTechnicalCollection(

@@ -24,9 +24,11 @@ import {
   createScanConfig,
   listScanReports,
   readScanReport,
+  readScanReportNew,
   readTechnicalCollection,
   createTechnicalCollection,
   searchCollections,
+  createScanConfigNew,
 } from "../api";
 import {
   Api,
@@ -383,6 +385,10 @@ export class PlatformStore {
     return createScanConfig(apiId, name, config, this.getConnection(), this.logger);
   }
 
+  async createScanConfigNew(apiId: string, name: string, config: unknown) {
+    return createScanConfigNew(apiId, name, config, this.getConnection(), this.logger);
+  }
+
   async getScanConfigs(apiId: string): Promise<any> {
     const MAX_WAIT = 30000;
     const RETRY = 1000;
@@ -404,6 +410,10 @@ export class PlatformStore {
 
   async readScanReport(reportId: string): Promise<any> {
     return readScanReport(reportId, this.getConnection(), this.logger);
+  }
+
+  async readScanReportNew(reportId: string): Promise<any> {
+    return readScanReportNew(reportId, this.getConnection(), this.logger);
   }
 
   async readTechnicalCollection(technicalName: string): Promise<any> {
