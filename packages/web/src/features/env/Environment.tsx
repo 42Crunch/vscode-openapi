@@ -39,7 +39,13 @@ export default function EnvironmentForm({
       <Form onChange={handleSubmit(onSubmit)}>
         {fields.map((field, index) => (
           <div key={field.id}>
-            <EnvKeyValue name={`values.${index}`} remove={() => remove(index)} />
+            <EnvKeyValue
+              name={`values.${index}`}
+              remove={() => {
+                remove(index);
+                handleSubmit(onSubmit)();
+              }}
+            />
           </div>
         ))}
         <div>
