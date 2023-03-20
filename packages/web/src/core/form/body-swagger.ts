@@ -48,7 +48,7 @@ export function createBody(
 
   if (mediaType == "application/json") {
     const body = Object.values(parameters.body)?.[0];
-    const schema = deref(oas, body.schema);
+    const schema = deref(oas, body?.schema);
     if (schema) {
       jsf.option("useExamplesValue", true);
       jsf.option("failOnInvalidFormat", false);
