@@ -63,31 +63,47 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
       document.offsetAt(position),
       document.languageId
     );
-    const targetPointer = findTargetPointer(this.version, nodePath);
-    const refContext = await getRefContext(this.parsed, line, document.uri, this.cache);
 
-    if (targetPointer && refContext) {
-      const targetNode = targetPointer && find(refContext.parsed, targetPointer);
+    const targetPointer = findTargetPointer(this.version, nodePath);
+
+    const refRe = /^(\s*)(['"]?\$ref['"\s]*:(.*))$/;
+
+    const match = line.match(refRe);
+    if (match && targetPointer) {
+      // don't replace trailing comma if there is one
+      const refLen = match[2].endsWith(",") ? match[2].length - 1 : match[2].length;
+
+      const replacing = new vscode.Range(
+        new vscode.Position(position.line, match[1].length),
+        new vscode.Position(position.line, match[1].length + refLen)
+      );
+
+      const inserting = new vscode.Range(
+        new vscode.Position(position.line, match[1].length),
+        position
+      );
+
+      const rc = await getRefContext(this.parsed, match[3], document.uri, this.cache);
+
+      const targetNode = find(rc!.parsed, targetPointer);
       if (targetNode) {
-        // YAML and JSON editors are slightly different in terms of completions
-        // depending on the editor completion might be not shown if
-        // completion items dont start with present/absent quotes, etc
-        if (document.languageId === "yaml") {
-          const openingQuote = refContext.pointer === "" ? refContext.openingQuote : "";
-          return Object.keys(targetNode).map((key: string) => {
-            return new vscode.CompletionItem(
-              `${openingQuote}#${targetPointer}/${key}${refContext.closingQuote}`,
-              vscode.CompletionItemKind.Reference
-            );
-          });
-        } else {
-          return Object.keys(targetNode).map((key: string) => {
-            return new vscode.CompletionItem(
-              `"${refContext.filename}#${targetPointer}/${key}"`,
-              vscode.CompletionItemKind.Reference
-            );
-          });
-        }
+        return Object.keys(targetNode).map((key: string) => {
+          const item = new vscode.CompletionItem(
+            `${rc.filename}#${targetPointer}/${key}`,
+            vscode.CompletionItemKind.Reference
+          );
+          item.range = { replacing, inserting };
+          if (document.languageId === "yaml") {
+            const oq = rc.openingQuote === "" ? '"' : rc.openingQuote;
+            const cq = rc.closingQuote === "" ? '"' : "";
+            item.insertText = `$ref: ${oq}${rc.filename}#${targetPointer}/${key}${cq}`;
+            item.filterText = `$ref: ${rc.openingQuote}${rc.filename}#${targetPointer}/${key}${rc.closingQuote}`;
+          } else {
+            item.insertText = `"$ref": "${rc.filename}#${targetPointer}/${key}"`;
+            item.filterText = `"$ref": "${rc.filename}#${targetPointer}/${key}"`;
+          }
+          return item;
+        });
       }
     }
   }
@@ -95,50 +111,44 @@ export class CompletionItemProvider implements vscode.CompletionItemProvider {
 
 async function getRefContext(
   parsed: Parsed,
-  line: string,
+  content: string,
   baseUri: vscode.Uri,
   cache: Cache
-): Promise<
-  | {
-      parsed: Parsed;
-      openingQuote: string;
-      closingQuote: string;
-      filename: string;
-      pointer: string;
-    }
-  | undefined
-> {
-  const refRe = /^\S+\s+(['"]?)([^"^'^\s]*)(['"]?)$/;
-  const match = line.trim().match(refRe);
-  if (match) {
-    const [_, openingQuote, content, closingQuote] = match;
-    // TODO unquoted
-    if (content === "") {
-      return { parsed, openingQuote, closingQuote: "", filename: "", pointer: "" };
-    }
-    if (content.startsWith("#")) {
-      return { parsed, openingQuote, closingQuote: "", filename: "", pointer: content };
-    }
+): Promise<{
+  parsed: Parsed;
+  filename: string;
+  pointer: string;
+  openingQuote: string;
+  closingQuote: string;
+}> {
+  const trimmed = content.trim();
+  const openingQuote = trimmed.startsWith('"') ? '"' : trimmed.startsWith("'") ? "'" : "";
+  const closingQuote = trimmed.endsWith('"') ? '"' : trimmed.endsWith("'") ? "'" : "";
+  const match = trimmed.match(/(['"])?([^"']*)(\1)?(?:,|$)/);
 
-    const filename = content.substring(0, content.indexOf("#"));
-    const pointer = content.substring(content.indexOf("#"), content.length);
-
-    const normalized = path.normalize(path.join(path.dirname(baseUri.fsPath), filename));
-    const uri = baseUri.with({ path: normalized });
-    try {
-      // stat uri, if it does not exists an exception is thrown
-      await vscode.workspace.fs.stat(uri);
-      const document = await vscode.workspace.openTextDocument(uri);
-      const parsed = cache.getLastGoodParsedDocument(document);
-      if (parsed) {
-        return { parsed, openingQuote, closingQuote: "", filename, pointer };
-      }
-    } catch (ex) {
-      return undefined;
+  if (match !== null && match[2].trim() !== "") {
+    if (match[2].startsWith("#")) {
+      // local reference
+      return { parsed, filename: "", pointer: match[2], openingQuote, closingQuote };
+    } else if (match[2].includes("#")) {
+      // external reference
+      const filename = match[2].substring(0, match[2].indexOf("#"));
+      const pointer = match[2].substring(match[2].indexOf("#"), match[2].length);
+      const normalized = path.normalize(path.join(path.dirname(baseUri.fsPath), filename));
+      const uri = baseUri.with({ path: normalized });
+      try {
+        // stat uri, if it does not exists an exception is thrown
+        await vscode.workspace.fs.stat(uri);
+        const document = await vscode.workspace.openTextDocument(uri);
+        const parsed = cache.getLastGoodParsedDocument(document);
+        if (parsed) {
+          return { parsed, filename, pointer, openingQuote, closingQuote };
+        }
+      } catch (ex) {}
     }
-  } else {
-    return { parsed, openingQuote: '"', closingQuote: '"', filename: "", pointer: "" };
   }
+
+  return { parsed, filename: "", pointer: "", openingQuote, closingQuote };
 }
 
 function findPathAtOffset(parsed: Parsed, offset: number, languageId: string): Path {
@@ -164,6 +174,10 @@ function findPathAtOffset(parsed: Parsed, offset: number, languageId: string): P
 function findTargetPointer(version: OpenApiVersion, nodePath: Path): string | undefined {
   const mapping = targetMapping[version];
   if (mapping) {
-    return mapping[nodePath[nodePath.length - 1]] || mapping[nodePath[nodePath.length - 2]];
+    return (
+      mapping[nodePath[nodePath.length - 1]] ||
+      mapping[nodePath[nodePath.length - 2]] ||
+      mapping[nodePath[nodePath.length - 3]]
+    );
   }
 }
