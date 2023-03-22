@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 4.16.1 (March 22, 2023)
+
+- Fix issue with extra quotes added by intellisence #210
+
+## Version 4.16 (March 21, 2023)
+
+- Add support for Swagger 2.0 in TryIt and Conformance Scan
+- Restyle TryIt and Scan UI
+
 ## Version 4.15 (October 28, 2022)
 
 - Add support for single operation Conformance Scan
