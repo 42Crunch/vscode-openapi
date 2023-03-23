@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.16.2 (March 23, 2023)
+
+- Fix issue with TryIt failing to display UI #209
+
 ## Version 4.16.1 (March 22, 2023)
 
 - Fix issue with extra quotes added by intellisence #210

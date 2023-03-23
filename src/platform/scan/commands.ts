@@ -155,7 +155,7 @@ function extractSinglePath(path: string, oas: any): BundledSwaggerOrOasSpec {
 }
 
 function crawl(root: any, current: any, visited: Set<string>) {
-  if (typeof current !== "object") {
+  if (current === null || typeof current !== "object") {
     return;
   }
 
