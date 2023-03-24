@@ -56,11 +56,13 @@ const Button = styled.button`
   color: var(${ThemeColorVariables.buttonForeground});
   border: none;
 
-  ${({ disabled }: { disabled?: boolean; waiting?: boolean }) => disabled && `cursor: not-allowed;`}
-
+  > span {
+    flex: 1;
+  }
   > svg {
     fill: var(${ThemeColorVariables.buttonForeground});
     animation: ${rotation} 2s infinite linear;
-    ${({ waiting }: { disabled?: boolean; waiting?: boolean }) => !waiting && "display: none;"}
+    transition: width 0.2s linear;
+    ${({ waiting }: { disabled?: boolean; waiting?: boolean }) => !waiting && "width: 0;"}
   }
 `;
