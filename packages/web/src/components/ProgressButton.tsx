@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { Spinner } from "../icons";
 import { useEffect, useState } from "react";
@@ -38,6 +38,15 @@ export default function OperationHeader({
   );
 }
 
+const rotation = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+`;
+
 const Button = styled.button`
   display: flex;
   align-items: center;
@@ -51,16 +60,7 @@ const Button = styled.button`
 
   > svg {
     fill: var(${ThemeColorVariables.buttonForeground});
-    animation: rotation 2s infinite linear;
+    animation: ${rotation} 2s infinite linear;
     ${({ waiting }: { disabled?: boolean; waiting?: boolean }) => !waiting && "display: none;"}
-  }
-
-  @keyframes rotation {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(359deg);
-    }
   }
 `;

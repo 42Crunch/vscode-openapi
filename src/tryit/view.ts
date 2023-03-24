@@ -6,7 +6,6 @@
 import * as vscode from "vscode";
 
 import { OasWithOperation } from "@xliic/common/tryit";
-import { NamedEnvironment } from "@xliic/common/env";
 import { Preferences } from "@xliic/common/prefs";
 
 import { Webapp } from "@xliic/common/webapp/tryit";

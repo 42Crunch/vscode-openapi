@@ -46,15 +46,6 @@ export default (
   );
 };
 
-// snippet from scan-report webapp
-// vscode.commands.registerCommand(
-//   "openapi.platform.showScanReport",
-//   async (report: SingleOperationScanReport) => {
-//     await view.show();
-//     await view.sendShowScanReport(report);
-//   }
-// );
-
 async function editorRunSingleOperationScan(
   editor: vscode.TextEditor,
   edit: vscode.TextEditorEdit,
@@ -65,6 +56,9 @@ async function editorRunSingleOperationScan(
   path: string,
   method: HttpMethod
 ): Promise<void> {
+  await view.show();
+  await view.sendColorTheme(vscode.window.activeColorTheme);
+
   const bundle = await cache.getDocumentBundle(editor.document);
   if (bundle && !("errors" in bundle)) {
     //const oas = extractSingleOperation(method as HttpMethod, path as string, bundle.value);
@@ -94,8 +88,6 @@ async function editorRunSingleOperationScan(
     await store.deleteApi(api.desc.id);
 
     if (config !== undefined) {
-      await view.show();
-      await view.sendColorTheme(vscode.window.activeColorTheme);
       await view.sendScanOperation(editor.document, {
         documentUrl: editor.document.uri.toString(),
         oas: oas as BundledSwaggerOrOasSpec,
@@ -106,32 +98,6 @@ async function editorRunSingleOperationScan(
       });
     }
   }
-}
-
-function extractSingleOperation(
-  method: HttpMethod,
-  path: string,
-  oas: any
-): BundledSwaggerOrOasSpec {
-  const visited = new Set<string>();
-  crawl(oas, oas["paths"][path][method], visited);
-  if (oas["paths"][path]["parameters"]) {
-    crawl(oas, oas["paths"][path]["parameters"], visited);
-  }
-  const cloned: any = simpleClone(oas);
-  delete cloned["paths"];
-  delete cloned["components"];
-  // copy single path and path parameters
-  cloned["paths"] = { [path]: { [method]: oas["paths"][path][method] } };
-  if (oas["paths"][path]["parameters"]) {
-    cloned["paths"][path]["parameters"] = oas["paths"][path]["parameters"];
-  }
-  // copy security schemes
-  if (oas?.["components"]?.["securitySchemes"]) {
-    cloned["components"] = { securitySchemes: oas["components"]["securitySchemes"] };
-  }
-  copyByPointer(oas, cloned, Array.from(visited));
-  return cloned as BundledSwaggerOrOasSpec;
 }
 
 function extractSinglePath(path: string, oas: any): BundledSwaggerOrOasSpec {

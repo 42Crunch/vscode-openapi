@@ -9,7 +9,7 @@ export type RouterState = {
 };
 
 export const initialState: RouterState = {
-  current: [],
+  current: ["starting"],
   history: [],
 };
 
@@ -32,7 +32,7 @@ export const slice = createSlice({
 export const { goTo, goBack } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<
-  ReturnType<typeof slice.actions[keyof typeof slice.actions]>
+  ReturnType<(typeof slice.actions)[keyof typeof slice.actions]>
 > = useDispatch;
 
 export const useFeatureSelector: TypedUseSelectorHook<

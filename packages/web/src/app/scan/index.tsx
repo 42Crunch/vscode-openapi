@@ -25,8 +25,14 @@ import { loadEnv } from "../../features/env/slice";
 import { loadPrefs } from "../../features/prefs/slice";
 
 import ScanOperation from "./ScanOperation";
+import Starting from "./Starting";
 
 const routes: Routes = [
+  {
+    id: "starting",
+    title: "Starting",
+    element: <Starting />,
+  },
   {
     id: "scan",
     title: "Scan",

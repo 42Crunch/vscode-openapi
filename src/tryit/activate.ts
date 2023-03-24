@@ -46,10 +46,6 @@ export function activate(
     previewUpdateDelay = delay;
   });
 
-  const wrap = <T extends Array<unknown>, U>(fn: (...args: T) => U) => {
-    return (...args: T): U => fn(...args);
-  };
-
   function debounce<A extends unknown[], R>(fn: (...args: A) => R) {
     return (...args: A): Promise<R> => {
       let timer: NodeJS.Timeout;
