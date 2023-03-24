@@ -36,10 +36,10 @@
     "redux-logger": "^3.0.6",
     "styled-components": "^5.3.5",
     "swagger-client": "^3.18.5",
-    "typescript": "4.7.4",
-    "vite": "^4.0.1",
+    "typescript": "^5.0.2",
+    "vite": "^4.2.1",
     "vite-plugin-svgr": "^2.4.0",
-    "vitest": "^0.18.0"
+    "vitest": "^0.29.0"
   },
   "override": {
     "json-schema-faker": {
