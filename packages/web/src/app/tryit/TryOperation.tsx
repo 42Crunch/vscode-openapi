@@ -16,15 +16,17 @@ import { makeHttpRequest } from "../../core/http";
 import Settings from "./Settings";
 
 import Response from "./Response";
-import Error from "./Error";
+import HttpError from "./HttpError";
+import GeneralError from "./GeneralError";
 import Section from "../../components/Section";
 import { useEffect, useState } from "react";
 
 export default function TryOperation() {
   const dispatch = useAppDispatch();
 
-  const { path, method, oas, defaultValues, tryitConfig, response, error, waiting } =
-    useAppSelector((state) => state.tryit);
+  const { path, method, oas, defaultValues, tryitConfig, response, waiting } = useAppSelector(
+    (state) => state.tryit
+  );
   const prefs = useAppSelector((state) => state.prefs);
   const env = useAppSelector((state) => state.env.data);
 
@@ -105,7 +107,8 @@ export default function TryOperation() {
           />
         </Section>
       </FormProvider>
-      {error && <Error />}
+      <HttpError />
+      <GeneralError />
       {response && <Response />}
     </>
   );
