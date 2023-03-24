@@ -4,7 +4,11 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { useAppSelector } from "./store";
 
 export default function Error() {
-  const error = useAppSelector((state) => state.tryit.error!);
+  const error = useAppSelector((state) => state.tryit.error);
+
+  if (!error) {
+    return null;
+  }
 
   return (
     <Container>

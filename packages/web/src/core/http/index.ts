@@ -80,7 +80,8 @@ async function buildOasSpec(
   values: TryitOperationValues,
   env: EnvData
 ): Promise<unknown> {
-  const servers = pickServer(oas.servers!, values.server);
+  // FIXME should depend on values.server?
+  const servers = pickServer(oas.servers || [{ url: "http://localhost/" }], values.server);
 
   // stringify/parse to make the spec mutable
   const { spec, errors } = await SwaggerClient.resolve({
@@ -97,9 +98,13 @@ async function buildSwaggerSpec(
   values: TryitOperationValues,
   env: EnvData
 ): Promise<unknown> {
+  // FIXME should depend on values.server?
+  // if no host defined, default to localhost
+  const host = swagger.host || "localhost";
+
   // stringify/parse to make the spec mutable
   const { spec, errors } = await SwaggerClient.resolve({
-    spec: JSON.parse(JSON.stringify(swagger)),
+    spec: JSON.parse(JSON.stringify({ ...swagger, host })),
   });
 
   return spec;

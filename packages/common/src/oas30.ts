@@ -358,26 +358,12 @@ export function getOperations(oas: BundledOpenApiSpec): [string, HttpMethod, Oas
 }
 
 export const OasPrimitiveTypes = ["string", "number", "integer", "boolean"] as const;
-export type OasPrimitiveType = typeof OasPrimitiveTypes[number];
+export type OasPrimitiveType = (typeof OasPrimitiveTypes)[number];
 
 export type OasVaueType =
   | { type: "primitive"; value: OasPrimitiveType }
   | { type: "array"; items: OasPrimitiveType | "unknown" }
   | { type: "object" };
-
-// export function getParameterType(oas: BundledOpenApiSpec, parameter: OasParameter): OasVaueType {
-//   const schema = deref(oas, parameter.schema);
-//   if (OasPrimitiveTypes.includes(schema?.type as any)) {
-//     return { type: "primitive", value: schema?.type as OasPrimitiveType };
-//   } else if (schema?.type === "array") {
-//     if (schema.items && OasPrimitiveTypes.includes(schema.items.type as any)) {
-//       return { type: "array", items: schema.items.type as OasPrimitiveType };
-//     } else {
-//       return { type: "array", items: "unknown" };
-//     }
-//   }
-//   return { type: "object" };
-// }
 
 export function getServerUrls(oas: OpenApiSpec): string[] {
   const servers = (oas.servers ?? [])
