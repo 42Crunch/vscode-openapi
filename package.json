@@ -51,7 +51,7 @@
     "build-webapps": "cd packages && npm run build",
     "compile": "tsc -b",
     "watch": "tsc -b -w",
-    "pretest": "npm run compile",
+    "pretest": "npm run build",
     "test": "node ./out/test/runTest.js"
   },
   "contributes": {
@@ -858,6 +858,7 @@
     "@vscode/test-electron": "^2.1.2",
     "glob": "^7.1.4",
     "marked": "^4.0.10",
+    "mocha": "^10.2.0",
     "typescript": "^5.0.2"
   }
 }
