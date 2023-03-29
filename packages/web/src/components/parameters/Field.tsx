@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { ResolvedOasParameter } from "@xliic/common/oas30";
 import { ResolvedSwaggerParameter } from "@xliic/common/swagger";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { TrashCan } from "../../icons";
+import { TrashCan, TriangleExclamation } from "../../icons";
 
 export type Parameter = ResolvedOasParameter | ResolvedSwaggerParameter;
 export type Schema = { type?: string };
@@ -42,38 +42,55 @@ export default function Field({
 
   return (
     <Container>
-      <Name>{parameter.name}</Name>
-      <Value
-        type="text"
-        // className={error ? "is-invalid" : undefined}
-        onChange={(e) => {
-          setValue(e.target.value);
-          try {
-            field.onChange(convertFormToData(schema, e.target.value));
-            clearErrors(name);
-          } catch (e: any) {
-            setError(name, { message: `${e}` });
-          }
-        }}
-        onBlur={field.onBlur}
-        value={value}
-        ref={field.ref}
-      />
-      {/* {error && <div className="invalid-feedback">{error.message}</div>} */}
-      <Remove
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onDelete();
-        }}
-      >
-        <TrashCan />
-      </Remove>
+      <Content>
+        <Name>{parameter.name}</Name>
+        <Value
+          type="text"
+          onChange={(e) => {
+            setValue(e.target.value);
+            try {
+              field.onChange(convertFormToData(schema, e.target.value));
+              clearErrors(name);
+            } catch (e: any) {
+              setError(name, { message: `${e}` });
+            }
+          }}
+          onBlur={field.onBlur}
+          value={value}
+          ref={field.ref}
+        />
+        <Remove
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onDelete();
+          }}
+        >
+          <TrashCan />
+        </Remove>
+      </Content>
+      {error && (
+        <ErrorMessage>
+          <TriangleExclamation /> {error.message}
+        </ErrorMessage>
+      )}
     </Container>
   );
 }
 
-const Container = styled.div`
+const Container = styled.div``;
+
+const ErrorMessage = styled.div`
+  color: var(${ThemeColorVariables.errorForeground});
+  > svg {
+    fill: var(${ThemeColorVariables.errorForeground});
+    padding-right: 4px;
+  }
+  display: flex;
+  margin: 4px 0;
+`;
+
+const Content = styled.div`
   display: flex;
   &:hover > :last-child {
     visibility: visible;
@@ -144,7 +161,10 @@ function convertFormToData(schema: Schema | undefined, value: string): any {
     return convertToNumber(value);
   }
   if (type === "boolean") {
-    return value == "true" ? true : false;
+    if (value === "true" || value === "false") {
+      return value === "true" ? true : false;
+    }
+    throw new Error("failed to convert to 'boolean'");
   }
   if (type === "object" || type === "array") {
     return convertToObjectOrArray(value);
