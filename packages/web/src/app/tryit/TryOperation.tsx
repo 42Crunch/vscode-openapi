@@ -38,11 +38,7 @@ export default function TryOperation() {
     security: updateSecurityWithPrefs(defaultValues!.security, prefs.security),
   };
 
-  const [values, setValues] = useState(wrapFormDefaults(updatedDefaults));
-
-  useEffect(() => {
-    setValues(wrapFormDefaults(updatedDefaults));
-  }, [defaultValues]);
+  const values = wrapFormDefaults(updatedDefaults);
 
   const tryOperation = async (data: Record<string, any>) => {
     const values = unwrapFormDefaults(data);

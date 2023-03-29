@@ -1,10 +1,12 @@
 import styled from "styled-components";
+import { useEffect, useState } from "react";
 import { useFormContext, useController } from "react-hook-form";
 
 import type { BundledOpenApiSpec, OasRequestBody } from "@xliic/common/oas30";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
-import { useEffect, useState } from "react";
+import { TriangleExclamation } from "../../icons";
+
 import { createBody, serializeToFormText, parseFromFormText } from "../../core/form/body";
 
 export default function RequestBody({
@@ -37,11 +39,19 @@ export default function RequestBody({
     },
   });
 
-  const [bodyText, setBodyText] = useState("");
+  const [bodyText, setBodyText] = useState(
+    serializeToFormText({ mediaType: bodyMediaType.value, value: bodyValue.value })
+  );
 
   // update body on changes
   useEffect(() => {
-    if (bodyMediaType.value !== undefined) {
+    if (bodyValue.value instanceof Error) {
+      return;
+    }
+    if (
+      JSON.stringify(parseFromFormText(bodyMediaType.value, bodyText)) !==
+      JSON.stringify(bodyValue.value)
+    ) {
       const body = createBody(
         oas,
         bodyMediaType.value,
@@ -50,11 +60,20 @@ export default function RequestBody({
       );
       setBodyText(serializeToFormText(body));
     }
-  }, [bodyMediaType.value, bodyValue.value]);
+  }, [bodyMediaType.value, bodyValue.value, bodyText]);
 
   return (
     <Container>
-      <select onChange={bodyMediaType.onChange} value={bodyMediaType.value} ref={bodyMediaType.ref}>
+      <select
+        onChange={(e) => {
+          const mediaType = e.target.value;
+          const body = createBody(oas, mediaType, requestBody?.content?.[mediaType]);
+          bodyMediaType.onChange(mediaType);
+          bodyValue.onChange(body.value);
+        }}
+        value={bodyMediaType.value}
+        ref={bodyMediaType.ref}
+      >
         {Object.keys(requestBody.content).map((mediaType) => (
           <option key={mediaType}>{mediaType}</option>
         ))}
@@ -69,12 +88,17 @@ export default function RequestBody({
         value={bodyText}
         ref={bodyValue.ref}
       />
-      {error && <div className="invalid-feedback">{error.message}</div>}
+      {error && (
+        <ErrorMessage>
+          <TriangleExclamation /> {error.message}
+        </ErrorMessage>
+      )}
     </Container>
   );
 }
 
 function validate(value: any): any {
+  console.log("body validate", value);
   if (value instanceof Error) {
     return value.message;
   }
@@ -100,4 +124,16 @@ const Container = styled.div`
     border: none;
     border-bottom: 1px solid var(${ThemeColorVariables.border});
   }
+`;
+
+const ErrorMessage = styled.div`
+  display: flex;
+  align-items: center;
+  color: var(${ThemeColorVariables.errorForeground});
+  > svg {
+    fill: var(${ThemeColorVariables.errorForeground});
+    padding-right: 4px;
+  }
+  display: flex;
+  margin: 4px 0;
 `;

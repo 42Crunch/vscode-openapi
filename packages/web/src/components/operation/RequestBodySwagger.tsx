@@ -4,6 +4,7 @@ import { useFormContext, useController } from "react-hook-form";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { BundledSwaggerSpec, ResolvedSwaggerParameter } from "@xliic/common/swagger";
+import { TriangleExclamation } from "../../icons";
 
 import { createBody, serializeToFormText, parseFromFormText } from "../../core/form/body-swagger";
 
@@ -11,11 +12,12 @@ function serialize(value: any): string {
   return JSON.stringify(value, null, 2);
 }
 
-function parse(value: string | undefined): unknown {
-  if (value === undefined || value === "") {
-    return undefined;
+function parse(value: string): unknown {
+  try {
+    return JSON.parse(value);
+  } catch (e) {
+    return new Error(`failed to convert: ${e}`);
   }
-  return JSON.parse(value);
 }
 
 export default function RequestBodySwagger({
@@ -38,27 +40,36 @@ export default function RequestBodySwagger({
     },
   });
 
-  const [bodyText, setBodyText] = useState("");
+  const [bodyText, setBodyText] = useState(serialize(bodyValue.value));
 
+  // update body on changes
   useEffect(() => {
-    if (bodyValue.value !== undefined) {
+    if (bodyValue.value instanceof Error) {
+      return;
+    }
+
+    if (JSON.stringify(parse(bodyText)) !== JSON.stringify(bodyValue.value)) {
       setBodyText(serialize(bodyValue.value));
     }
-  }, [bodyValue.value]);
+  }, [bodyValue.value, bodyText]);
 
   return (
     <Container>
       <textarea
         rows={10}
         onChange={(e) => {
-          setBodyText(e.target.value);
           bodyValue.onChange(parse(e.target.value));
+          setBodyText(e.target.value);
         }}
         onBlur={bodyValue.onBlur}
         value={bodyText}
         ref={bodyValue.ref}
       />
-      {/* {error && <div className="invalid-feedback">{error.message}</div>} */}
+      {error && (
+        <ErrorMessage>
+          <TriangleExclamation /> {error.message}
+        </ErrorMessage>
+      )}
     </Container>
   );
 }
@@ -75,6 +86,18 @@ const Container = styled.div`
     border: 1px solid var(${ThemeColorVariables.border});
     padding: 4px;
   }
+`;
+
+const ErrorMessage = styled.div`
+  display: flex;
+  align-items: center;
+  color: var(${ThemeColorVariables.errorForeground});
+  > svg {
+    fill: var(${ThemeColorVariables.errorForeground});
+    padding-right: 4px;
+  }
+  display: flex;
+  margin: 4px 0;
 `;
 
 function validate(value: any): any {
