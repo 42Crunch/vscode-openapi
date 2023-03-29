@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.16.3 (March 24, 2023)
+
+- Fix issue with TryIt failing on Swagger/OpenAPI files with no servers or host defined
+
 ## Version 4.16.2 (March 23, 2023)
 
 - Fix issue with TryIt failing to display UI #209
