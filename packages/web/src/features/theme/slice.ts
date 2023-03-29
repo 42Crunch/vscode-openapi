@@ -21,10 +21,10 @@ export const slice = createSlice({
       state.theme = { ...state.theme, ...(action.payload.theme ?? {}) };
       if (state.kind === "light") {
         state.theme.computedOne = "rgba(0, 0, 0, 0.05)";
-        state.theme.computedTwo = "rgba(0, 0, 0, 0.075)";
+        state.theme.computedTwo = "rgba(0, 0, 0, 0.1)";
       } else if (state.kind === "dark") {
         state.theme.computedOne = "rgba(255, 255, 255, 0.05)";
-        state.theme.computedTwo = "rgba(255, 255, 255, 0.075)";
+        state.theme.computedTwo = "rgba(255, 255, 255, 0.1)";
       } else {
         state.theme.computedOne = "transparent";
         state.theme.computedTwo = "transparent";
