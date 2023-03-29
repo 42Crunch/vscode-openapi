@@ -92,7 +92,6 @@ export function generateParameterValues(
       if (parameter.type) {
         jsf.option("useExamplesValue", true);
         jsf.option("failOnInvalidFormat", false);
-        jsf.option("maxItems", 100);
         jsf.option("maxLength", 4096);
         jsf.option("alwaysFakeOptionals", true);
 
