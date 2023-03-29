@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.16.4 (March 29, 2023)
+
+- Fix issue with TryIt request body editing input failing on invalid JSON
+- Improve errors displaying when editing request parameters in TryIt
+
 ## Version 4.16.3 (March 24, 2023)
 
 - Fix issue with TryIt failing on Swagger/OpenAPI files with no servers or host defined
