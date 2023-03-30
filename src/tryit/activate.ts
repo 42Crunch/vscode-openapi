@@ -9,7 +9,7 @@ import { Preferences } from "@xliic/common/prefs";
 import { Bundle } from "../types";
 import { Cache } from "../cache";
 import { HttpMethod } from "@xliic/common/http";
-import { BundledOpenApiSpec } from "@xliic/common/oas30";
+import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
 import { TryItWebView } from "./view";
 import { TryItCodelensProvider } from "./lens";
 import { Configuration } from "../configuration";
@@ -191,7 +191,11 @@ function getBundleVersions(bundle: Bundle) {
   return versions;
 }
 
-function extractSingleOperation(method: HttpMethod, path: string, oas: any): BundledOpenApiSpec {
+function extractSingleOperation(
+  method: HttpMethod,
+  path: string,
+  oas: any
+): BundledSwaggerOrOasSpec {
   const visited = new Set<string>();
   crawl(oas, oas["paths"][path][method], visited);
   if (oas["paths"][path]["parameters"]) {
@@ -200,6 +204,8 @@ function extractSingleOperation(method: HttpMethod, path: string, oas: any): Bun
   const cloned: any = simpleClone(oas);
   delete cloned["paths"];
   delete cloned["components"];
+  delete cloned["definitions"];
+
   // copy single path and path parameters
   cloned["paths"] = { [path]: { [method]: oas["paths"][path][method] } };
   if (oas["paths"][path]["parameters"]) {
@@ -210,7 +216,7 @@ function extractSingleOperation(method: HttpMethod, path: string, oas: any): Bun
     cloned["components"] = { securitySchemes: oas["components"]["securitySchemes"] };
   }
   copyByPointer(oas, cloned, Array.from(visited));
-  return cloned as BundledOpenApiSpec;
+  return cloned as BundledSwaggerOrOasSpec;
 }
 
 function crawl(root: any, current: any, visited: Set<string>) {
