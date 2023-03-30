@@ -135,12 +135,12 @@ async function editorRunSingleOperationScan(
 function extractSinglePath(path: string, oas: any): BundledSwaggerOrOasSpec {
   const visited = new Set<string>();
   crawl(oas, oas["paths"][path], visited);
-  if (oas["paths"][path]["parameters"]) {
-    crawl(oas, oas["paths"][path]["parameters"], visited);
-  }
+
   const cloned: any = simpleClone(oas);
   delete cloned["paths"];
   delete cloned["components"];
+  delete cloned["definitions"];
+
   // copy single path and path parameters
   cloned["paths"] = { [path]: oas["paths"][path] };
 
