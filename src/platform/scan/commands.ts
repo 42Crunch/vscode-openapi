@@ -11,12 +11,15 @@ import { PlatformStore } from "../stores/platform-store";
 import { HttpMethod } from "@xliic/common/http";
 import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
 import { ScanWebView } from "./view";
+import { parseAuditReport } from "../../audit/audit";
+import { AuditWebView } from "../../audit/view";
 
 export default (
   cache: Cache,
   platformContext: PlatformContext,
   store: PlatformStore,
-  view: ScanWebView
+  view: ScanWebView,
+  auditView: AuditWebView
 ) => {
   vscode.commands.registerTextEditorCommand(
     "openapi.platform.editorRunSingleOperationScan",
@@ -28,7 +31,17 @@ export default (
       method: HttpMethod
     ): Promise<void> => {
       try {
-        await editorRunSingleOperationScan(editor, edit, cache, store, view, uri, path, method);
+        await editorRunSingleOperationScan(
+          editor,
+          edit,
+          cache,
+          store,
+          view,
+          auditView,
+          uri,
+          path,
+          method
+        );
       } catch (ex: any) {
         if (
           ex?.response?.statusCode === 409 &&
@@ -52,6 +65,7 @@ async function editorRunSingleOperationScan(
   cache: Cache,
   store: PlatformStore,
   view: ScanWebView,
+  auditView: AuditWebView,
   uri: string,
   path: string,
   method: HttpMethod
@@ -69,8 +83,15 @@ async function editorRunSingleOperationScan(
 
     const api = await store.createTempApi(rawOas);
 
-    const audit = await store.getAuditReport(api.desc.id);
-    if (audit?.openapiState !== "valid") {
+    const report = await store.getAuditReport(api.desc.id);
+
+    if (report?.openapiState !== "valid") {
+      // const audit = await parseAuditReport(cache, editor.document, report, {
+      //   value: { uri, hash: "" },
+      //   children: {},
+      // });
+      // await auditView.showReport(audit);
+
       await store.deleteApi(api.desc.id);
       throw new Error(
         "OpenAPI has failed Security Audit. Please run API Security Audit, fix the issues and try running the Scan again."

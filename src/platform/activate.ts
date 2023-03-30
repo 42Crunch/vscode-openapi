@@ -96,7 +96,16 @@ export async function activate(
     });
   }
 
-  activateScan(context, platformContext, cache, configuration, store, envStore, prefs);
+  activateScan(
+    context,
+    platformContext,
+    cache,
+    configuration,
+    store,
+    envStore,
+    prefs,
+    reportWebView
+  );
   activateLinter(cache, platformContext, store, dataDictionaryDiagnostics);
 
   const disposable1 = vscode.workspace.onDidSaveTextDocument((document) =>

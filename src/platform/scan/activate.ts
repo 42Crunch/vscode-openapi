@@ -9,6 +9,7 @@ import commands from "./commands";
 import { ScanWebView } from "./view";
 import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
+import { AuditWebView } from "../../audit/view";
 
 const selectors = {
   json: { language: "json" },
@@ -23,7 +24,8 @@ export function activate(
   configuration: Configuration,
   store: PlatformStore,
   envStore: EnvStore,
-  prefs: Record<string, Preferences>
+  prefs: Record<string, Preferences>,
+  auditView: AuditWebView
 ): vscode.Disposable {
   const view = new ScanWebView(context.extensionPath, cache, configuration, store, envStore, prefs);
 
@@ -42,7 +44,7 @@ export function activate(
     }
   });
 
-  commands(cache, platformContext, store, view);
+  commands(cache, platformContext, store, view, auditView);
 
   return new vscode.Disposable(() => disposables.forEach((disposable) => disposable.dispose()));
 }
