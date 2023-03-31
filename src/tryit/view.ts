@@ -29,7 +29,10 @@ export class TryItWebView extends WebView<Webapp> {
         .update("tryit.insecureSslHostnames", config.insecureSslHostnames);
     },
     savePrefs: async (prefs: Preferences) => {
-      this.prefs[this.document!.uri.toString()] = prefs;
+      this.prefs[this.document!.uri.toString()] = {
+        ...this.prefs[this.document!.uri.toString()],
+        ...prefs,
+      };
     },
     showEnvWindow: async () => {
       vscode.commands.executeCommand("openapi.showEnvironment");

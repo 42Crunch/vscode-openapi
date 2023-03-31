@@ -84,7 +84,10 @@ export class ScanWebView extends WebView<Webapp> {
     },
 
     savePrefs: async (prefs: Preferences) => {
-      this.prefs[this.document!.uri.toString()] = prefs;
+      this.prefs[this.document!.uri.toString()] = {
+        ...this.prefs[this.document!.uri.toString()],
+        ...prefs,
+      };
     },
 
     showEnvWindow: async () => {
