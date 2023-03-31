@@ -27,7 +27,8 @@ export const slice = createSlice({
       state.ready = true;
     },
     saveEnv: (state, action: PayloadAction<NamedEnvironment>) => {
-      // hook for a listener, state will be updated after a round trip to the host app
+      // this is also a hook for a listener
+      state.data[action.payload.name] = action.payload.environment;
     },
     showEnvWindow: (state, action: PayloadAction<undefined>) => {
       // hook for a listener
