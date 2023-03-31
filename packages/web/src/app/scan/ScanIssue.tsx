@@ -43,10 +43,7 @@ export default function ScanIssue({
   let responsePayloadMatchesContract = "N/A";
 
   const responseCodeFound =
-    outcome?.apiResponseAnalysis === null ||
-    outcome?.apiResponseAnalysis?.[0]?.responseKey === "response-http-status-scan"
-      ? "No"
-      : "Yes";
+    outcome?.apiResponseAnalysis?.[0]?.responseKey === "response-http-status-scan" ? "No" : "Yes";
 
   if (responseCodeFound === "Yes") {
     contentTypeFound =
