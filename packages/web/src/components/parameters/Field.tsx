@@ -121,6 +121,9 @@ const Remove = styled.button`
   align-items: center;
   justify-content: center;
   visibility: hidden;
+  > svg {
+    fill: var(${ThemeColorVariables.foreground});
+  }
 `;
 
 function validate(schema: Schema, value: unknown): any {
