@@ -15,7 +15,6 @@ import {
   ShowHttpResponseMessage,
   ShowHttpErrorMessage,
 } from "../http";
-import { SetDocumentUrlMessage } from "../document";
 
 export type Webapp = App<
   // consumes
@@ -26,8 +25,7 @@ export type Webapp = App<
   | ChangeThemeMessage
   | ShowHttpErrorMessage
   | ShowScanReportMessage
-  | ShowHttpResponseMessage
-  | SetDocumentUrlMessage,
+  | ShowHttpResponseMessage,
   // produces
   | RunScanMessage
   | ShowEnvWindow

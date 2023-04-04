@@ -50,7 +50,6 @@ const messageHandlers: Webapp["webappHandlers"] = {
   showScanReport,
   loadEnv,
   loadPrefs,
-  updateDocumentUrl,
 };
 
 function App() {
