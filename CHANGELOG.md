@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 4.16.5 (April 4, 2023)
+
+- Fix issue where TryIt woudln't use value defined in parameter's 'example' #213
+- Fix issue where Scan report incorrectly shows that response code wasn't found
+- Fix color for trashcan icon in the dark theme
+
 ## Version 4.16.4 (March 29, 2023)
 
 - Fix issue with TryIt request body editing input failing on invalid JSON
