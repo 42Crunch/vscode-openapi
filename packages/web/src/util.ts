@@ -1,4 +1,5 @@
 import jsf from "json-schema-faker";
+import { deref } from "@xliic/common/ref";
 
 import {
   BundledOpenApiSpec,
@@ -109,7 +110,13 @@ export function generateParameterValues(
   for (const location of locations) {
     for (const name of Object.keys(parameters[location])) {
       const parameter = parameters[location][name];
-      if (parameter.schema) {
+      if (parameter?.example !== undefined) {
+        values[location][name] = parameter.example;
+      } else if (parameter?.examples && Object.values(parameter.examples).length > 0) {
+        const example = Object.values(parameter.examples)[0];
+        const value = deref(oas, example)?.value;
+        values[location][name] = value === undefined ? "" : value;
+      } else if (parameter.schema) {
         jsf.option("useExamplesValue", true);
         jsf.option("failOnInvalidFormat", false);
         jsf.option("maxLength", 4096);
