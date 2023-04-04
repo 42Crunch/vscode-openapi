@@ -18,7 +18,7 @@ export default (
   cache: Cache,
   platformContext: PlatformContext,
   store: PlatformStore,
-  view: ScanWebView,
+  getScanView: (document: vscode.TextDocument) => ScanWebView,
   auditView: AuditWebView
 ) => {
   vscode.commands.registerTextEditorCommand(
@@ -36,7 +36,7 @@ export default (
           edit,
           cache,
           store,
-          view,
+          getScanView,
           auditView,
           uri,
           path,
@@ -64,12 +64,13 @@ async function editorRunSingleOperationScan(
   edit: vscode.TextEditorEdit,
   cache: Cache,
   store: PlatformStore,
-  view: ScanWebView,
+  getTryItView: (document: vscode.TextDocument) => ScanWebView,
   auditView: AuditWebView,
   uri: string,
   path: string,
   method: HttpMethod
 ): Promise<void> {
+  const view = getTryItView(editor.document);
   await view.show();
   await view.sendColorTheme(vscode.window.activeColorTheme);
 
@@ -120,8 +121,7 @@ async function editorRunSingleOperationScan(
       }
       await view.show();
       await view.sendColorTheme(vscode.window.activeColorTheme);
-      await view.sendScanOperation(editor.document, {
-        documentUrl: editor.document.uri.toString(),
+      await view.sendScanOperation({
         oas: oas as BundledSwaggerOrOasSpec,
         rawOas: rawOas,
         path: path as string,

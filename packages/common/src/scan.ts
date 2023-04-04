@@ -26,7 +26,6 @@ export interface OasWithOperationAndConfig {
   path: string;
   method: HttpMethod;
   config: unknown;
-  documentUrl: string;
 }
 
 export interface ScanRunConfig {
@@ -53,12 +52,7 @@ export type ShowScanReportMessage = {
 // responses sent from web app to the vs code extension
 export type RunScanMessage = { command: "runScan"; payload: ScanRunConfig };
 
-export type DocumentAndJsonPointer = {
-  document: string;
-  jsonPointer: string;
-};
-
 export type ShowJsonPointerMessage = {
   command: "showJsonPointer";
-  payload: DocumentAndJsonPointer;
+  payload: string;
 };

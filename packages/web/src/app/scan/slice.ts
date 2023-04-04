@@ -6,7 +6,6 @@ import {
   ScanConfig,
   OasWithOperationAndConfig,
   SingleOperationScanReport,
-  DocumentAndJsonPointer,
 } from "@xliic/common/scan";
 import { HttpMethod, HttpRequest, HttpResponse, HttpError } from "@xliic/common/http";
 import { GeneralError } from "@xliic/common/error";
@@ -22,7 +21,6 @@ import {
 export interface OasState {
   oas: BundledSwaggerOrOasSpec;
   rawOas: string;
-  document: string;
   path?: string;
   method?: HttpMethod;
   example?: {
@@ -49,7 +47,6 @@ const initialState: OasState = {
     paths: {},
   },
   rawOas: "",
-  document: "",
   scanReport: undefined,
   prefs: {
     scanServer: "",
@@ -68,7 +65,7 @@ export const slice = createSlice({
   initialState,
   reducers: {
     scanOperation: (state, action: PayloadAction<OasWithOperationAndConfig>) => {
-      const { oas, rawOas, path, method, config, documentUrl: document } = action.payload;
+      const { oas, rawOas, path, method, config } = action.payload;
       const scanConfig = readRawScanConfig(config, path, method);
 
       if (isOpenapi(oas)) {
@@ -101,7 +98,6 @@ export const slice = createSlice({
           securityIndex: 0,
         };
       }
-      state.document = document;
       state.oas = oas;
       state.rawOas = rawOas;
       state.path = path;
@@ -160,7 +156,7 @@ export const slice = createSlice({
 
     sendCurlRequest: (state, action: PayloadAction<string>) => {},
 
-    showJsonPointer: (state, action: PayloadAction<DocumentAndJsonPointer>) => {},
+    showJsonPointer: (state, action: PayloadAction<string>) => {},
   },
 });
 

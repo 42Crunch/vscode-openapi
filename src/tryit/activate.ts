@@ -10,7 +10,7 @@ import { Bundle } from "../types";
 import { Cache } from "../cache";
 import { HttpMethod } from "@xliic/common/http";
 import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
-import { TryItWebView } from "./view";
+import { getWebview, TryItWebView } from "./view";
 import { TryItCodelensProvider } from "./lens";
 import { Configuration } from "../configuration";
 import { EnvStore } from "../envstore";
@@ -60,7 +60,19 @@ export function activate(
 
   const debouncedTryIt = debounce(showTryIt);
 
-  const view = new TryItWebView(context.extensionPath, cache, envStore, prefs);
+  let exitingTryItView: TryItWebView | undefined = undefined;
+
+  function getTryItWebview(document: vscode.TextDocument) {
+    exitingTryItView = getWebview(
+      context.extensionPath,
+      cache,
+      envStore,
+      prefs,
+      document,
+      exitingTryItView
+    );
+    return exitingTryItView;
+  }
 
   cache.onDidChange(async (document: vscode.TextDocument) => {
     const uri = document.uri.toString();
@@ -70,7 +82,7 @@ export function activate(
         const versions = getBundleVersions(bundle);
         if (isBundleVersionsDifferent(versions, tryIt.versions)) {
           tryIt.versions = versions;
-          debouncedTryIt(view, document, bundle, tryIt.path, tryIt.method);
+          debouncedTryIt(getTryItWebview(document), bundle, tryIt.path, tryIt.method);
         }
       }
     }
@@ -80,7 +92,7 @@ export function activate(
     "openapi.tryOperation",
     async (uri: vscode.Uri, path: string, method: HttpMethod) => {
       tryIt = { documentUri: uri, path, method, versions: {} };
-      startTryIt(view, cache, tryIt);
+      startTryIt(getTryItWebview, cache, tryIt);
     }
   );
 
@@ -101,7 +113,7 @@ export function activate(
         preferredMediaType,
         preferredBodyValue,
       };
-      startTryIt(view, cache, tryIt);
+      startTryIt(getTryItWebview, cache, tryIt);
     }
   );
 
@@ -111,7 +123,11 @@ export function activate(
   }
 }
 
-async function startTryIt(view: TryItWebView, cache: Cache, tryIt: TryIt) {
+async function startTryIt(
+  getView: (document: vscode.TextDocument) => TryItWebView,
+  cache: Cache,
+  tryIt: TryIt
+) {
   const document = await vscode.workspace.openTextDocument(tryIt.documentUri);
   const bundle = await cache.getDocumentBundle(document);
 
@@ -120,11 +136,11 @@ async function startTryIt(view: TryItWebView, cache: Cache, tryIt: TryIt) {
     vscode.window.showErrorMessage("Failed to try it, check OpenAPI file for errors.");
   } else {
     tryIt.versions = getBundleVersions(bundle);
+    const view = getView(document);
     await view.show();
     await view.sendColorTheme(vscode.window.activeColorTheme);
     await showTryIt(
       view,
-      document,
       bundle,
       tryIt.path,
       tryIt.method,
@@ -136,7 +152,6 @@ async function startTryIt(view: TryItWebView, cache: Cache, tryIt: TryIt) {
 
 async function showTryIt(
   view: TryItWebView,
-  document: vscode.TextDocument,
   bundle: Bundle,
   path: string,
   method: HttpMethod,
@@ -149,7 +164,7 @@ async function showTryIt(
     const insecureSslHostnames =
       vscode.workspace.getConfiguration("openapi").get<string[]>("tryit.insecureSslHostnames") ||
       [];
-    view.sendTryOperation(document, {
+    view.sendTryOperation({
       oas,
       path,
       method,

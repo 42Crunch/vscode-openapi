@@ -10,7 +10,6 @@ import {
   OasWithOperationAndConfig,
   ShowScanReportMessage,
   SingleOperationScanReport,
-  DocumentAndJsonPointer,
 } from "@xliic/common/scan";
 
 import { NamedEnvironment, replaceEnv } from "@xliic/common/env";
@@ -32,8 +31,25 @@ import { EnvStore } from "../../envstore";
 import { executeHttpRequestRaw } from "../../tryit/http-handler";
 import { getLocationByPointer } from "../../audit/util";
 
+export function getWebview(
+  extensionPath: string,
+  cache: Cache,
+  configuration: Configuration,
+  store: PlatformStore,
+  envStore: EnvStore,
+  prefs: Record<string, Preferences>,
+  document: vscode.TextDocument,
+  existingView: ScanWebView | undefined
+): ScanWebView {
+  if (existingView !== undefined) {
+    existingView.setDocument(document);
+    return existingView;
+  }
+
+  return new ScanWebView(extensionPath, cache, configuration, store, envStore, prefs, document);
+}
+
 export class ScanWebView extends WebView<Webapp> {
-  private document?: vscode.TextDocument;
   private isNewApi: boolean = false;
 
   hostHandlers: Webapp["hostHandlers"] = {
@@ -84,8 +100,8 @@ export class ScanWebView extends WebView<Webapp> {
     },
 
     savePrefs: async (prefs: Preferences) => {
-      this.prefs[this.document!.uri.toString()] = {
-        ...this.prefs[this.document!.uri.toString()],
+      this.prefs[this.document.uri.toString()] = {
+        ...this.prefs[this.document.uri.toString()],
         ...prefs,
       };
     },
@@ -94,26 +110,22 @@ export class ScanWebView extends WebView<Webapp> {
       vscode.commands.executeCommand("openapi.showEnvironment");
     },
 
-    showJsonPointer: async (payload: DocumentAndJsonPointer) => {
+    showJsonPointer: async (payload: string) => {
       let editor: vscode.TextEditor | undefined = undefined;
 
       // check if document is already open
       for (const visibleEditor of vscode.window.visibleTextEditors) {
-        if (visibleEditor.document.uri.toString() == payload.document) {
+        if (visibleEditor.document.uri.toString() === this.document.uri.toString()) {
           editor = visibleEditor;
         }
       }
 
       if (!editor) {
-        // if not already open, load and show it
-        const document = await vscode.workspace.openTextDocument(
-          vscode.Uri.parse(payload.document)
-        );
-        editor = await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+        editor = await vscode.window.showTextDocument(this.document, vscode.ViewColumn.One);
       }
 
       const root = this.cache.getParsedDocument(editor.document);
-      const lineNo = getLocationByPointer(editor.document, root, payload.jsonPointer)[0];
+      const lineNo = getLocationByPointer(editor.document, root, payload)[0];
       const textLine = editor.document.lineAt(lineNo);
       editor.selection = new vscode.Selection(lineNo, 0, lineNo, 0);
       editor.revealRange(textLine.range, vscode.TextEditorRevealType.AtTop);
@@ -126,7 +138,8 @@ export class ScanWebView extends WebView<Webapp> {
     private configuration: Configuration,
     private store: PlatformStore,
     private envStore: EnvStore,
-    private prefs: Record<string, Preferences>
+    private prefs: Record<string, Preferences>,
+    private document: vscode.TextDocument
   ) {
     super(extensionPath, "scan", "Scan", vscode.ViewColumn.Two, false);
     envStore.onEnvironmentDidChange((env) => {
@@ -145,8 +158,7 @@ export class ScanWebView extends WebView<Webapp> {
     });
   }
 
-  async sendScanOperation(document: vscode.TextDocument, payload: OasWithOperationAndConfig) {
-    this.document = document;
+  async sendScanOperation(payload: OasWithOperationAndConfig) {
     this.sendRequest({ command: "loadEnv", payload: await this.envStore.all() });
     const prefs = this.prefs[this.document.uri.toString()];
     if (prefs) {
@@ -157,6 +169,10 @@ export class ScanWebView extends WebView<Webapp> {
 
   setNewApi() {
     this.isNewApi = true;
+  }
+
+  setDocument(document: vscode.TextDocument) {
+    this.document = document;
   }
 }
 

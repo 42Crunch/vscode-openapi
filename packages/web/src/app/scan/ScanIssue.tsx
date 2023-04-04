@@ -29,7 +29,6 @@ export default function ScanIssue({
   waiting: boolean;
 }) {
   const dispatch = useAppDispatch();
-  const document = useAppSelector((state) => state.scan.document);
 
   const [collapsed, setCollapsed] = useState(true);
   const { response, test, outcome } = issue;
@@ -157,7 +156,7 @@ export default function ScanIssue({
                     e.preventDefault();
                     e.stopPropagation();
                     dispatch(
-                      showJsonPointer({ document, jsonPointer: issue.test?.jsonPointer + "" }) // FIXME support indexed reports
+                      showJsonPointer(issue.test?.jsonPointer + "") // FIXME support indexed reports
                     );
                   }}
                 >
