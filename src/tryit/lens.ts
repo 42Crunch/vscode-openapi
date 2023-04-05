@@ -64,7 +64,7 @@ function operationLens(
     title: `Try it`,
     tooltip: "Try this operation by sending a request",
     command: "openapi.tryOperation",
-    arguments: [document.uri, path, method],
+    arguments: [document, path, method],
   });
 }
 
@@ -96,7 +96,7 @@ function operationExamplesLens(
               tooltip:
                 "Try this operation by sending a request, use this example for the request body",
               command: "openapi.tryOperationWithExample",
-              arguments: [document.uri, path, method, mediaType, example.value],
+              arguments: [document, path, method, mediaType, example.value],
             })
           );
         }

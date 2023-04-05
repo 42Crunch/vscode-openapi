@@ -66,7 +66,9 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
   async show(): Promise<void> {
     if (!this.panel) {
       const panel = await this.createPanel();
-      panel.onDidDispose(() => (this.panel = undefined));
+      panel.onDidDispose(() => {
+        this.onDispose();
+      });
       panel.webview.onDidReceiveMessage(async (message) => {
         this.handleResponse(message as W["produces"]);
       });
@@ -74,6 +76,10 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
     } else if (!this.panel.visible) {
       this.panel.reveal();
     }
+  }
+
+  onDispose() {
+    this.panel = undefined;
   }
 
   createPanel(): Promise<vscode.WebviewPanel> {

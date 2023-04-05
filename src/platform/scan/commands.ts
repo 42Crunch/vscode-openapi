@@ -13,12 +13,13 @@ import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
 import { ScanWebView } from "./view";
 import { parseAuditReport } from "../../audit/audit";
 import { AuditWebView } from "../../audit/view";
+import { extractSinglePath } from "../../util/extract";
 
 export default (
   cache: Cache,
   platformContext: PlatformContext,
   store: PlatformStore,
-  getScanView: (document: vscode.TextDocument) => ScanWebView,
+  view: ScanWebView,
   auditView: AuditWebView
 ) => {
   vscode.commands.registerTextEditorCommand(
@@ -36,7 +37,7 @@ export default (
           edit,
           cache,
           store,
-          getScanView,
+          view,
           auditView,
           uri,
           path,
@@ -64,13 +65,12 @@ async function editorRunSingleOperationScan(
   edit: vscode.TextEditorEdit,
   cache: Cache,
   store: PlatformStore,
-  getTryItView: (document: vscode.TextDocument) => ScanWebView,
+  view: ScanWebView,
   auditView: AuditWebView,
   uri: string,
   path: string,
   method: HttpMethod
 ): Promise<void> {
-  const view = getTryItView(editor.document);
   await view.show();
   await view.sendColorTheme(vscode.window.activeColorTheme);
 
@@ -121,7 +121,7 @@ async function editorRunSingleOperationScan(
       }
       await view.show();
       await view.sendColorTheme(vscode.window.activeColorTheme);
-      await view.sendScanOperation({
+      await view.sendScanOperation(editor.document, {
         oas: oas as BundledSwaggerOrOasSpec,
         rawOas: rawOas,
         path: path as string,
@@ -129,85 +129,5 @@ async function editorRunSingleOperationScan(
         config,
       });
     }
-  }
-}
-
-function extractSinglePath(path: string, oas: any): BundledSwaggerOrOasSpec {
-  const visited = new Set<string>();
-  crawl(oas, oas["paths"][path], visited);
-
-  const cloned: any = simpleClone(oas);
-  delete cloned["paths"];
-  delete cloned["components"];
-  delete cloned["definitions"];
-
-  // copy single path and path parameters
-  cloned["paths"] = { [path]: oas["paths"][path] };
-
-  // copy security schemes
-  if (oas?.["components"]?.["securitySchemes"]) {
-    cloned["components"] = { securitySchemes: oas["components"]["securitySchemes"] };
-  }
-  copyByPointer(oas, cloned, Array.from(visited));
-  return cloned as BundledSwaggerOrOasSpec;
-}
-
-function crawl(root: any, current: any, visited: Set<string>) {
-  if (current === null || typeof current !== "object") {
-    return;
-  }
-
-  for (const [key, value] of Object.entries(current)) {
-    if (key === "$ref") {
-      const path = (<string>value).substring(1, (<string>value).length);
-      if (!visited.has(path)) {
-        visited.add(path);
-        const ref = resolveRef(root, path);
-        crawl(root, ref, visited);
-      }
-    } else {
-      crawl(root, value, visited);
-    }
-  }
-}
-
-function resolveRef(root: any, pointer: string) {
-  const path = parseJsonPointer(pointer);
-  let current = root;
-  for (let i = 0; i < path.length; i++) {
-    current = current[path[i]];
-  }
-  return current;
-}
-
-function copyByPointer(src: any, dest: any, pointers: string[]) {
-  const sortedPointers = [...pointers];
-  sortedPointers.sort();
-  for (const pointer of sortedPointers) {
-    const path = parseJsonPointer(pointer);
-    copyByPath(src, dest, path);
-  }
-}
-
-function copyByPath(src: any, dest: any, path: Path): void {
-  let currentSrc = src;
-  let currentDest = dest;
-  for (let i = 0; i < path.length - 1; i++) {
-    const key = path[i];
-    currentSrc = currentSrc[key];
-    if (currentDest[key] === undefined) {
-      if (Array.isArray(currentSrc[key])) {
-        currentDest[key] = [];
-      } else {
-        currentDest[key] = {};
-      }
-    }
-    currentDest = currentDest[key];
-  }
-  const key = path[path.length - 1];
-  // check if the last segment of the path that is being copied is already set
-  // which might be the case if we've copied the parent of the path already
-  if (currentDest[key] === undefined) {
-    currentDest[key] = currentSrc[key];
   }
 }

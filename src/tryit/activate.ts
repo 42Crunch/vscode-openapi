@@ -4,27 +4,15 @@
 */
 
 import * as vscode from "vscode";
-import { parseJsonPointer, Path, simpleClone } from "@xliic/preserving-json-yaml-parser";
 import { Preferences } from "@xliic/common/prefs";
 import { Bundle } from "../types";
 import { Cache } from "../cache";
 import { HttpMethod } from "@xliic/common/http";
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
-import { getWebview, TryItWebView } from "./view";
+import { BundleDocumentVersions, TryItTarget, TryItWebView } from "./view";
 import { TryItCodelensProvider } from "./lens";
 import { Configuration } from "../configuration";
 import { EnvStore } from "../envstore";
-
-type BundleDocumentVersions = Record<string, number>;
-
-type TryIt = {
-  documentUri: vscode.Uri;
-  path: string;
-  method: HttpMethod;
-  versions: BundleDocumentVersions;
-  preferredMediaType?: string;
-  preferredBodyValue?: unknown;
-};
+import { DebounceDelay, debounce } from "../util/debounce";
 
 const selectors = {
   json: { language: "json" },
@@ -39,142 +27,81 @@ export function activate(
   envStore: EnvStore,
   prefs: Record<string, Preferences>
 ) {
-  let tryIt: TryIt | null = null;
-  let previewUpdateDelay: number;
+  const view = new TryItWebView(context.extensionPath, cache, envStore, prefs);
 
-  configuration.track<number>("previewUpdateDelay", (delay: number) => {
-    previewUpdateDelay = delay;
+  const debounceDelay: DebounceDelay = { delay: 1000 };
+  configuration.track<number>("previewUpdateDelay", (previewDelay: number) => {
+    debounceDelay.delay = previewDelay;
   });
-
-  function debounce<A extends unknown[], R>(fn: (...args: A) => R) {
-    return (...args: A): Promise<R> => {
-      let timer: NodeJS.Timeout;
-      return new Promise((resolve) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => {
-          resolve(fn(...args));
-        }, previewUpdateDelay);
-      });
-    };
-  }
-
-  const debouncedTryIt = debounce(showTryIt);
-
-  let exitingTryItView: TryItWebView | undefined = undefined;
-
-  function getTryItWebview(document: vscode.TextDocument) {
-    exitingTryItView = getWebview(
-      context.extensionPath,
-      cache,
-      envStore,
-      prefs,
-      document,
-      exitingTryItView
-    );
-    return exitingTryItView;
-  }
+  const debouncedUpdateTryIt = debounce(updateTryIt, debounceDelay);
 
   cache.onDidChange(async (document: vscode.TextDocument) => {
-    const uri = document.uri.toString();
-    if (tryIt !== null && tryIt.documentUri.toString() === uri) {
+    if (view?.isActive() && view.getTarget()?.document.uri.toString() === document.uri.toString()) {
       const bundle = await cache.getDocumentBundle(document);
       if (bundle && !("errors" in bundle)) {
         const versions = getBundleVersions(bundle);
-        if (isBundleVersionsDifferent(versions, tryIt.versions)) {
-          tryIt.versions = versions;
-          debouncedTryIt(getTryItWebview(document), bundle, tryIt.path, tryIt.method);
+        if (isBundleVersionsDifferent(versions, view.getTarget()!.versions)) {
+          await debouncedUpdateTryIt(view, bundle, versions);
         }
       }
     }
   });
 
+  const tryItCodeLensProvider = new TryItCodelensProvider(cache);
+  for (const selector of Object.values(selectors)) {
+    vscode.languages.registerCodeLensProvider(selector, tryItCodeLensProvider);
+  }
+
   vscode.commands.registerCommand(
     "openapi.tryOperation",
-    async (uri: vscode.Uri, path: string, method: HttpMethod) => {
-      tryIt = { documentUri: uri, path, method, versions: {} };
-      startTryIt(getTryItWebview, cache, tryIt);
+    async (document: vscode.TextDocument, path: string, method: HttpMethod) => {
+      await startTryIt(document, cache, view, path, method);
     }
   );
 
   vscode.commands.registerCommand(
     "openapi.tryOperationWithExample",
     async (
-      uri: vscode.Uri,
+      document: vscode.TextDocument,
       path: string,
       method: HttpMethod,
       preferredMediaType: string,
       preferredBodyValue: unknown
     ) => {
-      tryIt = {
-        documentUri: uri,
-        path,
-        method,
-        versions: {},
-        preferredMediaType,
-        preferredBodyValue,
-      };
-      startTryIt(getTryItWebview, cache, tryIt);
+      await startTryIt(document, cache, view, path, method, preferredMediaType, preferredBodyValue);
     }
   );
-
-  const tryItCodeLensProvider = new TryItCodelensProvider(cache);
-  for (const selector of Object.values(selectors)) {
-    vscode.languages.registerCodeLensProvider(selector, tryItCodeLensProvider);
-  }
 }
 
 async function startTryIt(
-  getView: (document: vscode.TextDocument) => TryItWebView,
+  document: vscode.TextDocument,
   cache: Cache,
-  tryIt: TryIt
-) {
-  const document = await vscode.workspace.openTextDocument(tryIt.documentUri);
-  const bundle = await cache.getDocumentBundle(document);
-
-  if (!bundle || "errors" in bundle) {
-    vscode.commands.executeCommand("workbench.action.problems.focus");
-    vscode.window.showErrorMessage("Failed to try it, check OpenAPI file for errors.");
-  } else {
-    tryIt.versions = getBundleVersions(bundle);
-    const view = getView(document);
-    await view.show();
-    await view.sendColorTheme(vscode.window.activeColorTheme);
-    await showTryIt(
-      view,
-      bundle,
-      tryIt.path,
-      tryIt.method,
-      tryIt.preferredMediaType,
-      tryIt.preferredBodyValue
-    );
-  }
-}
-
-async function showTryIt(
   view: TryItWebView,
-  bundle: Bundle,
   path: string,
   method: HttpMethod,
   preferredMediaType?: string,
   preferredBodyValue?: unknown
 ) {
-  if (view.isActive()) {
-    const oas = extractSingleOperation(method as HttpMethod, path as string, bundle.value);
-    await view.show();
-    const insecureSslHostnames =
-      vscode.workspace.getConfiguration("openapi").get<string[]>("tryit.insecureSslHostnames") ||
-      [];
-    view.sendTryOperation({
-      oas,
-      path,
-      method,
-      preferredMediaType,
-      preferredBodyValue,
-      config: {
-        insecureSslHostnames,
-      },
-    });
+  const bundle = await cache.getDocumentBundle(document);
+
+  if (!bundle || "errors" in bundle) {
+    vscode.commands.executeCommand("workbench.action.problems.focus");
+    vscode.window.showErrorMessage("Failed to try it, check OpenAPI file for errors.");
+    return view;
   }
+
+  return view.showTryIt(bundle, {
+    document,
+    versions: getBundleVersions(bundle),
+    path,
+    method,
+    preferredMediaType,
+    preferredBodyValue,
+  });
+}
+
+async function updateTryIt(view: TryItWebView, bundle: Bundle, versions: BundleDocumentVersions) {
+  return view.updateTryIt(bundle, versions);
 }
 
 function isBundleVersionsDifferent(
@@ -200,92 +127,4 @@ function getBundleVersions(bundle: Bundle) {
     versions[document.uri.toString()] = document.version;
   });
   return versions;
-}
-
-function extractSingleOperation(
-  method: HttpMethod,
-  path: string,
-  oas: any
-): BundledSwaggerOrOasSpec {
-  const visited = new Set<string>();
-  crawl(oas, oas["paths"][path][method], visited);
-  if (oas["paths"][path]["parameters"]) {
-    crawl(oas, oas["paths"][path]["parameters"], visited);
-  }
-  const cloned: any = simpleClone(oas);
-  delete cloned["paths"];
-  delete cloned["components"];
-  delete cloned["definitions"];
-
-  // copy single path and path parameters
-  cloned["paths"] = { [path]: { [method]: oas["paths"][path][method] } };
-  if (oas["paths"][path]["parameters"]) {
-    cloned["paths"][path]["parameters"] = oas["paths"][path]["parameters"];
-  }
-  // copy security schemes
-  if (oas?.["components"]?.["securitySchemes"]) {
-    cloned["components"] = { securitySchemes: oas["components"]["securitySchemes"] };
-  }
-  copyByPointer(oas, cloned, Array.from(visited));
-  return cloned as BundledSwaggerOrOasSpec;
-}
-
-function crawl(root: any, current: any, visited: Set<string>) {
-  if (current === null || typeof current !== "object") {
-    return;
-  }
-
-  for (const [key, value] of Object.entries(current)) {
-    if (key === "$ref") {
-      const path = (<string>value).substring(1, (<string>value).length);
-      if (!visited.has(path)) {
-        visited.add(path);
-        const ref = resolveRef(root, path);
-        crawl(root, ref, visited);
-      }
-    } else {
-      crawl(root, value, visited);
-    }
-  }
-}
-
-function resolveRef(root: any, pointer: string) {
-  const path = parseJsonPointer(pointer);
-  let current = root;
-  for (let i = 0; i < path.length; i++) {
-    current = current[path[i]];
-  }
-  return current;
-}
-
-function copyByPointer(src: any, dest: any, pointers: string[]) {
-  const sortedPointers = [...pointers];
-  sortedPointers.sort();
-  for (const pointer of sortedPointers) {
-    const path = parseJsonPointer(pointer);
-    copyByPath(src, dest, path);
-  }
-}
-
-function copyByPath(src: any, dest: any, path: Path): void {
-  let currentSrc = src;
-  let currentDest = dest;
-  for (let i = 0; i < path.length - 1; i++) {
-    const key = path[i];
-    currentSrc = currentSrc[key];
-    if (currentDest[key] === undefined) {
-      if (Array.isArray(currentSrc[key])) {
-        currentDest[key] = [];
-      } else {
-        currentDest[key] = {};
-      }
-    }
-    currentDest = currentDest[key];
-  }
-  const key = path[path.length - 1];
-  // check if the last segment of the path that is being copied is already set
-  // which might be the case if we've copied the parent of the path already
-  if (currentDest[key] === undefined) {
-    currentDest[key] = currentSrc[key];
-  }
 }

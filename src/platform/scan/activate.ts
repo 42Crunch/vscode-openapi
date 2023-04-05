@@ -6,7 +6,7 @@ import { PlatformContext } from "../types";
 
 import { ScanCodelensProvider } from "./lens";
 import commands from "./commands";
-import { ScanWebView, getWebview } from "./view";
+import { ScanWebView } from "./view";
 import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
 import { AuditWebView } from "../../audit/view";
@@ -28,21 +28,7 @@ export function activate(
   auditView: AuditWebView
 ): vscode.Disposable {
   let disposables: vscode.Disposable[] = [];
-  let existingScanView: ScanWebView | undefined = undefined;
-
-  function getScanView(document: vscode.TextDocument) {
-    existingScanView = getWebview(
-      context.extensionPath,
-      cache,
-      configuration,
-      store,
-      envStore,
-      prefs,
-      document,
-      existingScanView
-    );
-    return existingScanView;
-  }
+  const view = new ScanWebView(context.extensionPath, cache, configuration, store, envStore, prefs);
 
   const scanCodelensProvider = new ScanCodelensProvider(cache);
 
@@ -57,7 +43,7 @@ export function activate(
     }
   });
 
-  commands(cache, platformContext, store, getScanView, auditView);
+  commands(cache, platformContext, store, view, auditView);
 
   return new vscode.Disposable(() => disposables.forEach((disposable) => disposable.dispose()));
 }
