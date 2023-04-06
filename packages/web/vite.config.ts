@@ -21,6 +21,7 @@ export default defineConfig(({ command, mode }) => {
           tryit: resolve(__dirname, "src/app/tryit/index.tsx"),
           "data-dictionary": resolve(__dirname, "src/app/data-dictionary/index.tsx"),
           environment: resolve(__dirname, "src/app/environment/index.tsx"),
+          config: resolve(__dirname, "src/app/config/index.tsx"),
         },
         fileName: (format, name) => {
           return `${name}.js`;
