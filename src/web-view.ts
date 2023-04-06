@@ -228,7 +228,6 @@ const vscodeColorMap: VsCodeColorMap = {
   errorForeground: "--vscode-errorForeground",
   errorBackground: "--vscode-inputValidation-errorBackground",
   errorBorder: "--vscode-inputValidation-errorBorder",
-  sidebarBackground: "--vscode-sideBar-background",
   listActiveSelectionBackground: "--vscode-list-activeSelectionBackground",
   listActiveSelectionForeground: "--vscode-list-activeSelectionForeground",
   listHoverBackground: "--vscode-list-hoverBackground",
