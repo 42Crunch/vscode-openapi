@@ -213,6 +213,7 @@ const vscodeColorMap: VsCodeColorMap = {
   inputBackground: "--vscode-input-background",
   inputForeground: "--vscode-input-foreground",
   inputBorder: "--vscode-input-border",
+  inputPlaceholderForeground: "--vscode-input-placeholderForeground",
   tabBorder: "--vscode-tab-border",
   tabActiveBackground: "--vscode-tab-activeBackground",
   tabActiveForeground: "--vscode-tab-activeForeground",
