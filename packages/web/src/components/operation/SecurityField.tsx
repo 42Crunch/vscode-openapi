@@ -85,7 +85,7 @@ const Input = styled.input`
   color: var(${ThemeColorVariables.foreground});
   padding: 4px;
   &::placeholder {
-    opacity: 0.5;
+    color: var(${ThemeColorVariables.inputPlaceholderForeground});
   }
 `;
 

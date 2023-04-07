@@ -11,7 +11,7 @@ import { makeWebappMessageHandler } from "../webapp";
 import ThemeStyles from "../../features/theme/ThemeStyles";
 import { ThemeState, changeTheme } from "../../features/theme/slice";
 import { loadConfig } from "../../features/config/slice";
-import Env from "../../features/env/Env";
+import { Test } from "./Test";
 
 const messageHandlers: Webapp["webappHandlers"] = {
   changeTheme,
@@ -22,7 +22,7 @@ function App() {
   return (
     <>
       <ThemeStyles />
-      <Env />
+      <Test />
     </>
   );
 }

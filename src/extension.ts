@@ -29,6 +29,7 @@ import * as preview from "./preview";
 import * as platform from "./platform/activate";
 import * as tryit from "./tryit/activate";
 import * as environment from "./environment/activate";
+import * as config from "./webapps/config/activate";
 import { PlatformStore } from "./platform/stores/platform-store";
 import { Logger } from "./platform/types";
 import { getPlatformCredentials } from "./credentials";
@@ -118,6 +119,7 @@ export async function activate(context: vscode.ExtensionContext) {
   preview.activate(context, cache, configuration);
   tryit.activate(context, cache, configuration, envStore, prefs);
   environment.activate(context, envStore);
+  config.activate(context, configuration);
 
   await platform.activate(
     context,

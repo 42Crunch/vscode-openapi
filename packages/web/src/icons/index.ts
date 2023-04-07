@@ -5,6 +5,7 @@ export { default as Check } from "./Check";
 export { default as Clone } from "./Clone";
 export { default as ExclamationCircle } from "./ExclamationCircle";
 export { default as Eye } from "./Eye";
+export { default as MagnifyingGlass } from "./MagnifyingGlass";
 export { default as Pen } from "./Pen";
 export { default as Spinner } from "./Spinner";
 export { default as SquareCheck } from "./SquareCheck";

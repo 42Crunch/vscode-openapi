@@ -172,7 +172,7 @@
       },
       {
         "view": "platformWelcome",
-        "contents": "Please enter 42Crunch Platform credentials.\n[Configure](command:openapi.platform.updatePlatformCredentials)"
+        "contents": "Please enter 42Crunch Platform credentials.\n[Configure](command:openapi.showConfiguration)"
       }
     ],
     "menus": {
@@ -424,7 +424,7 @@
     },
     "commands": [
       {
-        "command": "openapi.platform.updatePlatformCredentials",
+        "command": "openapi.showConfiguration",
         "title": "42Crunch: Update platform credentials"
       },
       {

@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { useAppSelector } from "./store";
 import FormatCard from "./FormatCard";
 import Alert from "react-bootstrap/Alert";
-import List from "./List";
+import List from "../../components/List";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 function App() {
@@ -33,8 +33,13 @@ function App() {
     .filter((format) => format.dictionaryId === selected)
     .map((format) => <FormatCard format={format} key={`${format.dictionaryId}-${format.name}`} />);
 
-  const standardDictionary = dictionaries.filter((dicttionary) => dicttionary.id === "standard");
-  const userDictionaries = dictionaries.filter((dicttionary) => dicttionary.id !== "standard");
+  const standardDictionary = dictionaries
+    .filter((dicttionary) => dicttionary.id === "standard")
+    .map((dicttionary) => ({ ...dicttionary, label: dicttionary.name }));
+
+  const userDictionaries = dictionaries
+    .filter((dicttionary) => dicttionary.id !== "standard")
+    .map((dicttionary) => ({ ...dicttionary, label: dicttionary.name }));
 
   return (
     <>
@@ -80,7 +85,6 @@ const Container = styled.div`
 const Sidebar = styled.div`
   padding: 8px 16px 20px;
   width: 400px;
-  background-color: var(${ThemeColorVariables.sidebarBackground});
 `;
 
 const Content = styled.div`

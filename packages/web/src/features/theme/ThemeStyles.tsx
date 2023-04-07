@@ -84,11 +84,11 @@ function bootstrapColorOverrides(): string {
     color: var(${ThemeColorVariables.errorForeground});
   }
 
-  #root :focus-visible {
-    outline-color: var(${ThemeColorVariables.focusBorder});
-    outline-width: medium;
-    outline-style: solid;
-  }
+  // #root :focus-visible {
+  //   outline-color: var(${ThemeColorVariables.focusBorder});
+  //   outline-width: medium;
+  //   outline-style: solid;
+  // }
 
   #root .form-control::placeholder {
     opacity: 0.5;
