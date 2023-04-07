@@ -4,7 +4,8 @@ import { useForm, FormProvider } from "react-hook-form";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
 import List from "../../components/List";
-import { Input } from "../../components/Input";
+import Input from "../../components/Input";
+import Select from "../../components/Select";
 import { Checkbox } from "../../components/Checkbox";
 import { MagnifyingGlass } from "../../icons";
 
@@ -44,6 +45,8 @@ export function Test() {
           <Button>Test connection</Button>
           <div>foo</div>
           <Checkbox checked />
+          <div>foo</div>
+          <Select />
         </Content>
       </FormProvider>
     </Container>
@@ -60,7 +63,7 @@ const Container = styled.div`
   height: 100vh;
   overflow: hidden;
   > :first-child {
-    width: 280px;
+    width: 240px;
     overflow-y: auto;
   }
   > :last-child {
@@ -138,10 +141,10 @@ const Button = styled.button`
   cursor: pointer;
   background-color: var(${ThemeColorVariables.buttonBackground});
   color: var(${ThemeColorVariables.buttonForeground});
-  border: none;
+  border: 1px solid var(${ThemeColorVariables.buttonBorder});
   padding: 6px 16px;
   border-radius: 2px;
   &:focus {
-    outline: none;
+    outline: 1px solid var(${ThemeColorVariables.focusBorder});
   }
 `;
