@@ -8,7 +8,7 @@ import { NewParameterTrigger } from "./NewParameterTrigger";
 import { useRef } from "react";
 import { useFormContext, UseFieldArrayAppend, FieldValues } from "react-hook-form";
 
-export default function ParameterGroupSwagger({
+export default function ParameterGroup({
   oas,
   group,
 }: {
