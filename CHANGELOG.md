@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.16.6 (April 7, 2023)
+
+- Fix issue in TryIt where request parameters couldn't be deleted
+
 ## Version 4.16.5 (April 4, 2023)
 
 - Fix issue where TryIt woudln't use value defined in parameter's 'example' #213
