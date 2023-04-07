@@ -3,6 +3,7 @@ import { useForm, FormProvider } from "react-hook-form";
 import { TryitSecurityAllValues, TryitSecurityValue } from "@xliic/common/tryit";
 import { SecretsForSecurity } from "@xliic/common/prefs";
 import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
+import { HttpMethod, HttpRequest, HttpResponse } from "@xliic/common/http";
 
 import { useAppDispatch, useAppSelector } from "./store";
 import { sendHttpRequest, showGeneralError } from "./slice";
@@ -22,13 +23,9 @@ import Section from "../../components/Section";
 import { useEffect, useState } from "react";
 
 export default function TryOperation() {
-  const dispatch = useAppDispatch();
+  const { path, method, oas, defaultValues } = useAppSelector((state) => state.tryit);
 
-  const { path, method, oas, defaultValues, tryitConfig, response, waiting } = useAppSelector(
-    (state) => state.tryit
-  );
   const prefs = useAppSelector((state) => state.prefs);
-  const env = useAppSelector((state) => state.env.data);
 
   const server = getPreferredServer(oas, prefs.tryitServer, defaultValues!.server);
 
@@ -39,6 +36,30 @@ export default function TryOperation() {
   };
 
   const values = wrapFormDefaults(updatedDefaults);
+
+  return <TryOperationForm oas={oas} method={method} path={path} values={values} />;
+}
+
+function TryOperationForm({
+  oas,
+  method,
+  path,
+  values,
+}: {
+  oas: BundledSwaggerOrOasSpec;
+  method: HttpMethod | undefined;
+  path: string | undefined;
+  values: Record<string, any>;
+}) {
+  const dispatch = useAppDispatch();
+  const env = useAppSelector((state) => state.env.data);
+  const { tryitConfig, response, waiting } = useAppSelector((state) => state.tryit);
+
+  const [requestCollapsed, setRequestCollapsed] = useState(false);
+
+  useEffect(() => {
+    setRequestCollapsed(response !== undefined);
+  }, [response]);
 
   const tryOperation = async (data: Record<string, any>) => {
     const values = unwrapFormDefaults(data);
@@ -62,12 +83,6 @@ export default function TryOperation() {
       );
     }
   };
-
-  const [requestCollapsed, setRequestCollapsed] = useState(false);
-
-  useEffect(() => {
-    setRequestCollapsed(response !== undefined);
-  }, [response]);
 
   const methods = useForm({
     reValidateMode: "onChange",
