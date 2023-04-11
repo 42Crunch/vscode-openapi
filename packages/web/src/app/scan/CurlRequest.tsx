@@ -7,7 +7,7 @@ import { Clone } from "../../icons";
 import * as Tooltip from "@radix-ui/react-tooltip";
 
 import { sendHttpRequest, sendCurlRequest } from "./slice";
-import ProgressButton from "../../components/ProgressButton";
+import { ProgressButton } from "../../components/ProgressButton";
 
 export default function CurlRequest({
   curl,

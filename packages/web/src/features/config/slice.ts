@@ -7,6 +7,7 @@ export interface ConfigState {
   ready: boolean;
   data: Config;
   platformConnectionTestResult?: PlatformConnectionTestResult;
+  waitingForPlatformConnectionTest: boolean;
 }
 
 const initialState: ConfigState = {
@@ -17,6 +18,7 @@ const initialState: ConfigState = {
     platformApiToken: "",
   },
   platformConnectionTestResult: undefined,
+  waitingForPlatformConnectionTest: false,
 };
 
 export const slice = createSlice({
@@ -35,6 +37,7 @@ export const slice = createSlice({
 
     showPlatformConnectionTest: (state, action: PayloadAction<PlatformConnectionTestResult>) => {
       state.platformConnectionTestResult = action.payload;
+      state.waitingForPlatformConnectionTest = false;
     },
 
     showConfigWindow: (state, action: PayloadAction<undefined>) => {
@@ -42,6 +45,7 @@ export const slice = createSlice({
     },
 
     testPlatformConnection: (state, action: PayloadAction<undefined>) => {
+      state.waitingForPlatformConnectionTest = true;
       // hook for a listener
     },
   },
