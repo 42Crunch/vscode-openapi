@@ -301,7 +301,6 @@ export async function createDefaultScanConfig(
       name: "default",
     },
   });
-  console.log("body", body);
   return body.id;
 }
 
@@ -431,4 +430,16 @@ export async function createTechnicalCollection(
     },
   });
   return body.desc.id;
+}
+
+export async function testConnection(
+  options: PlatformConnection,
+  logger: Logger
+): Promise<{ success: true } | { success: false; message: string }> {
+  try {
+    await got("api/v2/collections?page=1&perPage=1", gotOptions("GET", options, logger));
+    return { success: true };
+  } catch (ex: any) {
+    return { success: false, message: ex.message };
+  }
 }

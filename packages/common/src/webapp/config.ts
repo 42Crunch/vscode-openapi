@@ -1,10 +1,15 @@
 import { Webapp as App } from "../message";
-import { LoadConfigMessage, SaveConfigMessage } from "../config";
+import {
+  LoadConfigMessage,
+  SaveConfigMessage,
+  TestPlatformConnectionMessage,
+  ShowPlatformConnectionTestMessage,
+} from "../config";
 import { ChangeThemeMessage } from "../theme";
 
 export type Webapp = App<
   // consumes
-  LoadConfigMessage | ChangeThemeMessage,
+  LoadConfigMessage | ShowPlatformConnectionTestMessage | ChangeThemeMessage,
   // produces
-  SaveConfigMessage
+  SaveConfigMessage | TestPlatformConnectionMessage
 >;

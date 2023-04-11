@@ -3,40 +3,37 @@ import styled from "styled-components";
 import { useForm, FormProvider } from "react-hook-form";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { Config as ConfigData } from "@xliic/common/config";
+
 import List from "../../components/List";
-import Input from "../../components/Input";
-import Select, { SelectOption } from "../../components/Select";
-import { Checkbox } from "../../components/Checkbox";
 import { MagnifyingGlass } from "../../icons";
+import { saveConfig, useFeatureDispatch, useFeatureSelector } from "../../features/config/slice";
+import PlatformConnection from "./PlatformConnection";
+import Scan from "./Scan";
 
-export function Test() {
-  const s = [{ id: "foo", label: "Insecure SSL hosts" }];
+const platformSettings = [
+  { id: "platform-connection", label: "Platform connection" },
+  { id: "platform-scan", label: "Scan" },
+];
 
-  const ss = [
-    { id: "foo1", label: "Platform connection" },
-    { id: "bar1", label: "Data Dictionary" },
-    { id: "baz1", label: "Scan" },
-  ];
+export default function Config() {
+  const { data, ready } = useFeatureSelector((state) => state.config);
+  const dispatch = useFeatureDispatch();
 
-  const books: SelectOption[] = [
-    { label: "Harper Lee", value: "To Kill a Mockingbird" },
-    { label: "Lev Tolstoy", value: "War and Peace" },
-    { label: "Fyodor Dostoyevsy", value: "The Idiot" },
-    { label: "Oscar Wilde", value: "A Picture of Dorian Gray" },
-    { label: "George Orwell", value: "1984" },
-    { label: "Jane Austen", value: "Pride and Prejudice" },
-    { label: "Marcus Aurelius", value: "Meditations" },
-    { label: "Fyodor Dostoevsky", value: "The Brothers Karamazov" },
-    { label: "Lev Tolstoy", value: "Anna Karenina" },
-    { label: "Fyodor Dostoevsky", value: "Crime and Punishment" },
-  ];
-
-  const [selected, setSelected] = useState(s[0]?.id);
+  const [selected, setSelected] = useState("platform-connection");
 
   const methods = useForm({
-    defaultValues: { platformUrl: "https://platform.42crunch.com", token: "foo", select: "1984" },
+    values: wrapFormValues(data),
     mode: "onChange",
   });
+
+  function onSubmit(values: ConfigData) {
+    dispatch(saveConfig(values));
+  }
+
+  if (!ready) {
+    return <Container>Loading environment data...</Container>;
+  }
 
   return (
     <Container>
@@ -46,20 +43,16 @@ export function Test() {
             <input placeholder="Search" />
             <MagnifyingGlass />
           </Search>
-          <Subheader>Try It</Subheader>
-          <List selected={selected} setSelected={setSelected} items={s} />
+          {/* <Subheader>Try It</Subheader>
+          <List selected={selected} setSelected={setSelected} items={s} /> */}
           <Subheader>42Crunch Platform</Subheader>
-          <List selected={selected} setSelected={setSelected} items={ss} />
+          <List selected={selected} setSelected={setSelected} items={platformSettings} />
         </Sidebar>
         <Content>
-          <h4 style={{ marginTop: 0 }}>Connection parameters</h4>
-          <Input label="Platform URL" name="platformUrl" />
-          <Input label="IDE token" name="token" />
-          <Button>Test connection</Button>
-          <div>foo</div>
-          <Checkbox checked />
-          <div>foo</div>
-          <Select name="select" options={books} placeholder="Which one?" />
+          <form onChange={methods.handleSubmit(onSubmit)}>
+            {selected === "platform-connection" && <PlatformConnection />}
+            {selected === "platform-scan" && <Scan />}
+          </form>
         </Content>
       </FormProvider>
     </Container>
@@ -157,3 +150,7 @@ const Button = styled.button`
     outline: 1px solid var(${ThemeColorVariables.focusBorder});
   }
 `;
+
+export function wrapFormValues(values: ConfigData): ConfigData {
+  return { ...values, insecureSslHostnames: [] };
+}

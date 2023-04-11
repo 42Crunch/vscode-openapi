@@ -5,7 +5,7 @@ import {
 } from "@reduxjs/toolkit";
 import { Webapp } from "@xliic/common/webapp/config";
 import { AppDispatch, RootState } from "./store";
-import { saveConfig } from "../../features/config/slice";
+import { saveConfig, testPlatformConnection } from "../../features/config/slice";
 import { startListeners } from "../webapp";
 
 const listenerMiddleware = createListenerMiddleware();
@@ -21,6 +21,17 @@ export function createListener(host: Webapp["host"]) {
           host.postMessage({
             command: "saveConfig",
             payload: action.payload,
+          });
+        },
+      }),
+
+    testPlatformConnection: () =>
+      startAppListening({
+        actionCreator: testPlatformConnection,
+        effect: async (action, listenerApi) => {
+          host.postMessage({
+            command: "testPlatformConnection",
+            payload: undefined,
           });
         },
       }),

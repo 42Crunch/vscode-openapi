@@ -29,6 +29,7 @@ import {
   createTechnicalCollection,
   searchCollections,
   createScanConfigNew,
+  testConnection,
 } from "../api";
 import {
   Api,
@@ -146,6 +147,10 @@ export class PlatformStore {
     return (
       this.connection !== undefined && !!this.connection.platformUrl && !!this.connection.apiToken
     );
+  }
+
+  async testConnection(credentials: PlatformConnection) {
+    return testConnection(credentials, this.logger);
   }
 
   getConnection(): PlatformConnection {

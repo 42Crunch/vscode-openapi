@@ -119,7 +119,7 @@ export async function activate(context: vscode.ExtensionContext) {
   preview.activate(context, cache, configuration);
   tryit.activate(context, cache, configuration, envStore, prefs);
   environment.activate(context, envStore);
-  config.activate(context, configuration);
+  config.activate(context, configuration, context.secrets, platformStore);
 
   await platform.activate(
     context,

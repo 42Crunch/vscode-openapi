@@ -1,37 +1,59 @@
 import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 
-import { Config } from "@xliic/common/config";
+import { Config, PlatformConnectionTestResult } from "@xliic/common/config";
 
-export interface SettingsState {
+export interface ConfigState {
   ready: boolean;
   data: Config;
+  platformConnectionTestResult?: PlatformConnectionTestResult;
 }
 
-const initialState: SettingsState = {
+const initialState: ConfigState = {
   ready: false,
-  data: { insecureSslHostnames: [] },
+  data: {
+    insecureSslHostnames: [],
+    platformUrl: "https://platform.42crunch.com",
+    platformApiToken: "",
+  },
+  platformConnectionTestResult: undefined,
 };
 
 export const slice = createSlice({
-  name: "settings",
+  name: "config",
   initialState,
   reducers: {
     loadConfig: (state, action: PayloadAction<Config>) => {
       state.data = action.payload;
       state.ready = true;
     },
+
     saveConfig: (state, action: PayloadAction<Config>) => {
       // this is also a hook for a listener
       state.data = action.payload;
     },
-    showSettingsWindow: (state, action: PayloadAction<undefined>) => {
+
+    showPlatformConnectionTest: (state, action: PayloadAction<PlatformConnectionTestResult>) => {
+      state.platformConnectionTestResult = action.payload;
+    },
+
+    showConfigWindow: (state, action: PayloadAction<undefined>) => {
+      // hook for a listener
+    },
+
+    testPlatformConnection: (state, action: PayloadAction<undefined>) => {
       // hook for a listener
     },
   },
 });
 
-export const { loadConfig, saveConfig, showSettingsWindow } = slice.actions;
+export const {
+  loadConfig,
+  saveConfig,
+  showConfigWindow,
+  testPlatformConnection,
+  showPlatformConnectionTest,
+} = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<
   ReturnType<(typeof slice.actions)[keyof typeof slice.actions]>

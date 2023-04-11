@@ -10,19 +10,20 @@ import { createListener } from "./listener";
 import { makeWebappMessageHandler } from "../webapp";
 import ThemeStyles from "../../features/theme/ThemeStyles";
 import { ThemeState, changeTheme } from "../../features/theme/slice";
-import { loadConfig } from "../../features/config/slice";
-import { Test } from "./Test";
+import { loadConfig, showPlatformConnectionTest } from "../../features/config/slice";
+import Config from "./Config";
 
 const messageHandlers: Webapp["webappHandlers"] = {
   changeTheme,
   loadConfig,
+  showPlatformConnectionTest,
 };
 
 function App() {
   return (
     <>
       <ThemeStyles />
-      <Test />
+      <Config />
     </>
   );
 }
