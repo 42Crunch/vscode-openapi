@@ -33,6 +33,7 @@ export const slice = createSlice({
     saveConfig: (state, action: PayloadAction<Config>) => {
       // this is also a hook for a listener
       state.data = action.payload;
+      state.platformConnectionTestResult = undefined;
     },
 
     showPlatformConnectionTest: (state, action: PayloadAction<PlatformConnectionTestResult>) => {
