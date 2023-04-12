@@ -51,12 +51,10 @@ const Item = styled.li`
   cursor: pointer;
   padding: 0 8px;
   overflow: hidden;
-  border-radius: 2px;
-  // border: 1px solid transparent;
 `;
 
 const SelectedItem = styled(Item)`
   background-color: var(${ThemeColorVariables.listActiveSelectionBackground});
   color: var(${ThemeColorVariables.listActiveSelectionForeground});
-  // border: 1px solid var(${ThemeColorVariables.focusBorder});
+  border-radius: 2px;
 `;

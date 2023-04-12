@@ -27,7 +27,7 @@ export default function PlatformConnection() {
 
   return (
     <>
-      <Title>Connection parameters</Title>
+      <Title>42Crunch Platform connection parameters</Title>
       <Container>
         <div>
           <Input label="Platform URL" name="platformUrl" />
@@ -52,7 +52,7 @@ export default function PlatformConnection() {
               label="Test connection"
               waiting={waitingForTest}
               onClick={(e) => {
-                dispatch(saveConfig(getValues() as ConfigData));
+                dispatch(saveConfig(JSON.parse(JSON.stringify(getValues())) as ConfigData));
                 dispatch(testPlatformConnection());
                 e.preventDefault();
                 e.stopPropagation();

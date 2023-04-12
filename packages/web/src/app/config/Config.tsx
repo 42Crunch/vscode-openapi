@@ -18,12 +18,19 @@ const platformSettings = [
 
 export default function Config() {
   const { data, ready } = useFeatureSelector((state) => state.config);
+
+  if (!ready) {
+    return null;
+  }
+
+  return <ConfigForm values={wrapFormValues(data)} />;
+}
+
+function ConfigForm({ values }: { values: ConfigData }) {
   const dispatch = useFeatureDispatch();
 
   const [selected, setSelected] = useState("platform-connection");
   const [search, setSearch] = useState("");
-
-  const values = wrapFormValues(data);
 
   const methods = useForm({
     values,
@@ -32,10 +39,6 @@ export default function Config() {
 
   function onSubmit(values: ConfigData) {
     dispatch(saveConfig(values));
-  }
-
-  if (!ready) {
-    return <Container>Loading environment data...</Container>;
   }
 
   return (
