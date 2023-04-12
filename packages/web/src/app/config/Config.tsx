@@ -21,6 +21,7 @@ export default function Config() {
   const dispatch = useFeatureDispatch();
 
   const [selected, setSelected] = useState("platform-connection");
+  const [search, setSearch] = useState("");
 
   const values = wrapFormValues(data);
 
@@ -42,13 +43,22 @@ export default function Config() {
       <FormProvider {...methods}>
         <Sidebar>
           <Search>
-            <input placeholder="Search" />
+            <input
+              placeholder="Search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
             <MagnifyingGlass />
           </Search>
           {/* <Subheader>Try It</Subheader>
           <List selected={selected} setSelected={setSelected} items={s} /> */}
           <Subheader>42Crunch Platform</Subheader>
-          <List selected={selected} setSelected={setSelected} items={platformSettings} />
+          <List
+            selected={selected}
+            setSelected={setSelected}
+            items={platformSettings}
+            filter={search.trim()}
+          />
         </Sidebar>
         <Content>
           <form onChange={methods.handleSubmit(onSubmit)}>
@@ -86,7 +96,6 @@ const Content = styled.div`
 
 const Sidebar = styled.div`
   padding: 16px;
-  border-right: 1px solid var(${ThemeColorVariables.border});
 `;
 
 const Subheader = styled.div`
@@ -142,7 +151,9 @@ const Search = styled.div`
 `;
 
 export function wrapFormValues(values: ConfigData): ConfigData {
-  const platformApiToken = values.platformApiToken === undefined ? "" : values.platformApiToken;
-  const mutableValues = JSON.parse(JSON.stringify(values));
-  return { ...mutableValues, insecureSslHostnames: [], platformApiToken };
+  const mutable = JSON.parse(JSON.stringify(values)) as ConfigData;
+  if (mutable.platformApiToken === undefined) {
+    mutable.platformApiToken = "";
+  }
+  return mutable;
 }

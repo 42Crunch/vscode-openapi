@@ -10,23 +10,29 @@ export default function List({
   items,
   selected,
   setSelected,
+  filter,
 }: {
   items: ListItem[];
   selected: string;
   setSelected: (selected: string) => void;
+  filter?: string;
 }) {
   return (
     <Body>
-      {items.map((item) => {
-        if (item.id === selected) {
-          return <SelectedItem key={item.id}>{item.label}</SelectedItem>;
-        }
-        return (
-          <Item onClick={() => setSelected(item.id)} key={item.id}>
-            {item.label}
-          </Item>
-        );
-      })}
+      {items
+        .filter(
+          (item) => filter === undefined || item.label.toLowerCase().includes(filter.toLowerCase())
+        )
+        .map((item) => {
+          if (item.id === selected) {
+            return <SelectedItem key={item.id}>{item.label}</SelectedItem>;
+          }
+          return (
+            <Item onClick={() => setSelected(item.id)} key={item.id}>
+              {item.label}
+            </Item>
+          );
+        })}
     </Body>
   );
 }
