@@ -3,13 +3,23 @@ import { useFormContext } from "react-hook-form";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
 
-export default function Input({ label, name }: { label: string; name: string }) {
+export default function Input({
+  label,
+  name,
+  disabled,
+  password,
+}: {
+  label: string;
+  name: string;
+  disabled?: boolean;
+  password?: boolean;
+}) {
   const { register } = useFormContext();
 
   return (
     <Container>
       <div>{label}</div>
-      <input {...register(name)} />
+      <input {...register(name)} disabled={disabled} type={password ? "password" : "text"} />
     </Container>
   );
 }
@@ -22,7 +32,6 @@ const Container = styled.div`
   flex-direction: column;
   padding: 4px 8px;
   gap: 4px;
-  max-width: 320px;
   &:focus-within {
     border: 1px solid var(${ThemeColorVariables.focusBorder});
   }

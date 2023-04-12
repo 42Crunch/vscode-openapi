@@ -32,7 +32,7 @@ export default function Select({
   const { isOpen, getToggleButtonProps, getMenuProps, getItemProps } = useSelect({
     items: options,
     itemToString,
-    selectedItem: field.value,
+    selectedItem: field.value ?? null,
     onSelectedItemChange: ({ selectedItem: newSelectedItem }) =>
       field.onChange(newSelectedItem?.value),
   });
@@ -64,7 +64,6 @@ function getOptionByValue(options: SelectOption[], value: string): SelectOption 
 const Container = styled.div`
   position: relative;
   z-index: 1;
-  max-width: 320px;
 `;
 
 const Input = styled.div`
@@ -86,14 +85,18 @@ const Input = styled.div`
 
 const List = styled.ul`
   ${({ isOpen }: { isOpen: boolean }) =>
-    isOpen && `border: 1px solid var(${ThemeColorVariables.dropdownBorder});`}
+    isOpen &&
+    `
+    border: 1px solid var(${ThemeColorVariables.dropdownBorder});
+    padding: 4px;
+    margin: 4px 0 0 0;
+    `}
   background-color: var(${ThemeColorVariables.dropdownBackground});
   color: var(${ThemeColorVariables.dropdownForeground});
   width: 100%;
   position: absolute;
   list-style: none;
-  padding: 4px;
-  margin: 4px 0 0 0;
+
   & > li {
     padding: 4px;
     cursor: pointer;

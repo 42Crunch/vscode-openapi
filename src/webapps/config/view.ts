@@ -10,7 +10,7 @@ import { Config } from "@xliic/common/config";
 import { Configuration } from "../../configuration";
 import { WebView } from "../../web-view";
 import { PlatformStore } from "../../platform/stores/platform-store";
-import { getPlatformCredentials } from "../../credentials";
+import { deriveServices } from "../../credentials";
 
 export class ConfigWebView extends WebView<Webapp> {
   private config?: Config;
@@ -38,7 +38,6 @@ export class ConfigWebView extends WebView<Webapp> {
     },
 
     testPlatformConnection: async () => {
-      //const c = await getPlatformCredentials(this.configuration, this.secrets);
       if (this.config === undefined) {
         return {
           command: "showPlatformConnectionTest",
@@ -59,12 +58,33 @@ export class ConfigWebView extends WebView<Webapp> {
   };
 
   async sendLoadConfig() {
-    const platformUrl = this.configuration.get<string>("platformUrl")!;
-    const insecureSslHostnames = this.configuration.get<string[]>("tryit.insecureSslHostnames")!;
-
+    const config = await loadConfig(this.configuration, this.secrets);
     this.sendRequest({
       command: "loadConfig",
-      payload: { platformUrl, platformApiToken: "", insecureSslHostnames },
+      payload: config,
     });
   }
+}
+
+async function loadConfig(
+  configuration: Configuration,
+  secrets: vscode.SecretStorage
+): Promise<Config> {
+  const platformUrl = configuration.get<string>("platformUrl")!;
+  const apiToken = await secrets.get("platformApiToken");
+  const insecureSslHostnames = configuration.get<string[]>("tryit.insecureSslHostnames")!;
+  const servicesManual = configuration.get<string>("platformServices");
+  const servicesAutomatic = deriveServices(platformUrl);
+  const servicesSource = servicesManual === "" ? "auto" : "manual";
+
+  return {
+    platformUrl,
+    platformApiToken: apiToken,
+    insecureSslHostnames,
+    platformServices: {
+      source: servicesSource,
+      manual: servicesManual,
+      auto: servicesAutomatic,
+    },
+  };
 }

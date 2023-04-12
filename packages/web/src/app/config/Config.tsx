@@ -22,8 +22,10 @@ export default function Config() {
 
   const [selected, setSelected] = useState("platform-connection");
 
+  const values = wrapFormValues(data);
+
   const methods = useForm({
-    values: wrapFormValues(data),
+    values,
     mode: "onChange",
   });
 
@@ -139,18 +141,8 @@ const Search = styled.div`
   }
 `;
 
-const Button = styled.button`
-  cursor: pointer;
-  background-color: var(${ThemeColorVariables.buttonBackground});
-  color: var(${ThemeColorVariables.buttonForeground});
-  border: 1px solid var(${ThemeColorVariables.buttonBorder});
-  padding: 6px 16px;
-  border-radius: 2px;
-  &:focus {
-    outline: 1px solid var(${ThemeColorVariables.focusBorder});
-  }
-`;
-
 export function wrapFormValues(values: ConfigData): ConfigData {
-  return { ...values, insecureSslHostnames: [] };
+  const platformApiToken = values.platformApiToken === undefined ? "" : values.platformApiToken;
+  const mutableValues = JSON.parse(JSON.stringify(values));
+  return { ...mutableValues, insecureSslHostnames: [], platformApiToken };
 }

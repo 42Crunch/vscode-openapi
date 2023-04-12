@@ -37,14 +37,16 @@ export async function getPlatformCredentials(
     if (services) {
       return { platformUrl, services, apiToken };
     }
-    const platformHost = vscode.Uri.parse(platformUrl).authority;
-    if (platformHost.toLowerCase().startsWith("platform")) {
-      const derivedServices = platformHost.replace(/^platform/i, "services") + ":8001";
-      return { platformUrl, services: derivedServices, apiToken };
-    }
-    const derivedServices = "services." + platformHost + ":8001";
-    return { platformUrl, services: derivedServices, apiToken };
+    return { platformUrl, services: deriveServices(platformUrl), apiToken };
   }
+}
+
+export function deriveServices(platformUrl: string): string {
+  const platformHost = vscode.Uri.parse(platformUrl).authority;
+  if (platformHost.toLowerCase().startsWith("platform")) {
+    return platformHost.replace(/^platform/i, "services") + ":8001";
+  }
+  return "services." + platformHost + ":8001";
 }
 
 export async function configureCredentials(

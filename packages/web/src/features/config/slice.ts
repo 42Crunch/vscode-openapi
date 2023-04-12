@@ -16,6 +16,11 @@ const initialState: ConfigState = {
     insecureSslHostnames: [],
     platformUrl: "https://platform.42crunch.com",
     platformApiToken: "",
+    platformServices: {
+      source: "auto",
+      manual: undefined,
+      auto: "services.42crunch.com:8001",
+    },
   },
   platformConnectionTestResult: undefined,
   waitingForPlatformConnectionTest: false,

@@ -1,7 +1,12 @@
 export type Config = {
   insecureSslHostnames: string[];
   platformUrl: string;
-  platformApiToken: string;
+  platformApiToken: string | undefined;
+  platformServices: {
+    source: "auto" | "manual";
+    manual: string | undefined;
+    auto: string;
+  };
 };
 
 export type PlatformConnectionTestResult = { success: true } | { success: false; message: string };
