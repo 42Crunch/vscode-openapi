@@ -29,6 +29,11 @@ export function createListener(host: Webapp["host"]) {
       startAppListening({
         actionCreator: testPlatformConnection,
         effect: async (action, listenerApi) => {
+          const state = listenerApi.getState();
+          host.postMessage({
+            command: "saveConfig",
+            payload: state.config.data,
+          });
           host.postMessage({
             command: "testPlatformConnection",
             payload: undefined,

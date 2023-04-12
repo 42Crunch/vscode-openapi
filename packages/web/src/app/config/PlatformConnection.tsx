@@ -7,7 +7,6 @@ import {
   useFeatureDispatch,
   useFeatureSelector,
   testPlatformConnection,
-  saveConfig,
 } from "../../features/config/slice";
 import { Banner, ErrorBanner } from "../../components/Banner";
 import { PlatformConnectionTestResult } from "../../../../common/src/config";
@@ -21,7 +20,7 @@ export default function PlatformConnection() {
     waitingForPlatformConnectionTest: waitingForTest,
   } = useFeatureSelector((state) => state.config);
 
-  const { watch, getValues } = useFormContext();
+  const { watch } = useFormContext();
 
   const source = watch("platformServices.source");
 
@@ -52,7 +51,6 @@ export default function PlatformConnection() {
               label="Test connection"
               waiting={waitingForTest}
               onClick={(e) => {
-                dispatch(saveConfig(JSON.parse(JSON.stringify(getValues())) as ConfigData));
                 dispatch(testPlatformConnection());
                 e.preventDefault();
                 e.stopPropagation();
