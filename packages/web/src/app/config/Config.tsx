@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useForm, FormProvider } from "react-hook-form";
 
@@ -37,9 +37,19 @@ function ConfigForm({ values }: { values: ConfigData }) {
     mode: "onChange",
   });
 
+  const {
+    formState: { isDirty, isValid },
+  } = methods;
+
   function onSubmit(values: ConfigData) {
     dispatch(saveConfig(values));
   }
+
+  useEffect(() => {
+    if (isDirty && isValid) {
+      methods.handleSubmit(onSubmit)();
+    }
+  }, [isDirty, isValid]);
 
   return (
     <Container>
@@ -64,10 +74,8 @@ function ConfigForm({ values }: { values: ConfigData }) {
           />
         </Sidebar>
         <Content>
-          <form onChange={methods.handleSubmit(onSubmit)}>
-            {selected === "platform-connection" && <PlatformConnection />}
-            {selected === "platform-scan" && <Scan />}
-          </form>
+          {selected === "platform-connection" && <PlatformConnection />}
+          {selected === "platform-scan" && <Scan />}
         </Content>
       </FormProvider>
     </Container>

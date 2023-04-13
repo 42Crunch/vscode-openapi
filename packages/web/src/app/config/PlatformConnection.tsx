@@ -1,6 +1,4 @@
 import styled from "styled-components";
-import { useFormContext } from "react-hook-form";
-import { Config as ConfigData } from "@xliic/common/config";
 
 import Input from "../../components/Input";
 import {
@@ -9,9 +7,8 @@ import {
   testPlatformConnection,
 } from "../../features/config/slice";
 import { Banner, ErrorBanner } from "../../components/Banner";
-import { PlatformConnectionTestResult } from "../../../../common/src/config";
+import { ConnectionTestResult } from "../../../../common/src/config";
 import { NormalProgressButton } from "../../components/ProgressButton";
-import Select from "../../components/Select";
 
 export default function PlatformConnection() {
   const dispatch = useFeatureDispatch();
@@ -20,10 +17,6 @@ export default function PlatformConnection() {
     waitingForPlatformConnectionTest: waitingForTest,
   } = useFeatureSelector((state) => state.config);
 
-  const { watch } = useFormContext();
-
-  const source = watch("platformServices.source");
-
   return (
     <>
       <Title>42Crunch Platform connection parameters</Title>
@@ -31,21 +24,6 @@ export default function PlatformConnection() {
         <div>
           <Input label="Platform URL" name="platformUrl" />
           <Input label="IDE token" name="platformApiToken" password />
-          <Select
-            name="platformServices.source"
-            options={[
-              { value: "auto", label: "Automatically detect services host" },
-              { value: "manual", label: "Specify services host manually" },
-            ]}
-          />
-          {source == "manual" && <Input label="Services host" name="platformServices.manual" />}
-          {source == "auto" && (
-            <Input
-              label="Services host (automatic, read-only)"
-              name="platformServices.auto"
-              disabled
-            />
-          )}
           <div>
             <NormalProgressButton
               label="Test connection"
@@ -64,7 +42,7 @@ export default function PlatformConnection() {
   );
 }
 
-function makeBanner(result: PlatformConnectionTestResult | undefined) {
+function makeBanner(result: ConnectionTestResult | undefined) {
   if (result !== undefined) {
     if (result.success) {
       return <Banner message="Successfully connected" />;

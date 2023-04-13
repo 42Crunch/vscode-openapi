@@ -5,7 +5,11 @@ import {
 } from "@reduxjs/toolkit";
 import { Webapp } from "@xliic/common/webapp/config";
 import { AppDispatch, RootState } from "./store";
-import { saveConfig, testPlatformConnection } from "../../features/config/slice";
+import {
+  saveConfig,
+  testPlatformConnection,
+  testOverlordConnection,
+} from "../../features/config/slice";
 import { startListeners } from "../webapp";
 
 const listenerMiddleware = createListenerMiddleware();
@@ -36,6 +40,22 @@ export function createListener(host: Webapp["host"]) {
           });
           host.postMessage({
             command: "testPlatformConnection",
+            payload: undefined,
+          });
+        },
+      }),
+
+    testOverlordConnection: () =>
+      startAppListening({
+        actionCreator: testOverlordConnection,
+        effect: async (action, listenerApi) => {
+          const state = listenerApi.getState();
+          host.postMessage({
+            command: "saveConfig",
+            payload: state.config.data,
+          });
+          host.postMessage({
+            command: "testOverlordConnection",
             payload: undefined,
           });
         },

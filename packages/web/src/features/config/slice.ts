@@ -1,13 +1,15 @@
 import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 
-import { Config, PlatformConnectionTestResult } from "@xliic/common/config";
+import { Config, ConnectionTestResult } from "@xliic/common/config";
 
 export interface ConfigState {
   ready: boolean;
   data: Config;
-  platformConnectionTestResult?: PlatformConnectionTestResult;
+  platformConnectionTestResult?: ConnectionTestResult;
   waitingForPlatformConnectionTest: boolean;
+  overlordConnectionTestResult?: ConnectionTestResult;
+  waitingForOverlordConnectionTest: boolean;
 }
 
 const initialState: ConfigState = {
@@ -24,6 +26,8 @@ const initialState: ConfigState = {
   },
   platformConnectionTestResult: undefined,
   waitingForPlatformConnectionTest: false,
+  overlordConnectionTestResult: undefined,
+  waitingForOverlordConnectionTest: false,
 };
 
 export const slice = createSlice({
@@ -39,9 +43,10 @@ export const slice = createSlice({
       // this is also a hook for a listener
       state.data = action.payload;
       state.platformConnectionTestResult = undefined;
+      state.overlordConnectionTestResult = undefined;
     },
 
-    showPlatformConnectionTest: (state, action: PayloadAction<PlatformConnectionTestResult>) => {
+    showPlatformConnectionTest: (state, action: PayloadAction<ConnectionTestResult>) => {
       state.platformConnectionTestResult = action.payload;
       state.waitingForPlatformConnectionTest = false;
     },
@@ -54,6 +59,16 @@ export const slice = createSlice({
       state.waitingForPlatformConnectionTest = true;
       // hook for a listener
     },
+
+    testOverlordConnection: (state, action: PayloadAction<undefined>) => {
+      state.waitingForOverlordConnectionTest = true;
+      // hook for a listener
+    },
+
+    showOverlordConnectionTest: (state, action: PayloadAction<ConnectionTestResult>) => {
+      state.overlordConnectionTestResult = action.payload;
+      state.waitingForOverlordConnectionTest = false;
+    },
   },
 });
 
@@ -63,6 +78,8 @@ export const {
   showConfigWindow,
   testPlatformConnection,
   showPlatformConnectionTest,
+  testOverlordConnection,
+  showOverlordConnectionTest,
 } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<

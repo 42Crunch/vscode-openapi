@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useSelect } from "downshift";
-import { useFormContext, useController } from "react-hook-form";
+import { useController } from "react-hook-form";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { AngleDown } from "../icons";
 
@@ -22,19 +22,18 @@ export default function Select({
   options: SelectOption[];
   placeholder?: string;
 }) {
-  const { control } = useFormContext();
-
   const { field } = useController({
     name,
-    control,
+    rules: { required: true },
   });
 
   const { isOpen, getToggleButtonProps, getMenuProps, getItemProps } = useSelect({
     items: options,
     itemToString,
     selectedItem: field.value ?? null,
-    onSelectedItemChange: ({ selectedItem: newSelectedItem }) =>
-      field.onChange(newSelectedItem?.value),
+    onSelectedItemChange: ({ selectedItem: newSelectedItem }) => {
+      field.onChange(newSelectedItem?.value);
+    },
   });
 
   const selected = getOptionByValue(options, field.value);

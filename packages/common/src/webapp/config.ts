@@ -4,12 +4,17 @@ import {
   SaveConfigMessage,
   TestPlatformConnectionMessage,
   ShowPlatformConnectionTestMessage,
+  TestOverlordConnectionMessage,
+  ShowOverlordConnectionTestMessage,
 } from "../config";
 import { ChangeThemeMessage } from "../theme";
 
 export type Webapp = App<
   // consumes
-  LoadConfigMessage | ShowPlatformConnectionTestMessage | ChangeThemeMessage,
+  | ChangeThemeMessage
+  | LoadConfigMessage
+  | ShowPlatformConnectionTestMessage
+  | ShowOverlordConnectionTestMessage,
   // produces
-  SaveConfigMessage | TestPlatformConnectionMessage
+  SaveConfigMessage | TestPlatformConnectionMessage | TestOverlordConnectionMessage
 >;

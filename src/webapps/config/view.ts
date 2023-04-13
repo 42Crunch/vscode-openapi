@@ -4,9 +4,10 @@
 */
 
 import * as vscode from "vscode";
+import * as http2 from "http2";
 
 import { Webapp } from "@xliic/common/webapp/config";
-import { Config } from "@xliic/common/config";
+import { Config, ConnectionTestResult } from "@xliic/common/config";
 import { Configuration } from "../../configuration";
 import { WebView } from "../../web-view";
 import { PlatformStore } from "../../platform/stores/platform-store";
@@ -35,6 +36,27 @@ export class ConfigWebView extends WebView<Webapp> {
       // vscode.workspace
       //   .getConfiguration("openapi")
       //   .update("tryit.insecureSslHostnames", config.insecureSslHostnames);
+    },
+
+    testOverlordConnection: async () => {
+      const services =
+        this.config?.platformServices.source === "auto"
+          ? this.config?.platformServices.auto
+          : this.config?.platformServices.manual;
+
+      if (services === undefined || services === "") {
+        return {
+          command: "showOverlordConnectionTest",
+          payload: { success: false, message: "Services host is not configured" },
+        };
+      }
+
+      const result = await http2Ping(`https://${services}`);
+
+      return {
+        command: "showOverlordConnectionTest",
+        payload: result,
+      };
     },
 
     testPlatformConnection: async () => {
@@ -87,4 +109,25 @@ async function loadConfig(
       auto: servicesAutomatic,
     },
   };
+}
+
+function http2Ping(url: string): Promise<ConnectionTestResult> {
+  return new Promise((resolve, reject) => {
+    const client = http2.connect(url);
+
+    client.on("error", (err) => {
+      client.close();
+      resolve({
+        success: false,
+        message: err.message,
+      });
+    });
+
+    client.on("connect", () => {
+      client.close();
+      resolve({
+        success: true,
+      });
+    });
+  });
 }

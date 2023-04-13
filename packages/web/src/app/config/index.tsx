@@ -10,13 +10,18 @@ import { createListener } from "./listener";
 import { makeWebappMessageHandler } from "../webapp";
 import ThemeStyles from "../../features/theme/ThemeStyles";
 import { ThemeState, changeTheme } from "../../features/theme/slice";
-import { loadConfig, showPlatformConnectionTest } from "../../features/config/slice";
+import {
+  loadConfig,
+  showPlatformConnectionTest,
+  showOverlordConnectionTest,
+} from "../../features/config/slice";
 import Config from "./Config";
 
 const messageHandlers: Webapp["webappHandlers"] = {
   changeTheme,
   loadConfig,
   showPlatformConnectionTest,
+  showOverlordConnectionTest,
 };
 
 function App() {
