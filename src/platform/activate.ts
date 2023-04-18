@@ -6,7 +6,7 @@
 import * as vscode from "vscode";
 import { Preferences } from "@xliic/common/prefs";
 import { Cache } from "../cache";
-import { Configuration, configuration } from "../configuration";
+import { Configuration } from "../configuration";
 import { CollectionsProvider } from "./explorer/provider";
 import { Logger, PlatformContext, platformUriScheme } from "./types";
 import { AuditContext } from "../types";
@@ -108,6 +108,7 @@ export async function activate(
     envStore,
     prefs,
     reportWebView,
+    auditContext,
     logger
   );
   activateLinter(cache, platformContext, store, dataDictionaryDiagnostics);

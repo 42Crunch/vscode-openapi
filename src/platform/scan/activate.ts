@@ -10,6 +10,7 @@ import { ScanWebView } from "./view";
 import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
 import { AuditWebView } from "../../audit/view";
+import { AuditContext } from "../../types";
 
 const selectors = {
   json: { language: "json" },
@@ -27,6 +28,7 @@ export function activate(
   envStore: EnvStore,
   prefs: Record<string, Preferences>,
   auditView: AuditWebView,
+  auditContext: AuditContext,
   logger: Logger
 ): vscode.Disposable {
   let disposables: vscode.Disposable[] = [];
@@ -38,7 +40,9 @@ export function activate(
     store,
     envStore,
     prefs,
-    logger
+    logger,
+    auditView,
+    auditContext
   );
 
   const scanCodelensProvider = new ScanCodelensProvider(cache);
@@ -54,7 +58,7 @@ export function activate(
     }
   });
 
-  commands(cache, platformContext, store, view, auditView);
+  commands(cache, platformContext, store, view);
 
   return new vscode.Disposable(() => disposables.forEach((disposable) => disposable.dispose()));
 }

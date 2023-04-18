@@ -4,6 +4,8 @@ import {
   ScanOperationMessage,
   ShowScanReportMessage,
   ShowJsonPointerMessage,
+  ShowAuditReportMessage,
+  StartScanMessage,
 } from "../scan";
 import { LoadPreferencesMessage, SavePreferencesMessage } from "../prefs";
 import { LoadEnvMessage, ShowEnvWindow } from "../env";
@@ -18,6 +20,7 @@ import {
 
 export type Webapp = App<
   // consumes
+  | StartScanMessage
   | ScanOperationMessage
   | ShowGeneralErrorMessage
   | LoadEnvMessage
@@ -33,4 +36,5 @@ export type Webapp = App<
   | SendHttpRequestMessage
   | SendCurlRequestMessage
   | ShowJsonPointerMessage
+  | ShowAuditReportMessage
 >;

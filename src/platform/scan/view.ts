@@ -36,6 +36,11 @@ import * as managerApi from "../api-scand-manager";
 import { ScandManagerJobStatus } from "../api-scand-manager";
 import { Logger } from "../types";
 import { loadConfig } from "../../util/config";
+import { AuditWebView } from "../../audit/view";
+import { parseAuditReport, updateAuditContext } from "../../audit/audit";
+import { updateDecorations } from "../../audit/decoration";
+import { updateDiagnostics } from "../../audit/diagnostic";
+import { AuditContext } from "../../types";
 
 export class ScanWebView extends WebView<Webapp> {
   private isNewApi: boolean = false;
@@ -49,7 +54,9 @@ export class ScanWebView extends WebView<Webapp> {
     private store: PlatformStore,
     private envStore: EnvStore,
     private prefs: Record<string, Preferences>,
-    private logger: Logger
+    private logger: Logger,
+    private auditView: AuditWebView,
+    private auditContext: AuditContext
   ) {
     super(extensionPath, "scan", "Scan", vscode.ViewColumn.Two, false);
     envStore.onEnvironmentDidChange((env) => {
@@ -155,11 +162,29 @@ export class ScanWebView extends WebView<Webapp> {
         editor.revealRange(textLine.range, vscode.TextEditorRevealType.AtTop);
       }
     },
+
+    showAuditReport: async (payload: string) => {
+      const report = JSON.parse(payload);
+      const uri = this.document!.uri.toString();
+      const audit = await parseAuditReport(this.cache, this.document!, report, {
+        value: { uri, hash: "" },
+        children: {},
+      });
+      updateAuditContext(this.auditContext, uri, audit);
+      updateDecorations(this.auditContext.decorations, audit.summary.documentUri, audit.issues);
+      updateDiagnostics(this.auditContext.diagnostics, audit.filename, audit.issues);
+      await this.auditView.showReport(audit);
+    },
   };
 
   onDispose(): void {
     this.document = undefined;
     super.onDispose();
+  }
+
+  async sendStartScan(document: vscode.TextDocument) {
+    this.document = document;
+    return this.sendRequest({ command: "startScan", payload: undefined });
   }
 
   async sendScanOperation(document: vscode.TextDocument, payload: OasWithOperationAndConfig) {
@@ -170,6 +195,11 @@ export class ScanWebView extends WebView<Webapp> {
       this.sendRequest({ command: "loadPrefs", payload: prefs });
     }
     return this.sendRequest({ command: "scanOperation", payload });
+  }
+
+  async sendError(document: vscode.TextDocument, payload: GeneralError) {
+    this.document = document;
+    return this.sendRequest({ command: "showGeneralError", payload });
   }
 
   setNewApi() {
@@ -185,20 +215,18 @@ async function runScan(
   logger: Logger,
   isNewApi: boolean
 ): Promise<ShowScanReportMessage | ShowGeneralErrorMessage> {
-  // const useScandMgr = scanOption == "scand";
-  // if (useScandMgr && !store.getConnection().scandManagerUrl) {
-  //   throw new Error(
-  //     "Scand manager URL is not set. Please set the URL in settings and try running the Scan again."
-  //   );
-  // }
-
   const api = await store.createTempApi(scanConfig.rawOas);
+
   const audit = await store.getAuditReport(api.desc.id);
   if (audit?.openapiState !== "valid") {
     await store.deleteApi(api.desc.id);
-    throw new Error(
-      "OpenAPI has failed Security Audit. Please run API Security Audit, fix the issues and try running the Scan again."
-    );
+    return {
+      command: "showGeneralError",
+      payload: {
+        message:
+          "OpenAPI has failed Security Audit. Please run API Security Audit, fix the issues and try running the Scan again.",
+      },
+    };
   }
 
   if (isNewApi) {

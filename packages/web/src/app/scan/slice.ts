@@ -64,6 +64,10 @@ export const slice = createSlice({
   name: "scan",
   initialState,
   reducers: {
+    startScan: (state, action: PayloadAction<undefined>) => {
+      state.error = undefined;
+    },
+
     scanOperation: (state, action: PayloadAction<OasWithOperationAndConfig>) => {
       const { oas, rawOas, path, method, config } = action.payload;
       const scanConfig = readRawScanConfig(config, path, method);
@@ -158,10 +162,13 @@ export const slice = createSlice({
     sendCurlRequest: (state, action: PayloadAction<string>) => {},
 
     showJsonPointer: (state, action: PayloadAction<string>) => {},
+
+    showAuditReport: (state, action: PayloadAction<string>) => {},
   },
 });
 
 export const {
+  startScan,
   scanOperation,
   runScan,
   showScanReport,
@@ -171,6 +178,7 @@ export const {
   sendCurlRequest,
   showHttpResponse,
   showJsonPointer,
+  showAuditReport,
 } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<

@@ -14,6 +14,7 @@ import Router from "../../features/router/Router";
 import { RouterContext, Routes } from "../../features/router/RouterContext";
 
 import {
+  startScan,
   scanOperation,
   showScanReport,
   showGeneralError,
@@ -29,9 +30,10 @@ import Starting from "./Starting";
 
 const routes: Routes = [
   {
-    id: "starting",
-    title: "Starting",
+    id: "start-scan",
+    title: "Scan is starting",
     element: <Starting />,
+    when: startScan,
   },
   {
     id: "scan",
@@ -43,6 +45,7 @@ const routes: Routes = [
 
 const messageHandlers: Webapp["webappHandlers"] = {
   changeTheme,
+  startScan,
   scanOperation,
   showGeneralError,
   showHttpError,

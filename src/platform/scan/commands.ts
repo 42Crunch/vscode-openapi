@@ -19,8 +19,7 @@ export default (
   cache: Cache,
   platformContext: PlatformContext,
   store: PlatformStore,
-  view: ScanWebView,
-  auditView: AuditWebView
+  view: ScanWebView
 ) => {
   vscode.commands.registerTextEditorCommand(
     "openapi.platform.editorRunSingleOperationScan",
@@ -32,17 +31,7 @@ export default (
       method: HttpMethod
     ): Promise<void> => {
       try {
-        await editorRunSingleOperationScan(
-          editor,
-          edit,
-          cache,
-          store,
-          view,
-          auditView,
-          uri,
-          path,
-          method
-        );
+        await editorRunSingleOperationScan(editor, edit, cache, store, view, uri, path, method);
       } catch (ex: any) {
         if (
           ex?.response?.statusCode === 409 &&
@@ -66,19 +55,16 @@ async function editorRunSingleOperationScan(
   cache: Cache,
   store: PlatformStore,
   view: ScanWebView,
-  auditView: AuditWebView,
   uri: string,
   path: string,
   method: HttpMethod
 ): Promise<void> {
   await view.show();
   await view.sendColorTheme(vscode.window.activeColorTheme);
+  await view.sendStartScan(editor.document);
 
   const bundle = await cache.getDocumentBundle(editor.document);
   if (bundle && !("errors" in bundle)) {
-    //const oas = extractSingleOperation(method as HttpMethod, path as string, bundle.value);
-    // extracting the entire path here, 'cause scan will generate requests
-    // for all possible HTTP Verbs and test the responses against the OAS
     const oas = extractSinglePath(path as string, bundle.value);
     const rawOas = stringify(oas);
 
@@ -87,16 +73,15 @@ async function editorRunSingleOperationScan(
     const report = await store.getAuditReport(api.desc.id);
 
     if (report?.openapiState !== "valid") {
-      // const audit = await parseAuditReport(cache, editor.document, report, {
-      //   value: { uri, hash: "" },
-      //   children: {},
-      // });
-      // await auditView.showReport(audit);
-
       await store.deleteApi(api.desc.id);
-      throw new Error(
-        "OpenAPI has failed Security Audit. Please run API Security Audit, fix the issues and try running the Scan again."
-      );
+      await view.show();
+      await view.sendError(editor.document, {
+        message:
+          "OpenAPI has failed Security Audit. Please run API Security Audit, fix the issues and try running the Scan again.",
+        code: "audit-error",
+        data: JSON.stringify(report),
+      });
+      return;
     }
 
     await store.createDefaultScanConfig(api.desc.id);
@@ -120,7 +105,6 @@ async function editorRunSingleOperationScan(
         view.setNewApi();
       }
       await view.show();
-      await view.sendColorTheme(vscode.window.activeColorTheme);
       await view.sendScanOperation(editor.document, {
         oas: oas as BundledSwaggerOrOasSpec,
         rawOas: rawOas,

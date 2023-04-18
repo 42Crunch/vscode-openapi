@@ -57,6 +57,16 @@ export type ShowJsonPointerMessage = {
   payload: string;
 };
 
+export type ShowAuditReportMessage = {
+  command: "showAuditReport";
+  payload: string;
+};
+
+export type StartScanMessage = {
+  command: "startScan";
+  payload: undefined;
+};
+
 export type ScandManagerConnection = {
   url: string;
   auth: "none" | "header";
