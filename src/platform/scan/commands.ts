@@ -75,12 +75,7 @@ async function editorRunSingleOperationScan(
     if (report?.openapiState !== "valid") {
       await store.deleteApi(api.desc.id);
       await view.show();
-      await view.sendError(editor.document, {
-        message:
-          "OpenAPI has failed Security Audit. Please run API Security Audit, fix the issues and try running the Scan again.",
-        code: "audit-error",
-        data: JSON.stringify(report),
-      });
+      await view.sendAuditError(editor.document, report);
       return;
     }
 

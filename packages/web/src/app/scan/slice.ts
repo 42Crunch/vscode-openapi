@@ -163,7 +163,7 @@ export const slice = createSlice({
 
     showJsonPointer: (state, action: PayloadAction<string>) => {},
 
-    showAuditReport: (state, action: PayloadAction<string>) => {},
+    showAuditReport: (state, action: PayloadAction<undefined>) => {},
   },
 });
 

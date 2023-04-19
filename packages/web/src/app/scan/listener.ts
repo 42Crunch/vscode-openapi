@@ -92,7 +92,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
         effect: async (action, listenerApi) => {
           host.postMessage({
             command: "showAuditReport",
-            payload: action.payload,
+            payload: undefined,
           });
         },
       }),

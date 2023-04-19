@@ -45,6 +45,7 @@ import { AuditContext } from "../../types";
 export class ScanWebView extends WebView<Webapp> {
   private isNewApi: boolean = false;
   private document?: vscode.TextDocument;
+  private auditReport?: any;
 
   constructor(
     extensionPath: string,
@@ -163,10 +164,9 @@ export class ScanWebView extends WebView<Webapp> {
       }
     },
 
-    showAuditReport: async (payload: string) => {
-      const report = JSON.parse(payload);
+    showAuditReport: async () => {
       const uri = this.document!.uri.toString();
-      const audit = await parseAuditReport(this.cache, this.document!, report, {
+      const audit = await parseAuditReport(this.cache, this.document!, this.auditReport, {
         value: { uri, hash: "" },
         children: {},
       });
@@ -184,11 +184,13 @@ export class ScanWebView extends WebView<Webapp> {
 
   async sendStartScan(document: vscode.TextDocument) {
     this.document = document;
+    this.auditReport = undefined;
     return this.sendRequest({ command: "startScan", payload: undefined });
   }
 
   async sendScanOperation(document: vscode.TextDocument, payload: OasWithOperationAndConfig) {
     this.document = document;
+    this.auditReport = undefined;
     this.sendRequest({ command: "loadEnv", payload: await this.envStore.all() });
     const prefs = this.prefs[this.document.uri.toString()];
     if (prefs) {
@@ -197,9 +199,18 @@ export class ScanWebView extends WebView<Webapp> {
     return this.sendRequest({ command: "scanOperation", payload });
   }
 
-  async sendError(document: vscode.TextDocument, payload: GeneralError) {
+  async sendAuditError(document: vscode.TextDocument, auditReport: any) {
     this.document = document;
-    return this.sendRequest({ command: "showGeneralError", payload });
+    this.auditReport = auditReport;
+
+    return this.sendRequest({
+      command: "showGeneralError",
+      payload: {
+        message:
+          "OpenAPI has failed Security Audit. Please run API Security Audit, fix the issues and try running the Scan again.",
+        code: "audit-error",
+      },
+    });
   }
 
   setNewApi() {

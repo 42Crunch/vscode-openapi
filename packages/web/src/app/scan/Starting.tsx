@@ -18,7 +18,7 @@ export default function Starting() {
           {error.code === "audit-error" && (
             <Button
               onClick={(e) => {
-                dispatch(showAuditReport(error.data!));
+                dispatch(showAuditReport());
                 e.preventDefault();
                 e.stopPropagation();
               }}
