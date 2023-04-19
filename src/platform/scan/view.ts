@@ -355,7 +355,7 @@ async function runScanWithScandManager(
     };
   }
 
-  if (job.status === "failed" || job.status === "unknown") {
+  if (job.status === "failed") {
     // TODO introduce settings whether delete failed jobs or not
     return {
       message: `Failed to create scand-manager job ${job.name}, received unexpected status: ${job.status}`,
