@@ -55,6 +55,11 @@ function makeBanner(result: ConnectionTestResult | undefined) {
 const Container = styled.div`
   display: flex;
   gap: 8px;
+
+  @media (max-width: 800px) {
+    flex-direction: column;
+  }
+
   > div {
     flex: 1;
     display: flex;
