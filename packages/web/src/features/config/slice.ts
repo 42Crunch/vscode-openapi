@@ -99,12 +99,17 @@ export const slice = createSlice({
 });
 
 function deriveServices(platformUrl: string) {
-  const url = new URL(platformUrl);
-  const platformHost = url.hostname;
-  if (platformHost.toLowerCase().startsWith("platform")) {
-    return platformHost.replace(/^platform/i, "services") + ":8001";
+  try {
+    const url = new URL(platformUrl);
+    const platformHost = url.hostname;
+    if (platformHost.toLowerCase().startsWith("platform")) {
+      return platformHost.replace(/^platform/i, "services") + ":8001";
+    }
+    return "services." + platformHost + ":8001";
+  } catch (ex) {
+    // failed to parse URL
+    return "";
   }
-  return "services." + platformHost + ":8001";
 }
 
 export const {
