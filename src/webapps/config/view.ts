@@ -107,22 +107,40 @@ export class ConfigWebView extends WebView<Webapp> {
 }
 
 function http2Ping(url: string): Promise<ConnectionTestResult> {
-  return new Promise((resolve, reject) => {
-    const client = http2.connect(url);
+  const timeout = 5000;
 
-    client.on("error", (err) => {
-      client.close();
+  return new Promise((resolve, reject) => {
+    try {
+      const client = http2.connect(url);
+      client.setTimeout(timeout);
+
+      client.on("error", (err) => {
+        client.close();
+        resolve({
+          success: false,
+          message: err.message,
+        });
+      });
+
+      client.on("timeout", (err) => {
+        client.close();
+        resolve({
+          success: false,
+          message: `Timed out wating to connect after ${timeout}ms`,
+        });
+      });
+
+      client.on("connect", () => {
+        client.close();
+        resolve({
+          success: true,
+        });
+      });
+    } catch (ex) {
       resolve({
         success: false,
-        message: err.message,
+        message: `Failed to create connection: ${ex}`,
       });
-    });
-
-    client.on("connect", () => {
-      client.close();
-      resolve({
-        success: true,
-      });
-    });
+    }
   });
 }
