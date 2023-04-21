@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useForm, FormProvider } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { Config as ConfigData } from "@xliic/common/config";
@@ -39,9 +41,21 @@ function ConfigForm({ values }: { values: ConfigData }) {
   const [selected, setSelected] = useState("platform-connection");
   const [search, setSearch] = useState("");
 
+  const schema = z
+    .object({
+      platformUrl: z.string().url().startsWith("https://"),
+      platformApiToken: z
+        .string()
+        .regex(
+          /^(ide_|api_)?[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+        ),
+    })
+    .catchall(z.unknown());
+
   const methods = useForm({
     values,
     mode: "onChange",
+    resolver: zodResolver(schema),
   });
 
   const {

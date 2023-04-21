@@ -1,4 +1,4 @@
-import { useWatch } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 
 import Input from "../../components/Input";
 import {
@@ -19,6 +19,10 @@ export default function Scan() {
   } = useFeatureSelector((state) => state.config);
 
   const source = useWatch({ name: "platformServices.source" });
+
+  const {
+    formState: { isValid },
+  } = useFormContext();
 
   return (
     <>
@@ -42,6 +46,7 @@ export default function Scan() {
         )}
         <Test>
           <NormalProgressButton
+            disabled={!isValid}
             label="Test connection"
             waiting={waitingForOverlordTest}
             onClick={(e) => {

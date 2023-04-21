@@ -1,5 +1,3 @@
-import styled from "styled-components";
-
 import Input from "../../components/Input";
 import {
   useFeatureDispatch,
@@ -9,6 +7,7 @@ import {
 import { NormalProgressButton } from "../../components/ProgressButton";
 import ConnectionTestBanner from "./ConnectionTestBanner";
 import { Container, Test, Title } from "./layout";
+import { useFormContext } from "react-hook-form";
 
 export default function PlatformConnection() {
   const dispatch = useFeatureDispatch();
@@ -16,6 +15,10 @@ export default function PlatformConnection() {
     platformConnectionTestResult: testResult,
     waitingForPlatformConnectionTest: waitingForTest,
   } = useFeatureSelector((state) => state.config);
+
+  const {
+    formState: { isValid },
+  } = useFormContext();
 
   return (
     <>
@@ -25,6 +28,7 @@ export default function PlatformConnection() {
         <Input label="IDE token" name="platformApiToken" password />
         <Test>
           <NormalProgressButton
+            disabled={!isValid}
             label="Test connection"
             waiting={waitingForTest}
             onClick={(e) => {

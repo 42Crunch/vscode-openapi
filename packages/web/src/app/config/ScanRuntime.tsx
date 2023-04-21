@@ -1,15 +1,11 @@
-import styled from "styled-components";
-import { useWatch } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 
 import Input from "../../components/Input";
 import {
   useFeatureDispatch,
   useFeatureSelector,
-  testOverlordConnection,
   testScandManagerConnection,
 } from "../../features/config/slice";
-import { Banner, ErrorBanner } from "../../components/Banner";
-import { ConnectionTestResult } from "../../../../common/src/config";
 import { NormalProgressButton } from "../../components/ProgressButton";
 import Select from "../../components/Select";
 import ConnectionTestBanner from "./ConnectionTestBanner";
@@ -26,6 +22,10 @@ export default function ScanRuntime() {
 
   const scanRuntime = useWatch({ name: "scanRuntime" });
   const scanAuth = useWatch({ name: "scandManager.auth" });
+
+  const {
+    formState: { isValid },
+  } = useFormContext();
 
   return (
     <>
@@ -58,6 +58,7 @@ export default function ScanRuntime() {
             )}
             <Test>
               <NormalProgressButton
+                disabled={!isValid}
                 label="Test connection"
                 waiting={waitingForScandManagerTest}
                 onClick={(e) => {

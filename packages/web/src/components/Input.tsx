@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { useFormContext } from "react-hook-form";
+import { useController } from "react-hook-form";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
 
@@ -14,13 +14,22 @@ export default function Input({
   disabled?: boolean;
   password?: boolean;
 }) {
-  const { register } = useFormContext();
+  const {
+    field,
+    fieldState: { error },
+  } = useController({
+    name,
+    rules: { required: true },
+  });
 
   return (
-    <Container>
-      <div>{label}</div>
-      <input {...register(name)} disabled={disabled} type={password ? "password" : "text"} />
-    </Container>
+    <>
+      <Container>
+        <div>{label}</div>
+        <input {...field} disabled={disabled} type={password ? "password" : "text"} />
+      </Container>
+      {error && <Error>{error?.message}</Error>}
+    </>
   );
 }
 
@@ -56,4 +65,8 @@ const Container = styled.div`
       //   outline: 1px solid var(${ThemeColorVariables.focusBorder});
     }
   }
+`;
+
+const Error = styled.div`
+  color: var(${ThemeColorVariables.errorForeground});
 `;
