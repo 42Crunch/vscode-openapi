@@ -64,6 +64,7 @@ export const slice = createSlice({
 
     testPlatformConnection: (state, action: PayloadAction<undefined>) => {
       state.waitingForPlatformConnectionTest = true;
+      state.platformConnectionTestResult = undefined;
       // hook for a listener
     },
 
@@ -74,6 +75,7 @@ export const slice = createSlice({
 
     testOverlordConnection: (state, action: PayloadAction<undefined>) => {
       state.waitingForOverlordConnectionTest = true;
+      state.overlordConnectionTestResult = undefined;
       // hook for a listener
     },
 
@@ -84,6 +86,7 @@ export const slice = createSlice({
 
     testScandManagerConnection: (state, action: PayloadAction<undefined>) => {
       state.waitingForScandManagerConnectionTest = true;
+      state.scandManagerConnectionTestResult = undefined;
       // hook for a listener
     },
 
