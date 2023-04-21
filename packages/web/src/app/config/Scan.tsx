@@ -31,9 +31,10 @@ export default function Scan() {
       <Title>Scan connection parameters</Title>
       <Container>
         <div>
-          <Input label="Scand Agent Image" name="scanImage" />
+          <Input label="Scand agent image" name="scanImage" />
 
           <Select
+            label="Platform services"
             name="platformServices.source"
             options={[
               { value: "auto", label: "Automatically detect services host" },
@@ -65,20 +66,22 @@ export default function Scan() {
       <Container>
         <div>
           <Select
+            label="Runtime"
             name="scanRuntime"
             options={[
-              { value: "docker", label: "docker" },
-              { value: "scand-manager", label: "scand-manager" },
+              { value: "docker", label: "Docker" },
+              { value: "scand-manager", label: "Scand manager" },
             ]}
           />
           {scanRuntime === "scand-manager" && (
             <>
               <Input label="Scand Manager URL" name="scandManager.url" />
               <Select
+                label="Authentication method"
                 name="scandManager.auth"
                 options={[
-                  { value: "none", label: "no authentication" },
-                  { value: "header", label: "header authentication" },
+                  { value: "none", label: "None" },
+                  { value: "header", label: "HTTP Header Authentication" },
                 ]}
               />
               {scanAuth === "header" && (

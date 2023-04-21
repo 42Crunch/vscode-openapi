@@ -17,10 +17,12 @@ export default function Select({
   name,
   options,
   placeholder,
+  label,
 }: {
   name: string;
   options: SelectOption[];
   placeholder?: string;
+  label: string;
 }) {
   const { field } = useController({
     name,
@@ -40,6 +42,8 @@ export default function Select({
 
   return (
     <Container>
+      <div>{label}</div>
+
       <Input {...getToggleButtonProps()}>
         <span>{selected ? selected.label : placeholder ?? ""}</span>
         <AngleDown />
@@ -63,15 +67,28 @@ function getOptionByValue(options: SelectOption[], value: string): SelectOption 
 const Container = styled.div`
   position: relative;
   z-index: 1;
+  background-color: var(${ThemeColorVariables.inputBackground});
+  border-radius: 2px;
+  border: 1px solid var(${ThemeColorVariables.border});
+  display: flex;
+  flex-direction: column;
+  padding: 4px 8px;
+  gap: 4px;
+  &:focus-within {
+    border: 1px solid var(${ThemeColorVariables.focusBorder});
+  }
+  > div:first-child {
+    font-style: normal;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 16px;
+    color: var(${ThemeColorVariables.inputPlaceholderForeground});
+  }
 `;
 
 const Input = styled.div`
   display: flex;
-  padding: 4px;
-  border-radius: 2px;
-  border: 1px solid var(${ThemeColorVariables.dropdownBorder});
-  background-color: var(${ThemeColorVariables.dropdownBackground});
-  color: var(${ThemeColorVariables.dropdownForeground});
+  color: var(${ThemeColorVariables.foreground});
   align-items: center;
   cursor: pointer;
   > span {
