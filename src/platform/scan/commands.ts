@@ -75,9 +75,11 @@ async function editorRunSingleOperationScan(
     if (report?.openapiState !== "valid") {
       await store.deleteApi(api.desc.id);
       await view.show();
-      await view.sendAuditError(editor.document, report);
+      await view.sendAuditError(editor.document, report, bundle.mapping);
       return;
     }
+
+    // TODO clean audit report for the current document
 
     await store.createDefaultScanConfig(api.desc.id);
 

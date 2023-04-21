@@ -40,12 +40,15 @@ import { AuditWebView } from "../../audit/view";
 import { parseAuditReport, updateAuditContext } from "../../audit/audit";
 import { updateDecorations } from "../../audit/decoration";
 import { updateDiagnostics } from "../../audit/diagnostic";
-import { AuditContext } from "../../types";
+import { AuditContext, MappingNode } from "../../types";
 
 export class ScanWebView extends WebView<Webapp> {
   private isNewApi: boolean = false;
   private document?: vscode.TextDocument;
-  private auditReport?: any;
+  private auditReport?: {
+    report: any;
+    mapping: MappingNode;
+  };
 
   constructor(
     extensionPath: string,
@@ -166,10 +169,12 @@ export class ScanWebView extends WebView<Webapp> {
 
     showAuditReport: async () => {
       const uri = this.document!.uri.toString();
-      const audit = await parseAuditReport(this.cache, this.document!, this.auditReport, {
-        value: { uri, hash: "" },
-        children: {},
-      });
+      const audit = await parseAuditReport(
+        this.cache,
+        this.document!,
+        this.auditReport!.report,
+        this.auditReport!.mapping
+      );
       updateAuditContext(this.auditContext, uri, audit);
       updateDecorations(this.auditContext.decorations, audit.summary.documentUri, audit.issues);
       updateDiagnostics(this.auditContext.diagnostics, audit.filename, audit.issues);
@@ -199,9 +204,13 @@ export class ScanWebView extends WebView<Webapp> {
     return this.sendRequest({ command: "scanOperation", payload });
   }
 
-  async sendAuditError(document: vscode.TextDocument, auditReport: any) {
+  async sendAuditError(document: vscode.TextDocument, report: any, mapping: MappingNode) {
     this.document = document;
-    this.auditReport = auditReport;
+
+    this.auditReport = {
+      report,
+      mapping,
+    };
 
     return this.sendRequest({
       command: "showGeneralError",
