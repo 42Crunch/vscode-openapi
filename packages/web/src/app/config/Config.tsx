@@ -9,11 +9,18 @@ import List from "../../components/List";
 import { MagnifyingGlass } from "../../icons";
 import { saveConfig, useFeatureDispatch, useFeatureSelector } from "../../features/config/slice";
 import PlatformConnection from "./PlatformConnection";
-import Scan from "./Scan";
+import PlatformServices from "./PlatformServices";
+import ScanDockerImage from "./ScanDockerImage";
+import ScanRuntime from "./ScanRuntime";
 
 const platformSettings = [
-  { id: "platform-connection", label: "Platform Connection" },
-  { id: "platform-scan", label: "Conformance Scan" },
+  { id: "platform-connection", label: "Connection" },
+  { id: "platform-services", label: "Services" },
+];
+
+const scanSettings = [
+  { id: "scan-image", label: "Docker image" },
+  { id: "scan-runtime", label: "Runtime" },
 ];
 
 export default function Config() {
@@ -63,8 +70,6 @@ function ConfigForm({ values }: { values: ConfigData }) {
             />
             <MagnifyingGlass />
           </Search>
-          {/* <Subheader>Try It</Subheader>
-          <List selected={selected} setSelected={setSelected} items={s} /> */}
           <Subheader>42Crunch Platform</Subheader>
           <List
             selected={selected}
@@ -72,10 +77,19 @@ function ConfigForm({ values }: { values: ConfigData }) {
             items={platformSettings}
             filter={search.trim()}
           />
+          <Subheader>Conformance Scan</Subheader>
+          <List
+            selected={selected}
+            setSelected={setSelected}
+            items={scanSettings}
+            filter={search.trim()}
+          />
         </Sidebar>
         <Content>
           {selected === "platform-connection" && <PlatformConnection />}
-          {selected === "platform-scan" && <Scan />}
+          {selected === "platform-services" && <PlatformServices />}
+          {selected === "scan-image" && <ScanDockerImage />}
+          {selected === "scan-runtime" && <ScanRuntime />}
         </Content>
       </FormProvider>
     </Container>
@@ -100,9 +114,6 @@ const Container = styled.div`
 const Content = styled.div`
   background-color: var(${ThemeColorVariables.computedOne});
   padding: 16px;
-  > div {
-    margin: 8px 0;
-  }
 `;
 
 const Sidebar = styled.div`
