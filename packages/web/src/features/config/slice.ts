@@ -56,6 +56,7 @@ export const slice = createSlice({
     saveConfig: (state, action: PayloadAction<Config>) => {
       // this is also a hook for a listener
       state.data = action.payload;
+      state.data.platformServices.auto = deriveServices(state.data.platformUrl);
       state.platformConnectionTestResult = undefined;
       state.overlordConnectionTestResult = undefined;
       state.scandManagerConnectionTestResult = undefined;
@@ -96,6 +97,15 @@ export const slice = createSlice({
     },
   },
 });
+
+function deriveServices(platformUrl: string) {
+  const url = new URL(platformUrl);
+  const platformHost = url.hostname;
+  if (platformHost.toLowerCase().startsWith("platform")) {
+    return platformHost.replace(/^platform/i, "services") + ":8001";
+  }
+  return "services." + platformHost + ":8001";
+}
 
 export const {
   loadConfig,
