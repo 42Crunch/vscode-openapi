@@ -437,7 +437,12 @@ export async function testConnection(
   logger: Logger
 ): Promise<{ success: true } | { success: false; message: string }> {
   try {
-    await got("api/v2/collections?page=1&perPage=1", gotOptions("GET", options, logger));
+    await got("api/v2/collections?page=1&perPage=1", {
+      ...gotOptions("GET", options, logger),
+      timeout: {
+        request: 5000,
+      },
+    });
     return { success: true };
   } catch (ex) {
     return { success: false, message: `${ex}` };

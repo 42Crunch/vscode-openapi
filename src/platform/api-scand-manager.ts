@@ -69,8 +69,12 @@ export async function testConnection(
   logger: Logger
 ): Promise<{ success: true } | { success: false; message: string }> {
   try {
-    const response = await got("api/job", gotOptions("GET", connection, logger));
-    console.log("r", response);
+    await got("api/job", {
+      ...gotOptions("GET", connection, logger),
+      timeout: {
+        request: 5000,
+      },
+    });
     return { success: true };
   } catch (ex) {
     return { success: false, message: `${ex}` };
