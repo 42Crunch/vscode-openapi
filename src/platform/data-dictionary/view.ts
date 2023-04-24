@@ -14,7 +14,13 @@ export class DataDictionaryWebView extends WebView<Webapp> {
   };
 
   constructor(extensionPath: string) {
-    super(extensionPath, "data-dictionary", "Data Dictionary Browser", vscode.ViewColumn.One, true);
+    super(extensionPath, "data-dictionary", "Data Dictionary", vscode.ViewColumn.One, false);
+
+    vscode.window.onDidChangeActiveColorTheme((e) => {
+      if (this.isActive()) {
+        this.sendColorTheme(e);
+      }
+    });
   }
 
   async sendShowDictionaries(payload: ShowDictionaryMessage["payload"]) {

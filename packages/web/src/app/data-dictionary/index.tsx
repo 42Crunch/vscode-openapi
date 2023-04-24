@@ -11,7 +11,6 @@ import { makeWebappMessageHandler } from "../webapp";
 
 import { showDictionary } from "./slice";
 
-import "bootstrap/dist/css/bootstrap.min.css";
 import Main from "./Main";
 
 const messageHandlers: Webapp["webappHandlers"] = {

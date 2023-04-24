@@ -17,10 +17,10 @@ export default function SearchSidebar({
   defaultSelection,
 }: {
   sections: Section[];
-  defaultSelection: string;
+  defaultSelection?: string;
   render: (selection: string) => ReactNode;
 }) {
-  const [selected, setSelected] = useState(defaultSelection);
+  const [selected, setSelected] = useState(defaultSelection || sections?.[0]?.items?.[0].id || "");
   const [search, setSearch] = useState("");
   return (
     <Container>
@@ -35,7 +35,7 @@ export default function SearchSidebar({
         </Search>
         {sections.map((section: Section) => (
           <React.Fragment key={section.title}>
-            <Subheader>42Crunch Platform</Subheader>
+            <Subheader>{section.title}</Subheader>
             <List
               selected={selected}
               setSelected={setSelected}

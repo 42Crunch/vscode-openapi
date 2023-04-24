@@ -1,10 +1,7 @@
-import Card from "react-bootstrap/Card";
-import Badge from "react-bootstrap/Badge";
 import styled from "styled-components";
 import { DateTime } from "luxon";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
-import CollapsibleCaret from "./CollapsibleCaret";
 import {
   DataFormatEnum,
   DataFormatInteger,
@@ -12,36 +9,34 @@ import {
   FlattenedDataFormat,
 } from "@xliic/common/data-dictionary";
 
+import { AngleDown, AngleUp } from "../../icons";
 import collapsible from "./collapsible";
 
 export default function FormatCard({ format }: { format: FlattenedDataFormat }) {
   const [isOpen, toggle] = collapsible();
 
   return (
-    <StyledCard key={`${format.dictionaryId}-${format.name}`} style={{ margin: "1em" }}>
-      <Card.Body>
-        <CollapsibleCardTitle onClick={toggle}>
-          <FormatName>{format.name}</FormatName>
-          {format.pii === "yes" && <Gdpr bg="secondary">GDPR</Gdpr>}
-          <CollapsibleCaret isOpen={isOpen} />
-        </CollapsibleCardTitle>
-        <CardSubtitle>
-          Last updated on{" "}
-          {DateTime.fromSeconds(parseInt(format.lastUpdate, 10)).toLocaleString(
-            DateTime.DATETIME_MED
-          )}
-        </CardSubtitle>
-        {isOpen && (
-          <>
-            <Description>{format.description}</Description>
-            <Properties>
-              {renderCommonProperties(format)}
-              {renderFormatSpecificProperties(format)}
-            </Properties>
-          </>
-        )}
-      </Card.Body>
-    </StyledCard>
+    <Container key={`${format.dictionaryId}-${format.name}`}>
+      <Title collapsed={!isOpen} onClick={toggle}>
+        <div>{isOpen ? <AngleUp /> : <AngleDown />}</div>
+        <div>
+          <TopDescription>{format.name}</TopDescription>
+          <BottomDescription>
+            Last updated on{" "}
+            {DateTime.fromSeconds(parseInt(format.lastUpdate, 10)).toLocaleString(
+              DateTime.DATETIME_MED
+            )}
+          </BottomDescription>
+        </div>
+      </Title>
+      {isOpen && (
+        <Content>
+          <Description>{format.description}</Description>
+          {renderCommonProperties(format)}
+          {renderFormatSpecificProperties(format)}
+        </Content>
+      )}
+    </Container>
   );
 }
 
@@ -114,63 +109,69 @@ function IntegerFormat({ format }: { format: DataFormatInteger }) {
 
 function Property({ label, value }: { label: string; value: any }) {
   return (
-    <PropertyItem>
-      <PropertyLabel>{label}</PropertyLabel>
-      <PropertyValue>{value}</PropertyValue>
-    </PropertyItem>
+    <Item>
+      <div>{label}</div>
+      <div>{value}</div>
+    </Item>
   );
 }
 
-const StyledCard = styled(Card)`
-  background-color: var(${ThemeColorVariables.background});
-  border-color: var(${ThemeColorVariables.border});
+const Container = styled.div`
+  margin: 8px;
+  border: 1px solid var(${ThemeColorVariables.border});
 `;
 
-const CollapsibleCardTitle = styled(Card.Title)`
+const Title = styled.div`
   display: flex;
   cursor: pointer;
+  padding: 10px 10px 10px 0px;
+  background-color: var(${ThemeColorVariables.computedOne});
+  & > div:first-child {
+    padding-left: 4px;
+    padding-right: 8px;
+    > svg {
+      fill: var(${ThemeColorVariables.foreground});
+    }
+  }
+  border-left: 5px solid transparent;
+  ${({ collapsed }: { collapsed: boolean }) =>
+    !collapsed &&
+    `border-bottom: 1px solid var(${ThemeColorVariables.border});
+    border-left: 5px solid var(${ThemeColorVariables.badgeBackground});`}
 `;
 
-const CardSubtitle = styled(Card.Subtitle)`
-  font-size: 0.75rem;
-  padding-bottom: 1rem;
+const TopDescription = styled.div`
+  font-weight: 600;
 `;
 
-const Gdpr = styled(Badge)`
-  margin-right: 0.5rem;
+const BottomDescription = styled.div`
+  margin-top: 8px;
+  display: flex;
+  font-size: 90%;
+  align-items: center;
+  gap: 16px;
 `;
 
-const FormatName = styled.div`
-  flex: 1;
+const Content = styled.div`
+  background-color: var(${ThemeColorVariables.computedOne});
+  padding: 16px;
 `;
 
 const Description = styled.div`
+  padding-bottom: 16px;
   border-bottom: 1px solid var(${ThemeColorVariables.border});
-  padding-bottom: 1rem;
 `;
 
-const Properties = styled.ul`
-  display: inline-block;
-  padding-left: 0;
-`;
-
-const PropertyItem = styled.li`
-  list-style: none;
+const Item = styled.div`
   display: flex;
-  align-items: center;
-  padding: 6px;
-`;
-
-const PropertyLabel = styled.div`
-  width: 120px;
-  font-size: 0.85rem;
-  flex-shrink: 0;
-  margin-right: 1rem;
-`;
-
-const PropertyValue = styled.div`
-  font-size: 0.85rem;
-  overflow-wrap: break-word;
-  max-width: 100%;
-  text-overflow: ellipsis;
+  padding: 8px 0;
+  gap: 8px;
+  & > div:first-child {
+    flex: 1;
+    opacity: 0.8;
+  }
+  & > div:last-child {
+    line-break: anywhere;
+    flex: 3;
+  }
 `;

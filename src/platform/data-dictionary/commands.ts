@@ -26,6 +26,7 @@ export default (
   browseDataDictionaries: async () => {
     const formats = await store.getDataDictionaries();
     await dataDictionaryView.show();
+    await dataDictionaryView.sendColorTheme(vscode.window.activeColorTheme);
     dataDictionaryView.sendShowDictionaries(formats);
   },
 
