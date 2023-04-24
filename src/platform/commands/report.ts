@@ -9,6 +9,7 @@ import { AuditWebView } from "../../audit/view";
 import { parseAuditReport, updateAuditContext } from "../../audit/audit";
 import { setDecorations, updateDecorations } from "../../audit/decoration";
 import { updateDiagnostics } from "../../audit/diagnostic";
+import { setAudit } from "../../audit/service";
 
 export default (
   store: PlatformStore,
@@ -60,9 +61,7 @@ export default (
           value: { uri, hash: "" },
           children: {},
         });
-        updateAuditContext(auditContext, uri, audit);
-        updateDecorations(auditContext.decorations, audit.summary.documentUri, audit.issues);
-        updateDiagnostics(auditContext.diagnostics, audit.filename, audit.issues);
+        setAudit(auditContext, uri, audit);
         setDecorations(editor, auditContext);
         await reportWebView.showReport(audit);
       } else {

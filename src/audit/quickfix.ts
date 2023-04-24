@@ -44,6 +44,7 @@ import { getLocationByPointer } from "./util";
 import { generateSchemaFixCommand, createGenerateSchemaAction } from "./quickfix-schema";
 import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 import { findJsonNodeValue } from "../json-utils";
+import { setAudit } from "./service";
 
 const registeredQuickFixes: { [key: string]: Fix } = {};
 

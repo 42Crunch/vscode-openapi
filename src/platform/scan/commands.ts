@@ -5,14 +5,12 @@
 
 import * as vscode from "vscode";
 import { PlatformContext } from "../types";
-import { parseJsonPointer, Path, simpleClone, stringify } from "@xliic/preserving-json-yaml-parser";
+import { stringify } from "@xliic/preserving-json-yaml-parser";
 import { Cache } from "../../cache";
 import { PlatformStore } from "../stores/platform-store";
 import { HttpMethod } from "@xliic/common/http";
 import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
 import { ScanWebView } from "./view";
-import { parseAuditReport } from "../../audit/audit";
-import { AuditWebView } from "../../audit/view";
 import { extractSinglePath } from "../../util/extract";
 
 export default (
@@ -78,8 +76,6 @@ async function editorRunSingleOperationScan(
       await view.sendAuditError(editor.document, report, bundle.mapping);
       return;
     }
-
-    // TODO clean audit report for the current document
 
     await store.createDefaultScanConfig(api.desc.id);
 

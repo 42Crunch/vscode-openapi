@@ -18,6 +18,7 @@ import { parseAuditReport, updateAuditContext } from "./audit";
 import { configureCredentials, getPlatformCredentials, hasCredentials } from "../credentials";
 import { PlatformStore } from "../platform/stores/platform-store";
 import { Configuration, configuration } from "../configuration";
+import { setAudit } from "./service";
 
 export function registerSecurityAudit(
   context: vscode.ExtensionContext,
@@ -57,9 +58,7 @@ export function registerSecurityAudit(
         reportWebView.prefetchKdb();
         const audit = await securityAudit(cache, configuration, context.secrets, store, textEditor);
         if (audit) {
-          updateAuditContext(auditContext, uri, audit);
-          updateDecorations(auditContext.decorations, audit.summary.documentUri, audit.issues);
-          updateDiagnostics(auditContext.diagnostics, audit.filename, audit.issues);
+          setAudit(auditContext, uri, audit);
           setDecorations(textEditor, auditContext);
           await reportWebView.showReport(audit);
         }

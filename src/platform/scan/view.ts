@@ -37,10 +37,9 @@ import { ScandManagerJobStatus } from "../api-scand-manager";
 import { Logger } from "../types";
 import { loadConfig } from "../../util/config";
 import { AuditWebView } from "../../audit/view";
-import { parseAuditReport, updateAuditContext } from "../../audit/audit";
-import { updateDecorations } from "../../audit/decoration";
-import { updateDiagnostics } from "../../audit/diagnostic";
+import { parseAuditReport } from "../../audit/audit";
 import { AuditContext, MappingNode } from "../../types";
+import { setAudit, clearAudit } from "../../audit/service";
 
 export class ScanWebView extends WebView<Webapp> {
   private isNewApi: boolean = false;
@@ -175,9 +174,7 @@ export class ScanWebView extends WebView<Webapp> {
         this.auditReport!.report,
         this.auditReport!.mapping
       );
-      updateAuditContext(this.auditContext, uri, audit);
-      updateDecorations(this.auditContext.decorations, audit.summary.documentUri, audit.issues);
-      updateDiagnostics(this.auditContext.diagnostics, audit.filename, audit.issues);
+      setAudit(this.auditContext, uri, audit);
       await this.auditView.showReport(audit);
     },
   };
@@ -196,6 +193,7 @@ export class ScanWebView extends WebView<Webapp> {
   async sendScanOperation(document: vscode.TextDocument, payload: OasWithOperationAndConfig) {
     this.document = document;
     this.auditReport = undefined;
+    clearAudit(this.auditContext, this.document.uri.toString());
     this.sendRequest({ command: "loadEnv", payload: await this.envStore.all() });
     const prefs = this.prefs[this.document.uri.toString()];
     if (prefs) {
@@ -439,14 +437,6 @@ async function waitForScandJob(
 
 async function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function throwKbError(store: PlatformStore, apiId: string, name: string, status: string) {
-  await store.deleteApi(apiId);
-  await store.deleteJobStatus(name);
-  // Status unknown causes logs request error 400 (Bad Request)
-  const reason = status === "unknown" ? undefined : await store.readJobLog(name);
-  throw new Error("Job " + name + " status " + status + (reason ? ": " + reason : ""));
 }
 
 function findOrCreateTerminal() {

@@ -7,6 +7,7 @@ import { Cache } from "../cache";
 import { Audit, AuditContext } from "../types";
 import { PlatformStore } from "./stores/platform-store";
 import { getApiId, isPlatformUri } from "./util";
+import { setAudit } from "../audit/service";
 
 export async function refreshAuditReport(
   store: PlatformStore,
@@ -33,9 +34,7 @@ export async function refreshAuditReport(
         auditContext.diagnostics.set(document.uri, undefined);
         auditContext.decorations[uri] = [];
       } else {
-        updateAuditContext(auditContext, uri, audit);
-        updateDecorations(auditContext.decorations, audit.summary.documentUri, audit.issues);
-        updateDiagnostics(auditContext.diagnostics, audit.filename, audit.issues);
+        setAudit(auditContext, uri, audit);
       }
       if (vscode.window.activeTextEditor?.document === document) {
         setDecorations(vscode.window.activeTextEditor, auditContext);
