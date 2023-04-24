@@ -16,7 +16,7 @@ export default function Input({
 }) {
   const {
     field,
-    fieldState: { error },
+    fieldState: { error, invalid },
   } = useController({
     name,
     rules: { required: true },
@@ -24,7 +24,7 @@ export default function Input({
 
   return (
     <>
-      <Container>
+      <Container invalid={invalid}>
         <div>{label}</div>
         <input {...field} disabled={disabled} type={password ? "password" : "text"} />
       </Container>
@@ -37,14 +37,20 @@ const Container = styled.div`
   height: 40px;
   background-color: var(${ThemeColorVariables.inputBackground});
   border-radius: 2px;
-  border: 1px solid var(${ThemeColorVariables.border});
   display: flex;
   flex-direction: column;
   padding: 4px 8px;
   gap: 4px;
-  &:focus-within {
-    border: 1px solid var(${ThemeColorVariables.focusBorder});
-  }
+
+  ${({ invalid }: { invalid?: boolean }) =>
+    invalid
+      ? `border: 1px solid var(${ThemeColorVariables.errorBorder});`
+      : `border: 1px solid var(${ThemeColorVariables.border});
+         &:focus-within {
+           border: 1px solid var(${ThemeColorVariables.focusBorder});
+         }
+      `}
+
   > div {
     font-style: normal;
     font-weight: 500;
@@ -63,7 +69,6 @@ const Container = styled.div`
     }
     &:focus {
       outline: none;
-      //   outline: 1px solid var(${ThemeColorVariables.focusBorder});
     }
   }
 `;
