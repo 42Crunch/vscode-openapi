@@ -26,11 +26,7 @@ export default function SearchSidebar({
     <Container>
       <Sidebar>
         <Search>
-          <input
-            placeholder="Search"
-            value={search}
-            onChange={(e) => setSearch(e.target.value.trim())}
-          />
+          <input placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} />
           <MagnifyingGlass />
         </Search>
         {sections.map((section: Section) => (
@@ -40,7 +36,7 @@ export default function SearchSidebar({
               selected={selected}
               setSelected={setSelected}
               items={section.items}
-              filter={search}
+              filter={search.trim()}
             />
           </React.Fragment>
         ))}
