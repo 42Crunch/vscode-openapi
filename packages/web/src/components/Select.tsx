@@ -65,6 +65,7 @@ function getOptionByValue(options: SelectOption[], value: string): SelectOption 
 }
 
 const Container = styled.div`
+  height: 40px;
   position: relative;
   z-index: 1;
   background-color: var(${ThemeColorVariables.inputBackground});

@@ -34,6 +34,7 @@ export default function Input({
 }
 
 const Container = styled.div`
+  height: 40px;
   background-color: var(${ThemeColorVariables.inputBackground});
   border-radius: 2px;
   border: 1px solid var(${ThemeColorVariables.border});
