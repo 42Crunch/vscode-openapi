@@ -11,7 +11,9 @@ export async function loadConfig(
   const apiToken = (await secrets.get("platformApiToken")) ?? "";
   const insecureSslHostnames = configuration.get<string[]>("tryit.insecureSslHostnames");
   const platformServices = configuration.get<string>("platformServices");
-  const scandManager = configuration.get<any>("platformScandManager");
+  const scandManager = configuration.get<Config["scandManager"]>("platformScandManager");
+  const docker = configuration.get<Config["docker"]>("docker");
+
   const scanRuntime = configuration.get<"docker" | "scand-manager">(
     "platformConformanceScanRuntime"
   );
@@ -34,6 +36,7 @@ export async function loadConfig(
     },
     scanRuntime,
     scanImage,
+    docker,
   };
 }
 
@@ -50,16 +53,12 @@ export async function saveConfig(
     await configuration.update("platformServices", config.platformServices.manual);
   }
 
-  await configuration.update("platformScandManager", {
-    url: config.scandManager.url,
-    auth: config.scandManager.auth,
-  });
-
+  await configuration.update("platformScandManager", config.scandManager);
+  await configuration.update("docker", config.docker);
   await configuration.update("platformConformanceScanRuntime", config.scanRuntime);
   await configuration.update("platformConformanceScanImage", config.scanImage);
-
+  // secrets
   await secrets.store("platformApiToken", config.platformApiToken);
-
   if (config.scandManager.auth == "header") {
     await secrets.store("platformScandManagerHeader", JSON.stringify(config.scandManager.header));
   }

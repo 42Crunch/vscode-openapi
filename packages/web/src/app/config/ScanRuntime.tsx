@@ -10,6 +10,7 @@ import { NormalProgressButton } from "../../components/ProgressButton";
 import Select from "../../components/Select";
 import ConnectionTestBanner from "./ConnectionTestBanner";
 import { Container, Test, Title } from "./layout";
+import { Checkbox } from "../../components/Checkbox";
 
 export default function ScanRuntime() {
   const dispatch = useFeatureDispatch();
@@ -39,6 +40,15 @@ export default function ScanRuntime() {
             { value: "scand-manager", label: "Scand manager" },
           ]}
         />
+        {scanRuntime === "docker" && (
+          <>
+            <Checkbox
+              name="docker.replaceLocalhost"
+              label='Replace "locahost" hostname with "host.docker.internal" (Windows and Mac only)'
+            />
+            <Checkbox name="docker.useHostNetwork" label='Use "host" network (Linux only)' />
+          </>
+        )}
         {scanRuntime === "scand-manager" && (
           <>
             <Input label="Scand Manager URL" name="scandManager.url" />

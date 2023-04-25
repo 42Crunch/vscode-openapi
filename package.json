@@ -762,10 +762,33 @@
             "Use Scand-Manager to execute 42Crunch API Conformance Scan"
           ]
         },
+        "openapi.docker": {
+          "scope": "workbench",
+          "type": "object",
+          "description": "Docker",
+          "properties": {
+            "replaceLocalhost": {
+              "type": "boolean",
+              "description": "When runnig Conformance Scan on Mac or Windows, replace 'locahost' hostname with 'host.docker.internal'"
+            },
+            "useHostNetwork": {
+              "type": "boolean",
+              "description": "When runnig Conformance Scan on Linux, use 'host' network"
+            }
+          },
+          "required": [
+            "replaceLocalhost",
+            "useHostNetwork"
+          ],
+          "default": {
+            "replaceLocalhost": true,
+            "useHostNetwork": true
+          }
+        },
         "openapi.platformScandManager": {
           "scope": "workbench",
           "type": "object",
-          "description": "Scand-manager connection details",
+          "description": "Scand Manager",
           "properties": {
             "url": {
               "type": "string"

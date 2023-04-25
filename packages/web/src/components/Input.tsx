@@ -19,7 +19,6 @@ export default function Input({
     fieldState: { error, invalid },
   } = useController({
     name,
-    rules: { required: true },
   });
 
   return (

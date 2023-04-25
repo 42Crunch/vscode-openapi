@@ -35,6 +35,10 @@ const initialState: ConfigState = {
     },
     scanRuntime: "docker",
     scanImage: "",
+    docker: {
+      replaceLocalhost: true,
+      useHostNetwork: true,
+    },
   },
   platformConnectionTestResult: undefined,
   waitingForPlatformConnectionTest: false,

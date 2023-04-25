@@ -9,6 +9,10 @@ export type Config = {
     manual: string | undefined;
     auto: string;
   };
+  docker: {
+    replaceLocalhost: boolean;
+    useHostNetwork: boolean;
+  };
   scandManager: ScandManagerConnection;
   scanRuntime: "docker" | "scand-manager";
   scanImage: string;
