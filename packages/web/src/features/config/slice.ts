@@ -39,6 +39,7 @@ const initialState: ConfigState = {
       replaceLocalhost: true,
       useHostNetwork: true,
     },
+    platform: "",
   },
   platformConnectionTestResult: undefined,
   waitingForPlatformConnectionTest: false,

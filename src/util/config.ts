@@ -37,6 +37,7 @@ export async function loadConfig(
     scanRuntime,
     scanImage,
     docker,
+    platform: process.platform,
   };
 }
 

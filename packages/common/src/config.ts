@@ -16,6 +16,7 @@ export type Config = {
   scandManager: ScandManagerConnection;
   scanRuntime: "docker" | "scand-manager";
   scanImage: string;
+  platform: string;
 };
 
 export type ConnectionTestResult = { success: true } | { success: false; message: string };
