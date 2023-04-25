@@ -137,7 +137,12 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
     <script>
       window.addEventListener("DOMContentLoaded", (event) => {
         const vscode = acquireVsCodeApi();
-        window.renderWebView(vscode);
+        window.renderWebView({
+          postMessage: (message) => {
+            console.log('sending message', message);
+            vscode.postMessage(message);
+          }
+        });
         vscode.postMessage({command: "started"});
       });
     </script>
