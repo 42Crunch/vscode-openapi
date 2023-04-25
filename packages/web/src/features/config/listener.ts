@@ -27,12 +27,12 @@ import config from "./slice";
 const reducer = { config };
 const initStore = () => configureStore({ reducer });
 
-type RootState = StateFromReducersMapObject<typeof reducer>;
-type AppDispatch = ReturnType<typeof initStore>["dispatch"];
-type AppListening = TypedStartListening<RootState, AppDispatch>;
+type FeatureState = StateFromReducersMapObject<typeof reducer>;
+type FeatureDispatch = ReturnType<typeof initStore>["dispatch"];
+type FeatureListening = TypedStartListening<FeatureState, FeatureDispatch>;
 
 export function onSaveConfig(
-  startAppListening: AppListening,
+  startAppListening: FeatureListening,
   host: Webapp<NoopMessage, SaveConfigMessage>["host"]
 ) {
   return () =>
@@ -48,7 +48,7 @@ export function onSaveConfig(
 }
 
 export function onTestPlatformConnection(
-  startAppListening: AppListening,
+  startAppListening: FeatureListening,
   host: Webapp<NoopMessage, SaveConfigMessage | TestPlatformConnectionMessage>["host"]
 ) {
   return () =>
@@ -69,7 +69,7 @@ export function onTestPlatformConnection(
 }
 
 export function onTestOverlordConnection(
-  startAppListening: AppListening,
+  startAppListening: FeatureListening,
   host: Webapp<NoopMessage, SaveConfigMessage | TestOverlordConnectionMessage>["host"]
 ) {
   return () =>
@@ -90,7 +90,7 @@ export function onTestOverlordConnection(
 }
 
 export function onTestScandManagerConnection(
-  startAppListening: AppListening,
+  startAppListening: FeatureListening,
   host: Webapp<NoopMessage, SaveConfigMessage | TestScandManagerConnectionMessage>["host"]
 ) {
   return () =>
@@ -111,7 +111,7 @@ export function onTestScandManagerConnection(
 }
 
 export function onInsecureSslHostnameChange(
-  startAppListening: AppListening,
+  startAppListening: FeatureListening,
   host: Webapp<NoopMessage, SaveConfigMessage>["host"]
 ) {
   return () =>
