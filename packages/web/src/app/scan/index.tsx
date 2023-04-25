@@ -24,6 +24,7 @@ import {
 
 import { loadEnv } from "../../features/env/slice";
 import { loadPrefs } from "../../features/prefs/slice";
+import { loadConfig } from "../../features/config/slice";
 
 import ScanOperation from "./ScanOperation";
 import Starting from "./Starting";
@@ -53,6 +54,7 @@ const messageHandlers: Webapp["webappHandlers"] = {
   showScanReport,
   loadEnv,
   loadPrefs,
+  loadConfig,
 };
 
 function App() {

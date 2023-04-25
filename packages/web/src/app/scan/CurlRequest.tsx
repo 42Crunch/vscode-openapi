@@ -8,6 +8,7 @@ import * as Tooltip from "@radix-ui/react-tooltip";
 
 import { sendHttpRequest, sendCurlRequest } from "./slice";
 import { ProgressButton } from "../../components/ProgressButton";
+import { optionallyUnreplaceLocalhost } from "./util-scan";
 
 export default function CurlRequest({
   curl,
@@ -19,8 +20,11 @@ export default function CurlRequest({
   waiting: boolean;
 }) {
   const dispatch = useAppDispatch();
-  const env = useAppSelector((state) => state.env.data);
   const defaultValues = useAppSelector((state) => state.scan.defaultValues);
+  const {
+    docker: { replaceLocalhost },
+    platform,
+  } = useAppSelector((state) => state.config.data);
   const security = defaultValues?.security[defaultValues.securityIndex];
 
   const secretCurl = curl.replace(/{{([\w-]+)\/([\w-]+)}}/gm, (match, p1, p2): string => {
@@ -30,7 +34,7 @@ export default function CurlRequest({
     return match;
   });
 
-  const request = extract(secretCurl, id);
+  const request = extract(secretCurl, id, replaceLocalhost, platform);
 
   return (
     <Request>
@@ -43,7 +47,11 @@ export default function CurlRequest({
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    dispatch(sendCurlRequest(secretCurl));
+                    dispatch(
+                      sendCurlRequest(
+                        optionallyUnreplaceLocalhost(secretCurl, replaceLocalhost, platform)
+                      )
+                    );
                   }}
                 />
               </span>
@@ -56,7 +64,7 @@ export default function CurlRequest({
             </Tooltip.Portal>
           </Tooltip.Root>
         </Tooltip.Provider>
-        {curl}
+        {optionallyUnreplaceLocalhost(curl, replaceLocalhost, platform)}
       </Code>
       <Buttons>
         <ProgressButton
@@ -120,7 +128,12 @@ type ParsedValue = {
   value: string;
 };
 
-function extract(curl: string, id: string): HttpRequest {
+function extract(
+  curl: string,
+  id: string,
+  replaceLocalhost: boolean,
+  platform: string
+): HttpRequest {
   const parts = split(curl).slice(1);
   const result: HttpRequest = {
     id,
@@ -146,6 +159,8 @@ function extract(curl: string, id: string): HttpRequest {
       result.headers[headerName] = headerValue;
     }
   }
+
+  result.url = optionallyUnreplaceLocalhost(result.url, replaceLocalhost, platform);
 
   return result;
 }

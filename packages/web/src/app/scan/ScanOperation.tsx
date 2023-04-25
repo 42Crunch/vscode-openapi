@@ -24,6 +24,11 @@ export default function ScanOperation() {
 
   const prefs = useAppSelector((state) => state.prefs);
 
+  const {
+    docker: { replaceLocalhost },
+    platform,
+  } = useAppSelector((state) => state.config.data);
+
   const server = getPreferredServer(oas, prefs.scanServer, defaultValues!.server);
 
   const updatedDefaults = {
@@ -34,7 +39,14 @@ export default function ScanOperation() {
 
   const scan = async (data: Record<string, any>) => {
     const values = unwrapFormDefaults(data);
-    const [updatedScanConfig, env] = updateScanConfig(scanConfigRaw, path!, method!, values);
+    const [updatedScanConfig, env] = updateScanConfig(
+      scanConfigRaw,
+      path!,
+      method!,
+      replaceLocalhost,
+      platform,
+      values
+    );
     dispatch(setScanServer(values.server));
 
     const security = values.security[values.securityIndex];

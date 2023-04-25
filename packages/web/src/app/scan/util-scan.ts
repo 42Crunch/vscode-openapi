@@ -1,6 +1,5 @@
 import { ScanConfig } from "@xliic/common/scan";
 
-import { BundledOpenApiSpec } from "@xliic/common/oas30";
 import {
   TryitOperationValues,
   TryitParameterValues,
@@ -44,6 +43,8 @@ export function updateScanConfig(
   config: unknown,
   path: string,
   method: HttpMethod,
+  replaceLocalhost: boolean,
+  platform: string,
   values: TryitOperationValues
 ): [unknown, Record<string, string>] {
   const mutableConfig = JSON.parse(JSON.stringify(config));
@@ -53,7 +54,7 @@ export function updateScanConfig(
     (mutableConfig as any)["playbook"]["paths"][path][method]["happyPaths"][0]["requests"][0]
   );
 
-  const host = values.server;
+  const host = optionallyReplaceLocalhost(values.server, replaceLocalhost, platform);
 
   target.host = host.endsWith("/") ? host.slice(0, -1) : host;
 
@@ -128,38 +129,30 @@ function extractEnvVariableName(environmentConfig: any, name: string): string | 
   }
 }
 
-/*
-
-export function generateDefaultValues(
-  method: HttpMethod,
-  parameters: OperationParametersMap,
-  configuration: ScanConfig
-): Record<string, any> {
-  const values: Record<string, any> = { parameters: {} };
-  const locations = Object.keys(parameters) as OasParameterLocation[];
-  for (const location of locations) {
-    for (const name of Object.keys(parameters[location])) {
-      const value = configuration.parameters[location]?.[name];
-      if (value !== undefined) {
-        if (!values.parameters[location]) {
-          values.parameters[location] = {};
-        }
-        values.parameters[location][name] = Array.isArray(value) ? wrap(value) : value;
-      }
-    }
+function optionallyReplaceLocalhost(server: string, replaceLocalhost: boolean, platform: string) {
+  if (
+    replaceLocalhost &&
+    (platform === "darwin" || platform === "win32") &&
+    (server.toLowerCase().startsWith("https://localhost") ||
+      server.toLowerCase().startsWith("http://localhost"))
+  ) {
+    return server.replace(/localhost/i, "host.docker.internal");
   }
-
-  if (configuration.requestBody !== undefined) {
-    values["requestBody"] = JSON.stringify(configuration.requestBody, null, 2);
-  }
-
-  values["host"] = configuration.host;
-  values["method"] = method;
-
-  return values;
+  return server;
 }
 
-// arrays must be wrapped for react form hook
-function wrap(array: unknown[]): unknown {
-  return array.map((value) => ({ value }));
-}*/
+export function optionallyUnreplaceLocalhost(
+  value: string,
+  replaceLocalhost: boolean,
+  platform: string
+) {
+  if (
+    replaceLocalhost &&
+    (platform === "darwin" || platform === "win32") &&
+    (value.toLowerCase().includes("https://host.docker.internal") ||
+      value.toLowerCase().includes("http://host.docker.internal"))
+  ) {
+    return value.replace("host.docker.internal", "localhost");
+  }
+  return value;
+}

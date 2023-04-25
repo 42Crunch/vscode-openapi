@@ -17,6 +17,7 @@ import {
   ShowHttpResponseMessage,
   ShowHttpErrorMessage,
 } from "../http";
+import { LoadConfigMessage } from "../config";
 
 export type Webapp = App<
   // consumes
@@ -25,6 +26,7 @@ export type Webapp = App<
   | ShowGeneralErrorMessage
   | LoadEnvMessage
   | LoadPreferencesMessage
+  | LoadConfigMessage
   | ChangeThemeMessage
   | ShowHttpErrorMessage
   | ShowScanReportMessage

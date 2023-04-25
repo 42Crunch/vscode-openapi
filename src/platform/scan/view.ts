@@ -195,6 +195,7 @@ export class ScanWebView extends WebView<Webapp> {
     this.auditReport = undefined;
     clearAudit(this.auditContext, this.document.uri.toString());
     this.sendRequest({ command: "loadEnv", payload: await this.envStore.all() });
+    this.sendLoadConfig();
     const prefs = this.prefs[this.document.uri.toString()];
     if (prefs) {
       this.sendRequest({ command: "loadPrefs", payload: prefs });
@@ -217,6 +218,14 @@ export class ScanWebView extends WebView<Webapp> {
           "OpenAPI has failed Security Audit. Please run API Security Audit, fix the issues and try running the Scan again.",
         code: "audit-error",
       },
+    });
+  }
+
+  async sendLoadConfig() {
+    const config = await loadConfig(this.configuration, this.secrets);
+    this.sendRequest({
+      command: "loadConfig",
+      payload: config,
     });
   }
 

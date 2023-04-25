@@ -12,6 +12,7 @@ import router from "../../features/router/slice";
 import scan from "./slice";
 import env from "../../features/env/slice";
 import prefs from "../../features/prefs/slice";
+import config from "../../features/config/slice";
 
 const reducer = {
   theme,
@@ -19,6 +20,7 @@ const reducer = {
   router,
   env,
   prefs,
+  config,
 };
 
 export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme: ThemeState) =>

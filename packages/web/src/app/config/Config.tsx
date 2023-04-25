@@ -23,8 +23,8 @@ const sections = [
   {
     title: "Conformance Scan",
     items: [
-      { id: "scan-image", label: "Docker image" },
       { id: "scan-runtime", label: "Runtime" },
+      { id: "scan-image", label: "Docker image" },
     ],
   },
 ];
