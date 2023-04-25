@@ -67,6 +67,16 @@ export const slice = createSlice({
       state.scandManagerConnectionTestResult = undefined;
     },
 
+    addInsecureSslHostname: (state, action: PayloadAction<string>) => {
+      state.data.insecureSslHostnames.push(action.payload);
+    },
+
+    removeInsecureSslHostname: (state, action: PayloadAction<string>) => {
+      state.data.insecureSslHostnames = state.data.insecureSslHostnames.filter(
+        (hostname) => hostname !== action.payload
+      );
+    },
+
     testPlatformConnection: (state, action: PayloadAction<undefined>) => {
       state.waitingForPlatformConnectionTest = true;
       state.platformConnectionTestResult = undefined;
@@ -130,6 +140,8 @@ export const {
   showOverlordConnectionTest,
   testScandManagerConnection,
   showScandManagerConnectionTest,
+  addInsecureSslHostname,
+  removeInsecureSslHostname,
 } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<

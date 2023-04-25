@@ -1,16 +1,16 @@
 import styled from "styled-components";
 import * as Checkbox from "@radix-ui/react-checkbox";
-import { TryitConfig } from "@xliic/common/tryit";
+import { Config } from "@xliic/common/config";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { Check } from "../../icons";
 import { useFormContext, useWatch } from "react-hook-form";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 
-import { saveConfig } from "./slice";
+import { addInsecureSslHostname, removeInsecureSslHostname } from "../../features/config/slice";
 
 import { parseHttpsHostname } from "../../util";
 
-export default function Settings({ config }: { config: TryitConfig }) {
+export default function Settings({ config }: { config: Config }) {
   const dispatch = useDispatch();
 
   const { control } = useFormContext();
@@ -32,9 +32,9 @@ export default function Settings({ config }: { config: TryitConfig }) {
             checked={ignore}
             onCheckedChange={(checked) => {
               if (checked) {
-                dispatch(saveConfig({ type: "configSslIgnoreAdd", hostname }));
+                dispatch(addInsecureSslHostname(hostname));
               } else {
-                dispatch(saveConfig({ type: "configSslIgnoreRemove", hostname }));
+                dispatch(removeInsecureSslHostname(hostname));
               }
             }}
           >

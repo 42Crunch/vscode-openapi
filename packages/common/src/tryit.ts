@@ -1,17 +1,12 @@
 import { HttpMethod } from "./http";
 import { BundledSwaggerOrOasSpec } from "./openapi";
 
-export interface TryitConfig {
-  insecureSslHostnames: string[];
-}
-
 export interface OasWithOperation {
   oas: BundledSwaggerOrOasSpec;
   path: string;
   method: HttpMethod;
   preferredMediaType?: string;
   preferredBodyValue?: unknown;
-  config: TryitConfig;
 }
 
 export type TryItParameterLocation = "query" | "header" | "path" | "cookie";
@@ -43,4 +38,3 @@ export type TryOperationMessage = { command: "tryOperation"; payload: OasWithOpe
 
 // webapp to vs code responses
 export type CreateSchemaCommandMessage = { command: "createSchema"; payload: any };
-export type SaveConfigMessage = { command: "saveConfig"; payload: TryitConfig };

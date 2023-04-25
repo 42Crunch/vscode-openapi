@@ -8,6 +8,7 @@ import * as vscode from "vscode";
 import { Preferences } from "@xliic/common/prefs";
 import { HttpMethod } from "@xliic/common/http";
 import { Webapp } from "@xliic/common/webapp/tryit";
+import { Config } from "@xliic/common/config";
 
 import { Bundle } from "../types";
 
@@ -17,6 +18,8 @@ import { executeCreateSchemaRequest } from "./create-schema-handler";
 import { Cache } from "../cache";
 import { EnvStore } from "../envstore";
 import { extractSingleOperation } from "../util/extract";
+import { loadConfig, saveConfig } from "../util/config";
+import { Configuration } from "../configuration";
 
 export type BundleDocumentVersions = Record<string, number>;
 
@@ -35,7 +38,9 @@ export class TryItWebView extends WebView<Webapp> {
     extensionPath: string,
     private cache: Cache,
     private envStore: EnvStore,
-    private prefs: Record<string, Preferences>
+    private prefs: Record<string, Preferences>,
+    private configuration: Configuration,
+    private secrets: vscode.SecretStorage
   ) {
     super(extensionPath, "tryit", "Try It", vscode.ViewColumn.Two, false);
 
@@ -64,12 +69,6 @@ export class TryItWebView extends WebView<Webapp> {
       }
     },
 
-    saveConfig: async (config: any) => {
-      vscode.workspace
-        .getConfiguration("openapi")
-        .update("tryit.insecureSslHostnames", config.insecureSslHostnames);
-    },
-
     savePrefs: async (prefs: Preferences) => {
       if (this.target) {
         const uri = this.target.document.uri.toString();
@@ -82,6 +81,10 @@ export class TryItWebView extends WebView<Webapp> {
 
     showEnvWindow: async () => {
       vscode.commands.executeCommand("openapi.showEnvironment");
+    },
+
+    saveConfig: async (config: Config) => {
+      await saveConfig(config, this.configuration, this.secrets);
     },
   };
 
@@ -105,9 +108,7 @@ export class TryItWebView extends WebView<Webapp> {
       await this.sendRequest({ command: "loadPrefs", payload: prefs });
     }
 
-    const insecureSslHostnames =
-      vscode.workspace.getConfiguration("openapi").get<string[]>("tryit.insecureSslHostnames") ||
-      [];
+    await this.sendLoadConfig();
 
     const oas = extractSingleOperation(target.method as HttpMethod, target.path, bundle.value);
 
@@ -115,9 +116,6 @@ export class TryItWebView extends WebView<Webapp> {
       command: "tryOperation",
       payload: {
         oas,
-        config: {
-          insecureSslHostnames,
-        },
         ...target,
       },
     });
@@ -132,19 +130,20 @@ export class TryItWebView extends WebView<Webapp> {
 
     const oas = extractSingleOperation(this.target.method, this.target.path, bundle.value);
 
-    const insecureSslHostnames =
-      vscode.workspace.getConfiguration("openapi").get<string[]>("tryit.insecureSslHostnames") ||
-      [];
-
     return this.sendRequest({
       command: "tryOperation",
       payload: {
         oas,
-        config: {
-          insecureSslHostnames,
-        },
         ...this.target,
       },
+    });
+  }
+
+  async sendLoadConfig() {
+    const config = await loadConfig(this.configuration, this.secrets);
+    this.sendRequest({
+      command: "loadConfig",
+      payload: config,
     });
   }
 }

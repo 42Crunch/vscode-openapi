@@ -1,9 +1,10 @@
 import { Webapp as App } from "../message";
 import { SendHttpRequestMessage, ShowHttpResponseMessage, ShowHttpErrorMessage } from "../http";
-import { TryOperationMessage, CreateSchemaCommandMessage, SaveConfigMessage } from "../tryit";
+import { TryOperationMessage, CreateSchemaCommandMessage } from "../tryit";
 import { LoadPreferencesMessage, SavePreferencesMessage } from "../prefs";
 import { LoadEnvMessage, ShowEnvWindow } from "../env";
 import { ChangeThemeMessage } from "../theme";
+import { LoadConfigMessage, SaveConfigMessage } from "../config";
 
 export type Webapp = App<
   // consumes
@@ -12,11 +13,12 @@ export type Webapp = App<
   | ShowHttpErrorMessage
   | LoadEnvMessage
   | LoadPreferencesMessage
+  | LoadConfigMessage
   | ChangeThemeMessage,
   // produces
   | SendHttpRequestMessage
   | CreateSchemaCommandMessage
-  | SaveConfigMessage
   | ShowEnvWindow
   | SavePreferencesMessage
+  | SaveConfigMessage
 >;

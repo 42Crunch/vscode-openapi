@@ -10,6 +10,7 @@ import theme, { ThemeState } from "../../features/theme/slice";
 import tryit from "./slice";
 import env from "../../features/env/slice";
 import prefs from "../../features/prefs/slice";
+import config from "../../features/config/slice";
 import router from "../../features/router/slice";
 
 const reducer = {
@@ -18,6 +19,7 @@ const reducer = {
   router,
   env,
   prefs,
+  config,
 };
 
 export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme: ThemeState) =>

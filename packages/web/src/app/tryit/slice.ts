@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 import { BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/common/openapi";
-import { OasWithOperation, TryitOperationValues, TryitConfig } from "@xliic/common/tryit";
+import { OasWithOperation, TryitOperationValues } from "@xliic/common/tryit";
 import { HttpMethod, HttpRequest, HttpResponse, HttpError } from "@xliic/common/http";
 import { createDefaultValues } from "../../util";
 
@@ -29,7 +29,6 @@ export interface OasState {
     name: string;
   };
   defaultValues?: TryitOperationValues;
-  tryitConfig: TryitConfig;
   response?: HttpResponse;
   error?: HttpError;
   gerror: GeneralError | undefined;
@@ -42,9 +41,6 @@ const initialState: OasState = {
     info: { title: "", version: "0.0" },
     paths: {},
   },
-  tryitConfig: {
-    insecureSslHostnames: [],
-  },
   waiting: false,
   response: undefined,
   error: undefined,
@@ -56,7 +52,7 @@ export const slice = createSlice({
   initialState,
   reducers: {
     tryOperation: (state, action: PayloadAction<OasWithOperation>) => {
-      const { oas, path, method, preferredMediaType, preferredBodyValue, config } = action.payload;
+      const { oas, path, method, preferredMediaType, preferredBodyValue } = action.payload;
       try {
         if (isOpenapi(oas)) {
           state.defaultValues = createDefaultValues(
@@ -76,8 +72,6 @@ export const slice = createSlice({
           );
         }
 
-        // excersise a bit of caution, config is user-editable, let's make sure it has all expected values
-        state.tryitConfig.insecureSslHostnames = config?.insecureSslHostnames || [];
         state.response = undefined;
         state.error = undefined;
       } catch (e) {
@@ -121,15 +115,6 @@ export const slice = createSlice({
       state.waiting = true;
     },
     createSchema: (state, action: PayloadAction<{ response: any }>) => {},
-    saveConfig: (state, action: PayloadAction<ConfigUpdatePayload>) => {
-      if (action.payload.type === "configSslIgnoreAdd") {
-        state.tryitConfig.insecureSslHostnames.push(action.payload.hostname);
-      } else if (action.payload.type === "configSslIgnoreRemove") {
-        state.tryitConfig.insecureSslHostnames = state.tryitConfig.insecureSslHostnames.filter(
-          (hostname) => hostname !== action.payload.hostname
-        );
-      }
-    },
   },
 });
 
@@ -139,7 +124,6 @@ export const {
   showHttpError,
   sendHttpRequest,
   createSchema,
-  saveConfig,
   showGeneralError,
 } = slice.actions;
 

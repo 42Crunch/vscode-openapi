@@ -8,7 +8,7 @@ import { Preferences } from "@xliic/common/prefs";
 import { Bundle } from "../types";
 import { Cache } from "../cache";
 import { HttpMethod } from "@xliic/common/http";
-import { BundleDocumentVersions, TryItTarget, TryItWebView } from "./view";
+import { BundleDocumentVersions, TryItWebView } from "./view";
 import { TryItCodelensProvider } from "./lens";
 import { Configuration } from "../configuration";
 import { EnvStore } from "../envstore";
@@ -27,7 +27,14 @@ export function activate(
   envStore: EnvStore,
   prefs: Record<string, Preferences>
 ) {
-  const view = new TryItWebView(context.extensionPath, cache, envStore, prefs);
+  const view = new TryItWebView(
+    context.extensionPath,
+    cache,
+    envStore,
+    prefs,
+    configuration,
+    context.secrets
+  );
 
   const debounceDelay: DebounceDelay = { delay: 1000 };
   configuration.track<number>("previewUpdateDelay", (previewDelay: number) => {

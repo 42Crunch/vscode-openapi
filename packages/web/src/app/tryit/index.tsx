@@ -14,6 +14,7 @@ import { RouterContext, Routes } from "../../features/router/RouterContext";
 import { showHttpResponse, showHttpError, tryOperation } from "./slice";
 import { loadEnv } from "../../features/env/slice";
 import { loadPrefs } from "../../features/prefs/slice";
+import { loadConfig } from "../../features/config/slice";
 
 import TryOperation from "./TryOperation";
 
@@ -33,6 +34,7 @@ const messageHandlers: Webapp["webappHandlers"] = {
   showHttpError,
   loadEnv,
   loadPrefs,
+  loadConfig,
 };
 
 function App() {

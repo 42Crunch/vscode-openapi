@@ -3,10 +3,10 @@ import SwaggerClient from "swagger-client";
 import { BundledOpenApiSpec, OasSecurityScheme, OasServer } from "@xliic/common/oas30";
 import { BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/common/openapi";
 import { BundledSwaggerSpec, SwaggerSecurityScheme } from "@xliic/common/swagger";
-
 import { HttpMethod, HttpRequest } from "@xliic/common/http";
+import { Config } from "@xliic/common/config";
+
 import {
-  TryitConfig,
   TryitOperationValues,
   TryitParameterValues,
   TryitSecurityAllValues,
@@ -21,7 +21,7 @@ import { replaceEnv } from "@xliic/common/env";
 import { getParameters } from "../../util-swagger";
 
 export async function makeHttpRequest(
-  config: TryitConfig,
+  config: Config,
   oas: BundledSwaggerOrOasSpec,
   method: HttpMethod,
   path: string,

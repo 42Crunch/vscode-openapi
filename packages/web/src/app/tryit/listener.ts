@@ -6,12 +6,17 @@ import {
 } from "@reduxjs/toolkit";
 import { Webapp } from "@xliic/common/webapp/tryit";
 import { AppDispatch, RootState } from "./store";
-import { sendHttpRequest, createSchema, saveConfig } from "./slice";
+import { sendHttpRequest, createSchema } from "./slice";
 import { showEnvWindow } from "../../features/env/slice";
 import { setTryitServer, setSecretForSecurity } from "../../features/prefs/slice";
 import { startNavigationListening } from "../../features/router/listener";
 import { Routes } from "../../features/router/RouterContext";
 import { startListeners } from "../webapp";
+import {
+  addInsecureSslHostname,
+  removeInsecureSslHostname,
+  saveConfig,
+} from "../../features/config/slice";
 
 const listenerMiddleware = createListenerMiddleware();
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
@@ -35,15 +40,6 @@ export function createListener(host: Webapp["host"], routes: Routes) {
         },
       }),
 
-    saveConfig: () =>
-      startAppListening({
-        actionCreator: saveConfig,
-        effect: async (action, listenerApi) => {
-          const state = listenerApi.getState();
-          host.postMessage({ command: "saveConfig", payload: state.tryit.tryitConfig });
-        },
-      }),
-
     savePrefs: () =>
       startAppListening({
         matcher: isAnyOf(setTryitServer, setSecretForSecurity),
@@ -61,6 +57,17 @@ export function createListener(host: Webapp["host"], routes: Routes) {
         actionCreator: showEnvWindow,
         effect: async (action, listenerApi) => {
           host.postMessage({ command: "showEnvWindow", payload: undefined });
+        },
+      }),
+
+    saveConfig: () =>
+      startAppListening({
+        matcher: isAnyOf(saveConfig, addInsecureSslHostname, removeInsecureSslHostname),
+        effect: async (action, listenerApi) => {
+          const {
+            config: { data: config },
+          } = listenerApi.getState();
+          host.postMessage({ command: "saveConfig", payload: config });
         },
       }),
   };
