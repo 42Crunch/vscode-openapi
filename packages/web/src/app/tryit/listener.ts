@@ -12,11 +12,7 @@ import { setTryitServer, setSecretForSecurity } from "../../features/prefs/slice
 import { startNavigationListening } from "../../features/router/listener";
 import { Routes } from "../../features/router/RouterContext";
 import { startListeners } from "../webapp";
-import {
-  addInsecureSslHostname,
-  removeInsecureSslHostname,
-  saveConfig,
-} from "../../features/config/slice";
+import * as configListener from "../../features/config/listener";
 
 const listenerMiddleware = createListenerMiddleware();
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
@@ -60,16 +56,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
         },
       }),
 
-    saveConfig: () =>
-      startAppListening({
-        matcher: isAnyOf(saveConfig, addInsecureSslHostname, removeInsecureSslHostname),
-        effect: async (action, listenerApi) => {
-          const {
-            config: { data: config },
-          } = listenerApi.getState();
-          host.postMessage({ command: "saveConfig", payload: config });
-        },
-      }),
+    saveConfig: configListener.onInsecureSslHostnameChange(startAppListening, host),
   };
 
   startNavigationListening(startAppListening, routes);

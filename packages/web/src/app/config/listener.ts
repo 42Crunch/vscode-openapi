@@ -5,13 +5,8 @@ import {
 } from "@reduxjs/toolkit";
 import { Webapp } from "@xliic/common/webapp/config";
 import { AppDispatch, RootState } from "./store";
-import {
-  saveConfig,
-  testPlatformConnection,
-  testOverlordConnection,
-  testScandManagerConnection,
-} from "../../features/config/slice";
 import { startListeners } from "../webapp";
+import * as configListener from "../../features/config/listener";
 
 const listenerMiddleware = createListenerMiddleware();
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
@@ -19,64 +14,13 @@ const startAppListening = listenerMiddleware.startListening as AppStartListening
 
 export function createListener(host: Webapp["host"]) {
   const listeners: Record<keyof Webapp["hostHandlers"], () => UnsubscribeListener> = {
-    saveConfig: () =>
-      startAppListening({
-        actionCreator: saveConfig,
-        effect: async (action, listenerApi) => {
-          host.postMessage({
-            command: "saveConfig",
-            payload: action.payload,
-          });
-        },
-      }),
-
-    testPlatformConnection: () =>
-      startAppListening({
-        actionCreator: testPlatformConnection,
-        effect: async (action, listenerApi) => {
-          const state = listenerApi.getState();
-          host.postMessage({
-            command: "saveConfig",
-            payload: state.config.data,
-          });
-          host.postMessage({
-            command: "testPlatformConnection",
-            payload: undefined,
-          });
-        },
-      }),
-
-    testOverlordConnection: () =>
-      startAppListening({
-        actionCreator: testOverlordConnection,
-        effect: async (action, listenerApi) => {
-          const state = listenerApi.getState();
-          host.postMessage({
-            command: "saveConfig",
-            payload: state.config.data,
-          });
-          host.postMessage({
-            command: "testOverlordConnection",
-            payload: undefined,
-          });
-        },
-      }),
-
-    testScandManagerConnection: () =>
-      startAppListening({
-        actionCreator: testScandManagerConnection,
-        effect: async (action, listenerApi) => {
-          const state = listenerApi.getState();
-          host.postMessage({
-            command: "saveConfig",
-            payload: state.config.data,
-          });
-          host.postMessage({
-            command: "testScandManagerConnection",
-            payload: undefined,
-          });
-        },
-      }),
+    saveConfig: configListener.onSaveConfig(startAppListening, host),
+    testOverlordConnection: configListener.onTestOverlordConnection(startAppListening, host),
+    testScandManagerConnection: configListener.onTestScandManagerConnection(
+      startAppListening,
+      host
+    ),
+    testPlatformConnection: configListener.onTestPlatformConnection(startAppListening, host),
   };
 
   startListeners(listeners);
