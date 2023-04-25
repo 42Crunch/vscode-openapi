@@ -23,6 +23,7 @@ export default function CurlRequest({
   const defaultValues = useAppSelector((state) => state.scan.defaultValues);
   const {
     docker: { replaceLocalhost },
+    scanRuntime,
     platform,
   } = useAppSelector((state) => state.config.data);
   const security = defaultValues?.security[defaultValues.securityIndex];
@@ -34,7 +35,7 @@ export default function CurlRequest({
     return match;
   });
 
-  const request = extract(secretCurl, id, replaceLocalhost, platform);
+  const request = extract(secretCurl, id, scanRuntime, replaceLocalhost, platform);
 
   return (
     <Request>
@@ -49,7 +50,12 @@ export default function CurlRequest({
                     e.stopPropagation();
                     dispatch(
                       sendCurlRequest(
-                        optionallyUnreplaceLocalhost(secretCurl, replaceLocalhost, platform)
+                        optionallyUnreplaceLocalhost(
+                          secretCurl,
+                          scanRuntime,
+                          replaceLocalhost,
+                          platform
+                        )
                       )
                     );
                   }}
@@ -64,7 +70,7 @@ export default function CurlRequest({
             </Tooltip.Portal>
           </Tooltip.Root>
         </Tooltip.Provider>
-        {optionallyUnreplaceLocalhost(curl, replaceLocalhost, platform)}
+        {optionallyUnreplaceLocalhost(curl, scanRuntime, replaceLocalhost, platform)}
       </Code>
       <Buttons>
         <ProgressButton
@@ -131,6 +137,7 @@ type ParsedValue = {
 function extract(
   curl: string,
   id: string,
+  scanRuntime: "docker" | "scand-manager",
   replaceLocalhost: boolean,
   platform: string
 ): HttpRequest {
@@ -160,7 +167,7 @@ function extract(
     }
   }
 
-  result.url = optionallyUnreplaceLocalhost(result.url, replaceLocalhost, platform);
+  result.url = optionallyUnreplaceLocalhost(result.url, scanRuntime, replaceLocalhost, platform);
 
   return result;
 }

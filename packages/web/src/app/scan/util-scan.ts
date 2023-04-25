@@ -43,6 +43,7 @@ export function updateScanConfig(
   config: unknown,
   path: string,
   method: HttpMethod,
+  scanRuntime: "docker" | "scand-manager",
   replaceLocalhost: boolean,
   platform: string,
   values: TryitOperationValues
@@ -54,7 +55,7 @@ export function updateScanConfig(
     (mutableConfig as any)["playbook"]["paths"][path][method]["happyPaths"][0]["requests"][0]
   );
 
-  const host = optionallyReplaceLocalhost(values.server, replaceLocalhost, platform);
+  const host = optionallyReplaceLocalhost(values.server, scanRuntime, replaceLocalhost, platform);
 
   target.host = host.endsWith("/") ? host.slice(0, -1) : host;
 
@@ -129,8 +130,14 @@ function extractEnvVariableName(environmentConfig: any, name: string): string | 
   }
 }
 
-function optionallyReplaceLocalhost(server: string, replaceLocalhost: boolean, platform: string) {
+function optionallyReplaceLocalhost(
+  server: string,
+  runtime: "docker" | "scand-manager",
+  replaceLocalhost: boolean,
+  platform: string
+) {
   if (
+    runtime == "docker" &&
     replaceLocalhost &&
     (platform === "darwin" || platform === "win32") &&
     (server.toLowerCase().startsWith("https://localhost") ||
@@ -143,10 +150,12 @@ function optionallyReplaceLocalhost(server: string, replaceLocalhost: boolean, p
 
 export function optionallyUnreplaceLocalhost(
   value: string,
+  runtime: "docker" | "scand-manager",
   replaceLocalhost: boolean,
   platform: string
 ) {
   if (
+    runtime == "docker" &&
     replaceLocalhost &&
     (platform === "darwin" || platform === "win32") &&
     (value.toLowerCase().includes("https://host.docker.internal") ||

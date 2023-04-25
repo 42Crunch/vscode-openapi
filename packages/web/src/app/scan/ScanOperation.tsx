@@ -26,6 +26,7 @@ export default function ScanOperation() {
 
   const {
     docker: { replaceLocalhost },
+    scanRuntime,
     platform,
   } = useAppSelector((state) => state.config.data);
 
@@ -43,6 +44,7 @@ export default function ScanOperation() {
       scanConfigRaw,
       path!,
       method!,
+      scanRuntime,
       replaceLocalhost,
       platform,
       values
