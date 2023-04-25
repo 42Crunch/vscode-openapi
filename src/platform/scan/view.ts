@@ -343,7 +343,12 @@ async function runScanWithDocker(
     .map(([key, value]) => `-e ${key}='${value}'`)
     .join(" ");
 
-  terminal.sendText(`docker run --rm ${envString} ${config.scanImage}`);
+  const hostNetwork =
+    config.docker.useHostNetwork && (config.platform == "linux" || config.platform == "freebsd")
+      ? "--network host"
+      : "";
+
+  terminal.sendText(`docker run ${hostNetwork} --rm ${envString} ${config.scanImage}`);
   terminal.show();
 }
 
