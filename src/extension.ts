@@ -34,6 +34,7 @@ import { PlatformStore } from "./platform/stores/platform-store";
 import { Logger } from "./platform/types";
 import { getPlatformCredentials } from "./credentials";
 import { EnvStore } from "./envstore";
+import { debounce } from "./util/debounce";
 
 export async function activate(context: vscode.ExtensionContext) {
   const versionProperty = "openapiVersion";
@@ -148,6 +149,13 @@ export async function activate(context: vscode.ExtensionContext) {
 
   platformStore.setCredentials(await getPlatformCredentials(configuration, context.secrets));
 
+  const reloadCredentials = debounce(
+    async () => {
+      platformStore.setCredentials(await getPlatformCredentials(configuration, context.secrets));
+    },
+    { delay: 3000 }
+  );
+
   configuration.onDidChange(async (e: vscode.ConfigurationChangeEvent) => {
     if (
       configuration.changed(e, "platformUrl") ||
@@ -156,13 +164,13 @@ export async function activate(context: vscode.ExtensionContext) {
       configuration.changed(e, "scandManagerHeaderName") ||
       configuration.changed(e, "scandManagerHeaderValue")
     ) {
-      platformStore.setCredentials(await getPlatformCredentials(configuration, context.secrets));
+      reloadCredentials();
     }
   });
 
   context.secrets.onDidChange(async (e) => {
     if (e.key === "platformApiToken") {
-      platformStore.setCredentials(await getPlatformCredentials(configuration, context.secrets));
+      reloadCredentials();
     }
   });
 }

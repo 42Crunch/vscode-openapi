@@ -35,10 +35,7 @@ export function registerSecurityAudit(
       if (credentials === undefined) {
         // try asking for credentials if not found
         const configured = await configureCredentials(configuration, context.secrets);
-        if (configured === "platform") {
-          // update platform connection if platform credentials have been provided
-          store.setCredentials(await getPlatformCredentials(configuration, context.secrets));
-        } else if (configured === undefined) {
+        if (configured === undefined) {
           // or don't do audit if no credentials been supplied
           return;
         }
