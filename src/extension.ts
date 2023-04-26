@@ -159,6 +159,12 @@ export async function activate(context: vscode.ExtensionContext) {
       platformStore.setCredentials(await getPlatformCredentials(configuration, context.secrets));
     }
   });
+
+  context.secrets.onDidChange(async (e) => {
+    if (e.key === "platformApiToken") {
+      platformStore.setCredentials(await getPlatformCredentials(configuration, context.secrets));
+    }
+  });
 }
 
 export function deactivate() {}

@@ -134,18 +134,12 @@ export class PlatformStore {
   }
 
   async setCredentials(credentials?: PlatformConnection) {
-    if (
-      this.connection?.apiToken !== credentials?.apiToken ||
-      this.connection?.platformUrl !== credentials?.platformUrl ||
-      this.connection?.services !== credentials?.services
-    ) {
-      this.connection = credentials;
-      await this.refresh();
-      this._onConnectionDidChange.fire({
-        credentials: this.hasCredentials(),
-        connected: this.isConnected(),
-      });
-    }
+    this.connection = credentials;
+    await this.refresh();
+    this._onConnectionDidChange.fire({
+      credentials: this.hasCredentials(),
+      connected: this.isConnected(),
+    });
   }
 
   hasCredentials(): boolean {

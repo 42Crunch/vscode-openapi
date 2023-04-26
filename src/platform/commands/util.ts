@@ -22,11 +22,4 @@ export default (context: vscode.ExtensionContext, store: PlatformStore) => ({
       vscode.env.openExternal(uri);
     }
   },
-
-  updatePlatformCredentials: async () => {
-    const success = await configurePlatformUser(configuration, context.secrets);
-    if (success) {
-      store.setCredentials(await getPlatformCredentials(configuration, context.secrets));
-    }
-  },
 });
