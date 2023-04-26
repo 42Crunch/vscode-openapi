@@ -64,11 +64,11 @@ export async function activate(
     treeDataProvider: provider,
   });
 
-  store.onConnectionDidChange(({ connected }) =>
+  store.onConnectionDidChange(({ credentials }) =>
     vscode.commands.executeCommand(
       "setContext",
       "openapi.platform.credentials",
-      connected ? "present" : "missing"
+      credentials ? "present" : "missing"
     )
   );
 

@@ -9,7 +9,7 @@ export class FavoritesStore {
   }
 
   getFavoriteCollectionIds(): string[] {
-    if (this.store.hasConnection()) {
+    if (this.store.isConnected()) {
       const favorite = this.context.globalState.get<string[]>(this.key());
       if (!favorite) {
         return [];

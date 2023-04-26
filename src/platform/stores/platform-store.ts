@@ -114,17 +114,18 @@ export class Filters {
 }
 
 export type PlatformConnectionEvent = {
+  credentials: boolean;
   connected: boolean;
 };
 
 export class PlatformStore {
-  [x: string]: any;
   private apiLastAssessment = new Map<string, Date>();
   private connection: PlatformConnection | undefined = undefined;
   readonly limits = new Limits();
   readonly filters = new Filters();
   private formats?: DataDictionaryFormat[];
   private _onConnectionDidChange = new EventEmitter<PlatformConnectionEvent>();
+  private connected = false;
 
   constructor(private logger: Logger) {}
 
@@ -140,14 +141,21 @@ export class PlatformStore {
     ) {
       this.connection = credentials;
       await this.refresh();
-      this._onConnectionDidChange.fire({ connected: this.hasConnection() });
+      this._onConnectionDidChange.fire({
+        credentials: this.hasCredentials(),
+        connected: this.isConnected(),
+      });
     }
   }
 
-  hasConnection(): boolean {
+  hasCredentials(): boolean {
     return (
       this.connection !== undefined && !!this.connection.platformUrl && !!this.connection.apiToken
     );
+  }
+
+  isConnected(): boolean {
+    return this.connected;
   }
 
   async testConnection(credentials: PlatformConnection) {
@@ -374,7 +382,9 @@ export class PlatformStore {
   }
 
   async refresh(): Promise<void> {
+    const { success } = await testConnection(this.getConnection(), this.logger);
     this.formats = undefined;
+    this.connected = success;
   }
 
   async createDefaultScanConfig(apiId: string): Promise<any> {

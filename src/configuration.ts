@@ -11,7 +11,6 @@ import {
   ExtensionContext,
   Uri,
   workspace,
-  WorkspaceConfiguration,
 } from "vscode";
 import { configId } from "./types";
 
