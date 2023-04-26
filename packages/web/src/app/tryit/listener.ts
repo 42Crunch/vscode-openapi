@@ -56,7 +56,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
         },
       }),
 
-    saveConfig: configListener.onInsecureSslHostnameChange(startAppListening, host),
+    saveConfig: configListener.onConfigChange(startAppListening, host),
   };
 
   startNavigationListening(startAppListening, routes);

@@ -31,18 +31,18 @@ type FeatureState = StateFromReducersMapObject<typeof reducer>;
 type FeatureDispatch = ReturnType<typeof initStore>["dispatch"];
 type FeatureListening = TypedStartListening<FeatureState, FeatureDispatch>;
 
-export function onSaveConfig(
+export function onConfigChange(
   startAppListening: FeatureListening,
   host: Webapp<NoopMessage, SaveConfigMessage>["host"]
 ) {
   return () =>
     startAppListening({
-      actionCreator: saveConfig,
+      matcher: isAnyOf(saveConfig, addInsecureSslHostname, removeInsecureSslHostname),
       effect: async (action, listenerApi) => {
-        host.postMessage({
-          command: "saveConfig",
-          payload: action.payload,
-        });
+        const {
+          config: { data: config },
+        } = listenerApi.getState();
+        host.postMessage({ command: "saveConfig", payload: config });
       },
     });
 }
@@ -106,22 +106,6 @@ export function onTestScandManagerConnection(
           command: "testScandManagerConnection",
           payload: undefined,
         });
-      },
-    });
-}
-
-export function onInsecureSslHostnameChange(
-  startAppListening: FeatureListening,
-  host: Webapp<NoopMessage, SaveConfigMessage>["host"]
-) {
-  return () =>
-    startAppListening({
-      matcher: isAnyOf(addInsecureSslHostname, removeInsecureSslHostname),
-      effect: async (action, listenerApi) => {
-        const {
-          config: { data: config },
-        } = listenerApi.getState();
-        host.postMessage({ command: "saveConfig", payload: config });
       },
     });
 }
