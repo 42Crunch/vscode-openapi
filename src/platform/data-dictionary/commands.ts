@@ -151,19 +151,13 @@ async function shouldFixDataDictionaryErrros(): Promise<"fix" | "skip" | "cancel
     const choice = await vscode.window.showInformationMessage(
       "Found Data Dictionary mismatch, update the document with Data Dictionary properties?",
       { modal: true },
-      { title: "Yes, update", id: "fix" },
-      { title: "No, don't update", id: "skip" },
-      { title: "Always update", id: "always" },
-      { title: "Never update", id: "never" }
+      { title: "Update", id: "fix" },
+      { title: "Don't update", id: "skip" }
     );
     if (choice === undefined) {
       return "cancel";
-    } else if (choice.id === "always" || choice.id === "never") {
-      await configuration.update("dataDictionaryPreAuditFix", choice.id);
     }
     if (choice.id === "fix") {
-      return "fix";
-    } else if (choice.id == "always") {
       return "fix";
     } else {
       return "skip";
