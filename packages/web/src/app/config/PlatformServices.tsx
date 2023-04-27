@@ -26,7 +26,7 @@ export default function Scan() {
 
   return (
     <>
-      <Title>Services blah blah</Title>
+      <Title>42Crunch Platform services</Title>
       <Container>
         <Select
           label="Platform services"

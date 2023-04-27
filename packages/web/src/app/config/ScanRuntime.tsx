@@ -15,8 +15,6 @@ import { Checkbox } from "../../components/Checkbox";
 export default function ScanRuntime() {
   const dispatch = useFeatureDispatch();
   const {
-    overlordConnectionTestResult: overlordTestResult,
-    waitingForOverlordConnectionTest: waitingForOverlordTest,
     scandManagerConnectionTestResult: scandManagerTestResult,
     waitingForScandManagerConnectionTest: waitingForScandManagerTest,
   } = useFeatureSelector((state) => state.config);
@@ -30,7 +28,7 @@ export default function ScanRuntime() {
 
   return (
     <>
-      <Title>Runtime</Title>
+      <Title>Runtime for scand-agent</Title>
       <Container>
         <Select
           label="Runtime"
