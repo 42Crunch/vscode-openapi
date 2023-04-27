@@ -42,20 +42,21 @@ export default function Select({
 
   return (
     <Container>
-      <div>{label}</div>
-
-      <Input {...getToggleButtonProps()}>
-        <span>{selected ? selected.label : placeholder ?? ""}</span>
-        <AngleDown />
-      </Input>
-      <List {...getMenuProps()} isOpen={isOpen}>
+      <SelectContainer>
+        <div>{label}</div>
+        <Input {...getToggleButtonProps()}>
+          <span>{selected ? selected.label : placeholder ?? ""}</span>
+          <AngleDown />
+        </Input>
+      </SelectContainer>
+      <Dropdown {...getMenuProps()} isOpen={isOpen}>
         {isOpen &&
           options.map((item, index) => (
             <li key={`${item.value}${index}`} {...getItemProps({ item, index })}>
               <span>{item.label}</span>
             </li>
           ))}
-      </List>
+      </Dropdown>
     </Container>
   );
 }
@@ -65,9 +66,13 @@ function getOptionByValue(options: SelectOption[], value: string): SelectOption 
 }
 
 const Container = styled.div`
-  height: 40px;
+  display: flex;
+  flex-direction: column;
   position: relative;
-  z-index: 1;
+`;
+
+const SelectContainer = styled.div`
+  height: 40px;
   background-color: var(${ThemeColorVariables.inputBackground});
   border-radius: 2px;
   border: 1px solid var(${ThemeColorVariables.border});
@@ -100,19 +105,21 @@ const Input = styled.div`
   }
 `;
 
-const List = styled.ul`
+const Dropdown = styled.ul`
+  position: absolute;
+  top: 50px;
+  left: 0;
+  right: 0;
+  margin: 0;
+  list-style: none;
+  background-color: var(${ThemeColorVariables.dropdownBackground});
+  color: var(${ThemeColorVariables.dropdownForeground});
   ${({ isOpen }: { isOpen: boolean }) =>
     isOpen &&
     `
     border: 1px solid var(${ThemeColorVariables.dropdownBorder});
     padding: 4px;
-    margin: 4px 0 0 0;
-    `}
-  background-color: var(${ThemeColorVariables.dropdownBackground});
-  color: var(${ThemeColorVariables.dropdownForeground});
-  width: 100%;
-  position: absolute;
-  list-style: none;
+  `}
 
   & > li {
     padding: 4px;
