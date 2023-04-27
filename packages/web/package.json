@@ -21,7 +21,7 @@
     "@types/react-dom": "^18.0.0",
     "@types/redux-logger": "^3.0.9",
     "@types/styled-components": "^5.1.0",
-    "@vitejs/plugin-react": "^3.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
     "@xliic/preserving-json-yaml-parser": "^1.10.0",
     "bootstrap": "^5.2.2",
     "buffer": "6.0.3",
@@ -37,7 +37,7 @@
     "styled-components": "^5.3.5",
     "swagger-client": "^3.18.5",
     "typescript": "^5.0.2",
-    "vite": "^4.2.1",
+    "vite": "^4.3.0",
     "vite-plugin-svgr": "^2.4.0",
     "vitest": "^0.29.0",
     "zod": "^3.21.4"
