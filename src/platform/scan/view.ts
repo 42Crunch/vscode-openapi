@@ -94,18 +94,19 @@ export class ScanWebView extends WebView<Webapp> {
           this.isNewApi
         );
       } catch (ex: any) {
-        if (
+        const message =
           ex?.response?.statusCode === 409 &&
           ex?.response?.body?.code === 109 &&
           ex?.response?.body?.message === "limit reached"
-        ) {
-          vscode.window.showErrorMessage(
-            "You have reached your maximum number of APIs. Please contact support@42crunch.com to upgrade your account."
-          );
-        } else {
-          vscode.window.showErrorMessage("Failed to run scan: " + ex.message);
-        }
-        throw ex;
+            ? "You have reached your maximum number of APIs. Please contact support@42crunch.com to upgrade your account."
+            : "Failed to run scan: " + ex.message;
+
+        return {
+          command: "showGeneralError",
+          payload: {
+            message,
+          },
+        };
       }
     },
 
