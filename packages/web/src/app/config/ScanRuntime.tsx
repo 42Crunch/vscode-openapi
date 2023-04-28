@@ -42,7 +42,7 @@ export default function ScanRuntime() {
           <>
             <Checkbox
               name="docker.replaceLocalhost"
-              label='Replace "locahost" hostname with "host.docker.internal" (Windows and Mac only)'
+              label='Replace "localhost" hostname with "host.docker.internal" (Windows and Mac only)'
             />
             <Checkbox name="docker.useHostNetwork" label='Use "host" network (Linux only)' />
           </>
