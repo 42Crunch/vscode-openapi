@@ -23,4 +23,10 @@ export function activate(
     await view.sendColorTheme(vscode.window.activeColorTheme);
     await view.sendLoadConfig();
   });
+
+  vscode.commands.registerCommand("openapi.showSettings", async () => {
+    await view.show();
+    await view.sendColorTheme(vscode.window.activeColorTheme);
+    await view.sendLoadConfig();
+  });
 }
