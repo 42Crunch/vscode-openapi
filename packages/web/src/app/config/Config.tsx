@@ -21,7 +21,7 @@ const sections = [
     ],
   },
   {
-    title: "Conformance Scan",
+    title: "API Conformance Scan",
     items: [
       { id: "scan-runtime", label: "Runtime" },
       { id: "scan-image", label: "Docker image" },

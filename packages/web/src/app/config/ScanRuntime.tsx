@@ -49,19 +49,19 @@ export default function ScanRuntime() {
         )}
         {scanRuntime === "scand-manager" && (
           <>
-            <Input label="Scand Manager URL" name="scandManager.url" />
+            <Input label="Scand manager URL" name="scandManager.url" />
             <Select
               label="Authentication method"
               name="scandManager.auth"
               options={[
                 { value: "none", label: "None" },
-                { value: "header", label: "HTTP Header Authentication" },
+                { value: "header", label: "HTTP header authentication" },
               ]}
             />
             {scanAuth === "header" && (
               <>
-                <Input label="Header Name" name="scandManager.header.name" />
-                <Input label="Header Value" name="scandManager.header.value" />
+                <Input label="Header name" name="scandManager.header.name" />
+                <Input label="Header value" name="scandManager.header.value" />
               </>
             )}
             <Test>

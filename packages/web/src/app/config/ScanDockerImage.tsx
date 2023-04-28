@@ -4,7 +4,7 @@ import { Container, Title } from "./layout";
 export default function ScanDockerImage() {
   return (
     <>
-      <Title>Docker image of a scand-agent</Title>
+      <Title>Scand-agent Docker image</Title>
       <Container>
         <Input label="Docker image" name="scanImage" />
       </Container>

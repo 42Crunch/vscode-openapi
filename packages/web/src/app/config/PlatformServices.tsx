@@ -32,17 +32,13 @@ export default function Scan() {
           label="Platform services"
           name="platformServices.source"
           options={[
-            { value: "auto", label: "Automatically detect services host" },
-            { value: "manual", label: "Specify services host manually" },
+            { value: "auto", label: "Detect the host automatically" },
+            { value: "manual", label: "Specify the host manually" },
           ]}
         />
-        {source == "manual" && <Input label="Services host" name="platformServices.manual" />}
+        {source == "manual" && <Input label="Host" name="platformServices.manual" />}
         {source == "auto" && (
-          <Input
-            label="Services host (automatic, read-only)"
-            name="platformServices.auto"
-            disabled
-          />
+          <Input label="Host (automatic, read-only)" name="platformServices.auto" disabled />
         )}
         <Test>
           <NormalProgressButton

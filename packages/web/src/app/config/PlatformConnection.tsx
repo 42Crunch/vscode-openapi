@@ -22,7 +22,7 @@ export default function PlatformConnection() {
 
   return (
     <>
-      <Title>42Crunch Platform connection</Title>
+      <Title>Connection to 42Crunch Platform</Title>
       <Container>
         <Input label="Platform URL" name="platformUrl" />
         <Input label="IDE token" name="platformApiToken" password />
