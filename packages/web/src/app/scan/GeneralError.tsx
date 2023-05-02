@@ -28,8 +28,7 @@ const ErrorText = styled.div`
   margin-bottom: 1rem;
   padding: 0.75rem;
   line-break: anywhere;
-  > div:last-child {
-    margin-top: 8px;
+  > div {
     font-family: monospace;
   }
 `;
