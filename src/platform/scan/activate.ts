@@ -28,8 +28,7 @@ export function activate(
   envStore: EnvStore,
   prefs: Record<string, Preferences>,
   auditView: AuditWebView,
-  auditContext: AuditContext,
-  logger: Logger
+  auditContext: AuditContext
 ): vscode.Disposable {
   let disposables: vscode.Disposable[] = [];
   const view = new ScanWebView(
@@ -40,7 +39,6 @@ export function activate(
     store,
     envStore,
     prefs,
-    logger,
     auditView,
     auditContext
   );

@@ -108,8 +108,7 @@ export async function activate(
     envStore,
     prefs,
     reportWebView,
-    auditContext,
-    logger
+    auditContext
   );
   activateLinter(cache, platformContext, store, dataDictionaryDiagnostics);
 

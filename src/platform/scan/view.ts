@@ -17,6 +17,7 @@ import { Preferences } from "@xliic/common/prefs";
 import { Webapp } from "@xliic/common/webapp/scan";
 import { Config } from "@xliic/common/config";
 import { GeneralError, ShowGeneralErrorMessage } from "@xliic/common/error";
+import { LogLevel } from "@xliic/common/logging";
 
 import {
   ShowHttpResponseMessage,
@@ -57,7 +58,6 @@ export class ScanWebView extends WebView<Webapp> {
     private store: PlatformStore,
     private envStore: EnvStore,
     private prefs: Record<string, Preferences>,
-    private logger: Logger,
     private auditView: AuditWebView,
     private auditContext: AuditContext
   ) {
@@ -90,7 +90,7 @@ export class ScanWebView extends WebView<Webapp> {
           this.envStore,
           scanConfig,
           config,
-          this.logger,
+          makeLogger(this),
           this.isNewApi
         );
       } catch (ex: any) {
@@ -230,9 +230,26 @@ export class ScanWebView extends WebView<Webapp> {
     });
   }
 
+  async sendLogMessage(message: string, level: LogLevel) {
+    this.sendRequest({
+      command: "showLogMessage",
+      payload: { message, level, timestamp: new Date().toISOString() },
+    });
+  }
+
   setNewApi() {
     this.isNewApi = true;
   }
+}
+
+function makeLogger(view: { sendLogMessage: (message: string, level: LogLevel) => void }): Logger {
+  return {
+    debug: (message: string) => view.sendLogMessage(message, "debug"),
+    info: (message: string) => view.sendLogMessage(message, "info"),
+    warning: (message: string) => view.sendLogMessage(message, "warning"),
+    error: (message: string) => view.sendLogMessage(message, "error"),
+    fatal: (message: string) => view.sendLogMessage(message, "fatal"),
+  };
 }
 
 async function runScan(
@@ -243,7 +260,10 @@ async function runScan(
   logger: Logger,
   isNewApi: boolean
 ): Promise<ShowScanReportMessage | ShowGeneralErrorMessage> {
+  logger.info(`Starting API Conformance scan`);
   const api = await store.createTempApi(scanConfig.rawOas);
+
+  logger.info(`Created temp API "${api.desc.id}", waiting for Security Audit`);
 
   const audit = await store.getAuditReport(api.desc.id);
   if (audit?.openapiState !== "valid") {
@@ -256,6 +276,8 @@ async function runScan(
       },
     };
   }
+
+  logger.info(`Security Audit check is successfull`);
 
   if (isNewApi) {
     await store.createScanConfigNew(api.desc.id, "updated", scanConfig.config);
@@ -360,6 +382,8 @@ async function runScanWithScandManager(
   logger: Logger,
   token: string
 ): Promise<GeneralError | undefined> {
+  logger.info(`Using scand-manager`);
+
   const env: Record<string, string> = {};
 
   for (const [name, value] of Object.entries(scanConfig.env)) {
@@ -388,10 +412,12 @@ async function runScanWithScandManager(
     };
   }
 
+  logger.info(`Created scand-manager job: "${job.name}"`);
+
   if (job.status === "failed") {
     // TODO introduce settings whether delete failed jobs or not
     return {
-      message: `Failed to create scand-manager job ${job.name}, received unexpected status: ${job.status}`,
+      message: `Failed to create scand-manager job "${job.name}", received unexpected status: ${job.status}`,
     };
   }
 
@@ -441,13 +467,13 @@ async function waitForScandJob(
       return undefined;
     } else if (status.status === "failed") {
       const log = await managerApi.readJobLog(name, manager, logger);
-      return { message: `Scand-manager job ${name} has failed`, details: log };
+      return { message: `Scand-manager job "${name}" has failed`, details: log };
     }
-    console.log("Waiting for scand job to become available");
+    logger.info(`Waiting for job: "${name}", status: "${status.status}"`);
     await delay(1000);
     currentDelay = currentDelay + 1000;
   }
-  return { message: `Timed out waiting for scand-manager job ${name} to complete` };
+  return { message: `Timed out waiting for scand-manager job "${name}" to finish` };
 }
 
 async function delay(ms: number) {

@@ -13,6 +13,7 @@ import scan from "./slice";
 import env from "../../features/env/slice";
 import prefs from "../../features/prefs/slice";
 import config from "../../features/config/slice";
+import logging from "../../features/logging/slice";
 
 const reducer = {
   theme,
@@ -21,6 +22,7 @@ const reducer = {
   env,
   prefs,
   config,
+  logging,
 };
 
 export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme: ThemeState) =>

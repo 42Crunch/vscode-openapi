@@ -25,6 +25,7 @@ import {
 import { loadEnv } from "../../features/env/slice";
 import { loadPrefs } from "../../features/prefs/slice";
 import { loadConfig } from "../../features/config/slice";
+import { showLogMessage } from "../../features/logging/slice";
 
 import ScanOperation from "./ScanOperation";
 import Starting from "./Starting";
@@ -55,6 +56,7 @@ const messageHandlers: Webapp["webappHandlers"] = {
   loadEnv,
   loadPrefs,
   loadConfig,
+  showLogMessage,
 };
 
 function App() {
