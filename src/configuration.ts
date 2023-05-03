@@ -52,7 +52,8 @@ export class Configuration {
   }
 
   update(section: string, value: any, configurationTarget?: ConfigurationTarget) {
-    return workspace.getConfiguration(this.section).update(section, value, configurationTarget);
+    const target = workspace.workspaceFolders ? configurationTarget : ConfigurationTarget.Global;
+    return workspace.getConfiguration(this.section).update(section, value, target);
   }
 
   track<T>(section: string, callback: Function, defaultValue?: T) {
