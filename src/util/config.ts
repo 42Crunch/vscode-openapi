@@ -46,18 +46,34 @@ export async function saveConfig(
   configuration: Configuration,
   secrets: vscode.SecretStorage
 ) {
-  await configuration.update("platformUrl", config.platformUrl);
+  await configuration.update("platformUrl", config.platformUrl, vscode.ConfigurationTarget.Global);
 
   if (config.platformServices.source === "auto") {
-    await configuration.update("platformServices", "");
+    await configuration.update("platformServices", "", vscode.ConfigurationTarget.Global);
   } else {
-    await configuration.update("platformServices", config.platformServices.manual);
+    await configuration.update(
+      "platformServices",
+      config.platformServices.manual,
+      vscode.ConfigurationTarget.Global
+    );
   }
 
-  await configuration.update("platformScandManager", config.scandManager);
-  await configuration.update("docker", config.docker);
-  await configuration.update("platformConformanceScanRuntime", config.scanRuntime);
-  await configuration.update("platformConformanceScanImage", config.scanImage);
+  await configuration.update(
+    "platformScandManager",
+    config.scandManager,
+    vscode.ConfigurationTarget.Global
+  );
+  await configuration.update("docker", config.docker, vscode.ConfigurationTarget.Global);
+  await configuration.update(
+    "platformConformanceScanRuntime",
+    config.scanRuntime,
+    vscode.ConfigurationTarget.Global
+  );
+  await configuration.update(
+    "platformConformanceScanImage",
+    config.scanImage,
+    vscode.ConfigurationTarget.Global
+  );
   // secrets
   await secrets.store("platformApiToken", config.platformApiToken);
   if (config.scandManager.auth == "header") {
