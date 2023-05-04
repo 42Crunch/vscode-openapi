@@ -2,25 +2,53 @@ import styled from "styled-components";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { useFeatureSelector } from "./slice";
+import { useEffect, useRef, useState } from "react";
 
-export default function LogMessages() {
+export default function SmallLogMessages() {
   const messages = useFeatureSelector((state) => state.logging.messages);
 
   const filtered = messages.filter((message) => message.level == "info");
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scrolledManually, setScrolledManually] = useState(false);
+
+  useEffect(() => {
+    if (containerRef.current && !scrolledManually) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [filtered, scrolledManually]);
 
   if (filtered.length === 0) {
     return null;
   }
 
+  const handleScroll = () => {
+    const container = containerRef.current;
+
+    if (container) {
+      const scrollTop = container.scrollTop;
+      const scrollHeight = container.scrollHeight;
+      const clientHeight = container.clientHeight;
+
+      if (scrollHeight - (scrollTop + clientHeight) < 10) {
+        setScrolledManually(false);
+      } else {
+        setScrolledManually(true);
+      }
+    }
+  };
+
   return (
-    <LogText>
-      {filtered.map((message, index, array) => (
-        <div key={index}>
-          <Peg first={index === 0} last={index === array.length - 1} />
-          <div>{message.message}</div>
-        </div>
-      ))}
-    </LogText>
+    <Container>
+      <LogText ref={containerRef} onScroll={handleScroll}>
+        {filtered.map((message, index, array) => (
+          <div key={index}>
+            <Peg first={index === 0} last={index === array.length - 1} />
+            <div>{message.message}</div>
+          </div>
+        ))}
+      </LogText>
+    </Container>
   );
 }
 
@@ -38,7 +66,8 @@ const LogText = styled.div`
   color: var(${ThemeColorVariables.foreground});
   background-color: var(${ThemeColorVariables.background});
   line-break: anywhere;
-  padding: 8px;
+  overflow-y: scroll;
+  max-height: 200px;
 
   > div {
     display: flex;
@@ -74,4 +103,11 @@ const PegContainer = styled.div`
     ${({ last }: { first: boolean; last: boolean }) =>
       !last && `background-color: var(${ThemeColorVariables.border});`}
   }
+`;
+
+const Container = styled.div`
+  padding: 8px;
+  margin: 8px;
+  border-radius: 2px;
+  border: 1px solid var(${ThemeColorVariables.border});
 `;

@@ -18,10 +18,13 @@ export const slice = createSlice({
     showLogMessage: (state, action: PayloadAction<LogMessage>) => {
       state.messages.push(action.payload);
     },
+    clearLogs: (state) => {
+      state.messages = [];
+    },
   },
 });
 
-export const { showLogMessage } = slice.actions;
+export const { showLogMessage, clearLogs } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<
   ReturnType<(typeof slice.actions)[keyof typeof slice.actions]>

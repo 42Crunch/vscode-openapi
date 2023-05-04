@@ -260,7 +260,7 @@ async function runScan(
   logger: Logger,
   isNewApi: boolean
 ): Promise<ShowScanReportMessage | ShowGeneralErrorMessage> {
-  logger.info(`Starting API Conformance scan`);
+  logger.info(`Starting API Conformance Scan`);
   const api = await store.createTempApi(scanConfig.rawOas);
 
   logger.info(`Created temp API "${api.desc.id}", waiting for Security Audit`);
@@ -277,7 +277,7 @@ async function runScan(
     };
   }
 
-  logger.info(`Security Audit check is successfull`);
+  logger.info(`Security Audit check is successful`);
 
   if (isNewApi) {
     await store.createScanConfigNew(api.desc.id, "updated", scanConfig.config);
@@ -328,6 +328,8 @@ async function runScan(
   const parsed = JSON.parse(Buffer.from(report, "base64").toString("utf-8"));
 
   await store.deleteApi(api.desc.id);
+
+  logger.info(`Finished API Conformance Scan`);
 
   return {
     command: "showScanReport",

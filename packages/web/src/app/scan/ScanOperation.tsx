@@ -1,14 +1,16 @@
 import { useForm, FormProvider } from "react-hook-form";
 import { useEffect, useState } from "react";
 
+import { TryitSecurityAllValues, TryitSecurityValue } from "@xliic/common/tryit";
+
 import { useAppDispatch, useAppSelector } from "./store";
 import { wrapFormDefaults, unwrapFormDefaults } from "../../util";
-import { TryitSecurityAllValues, TryitSecurityValue } from "@xliic/common/tryit";
 import Operation from "../../components/operation/Operation";
 import OperationHeader from "../../components/operation/OperationHeader";
 
 import { runScan } from "./slice";
 import { setScanServer, setSecretForSecurity } from "../../features/prefs/slice";
+import { clearLogs } from "../../features/logging/slice";
 
 import { updateScanConfig } from "./util-scan";
 import { SecretsForSecurity } from "@xliic/common/prefs";
@@ -16,11 +18,11 @@ import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import Section from "../../components/Section";
 import ScanReport from "./ScanReport";
 import GeneralError from "./GeneralError";
-import LogMessages from "../../features/logging/LogMessages";
+import SmallLogMessages from "../../features/logging/SmallLogMessages";
 
 export default function ScanOperation() {
   const dispatch = useAppDispatch();
-  const { path, method, oas, rawOas, defaultValues, scanConfigRaw, scanReport, waiting } =
+  const { path, method, oas, rawOas, defaultValues, scanConfigRaw, scanReport, waiting, error } =
     useAppSelector((state) => state.scan);
 
   const prefs = useAppSelector((state) => state.prefs);
@@ -60,6 +62,8 @@ export default function ScanOperation() {
         }
       }
     }
+
+    dispatch(clearLogs());
 
     dispatch(
       runScan({
@@ -108,7 +112,7 @@ export default function ScanOperation() {
       </FormProvider>
       {scanReport && <ScanReport />}
       <GeneralError />
-      {waiting && <LogMessages />}
+      {(waiting || error) && <SmallLogMessages />}
     </>
   );
 }

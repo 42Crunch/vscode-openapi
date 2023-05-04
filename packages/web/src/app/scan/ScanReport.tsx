@@ -7,16 +7,16 @@ import { HttpMethods } from "@xliic/common/http";
 import { TestLogReport } from "@xliic/common/scan-report";
 
 import { TabList, TabButton } from "../../components/Tabs";
+import LogMessages from "../../features/logging/LogMessages";
 import { HappyPath } from "./HappyPath";
 import { ScanSummary } from "./ScanSummary";
 import ScanIssues from "./ScanIssues";
 import { useState } from "react";
 
 export default function ScanReport() {
-  const { scanReport, path, method, defaultValues, responses, errors, waitings } = useAppSelector(
+  const { scanReport, path, method, responses, errors, waitings } = useAppSelector(
     (state) => state.scan
   );
-  const dispatch = useAppDispatch();
 
   const [activeTab, setActiveTab] = useState("summary");
 
@@ -45,6 +45,7 @@ export default function ScanReport() {
         <TabList>
           <TabButton value="summary">Summary</TabButton>
           <TabButton value="tests">Tests</TabButton>
+          <TabButton value="logs">Logs</TabButton>
         </TabList>
         <Tabs.Content value="summary">
           <ScanSummary global={scanReport.summary} operation={operation} />
@@ -59,6 +60,9 @@ export default function ScanReport() {
         </Tabs.Content>
         <Tabs.Content value="tests">
           <ScanIssues issues={issues} responses={responses} errors={errors} waitings={waitings} />
+        </Tabs.Content>
+        <Tabs.Content value="logs">
+          <LogMessages />
         </Tabs.Content>
       </Tabs.Root>
     </Container>
