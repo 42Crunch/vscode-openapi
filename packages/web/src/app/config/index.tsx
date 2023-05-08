@@ -16,7 +16,7 @@ import {
   showOverlordConnectionTest,
   showScandManagerConnectionTest,
 } from "../../features/config/slice";
-import Config from "./Config";
+import Config from "./Main";
 
 const messageHandlers: Webapp["webappHandlers"] = {
   changeTheme,

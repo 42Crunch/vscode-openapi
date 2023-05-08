@@ -1,11 +1,11 @@
 import styled from "styled-components";
 import * as ReactCheckbox from "@radix-ui/react-checkbox";
-import { useController } from "react-hook-form";
+import { useController, Path } from "react-hook-form";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { Check } from "../icons";
 import { useId } from "react";
 
-export function Checkbox({ name, label }: { name: string; label: string }) {
+export function Checkbox<T>({ name, label }: { name: Path<T>; label: string }) {
   const id = useId();
 
   const { field } = useController({

@@ -1,16 +1,16 @@
 import styled from "styled-components";
-import { useController } from "react-hook-form";
+import { useController, Path } from "react-hook-form";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
 
-export default function Input({
+export default function Input<T>({
   label,
   name,
   disabled,
   password,
 }: {
   label: string;
-  name: string;
+  name: Path<T>;
   disabled?: boolean;
   password?: boolean;
 }) {

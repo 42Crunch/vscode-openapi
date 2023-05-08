@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useSelect } from "downshift";
-import { useController } from "react-hook-form";
+import { useController, Path } from "react-hook-form";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { AngleDown } from "../icons";
 
@@ -13,13 +13,13 @@ function itemToString(item: SelectOption | null) {
   return item ? item.label : "";
 }
 
-export default function Select({
+export default function Select<T>({
   name,
   options,
   placeholder,
   label,
 }: {
-  name: string;
+  name: Path<T>;
   options: SelectOption[];
   placeholder?: string;
   label: string;

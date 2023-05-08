@@ -40,9 +40,13 @@ export function onConfigChange(
       matcher: isAnyOf(saveConfig, addInsecureSslHostname, removeInsecureSslHostname),
       effect: async (action, listenerApi) => {
         const {
-          config: { data: config },
+          config: { data: config, hasErrors },
         } = listenerApi.getState();
-        host.postMessage({ command: "saveConfig", payload: config });
+        if (hasErrors) {
+          console.log("not saving config, has errors");
+        } else {
+          host.postMessage({ command: "saveConfig", payload: config });
+        }
       },
     });
 }

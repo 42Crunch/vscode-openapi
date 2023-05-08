@@ -1,19 +1,26 @@
-import { useFormContext, useWatch } from "react-hook-form";
+import { useWatch } from "react-hook-form";
+import React from "react";
+import * as z from "zod";
+import { Config } from "@xliic/common/config";
 
-import Input from "../../components/Input";
 import {
+  ConfigScreen,
   useFeatureDispatch,
   useFeatureSelector,
   testScandManagerConnection,
-} from "../../features/config/slice";
-import { NormalProgressButton } from "../../components/ProgressButton";
-import Select from "../../components/Select";
-import ConnectionTestBanner from "./ConnectionTestBanner";
-import { Container, Test, Title } from "./layout";
-import { Checkbox } from "../../components/Checkbox";
+} from "../../../features/config/slice";
+import Input from "../../../components/Input";
+import Select from "../../../components/Select";
+import { Checkbox } from "../../../components/Checkbox";
+import ConnectionTestBanner from "../ConnectionTestBanner";
+import { Container, Test, Title } from "../layout";
+import ValidProgressButton from "../../../components/form/ValidProgressButton";
 
-export default function ScanRuntime() {
+type Section = Pick<Config, "scanRuntime" | "docker" | "scandManager">;
+
+export function PlatformServices() {
   const dispatch = useFeatureDispatch();
+
   const {
     scandManagerConnectionTestResult: scandManagerTestResult,
     waitingForScandManagerConnectionTest: waitingForScandManagerTest,
@@ -22,15 +29,11 @@ export default function ScanRuntime() {
   const scanRuntime = useWatch({ name: "scanRuntime" });
   const scanAuth = useWatch({ name: "scandManager.auth" });
 
-  const {
-    formState: { isValid },
-  } = useFormContext();
-
   return (
     <>
       <Title>Runtime for scand-agent</Title>
       <Container>
-        <Select
+        <Select<Section>
           label="Runtime"
           name="scanRuntime"
           options={[
@@ -40,17 +43,20 @@ export default function ScanRuntime() {
         />
         {scanRuntime === "docker" && (
           <>
-            <Checkbox
+            <Checkbox<Section>
               name="docker.replaceLocalhost"
               label='Replace "localhost" hostname with "host.docker.internal" (Windows and Mac only)'
             />
-            <Checkbox name="docker.useHostNetwork" label='Use "host" network (Linux only)' />
+            <Checkbox<Section>
+              name="docker.useHostNetwork"
+              label='Use "host" network (Linux only)'
+            />
           </>
         )}
         {scanRuntime === "scand-manager" && (
           <>
-            <Input label="Scand manager URL" name="scandManager.url" />
-            <Select
+            <Input<Section> label="Scand manager URL" name="scandManager.url" />
+            <Select<Section>
               label="Authentication method"
               name="scandManager.auth"
               options={[
@@ -60,13 +66,12 @@ export default function ScanRuntime() {
             />
             {scanAuth === "header" && (
               <>
-                <Input label="Header name" name="scandManager.header.name" />
-                <Input label="Header value" name="scandManager.header.value" />
+                <Input<Section> label="Header name" name="scandManager.header.name" />
+                <Input<Section> label="Header value" name="scandManager.header.value" />
               </>
             )}
             <Test>
-              <NormalProgressButton
-                disabled={!isValid}
+              <ValidProgressButton
                 label="Test connection"
                 waiting={waitingForScandManagerTest}
                 onClick={(e) => {
@@ -83,3 +88,19 @@ export default function ScanRuntime() {
     </>
   );
 }
+
+const schema = z.object({}).catchall(z.unknown());
+
+const screen: {
+  id: ConfigScreen;
+  label: string;
+  schema: z.ZodObject<any>;
+  form: React.FC;
+} = {
+  id: "scan-runtime",
+  label: "Runtime",
+  schema,
+  form: PlatformServices,
+};
+
+export default screen;

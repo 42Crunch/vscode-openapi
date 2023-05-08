@@ -6,6 +6,8 @@ import { Config, ConnectionTestResult } from "@xliic/common/config";
 export interface ConfigState {
   ready: boolean;
   data: Config;
+  errors: Record<ConfigScreen, string | undefined>;
+  hasErrors: boolean;
   platformConnectionTestResult?: ConnectionTestResult;
   waitingForPlatformConnectionTest: boolean;
   overlordConnectionTestResult?: ConnectionTestResult;
@@ -13,6 +15,12 @@ export interface ConfigState {
   scandManagerConnectionTestResult?: ConnectionTestResult;
   waitingForScandManagerConnectionTest: boolean;
 }
+
+export type ConfigScreen =
+  | "platform-connection"
+  | "platform-services"
+  | "scan-runtime"
+  | "scan-image";
 
 const initialState: ConfigState = {
   ready: false,
@@ -47,6 +55,13 @@ const initialState: ConfigState = {
   waitingForOverlordConnectionTest: false,
   scandManagerConnectionTestResult: undefined,
   waitingForScandManagerConnectionTest: false,
+  errors: {
+    "platform-connection": undefined,
+    "platform-services": undefined,
+    "scan-image": undefined,
+    "scan-runtime": undefined,
+  },
+  hasErrors: false,
 };
 
 export const slice = createSlice({
@@ -58,13 +73,24 @@ export const slice = createSlice({
       state.ready = true;
     },
 
-    saveConfig: (state, action: PayloadAction<Config>) => {
+    saveConfig: (state, action: PayloadAction<Partial<Config>>) => {
       // this is also a hook for a listener
-      state.data = action.payload;
+      state.data = { ...state.data, ...action.payload };
       state.data.platformServices.auto = deriveServices(state.data.platformUrl);
       state.platformConnectionTestResult = undefined;
       state.overlordConnectionTestResult = undefined;
       state.scandManagerConnectionTestResult = undefined;
+    },
+
+    setError: (state, action: PayloadAction<{ screen: ConfigScreen; error: string }>) => {
+      const { screen, error } = action.payload;
+      state.errors[screen] = error;
+      state.hasErrors = Object.values(state.errors).some((error) => error !== undefined);
+    },
+
+    clearError: (state, action: PayloadAction<ConfigScreen>) => {
+      state.errors[action.payload] = undefined;
+      state.hasErrors = Object.values(state.errors).some((error) => error !== undefined);
     },
 
     addInsecureSslHostname: (state, action: PayloadAction<string>) => {
@@ -134,6 +160,8 @@ export const {
   loadConfig,
   saveConfig,
   showConfigWindow,
+  setError,
+  clearError,
   testPlatformConnection,
   showPlatformConnectionTest,
   testOverlordConnection,

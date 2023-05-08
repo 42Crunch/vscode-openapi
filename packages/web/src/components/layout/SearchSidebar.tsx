@@ -14,9 +14,11 @@ export type Section = {
 export default function SearchSidebar({
   render,
   sections,
+  errors,
   defaultSelection,
 }: {
   sections: Section[];
+  errors?: Record<string, string | undefined>;
   defaultSelection?: string;
   render: (selection: string) => ReactNode;
 }) {
@@ -36,6 +38,7 @@ export default function SearchSidebar({
               selected={selected}
               setSelected={setSelected}
               items={section.items}
+              errors={errors}
               filter={search.trim()}
             />
           </React.Fragment>
