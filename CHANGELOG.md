@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 4.17.0 (May 12, 2023)
+
+- Add support running Conformance Scan using scand-manager
+- Add Settings webapp
+- Update Data Dictionary browser UI
+- Show Audit report in case pre-scan Audit fails
+
 ## Version 4.16.6 (April 7, 2023)
 
 - Fix issue in TryIt where request parameters couldn't be deleted
