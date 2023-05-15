@@ -1,5 +1,7 @@
 import { Parsed, Path } from "@xliic/preserving-json-yaml-parser";
 import * as vscode from "vscode";
+import { Audit, Issue } from "@xliic/common/audit";
+
 import { JsonNodeValue } from "./json-utils";
 
 export const configId = "openapi";
@@ -47,42 +49,8 @@ export interface BundlingFailure {
 }
 export type BundleResult = Bundle | BundlingFailure;
 
-interface Grade {
-  value: number;
-  max: number;
-}
-
-export interface Grades {
-  datavalidation: Grade;
-  security: Grade;
-  oasconformance: Grade;
-  all: number;
-  errors: boolean;
-  invalid: boolean;
-}
-
-export interface ReportedIssue {
-  id: string;
-  description: string;
-  pointer: string;
-  score: number;
-  displayScore: string;
-  criticality: number;
-}
-
-export interface Issue extends ReportedIssue {
-  lineNo: number;
-  range: vscode.Range;
-  documentUri: string;
-}
-
 export interface IssuesByDocument {
   [uri: string]: Issue[];
-}
-
-export interface Summary extends Grades {
-  documentUri: string;
-  subdocumentUris: string[];
 }
 
 export interface DocumentDecorations {
@@ -95,17 +63,6 @@ export interface DocumentAudits {
 
 export interface PendingAudits {
   [uri: string]: boolean;
-}
-
-export interface Audit {
-  filename: string;
-  files: {
-    [uri: string]: {
-      relative: string;
-    };
-  };
-  summary: Summary;
-  issues: IssuesByDocument;
 }
 
 export interface AuditContext {

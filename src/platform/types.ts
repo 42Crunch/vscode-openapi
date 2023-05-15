@@ -105,3 +105,8 @@ export interface NamingConvention {
   description: string;
   example: string;
 }
+
+export type ApiAuditReport = {
+  tid: string;
+  data: any;
+};

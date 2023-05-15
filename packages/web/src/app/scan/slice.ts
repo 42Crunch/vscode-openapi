@@ -7,16 +7,22 @@ import {
   OasWithOperationAndConfig,
   SingleOperationScanReport,
 } from "@xliic/common/scan";
-import { HttpMethod, HttpRequest, HttpResponse, HttpError } from "@xliic/common/http";
+import { HttpMethod, HttpRequest, HttpResponse, HttpError, HttpMethods } from "@xliic/common/http";
 import { GeneralError } from "@xliic/common/error";
 import { Preferences } from "@xliic/common/prefs";
-import { ScanReportJSONSchema } from "@xliic/common/scan-report";
+import { ScanReportJSONSchema, TestLogReport } from "@xliic/common/scan-report";
+import { SeverityLevel, SeverityLevels } from "@xliic/common/audit";
 import { generateSecurityValues, getSecurity } from "../../util";
 import { generateParameterValuesForScan, readRawScanConfig } from "./util-scan";
 import {
   getSecurity as getSwaggerSecurity,
   generateSecurityValues as generateSwaggerSecurityValues,
 } from "../../util-swagger";
+
+export type Filter = {
+  severity?: SeverityLevel;
+  title?: string;
+};
 
 export interface OasState {
   oas: BundledSwaggerOrOasSpec;
@@ -38,6 +44,11 @@ export interface OasState {
   waitings: Record<string, boolean>;
   errors: Record<string, HttpError>;
   waiting: boolean;
+  filter: Filter;
+  tab: "summary" | "tests" | "logs";
+  grouped: Record<string, TestLogReport[]>;
+  titles: string[];
+  issues: TestLogReport[];
 }
 
 const initialState: OasState = {
@@ -58,6 +69,11 @@ const initialState: OasState = {
   waitings: {},
   errors: {},
   waiting: false,
+  filter: {},
+  tab: "summary",
+  grouped: {},
+  issues: [],
+  titles: [],
 };
 
 export const slice = createSlice({
@@ -132,8 +148,26 @@ export const slice = createSlice({
 
     showScanReport: (state, action: PayloadAction<SingleOperationScanReport>) => {
       // path and method stays the same, update the report alone
+      const issues = flattenIssues(action.payload.report, state.path!, state.method!);
+      const filtered = filterIssues(issues, state.filter);
+      const { titles } = groupIssues(issues);
+      const { grouped } = groupIssues(filtered);
       state.scanReport = action.payload.report;
       state.waiting = false;
+      state.issues = issues;
+      state.titles = titles;
+      state.grouped = grouped;
+    },
+
+    changeFilter: (state, action: PayloadAction<Filter>) => {
+      state.filter = action.payload;
+      const filtered = filterIssues(state.issues, state.filter);
+      const { grouped } = groupIssues(filtered);
+      state.grouped = grouped;
+    },
+
+    changeTab: (state, action: PayloadAction<OasState["tab"]>) => {
+      state.tab = action.payload;
     },
 
     showGeneralError: (state, action: PayloadAction<GeneralError>) => {
@@ -179,6 +213,8 @@ export const {
   showHttpResponse,
   showJsonPointer,
   showAuditReport,
+  changeTab,
+  changeFilter,
 } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<
@@ -188,5 +224,81 @@ export const useFeatureDispatch: () => Dispatch<
 export const useFeatureSelector: TypedUseSelectorHook<
   StateFromReducersMapObject<Record<typeof slice.name, typeof slice.reducer>>
 > = useSelector;
+
+function filterIssues(issues: TestLogReport[], filter: Filter) {
+  const byTitle = (issue: TestLogReport) =>
+    filter?.title === undefined || issue.test?.key === filter.title;
+
+  const criticality =
+    filter.severity !== undefined ? SeverityLevels.indexOf(filter.severity) + 1 : 0;
+  const byCriticality = (issue: TestLogReport) =>
+    filter.severity === undefined ||
+    issue.outcome?.criticality === undefined ||
+    issue.outcome?.criticality >= criticality;
+
+  return issues.filter((issue) => {
+    return byTitle(issue) && byCriticality(issue);
+  });
+}
+
+function flattenIssues(scanReport: ScanReportJSONSchema, path: string, method: string) {
+  const issues: TestLogReport[] = [];
+  for (const method of HttpMethods) {
+    const conformanceIssues = scanReport?.paths?.[path!]?.[method!]?.conformanceRequestIssues;
+    if (conformanceIssues !== undefined) {
+      issues.push(...conformanceIssues);
+    }
+  }
+  return issues;
+}
+
+function groupIssues(issues: TestLogReport[]): {
+  grouped: OasState["grouped"];
+  titles: OasState["titles"];
+} {
+  const grouped: Record<string, TestLogReport[]> = {};
+  const titles: Record<string, string> = {};
+
+  for (const issue of issues) {
+    const key = issue.test?.key;
+    if (key !== undefined) {
+      if (grouped[key] === undefined) {
+        grouped[key] = [];
+        titles[key] = issue.test?.description as string;
+      }
+      grouped[key].push(issue);
+    }
+  }
+
+  const keys = Object.keys(grouped);
+
+  for (const key of keys) {
+    // improve sorting
+    grouped[key].sort((a, b) => {
+      if (a.outcome?.status !== b.outcome?.status) {
+        if (a.outcome?.status === "incorrect") {
+          return -1;
+        }
+        if (b.outcome?.status === "incorrect") {
+          return 1;
+        }
+        if (a.outcome?.status === "unexpected") {
+          return -1;
+        }
+        if (b.outcome?.status === "unexpected") {
+          return 1;
+        }
+      }
+
+      if (a.outcome?.criticality !== b.outcome?.criticality) {
+        return a.outcome?.criticality! - b.outcome?.criticality!;
+      }
+
+      return 0;
+    });
+  }
+
+  return { grouped, titles: Object.keys(titles) };
+}
 
 export default slice.reducer;

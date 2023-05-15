@@ -2,6 +2,9 @@ import styled from "styled-components";
 import { DateTime } from "luxon";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { GlobalSummary, OperationSummary } from "@xliic/common/scan-report";
+import { ArrowUpRightFromSquare } from "../../icons";
+import { useAppDispatch } from "./store";
+import { changeFilter, changeTab } from "./slice";
 
 export function ScanSummary({
   global,
@@ -10,6 +13,8 @@ export function ScanSummary({
   global: GlobalSummary;
   operation: OperationSummary;
 }) {
+  const dispatch = useAppDispatch();
+
   const critical = operation.issues.critical ?? 0;
   const high = operation.issues.high ?? 0;
 
@@ -28,16 +33,43 @@ export function ScanSummary({
         </div>
       </Stats>
       <Tiles>
-        <div>
-          <div>{operation.conformanceTestRequests.executed}</div>
+        <div
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dispatch(changeTab("tests"));
+            dispatch(changeFilter({}));
+          }}
+        >
+          <div>
+            {operation.conformanceTestRequests.executed} <ArrowUpRightFromSquare />
+          </div>
           <div>Executed</div>
         </div>
-        <div>
-          <div>{operation.issues.total ?? 0}</div>
+        <div
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dispatch(changeTab("tests"));
+            dispatch(changeFilter({}));
+          }}
+        >
+          <div>
+            {operation.issues.total ?? 0} <ArrowUpRightFromSquare />
+          </div>
           <div>Issues Found</div>
         </div>
-        <div>
-          <div>{critical + high}</div>
+        <div
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dispatch(changeTab("tests"));
+            dispatch(changeFilter({ severity: "high" }));
+          }}
+        >
+          <div>
+            {critical + high} <ArrowUpRightFromSquare />
+          </div>
           <div>Critical/High</div>
         </div>
       </Tiles>
@@ -55,6 +87,7 @@ const Tiles = styled.div`
   margin-top: 8px;
   margin-bottom: 8px;
   & > div {
+    cursor: pointer;
     flex: 1;
     display: flex;
     flex-direction: column;

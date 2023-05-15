@@ -10,13 +10,43 @@ import { createListener } from "./listener";
 import ThemeStyles from "../../features/theme/ThemeStyles";
 import { ThemeState, changeTheme } from "../../features/theme/slice";
 import { makeWebappMessageHandler } from "../webapp";
-import { showFullReport, showPartialReport, showNoReport, loadKdb } from "./slice";
+import { showFullReport, showPartialReport, showNoReport, loadKdb, startAudit } from "./slice";
+import { RouterContext, Routes } from "../../features/router/RouterContext";
+import Router from "../../features/router/Router";
 
-import Main from "./components/Main";
+import AuditReport from "./AuditReport";
+import NoReport from "./NoReport";
+import Loading from "./Loading";
 
-import "bootstrap/dist/css/bootstrap.min.css";
+const routes: Routes = [
+  {
+    id: "start-audit",
+    title: "Audit is starting",
+    element: <Loading />,
+    when: startAudit,
+  },
+  {
+    id: "no-report",
+    title: "No Audit Report",
+    element: <NoReport />,
+    when: showNoReport,
+  },
+  {
+    id: "audit-report",
+    title: "Security Audit",
+    element: <AuditReport />,
+    when: showFullReport,
+  },
+  {
+    id: "audit-report",
+    title: "Security Audit",
+    element: <AuditReport />,
+    when: showPartialReport,
+  },
+];
 
 const messageHandlers: Webapp["webappHandlers"] = {
+  startAudit,
   showFullReport,
   showPartialReport,
   showNoReport,
@@ -28,18 +58,20 @@ function App() {
   return (
     <>
       <ThemeStyles />
-      <Main />
+      <Router />
     </>
   );
 }
 
 function renderWebView(host: Webapp["host"], theme: ThemeState) {
-  const store = initStore(createListener(host), theme);
+  const store = initStore(createListener(host, routes), theme);
 
   createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
       <Provider store={store}>
-        <App />
+        <RouterContext.Provider value={routes}>
+          <App />
+        </RouterContext.Provider>
       </Provider>
     </React.StrictMode>
   );

@@ -1,18 +1,11 @@
 import path, { basename } from "path";
 import * as vscode from "vscode";
 import { Parsed, find } from "@xliic/preserving-json-yaml-parser";
+import { Audit, Issue, Grades, ReportedIssue } from "@xliic/common/audit";
 
 import { Cache } from "../cache";
 import { findMapping } from "../bundler";
-import {
-  Audit,
-  AuditContext,
-  Grades,
-  Issue,
-  IssuesByDocument,
-  MappingNode,
-  ReportedIssue,
-} from "../types";
+import { AuditContext, IssuesByDocument, MappingNode } from "../types";
 import { getLocationByPointer } from "./util";
 import { fromInternalUri } from "../external-refs";
 
@@ -73,6 +66,8 @@ export async function parseAuditReport(
   }
 
   const result = {
+    valid: report.valid,
+    minimalReport: report.minimalReport,
     summary: {
       ...grades,
       documentUri,

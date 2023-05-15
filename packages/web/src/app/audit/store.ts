@@ -8,12 +8,14 @@ import logger from "redux-logger";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 import theme, { ThemeState } from "../../features/theme/slice";
+import router from "../../features/router/slice";
 
 import audit from "./slice";
 
 const reducer = {
   audit,
   theme,
+  router,
 };
 
 export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme: ThemeState) =>

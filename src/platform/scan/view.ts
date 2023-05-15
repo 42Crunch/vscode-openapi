@@ -61,7 +61,7 @@ export class ScanWebView extends WebView<Webapp> {
     private auditView: AuditWebView,
     private auditContext: AuditContext
   ) {
-    super(extensionPath, "scan", "Scan", vscode.ViewColumn.Two, false);
+    super(extensionPath, "scan", "Scan", vscode.ViewColumn.Two);
     envStore.onEnvironmentDidChange((env) => {
       if (this.isActive()) {
         this.sendRequest({
@@ -237,8 +237,8 @@ export class ScanWebView extends WebView<Webapp> {
     });
   }
 
-  setNewApi() {
-    this.isNewApi = true;
+  setNewApi(isNewApi: boolean) {
+    this.isNewApi = isNewApi;
   }
 }
 
@@ -266,7 +266,7 @@ async function runScan(
   logger.info(`Created temp API "${api.desc.id}", waiting for Security Audit`);
 
   const audit = await store.getAuditReport(api.desc.id);
-  if (audit?.openapiState !== "valid") {
+  if (audit?.data.openapiState !== "valid") {
     await store.deleteApi(api.desc.id);
     return {
       command: "showGeneralError",

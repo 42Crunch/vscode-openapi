@@ -1,6 +1,8 @@
 import * as vscode from "vscode";
 
-import { Audit, AuditContext } from "../types";
+import { Audit } from "@xliic/common/audit";
+
+import { AuditContext } from "../types";
 import { updateAuditContext } from "./audit";
 import { updateDecorations } from "./decoration";
 import { updateDiagnostics } from "./diagnostic";

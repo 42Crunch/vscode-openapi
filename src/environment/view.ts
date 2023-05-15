@@ -20,7 +20,7 @@ export class EnvironmentWebView extends WebView<Webapp> {
   };
 
   constructor(extensionPath: string, private envStore: EnvStore) {
-    super(extensionPath, "environment", "Environment", vscode.ViewColumn.Two, false);
+    super(extensionPath, "environment", "Environment", vscode.ViewColumn.Two);
     envStore.onEnvironmentDidChange((env) => {
       if (this.isActive()) {
         this.sendRequest({

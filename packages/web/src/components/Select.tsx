@@ -5,7 +5,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { AngleDown } from "../icons";
 
 export type SelectOption = {
-  value: string;
+  value: string | number;
   label: string;
 };
 
@@ -29,23 +29,53 @@ export default function Select({
     rules: { required: true },
   });
 
+  const selected = getOptionByValue(options, field.value);
+
+  const onSelectedItemChange = (item: SelectOption | null | undefined) => {
+    field.onChange(item?.value);
+  };
+
+  return (
+    <PlainSelect
+      options={options}
+      placeholder={placeholder}
+      label={label}
+      selected={selected?.value}
+      onSelectedItemChange={onSelectedItemChange}
+    />
+  );
+}
+
+export function PlainSelect({
+  options,
+  placeholder,
+  label,
+  selected,
+  onSelectedItemChange,
+}: {
+  options: SelectOption[];
+  placeholder?: string;
+  label: string;
+  selected?: SelectOption["value"];
+  onSelectedItemChange: (item: SelectOption | null | undefined) => void;
+}) {
+  const selectedItem = options.filter((item) => item.value === selected)?.[0];
+
   const { isOpen, getToggleButtonProps, getMenuProps, getItemProps } = useSelect({
     items: options,
     itemToString,
-    selectedItem: field.value ?? null,
+    selectedItem: selectedItem || null,
     onSelectedItemChange: ({ selectedItem: newSelectedItem }) => {
-      field.onChange(newSelectedItem?.value);
+      onSelectedItemChange(newSelectedItem);
     },
   });
-
-  const selected = getOptionByValue(options, field.value);
 
   return (
     <Container>
       <SelectContainer>
         <div>{label}</div>
         <Input {...getToggleButtonProps()}>
-          <span>{selected ? selected.label : placeholder ?? ""}</span>
+          <span>{selectedItem ? selectedItem.label : placeholder ?? ""}</span>
           <AngleDown />
         </Input>
       </SelectContainer>
@@ -97,8 +127,12 @@ const Input = styled.div`
   color: var(${ThemeColorVariables.foreground});
   align-items: center;
   cursor: pointer;
+  overflow: hidden;
   > span {
     flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   > svg {
     fill: var(${ThemeColorVariables.foreground});
@@ -106,6 +140,9 @@ const Input = styled.div`
 `;
 
 const Dropdown = styled.ul`
+  max-height: 350px;
+  overflow-y: auto;
+  z-index: 1;
   position: absolute;
   top: 50px;
   left: 0;

@@ -24,7 +24,7 @@ export class ConfigWebView extends WebView<Webapp> {
     private platform: PlatformStore,
     private logger: Logger
   ) {
-    super(extensionPath, "config", "Settings", vscode.ViewColumn.One, false);
+    super(extensionPath, "config", "Settings", vscode.ViewColumn.One);
 
     vscode.window.onDidChangeActiveColorTheme((e) => {
       if (this.isActive()) {

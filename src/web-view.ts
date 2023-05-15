@@ -23,8 +23,7 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
     private extensionPath: string,
     private viewId: string,
     private viewTitle: string,
-    private column: vscode.ViewColumn,
-    private needsStyle: boolean
+    private column: vscode.ViewColumn
   ) {}
 
   isActive(): boolean {
@@ -157,17 +156,13 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
         path.join(this.extensionPath, "webview", "generated", "web", `${this.viewId}.js`)
       )
     );
-    const style = panel.webview.asWebviewUri(
-      vscode.Uri.file(path.join(this.extensionPath, "webview", "generated", "web", "style.css"))
-    );
-    const styleHref = this.needsStyle ? `<link href="${style}" rel="stylesheet">` : "";
+
     return `<!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="UTF-8">
       <meta http-equiv="Content-Security-Policy"  content="default-src 'none';  img-src ${cspSource} https: data:; script-src ${cspSource} 'unsafe-inline'; style-src ${cspSource}  'unsafe-inline'; connect-src http: https:">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      ${styleHref}
       <style type="text/css">
         ${customCssProperties()}
       </style>
@@ -246,4 +241,5 @@ const vscodeColorMap: VsCodeColorMap = {
   notificationsForeground: "--vscode-notifications-foreground",
   notificationsBackground: "--vscode-notifications-background",
   notificationsBorder: "--vscode-notifications-border",
+  fontSize: "--vscode-font-size",
 };

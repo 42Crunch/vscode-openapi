@@ -42,7 +42,7 @@ export class TryItWebView extends WebView<Webapp> {
     private configuration: Configuration,
     private secrets: vscode.SecretStorage
   ) {
-    super(extensionPath, "tryit", "Try It", vscode.ViewColumn.Two, false);
+    super(extensionPath, "tryit", "Try It", vscode.ViewColumn.Two);
 
     envStore.onEnvironmentDidChange((env) => {
       if (this.isActive()) {

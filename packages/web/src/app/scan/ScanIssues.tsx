@@ -6,60 +6,21 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { TestLogReport } from "@xliic/common/scan-report";
 
 import ScanIssue from "./ScanIssue";
+import FilterPanel from "./FilterPanel";
 
 export default function ScanIssues({
   issues,
   responses,
   errors,
   waitings,
+  grouped,
 }: {
   issues: TestLogReport[];
   responses: Record<string, HttpResponse>;
   errors: Record<string, HttpError>;
   waitings: Record<string, boolean>;
+  grouped: Record<string, TestLogReport[]>;
 }) {
-  const grouped: Record<string, TestLogReport[]> = {};
-  const titles: Record<string, string> = {};
-
-  for (const issue of issues) {
-    const key = issue.test?.key;
-    if (key !== undefined) {
-      if (grouped[key] === undefined) {
-        grouped[key] = [];
-        titles[key] = issue.test?.description as string;
-      }
-      grouped[key].push(issue);
-    }
-  }
-
-  const keys = Object.keys(grouped);
-
-  for (const key of keys) {
-    // fixme, improve sorting
-    grouped[key].sort((a, b) => {
-      if (a.outcome?.status !== b.outcome?.status) {
-        if (a.outcome?.status === "incorrect") {
-          return -1;
-        }
-        if (b.outcome?.status === "incorrect") {
-          return 1;
-        }
-        if (a.outcome?.status === "unexpected") {
-          return -1;
-        }
-        if (b.outcome?.status === "unexpected") {
-          return 1;
-        }
-      }
-
-      if (a.outcome?.criticality !== b.outcome?.criticality) {
-        return a.outcome?.criticality! - b.outcome?.criticality!;
-      }
-
-      return 0;
-    });
-  }
-
   if (issues.length === 0) {
     return (
       <Container>
@@ -70,7 +31,8 @@ export default function ScanIssues({
 
   return (
     <Container>
-      {keys.map((key) => (
+      <FilterPanel />
+      {Object.keys(grouped).map((key) => (
         <div key={key}>
           <GroupTitle>{kdbTitles[key] ?? "Unknown test type"}</GroupTitle>
           {grouped[key].map((issue, index) => {

@@ -6,9 +6,8 @@ import { refreshAuditReport } from "../audit";
 import { AuditContext } from "../../types";
 import { makePlatformUri } from "../util";
 import { AuditWebView } from "../../audit/view";
-import { parseAuditReport, updateAuditContext } from "../../audit/audit";
-import { setDecorations, updateDecorations } from "../../audit/decoration";
-import { updateDiagnostics } from "../../audit/diagnostic";
+import { parseAuditReport } from "../../audit/audit";
+import { setDecorations } from "../../audit/decoration";
 import { setAudit } from "../../audit/service";
 
 export default (

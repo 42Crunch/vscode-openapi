@@ -30,9 +30,12 @@ import {
   searchCollections,
   createScanConfigNew,
   testConnection,
+  readAuditCompliance,
+  readAuditReportSqgTodo,
 } from "../api";
 import {
   Api,
+  ApiAuditReport,
   ApiFilter,
   CollectionData,
   CollectionFilter,
@@ -289,7 +292,7 @@ export class PlatformStore {
     return collection;
   }
 
-  async getAuditReport(apiId: string): Promise<any> {
+  async getAuditReport(apiId: string): Promise<ApiAuditReport> {
     const ASSESSMENT_MAX_WAIT = 60000;
     const ASSESSMENT_RETRY = 1000;
 
@@ -432,6 +435,14 @@ export class PlatformStore {
 
   async createTechnicalCollection(technicalName: string, name: string): Promise<any> {
     return createTechnicalCollection(technicalName, name, this.getConnection(), this.logger);
+  }
+
+  async readAuditCompliance(taskId: string) {
+    return readAuditCompliance(taskId, this.getConnection(), this.logger);
+  }
+
+  async readAuditReportSqgTodo(taskId: string) {
+    return readAuditReportSqgTodo(taskId, this.getConnection(), this.logger);
   }
 
   async findOrCreateTempCollection(): Promise<string> {

@@ -4,13 +4,15 @@
 */
 import * as vscode from "vscode";
 
+import { HttpMethod } from "@xliic/common/http";
+import { Audit } from "@xliic/common/audit";
+
 import { audit } from "./client";
-import { setDecorations, updateDecorations } from "./decoration";
-import { updateDiagnostics } from "./diagnostic";
+import { setDecorations } from "./decoration";
 
 import { AuditWebView } from "./view";
 
-import { AuditContext, Audit, PendingAudits, BundleResult, Bundle } from "../types";
+import { AuditContext, PendingAudits, MappingNode } from "../types";
 
 import { Cache } from "../cache";
 import { stringify } from "@xliic/preserving-json-yaml-parser";
@@ -19,6 +21,7 @@ import { configureCredentials, getPlatformCredentials, hasCredentials } from "..
 import { PlatformStore } from "../platform/stores/platform-store";
 import { Configuration, configuration } from "../configuration";
 import { setAudit } from "./service";
+import { extractSingleOperation } from "../util/extract";
 
 export function registerSecurityAudit(
   context: vscode.ExtensionContext,
@@ -52,7 +55,10 @@ export function registerSecurityAudit(
       pendingAudits[uri] = true;
 
       try {
+        await reportWebView.show();
+        await reportWebView.sendColorTheme(vscode.window.activeColorTheme);
         reportWebView.prefetchKdb();
+        await reportWebView.sendStartAudit();
         const audit = await securityAudit(cache, configuration, context.secrets, store, textEditor);
         if (audit) {
           setAudit(auditContext, uri, audit);
@@ -138,11 +144,19 @@ async function securityAudit(
       }
 
       const credentials = await hasCredentials(configuration, secrets);
+      const oas = stringify(bundle.value);
       // prefer anond credentials for now
       if (credentials === "anond") {
-        return runAnondAudit(textEditor.document, bundle, cache, configuration, progress);
+        return runAnondAudit(
+          textEditor.document,
+          oas,
+          bundle.mapping,
+          cache,
+          configuration,
+          progress
+        );
       } else if (credentials === "platform") {
-        return runPlatformAudit(textEditor.document, bundle, cache, store);
+        return runPlatformAudit(textEditor.document, oas, bundle.mapping, cache, store);
       }
     }
   );
@@ -150,15 +164,16 @@ async function securityAudit(
 
 async function runAnondAudit(
   document: vscode.TextDocument,
-  bundle: Bundle,
+  oas: string,
+  mapping: MappingNode,
   cache: Cache,
   configuration: Configuration,
   progress: vscode.Progress<any>
 ): Promise<Audit | undefined> {
   const apiToken = <string>configuration.get("securityAuditToken");
   try {
-    const report = await audit(stringify(bundle.value), apiToken.trim(), progress);
-    return parseAuditReport(cache, document, report, bundle.mapping);
+    const report = await audit(oas, apiToken.trim(), progress);
+    return parseAuditReport(cache, document, report, mapping);
   } catch (e: any) {
     if (e?.response?.statusCode === 429) {
       vscode.window.showErrorMessage(
@@ -182,15 +197,22 @@ async function runAnondAudit(
 
 async function runPlatformAudit(
   document: vscode.TextDocument,
-  bundle: Bundle,
+  oas: string,
+  mapping: MappingNode,
   cache: Cache,
   store: PlatformStore
 ): Promise<Audit | undefined> {
   try {
-    const api = await store.createTempApi(stringify(bundle.value));
+    const api = await store.createTempApi(oas);
     const report = await store.getAuditReport(api.desc.id);
+    const compliance = await store.readAuditCompliance(report.tid);
+    const todoReport = await store.readAuditReportSqgTodo(report.tid);
     await store.deleteApi(api.desc.id);
-    return parseAuditReport(cache, document, report, bundle.mapping);
+    const audit = await parseAuditReport(cache, document, report.data, mapping);
+    const { issues: todo } = await parseAuditReport(cache, document, todoReport.data, mapping);
+    audit.compliance = compliance;
+    audit.todo = todo;
+    return audit;
   } catch (ex: any) {
     if (
       ex?.response?.statusCode === 409 &&
@@ -208,4 +230,77 @@ async function runPlatformAudit(
       );
     }
   }
+}
+
+async function singleOperationSecurityAudit(
+  path: string,
+  method: HttpMethod,
+  cache: Cache,
+  configuration: Configuration,
+  secrets: vscode.SecretStorage,
+  store: PlatformStore,
+  editor: vscode.TextEditor
+): Promise<Audit | undefined> {
+  return vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: "Running API Contract Security Audit...",
+      cancellable: false,
+    },
+    async (progress, cancellationToken): Promise<Audit | undefined> => {
+      const bundle = await cache.getDocumentBundle(editor.document);
+
+      if (!bundle || "errors" in bundle) {
+        vscode.commands.executeCommand("workbench.action.problems.focus");
+        throw new Error("Failed to bundle for audit, check OpenAPI file for errors.");
+      }
+
+      const credentials = await hasCredentials(configuration, secrets);
+      const oas = stringify(extractSingleOperation(method, path as string, bundle.value));
+      // prefer anond credentials for now
+      if (credentials === "anond") {
+        return runAnondAudit(editor.document, oas, bundle.mapping, cache, configuration, progress);
+      } else if (credentials === "platform") {
+        return runPlatformAudit(editor.document, oas, bundle.mapping, cache, store);
+      }
+    }
+  );
+}
+
+export async function registerSingleOperationAudit(
+  context: vscode.ExtensionContext,
+  cache: Cache,
+  auditContext: AuditContext,
+  pendingAudits: PendingAudits,
+  view: AuditWebView,
+  store: PlatformStore
+): Promise<void> {
+  vscode.commands.registerTextEditorCommand(
+    "openapi.editorSingleOperationAudit",
+    async (editor: vscode.TextEditor, edit, path: string, method: HttpMethod) => {
+      const uri = editor.document.uri.toString();
+      await view.show();
+      await view.sendColorTheme(vscode.window.activeColorTheme);
+      view.prefetchKdb();
+      await view.sendStartAudit();
+      try {
+        const audit = await singleOperationSecurityAudit(
+          path,
+          method,
+          cache,
+          configuration,
+          context.secrets,
+          store,
+          editor
+        );
+        if (audit) {
+          setAudit(auditContext, uri, audit);
+          setDecorations(editor, auditContext);
+          await view.showReport(audit);
+        }
+      } catch (ex: any) {
+        console.log("error", ex);
+      }
+    }
+  );
 }

@@ -42,6 +42,7 @@ export const ThemeColorNames = [
   "notificationsForeground",
   "notificationsBackground",
   "notificationsBorder",
+  "fontSize",
 ] as const;
 
 export type ThemeColorName = (typeof ThemeColorNames)[number];
@@ -92,6 +93,7 @@ export const ThemeColorVariables: ThemeColorValues = {
   notificationsForeground: "--xliic-notificationsForeground",
   notificationsBackground: "--xliic-notificationsBackground",
   notificationsBorder: "--xliic-notificationsBorder",
+  fontSize: "--xliic-fontSize",
 } as const;
 
 export type VsCodeColorMap = ThemeColorValues;

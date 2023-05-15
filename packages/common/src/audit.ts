@@ -1,3 +1,5 @@
+import { YesNo } from "./common";
+
 export interface SummaryData {
   datavalidation: Grade;
   security: Grade;
@@ -30,14 +32,16 @@ export interface ReportedIssue {
   pointer: string;
   score: number;
   displayScore: string;
-  criticality: 1 | 2 | 3 | 4 | 5;
+  criticality: CriticalityLevel;
 }
 
 export interface Issue extends ReportedIssue {
-  key: string;
   lineNo: number;
+  range: {
+    start: { line: number; character: number };
+    end: { line: number; character: number };
+  };
   documentUri: string;
-  filename: string;
 }
 
 export interface IssuesByDocument {
@@ -55,8 +59,106 @@ export interface Audit {
   files: FilesMap;
   summary: Summary;
   issues: IssuesByDocument;
+  minimalReport: boolean;
+  valid: boolean;
+  compliance?: AuditCompliance;
+  todo?: IssuesByDocument;
 }
+
+export type Sqg = {
+  id: string;
+  name: string;
+  directives: {
+    rejectInvalidContract: YesNo;
+    minimumAssessmentScores: { global: number; security: number; dataValidation: number };
+    subcategoryRules: {
+      dataValidation: {
+        parameters: SeverityLevel;
+        responseHeaders: SeverityLevel;
+        responseDefinition: SeverityLevel;
+        schema: SeverityLevel;
+        paths: SeverityLevel;
+      };
+      security: {
+        authentication: SeverityLevel;
+        authorization: SeverityLevel;
+        transport: SeverityLevel;
+      };
+    };
+    issueRules: string[];
+  };
+};
+
+export type ProcessingDetails = {
+  blockingSqgId: string;
+  blockingRules: string[];
+};
+
+export type AuditCompliance = {
+  acceptance: YesNo;
+  sqgsDetail: Sqg[];
+  processingDetails: ProcessingDetails[];
+};
 
 export interface Kdb {
   [key: string]: any;
 }
+
+export type CriticalityLevel = 1 | 2 | 3 | 4 | 5;
+
+export const SeverityLevels = ["info", "low", "medium", "high", "critical"] as const;
+export type SeverityLevel = (typeof SeverityLevels)[number];
+
+export const Criticality = {
+  Info: 1,
+  Low: 2,
+  Medium: 3,
+  High: 4,
+  Critical: 5,
+} as const;
+
+export const CriticalityLevelId = {
+  [Criticality.Info]: "info",
+  [Criticality.Low]: "low",
+  [Criticality.Medium]: "medium",
+  [Criticality.High]: "high",
+  [Criticality.Critical]: "critical",
+} as const;
+
+export const CriticalityLevelName = {
+  [Criticality.Info]: "Info",
+  [Criticality.Low]: "Low",
+  [Criticality.Medium]: "Medium",
+  [Criticality.High]: "High",
+  [Criticality.Critical]: "Critical",
+} as const;
+
+export type Domain = "security" | "datavalidation" | "oasconformance";
+export type OasConformanceGroup = "validation" | "semantics" | "bestpractices";
+export type DataValidationGroup =
+  | "parameters"
+  | "paths"
+  | "schema"
+  | "responseheader"
+  | "responsedefinition";
+export type SecurityGroup = "authentication" | "authorization" | "transport";
+
+export const groupNames = {
+  oasconformance: {
+    validation: "Structure",
+    semantics: "Semantics",
+    bestpractices: "Best practices",
+  },
+  datavalidation: {
+    parameters: "Parameters",
+    paths: "Paths",
+    schema: "Schema",
+    responseheader: "Response headers",
+    responsedefinition: "Response definition",
+  },
+  security: {
+    authentication: "Authentication",
+    authorization: "Authorization",
+    transport: "Transport",
+  },
+} as const;

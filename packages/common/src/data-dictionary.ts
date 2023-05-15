@@ -1,4 +1,4 @@
-export type YesNo = "yes" | "no";
+import { YesNo } from "./common";
 
 export interface DataDictionary {
   id: string;

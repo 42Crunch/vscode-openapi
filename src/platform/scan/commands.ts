@@ -70,10 +70,10 @@ async function editorRunSingleOperationScan(
 
     const report = await store.getAuditReport(api.desc.id);
 
-    if (report?.openapiState !== "valid") {
+    if (report?.data.openapiState !== "valid") {
       await store.deleteApi(api.desc.id);
       await view.show();
-      await view.sendAuditError(editor.document, report, bundle.mapping);
+      await view.sendAuditError(editor.document, report.data, bundle.mapping);
       return;
     }
 
@@ -94,9 +94,7 @@ async function editorRunSingleOperationScan(
     await store.deleteApi(api.desc.id);
 
     if (config !== undefined) {
-      if (isNewApi) {
-        view.setNewApi();
-      }
+      view.setNewApi(isNewApi);
       await view.show();
       await view.sendScanOperation(editor.document, {
         oas: oas as BundledSwaggerOrOasSpec,

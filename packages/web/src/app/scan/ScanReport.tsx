@@ -11,14 +11,16 @@ import LogMessages from "../../features/logging/LogMessages";
 import { HappyPath } from "./HappyPath";
 import { ScanSummary } from "./ScanSummary";
 import ScanIssues from "./ScanIssues";
-import { useState } from "react";
+import { OasState, changeTab } from "./slice";
 
 export default function ScanReport() {
-  const { scanReport, path, method, responses, errors, waitings } = useAppSelector(
-    (state) => state.scan
-  );
+  const { scanReport, path, method, responses, errors, waitings, tab, issues, grouped } =
+    useAppSelector((state) => state.scan);
 
-  const [activeTab, setActiveTab] = useState("summary");
+  const dispatch = useAppDispatch();
+  const setTab = (tab: string) => {
+    dispatch(changeTab(tab as OasState["tab"]));
+  };
 
   if (scanReport === undefined) {
     return (
@@ -31,17 +33,9 @@ export default function ScanReport() {
   const happyPath = scanReport.paths?.[path!]?.[method!]?.["happyPaths"]?.[0];
   const operation = scanReport.paths?.[path!]?.["summary"]!;
 
-  const issues: TestLogReport[] = [];
-  for (const method of HttpMethods) {
-    const conformanceIssues = scanReport?.paths?.[path!]?.[method!]?.conformanceRequestIssues;
-    if (conformanceIssues !== undefined) {
-      issues.push(...conformanceIssues);
-    }
-  }
-
   return (
     <Container>
-      <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
+      <Tabs.Root value={tab} onValueChange={setTab}>
         <TabList>
           <TabButton value="summary">Summary</TabButton>
           <TabButton value="tests">Tests</TabButton>
@@ -59,7 +53,13 @@ export default function ScanReport() {
           )}
         </Tabs.Content>
         <Tabs.Content value="tests">
-          <ScanIssues issues={issues} responses={responses} errors={errors} waitings={waitings} />
+          <ScanIssues
+            issues={issues}
+            grouped={grouped}
+            responses={responses}
+            errors={errors}
+            waitings={waitings}
+          />
         </Tabs.Content>
         <Tabs.Content value="logs">
           <LogMessages />

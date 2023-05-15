@@ -14,7 +14,7 @@ export class DataDictionaryWebView extends WebView<Webapp> {
   };
 
   constructor(extensionPath: string) {
-    super(extensionPath, "data-dictionary", "Data Dictionary", vscode.ViewColumn.One, false);
+    super(extensionPath, "data-dictionary", "Data Dictionary", vscode.ViewColumn.One);
 
     vscode.window.onDidChangeActiveColorTheme((e) => {
       if (this.isActive()) {

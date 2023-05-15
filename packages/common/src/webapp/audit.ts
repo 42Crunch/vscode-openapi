@@ -2,6 +2,11 @@ import { Webapp as App } from "../message";
 import { ChangeThemeMessage } from "../theme";
 import { Audit, Kdb } from "../audit";
 
+export type StartAuditMessage = {
+  command: "startAudit";
+  payload: undefined;
+};
+
 type ShowFullReportMessage = {
   command: "showFullReport";
   payload: Audit;
@@ -39,6 +44,7 @@ type OpenLinkMessage = {
 
 export type Webapp = App<
   // consumes
+  | StartAuditMessage
   | ShowFullReportMessage
   | ShowPartialReportMessage
   | ShowNoReportMessage

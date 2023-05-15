@@ -8,6 +8,7 @@ import {
   registerSecurityAudit,
   registerFocusSecurityAudit,
   registerFocusSecurityAuditById,
+  registerSingleOperationAudit,
 } from "./commands";
 import { AuditWebView } from "./view";
 import { AuditContext, PendingAudits } from "../types";
@@ -15,6 +16,7 @@ import { registerQuickfixes } from "./quickfix";
 import { Cache } from "../cache";
 import { setDecorations } from "./decoration";
 import { PlatformStore } from "../platform/stores/platform-store";
+import { AuditCodelensProvider } from "./lens";
 
 export function activate(
   context: vscode.ExtensionContext,
@@ -47,9 +49,21 @@ export function activate(
     }
   }
 
+  const selectors = {
+    json: { language: "json" },
+    jsonc: { language: "jsonc" },
+    yaml: { language: "yaml" },
+  };
+
+  const auditCodelensProvider = new AuditCodelensProvider(cache);
+  Object.values(selectors).map((selector) =>
+    vscode.languages.registerCodeLensProvider(selector, auditCodelensProvider)
+  );
+
   vscode.window.onDidChangeActiveTextEditor((editor) => update(editor));
 
   registerSecurityAudit(context, cache, auditContext, pendingAudits, reportWebView, store);
+  registerSingleOperationAudit(context, cache, auditContext, pendingAudits, reportWebView, store);
   registerFocusSecurityAudit(context, cache, auditContext, reportWebView);
   registerFocusSecurityAuditById(context, auditContext, reportWebView);
   registerQuickfixes(context, cache, auditContext, reportWebView);

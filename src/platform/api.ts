@@ -3,8 +3,10 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import got, { Method, OptionsOfJSONResponseBody, HTTPError, OptionsOfTextResponseBody } from "got";
-import { NamingConvention, SearchCollectionsResponse } from "./types";
+import got, { Method, OptionsOfJSONResponseBody, HTTPError } from "got";
+import { Sqg, AuditCompliance } from "@xliic/common/audit";
+
+import { ApiAuditReport, NamingConvention, SearchCollectionsResponse } from "./types";
 import {
   Api,
   ListCollectionsResponse,
@@ -131,13 +133,14 @@ export async function readAuditReport(
   apiId: string,
   options: PlatformConnection,
   logger: Logger
-): Promise<any> {
+): Promise<ApiAuditReport> {
   const { body } = <any>(
     await got(`api/v1/apis/${apiId}/assessmentreport`, gotOptions("GET", options, logger))
   );
 
   const text = Buffer.from(body.data, "base64").toString("utf-8");
-  return JSON.parse(text);
+  const data = JSON.parse(text);
+  return { tid: body.tid, data };
 }
 
 export async function deleteApi(apiId: string, options: PlatformConnection, logger: Logger) {
@@ -447,4 +450,31 @@ export async function testConnection(
   } catch (ex) {
     return { success: false, message: `${ex}` };
   }
+}
+
+export async function readAuditCompliance(
+  taskId: string,
+  options: PlatformConnection,
+  logger: Logger
+): Promise<AuditCompliance> {
+  const { body } = <any>(
+    await got(`api/v2/sqgs/audit/reportComplianceStatus/${taskId}?readSqg=true&readReport=false`, {
+      ...gotOptions("GET", options, logger),
+    })
+  );
+  return body;
+}
+
+export async function readAuditReportSqgTodo(
+  taskId: string,
+  options: PlatformConnection,
+  logger: Logger
+): Promise<ApiAuditReport> {
+  const { body } = <any>(
+    await got(`api/v2/sqgs/audit/todo/${taskId}`, gotOptions("GET", options, logger))
+  );
+
+  const text = Buffer.from(body.data, "base64").toString("utf-8");
+  const data = JSON.parse(text);
+  return { tid: body.tid, data };
 }

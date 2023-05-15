@@ -13,15 +13,16 @@ import {
   showFullReport,
   showPartialReport,
   showNoReport,
-  goToFullReport,
 } from "./slice";
 import { startListeners } from "../webapp";
+import { Routes } from "../../features/router/RouterContext";
+import { startNavigationListening } from "../../features/router/listener";
 
 const listenerMiddleware = createListenerMiddleware();
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 const startAppListening = listenerMiddleware.startListening as AppStartListening;
 
-export function createListener(host: Webapp["host"]) {
+export function createListener(host: Webapp["host"], routes: Routes) {
   const listeners: Record<keyof Webapp["hostHandlers"], () => UnsubscribeListener> = {
     goToLine: () =>
       startAppListening({
@@ -58,12 +59,13 @@ export function createListener(host: Webapp["host"]) {
   };
 
   startAppListening({
-    matcher: isAnyOf(showFullReport, showPartialReport, showNoReport, goToFullReport),
+    matcher: isAnyOf(showFullReport, showPartialReport, showNoReport),
     effect: async (action, listenerApi) => {
       window.scrollTo(0, 0);
     },
   });
 
+  startNavigationListening(startAppListening, routes);
   startListeners(listeners);
 
   return listenerMiddleware;

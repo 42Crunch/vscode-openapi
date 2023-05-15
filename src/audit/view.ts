@@ -5,11 +5,12 @@
 
 import * as vscode from "vscode";
 import { Webapp } from "@xliic/common/webapp/audit";
+import { Audit } from "@xliic/common/audit";
+
 import { WebView } from "../web-view";
 import { Cache } from "../cache";
 import { getLocationByPointer } from "./util";
 import { getArticles } from "./client";
-import { Audit } from "../types";
 
 export class AuditWebView extends WebView<Webapp> {
   private kdb?: Promise<any>;
@@ -31,7 +32,13 @@ export class AuditWebView extends WebView<Webapp> {
   };
 
   constructor(extensionPath: string, private cache: Cache) {
-    super(extensionPath, "audit", "Security Audit Report", vscode.ViewColumn.Two, true);
+    super(extensionPath, "audit", "Security Audit Report", vscode.ViewColumn.Two);
+
+    vscode.window.onDidChangeActiveColorTheme((e) => {
+      if (this.isActive()) {
+        this.sendColorTheme(e);
+      }
+    });
   }
 
   public prefetchKdb() {
@@ -46,11 +53,16 @@ export class AuditWebView extends WebView<Webapp> {
     return this.kdb;
   }
 
+  async sendStartAudit() {
+    return this.sendRequest({ command: "startAudit", payload: undefined });
+  }
+
   async showReport(report: Audit) {
     const kdb = await this.getKdb();
     await this.show();
-    this.sendRequest({ command: "loadKdb", payload: kdb });
-    return this.sendRequest({ command: "showFullReport", payload: report as any });
+    await this.sendRequest({ command: "loadKdb", payload: kdb });
+    await this.sendColorTheme(vscode.window.activeColorTheme);
+    return this.sendRequest({ command: "showFullReport", payload: report });
   }
 
   public async showIds(report: Audit, uri: string, ids: any[]) {
@@ -59,14 +71,14 @@ export class AuditWebView extends WebView<Webapp> {
     this.sendRequest({ command: "loadKdb", payload: kdb });
     this.sendRequest({
       command: "showPartialReport",
-      payload: { report: report as any, uri, ids },
+      payload: { report: report, uri, ids },
     });
   }
 
   public async showIfVisible(report: Audit) {
     if (this.isActive()) {
       this.sendRequest({ command: "loadKdb", payload: await this.getKdb() });
-      return this.sendRequest({ command: "showFullReport", payload: report as any });
+      return this.sendRequest({ command: "showFullReport", payload: report });
     }
   }
 
