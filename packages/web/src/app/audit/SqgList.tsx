@@ -34,22 +34,25 @@ export default function SqgList({
 
 const Container = styled.div`
   display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 `;
 
 const Button = styled.div<{ selected: boolean }>`
   display: flex;
   height: 28px;
-  width: 100px;
-  overflow: hidden;
+  min-width: 100px;
   border-radius: 16px;
   margin-left: 4px;
   margin-right: 4px;
-  border: 1px solid var(${ThemeColorVariables.errorBorder});
-
-  color: var(${ThemeColorVariables.errorForeground});
+  padding-left: 4px;
+  padding-right: 4px;
+  border: 1px solid var(${ThemeColorVariables.border});
+  color: var(${ThemeColorVariables.foreground});
   cursor: pointer;
   align-items: center;
   justify-content: center;
+
   ${({ selected }) =>
     selected
       ? `background-color: var(${ThemeColorVariables.computedTwo});`
