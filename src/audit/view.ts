@@ -68,7 +68,8 @@ export class AuditWebView extends WebView<Webapp> {
   public async showIds(report: Audit, uri: string, ids: any[]) {
     const kdb = await this.getKdb();
     await this.show();
-    this.sendRequest({ command: "loadKdb", payload: kdb });
+    await this.sendRequest({ command: "loadKdb", payload: kdb });
+    await this.sendColorTheme(vscode.window.activeColorTheme);
     this.sendRequest({
       command: "showPartialReport",
       payload: { report: report, uri, ids },
