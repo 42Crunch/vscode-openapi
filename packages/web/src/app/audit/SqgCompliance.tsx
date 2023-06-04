@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { useState } from "react";
 import { AuditCompliance, Summary } from "@xliic/common/audit";
+import { ThemeColorVariables } from "@xliic/common/theme";
 
 import SqgList from "./SqgList";
 import SqgDetails from "./SqgDetails";
@@ -37,4 +38,7 @@ export default function Compliance({
 
 const Container = styled.div`
   padding: 8px;
+  color: var(${ThemeColorVariables.foreground});
+  background-color: var(${ThemeColorVariables.background});
+  border-top: 1px solid var(${ThemeColorVariables.errorBorder});
 `;
