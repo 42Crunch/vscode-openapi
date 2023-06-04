@@ -43,7 +43,7 @@ export default function ConfigurationForm<T extends Partial<Config>>({
 
   useEffect(() => {
     methods.trigger();
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     if (isValid && isDirty) {
