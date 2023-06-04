@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { Preferences } from "@xliic/common/prefs";
 import { Cache } from "../../cache";
 import { PlatformStore } from "../stores/platform-store";
-import { Logger, PlatformContext } from "../types";
+import { PlatformContext } from "../types";
 
 import { ScanCodelensProvider } from "./lens";
 import commands from "./commands";
@@ -45,14 +45,24 @@ export function activate(
 
   const scanCodelensProvider = new ScanCodelensProvider(cache);
 
-  store.onConnectionDidChange(({ connected }) => {
+  function activateLens(connected: boolean, enabled: boolean) {
     disposables.forEach((disposable) => disposable.dispose());
-    if (connected) {
+    if (connected && enabled) {
       disposables = Object.values(selectors).map((selector) =>
         vscode.languages.registerCodeLensProvider(selector, scanCodelensProvider)
       );
     } else {
       disposables = [];
+    }
+  }
+
+  store.onConnectionDidChange(({ connected }) => {
+    activateLens(connected, configuration.get("codeLens"));
+  });
+
+  configuration.onDidChange(async (e: vscode.ConfigurationChangeEvent) => {
+    if (configuration.changed(e, "codeLens")) {
+      activateLens(store.isConnected(), configuration.get("codeLens"));
     }
   });
 

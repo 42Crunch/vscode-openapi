@@ -17,14 +17,17 @@ import { Cache } from "../cache";
 import { setDecorations } from "./decoration";
 import { PlatformStore } from "../platform/stores/platform-store";
 import { AuditCodelensProvider } from "./lens";
+import { Configuration } from "../configuration";
 
 export function activate(
   context: vscode.ExtensionContext,
   auditContext: AuditContext,
   cache: Cache,
+  configuration: Configuration,
   reportWebView: AuditWebView,
   store: PlatformStore
-) {
+): vscode.Disposable {
+  let disposables: vscode.Disposable[] = [];
   const pendingAudits: PendingAudits = {};
 
   function update(editor: vscode.TextEditor | undefined) {
@@ -56,9 +59,25 @@ export function activate(
   };
 
   const auditCodelensProvider = new AuditCodelensProvider(cache);
-  Object.values(selectors).map((selector) =>
-    vscode.languages.registerCodeLensProvider(selector, auditCodelensProvider)
-  );
+
+  function activateLens(enabled: boolean) {
+    disposables.forEach((disposable) => disposable.dispose());
+    if (enabled) {
+      disposables = Object.values(selectors).map((selector) =>
+        vscode.languages.registerCodeLensProvider(selector, auditCodelensProvider)
+      );
+    } else {
+      disposables = [];
+    }
+  }
+
+  configuration.onDidChange(async (e: vscode.ConfigurationChangeEvent) => {
+    if (configuration.changed(e, "codeLens")) {
+      activateLens(configuration.get("codeLens"));
+    }
+  });
+
+  activateLens(configuration.get("codeLens"));
 
   vscode.window.onDidChangeActiveTextEditor((editor) => update(editor));
 
@@ -67,4 +86,6 @@ export function activate(
   registerFocusSecurityAudit(context, cache, auditContext, reportWebView);
   registerFocusSecurityAuditById(context, auditContext, reportWebView);
   registerQuickfixes(context, cache, auditContext, reportWebView);
+
+  return new vscode.Disposable(() => disposables.forEach((disposable) => disposable.dispose()));
 }

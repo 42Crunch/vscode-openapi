@@ -26,7 +26,9 @@ export function activate(
   configuration: Configuration,
   envStore: EnvStore,
   prefs: Record<string, Preferences>
-) {
+): vscode.Disposable {
+  let disposables: vscode.Disposable[] = [];
+
   const view = new TryItWebView(
     context.extensionPath,
     cache,
@@ -55,9 +57,25 @@ export function activate(
   });
 
   const tryItCodeLensProvider = new TryItCodelensProvider(cache);
-  for (const selector of Object.values(selectors)) {
-    vscode.languages.registerCodeLensProvider(selector, tryItCodeLensProvider);
+
+  function activateLens(enabled: boolean) {
+    disposables.forEach((disposable) => disposable.dispose());
+    if (enabled) {
+      disposables = Object.values(selectors).map((selector) =>
+        vscode.languages.registerCodeLensProvider(selector, tryItCodeLensProvider)
+      );
+    } else {
+      disposables = [];
+    }
   }
+
+  configuration.onDidChange(async (e: vscode.ConfigurationChangeEvent) => {
+    if (configuration.changed(e, "codeLens")) {
+      activateLens(configuration.get("codeLens"));
+    }
+  });
+
+  activateLens(configuration.get("codeLens"));
 
   vscode.commands.registerCommand(
     "openapi.tryOperation",
@@ -78,6 +96,8 @@ export function activate(
       await startTryIt(document, cache, view, path, method, preferredMediaType, preferredBodyValue);
     }
   );
+
+  return new vscode.Disposable(() => disposables.forEach((disposable) => disposable.dispose()));
 }
 
 async function startTryIt(

@@ -116,7 +116,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const prefs = {};
 
   const reportWebView = new AuditWebView(context.extensionPath, cache);
-  audit.activate(context, auditContext, cache, reportWebView, platformStore);
+  audit.activate(context, auditContext, cache, configuration, reportWebView, platformStore);
   preview.activate(context, cache, configuration);
   tryit.activate(context, cache, configuration, envStore, prefs);
   environment.activate(context, envStore);

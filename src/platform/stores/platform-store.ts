@@ -402,9 +402,13 @@ export class PlatformStore {
   }
 
   async refresh(): Promise<void> {
-    const { success } = await testConnection(this.getConnection(), this.logger);
     this.formats = undefined;
-    this.connected = success;
+    if (this.hasCredentials()) {
+      const { success } = await testConnection(this.getConnection(), this.logger);
+      this.connected = success;
+    } else {
+      this.connected = false;
+    }
   }
 
   async createDefaultScanConfig(apiId: string): Promise<any> {

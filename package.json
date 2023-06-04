@@ -4,7 +4,7 @@
   "displayName": "OpenAPI (Swagger) Editor",
   "description": "OpenAPI extension for Visual Studio Code",
   "license": "AGPL-3.0-only",
-  "version": "4.18.1-rc1",
+  "version": "4.18.1-rc3",
   "publisher": "42Crunch",
   "repository": {
     "type": "git",
@@ -890,6 +890,12 @@
             "Always update, don't ask for confirmation",
             "Never update, don't ask for confirmation"
           ]
+        },
+        "openapi.codeLens": {
+          "scope": "workbench",
+          "type": "boolean",
+          "default": true,
+          "description": "Show TryIt/Audit/Scan CodeLenses"
         }
       }
     },
