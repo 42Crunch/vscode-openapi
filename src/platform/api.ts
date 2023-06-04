@@ -4,7 +4,7 @@
 */
 
 import got, { Method, OptionsOfJSONResponseBody, HTTPError } from "got";
-import { Sqg, AuditCompliance } from "@xliic/common/audit";
+import { AuditCompliance } from "@xliic/common/audit";
 
 import { ApiAuditReport, NamingConvention, SearchCollectionsResponse } from "./types";
 import {

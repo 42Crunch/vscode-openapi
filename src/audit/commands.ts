@@ -203,11 +203,11 @@ async function runPlatformAudit(
   store: PlatformStore
 ): Promise<Audit | undefined> {
   try {
-    const api = await store.createTempApi(oas);
-    const report = await store.getAuditReport(api.desc.id);
+    const tmpApi = await store.createTempApi(oas);
+    const report = await store.getAuditReport(tmpApi.apiId);
     const compliance = await store.readAuditCompliance(report.tid);
     const todoReport = await store.readAuditReportSqgTodo(report.tid);
-    await store.deleteApi(api.desc.id);
+    await store.clearTempApi(tmpApi);
     const audit = await parseAuditReport(cache, document, report.data, mapping);
     const { issues: todo } = await parseAuditReport(cache, document, todoReport.data, mapping);
     audit.compliance = compliance;

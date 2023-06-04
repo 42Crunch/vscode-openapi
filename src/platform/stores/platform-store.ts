@@ -234,10 +234,33 @@ export class PlatformStore {
     return api;
   }
 
-  async createTempApi(json: string): Promise<Api> {
+  async createTempApi(json: string): Promise<{ apiId: string; collectionId: string }> {
     const collectionId = await this.findOrCreateTempCollection();
     const apiName = `tmp-${Date.now()}`;
-    return createApi(collectionId, apiName, Buffer.from(json), this.getConnection(), this.logger);
+    const api = await createApi(
+      collectionId,
+      apiName,
+      Buffer.from(json),
+      this.getConnection(),
+      this.logger
+    );
+    return { apiId: api.desc.id, collectionId };
+  }
+
+  async clearTempApi(tmp: { apiId: string; collectionId: string }): Promise<void> {
+    await deleteApi(tmp.apiId, this.getConnection(), this.logger);
+    // check if any of the old apis have to be deleted
+    const current = new Date().getTime();
+    const response = await listApis(tmp.collectionId, this.getConnection(), this.logger);
+    for (const api of response.list) {
+      const name = api.desc.name;
+      if (name.startsWith("tmp-")) {
+        const timestamp = Number(name.split("-")[1]);
+        if (current - timestamp > 60000) {
+          await deleteApi(api.desc.id, this.getConnection(), this.logger);
+        }
+      }
+    }
   }
 
   async updateApi(apiId: string, content: Buffer): Promise<void> {

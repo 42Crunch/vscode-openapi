@@ -66,20 +66,20 @@ async function editorRunSingleOperationScan(
     const oas = extractSinglePath(path as string, bundle.value);
     const rawOas = stringify(oas);
 
-    const api = await store.createTempApi(rawOas);
+    const tmpApi = await store.createTempApi(rawOas);
 
-    const report = await store.getAuditReport(api.desc.id);
+    const report = await store.getAuditReport(tmpApi.apiId);
 
     if (report?.data.openapiState !== "valid") {
-      await store.deleteApi(api.desc.id);
+      await store.clearTempApi(tmpApi);
       await view.show();
       await view.sendAuditError(editor.document, report.data, bundle.mapping);
       return;
     }
 
-    await store.createDefaultScanConfig(api.desc.id);
+    await store.createDefaultScanConfig(tmpApi.apiId);
 
-    const configs = await store.getScanConfigs(api.desc.id);
+    const configs = await store.getScanConfigs(tmpApi.apiId);
 
     const isNewApi = configs[0].configuration !== undefined;
 
@@ -91,7 +91,7 @@ async function editorRunSingleOperationScan(
       ? JSON.parse(Buffer.from(c.file, "base64").toString("utf-8"))
       : JSON.parse(Buffer.from(c.scanConfiguration, "base64").toString("utf-8"));
 
-    await store.deleteApi(api.desc.id);
+    await store.clearTempApi(tmpApi);
 
     if (config !== undefined) {
       view.setNewApi(isNewApi);

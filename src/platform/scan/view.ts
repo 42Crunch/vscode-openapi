@@ -261,13 +261,13 @@ async function runScan(
   isNewApi: boolean
 ): Promise<ShowScanReportMessage | ShowGeneralErrorMessage> {
   logger.info(`Starting API Conformance Scan`);
-  const api = await store.createTempApi(scanConfig.rawOas);
+  const tmpApi = await store.createTempApi(scanConfig.rawOas);
 
-  logger.info(`Created temp API "${api.desc.id}", waiting for Security Audit`);
+  logger.info(`Created temp API "${tmpApi.apiId}", waiting for Security Audit`);
 
-  const audit = await store.getAuditReport(api.desc.id);
+  const audit = await store.getAuditReport(tmpApi.apiId);
   if (audit?.data.openapiState !== "valid") {
-    await store.deleteApi(api.desc.id);
+    await store.clearTempApi(tmpApi);
     return {
       command: "showGeneralError",
       payload: {
@@ -280,12 +280,12 @@ async function runScan(
   logger.info(`Security Audit check is successful`);
 
   if (isNewApi) {
-    await store.createScanConfigNew(api.desc.id, "updated", scanConfig.config);
+    await store.createScanConfigNew(tmpApi.apiId, "updated", scanConfig.config);
   } else {
-    await store.createScanConfig(api.desc.id, "updated", scanConfig.config);
+    await store.createScanConfig(tmpApi.apiId, "updated", scanConfig.config);
   }
 
-  const configs = await store.getScanConfigs(api.desc.id);
+  const configs = await store.getScanConfigs(tmpApi.apiId);
 
   const c = isNewApi
     ? await store.readScanConfig(configs[0].configuration.id)
@@ -301,9 +301,9 @@ async function runScan(
   if (failure !== undefined) {
     // cleanup
     try {
-      await store.deleteApi(api.desc.id);
+      await store.clearTempApi(tmpApi);
     } catch (ex) {
-      console.log(`Failed to cleanup temp api ${api.desc.id}: ${ex}`);
+      console.log(`Failed to cleanup temp api ${tmpApi.apiId}: ${ex}`);
     }
 
     return {
@@ -312,7 +312,7 @@ async function runScan(
     };
   }
 
-  const reportId = await waitForReport(store, api.desc.id, 10000, isNewApi);
+  const reportId = await waitForReport(store, tmpApi.apiId, 10000, isNewApi);
 
   if (reportId === undefined) {
     return {
@@ -327,7 +327,7 @@ async function runScan(
 
   const parsed = JSON.parse(Buffer.from(report, "base64").toString("utf-8"));
 
-  await store.deleteApi(api.desc.id);
+  await store.clearTempApi(tmpApi);
 
   logger.info(`Finished API Conformance Scan`);
 
