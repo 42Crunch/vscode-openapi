@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 4.18.1 (June 5, 2023)
+
+- Update styling of Security Audit Report
+- Display SQG status in Security Audit
+- Add filtering to Conformance Scan and Security Audit reports
+- Implement single-operation Security Audit
+- Add configuration option to disable use of CodeLenses #185
+
 ## Version 4.17.0 (May 12, 2023)
 
 - Add support running Conformance Scan using scand-manager
