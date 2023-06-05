@@ -15,6 +15,7 @@ import { Checkbox } from "../../../components/Checkbox";
 import ConnectionTestBanner from "../ConnectionTestBanner";
 import { Container, Test, Title } from "../layout";
 import ValidProgressButton from "../../../components/form/ValidProgressButton";
+import { Banner } from "../../../components/Banner";
 
 type Section = Pick<Config, "scanRuntime" | "docker" | "scandManager">;
 
@@ -28,11 +29,16 @@ export function PlatformServices() {
 
   const scanRuntime = useWatch({ name: "scanRuntime" });
   const scanAuth = useWatch({ name: "scandManager.auth" });
+  const scanImage = useWatch({ name: "scanImage" });
 
   return (
     <>
       <Title>Runtime for scand-agent</Title>
       <Container>
+        <Banner
+          message={`Using "${scanImage}" image. It can be changed in "Docker image" section`}
+        />
+
         <Select<Section>
           label="Runtime"
           name="scanRuntime"
@@ -41,6 +47,7 @@ export function PlatformServices() {
             { value: "scand-manager", label: "Scand manager" },
           ]}
         />
+
         {scanRuntime === "docker" && (
           <>
             <Checkbox<Section>
