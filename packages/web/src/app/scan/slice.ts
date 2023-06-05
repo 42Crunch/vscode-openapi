@@ -144,6 +144,8 @@ export const slice = createSlice({
       state.scanReport = undefined;
       state.error = undefined;
       state.waiting = true;
+      state.response = undefined;
+      state.responses = {};
     },
 
     showScanReport: (state, action: PayloadAction<SingleOperationScanReport>) => {
