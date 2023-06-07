@@ -44,11 +44,11 @@ export default (
           await documentBulkUpdate(store, cache, dataDictionaryDiagnostics, editor.document);
           return true;
         }
-        // no document updated
-        vscode.window.showInformationMessage(
-          `Failed to update contents of the ${documentUri} with Data Dictionary properties`
-        );
       }
+      // no document updated
+      vscode.window.showInformationMessage(
+        `Failed to update contents of the ${documentUri} with Data Dictionary properties`
+      );
     }
     return true;
   },
@@ -147,6 +147,7 @@ const schemaProps = [
 
 async function shouldFixDataDictionaryErrros(): Promise<"fix" | "skip" | "cancel"> {
   const config = configuration.get<"ask" | "always" | "never">("dataDictionaryPreAuditFix");
+
   if (config === "ask") {
     const choice = await vscode.window.showInformationMessage(
       "Found Data Dictionary mismatch, update the document with Data Dictionary properties?",
@@ -154,6 +155,43 @@ async function shouldFixDataDictionaryErrros(): Promise<"fix" | "skip" | "cancel
       { title: "Update", id: "fix" },
       { title: "Don't update", id: "skip" }
     );
+
+    if (choice?.id === "fix") {
+      vscode.window
+        .showInformationMessage(
+          "Remember your choice and always update document with Data Dictionary properties?",
+          { modal: false },
+          { title: "Always update", id: "always" },
+          { title: "Cancel", id: "cancel" }
+        )
+        .then((choice) => {
+          if (choice?.id === "always") {
+            configuration.update(
+              "dataDictionaryPreAuditFix",
+              "always",
+              vscode.ConfigurationTarget.Global
+            );
+          }
+        });
+    } else if (choice?.id === "skip") {
+      vscode.window
+        .showInformationMessage(
+          "Remember your choice and never update document with Data Dictionary properties?",
+          { modal: false },
+          { title: "Never update", id: "never" },
+          { title: "Cancel", id: "cancel" }
+        )
+        .then((choice) => {
+          if (choice?.id === "never") {
+            configuration.update(
+              "dataDictionaryPreAuditFix",
+              "never",
+              vscode.ConfigurationTarget.Global
+            );
+          }
+        });
+    }
+
     if (choice === undefined) {
       return "cancel";
     }
