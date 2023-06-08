@@ -73,6 +73,9 @@ const Tiles = styled.div`
     border: 1px solid var(${ThemeColorVariables.border});
     border-radius: 2px;
     cursor: pointer;
+    &:hover {
+      background-color: var(${ThemeColorVariables.computedOne});
+    }
     & > div:nth-child(1) {
       font-weight: 700;
       font-size: 12px;
