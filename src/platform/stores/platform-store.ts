@@ -256,7 +256,7 @@ export class PlatformStore {
       const name = api.desc.name;
       if (name.startsWith("tmp-")) {
         const timestamp = Number(name.split("-")[1]);
-        if (current - timestamp > 60000) {
+        if (current - timestamp > 600000) {
           await deleteApi(api.desc.id, this.getConnection(), this.logger);
         }
       }
