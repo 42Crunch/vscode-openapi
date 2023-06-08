@@ -7,6 +7,11 @@ export type StartAuditMessage = {
   payload: undefined;
 };
 
+export type CancelAuditMessage = {
+  command: "cancelAudit";
+  payload: undefined;
+};
+
 type ShowFullReportMessage = {
   command: "showFullReport";
   payload: Audit;
@@ -45,6 +50,7 @@ type OpenLinkMessage = {
 export type Webapp = App<
   // consumes
   | StartAuditMessage
+  | CancelAuditMessage
   | ShowFullReportMessage
   | ShowPartialReportMessage
   | ShowNoReportMessage

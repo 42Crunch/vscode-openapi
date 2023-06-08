@@ -57,6 +57,10 @@ export class AuditWebView extends WebView<Webapp> {
     return this.sendRequest({ command: "startAudit", payload: undefined });
   }
 
+  async sendCancelAudit() {
+    return this.sendRequest({ command: "cancelAudit", payload: undefined });
+  }
+
   async showReport(report: Audit) {
     const kdb = await this.getKdb();
     await this.show();

@@ -132,6 +132,7 @@ export const slice = createSlice({
   initialState,
   reducers: {
     startAudit: (state, action: PayloadAction<undefined>) => {},
+    cancelAudit: (state, action: PayloadAction<undefined>) => {},
     showFullReport: (state, { payload: audit }: PayloadAction<Audit>) => {
       if (state.audit.filename !== audit.filename) {
         // reset filter, sqg todo if showing report for a different file than the one
@@ -360,6 +361,7 @@ const fallbackArticle = {
 
 export const {
   startAudit,
+  cancelAudit,
   showFullReport,
   showPartialReport,
   showNoReport,

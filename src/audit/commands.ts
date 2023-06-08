@@ -64,6 +64,8 @@ export function registerSecurityAudit(
           setAudit(auditContext, uri, audit);
           setDecorations(textEditor, auditContext);
           await reportWebView.showReport(audit);
+        } else {
+          await reportWebView.sendCancelAudit();
         }
         delete pendingAudits[uri];
       } catch (e) {
@@ -297,6 +299,8 @@ export async function registerSingleOperationAudit(
           setAudit(auditContext, uri, audit);
           setDecorations(editor, auditContext);
           await view.showReport(audit);
+        } else {
+          await view.sendCancelAudit();
         }
       } catch (ex: any) {
         console.log("error", ex);
