@@ -15,7 +15,7 @@ const sections = [
   },
   {
     title: "API Conformance Scan",
-    items: [scanRuntime, scanImage],
+    items: [scanImage, scanRuntime],
   },
 ];
 
