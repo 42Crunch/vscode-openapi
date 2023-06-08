@@ -1,4 +1,10 @@
-import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  PayloadAction,
+  Dispatch,
+  StateFromReducersMapObject,
+  Draft,
+} from "@reduxjs/toolkit";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 
 import {
@@ -126,86 +132,49 @@ export const slice = createSlice({
   initialState,
   reducers: {
     startAudit: (state, action: PayloadAction<undefined>) => {},
-    showFullReport: (state, action: PayloadAction<Audit>) => {
-      const { issues, filtered, stats, titles } = processAudit(
-        action.payload.issues,
-        action.payload.files,
-        state.kdb,
-        state.filter
-      );
-      if (state.audit.filename !== action.payload.filename) {
+    showFullReport: (state, { payload: audit }: PayloadAction<Audit>) => {
+      if (state.audit.filename !== audit.filename) {
+        // reset filter, sqg todo if showing report for a different file than the one
+        // currently displayed
         state.tab = "priority";
         state.filter = {};
+        state.sqgTodo = false;
       }
-      state.audit = action.payload;
-      state.issues = issues;
-      state.filtered = filtered;
-      state.stats = stats;
-      state.issueTitles = titles;
+      state.audit = audit;
+      updateAll(state);
     },
 
     showPartialReport: (
       state,
-      action: PayloadAction<{ report: any; uri: string; ids: number[] }>
+      {
+        payload: { report: audit, uri, ids },
+      }: PayloadAction<{ report: any; uri: string; ids: number[] }>
     ) => {
-      state.filter = { ids: action.payload.ids };
-      const { issues, filtered, stats, titles } = processAudit(
-        action.payload.report.issues,
-        action.payload.report.files,
-        state.kdb,
-        state.filter
-      );
-      state.audit = action.payload.report;
-      state.issues = issues;
-      state.filtered = filtered;
-      state.stats = stats;
-      state.issueTitles = titles;
+      state.audit = audit;
+      state.filter = { ids };
       state.tab = "issues";
+      state.sqgTodo = false;
+      updateAll(state);
     },
 
-    loadKdb: (state, action: PayloadAction<Kdb>) => {
-      const { issues, filtered, stats, titles } = processAudit(
-        state.audit.issues,
-        state.audit.files,
-        action.payload,
-        state.filter
-      );
-      state.kdb = action.payload;
-      state.issues = issues;
-      state.filtered = filtered;
-      state.stats = stats;
-      state.issueTitles = titles;
+    loadKdb: (state, { payload: kdb }: PayloadAction<Kdb>) => {
+      state.kdb = kdb;
+      updateAll(state);
     },
 
     changeTab: (state, action: PayloadAction<ReportState["tab"]>) => {
       state.tab = action.payload;
     },
 
-    changeFilter: (state, action: PayloadAction<Filter>) => {
-      const { filtered } = processAudit(
-        state.audit.issues,
-        state.audit.files,
-        state.kdb,
-        action.payload
-      );
-      state.filter = action.payload;
-      state.filtered = filtered;
+    changeFilter: (state, { payload: filter }: PayloadAction<Filter>) => {
+      state.filter = filter;
+      updateAll(state);
     },
 
-    setSqgTodo: (state, action: PayloadAction<ReportState["sqgTodo"]>) => {
-      const byDocument = action.payload ? state.audit.todo! : state.audit.issues;
-      const { issues, filtered, stats, titles } = processAudit(
-        byDocument,
-        state.audit.files,
-        state.kdb,
-        state.filter
-      );
-      state.sqgTodo = action.payload;
-      state.issues = issues;
-      state.filtered = filtered;
-      state.stats = stats;
-      state.issueTitles = titles;
+    setSqgTodo: (state, { payload: todo }: PayloadAction<ReportState["sqgTodo"]>) => {
+      state.sqgTodo = todo;
       state.filter = {};
+      updateAll(state);
     },
 
     showNoReport: (state) => {
@@ -219,6 +188,20 @@ export const slice = createSlice({
     openLink: (state, action: PayloadAction<string>) => {},
   },
 });
+
+function updateAll(state: Draft<ReportState>) {
+  const { issues, filtered, stats, titles } = processAudit(
+    state.sqgTodo ? state.audit.todo! : state.audit.issues,
+    state.audit.files,
+    state.kdb,
+    state.filter
+  );
+
+  state.issues = issues;
+  state.filtered = filtered;
+  state.stats = stats;
+  state.issueTitles = titles;
+}
 
 function processAudit(byDocument: IssuesByDocument, files: FilesMap, kdb: Kdb, filter: Filter) {
   const issues = flattenIssues(byDocument, files, kdb);
