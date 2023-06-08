@@ -118,22 +118,22 @@ export class ThreeOutlineProvider implements vscode.TreeDataProvider<Node> {
 
   getIcon(key: string) {
     const icons: any = {
-      PATHS: "code.svg",
-      "OPERATION ID": "id-card.svg",
-      SERVERS: "server.svg",
-      COMPONENTS: "gear.svg",
-      GENERAL: "bars.svg",
-      TAGS: "tags.svg",
-      SECURITY: "shield-check.svg",
-      schemas: "sitemap.svg",
-      responses: "arrow-right-from-bracket.svg",
-      requestBodies: "arrow-right-to-bracket.svg",
-      parameters: "sliders.svg",
-      headers: "line-columns.svg",
-      securitySchemes: "shield-halved.svg",
-      links: "link-simple.svg",
-      callbacks: "phone-arrow-up-right.svg",
-      examples: "message-code.svg",
+      Paths: "code.svg",
+      "Operation ID": "id-card.svg",
+      Servers: "server.svg",
+      Components: "gear.svg",
+      General: "bars.svg",
+      Tags: "tags.svg",
+      Security: "shield-check.svg",
+      Schemas: "sitemap.svg",
+      Responses: "arrow-right-from-bracket.svg",
+      "Request Bodies": "arrow-right-to-bracket.svg",
+      Parameters: "sliders.svg",
+      Headers: "line-columns.svg",
+      "Security Schemes": "shield-halved.svg",
+      Links: "link-simple.svg",
+      Callbacks: "phone-arrow-up-right.svg",
+      Examples: "message-code.svg",
     };
 
     if (icons[key] !== undefined) {
@@ -149,49 +149,49 @@ export class ThreeOutlineProvider implements vscode.TreeDataProvider<Node> {
       return [
         {
           parent: undefined,
-          key: "GENERAL",
+          key: "General",
           value: undefined,
           depth: 0,
           path: [],
         },
         {
           parent: undefined,
-          key: "PATHS",
+          key: "Paths",
           value: undefined,
           depth: 0,
           path: [],
         },
         {
           parent: undefined,
-          key: "TAGS",
+          key: "Tags",
           value: undefined,
           depth: 0,
           path: [],
         },
         {
           parent: undefined,
-          key: "OPERATION ID",
+          key: "Operation ID",
           value: undefined,
           depth: 0,
           path: [],
         },
         {
           parent: undefined,
-          key: "SERVERS",
+          key: "Servers",
           value: undefined,
           depth: 0,
           path: [],
         },
         {
           parent: undefined,
-          key: "COMPONENTS",
+          key: "Components",
           value: undefined,
           depth: 0,
           path: [],
         },
         {
           parent: undefined,
-          key: "SECURITY",
+          key: "Security",
           value: undefined,
           depth: 0,
           path: [],
@@ -199,71 +199,71 @@ export class ThreeOutlineProvider implements vscode.TreeDataProvider<Node> {
       ];
     }
 
-    if (element.key === "PATHS") {
+    if (element.key === "Paths") {
       return getChildren({ value: find(this.root!.value, "/paths"), path: [] } as unknown as Node);
     }
 
-    if (element.key === "COMPONENTS") {
+    if (element.key === "Components") {
       return [
         {
           parent: undefined,
-          key: "schemas",
+          key: "Schemas",
           value: undefined,
           depth: 0,
           path: [],
         },
         {
           parent: undefined,
-          key: "responses",
+          key: "Responses",
           value: undefined,
           depth: 0,
           path: [],
         },
         {
           parent: undefined,
-          key: "parameters",
+          key: "Parameters",
           value: undefined,
           depth: 0,
           path: [],
         },
         {
           parent: undefined,
-          key: "examples",
+          key: "Examples",
           value: undefined,
           depth: 0,
           path: [],
         },
         {
           parent: undefined,
-          key: "requestBodies",
+          key: "Request Bodies",
           value: undefined,
           depth: 0,
           path: [],
         },
         {
           parent: undefined,
-          key: "headers",
+          key: "Headers",
           value: undefined,
           depth: 0,
           path: [],
         },
         {
           parent: undefined,
-          key: "securitySchemes",
+          key: "Security Schemes",
           value: undefined,
           depth: 0,
           path: [],
         },
         {
           parent: undefined,
-          key: "links",
+          key: "Links",
           value: undefined,
           depth: 0,
           path: [],
         },
         {
           parent: undefined,
-          key: "callbacks",
+          key: "Callbacks",
           value: undefined,
           depth: 0,
           path: [],
