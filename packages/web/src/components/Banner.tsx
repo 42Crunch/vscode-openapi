@@ -7,8 +7,10 @@ export function Banner({ message }: { message: string }) {
   return (
     <Container>
       <div>
-        <CircleInfo />
-        {message}
+        <div>
+          <CircleInfo />
+        </div>
+        <span>{message}</span>
       </div>
     </Container>
   );
@@ -18,8 +20,10 @@ export function ErrorBanner({ message, children }: { message: string; children?:
   return (
     <ErrorContainer>
       <div>
-        <TriangleExclamation />
-        {message}
+        <div>
+          <TriangleExclamation />
+        </div>
+        <span>{message}</span>
       </div>
       <div>{children}</div>
     </ErrorContainer>
@@ -33,7 +37,12 @@ const Container = styled.div`
     display: flex;
     align-items: center;
     gap: 8px;
-    > svg {
+    > div {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    > div > svg {
       fill: var(${ThemeColorVariables.foreground});
     }
   }
@@ -49,7 +58,12 @@ const ErrorContainer = styled(Container)`
   background-color: var(${ThemeColorVariables.errorBackground});
   color: var(${ThemeColorVariables.errorForeground});
   > div:first-child {
-    > svg {
+    > div {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    > div > svg {
       fill: var(${ThemeColorVariables.errorForeground});
     }
   }
