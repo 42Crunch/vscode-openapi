@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.18.2 (June 9, 2023)
+
+- Fix bug with sorting and filtering issues in Security Audit report
+
 ## Version 4.18.1 (June 5, 2023)
 
 - Update styling of Security Audit Report
