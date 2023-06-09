@@ -8,6 +8,7 @@ import Switch from "../../components/Switch";
 import CollapsibleCaret from "../../components/CollapsibleCaret";
 import { ExclamationCircle } from "../../icons";
 import Compliance from "./SqgCompliance";
+import { Banner } from "../../components/Banner";
 
 export default function FilterPanel() {
   const { compliance, summary } = useAppSelector((state) => state.audit.audit);
@@ -22,8 +23,16 @@ export default function FilterPanel() {
 
   const [expanded, setExpanded] = useState(false);
 
-  if (compliance === undefined || compliance.acceptance === "yes") {
+  if (compliance === undefined) {
     return null;
+  }
+
+  if (compliance.acceptance === "yes") {
+    return (
+      <ContainerOk>
+        <Banner message="Security quality gates passed" />
+      </ContainerOk>
+    );
   }
 
   return (
@@ -64,4 +73,8 @@ const Top = styled.div`
   > div:nth-child(2) {
     flex: 1;
   }
+`;
+
+const ContainerOk = styled.div`
+  margin: 8px;
 `;
