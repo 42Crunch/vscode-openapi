@@ -34,7 +34,7 @@ export function Locations({ issueId, issues }: { issueId: string; issues: FlatIs
                 );
               }}
             >
-              {issue.filename}:{issue.lineNo}
+              {issue.filename}:{issue.lineNo + 1}
             </a>
           </Location>
         ))}
