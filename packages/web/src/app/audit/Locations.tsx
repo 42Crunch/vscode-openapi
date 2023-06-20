@@ -13,6 +13,14 @@ export function Locations({ issueId, issues }: { issueId: string; issues: FlatIs
   const maxDisplayed = expanded ? matching.length : 4;
   const displayed = matching.slice(0, maxDisplayed);
 
+  displayed.sort((a, b) => {
+    const filename = a.filename.localeCompare(b.filename);
+    if (filename === 0) {
+      return a.lineNo - b.lineNo;
+    }
+    return filename;
+  });
+
   return (
     <Container>
       <h2>{matching.length} results with this issue</h2>
