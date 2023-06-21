@@ -140,6 +140,10 @@ export const slice = createSlice({
         state.filter = {};
         state.sqgTodo = false;
       }
+      // reset sqgTodo if no compliance or if compliant
+      if (audit.compliance === undefined || audit.compliance.acceptance === "yes") {
+        state.sqgTodo = false;
+      }
       state.audit = audit;
       updateAll(state);
     },
