@@ -41,6 +41,8 @@ export function registerSecurityAudit(
         if (configured === undefined) {
           // or don't do audit if no credentials been supplied
           return;
+        } else {
+          await delay(3000);
         }
       }
 
@@ -278,6 +280,18 @@ export async function registerSingleOperationAudit(
   vscode.commands.registerTextEditorCommand(
     "openapi.editorSingleOperationAudit",
     async (editor: vscode.TextEditor, edit, path: string, method: HttpMethod) => {
+      const credentials = await hasCredentials(configuration, context.secrets);
+      if (credentials === undefined) {
+        // try asking for credentials if not found
+        const configured = await configureCredentials(configuration, context.secrets);
+        if (configured === undefined) {
+          // or don't do audit if no credentials been supplied
+          return;
+        } else {
+          await delay(3000);
+        }
+      }
+
       const uri = editor.document.uri.toString();
       await view.show();
       await view.sendColorTheme(vscode.window.activeColorTheme);
@@ -303,4 +317,8 @@ export async function registerSingleOperationAudit(
       }
     }
   );
+}
+
+async function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
