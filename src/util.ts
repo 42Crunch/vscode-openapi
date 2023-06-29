@@ -337,7 +337,16 @@ export function insertYamlNode(context: FixContext, value: string): [string, vsc
   } else {
     [start, end] = anchor.getRange(root);
     const padding = getCurrentIndent(document, start);
-    const position = document.positionAt(end);
+    let position = document.positionAt(end);
+    if (position.e === 0) {
+      // YAML parser adds NL to offset after array items
+      // For example:
+      // |A:
+      // |  - b: c
+      // Thus if we know the end offset has position with column = 0
+      // We substract 1 (same for CRLF or LF) from offset and recalculate the position
+      position = document.positionAt(end - 1);
+    }
     if (target.isObject()) {
       value = shift(value, indent, padding);
       if (snippet) {
