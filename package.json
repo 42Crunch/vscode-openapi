@@ -916,7 +916,7 @@
     "got": "^11.8.2",
     "js-yaml": "^4.1.0",
     "jsonc-parser": "^3.0.0",
-    "semver": "^6.3.0",
+    "semver": "^6.3.1",
     "yaml-language-server-parser": "^0.1.2"
   },
   "devDependencies": {
