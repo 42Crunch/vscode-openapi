@@ -13,7 +13,8 @@ import { Preferences } from "@xliic/common/prefs";
 import { ScanReportJSONSchema, TestLogReport } from "@xliic/common/scan-report";
 import { SeverityLevel, SeverityLevels } from "@xliic/common/audit";
 import { generateSecurityValues, getSecurity } from "../../util";
-import { generateParameterValuesForScan, readRawScanConfig } from "./util-scan";
+import * as scanUtil from "./util-scan";
+import * as scanUtilNew from "./util-scan-new";
 import {
   getSecurity as getSwaggerSecurity,
   generateSecurityValues as generateSwaggerSecurityValues,
@@ -29,6 +30,7 @@ export interface OasState {
   rawOas: string;
   path?: string;
   method?: HttpMethod;
+  operationId?: string;
   example?: {
     mediaType: string;
     name: string;
@@ -36,6 +38,7 @@ export interface OasState {
   defaultValues?: TryitOperationValues;
   scanConfig?: ScanConfig;
   scanConfigRaw?: unknown;
+  isNewScanConfig: boolean;
   scanReport?: ScanReportJSONSchema;
   response?: HttpResponse;
   error?: GeneralError;
@@ -59,6 +62,7 @@ const initialState: OasState = {
   },
   rawOas: "",
   scanReport: undefined,
+  isNewScanConfig: false,
   prefs: {
     scanServer: "",
     tryitServer: "",
@@ -86,7 +90,17 @@ export const slice = createSlice({
 
     scanOperation: (state, action: PayloadAction<OasWithOperationAndConfig>) => {
       const { oas, rawOas, path, method, config } = action.payload;
-      const scanConfig = readRawScanConfig(config, path, method);
+
+      const operation = getOperation(oas, path, method);
+
+      const operationId =
+        operation?.operationId === undefined ? `${path}:${method}` : operation.operationId;
+
+      const isNewScanConfig = (config as any)["playbook"] === undefined;
+
+      const scanConfig = isNewScanConfig
+        ? scanUtilNew.readRawScanConfig(config, operationId)
+        : scanUtil.readRawScanConfig(config, path, method);
 
       if (isOpenapi(oas)) {
         // security
@@ -94,7 +108,9 @@ export const slice = createSlice({
         const securityValues = generateSecurityValues(security);
 
         // parameters
-        const parameterValues = generateParameterValuesForScan(scanConfig);
+        const parameterValues = isNewScanConfig
+          ? scanUtilNew.generateParameterValuesForScan(scanConfig)
+          : scanUtil.generateParameterValuesForScan(scanConfig);
 
         state.defaultValues = {
           server: scanConfig.host,
@@ -109,7 +125,9 @@ export const slice = createSlice({
         const securityValues = generateSwaggerSecurityValues(security);
 
         // parameters
-        const parameterValues = generateParameterValuesForScan(scanConfig);
+        const parameterValues = isNewScanConfig
+          ? scanUtilNew.generateParameterValuesForScan(scanConfig)
+          : scanUtil.generateParameterValuesForScan(scanConfig);
 
         state.defaultValues = {
           server: scanConfig.host,
@@ -118,13 +136,16 @@ export const slice = createSlice({
           securityIndex: 0,
         };
       }
+
       state.oas = oas;
       state.rawOas = rawOas;
       state.path = path;
       state.method = method;
+      state.operationId = operationId;
 
       state.scanConfigRaw = config;
       state.scanConfig = scanConfig;
+      state.isNewScanConfig = isNewScanConfig;
 
       state.scanReport = undefined;
       state.error = undefined;
