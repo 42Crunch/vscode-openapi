@@ -21,6 +21,7 @@ import Section from "../../components/Section";
 import ScanReport from "./ScanReport";
 import GeneralError from "./GeneralError";
 import SmallLogMessages from "../../features/logging/SmallLogMessages";
+import ScanReportNew from "./ScanReportNew";
 
 export default function ScanOperation() {
   const dispatch = useAppDispatch();
@@ -132,7 +133,8 @@ export default function ScanOperation() {
           <Operation oas={oas} path={path!} method={method!} />
         </Section>
       </FormProvider>
-      {scanReport && <ScanReport />}
+      {scanReport && !isNewScanConfig && <ScanReport />}
+      {scanReport && isNewScanConfig && <ScanReportNew />}
       <GeneralError />
       {(waiting || error) && <SmallLogMessages />}
     </>
