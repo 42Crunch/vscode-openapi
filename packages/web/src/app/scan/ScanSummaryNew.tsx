@@ -15,8 +15,12 @@ export function ScanSummaryNew({
 }) {
   const dispatch = useAppDispatch();
 
-  const critical = operation.issues.critical ?? 0;
-  const high = operation.issues.high ?? 0;
+  const critical = global.issues.critical ?? 0;
+  const high = global.issues.high ?? 0;
+
+  const executed =
+    (global.conformanceTestRequests.executed.total ?? 0) +
+    (global.methodNotAllowedTestRequests?.executed.total ?? 0);
 
   return (
     <Container>
@@ -42,7 +46,7 @@ export function ScanSummaryNew({
           }}
         >
           <div>
-            {operation.conformanceTestRequests.executed.total} <ArrowUpRightFromSquare />
+            {executed} <ArrowUpRightFromSquare />
           </div>
           <div>Executed</div>
         </div>
@@ -55,7 +59,7 @@ export function ScanSummaryNew({
           }}
         >
           <div>
-            {operation.issues.total ?? 0} <ArrowUpRightFromSquare />
+            {global.issues.total ?? 0} <ArrowUpRightFromSquare />
           </div>
           <div>Issues Found</div>
         </div>

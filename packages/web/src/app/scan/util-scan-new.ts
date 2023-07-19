@@ -69,13 +69,10 @@ export function updateScanConfig(
 
   const host = optionallyReplaceLocalhost(values.server, scanRuntime, replaceLocalhost, platform);
 
-  // mutableConfig["environments"]["default"]["variables"]["host"]["default"] = host.endsWith("/")
-  //   ? host.slice(0, -1)
-  //   : host;
-
   if (target.requestBody && values.body?.value !== undefined) {
     target.requestBody.json = values.body?.value; // TODO multiple media types?
   }
+
   target.headers = pack(values.parameters.header);
   target.querys = pack(values.parameters.query);
   target.cookies = pack(values.parameters.cookie);
@@ -96,7 +93,7 @@ export function updateScanConfig(
   const security = generateSecurityEnv(
     values.security,
     values.securityIndex,
-    mutableConfig?.environment
+    mutableConfig?.environments?.default
   );
 
   return [mutableConfig, security];
@@ -125,14 +122,9 @@ function generateSecurityEnv(
 }
 
 function extractEnvVariableName(environmentConfig: any, name: string): string | undefined {
-  const value = environmentConfig?.[name];
-  const match = value?.match(/env\('(.+)'\)/);
-  if (Array.isArray(match)) {
-    return match[1];
-  }
-  const match2 = value?.match(/env_with_default\('(.+)',.+\)/);
-  if (Array.isArray(match2)) {
-    return match2[1];
+  const variable = environmentConfig?.variables?.[name];
+  if (variable.from === "environment") {
+    return variable.name;
   }
 }
 

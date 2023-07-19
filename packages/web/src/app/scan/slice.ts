@@ -22,6 +22,7 @@ import {
 import {
   ScanReportJSONSchema as ScanReportJSONSchemaNew,
   TestLogReport as TestLogReportNew,
+  TestResults,
 } from "./scan-report-new";
 export type Filter = {
   severity?: SeverityLevel;
@@ -176,6 +177,7 @@ export const slice = createSlice({
       if (state.isNewScanConfig) {
         const issues = flattenIssuesNew(
           action.payload.report as unknown as ScanReportJSONSchemaNew,
+          state.path!,
           state.operationId!
         );
         const filtered = filterIssuesNew(issues, state.filter);
@@ -346,12 +348,22 @@ function groupIssues(issues: TestLogReport[]): {
   return { grouped, titles: Object.keys(titles) };
 }
 
-function flattenIssuesNew(scanReport: ScanReportJSONSchemaNew, operationId: string) {
+function flattenIssuesNew(scanReport: ScanReportJSONSchemaNew, path: string, operationId: string) {
   const issues: TestLogReportNew[] = [];
   const conformanceIssues = scanReport?.operations?.[operationId]?.conformanceRequestsResults;
   if (conformanceIssues !== undefined) {
     issues.push(...conformanceIssues);
   }
+
+  const methodNotAllowed = scanReport?.methodNotAllowed;
+
+  for (const method of HttpMethods) {
+    const conformanceIssues = methodNotAllowed?.[path]?.[method]?.conformanceRequestsResults;
+    if (conformanceIssues !== undefined) {
+      issues.push(...conformanceIssues);
+    }
+  }
+
   return issues;
 }
 
