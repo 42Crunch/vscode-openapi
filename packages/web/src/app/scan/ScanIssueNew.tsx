@@ -35,10 +35,9 @@ export default function ScanIssueNew({
   const [collapsed, setCollapsed] = useState(true);
   const { response, test, outcome } = issue;
 
-  const failed = !operation.fuzzed;
-
   const responseCodeExpected = outcome?.status === "correct";
   const conformsToContract = outcome?.conformant;
+  const failed = !(responseCodeExpected && conformsToContract);
 
   let contentTypeFound = "N/A";
   let responsePayloadMatchesContract = "N/A";
