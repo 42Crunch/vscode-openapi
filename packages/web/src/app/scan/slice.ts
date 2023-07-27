@@ -138,6 +138,7 @@ export const slice = createSlice({
           parameters: parameterValues,
           security: securityValues,
           securityIndex: 0,
+          body: { mediaType: "application/json", value: scanConfig.requestBody },
         };
       }
 
