@@ -823,7 +823,7 @@
         "openapi.platformConformanceScanImage": {
           "scope": "workbench",
           "type": "string",
-          "default": "42crunch/scand-agent:v2.0.0-rc05",
+          "default": "42crunch/scand-agent:v2.0.0",
           "description": "Docker image for 42Crunch Conformance Scan"
         },
         "openapi.securityAuditToken": {
