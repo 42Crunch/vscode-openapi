@@ -8,18 +8,6 @@ import { createDefaultValues } from "../../util";
 import { createDefaultValues as createSwaggerDefaultValues } from "../../util-swagger";
 import { GeneralError } from "@xliic/common/error";
 
-type ConfigSslIgnoreAdd = {
-  type: "configSslIgnoreAdd";
-  hostname: string;
-};
-
-type ConfigSslIgnoreRemove = {
-  type: "configSslIgnoreRemove";
-  hostname: string;
-};
-
-type ConfigUpdatePayload = ConfigSslIgnoreAdd | ConfigSslIgnoreRemove;
-
 export interface OasState {
   oas: BundledSwaggerOrOasSpec;
   path?: string;

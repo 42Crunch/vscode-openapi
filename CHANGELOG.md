@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.18.6 (August 2, 2023)
+
+- Fixes to support updated scan report
+
 ## Version 4.18.2 (June 9, 2023)
 
 - Fix bug with sorting and filtering issues in Security Audit report

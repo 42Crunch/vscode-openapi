@@ -312,7 +312,7 @@ async function runScan(
     };
   }
 
-  const reportId = await waitForReport(store, tmpApi.apiId, 10000, isNewApi);
+  const reportId = await waitForReport(store, tmpApi.apiId, 30000, isNewApi);
 
   if (reportId === undefined) {
     return {

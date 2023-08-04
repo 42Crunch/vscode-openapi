@@ -43,7 +43,7 @@ export default function OperationHeader({
             style={{ width: "100%", textOverflow: "ellipsis" }}
           >
             {servers.map((server, index) => (
-              <option key={server} value={server}>{`${server}${path}`}</option>
+              <option key={`${server}-${index}`} value={server}>{`${server}${path}`}</option>
             ))}
           </select>
         </Path>

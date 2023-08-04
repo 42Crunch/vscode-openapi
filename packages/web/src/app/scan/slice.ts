@@ -13,12 +13,17 @@ import { Preferences } from "@xliic/common/prefs";
 import { ScanReportJSONSchema, TestLogReport } from "@xliic/common/scan-report";
 import { SeverityLevel, SeverityLevels } from "@xliic/common/audit";
 import { generateSecurityValues, getSecurity } from "../../util";
-import { generateParameterValuesForScan, readRawScanConfig } from "./util-scan";
+import * as scanUtil from "./util-scan";
+import * as scanUtilNew from "./util-scan-new";
 import {
   getSecurity as getSwaggerSecurity,
   generateSecurityValues as generateSwaggerSecurityValues,
 } from "../../util-swagger";
-
+import {
+  ScanReportJSONSchema as ScanReportJSONSchemaNew,
+  TestLogReport as TestLogReportNew,
+  TestResults,
+} from "./scan-report-new";
 export type Filter = {
   severity?: SeverityLevel;
   title?: string;
@@ -29,6 +34,7 @@ export interface OasState {
   rawOas: string;
   path?: string;
   method?: HttpMethod;
+  operationId?: string;
   example?: {
     mediaType: string;
     name: string;
@@ -36,7 +42,8 @@ export interface OasState {
   defaultValues?: TryitOperationValues;
   scanConfig?: ScanConfig;
   scanConfigRaw?: unknown;
-  scanReport?: ScanReportJSONSchema;
+  isNewScanConfig: boolean;
+  scanReport?: ScanReportJSONSchema | ScanReportJSONSchemaNew;
   response?: HttpResponse;
   error?: GeneralError;
   prefs: Preferences;
@@ -46,9 +53,9 @@ export interface OasState {
   waiting: boolean;
   filter: Filter;
   tab: "summary" | "tests" | "logs";
-  grouped: Record<string, TestLogReport[]>;
+  grouped: Record<string, TestLogReport[] | TestLogReportNew[]>;
   titles: string[];
-  issues: TestLogReport[];
+  issues: TestLogReport[] | TestLogReportNew[];
 }
 
 const initialState: OasState = {
@@ -59,6 +66,7 @@ const initialState: OasState = {
   },
   rawOas: "",
   scanReport: undefined,
+  isNewScanConfig: false,
   prefs: {
     scanServer: "",
     tryitServer: "",
@@ -86,7 +94,17 @@ export const slice = createSlice({
 
     scanOperation: (state, action: PayloadAction<OasWithOperationAndConfig>) => {
       const { oas, rawOas, path, method, config } = action.payload;
-      const scanConfig = readRawScanConfig(config, path, method);
+
+      const operation = getOperation(oas, path, method);
+
+      const operationId =
+        operation?.operationId === undefined ? `${path}:${method}` : operation.operationId;
+
+      const isNewScanConfig = (config as any)["playbook"] === undefined;
+
+      const scanConfig = isNewScanConfig
+        ? scanUtilNew.readRawScanConfig(config, operationId)
+        : scanUtil.readRawScanConfig(config, path, method);
 
       if (isOpenapi(oas)) {
         // security
@@ -94,7 +112,9 @@ export const slice = createSlice({
         const securityValues = generateSecurityValues(security);
 
         // parameters
-        const parameterValues = generateParameterValuesForScan(scanConfig);
+        const parameterValues = isNewScanConfig
+          ? scanUtilNew.generateParameterValuesForScan(scanConfig)
+          : scanUtil.generateParameterValuesForScan(scanConfig);
 
         state.defaultValues = {
           server: scanConfig.host,
@@ -109,22 +129,28 @@ export const slice = createSlice({
         const securityValues = generateSwaggerSecurityValues(security);
 
         // parameters
-        const parameterValues = generateParameterValuesForScan(scanConfig);
+        const parameterValues = isNewScanConfig
+          ? scanUtilNew.generateParameterValuesForScan(scanConfig)
+          : scanUtil.generateParameterValuesForScan(scanConfig);
 
         state.defaultValues = {
           server: scanConfig.host,
           parameters: parameterValues,
           security: securityValues,
           securityIndex: 0,
+          body: { mediaType: "application/json", value: scanConfig.requestBody },
         };
       }
+
       state.oas = oas;
       state.rawOas = rawOas;
       state.path = path;
       state.method = method;
+      state.operationId = operationId;
 
       state.scanConfigRaw = config;
       state.scanConfig = scanConfig;
+      state.isNewScanConfig = isNewScanConfig;
 
       state.scanReport = undefined;
       state.error = undefined;
@@ -149,23 +175,43 @@ export const slice = createSlice({
     },
 
     showScanReport: (state, action: PayloadAction<SingleOperationScanReport>) => {
-      // path and method stays the same, update the report alone
-      const issues = flattenIssues(action.payload.report, state.path!, state.method!);
-      const filtered = filterIssues(issues, state.filter);
-      const { titles } = groupIssues(issues);
-      const { grouped } = groupIssues(filtered);
+      if (state.isNewScanConfig) {
+        const issues = flattenIssuesNew(
+          action.payload.report as unknown as ScanReportJSONSchemaNew,
+          state.path!,
+          state.operationId!
+        );
+        const filtered = filterIssuesNew(issues, state.filter);
+        const { titles } = groupIssuesNew(issues);
+        const { grouped } = groupIssuesNew(filtered);
+        state.issues = issues;
+        state.titles = titles;
+        state.grouped = grouped;
+      } else {
+        // path and method stays the same, update the report alone
+        const issues = flattenIssues(action.payload.report, state.path!, state.method!);
+        const filtered = filterIssues(issues, state.filter);
+        const { titles } = groupIssues(issues);
+        const { grouped } = groupIssues(filtered);
+        state.issues = issues;
+        state.titles = titles;
+        state.grouped = grouped;
+      }
       state.scanReport = action.payload.report;
       state.waiting = false;
-      state.issues = issues;
-      state.titles = titles;
-      state.grouped = grouped;
     },
 
     changeFilter: (state, action: PayloadAction<Filter>) => {
       state.filter = action.payload;
-      const filtered = filterIssues(state.issues, state.filter);
-      const { grouped } = groupIssues(filtered);
-      state.grouped = grouped;
+      if (state.isNewScanConfig) {
+        const filtered = filterIssuesNew(state.issues as TestLogReportNew[], state.filter);
+        const { grouped } = groupIssuesNew(filtered);
+        state.grouped = grouped;
+      } else {
+        const filtered = filterIssues(state.issues as TestLogReport[], state.filter);
+        const { grouped } = groupIssues(filtered);
+        state.grouped = grouped;
+      }
     },
 
     changeTab: (state, action: PayloadAction<OasState["tab"]>) => {
@@ -288,6 +334,90 @@ function groupIssues(issues: TestLogReport[]): {
           return -1;
         }
         if (b.outcome?.status === "unexpected") {
+          return 1;
+        }
+      }
+
+      if (a.outcome?.criticality !== b.outcome?.criticality) {
+        return a.outcome?.criticality! - b.outcome?.criticality!;
+      }
+
+      return 0;
+    });
+  }
+
+  return { grouped, titles: Object.keys(titles) };
+}
+
+function flattenIssuesNew(scanReport: ScanReportJSONSchemaNew, path: string, operationId: string) {
+  const issues: TestLogReportNew[] = [];
+  const conformanceIssues = scanReport?.operations?.[operationId]?.conformanceRequestsResults;
+  if (conformanceIssues !== undefined) {
+    issues.push(...conformanceIssues);
+  }
+
+  const methodNotAllowed = scanReport?.methodNotAllowed;
+
+  for (const method of HttpMethods) {
+    const conformanceIssues = methodNotAllowed?.[path]?.[method]?.conformanceRequestsResults;
+    if (conformanceIssues !== undefined) {
+      issues.push(...conformanceIssues);
+    }
+  }
+
+  return issues;
+}
+
+function filterIssuesNew(issues: TestLogReportNew[], filter: Filter) {
+  const byTitle = (issue: TestLogReportNew) =>
+    filter?.title === undefined || issue.test?.key === filter.title;
+
+  const criticality =
+    filter.severity !== undefined ? SeverityLevels.indexOf(filter.severity) + 1 : 0;
+  const byCriticality = (issue: TestLogReportNew) =>
+    filter.severity === undefined ||
+    issue.outcome?.criticality === undefined ||
+    issue.outcome?.criticality >= criticality;
+
+  return issues.filter((issue) => {
+    return byTitle(issue) && byCriticality(issue);
+  });
+}
+
+function groupIssuesNew(issues: TestLogReportNew[]): {
+  grouped: OasState["grouped"];
+  titles: OasState["titles"];
+} {
+  const grouped: Record<string, TestLogReportNew[]> = {};
+  const titles: Record<string, string> = {};
+
+  for (const issue of issues) {
+    const key = issue.test?.key;
+    if (key !== undefined) {
+      if (grouped[key] === undefined) {
+        grouped[key] = [];
+        titles[key] = issue.test?.description as string;
+      }
+      grouped[key].push(issue);
+    }
+  }
+
+  const keys = Object.keys(grouped);
+
+  for (const key of keys) {
+    // improve sorting
+    grouped[key].sort((a, b) => {
+      if (a.outcome?.status !== b.outcome?.status) {
+        if (a.outcome?.status === "error") {
+          return -1;
+        }
+        if (b.outcome?.status === "error") {
+          return 1;
+        }
+        if (a.outcome?.status === "defective") {
+          return -1;
+        }
+        if (b.outcome?.status === "defective") {
           return 1;
         }
       }

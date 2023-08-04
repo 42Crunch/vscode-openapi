@@ -10,7 +10,14 @@ import { createListener } from "./listener";
 import ThemeStyles from "../../features/theme/ThemeStyles";
 import { ThemeState, changeTheme } from "../../features/theme/slice";
 import { makeWebappMessageHandler } from "../webapp";
-import { showFullReport, showPartialReport, showNoReport, loadKdb, startAudit } from "./slice";
+import {
+  showFullReport,
+  showPartialReport,
+  showNoReport,
+  loadKdb,
+  startAudit,
+  cancelAudit,
+} from "./slice";
 import { RouterContext, Routes } from "../../features/router/RouterContext";
 import Router from "../../features/router/Router";
 
@@ -19,6 +26,7 @@ import NoReport from "./NoReport";
 import Loading from "./Loading";
 
 const routes: Routes = [
+  { id: "blank", title: "Blank", element: <div />, when: cancelAudit },
   {
     id: "start-audit",
     title: "Audit is starting",
@@ -47,6 +55,7 @@ const routes: Routes = [
 
 const messageHandlers: Webapp["webappHandlers"] = {
   startAudit,
+  cancelAudit,
   showFullReport,
   showPartialReport,
   showNoReport,

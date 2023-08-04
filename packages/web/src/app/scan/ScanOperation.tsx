@@ -13,17 +13,31 @@ import { setScanServer, setSecretForSecurity } from "../../features/prefs/slice"
 import { clearLogs } from "../../features/logging/slice";
 
 import { updateScanConfig } from "./util-scan";
+import { updateScanConfig as updateScanConfigNew } from "./util-scan-new";
+
 import { SecretsForSecurity } from "@xliic/common/prefs";
 import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import Section from "../../components/Section";
 import ScanReport from "./ScanReport";
 import GeneralError from "./GeneralError";
 import SmallLogMessages from "../../features/logging/SmallLogMessages";
+import ScanReportNew from "./ScanReportNew";
 
 export default function ScanOperation() {
   const dispatch = useAppDispatch();
-  const { path, method, oas, rawOas, defaultValues, scanConfigRaw, scanReport, waiting, error } =
-    useAppSelector((state) => state.scan);
+  const {
+    path,
+    method,
+    operationId,
+    oas,
+    rawOas,
+    defaultValues,
+    scanConfigRaw,
+    scanReport,
+    waiting,
+    error,
+    isNewScanConfig,
+  } = useAppSelector((state) => state.scan);
 
   const prefs = useAppSelector((state) => state.prefs);
 
@@ -43,15 +57,24 @@ export default function ScanOperation() {
 
   const scan = async (data: Record<string, any>) => {
     const values = unwrapFormDefaults(data);
-    const [updatedScanConfig, env] = updateScanConfig(
-      scanConfigRaw,
-      path!,
-      method!,
-      scanRuntime,
-      replaceLocalhost,
-      platform,
-      values
-    );
+    const [updatedScanConfig, env] = isNewScanConfig
+      ? updateScanConfigNew(
+          scanConfigRaw,
+          operationId!,
+          scanRuntime,
+          replaceLocalhost,
+          platform,
+          values
+        )
+      : updateScanConfig(
+          scanConfigRaw,
+          path!,
+          method!,
+          scanRuntime,
+          replaceLocalhost,
+          platform,
+          values
+        );
     dispatch(setScanServer(values.server));
 
     const security = values.security[values.securityIndex];
@@ -110,7 +133,8 @@ export default function ScanOperation() {
           <Operation oas={oas} path={path!} method={method!} />
         </Section>
       </FormProvider>
-      {scanReport && <ScanReport />}
+      {scanReport && !isNewScanConfig && <ScanReport />}
+      {scanReport && isNewScanConfig && <ScanReportNew />}
       <GeneralError />
       {(waiting || error) && <SmallLogMessages />}
     </>
