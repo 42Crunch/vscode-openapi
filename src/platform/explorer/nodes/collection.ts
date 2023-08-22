@@ -4,6 +4,7 @@ import { CollectionData } from "../../types";
 import { ApiNode } from "./api";
 import { AbstractExplorerNode, ExplorerNode } from "./base";
 import { LoadMoreApisNode, LoadMoreCollectionsNode } from "./load-more";
+import { GitManager, isCheckedOut } from "../../stores/git-store";
 
 export class CollectionsNode extends AbstractExplorerNode {
   constructor(parent: ExplorerNode, private store: PlatformStore) {
@@ -53,7 +54,7 @@ export class CollectionNode extends AbstractExplorerNode {
     super(
       parent,
       `${parent.id}-${collection.desc.id}`,
-      collection.desc.name,
+      getCollectionTitle(store, collection.desc),
       collection.summary.apis === 0
         ? vscode.TreeItemCollapsibleState.None
         : vscode.TreeItemCollapsibleState.Collapsed
@@ -82,6 +83,10 @@ export class CollectionNode extends AbstractExplorerNode {
   public getCollectionId(): string {
     return this.collection.desc.id;
   }
+
+  public getCollectionTechnicalName(): string {
+    return this.collection.desc.technicalName;
+  }
 }
 
 export class FilteredApiNode extends AbstractExplorerNode {
@@ -94,4 +99,11 @@ export class FilteredApiNode extends AbstractExplorerNode {
   getCollectionId() {
     return this.parent.getCollectionId();
   }
+}
+
+function getCollectionTitle(store: PlatformStore, desc: any): string {
+  if (isCheckedOut(desc.technicalName, store.gitManager.getInfo())) {
+    return desc.name + " [checked out]";
+  }
+  return desc.name;
 }

@@ -126,4 +126,10 @@ export default (
     const document = await vscode.workspace.openTextDocument(uri);
     await vscode.window.showTextDocument(document);
   },
+
+  openFile: async (rootPath: string, technicalName: string) => {
+    const uri = vscode.Uri.file(`${rootPath}/${technicalName}`);
+    const document = await vscode.workspace.openTextDocument(uri);
+    await vscode.window.showTextDocument(document);
+  },
 });

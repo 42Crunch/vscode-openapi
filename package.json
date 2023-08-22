@@ -27,7 +27,8 @@
     "vscode": "^1.61.0"
   },
   "extensionDependencies": [
-    "redhat.vscode-yaml"
+    "redhat.vscode-yaml",
+    "vscode.git"
   ],
   "activationEvents": [
     "*",
@@ -916,6 +917,7 @@
     "got": "^11.8.2",
     "js-yaml": "^4.1.0",
     "jsonc-parser": "^3.0.0",
+    "picomatch": "^2.3.1",
     "semver": "^6.3.0",
     "yaml-language-server-parser": "^0.1.2"
   },
@@ -924,6 +926,7 @@
     "@types/js-yaml": "^4.0.3",
     "@types/mocha": "^9.1.0",
     "@types/node": "^14.14.31",
+    "@types/picomatch": "^2.3.0",
     "@types/semver": "^6.2.0",
     "@types/vscode": "1.61.0",
     "@vscode/test-electron": "^2.1.2",
