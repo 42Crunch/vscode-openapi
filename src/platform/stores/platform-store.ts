@@ -44,6 +44,7 @@ import {
   PlatformConnection,
   UserData,
 } from "../types";
+import { GitManager } from "./git-store";
 
 export interface CollectionsView {
   collections: CollectionData[];
@@ -126,9 +127,11 @@ export class PlatformStore {
   private connection: PlatformConnection | undefined = undefined;
   readonly limits = new Limits();
   readonly filters = new Filters();
+  readonly readonlyApis = new Set();
   private formats?: DataDictionaryFormat[];
   private _onConnectionDidChange = new EventEmitter<PlatformConnectionEvent>();
   private connected = false;
+  readonly gitManager: GitManager = new GitManager();
 
   constructor(private logger: Logger) {}
 
@@ -138,6 +141,7 @@ export class PlatformStore {
 
   async setCredentials(credentials?: PlatformConnection) {
     this.connection = credentials;
+    this.readonlyApis.clear();
     await this.refresh();
     this._onConnectionDidChange.fire({
       credentials: this.hasCredentials(),
@@ -403,6 +407,7 @@ export class PlatformStore {
 
   async refresh(): Promise<void> {
     this.formats = undefined;
+    this.gitManager.refresh();
     if (this.hasCredentials()) {
       const { success } = await testConnection(this.getConnection(), this.logger);
       this.connected = success;
