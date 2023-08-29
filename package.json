@@ -66,10 +66,21 @@
           "id": "42crunch-platform",
           "title": "42Crunch",
           "icon": "resources/icon_42crunch_platform.svg"
+        },
+        {
+          "id": "42crunch-playbook",
+          "title": "42Crunch Playbook",
+          "icon": "resources/icon_42crunch_platform.svg"
         }
       ]
     },
     "views": {
+      "42crunch-playbook": [
+        {
+          "id": "playbookExplorer",
+          "name": "Playbook"
+        }
+      ],
       "42crunch-platform": [
         {
           "id": "platformExplorer",

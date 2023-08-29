@@ -26,6 +26,8 @@ import { activate as activateLinter } from "./data-dictionary/linter";
 import { activate as activateScan } from "./scan/activate";
 
 import { EnvStore } from "../envstore";
+import { PlaybookProvider } from "./playbook/explorer/provider";
+import { PlaybookCodelensProvider } from "./playbook/lens";
 
 export async function activate(
   context: vscode.ExtensionContext,
@@ -72,6 +74,37 @@ export async function activate(
     )
   );
 
+  const playbookProvider = new PlaybookProvider(context, cache);
+
+  const playbookTree = vscode.window.createTreeView("playbookExplorer", {
+    treeDataProvider: playbookProvider,
+  });
+
+  const playbookCodelensProvider = new PlaybookCodelensProvider(cache);
+
+  function activateLens(connected: boolean, enabled: boolean) {
+    let disposables: vscode.Disposable[] = []; // todo: what?
+    disposables.forEach((disposable) => disposable.dispose());
+    if (connected && enabled) {
+      disposables = Object.values(selectors).map((selector) =>
+        vscode.languages.registerCodeLensProvider(selector, playbookCodelensProvider)
+      );
+    } else {
+      disposables = [];
+    }
+  }
+
+  store.onConnectionDidChange(({ connected }) => {
+    activateLens(true, true);
+    //activateLens(connected, configuration.get("codeLens"));
+  });
+
+  configuration.onDidChange(async (e: vscode.ConfigurationChangeEvent) => {
+    if (configuration.changed(e, "codeLens")) {
+      activateLens(true, true);
+      //activateLens(store.isConnected(), configuration.get("codeLens"));
+    }
+  });
   // TODO unsubscribe?
 
   const selectors = {

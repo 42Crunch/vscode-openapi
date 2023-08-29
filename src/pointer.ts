@@ -6,7 +6,7 @@
 const SLASHES = /\//g;
 const TILDES = /~/g;
 
-function encodeJsonPointerSegment(segment: string | number) {
+export function encodeJsonPointerSegment(segment: string | number) {
   if (typeof segment === "number") {
     return String(segment);
   }
