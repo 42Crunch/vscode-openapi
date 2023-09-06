@@ -44,7 +44,8 @@ export class SimpleNode extends AbstractOutlineNode {
     this.icon = icons[key];
     this.depth = depth;
     this.getTitle = getTitle;
-    const parentContextValue = parent.contextValue;
+    this.contextValue = key; // todo: align design with outline stuff
+    //const parentContextValue = parent.contextValue;
     // if (parentContextValue && contextValues[parentContextValue]) {
     //   this.contextValue = contextValues[parentContextValue];
     // } else if (this.context.version === OpenApiVersion.V3) {

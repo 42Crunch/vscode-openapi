@@ -78,7 +78,13 @@
       "42crunch-playbook": [
         {
           "id": "playbookExplorer",
-          "name": "Playbook"
+          "name": "Playbook",
+          "when": "openapiPlaybookEnabled"
+        },
+        {
+          "id": "openapiNotSelectedPlaybook",
+          "name": "",
+          "when": "!openapiPlaybookEnabled"
         }
       ],
       "42crunch-platform": [
@@ -184,6 +190,10 @@
       {
         "view": "platformWelcome",
         "contents": "Please enter 42Crunch Platform credentials.\n[Configure](command:openapi.showConfiguration)"
+      },
+      {
+        "view": "openapiNotSelectedPlaybook",
+        "contents": "No Playbook file selected."
       }
     ],
     "menus": {
@@ -430,6 +440,10 @@
           "title": "Remove filter",
           "when": "view == platformExplorer && viewItem == favoriteApiFilter",
           "group": "inline"
+        },
+        {
+          "command": "playbook.showAuthDetails",
+          "when": "view == playbookExplorer && viewItem == authenticationDetails"
         }
       ]
     },
@@ -744,6 +758,10 @@
         "command": "openapi.platform.editorLoadAuditReportFromFile",
         "title": "42Crunch: Load Security Audit report from file",
         "enablement": "openapiTwoEnabled || openapiThreeEnabled"
+      },
+      {
+        "command": "playbook.showAuthDetails",
+        "title": "Playbook: show auth details"
       }
     ],
     "keybindings": [
@@ -912,8 +930,15 @@
     },
     "jsonValidation": [
       {
-        "fileMatch": "*.json",
+        "fileMatch": [
+          "*.json",
+          "!*.playbook.json"
+        ],
         "url": "./schema/generated/openapi.json"
+      },
+      {
+        "fileMatch": "*.playbook.json",
+        "url": "./schema/generated/fullBundle.json"
       }
     ]
   },

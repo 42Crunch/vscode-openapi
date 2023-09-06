@@ -15,6 +15,12 @@ export async function updateContext(cache: Cache, document: vscode.TextDocument 
     return;
   }
 
+  const documentUri = document.uri.toString();
+  vscode.commands.executeCommand(
+    "setContext",
+    "openapiPlaybookEnabled",
+    documentUri.endsWith(".playbook.json")
+  ); // todo: write func in utils
   const version = cache.getDocumentVersion(document);
 
   if (version !== OpenApiVersion.Unknown) {

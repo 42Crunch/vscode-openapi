@@ -48,9 +48,15 @@ export class PlaybookProvider implements vscode.TreeDataProvider<OutlineNode> {
         // const version = this.cache.getDocumentVersion(document);
         // if (version !== OpenApiVersion.Unknown) {
         this.documentUri = document.uri.toString();
+        if (!this.documentUri.endsWith(".playbook.json")) {
+          return;
+        }
         const root = cache.getLastGoodParsedDocument(document);
         // if (!(this.documentUri in this.search)) {
         //   this.search[this.documentUri] = undefined;
+        // }
+        // if ((root as any)["version"] !== "2.0.0") {
+        //   return;
         // }
         const context = {
           version: OpenApiVersion.Unknown,

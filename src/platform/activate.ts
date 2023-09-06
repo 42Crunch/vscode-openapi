@@ -28,6 +28,7 @@ import { activate as activateScan } from "./scan/activate";
 import { EnvStore } from "../envstore";
 import { PlaybookProvider } from "./playbook/explorer/provider";
 import { PlaybookCodelensProvider } from "./playbook/lens";
+import commands from "./playbook/commands";
 
 export async function activate(
   context: vscode.ExtensionContext,
@@ -93,6 +94,8 @@ export async function activate(
       disposables = [];
     }
   }
+
+  commands(); //cache, platformContext, store, view);
 
   store.onConnectionDidChange(({ connected }) => {
     activateLens(true, true);
