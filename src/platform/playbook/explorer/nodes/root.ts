@@ -12,6 +12,29 @@ import { SimpleNode } from "./simple";
 // import { PanelNode, panelsVer2 } from "./panel";
 // import { TagsNode } from "./tags";
 
+const numOfChildren: any = {
+  runtimeConfiguration: 0,
+  customizations: 1,
+  authorizationTests: 1,
+  authenticationDetails: 1,
+  apiVersion: 1,
+  before: 1,
+  after: 1,
+  hooks: 1,
+  operations: 2,
+  requests: 2,
+  environments: 1,
+};
+
+const lablers: any = {
+  before: function (id: string, value: any): string {
+    return "beforeItem[" + id + "]";
+  },
+  authenticationDetails: function (id: string, value: any): string {
+    return "authDetailsItem[" + id + "]";
+  },
+};
+
 export class RootNode extends AbstractOutlineNode {
   constructor(root: any, context: OutlineContext) {
     super(undefined, "/", "", vscode.TreeItemCollapsibleState.Expanded, root, context);
@@ -28,7 +51,12 @@ export class RootNode extends AbstractOutlineNode {
       // res.push(new TagsNode(this, this.node["tags"], this.node["paths"]));
       // res.push(new OperationIdsNode(this, this.node["paths"]));
       for (const key of Object.keys(this.node)) {
-        res.push(new SimpleNode(this, "/" + key, key, this.node[key], 2));
+        if (key in numOfChildren) {
+          const num = numOfChildren[key];
+          const node = new SimpleNode(this, "/" + key, key, this.node[key], num, lablers[key]);
+          node.icon = "book.svg";
+          res.push(node);
+        }
 
         // if (key === "paths") {
         //   res.push(new PathsNode(this, this.node[key]));
