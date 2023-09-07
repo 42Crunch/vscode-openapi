@@ -8,6 +8,7 @@ import {
   ShowOverlordConnectionTestMessage,
   TestScandManagerConnectionMessage,
   ShowScandManagerConnectionTestMessage,
+  ShowEditorSettings,
 } from "../config";
 import { ChangeThemeMessage } from "../theme";
 
@@ -23,4 +24,5 @@ export type Webapp = App<
   | TestPlatformConnectionMessage
   | TestOverlordConnectionMessage
   | TestScandManagerConnectionMessage
+  | ShowEditorSettings
 >;

@@ -95,6 +95,10 @@ export class ConfigWebView extends WebView<Webapp> {
         payload: result,
       };
     },
+
+    showEditorSettings: async (section: string) => {
+      vscode.commands.executeCommand("workbench.action.openSettings", section);
+    },
   };
 
   async sendLoadConfig() {

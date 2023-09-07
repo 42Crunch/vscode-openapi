@@ -18,6 +18,7 @@ export function createListener(host: Webapp["host"]) {
     testOverlordConnection: listener.onTestOverlordConnection(startAppListening, host),
     testScandManagerConnection: listener.onTestScandManagerConnection(startAppListening, host),
     testPlatformConnection: listener.onTestPlatformConnection(startAppListening, host),
+    showEditorSettings: listener.onShowEditorSettings(startAppListening, host),
   };
 
   startListeners(listeners);

@@ -136,7 +136,7 @@ export const slice = createSlice({
       state.waitingForScandManagerConnectionTest = false;
     },
 
-    showConfigWindow: (state, action: PayloadAction<undefined>) => {
+    showEditorSettings: (state, action: PayloadAction<string>) => {
       // hook for a listener
     },
   },
@@ -159,7 +159,6 @@ function deriveServices(platformUrl: string) {
 export const {
   loadConfig,
   saveConfig,
-  showConfigWindow,
   setError,
   clearError,
   testPlatformConnection,
@@ -170,6 +169,7 @@ export const {
   showScandManagerConnectionTest,
   addInsecureSslHostname,
   removeInsecureSslHostname,
+  showEditorSettings,
 } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<

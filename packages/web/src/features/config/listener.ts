@@ -11,6 +11,7 @@ import {
   TestPlatformConnectionMessage,
   TestOverlordConnectionMessage,
   TestScandManagerConnectionMessage,
+  ShowEditorSettings,
 } from "@xliic/common/config";
 
 import {
@@ -20,6 +21,7 @@ import {
   testPlatformConnection,
   testOverlordConnection,
   testScandManagerConnection,
+  showEditorSettings,
 } from "./slice";
 
 import config from "./slice";
@@ -109,6 +111,22 @@ export function onTestScandManagerConnection(
         host.postMessage({
           command: "testScandManagerConnection",
           payload: undefined,
+        });
+      },
+    });
+}
+
+export function onShowEditorSettings(
+  startAppListening: FeatureListening,
+  host: Webapp<NoopMessage, ShowEditorSettings>["host"]
+) {
+  return () =>
+    startAppListening({
+      actionCreator: showEditorSettings,
+      effect: async (action, listenerApi) => {
+        host.postMessage({
+          command: "showEditorSettings",
+          payload: action.payload,
         });
       },
     });

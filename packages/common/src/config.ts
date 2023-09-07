@@ -54,3 +54,8 @@ export type ShowScandManagerConnectionTestMessage = {
   command: "showScandManagerConnectionTest";
   payload: ConnectionTestResult;
 };
+
+export type ShowEditorSettings = {
+  command: "showEditorSettings";
+  payload: string;
+};
