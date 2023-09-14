@@ -11,13 +11,15 @@ export function isPlatformUri(uri: vscode.Uri) {
   return uri.scheme === platformUriScheme;
 }
 
-export function makePlatformUri(apiId: string) {
-  return vscode.Uri.parse(`${platformUriScheme}://42crunch.com/apis/${apiId}.json`);
+export function makePlatformUri(apiId: string, yaml: boolean) {
+  const extension = yaml ? "yaml" : "json";
+  return vscode.Uri.parse(`${platformUriScheme}://42crunch.com/apis/${apiId}.${extension}`);
 }
 
 export function getApiId(uri: vscode.Uri): string | undefined {
   if (isPlatformUri(uri)) {
-    const apiId = path.basename(uri.fsPath, ".json");
+    const extension = uri.fsPath.endsWith(".yaml") ? ".yaml" : ".json";
+    const apiId = path.basename(uri.fsPath, extension);
     return apiId;
   }
 }

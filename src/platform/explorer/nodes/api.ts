@@ -42,7 +42,7 @@ export class AuditNode extends AbstractExplorerNode {
     this.item.command = {
       command: "openapi.platform.openAuditReport",
       title: "",
-      arguments: [api.desc.id],
+      arguments: [api.desc.id, api.desc.yaml],
     };
   }
 }
@@ -56,7 +56,7 @@ export class OasNode extends AbstractExplorerNode {
     this.item.command = {
       command: "openapi.platform.editApi",
       title: "",
-      arguments: [api.desc.id],
+      arguments: [api.desc.id, api.desc.yaml],
     };
   }
 }

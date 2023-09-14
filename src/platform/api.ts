@@ -150,6 +150,7 @@ export async function deleteApi(apiId: string, options: PlatformConnection, logg
 export async function createApi(
   collectionId: string,
   name: string,
+  yaml: boolean,
   contents: Buffer,
   options: PlatformConnection,
   logger: Logger
@@ -160,6 +161,7 @@ export async function createApi(
       cid: collectionId,
       name,
       specfile: contents.toString("base64"),
+      yaml,
     },
   });
 

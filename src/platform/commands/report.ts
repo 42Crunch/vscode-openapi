@@ -17,7 +17,7 @@ export default (
   cache: Cache,
   reportWebView: AuditWebView
 ) => ({
-  openAuditReport: async (apiId: string) => {
+  openAuditReport: async (apiId: string, yaml: boolean) => {
     await vscode.window.withProgress<void>(
       {
         title: `Loading Audit Report for API ${apiId}`,
@@ -26,7 +26,7 @@ export default (
       },
       async () => {
         try {
-          const uri = makePlatformUri(apiId);
+          const uri = makePlatformUri(apiId, yaml);
           const document = await vscode.workspace.openTextDocument(uri);
           const audit = await refreshAuditReport(store, cache, auditContext, document);
           if (audit) {

@@ -223,10 +223,11 @@ export class PlatformStore {
     await updateApi(apiId, { name }, this.getConnection(), this.logger);
   }
 
-  async createApi(collectionId: string, name: string, json: string): Promise<Api> {
+  async createApi(collectionId: string, name: string, json: string, yaml: boolean): Promise<Api> {
     const api = await createApi(
       collectionId,
       name,
+      yaml,
       Buffer.from(json),
       this.getConnection(),
       this.logger
@@ -240,6 +241,7 @@ export class PlatformStore {
     const api = await createApi(
       collectionId,
       apiName,
+      false,
       Buffer.from(json),
       this.getConnection(),
       this.logger

@@ -121,8 +121,8 @@ export default (
     provider.refresh();
   },
 
-  editApi: async (apiId: string) => {
-    const uri = makePlatformUri(apiId);
+  editApi: async (apiId: string, yaml: boolean) => {
+    const uri = makePlatformUri(apiId, yaml);
     const document = await vscode.workspace.openTextDocument(uri);
     await vscode.window.showTextDocument(document);
   },

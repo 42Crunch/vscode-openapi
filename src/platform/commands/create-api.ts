@@ -64,7 +64,8 @@ async function createApi(
 
     if (name) {
       const json = stringify(bundle.value);
-      const api = await store.createApi(collection.getCollectionId(), name, json);
+      const isYaml = document.languageId === "yaml";
+      const api = await store.createApi(collection.getCollectionId(), name, json, isYaml);
       const apiNode = new ApiNode(collection, store, api);
       provider.refresh();
       tree.reveal(apiNode, { focus: true });
@@ -86,8 +87,10 @@ async function createApiFromUrl(
 
   if (uri) {
     const { body, headers } = await got(uri);
+    const contentType = headers["content-type"];
+    const languageId = contentType?.includes("yaml") ? "yaml" : "json";
 
-    const [parsed, errors] = parse(body, "json", {});
+    const [parsed, errors] = parse(body, languageId, {});
 
     if (errors.length > 0) {
       throw new Error(
@@ -103,7 +106,12 @@ async function createApiFromUrl(
     });
 
     if (name) {
-      const api = await store.createApi(collection.getCollectionId(), name, body);
+      const api = await store.createApi(
+        collection.getCollectionId(),
+        name,
+        body,
+        languageId === "yaml"
+      );
       importedUrls.setUrl(api.desc.id, uri);
       const apiNode = new ApiNode(collection, store, api);
       provider.refresh();

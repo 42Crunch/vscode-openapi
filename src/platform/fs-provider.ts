@@ -1,4 +1,5 @@
 import { parse, stringify } from "@xliic/preserving-json-yaml-parser";
+import * as yaml from "js-yaml";
 import * as vscode from "vscode";
 
 import { PlatformStore } from "./stores/platform-store";
@@ -35,15 +36,22 @@ export class PlatformFS implements vscode.FileSystemProvider {
   async readFile(uri: vscode.Uri): Promise<Uint8Array> {
     const apiId = getApiId(uri)!;
     const api = await this.store.getApi(apiId);
-    // parse and format json
     const buffer = Buffer.from(api.desc.specfile!, "base64");
-    const [parsed, errors] = parse(buffer.toString("utf-8"), "json", {});
-    if (errors.length > 0) {
-      // failed to parse JSON, show it as is without formatting
-      return buffer;
+    const specfile = buffer.toString("utf-8");
+
+    if (uri.fsPath.endsWith(".yaml")) {
+      const text = convertJsonToYaml(specfile);
+      return Buffer.from(text, "utf-8");
+    } else {
+      // parse and format json
+      const [parsed, errors] = parse(specfile, "json", {});
+      if (errors.length > 0) {
+        // failed to parse JSON, show it as is without formatting
+        return buffer;
+      }
+      const text = stringify(parsed, 2);
+      return Buffer.from(text, "utf-8");
     }
-    const text = stringify(parsed, 2);
-    return Buffer.from(text, "utf-8");
   }
 
   async writeFile(
@@ -114,4 +122,42 @@ export class PlatformFS implements vscode.FileSystemProvider {
   createDirectory(uri: vscode.Uri): void | Promise<void> {
     throw new Error("Method not implemented.");
   }
+}
+
+function convertJsonToYaml(jsonCode: string): string {
+  // Convert jsonCode using standard JSON_SCHEMA (numbers larger than MAX_SAFE_INTEGER
+  // will be rounded to MAX_SAFE_INTEGER)
+  const jsonBaseObject = yaml.load(jsonCode, { schema: yaml.JSON_SCHEMA });
+
+  // Convert jsonCode using MINIMAL_SCHEMA (all values will be presented as strings)
+  const jsonObjectWithStringValues = yaml.load(jsonCode, { schema: yaml.FAILSAFE_SCHEMA });
+
+  // Getting yaml structures from both json structures
+  const baseYamlCode = yaml.dump(jsonBaseObject);
+  const yamlCodeWithStringValues = yaml.dump(jsonObjectWithStringValues);
+
+  /**
+   *  This is a bit of a hack.
+   *  We split yaml structures into separate lines and compare them line by line.
+   *  If lines are different that means there is a value of type number or boolean
+   *  in the second structure which is presented as string.
+   *  We use a regex to replace "string value" with "regular value".
+   */
+  const splittedBaseYaml = baseYamlCode.split("\n");
+  const splittedYamlWithStringValues = yamlCodeWithStringValues.split("\n");
+  const result: string[] = [];
+
+  splittedBaseYaml.forEach((line: string, index: number) => {
+    if (line === splittedYamlWithStringValues[index]) {
+      result.push(line);
+    } else {
+      // Match first group (text inside single quotes)
+      const numberValue = splittedYamlWithStringValues[index].match(/'(.*?)'/)?.[1]; // https://regex101.com/r/D61BTP/1
+      if (numberValue !== undefined) {
+        result.push(splittedYamlWithStringValues[index].replace(/'(.*?)'/, numberValue));
+      }
+    }
+  });
+
+  return result.join("\n");
 }

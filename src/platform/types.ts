@@ -32,6 +32,7 @@ export interface ApiDescriptor {
   name: string;
   technicalName: string;
   specfile?: string;
+  yaml: boolean;
 }
 
 export interface AssessSummary {
