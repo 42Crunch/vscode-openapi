@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 
-import { EnvData, NamedEnvironment } from "@xliic/common/env";
+import { DefaultOrSecretsEnvironment, EnvData, NamedEnvironment } from "@xliic/common/env";
 
 export interface EnvState {
   ready: boolean;
@@ -26,7 +26,7 @@ export const slice = createSlice({
       }
       state.ready = true;
     },
-    saveEnv: (state, action: PayloadAction<NamedEnvironment>) => {
+    saveEnv: (state, action: PayloadAction<DefaultOrSecretsEnvironment>) => {
       // this is also a hook for a listener
       state.data[action.payload.name] = action.payload.environment;
     },
