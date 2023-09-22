@@ -1,25 +1,41 @@
-export type Environment = Record<string, string>;
+import { Path } from "@xliic/preserving-json-yaml-parser";
 
-export type NamedEnvironment = { name: "default" | "secrets"; environment: Environment };
+export type Environment = Record<string, unknown>;
+export type SimpleEnvironment = Record<string, string>;
+
+export type NamedEnvironment = { name: string; environment: Environment };
+
+export type EnvironmentStack = NamedEnvironment[];
+
+export type LookupResult = {
+  name: string;
+  value: unknown;
+  location: Path;
+  offset: number;
+  context: string;
+};
+
+export type LookupFailure = {
+  name: string;
+  location: Path;
+};
+
+export type ReplacementResult<T> = {
+  value: T;
+  found: LookupResult[];
+  missing: LookupFailure[];
+};
+
+export type DefaultOrSecretsEnvironment = {
+  name: "default" | "secrets";
+  environment: SimpleEnvironment;
+};
 
 export type EnvData = {
-  default: Environment;
-  secrets: Environment;
+  default: SimpleEnvironment;
+  secrets: SimpleEnvironment;
 };
 
 export type LoadEnvMessage = { command: "loadEnv"; payload: Partial<EnvData> };
-export type SaveEnvMessage = { command: "saveEnv"; payload: NamedEnvironment };
+export type SaveEnvMessage = { command: "saveEnv"; payload: DefaultOrSecretsEnvironment };
 export type ShowEnvWindow = { command: "showEnvWindow"; payload: undefined };
-
-const ENV_VAR_REGEX = /{{([\w.]+)}}/g;
-const SECRETS_PREFIX = "secrets.";
-
-export function replaceEnv(value: string, env: EnvData): string {
-  return value.replace(ENV_VAR_REGEX, (match: string, name: string): string => {
-    if (name.startsWith(SECRETS_PREFIX)) {
-      const key = name.substring(SECRETS_PREFIX.length, name.length);
-      return env.secrets.hasOwnProperty(key) ? env.secrets[key] : match;
-    }
-    return env.default.hasOwnProperty(name) ? env.default[name] : match;
-  });
-}

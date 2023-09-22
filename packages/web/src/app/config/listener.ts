@@ -18,6 +18,8 @@ export function createListener(host: Webapp["host"]) {
     testOverlordConnection: listener.onTestOverlordConnection(startAppListening, host),
     testScandManagerConnection: listener.onTestScandManagerConnection(startAppListening, host),
     testPlatformConnection: listener.onTestPlatformConnection(startAppListening, host),
+    testCli: listener.onTestCli(startAppListening, host),
+    downloadCli: listener.onDownloadCli(startAppListening, host),
   };
 
   startListeners(listeners);

@@ -1,34 +1,33 @@
 import styled from "styled-components";
 import { Buffer } from "buffer";
 
-import { ExclamationCircle, Check, AngleDown, AngleUp } from "../../icons";
 import { HttpError, HttpResponse } from "@xliic/common/http";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { HappyPathReport } from "@xliic/common/scan-report";
 import Response from "../../components/response/Response";
-import { parseResponse } from "../../http-parser";
+import { parseResponse, safeParseResponse } from "../../http-parser";
 import CurlRequest from "./CurlRequest";
-import { useState } from "react";
+import { HappyPathReport, RuntimeOperationReport } from "./scan-report-new";
 
 export function HappyPath({
+  operation,
   issue,
   responses,
   errors,
   waitings,
 }: {
+  operation: RuntimeOperationReport;
   issue: HappyPathReport;
   responses: Record<string, HttpResponse>;
   errors: Record<string, HttpError>;
   waitings: Record<string, boolean>;
 }) {
   const { request, response, outcome, happyPath } = issue;
-  const failed = outcome?.status !== "expected" || !outcome?.conformant;
+  const failed = !operation.fuzzed;
 
   let responsePayloadMatchesContract = "N/A";
 
-  const responseCodeFound =
-    happyPath === null || happyPath?.key !== "happy.path.success" ? "No" : "Yes";
+  const responseCodeFound = issue?.outcome?.status === "correct" ? "Yes" : "No";
 
   if (responseCodeFound === "Yes") {
     responsePayloadMatchesContract = outcome?.conformant ? "Yes" : "No";
@@ -75,15 +74,13 @@ export function HappyPath({
         </Item>
       )}
 
-      {(response?.http || httpResponse) && (
+      {(response?.rawPayload || httpResponse) && (
         <Item>
           <div>Response</div>
           <div>
             <Response
               accented
-              response={
-                httpResponse ? httpResponse : parseResponse(Buffer.from(response!.http!, "base64"))
-              }
+              response={httpResponse ? httpResponse : safeParseResponse(response!.rawPayload)}
             />
           </div>
         </Item>

@@ -1,14 +1,12 @@
+import * as Tooltip from "@radix-ui/react-tooltip";
 import styled from "styled-components";
 
-import { HttpRequest } from "@xliic/common/http";
-import { useAppDispatch, useAppSelector } from "./store";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { Clone } from "../../icons";
-import * as Tooltip from "@radix-ui/react-tooltip";
 
-import { sendHttpRequest, sendCurlRequest } from "./slice";
-import { ProgressButton } from "../../components/ProgressButton";
-import { optionallyUnreplaceLocalhost } from "./util-scan";
+import { Clone } from "../../icons";
+import { useAppDispatch } from "./store";
+
+import { sendCurlRequest } from "./slice";
 
 export default function CurlRequest({
   curl,
@@ -20,22 +18,6 @@ export default function CurlRequest({
   waiting: boolean;
 }) {
   const dispatch = useAppDispatch();
-  const defaultValues = useAppSelector((state) => state.scan.defaultValues);
-  const {
-    docker: { replaceLocalhost },
-    scanRuntime,
-    platform,
-  } = useAppSelector((state) => state.config.data);
-  const security = defaultValues?.security[defaultValues.securityIndex];
-
-  const secretCurl = curl.replace(/{{([\w-]+)\/([\w-]+)}}/gm, (match, p1, p2): string => {
-    if (security !== undefined && typeof security[p1] === "string") {
-      return security[p1] as string;
-    }
-    return match;
-  });
-
-  const request = extract(secretCurl, id, scanRuntime, replaceLocalhost, platform);
 
   return (
     <Request>
@@ -48,16 +30,7 @@ export default function CurlRequest({
                   onClick={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    dispatch(
-                      sendCurlRequest(
-                        optionallyUnreplaceLocalhost(
-                          secretCurl,
-                          scanRuntime,
-                          replaceLocalhost,
-                          platform
-                        )
-                      )
-                    );
+                    dispatch(sendCurlRequest(curl));
                   }}
                 />
               </span>
@@ -70,19 +43,8 @@ export default function CurlRequest({
             </Tooltip.Portal>
           </Tooltip.Root>
         </Tooltip.Provider>
-        {optionallyUnreplaceLocalhost(curl, scanRuntime, replaceLocalhost, platform)}
+        {curl}
       </Code>
-      <Buttons>
-        <ProgressButton
-          label={"Resend"}
-          waiting={waiting}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            dispatch(sendHttpRequest(request));
-          }}
-        />
-      </Buttons>
     </Request>
   );
 }
@@ -118,83 +80,3 @@ const TooltipContent = styled(Tooltip.Content)`
 const TooltipArrow = styled(Tooltip.Arrow)`
   fill: var(${ThemeColorVariables.notificationsForeground});
 `;
-
-const Buttons = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 8px;
-  > button {
-    width: 80px;
-    height: 22px;
-  }
-`;
-
-type ParsedValue = {
-  type: "plain" | "single" | "double";
-  value: string;
-};
-
-function extract(
-  curl: string,
-  id: string,
-  scanRuntime: "docker" | "scand-manager",
-  replaceLocalhost: boolean,
-  platform: string
-): HttpRequest {
-  const parts = split(curl).slice(1);
-  const result: HttpRequest = {
-    id,
-    url: parts.pop()!,
-    headers: {},
-    method: "get",
-    config: {
-      https: {
-        rejectUnauthorized: false,
-      },
-    },
-  };
-
-  for (let i = 0; i < parts.length; i++) {
-    const flag = parts[i];
-    const value = parts[i + 1];
-    if (flag === "-d") {
-      result.body = value;
-    } else if (flag == "-X") {
-      result.method = value.toLowerCase() as HttpRequest["method"];
-    } else if (flag === "-H") {
-      const [headerName, headerValue] = value.split(": ", 2);
-      result.headers[headerName] = headerValue;
-    }
-  }
-
-  result.url = optionallyUnreplaceLocalhost(result.url, scanRuntime, replaceLocalhost, platform);
-
-  return result;
-}
-
-function split(string: string): string[] {
-  return splitDetailed(string).map((details) => details.value);
-}
-
-function splitDetailed(string: string): ParsedValue[] {
-  const groupsRegex = /[^\s"']+|(?:"|'){2,}|"(?!")([^"]*)"|'(?!')([^']*)'|"|'/g;
-
-  const matches: ParsedValue[] = [];
-
-  let match;
-
-  while ((match = groupsRegex.exec(string))) {
-    if (match[2]) {
-      // Single quoted group
-      matches.push({ type: "single", value: match[2] });
-    } else if (match[1]) {
-      // Double quoted group
-      matches.push({ type: "double", value: match[1] });
-    } else {
-      // No quote group present
-      matches.push({ type: "plain", value: match[0]! });
-    }
-  }
-
-  return matches;
-}

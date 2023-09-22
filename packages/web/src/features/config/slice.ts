@@ -1,7 +1,12 @@
 import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 
-import { Config, ConnectionTestResult } from "@xliic/common/config";
+import {
+  CliDownloadResult,
+  CliTestResult,
+  Config,
+  ConnectionTestResult,
+} from "@xliic/common/config";
 
 export interface ConfigState {
   ready: boolean;
@@ -14,6 +19,11 @@ export interface ConfigState {
   waitingForOverlordConnectionTest: boolean;
   scandManagerConnectionTestResult?: ConnectionTestResult;
   waitingForScandManagerConnectionTest: boolean;
+  cliTestResult?: CliTestResult;
+  waitingForCliTest: boolean;
+  waitingForCliDownload: boolean;
+  cliDownloadPercent: number;
+  cliDownloadError?: string;
 }
 
 export type ConfigScreen =
@@ -48,6 +58,8 @@ const initialState: ConfigState = {
       useHostNetwork: true,
     },
     platform: "",
+    cli: { found: false, location: "" },
+    repository: "",
   },
   platformConnectionTestResult: undefined,
   waitingForPlatformConnectionTest: false,
@@ -55,6 +67,10 @@ const initialState: ConfigState = {
   waitingForOverlordConnectionTest: false,
   scandManagerConnectionTestResult: undefined,
   waitingForScandManagerConnectionTest: false,
+  cliTestResult: undefined,
+  waitingForCliTest: false,
+  waitingForCliDownload: false,
+  cliDownloadPercent: 0,
   errors: {
     "platform-connection": undefined,
     "platform-services": undefined,
@@ -139,6 +155,41 @@ export const slice = createSlice({
     showConfigWindow: (state, action: PayloadAction<undefined>) => {
       // hook for a listener
     },
+
+    testCli: (state, action: PayloadAction<undefined>) => {
+      state.waitingForCliTest = true;
+      state.cliTestResult = undefined;
+      // hook for a listener
+    },
+
+    showCliTest: (state, action: PayloadAction<CliTestResult>) => {
+      state.cliTestResult = action.payload;
+      state.waitingForCliTest = false;
+    },
+
+    downloadCli: (state, action: PayloadAction<undefined>) => {
+      state.waitingForCliDownload = true;
+      state.cliTestResult = undefined;
+      // hook for a listener
+    },
+
+    showCliDownload: (state, action: PayloadAction<CliDownloadResult>) => {
+      state.cliTestResult = undefined;
+      if (action.payload.completed) {
+        state.waitingForCliDownload = false;
+        state.cliDownloadPercent = 0;
+        if (action.payload.success) {
+          state.data.cli.location = action.payload.location;
+          state.data.cli.found = true;
+        } else {
+          state.data.cli.found = false;
+          state.cliDownloadError = action.payload.error;
+        }
+      } else {
+        state.waitingForCliDownload = true;
+        state.cliDownloadPercent = action.payload.progress.percent;
+      }
+    },
   },
 });
 
@@ -170,6 +221,10 @@ export const {
   showScandManagerConnectionTest,
   addInsecureSslHostname,
   removeInsecureSslHostname,
+  testCli,
+  showCliTest,
+  downloadCli,
+  showCliDownload,
 } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<

@@ -22,6 +22,7 @@ export default defineConfig(({ command, mode }) => {
           "data-dictionary": resolve(__dirname, "src/app/data-dictionary/index.tsx"),
           environment: resolve(__dirname, "src/app/environment/index.tsx"),
           config: resolve(__dirname, "src/app/config/index.tsx"),
+          scanconf: resolve(__dirname, "src/app/scanconf/index.tsx"),
         },
         fileName: (format, name) => {
           return `${name}.js`;

@@ -65,7 +65,14 @@ function TryOperationForm({
   const tryOperation = async (data: Record<string, any>) => {
     const values = unwrapFormDefaults(data);
     try {
-      const httpRequest = await makeHttpRequest(config, oas, method!, path!, values, env);
+      const [httpRequest, httpConfig] = await makeHttpRequest(
+        config,
+        oas,
+        method!,
+        path!,
+        values,
+        env
+      );
       const security = values.security[values.securityIndex];
       if (security) {
         for (const [scheme, value] of Object.entries(security)) {
@@ -75,11 +82,13 @@ function TryOperationForm({
         }
       }
       dispatch(setTryitServer(values.server));
-      dispatch(sendHttpRequest({ defaultValues: values, request: httpRequest }));
+      dispatch(
+        sendHttpRequest({ defaultValues: values, request: httpRequest, config: httpConfig })
+      );
     } catch (ex) {
       dispatch(
         showGeneralError({
-          message: `Failed to build HTTP Request: ${ex}`,
+          message: `Failed to build HTTP request: ${ex}`,
         })
       );
     }

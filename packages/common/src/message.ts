@@ -23,7 +23,11 @@ export type Webapp<C extends Message, P extends Message> = {
 
   hostHandlers: UnionToIntersection<
     P extends Message
-      ? { [key in P["command"]]: (payload: P["payload"]) => Promise<C | void> }
+      ? {
+          [key in P["command"]]: (
+            payload: P["payload"]
+          ) => Promise<C | void> | AsyncGenerator<C, void, unknown>;
+        }
       : never
   >;
 

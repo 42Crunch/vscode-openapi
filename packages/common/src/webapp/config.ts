@@ -8,6 +8,10 @@ import {
   ShowOverlordConnectionTestMessage,
   TestScandManagerConnectionMessage,
   ShowScandManagerConnectionTestMessage,
+  ShowCliTestMessage,
+  TestCliMessage,
+  DownloadCliMessage,
+  ShowCliDownloadMessage,
 } from "../config";
 import { ChangeThemeMessage } from "../theme";
 
@@ -17,10 +21,14 @@ export type Webapp = App<
   | LoadConfigMessage
   | ShowPlatformConnectionTestMessage
   | ShowOverlordConnectionTestMessage
-  | ShowScandManagerConnectionTestMessage,
+  | ShowScandManagerConnectionTestMessage
+  | ShowCliTestMessage
+  | ShowCliDownloadMessage,
   // produces
   | SaveConfigMessage
   | TestPlatformConnectionMessage
   | TestOverlordConnectionMessage
   | TestScandManagerConnectionMessage
+  | TestCliMessage
+  | DownloadCliMessage
 >;

@@ -132,7 +132,7 @@ function extractEnvVariableName(environmentConfig: any, name: string): string | 
 
 function optionallyReplaceLocalhost(
   server: string,
-  runtime: "docker" | "scand-manager",
+  runtime: "docker" | "scand-manager" | "cli",
   replaceLocalhost: boolean,
   platform: string
 ) {
@@ -150,7 +150,7 @@ function optionallyReplaceLocalhost(
 
 export function optionallyUnreplaceLocalhost(
   value: string,
-  runtime: "docker" | "scand-manager",
+  runtime: "docker" | "scand-manager" | "cli",
   replaceLocalhost: boolean,
   platform: string
 ) {

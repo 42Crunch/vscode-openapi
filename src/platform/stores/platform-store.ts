@@ -425,7 +425,7 @@ export class PlatformStore {
     return createScanConfig(apiId, name, config, this.getConnection(), this.logger);
   }
 
-  async createScanConfigNew(apiId: string, name: string, config: unknown) {
+  async createScanConfigNew(apiId: string, name: string, config: string) {
     return createScanConfigNew(apiId, name, config, this.getConnection(), this.logger);
   }
 

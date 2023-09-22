@@ -6,42 +6,67 @@ import { AngleDown, AngleUp } from "../icons";
 
 export default function CollapsibleCard({
   children,
+  defaultCollapsed,
 }: {
-  children: [ReactNode, ReactNode, ReactNode];
+  defaultCollapsed?: boolean;
+  children: [...ReactNode[], ReactNode];
 }) {
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(defaultCollapsed ?? true);
+
+  const head = children.slice(0, children.length - 1);
+  const body = children[children.length - 1];
 
   return (
     <Container>
-      <Title collapsed={collapsed} onClick={() => setCollapsed(!collapsed)}>
+      <Title
+        collapsed={collapsed}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setCollapsed(!collapsed);
+        }}
+      >
         <div>{collapsed ? <AngleDown /> : <AngleUp />}</div>
-        <div>
-          {children[0]}
-          {children[1]}
-        </div>
+        <div>{...head}</div>
       </Title>
-      {!collapsed && <Content>{children[2]}</Content>}
+      {!collapsed && <Content>{body}</Content>}
     </Container>
   );
 }
 
+//margin: ${({ noMargin }: { noMargin: boolean | undefined }) => (noMargin ? "0" : "8px")};
 const Container = styled.div`
   margin: 8px;
   border: 1px solid var(${ThemeColorVariables.border});
+  //background-color: var(${ThemeColorVariables.computedOne});
 `;
 
 const Title = styled.div`
   display: flex;
   cursor: pointer;
   padding: 10px 10px 10px 0px;
-  background-color: var(${ThemeColorVariables.computedOne});
+  //background-color: var(${ThemeColorVariables.computedOne});
+  align-items: stretch;
   & > div:first-child {
     padding-left: 4px;
     padding-right: 8px;
+    display: flex;
+    justify-content: center;
     > svg {
       fill: var(${ThemeColorVariables.foreground});
     }
   }
+  & > div:nth-child(2) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  & > div:nth-child(3) {
+    display: flex;
+    align-items: center;
+  }
+
   border-left: 5px solid transparent;
   ${({ collapsed }: { collapsed: boolean }) =>
     !collapsed &&
@@ -50,11 +75,14 @@ const Title = styled.div`
 `;
 
 export const TopDescription = styled.div`
+  display: flex;
+  gap: 4px;
+  align-items: center;
   font-weight: 600;
 `;
 
 export const BottomDescription = styled.div`
-  margin-top: 8px;
+  //margin-top: 8px;
   display: flex;
   font-size: 90%;
   align-items: center;
@@ -72,5 +100,5 @@ export const BottomItem = styled.div`
 `;
 
 const Content = styled.div`
-  background-color: var(${ThemeColorVariables.computedOne});
+  //background-color: var(${ThemeColorVariables.computedOne});
 `;

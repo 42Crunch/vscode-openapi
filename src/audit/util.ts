@@ -64,6 +64,8 @@ function findLocationForJsonPointerResolvingRefs(
       i++;
     } else if (current.hasOwnProperty("$ref")) {
       current = findLocationForJsonPointerResolvingRefs(root, current["$ref"])[1];
+    } else {
+      return [undefined, undefined];
     }
   }
 

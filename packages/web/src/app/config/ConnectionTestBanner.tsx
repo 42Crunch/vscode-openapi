@@ -1,5 +1,5 @@
+import { ConnectionTestResult } from "@xliic/common/config";
 import { Banner, ErrorBanner } from "../../components/Banner";
-import { ConnectionTestResult } from "../../../../common/src/config";
 
 export default function ConnectionTestBanner({ result }: { result?: ConnectionTestResult }) {
   if (result !== undefined) {

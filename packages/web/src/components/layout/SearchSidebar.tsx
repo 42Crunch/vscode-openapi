@@ -2,76 +2,191 @@ import { ReactNode, useState } from "react";
 import styled from "styled-components";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { MagnifyingGlass } from "../../icons";
+import { ArrowLeftToLine, ArrowRightToLine, MagnifyingGlass } from "../../icons";
 import List, { ListItem } from "../List";
 import React from "react";
 
 export type Section = {
+  id: string;
   title: string;
   items: ListItem[];
+  menu?: React.ReactNode;
 };
 
-export default function SearchSidebar({
+export type ItemId = {
+  sectionId: string;
+  itemId: string;
+};
+
+export default function SearchSidebar(props: {
+  title?: string;
+  sections: Section[];
+  noSectionTitles?: boolean;
+  errors?: Record<string, string | undefined>;
+  defaultSelection?: ItemId;
+  render: (selection: ItemId | undefined) => ReactNode;
+  onSelected?: (selected: ItemId) => void;
+}) {
+  const [selected, setSelected] = useState(
+    props.defaultSelection || {
+      sectionId: props.sections?.[0]?.id,
+      itemId: props.sections?.[0]?.items?.[0]?.id,
+    }
+  );
+  return <SearchSidebarControlled {...props} selected={selected} onSelected={setSelected} />;
+}
+
+export function SearchSidebarControlled({
   render,
+  renderButtons,
   sections,
   errors,
   defaultSelection,
+  noSectionTitles,
+  selected,
+  onSelected,
+  title,
 }: {
+  title?: string;
   sections: Section[];
+  noSectionTitles?: boolean;
   errors?: Record<string, string | undefined>;
-  defaultSelection?: string;
-  render: (selection: string) => ReactNode;
+  defaultSelection?: ItemId;
+  render: (selection: ItemId | undefined) => ReactNode;
+  renderButtons?: () => ReactNode;
+  selected?: ItemId;
+  onSelected?: (selected: ItemId) => void;
 }) {
-  const [selected, setSelected] = useState(defaultSelection || sections?.[0]?.items?.[0].id || "");
   const [search, setSearch] = useState("");
+  const [expanded, setExpanded] = useState(true);
+
+  const count = sections.map((section) => section.items).flat().length;
+
   return (
-    <Container>
-      <Sidebar>
-        <Search>
-          <input placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} />
-          <MagnifyingGlass />
-        </Search>
-        {sections.map((section: Section) => (
-          <React.Fragment key={section.title}>
-            <Subheader>{section.title}</Subheader>
-            <List
-              selected={selected}
-              setSelected={setSelected}
-              items={section.items}
-              errors={errors}
-              filter={search.trim()}
+    <>
+      {!expanded && (
+        <SidebarCollapsed>
+          <ToggleButton
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              setExpanded(!expanded);
+            }}
+          >
+            <ArrowRightToLine />
+          </ToggleButton>
+        </SidebarCollapsed>
+      )}
+      {expanded && (
+        <Sidebar>
+          <Title>
+            <span>
+              {count} {title || "items"}
+            </span>
+            <ToggleButton
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setExpanded(!expanded);
+              }}
+            >
+              <ArrowLeftToLine />
+            </ToggleButton>
+          </Title>
+          <Search>
+            <input
+              placeholder="Search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
-          </React.Fragment>
-        ))}
-      </Sidebar>
-      <Content>{render(selected)}</Content>
-    </Container>
+            <MagnifyingGlass />
+          </Search>
+          <Sections>
+            {sections.map((section: Section) => (
+              <React.Fragment key={section.title}>
+                {!noSectionTitles && (
+                  <Subheader>
+                    <span>{section.title}</span>
+                    {section.menu && <Menu>{section.menu}</Menu>}
+                  </Subheader>
+                )}
+                <List
+                  selected={selected?.sectionId == section.id ? selected.itemId : undefined}
+                  setSelected={(selected) =>
+                    onSelected && onSelected({ sectionId: section.id, itemId: selected })
+                  }
+                  items={section.items}
+                  errors={errors}
+                  filter={search.trim()}
+                />
+              </React.Fragment>
+            ))}
+          </Sections>
+          {renderButtons && <Buttons>{renderButtons()}</Buttons>}
+        </Sidebar>
+      )}
+      <Content expanded={expanded}>{render(selected)}</Content>
+    </>
   );
 }
 
-const Container = styled.div`
+const Sidebar = styled.div`
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 288px;
+  overflow-y: scroll;
+  bottom: 0;
+  padding: 16px;
   display: flex;
+  flex-direction: column;
+  gap: 8px;
   background-color: var(${ThemeColorVariables.background});
-  height: 100vh;
-  overflow: hidden;
-  > :first-child {
-    width: 240px;
-    overflow-y: auto;
-  }
-  > :last-child {
-    flex: 1;
-    overflow-y: auto;
-  }
 `;
 
-const Content = styled.div`
+const SidebarCollapsed = styled.div`
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 40px;
+  overflow-y: scroll;
+  bottom: 0;
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background-color: var(${ThemeColorVariables.background});
+`;
+
+const Content = styled.div<{ expanded: boolean }>`
+  position: absolute;
+  ${({ expanded }) => (expanded ? `left: 320px;` : `left: 40px;`)}
+  top: 0;
+  right: 0;
+  bottom: 0;
   background-color: var(${ThemeColorVariables.computedOne});
   padding: 16px;
+  overflow-y: auto;
 `;
 
-const Sidebar = styled.div`
-  padding: 16px;
+const Sections = styled.div`
+  flex: 1;
+  > ul {
+    > li {
+      > .menu {
+        opacity: 0;
+      }
+    }
+    > li:hover {
+      > .menu {
+        opacity: 1;
+      }
+    }
+  }
 `;
+
+const Buttons = styled.div``;
 
 const Subheader = styled.div`
   display: flex;
@@ -84,6 +199,37 @@ const Subheader = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(${ThemeColorVariables.disabledForeground});
+`;
+
+const Menu = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+`;
+
+const Title = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  > span:first-child {
+    flex: 1;
+    font-weight: 600;
+  }
+`;
+
+const ToggleButton = styled.button`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  > svg {
+    height: 16px;
+    width: 16px;
+    fill: var(${ThemeColorVariables.foreground});
+  }
 `;
 
 const Search = styled.div`

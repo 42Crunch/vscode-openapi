@@ -25,7 +25,7 @@ export function ErrorBanner({ message, children }: { message: string; children?:
         </div>
         <span>{message}</span>
       </div>
-      <div>{children}</div>
+      {children && <div>{children}</div>}
     </ErrorContainer>
   );
 }

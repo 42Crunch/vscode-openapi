@@ -1,42 +1,34 @@
 import styled from "styled-components";
-import * as Tabs from "@radix-ui/react-tabs";
-
+import { TabContainer } from "../../new-components/Tabs";
+import FilteredIssues from "./FilteredIssues";
+import InvalidReport from "./InvalidReport";
+import PriorityIssues from "./PriorityIssues";
+import SqgReport from "./SqgReport";
+import { SummaryTiles } from "./SummaryTiles";
+import { ReportState, changeTab } from "./slice";
 import { useAppDispatch, useAppSelector } from "./store";
 
-import { TabList, TabButton } from "../../components/Tabs";
-import { ReportState, changeFilter, changeTab } from "./slice";
-
-import { SummaryTiles } from "./SummaryTiles";
-import PriorityIssues from "./PriorityIssues";
-import FilteredIssues from "./FilteredIssues";
-import SqgReport from "./SqgReport";
-import InvalidReport from "./InvalidReport";
-
 export default function AuditReport() {
-  const { tab, audit } = useAppSelector((state) => state.audit);
-
   const dispatch = useAppDispatch();
-  const setTab = (tab: string) => {
-    dispatch(changeTab(tab as ReportState["tab"]));
-  };
+  const { tab, audit } = useAppSelector((state) => state.audit);
 
   return (
     <Container>
       {audit.valid === false && <InvalidReport />}
       <SummaryTiles />
       <SqgReport />
-      <Tabs.Root value={tab} onValueChange={setTab}>
-        <TabList>
-          <TabButton value="priority">Priority</TabButton>
-          <TabButton value="issues">Issues</TabButton>
-        </TabList>
-        <Tabs.Content value="priority">
-          <PriorityIssues />
-        </Tabs.Content>
-        <Tabs.Content value="issues">
-          <FilteredIssues />
-        </Tabs.Content>
-      </Tabs.Root>
+      <TabContainer
+        activeTab={tab}
+        setActiveTab={(tab) => dispatch(changeTab(tab as ReportState["tab"]))}
+        tabs={[
+          {
+            id: "priority",
+            title: "Priority",
+            content: <PriorityIssues />,
+          },
+          { id: "issues", title: "Issues", content: <FilteredIssues /> },
+        ]}
+      />
     </Container>
   );
 }

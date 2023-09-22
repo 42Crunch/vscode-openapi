@@ -4,24 +4,26 @@ import { Buffer } from "buffer";
 import { HttpError, HttpResponse } from "@xliic/common/http";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { TestLogReport } from "@xliic/common/scan-report";
 import { ExclamationCircle, Check, AngleDown, AngleUp } from "../../icons";
 
 import CurlRequest from "./CurlRequest";
 import Response from "../../components/response/Response";
 import { showJsonPointer } from "./slice";
 
-import { parseResponse } from "../../http-parser";
+import { parseResponse, safeParseResponse } from "../../http-parser";
 import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "./store";
+import { RuntimeOperationReport, TestLogReport } from "./scan-report-new";
 
 export default function ScanIssue({
+  operation,
   issue,
   httpResponse,
   error,
   id,
   waiting,
 }: {
+  operation: RuntimeOperationReport;
   issue: TestLogReport;
   httpResponse: HttpResponse | undefined;
   error: HttpError | undefined;
@@ -33,10 +35,9 @@ export default function ScanIssue({
   const [collapsed, setCollapsed] = useState(true);
   const { response, test, outcome } = issue;
 
-  const failed = !(outcome?.status === "expected" && outcome?.conformant === true);
-
-  const responseCodeExpected = outcome?.status === "expected";
+  const responseCodeExpected = outcome?.status === "correct";
   const conformsToContract = outcome?.conformant;
+  const failed = !(responseCodeExpected && conformsToContract);
 
   let contentTypeFound = "N/A";
   let responsePayloadMatchesContract = "N/A";
@@ -177,16 +178,14 @@ export default function ScanIssue({
             </Item>
           )}
           {error === undefined &&
-            (httpResponse !== undefined || issue.response?.http !== undefined) && (
+            (httpResponse !== undefined || issue.response?.rawPayload !== undefined) && (
               <Item>
                 <div>Response</div>
                 <div>
                   <Response
                     accented
                     response={
-                      httpResponse
-                        ? httpResponse
-                        : parseResponse(Buffer.from(issue.response?.http!, "base64"))
+                      httpResponse ? httpResponse : safeParseResponse(issue.response?.rawPayload)
                     }
                   />
                 </div>

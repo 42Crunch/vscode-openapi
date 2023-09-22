@@ -19,7 +19,7 @@ export function ProgressButton({
   const [isWaiting, setIsWaiting] = useState(waiting);
 
   useEffect(() => {
-    let timeoutId: number | undefined;
+    let timeoutId: any;
     if (waiting) {
       setIsWaiting(true);
     } else {
@@ -61,7 +61,7 @@ const Button = styled.button`
   cursor: pointer;
   background-color: var(${ThemeColorVariables.buttonBackground});
   color: var(${ThemeColorVariables.buttonForeground});
-  border: none;
+  border: 1px solid var(${ThemeColorVariables.buttonBorder});
   ${({ waiting }: { disabled?: boolean; waiting?: boolean }) => waiting && "gap: 8px;"}
 
   > span {

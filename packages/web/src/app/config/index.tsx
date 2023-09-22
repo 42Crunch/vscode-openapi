@@ -1,39 +1,14 @@
+import { Webapp } from "@xliic/common/webapp/config";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
-
-import { Webapp } from "@xliic/common/webapp/config";
-
-import { initStore } from "./store";
-import { createListener } from "./listener";
-
-import { makeWebappMessageHandler } from "../webapp";
+import styled from "styled-components";
 import ThemeStyles from "../../features/theme/ThemeStyles";
-import { ThemeState, changeTheme } from "../../features/theme/slice";
-import {
-  loadConfig,
-  showPlatformConnectionTest,
-  showOverlordConnectionTest,
-  showScandManagerConnectionTest,
-} from "../../features/config/slice";
-import Config from "./Main";
-
-const messageHandlers: Webapp["webappHandlers"] = {
-  changeTheme,
-  loadConfig,
-  showPlatformConnectionTest,
-  showOverlordConnectionTest,
-  showScandManagerConnectionTest,
-};
-
-function App() {
-  return (
-    <>
-      <ThemeStyles />
-      <Config />
-    </>
-  );
-}
+import { ThemeState } from "../../features/theme/slice";
+import { makeWebappMessageHandler } from "../webapp";
+import Config from "./Config";
+import { createListener } from "./listener";
+import { initStore, messageHandlers } from "./store";
 
 function renderWebView(host: Webapp["host"], theme: ThemeState) {
   const store = initStore(createListener(host), theme);
@@ -41,7 +16,8 @@ function renderWebView(host: Webapp["host"], theme: ThemeState) {
   createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
       <Provider store={store}>
-        <App />
+        <ThemeStyles />
+        <Config />
       </Provider>
     </React.StrictMode>
   );

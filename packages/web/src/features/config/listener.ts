@@ -11,6 +11,8 @@ import {
   TestPlatformConnectionMessage,
   TestOverlordConnectionMessage,
   TestScandManagerConnectionMessage,
+  TestCliMessage,
+  DownloadCliMessage,
 } from "@xliic/common/config";
 
 import {
@@ -20,6 +22,8 @@ import {
   testPlatformConnection,
   testOverlordConnection,
   testScandManagerConnection,
+  testCli,
+  downloadCli,
 } from "./slice";
 
 import config from "./slice";
@@ -108,6 +112,48 @@ export function onTestScandManagerConnection(
         });
         host.postMessage({
           command: "testScandManagerConnection",
+          payload: undefined,
+        });
+      },
+    });
+}
+
+export function onTestCli(
+  startAppListening: FeatureListening,
+  host: Webapp<NoopMessage, SaveConfigMessage | TestCliMessage>["host"]
+) {
+  return () =>
+    startAppListening({
+      actionCreator: testCli,
+      effect: async (action, listenerApi) => {
+        const state = listenerApi.getState();
+        host.postMessage({
+          command: "saveConfig",
+          payload: state.config.data,
+        });
+        host.postMessage({
+          command: "testCli",
+          payload: undefined,
+        });
+      },
+    });
+}
+
+export function onDownloadCli(
+  startAppListening: FeatureListening,
+  host: Webapp<NoopMessage, SaveConfigMessage | DownloadCliMessage>["host"]
+) {
+  return () =>
+    startAppListening({
+      actionCreator: downloadCli,
+      effect: async (action, listenerApi) => {
+        const state = listenerApi.getState();
+        host.postMessage({
+          command: "saveConfig",
+          payload: state.config.data,
+        });
+        host.postMessage({
+          command: "downloadCli",
           payload: undefined,
         });
       },

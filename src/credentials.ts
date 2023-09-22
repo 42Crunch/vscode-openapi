@@ -20,6 +20,25 @@ export async function hasCredentials(
   return undefined;
 }
 
+export async function ensureHasCredentials(
+  configuration: Configuration,
+  secrets: vscode.SecretStorage
+): Promise<boolean> {
+  const credentials = await hasCredentials(configuration, secrets);
+  if (credentials === undefined) {
+    // try asking for credentials if not found
+    const configured = await configureCredentials(configuration, secrets);
+    if (configured === undefined) {
+      // or don't do audit if no credentials been supplied
+      return false;
+    } else {
+      await delay(3000);
+      return true;
+    }
+  }
+  return true;
+}
+
 export function getAnondCredentials(configuration: Configuration): string {
   return <string>configuration.get("securityAuditToken");
 }
@@ -188,4 +207,8 @@ export async function configurePlatformUser(
   await secrets.store("platformApiToken", token);
 
   return true;
+}
+
+async function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

@@ -7,7 +7,14 @@ import {
   OasWithOperationAndConfig,
   SingleOperationScanReport,
 } from "@xliic/common/scan";
-import { HttpMethod, HttpRequest, HttpResponse, HttpError, HttpMethods } from "@xliic/common/http";
+import {
+  HttpMethod,
+  HttpRequest,
+  HttpResponse,
+  HttpError,
+  HttpMethods,
+  HttpConfig,
+} from "@xliic/common/http";
 import { GeneralError } from "@xliic/common/error";
 import { Preferences } from "@xliic/common/prefs";
 import { ScanReportJSONSchema, TestLogReport } from "@xliic/common/scan-report";
@@ -66,7 +73,7 @@ const initialState: OasState = {
   },
   rawOas: "",
   scanReport: undefined,
-  isNewScanConfig: false,
+  isNewScanConfig: true,
   prefs: {
     scanServer: "",
     tryitServer: "",
@@ -76,7 +83,7 @@ const initialState: OasState = {
   responses: {},
   waitings: {},
   errors: {},
-  waiting: false,
+  waiting: true,
   filter: {},
   tab: "summary",
   grouped: {},
@@ -90,71 +97,13 @@ export const slice = createSlice({
   reducers: {
     startScan: (state, action: PayloadAction<undefined>) => {
       state.error = undefined;
-    },
-
-    scanOperation: (state, action: PayloadAction<OasWithOperationAndConfig>) => {
-      const { oas, rawOas, path, method, config } = action.payload;
-
-      const operation = getOperation(oas, path, method);
-
-      const operationId =
-        operation?.operationId === undefined ? `${path}:${method}` : operation.operationId;
-
-      const isNewScanConfig = (config as any)["playbook"] === undefined;
-
-      const scanConfig = isNewScanConfig
-        ? scanUtilNew.readRawScanConfig(config, operationId)
-        : scanUtil.readRawScanConfig(config, path, method);
-
-      if (isOpenapi(oas)) {
-        // security
-        const security = getSecurity(oas, path, method);
-        const securityValues = generateSecurityValues(security);
-
-        // parameters
-        const parameterValues = isNewScanConfig
-          ? scanUtilNew.generateParameterValuesForScan(scanConfig)
-          : scanUtil.generateParameterValuesForScan(scanConfig);
-
-        state.defaultValues = {
-          server: scanConfig.host,
-          parameters: parameterValues,
-          security: securityValues,
-          securityIndex: 0,
-          body: { mediaType: "application/json", value: scanConfig.requestBody },
-        };
-      } else {
-        // security
-        const security = getSwaggerSecurity(oas, path, method);
-        const securityValues = generateSwaggerSecurityValues(security);
-
-        // parameters
-        const parameterValues = isNewScanConfig
-          ? scanUtilNew.generateParameterValuesForScan(scanConfig)
-          : scanUtil.generateParameterValuesForScan(scanConfig);
-
-        state.defaultValues = {
-          server: scanConfig.host,
-          parameters: parameterValues,
-          security: securityValues,
-          securityIndex: 0,
-          body: { mediaType: "application/json", value: scanConfig.requestBody },
-        };
-      }
-
-      state.oas = oas;
-      state.rawOas = rawOas;
-      state.path = path;
-      state.method = method;
-      state.operationId = operationId;
-
-      state.scanConfigRaw = config;
-      state.scanConfig = scanConfig;
-      state.isNewScanConfig = isNewScanConfig;
-
       state.scanReport = undefined;
-      state.error = undefined;
+      state.waiting = true;
+      state.response = undefined;
+      state.responses = {};
     },
+
+    scanOperation: (state, action: PayloadAction<OasWithOperationAndConfig>) => {},
 
     runScan: (
       state,
@@ -175,28 +124,29 @@ export const slice = createSlice({
     },
 
     showScanReport: (state, action: PayloadAction<SingleOperationScanReport>) => {
-      if (state.isNewScanConfig) {
-        const issues = flattenIssuesNew(
-          action.payload.report as unknown as ScanReportJSONSchemaNew,
-          state.path!,
-          state.operationId!
-        );
-        const filtered = filterIssuesNew(issues, state.filter);
-        const { titles } = groupIssuesNew(issues);
-        const { grouped } = groupIssuesNew(filtered);
-        state.issues = issues;
-        state.titles = titles;
-        state.grouped = grouped;
-      } else {
-        // path and method stays the same, update the report alone
-        const issues = flattenIssues(action.payload.report, state.path!, state.method!);
-        const filtered = filterIssues(issues, state.filter);
-        const { titles } = groupIssues(issues);
-        const { grouped } = groupIssues(filtered);
-        state.issues = issues;
-        state.titles = titles;
-        state.grouped = grouped;
-      }
+      const { oas, path, method } = action.payload;
+      const operation = getOperation(oas, path, method);
+
+      const operationId =
+        operation?.operationId === undefined ? `${path}:${method}` : operation.operationId;
+
+      state.operationId = operationId;
+      state.oas = oas;
+      state.path = path;
+      state.method = method;
+
+      const issues = flattenIssuesNew(
+        action.payload.report as unknown as ScanReportJSONSchemaNew,
+        state.path!,
+        state.operationId!
+      );
+      const filtered = filterIssuesNew(issues, state.filter);
+      const { titles } = groupIssuesNew(issues);
+      const { grouped } = groupIssuesNew(filtered);
+      state.issues = issues;
+      state.titles = titles;
+      state.grouped = grouped;
+
       state.scanReport = action.payload.report;
       state.waiting = false;
     },
@@ -223,22 +173,29 @@ export const slice = createSlice({
       state.waiting = false;
     },
 
-    showHttpResponse: (state, action: PayloadAction<HttpResponse>) => {
-      const httpResponse = action.payload;
-      state.responses[httpResponse.id!] = httpResponse;
-      state.waitings[httpResponse.id!] = false;
-      delete state.errors[httpResponse.id!];
+    showHttpResponse: (
+      state,
+      { payload: { id, response } }: PayloadAction<{ id: string; response: HttpResponse }>
+    ) => {
+      state.responses[id] = response;
+      state.waitings[id] = false;
+      delete state.errors[id];
     },
 
-    showHttpError: (state, action: PayloadAction<HttpError>) => {
-      const httpError = action.payload;
-      state.errors[httpError.id!] = httpError;
-      state.waitings[httpError.id!] = false;
-      delete state.responses[httpError.id!];
+    showHttpError: (
+      state,
+      { payload: { id, error } }: PayloadAction<{ id: string; error: HttpError }>
+    ) => {
+      state.errors[id] = error;
+      state.waitings[id] = false;
+      delete state.responses[id];
     },
 
-    sendHttpRequest: (state, action: PayloadAction<HttpRequest>) => {
-      state.waitings[action.payload.id!] = true;
+    sendHttpRequest: (
+      state,
+      { payload: { id } }: PayloadAction<{ id: string; request: HttpRequest; config: HttpConfig }>
+    ) => {
+      state.waitings[id] = true;
     },
 
     sendCurlRequest: (state, action: PayloadAction<string>) => {},

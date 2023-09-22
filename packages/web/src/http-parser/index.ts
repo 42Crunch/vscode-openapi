@@ -64,6 +64,26 @@ export function parseRequest(input: Buffer) {
   };
 }
 
+export function safeParseResponse(response: string | undefined): HttpResponse {
+  if (response === undefined) {
+    return {
+      httpVersion: "1.0",
+      headers: [],
+      statusCode: 0,
+    };
+  }
+
+  try {
+    return parseResponse(Buffer.from(response, "base64"));
+  } catch (ex) {
+    return {
+      httpVersion: "1.0",
+      headers: [],
+      statusCode: 0,
+    };
+  }
+}
+
 export function parseResponse(input: Buffer): HttpResponse {
   const parser = new HTTPParser(HTTPParser.RESPONSE);
   let complete = false;

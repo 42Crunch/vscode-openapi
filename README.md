@@ -193,8 +193,6 @@ This extension features optional integration with [42Crunch Platform](https://pl
 
 ## Feedback
 
-When you have a minute **PLEASE** submit your feedback and feature requests at [this superquick survey](https://www.surveymonkey.com/r/L7R69JR).
-
 Submit your bug reports at [GitHub project Issues](https://github.com/42Crunch/vscode-openapi/issues).
 
 And, needless to say, your reviews at [VS Code marketplace](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi&ssr=false#review-details) mean the world to us!

@@ -7,13 +7,20 @@ import * as vscode from "vscode";
 import * as http2 from "http2";
 
 import { Webapp } from "@xliic/common/webapp/config";
-import { Config, ConnectionTestResult } from "@xliic/common/config";
+import {
+  CliDownloadProgress,
+  Config,
+  ConnectionTestResult,
+  ShowCliDownloadMessage,
+} from "@xliic/common/config";
 import { Configuration } from "../../configuration";
 import { WebView } from "../../web-view";
 import { PlatformStore } from "../../platform/stores/platform-store";
 import * as scandManagerApi from "../../platform/api-scand-manager";
 import { Logger } from "../../platform/types";
 import { loadConfig, saveConfig } from "../../util/config";
+import { downloadCli, testCli } from "../../platform/cli-ast";
+import { transformValues } from "./utils-gen";
 
 export class ConfigWebView extends WebView<Webapp> {
   private config?: Config;
@@ -95,6 +102,15 @@ export class ConfigWebView extends WebView<Webapp> {
         payload: result,
       };
     },
+
+    testCli: async () => {
+      return {
+        command: "showCliTest",
+        payload: await testCli(),
+      };
+    },
+
+    downloadCli: () => downloadCliHandler(this.config?.repository),
   };
 
   async sendLoadConfig() {
@@ -103,6 +119,42 @@ export class ConfigWebView extends WebView<Webapp> {
       command: "loadConfig",
       payload: config,
     });
+  }
+}
+
+async function* downloadCliHandler(
+  repository?: string
+): AsyncGenerator<ShowCliDownloadMessage, void, unknown> {
+  try {
+    if (repository === undefined || repository === "") {
+      throw new Error("Repository URL is not set");
+    }
+
+    const location = yield* transformValues(
+      downloadCli(repository),
+      (progress: CliDownloadProgress): ShowCliDownloadMessage => ({
+        command: "showCliDownload",
+        payload: { completed: false, progress },
+      })
+    );
+
+    yield {
+      command: "showCliDownload",
+      payload: {
+        completed: true,
+        success: true,
+        location,
+      },
+    };
+  } catch (ex) {
+    yield {
+      command: "showCliDownload",
+      payload: {
+        completed: true,
+        success: false,
+        error: `Failed to download: ${ex}`,
+      },
+    };
   }
 }
 

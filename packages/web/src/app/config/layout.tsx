@@ -10,6 +10,7 @@ export const Container = styled.div`
 export const Test = styled.div`
   display: flex;
   gap: 8px;
+  align-items: center;
   @media (max-width: 800px) {
     flex-direction: column;
   }

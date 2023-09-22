@@ -4,20 +4,32 @@
 */
 
 import * as vscode from "vscode";
-import { PlatformContext } from "../types";
-import { stringify } from "@xliic/preserving-json-yaml-parser";
-import { Cache } from "../../cache";
-import { PlatformStore } from "../stores/platform-store";
+
 import { HttpMethod } from "@xliic/common/http";
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
+import { stringify } from "@xliic/preserving-json-yaml-parser";
+
+import { Cache } from "../../cache";
+import { Configuration } from "../../configuration";
+import { loadConfig } from "../../util/config";
+import { PlatformStore } from "../stores/platform-store";
+import { Logger, PlatformContext } from "../types";
+import {
+  createScanConfigWithCliBinary,
+  ensureCliDownloaded,
+  runAuditWithCliBinary,
+} from "../cli-ast";
+import { createScanConfigWithPlatform } from "./runtime/platform";
 import { ScanWebView } from "./view";
-import { extractSinglePath } from "../../util/extract";
+import { getScanconfUri } from "./config";
+import { ensureHasCredentials } from "../../credentials";
 
 export default (
   cache: Cache,
   platformContext: PlatformContext,
   store: PlatformStore,
-  view: ScanWebView
+  configuration: Configuration,
+  secrets: vscode.SecretStorage,
+  getScanView: (uri: vscode.Uri) => ScanWebView
 ) => {
   vscode.commands.registerTextEditorCommand(
     "openapi.platform.editorRunSingleOperationScan",
@@ -29,7 +41,18 @@ export default (
       method: HttpMethod
     ): Promise<void> => {
       try {
-        await editorRunSingleOperationScan(editor, edit, cache, store, view, uri, path, method);
+        await editorRunSingleOperationScan(
+          editor,
+          edit,
+          cache,
+          store,
+          configuration,
+          secrets,
+          getScanView,
+          uri,
+          path,
+          method
+        );
       } catch (ex: any) {
         if (
           ex?.response?.statusCode === 409 &&
@@ -52,57 +75,110 @@ async function editorRunSingleOperationScan(
   edit: vscode.TextEditorEdit,
   cache: Cache,
   store: PlatformStore,
-  view: ScanWebView,
+  configuration: Configuration,
+  secrets: vscode.SecretStorage,
+  getScanView: (uri: vscode.Uri) => ScanWebView,
   uri: string,
   path: string,
   method: HttpMethod
 ): Promise<void> {
-  await view.show();
-  await view.sendColorTheme(vscode.window.activeColorTheme);
-  await view.sendStartScan(editor.document);
+  if (!(await ensureHasCredentials(configuration, secrets))) {
+    return;
+  }
+
+  const hasCli = configuration.get("platformConformanceScanRuntime") === "cli";
+  if (hasCli && !(await ensureCliDownloaded(configuration, secrets))) {
+    // cli is not available and user chose to cancel download
+    return;
+  }
 
   const bundle = await cache.getDocumentBundle(editor.document);
-  if (bundle && !("errors" in bundle)) {
-    const oas = extractSinglePath(path as string, bundle.value);
-    const rawOas = stringify(oas);
 
-    const tmpApi = await store.createTempApi(rawOas);
+  if (!bundle || "errors" in bundle) {
+    vscode.commands.executeCommand("workbench.action.problems.focus");
+    vscode.window.showErrorMessage("Failed to bundle, check OpenAPI file for errors.");
+    return;
+  }
 
-    const report = await store.getAuditReport(tmpApi.apiId);
+  const title = bundle?.value?.info?.title || "OpenAPI";
+  const scanconfUri = getScanconfUri(editor.document.uri, title);
 
-    if (report?.data.openapiState !== "valid") {
-      await store.clearTempApi(tmpApi);
-      await view.show();
-      await view.sendAuditError(editor.document, report.data, bundle.mapping);
-      return;
+  if (
+    (scanconfUri === undefined || !(await exists(scanconfUri))) &&
+    !(await createDefaultScanConfig(store, secrets, hasCli, scanconfUri, stringify(bundle.value)))
+  ) {
+    return;
+  }
+
+  const view = getScanView(editor.document.uri);
+  await view.show();
+  await view.sendColorTheme(vscode.window.activeColorTheme);
+  return view.sendScanOperation(bundle, editor.document, scanconfUri, path, method);
+}
+
+async function createDefaultScanConfig(
+  store: PlatformStore,
+  secrets: vscode.SecretStorage,
+  hasCli: boolean,
+  scanconfUri: vscode.Uri,
+  oas: string
+): Promise<boolean> {
+  return vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: "Creating scan configuration...",
+      cancellable: false,
+    },
+    async (progress, cancellationToken): Promise<boolean> => {
+      try {
+        if (hasCli) {
+          //const oas = stringify(bundle.value);
+          const [report, reportError] = await runAuditWithCliBinary(
+            secrets,
+            emptyLogger,
+            oas,
+            false
+          );
+          if (reportError !== undefined) {
+            // xxxx
+            return false;
+          }
+          if ((report.audit as any).openapiState !== "valid") {
+            throw new Error(
+              "Your API has structural or semantic issues in its OpenAPI format. Run Security Audit on this file and fix these issues first."
+            );
+          }
+          await createScanConfigWithCliBinary(scanconfUri, oas);
+        } else {
+          await createScanConfigWithPlatform(store, scanconfUri, oas);
+        }
+        vscode.window.showInformationMessage(
+          `Saved Conformance Scan configuration to: ${scanconfUri.toString()}`
+        );
+        return true;
+      } catch (e: any) {
+        vscode.window.showErrorMessage(
+          "Failed to create default config: " + ("message" in e ? e.message : e.toString())
+        );
+        return false;
+      }
     }
+  );
+}
 
-    await store.createDefaultScanConfig(tmpApi.apiId);
-
-    const configs = await store.getScanConfigs(tmpApi.apiId);
-
-    const isNewApi = configs[0].configuration !== undefined;
-
-    const c = isNewApi
-      ? await store.readScanConfig(configs[0].configuration.id)
-      : await store.readScanConfig(configs[0].scanConfigurationId);
-
-    const config = isNewApi
-      ? JSON.parse(Buffer.from(c.file, "base64").toString("utf-8"))
-      : JSON.parse(Buffer.from(c.scanConfiguration, "base64").toString("utf-8"));
-
-    await store.clearTempApi(tmpApi);
-
-    if (config !== undefined) {
-      view.setNewApi(isNewApi);
-      await view.show();
-      await view.sendScanOperation(editor.document, {
-        oas: oas as BundledSwaggerOrOasSpec,
-        rawOas: rawOas,
-        path: path as string,
-        method: method as HttpMethod,
-        config,
-      });
-    }
+async function exists(uri: vscode.Uri): Promise<boolean> {
+  try {
+    const stat = await vscode.workspace.fs.stat(uri);
+    return true;
+  } catch (e) {
+    return false;
   }
 }
+
+const emptyLogger: Logger = {
+  fatal: function (message: string): void {},
+  error: function (message: string): void {},
+  warning: function (message: string): void {},
+  info: function (message: string): void {},
+  debug: function (message: string): void {},
+};

@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useForm, useFieldArray, FormProvider } from "react-hook-form";
-import { EnvData, Environment } from "@xliic/common/env";
+import { EnvData, SimpleEnvironment } from "@xliic/common/env";
 
 import { saveEnv, useFeatureDispatch } from "./slice";
 import EnvKeyValue from "./EnvKeyValue";
@@ -11,7 +11,7 @@ export default function EnvironmentForm({
   data,
 }: {
   name: keyof EnvData;
-  data: Environment;
+  data: SimpleEnvironment;
 }) {
   const dispatch = useFeatureDispatch();
 
@@ -65,13 +65,13 @@ interface Item {
   value: string;
 }
 
-function wrapEnvironment(environment: Environment): { values: Item[] } {
+function wrapEnvironment(environment: SimpleEnvironment): { values: Item[] } {
   const wrapped = Object.entries(environment).map(([key, value]) => ({ key, value }));
   return { values: wrapped };
 }
 
-function unwrapEnvironment(data: { values: Item[] }): Environment {
-  const environment: Environment = {};
+function unwrapEnvironment(data: { values: Item[] }): SimpleEnvironment {
+  const environment: SimpleEnvironment = {};
   for (const item of data.values) {
     environment[item.key] = item.value;
   }

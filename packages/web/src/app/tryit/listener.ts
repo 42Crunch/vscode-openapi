@@ -24,7 +24,8 @@ export function createListener(host: Webapp["host"], routes: Routes) {
       startAppListening({
         actionCreator: sendHttpRequest,
         effect: async (action, listenerApi) => {
-          host.postMessage({ command: "sendHttpRequest", payload: action.payload.request });
+          const { request, config } = action.payload;
+          host.postMessage({ command: "sendHttpRequest", payload: { id: "", request, config } });
         },
       }),
 

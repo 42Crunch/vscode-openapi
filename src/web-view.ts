@@ -5,6 +5,7 @@
 
 import * as path from "path";
 import * as vscode from "vscode";
+
 import { Message, Webapp } from "@xliic/common/message";
 import { ChangeThemePayload } from "@xliic/common/theme";
 import {
@@ -23,7 +24,8 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
     private extensionPath: string,
     private viewId: string,
     private viewTitle: string,
-    private column: vscode.ViewColumn
+    private column: vscode.ViewColumn,
+    private icon?: string
   ) {}
 
   isActive(): boolean {
@@ -51,9 +53,16 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
     const handler = this.hostHandlers[response.command as W["produces"]["command"]];
 
     if (handler) {
-      const request = await handler(response.payload);
-      if (request !== undefined) {
-        this.sendRequest(request);
+      const result = handler(response.payload);
+      if (result instanceof Promise) {
+        const request = await result;
+        if (request !== undefined) {
+          this.sendRequest(request);
+        }
+      } else {
+        for await (const request of result) {
+          this.sendRequest(request);
+        }
       }
     } else {
       throw new Error(
@@ -94,6 +103,17 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
         retainContextWhenHidden: true,
       }
     );
+
+    if (this.icon !== undefined) {
+      panel.iconPath = {
+        light: vscode.Uri.file(
+          path.join(this.extensionPath, "resources", "icons", `${this.icon}.svg`)
+        ),
+        dark: vscode.Uri.file(
+          path.join(this.extensionPath, "resources", "icons", `${this.icon}-dark.svg`)
+        ),
+      };
+    }
 
     if (process.env["XLIIC_WEB_VIEW_DEV_MODE"] === "true") {
       panel.webview.html = this.getDevHtml(panel);

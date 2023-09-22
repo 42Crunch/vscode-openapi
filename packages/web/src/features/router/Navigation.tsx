@@ -17,30 +17,26 @@ function InnerNavigation({ routes }: { routes: Routes }) {
   const dispatch = useFeatureDispatch();
   const current = useFeatureSelector((state) => state.router.current);
 
-  const tabs = routes.map((route) => [route.id, route.title]);
-
   return (
     <NavigationContent>
-      {tabs.map(([page, title]) => (
-        <NavigationTab
-          key={page}
-          active={page === current[0]}
-          onClick={() => dispatch(goTo([page]))}
-        >
-          <div>{title}</div>
+      {routes.map(({ id, title }) => (
+        <NavigationTab key={id} active={id === current[0]} onClick={() => dispatch(goTo([id]))}>
+          {typeof title === "string" ? <div>{title}</div> : title}
         </NavigationTab>
       ))}
     </NavigationContent>
   );
 }
 
-const NavigationContent = styled.div`
+const NavigationContent = styled.nav`
+  height: 28px;
   display: flex;
-  margin-bottom: 1em;
-  font-weight: 500;
+  padding: 0px 16px;
+  padding-top: 6px;
+  gap: 24px;
+  //font-weight: 500;
+  font-size: 14px;
   border-bottom: 1px solid var(${ThemeColorVariables.border});
-  padding-left: 1em;
-  padding-right: 1em;
 `;
 
 const NavigationTab = styled.div<{ active?: boolean }>`

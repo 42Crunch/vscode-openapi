@@ -14,12 +14,32 @@ export type Config = {
     useHostNetwork: boolean;
   };
   scandManager: ScandManagerConnection;
-  scanRuntime: "docker" | "scand-manager";
+  scanRuntime: "docker" | "scand-manager" | "cli";
   scanImage: string;
   platform: string;
+  cli: {
+    location: string;
+    found: boolean;
+  };
+  repository: string;
 };
 
 export type ConnectionTestResult = { success: true } | { success: false; message: string };
+
+export type CliTestResult =
+  | { success: true; version: string }
+  | { success: false; message: string };
+
+export type CliDownloadProgress = {
+  percent: number;
+  transferred: number;
+  total?: number;
+};
+
+export type CliDownloadResult =
+  | { completed: false; progress: CliDownloadProgress }
+  | { completed: true; success: true; location: string }
+  | { completed: true; success: false; error: string };
 
 export type SaveConfigMessage = { command: "saveConfig"; payload: Config };
 
@@ -53,4 +73,24 @@ export type TestScandManagerConnectionMessage = {
 export type ShowScandManagerConnectionTestMessage = {
   command: "showScandManagerConnectionTest";
   payload: ConnectionTestResult;
+};
+
+export type TestCliMessage = {
+  command: "testCli";
+  payload: undefined;
+};
+
+export type ShowCliTestMessage = {
+  command: "showCliTest";
+  payload: CliTestResult;
+};
+
+export type DownloadCliMessage = {
+  command: "downloadCli";
+  payload: undefined;
+};
+
+export type ShowCliDownloadMessage = {
+  command: "showCliDownload";
+  payload: CliDownloadResult;
 };

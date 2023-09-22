@@ -3,7 +3,7 @@ import SwaggerClient from "swagger-client";
 import { BundledOpenApiSpec, OasSecurityScheme, OasServer } from "@xliic/common/oas30";
 import { BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/common/openapi";
 import { BundledSwaggerSpec, SwaggerSecurityScheme } from "@xliic/common/swagger";
-import { HttpMethod, HttpRequest } from "@xliic/common/http";
+import { HttpConfig, HttpMethod, HttpRequest } from "@xliic/common/http";
 import { Config } from "@xliic/common/config";
 
 import {
@@ -17,8 +17,8 @@ import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 
 import { parseHttpsHostname } from "../../util";
 import { EnvData } from "@xliic/common/env";
-import { replaceEnv } from "@xliic/common/env";
 import { getParameters } from "../../util-swagger";
+import { ENV_VAR_REGEX } from "../playbook/variables";
 
 export async function makeHttpRequest(
   config: Config,
@@ -27,7 +27,7 @@ export async function makeHttpRequest(
   path: string,
   values: TryitOperationValues,
   env: EnvData
-): Promise<HttpRequest> {
+): Promise<[HttpRequest, HttpConfig]> {
   const operationId = `${method}-${path}`;
 
   // FIXME, this can throw an exception, make sure it's handled
@@ -60,17 +60,19 @@ export async function makeHttpRequest(
   const [https, hostname] = parseHttpsHostname(request.url);
   const rejectUnauthorized = https && !config.insecureSslHostnames.includes(hostname);
 
-  return {
-    method,
-    url: request.url,
-    headers: request.headers as any,
-    body: convertBody(request.body),
-    config: {
+  return [
+    {
+      method,
+      url: request.url,
+      headers: request.headers as any,
+      body: convertBody(request.body),
+    },
+    {
       https: {
         rejectUnauthorized,
       },
     },
-  };
+  ];
 }
 
 async function buildOasSpec(
@@ -215,7 +217,7 @@ function makeSwaggerSecurities(
 
 function maybeGetSecret(value: TryitSecurityValue, env: EnvData) {
   if (typeof value === "string") {
-    return replaceEnv(value, env);
+    return replaceEnvOld(value, env);
   }
 
   return value;
@@ -223,15 +225,26 @@ function maybeGetSecret(value: TryitSecurityValue, env: EnvData) {
 
 function replaceEnvVariables(body: unknown, env: EnvData) {
   if (typeof body === "string") {
-    return replaceEnv(body, env);
+    return replaceEnvOld(body, env);
   } else if (typeof body === "object") {
     return simpleClone(body, (value) => {
       if (typeof value === "string") {
-        return replaceEnv(value, env);
+        return replaceEnvOld(value, env);
       }
       return value;
     });
   }
 
   return body;
+}
+
+export function replaceEnvOld(value: string, env: EnvData): string {
+  const SECRETS_PREFIX = "secrets.";
+  return value.replace(ENV_VAR_REGEX(), (match: string, name: string): string => {
+    if (name.startsWith(SECRETS_PREFIX)) {
+      const key = name.substring(SECRETS_PREFIX.length, name.length);
+      return env.secrets.hasOwnProperty(key) ? (env.secrets[key] as string) : match;
+    }
+    return env.default.hasOwnProperty(name) ? (env.default[name] as string) : match;
+  });
 }

@@ -350,11 +350,11 @@ export async function createScanConfig(
 export async function createScanConfigNew(
   apiId: string,
   name: string,
-  config: unknown,
+  config: string,
   options: PlatformConnection,
   logger: Logger
 ): Promise<any> {
-  const scanConfiguration = Buffer.from(JSON.stringify(config)).toString("base64");
+  const scanConfiguration = Buffer.from(config).toString("base64");
   const { body } = <any>await got(`api/v2/apis/${apiId}/scanConfigurations`, {
     ...gotOptions("POST", options, logger),
     json: {

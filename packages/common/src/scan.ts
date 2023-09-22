@@ -1,3 +1,4 @@
+import { SimpleEnvironment } from "./env";
 import { HttpMethod } from "./http";
 import { BundledSwaggerOrOasSpec } from "./openapi";
 import { ScanReportJSONSchema } from "./scan-report";
@@ -28,17 +29,12 @@ export type OasWithOperationAndConfig = {
   config: unknown;
 };
 
-export type ScanRunConfig = {
-  config: unknown;
-  env: Record<string, string>;
-  rawOas: string;
-};
-
 export interface SingleOperationScanReport {
   report: ScanReportJSONSchema;
   path: string;
   method: HttpMethod;
   security: TryitSecurityValues | undefined;
+  oas: BundledSwaggerOrOasSpec;
 }
 
 // requests to scan web app
@@ -50,8 +46,6 @@ export type ShowScanReportMessage = {
 };
 
 // responses sent from web app to the vs code extension
-export type RunScanMessage = { command: "runScan"; payload: ScanRunConfig };
-
 export type ShowJsonPointerMessage = {
   command: "showJsonPointer";
   payload: string;

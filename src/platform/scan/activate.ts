@@ -7,10 +7,12 @@ import { PlatformContext } from "../types";
 import { ScanCodelensProvider } from "./lens";
 import commands from "./commands";
 import { ScanWebView } from "./view";
+import { ScanReportWebView } from "./report-view";
 import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
 import { AuditWebView } from "../../audit/view";
 import { AuditContext } from "../../types";
+import { getOpenapiAlias } from "./config";
 
 const selectors = {
   json: { language: "json" },
@@ -31,23 +33,59 @@ export function activate(
   auditContext: AuditContext
 ): vscode.Disposable {
   let disposables: vscode.Disposable[] = [];
-  const view = new ScanWebView(
-    context.extensionPath,
-    cache,
-    configuration,
-    secrets,
-    store,
-    envStore,
-    prefs,
-    auditView,
-    auditContext
-  );
+  const scanViews: Record<string, ScanWebView> = {};
+  const reportViews: Record<string, ScanReportWebView> = {};
+
+  const getScanView = (uri: vscode.Uri): ScanWebView => {
+    const viewId = uri.toString();
+    const alias = getOpenapiAlias(uri) || "unknown";
+
+    if (scanViews[viewId] === undefined) {
+      scanViews[viewId] = new ScanWebView(
+        alias,
+        context.extensionPath,
+        cache,
+        configuration,
+        secrets,
+        store,
+        envStore,
+        prefs,
+        auditView,
+        () => getReportView(uri),
+        auditContext
+      );
+    }
+
+    return scanViews[viewId];
+  };
+
+  const getReportView = (uri: vscode.Uri): ScanReportWebView => {
+    const viewId = uri.toString();
+    const alias = getOpenapiAlias(uri) || "unknown";
+
+    if (reportViews[viewId] === undefined) {
+      reportViews[viewId] = new ScanReportWebView(
+        `Scan report ${alias}`,
+        context.extensionPath,
+        cache,
+        configuration,
+        secrets,
+        store,
+        envStore,
+        prefs,
+        auditView,
+        auditContext
+      );
+    }
+
+    return reportViews[viewId];
+  };
 
   const scanCodelensProvider = new ScanCodelensProvider(cache);
 
-  function activateLens(connected: boolean, enabled: boolean) {
+  function activateLens(connected: boolean, hasCli: boolean, enabled: boolean) {
     disposables.forEach((disposable) => disposable.dispose());
-    if (connected && enabled) {
+    if ((connected || hasCli) && enabled) {
       disposables = Object.values(selectors).map((selector) =>
         vscode.languages.registerCodeLensProvider(selector, scanCodelensProvider)
       );
@@ -57,16 +95,27 @@ export function activate(
   }
 
   store.onConnectionDidChange(({ connected }) => {
-    activateLens(connected, configuration.get("codeLens"));
+    activateLens(
+      connected,
+      configuration.get("platformConformanceScanRuntime") === "cli",
+      configuration.get("codeLens")
+    );
   });
 
   configuration.onDidChange(async (e: vscode.ConfigurationChangeEvent) => {
-    if (configuration.changed(e, "codeLens")) {
-      activateLens(store.isConnected(), configuration.get("codeLens"));
+    if (
+      configuration.changed(e, "codeLens") ||
+      configuration.changed(e, "platformConformanceScanRuntime")
+    ) {
+      activateLens(
+        store.isConnected(),
+        configuration.get("platformConformanceScanRuntime") === "cli",
+        configuration.get("codeLens")
+      );
     }
   });
 
-  commands(cache, platformContext, store, view);
+  commands(cache, platformContext, store, configuration, secrets, getScanView);
 
   return new vscode.Disposable(() => disposables.forEach((disposable) => disposable.dispose()));
 }

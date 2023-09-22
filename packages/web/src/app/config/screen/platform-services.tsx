@@ -1,21 +1,17 @@
+import React from "react";
+import { useWatch } from "react-hook-form";
 import * as z from "zod";
-import { Config } from "@xliic/common/config";
-
-import {
-  ConfigScreen,
-  useFeatureDispatch,
-  useFeatureSelector,
-  testOverlordConnection,
-} from "../../../features/config/slice";
 import Input from "../../../components/Input";
 import Select from "../../../components/Select";
+import ValidProgressButton from "../../../components/form/ValidProgressButton";
+import {
+  ConfigScreen,
+  testOverlordConnection,
+  useFeatureDispatch,
+  useFeatureSelector,
+} from "../../../features/config/slice";
 import ConnectionTestBanner from "../ConnectionTestBanner";
 import { Container, Test, Title } from "../layout";
-import ValidProgressButton from "../../../components/form/ValidProgressButton";
-import { useWatch } from "react-hook-form";
-import React from "react";
-
-type Section = Pick<Config, "platformServices">;
 
 export function PlatformServices() {
   const dispatch = useFeatureDispatch();
@@ -32,7 +28,7 @@ export function PlatformServices() {
       <Title>42Crunch Platform services</Title>
 
       <Container>
-        <Select<Section>
+        <Select
           label="Platform services"
           name="platformServices.source"
           options={[
@@ -40,13 +36,9 @@ export function PlatformServices() {
             { value: "manual", label: "Specify the host manually" },
           ]}
         />
-        {source == "manual" && <Input<Section> label="Host" name="platformServices.manual" />}
+        {source == "manual" && <Input label="Host" name="platformServices.manual" />}
         {source == "auto" && (
-          <Input<Section>
-            label="Host (automatic, read-only)"
-            name="platformServices.auto"
-            disabled
-          />
+          <Input label="Host (automatic, read-only)" name="platformServices.auto" disabled />
         )}
         <Test>
           <ValidProgressButton

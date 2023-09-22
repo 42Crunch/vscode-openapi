@@ -1,0 +1,49 @@
+/*
+ Copyright (c) 42Crunch Ltd. All rights reserved.
+ Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
+*/
+import * as vscode from "vscode";
+
+import { Audit } from "@xliic/common/audit";
+
+import { Cache } from "../../cache";
+import { PlatformStore } from "../../platform/stores/platform-store";
+import { MappingNode } from "../../types";
+import { parseAuditReport } from "../audit";
+
+export async function runPlatformAudit(
+  document: vscode.TextDocument,
+  oas: string,
+  mapping: MappingNode,
+  cache: Cache,
+  store: PlatformStore
+): Promise<Audit | undefined> {
+  try {
+    const tmpApi = await store.createTempApi(oas);
+    const report = await store.getAuditReport(tmpApi.apiId);
+    const compliance = await store.readAuditCompliance(report.tid);
+    const todoReport = await store.readAuditReportSqgTodo(report.tid);
+    await store.clearTempApi(tmpApi);
+    const audit = await parseAuditReport(cache, document, report.data, mapping);
+    const { issues: todo } = await parseAuditReport(cache, document, todoReport.data, mapping);
+    audit.compliance = compliance;
+    audit.todo = todo;
+    return audit;
+  } catch (ex: any) {
+    if (
+      ex?.response?.statusCode === 409 &&
+      ex?.response?.body?.code === 109 &&
+      ex?.response?.body?.message === "limit reached"
+    ) {
+      vscode.window.showErrorMessage(
+        "You have reached your maximum number of APIs. Please contact support@42crunch.com to upgrade your account."
+      );
+    } else {
+      vscode.window.showErrorMessage(
+        `Unexpected error when trying to audit API using the platform: ${ex} ${
+          ex?.response?.body ? JSON.stringify(ex.response.body) : ""
+        }`
+      );
+    }
+  }
+}

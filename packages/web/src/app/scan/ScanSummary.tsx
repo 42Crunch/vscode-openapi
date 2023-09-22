@@ -1,22 +1,34 @@
 import styled from "styled-components";
 import { DateTime } from "luxon";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { GlobalSummary, OperationSummary } from "@xliic/common/scan-report";
 import { ArrowUpRightFromSquare } from "../../icons";
 import { useAppDispatch } from "./store";
 import { changeFilter, changeTab } from "./slice";
+import { GlobalSummary, OperationSummary, TestLogReport } from "./scan-report-new";
 
 export function ScanSummary({
   global,
   operation,
+  issues,
 }: {
   global: GlobalSummary;
   operation: OperationSummary;
+  issues: TestLogReport[];
 }) {
   const dispatch = useAppDispatch();
 
-  const critical = operation.issues.critical ?? 0;
-  const high = operation.issues.high ?? 0;
+  const critical = global.issues.critical ?? 0;
+  const high = global.issues.high ?? 0;
+
+  const executed =
+    (global.conformanceTestRequests.executed.total ?? 0) +
+    (global.methodNotAllowedTestRequests?.executed.total ?? 0);
+
+  const issuesNumber = issues?.length | 0;
+
+  const criticalAndHigh = issues.filter(
+    (issue) => issue?.outcome?.criticality && issue.outcome?.criticality >= 4
+  ).length;
 
   return (
     <Container>
@@ -42,7 +54,7 @@ export function ScanSummary({
           }}
         >
           <div>
-            {operation.conformanceTestRequests.executed} <ArrowUpRightFromSquare />
+            {executed} <ArrowUpRightFromSquare />
           </div>
           <div>Executed</div>
         </div>
@@ -55,7 +67,7 @@ export function ScanSummary({
           }}
         >
           <div>
-            {operation.issues.total ?? 0} <ArrowUpRightFromSquare />
+            {issuesNumber ?? 0} <ArrowUpRightFromSquare />
           </div>
           <div>Issues Found</div>
         </div>
@@ -68,7 +80,7 @@ export function ScanSummary({
           }}
         >
           <div>
-            {critical + high} <ArrowUpRightFromSquare />
+            {criticalAndHigh} <ArrowUpRightFromSquare />
           </div>
           <div>Critical/High</div>
         </div>

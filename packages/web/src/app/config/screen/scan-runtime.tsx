@@ -1,23 +1,24 @@
-import { useWatch } from "react-hook-form";
 import React from "react";
+import { useWatch } from "react-hook-form";
 import * as z from "zod";
-import { Config } from "@xliic/common/config";
 
-import {
-  ConfigScreen,
-  useFeatureDispatch,
-  useFeatureSelector,
-  testScandManagerConnection,
-} from "../../../features/config/slice";
+import { Banner, ErrorBanner } from "../../../components/Banner";
+import { Checkbox } from "../../../components/Checkbox";
 import Input from "../../../components/Input";
 import Select from "../../../components/Select";
-import { Checkbox } from "../../../components/Checkbox";
-import ConnectionTestBanner from "../ConnectionTestBanner";
-import { Container, Test, Title } from "../layout";
 import ValidProgressButton from "../../../components/form/ValidProgressButton";
-import { Banner } from "../../../components/Banner";
-
-type Section = Pick<Config, "scanRuntime" | "docker" | "scandManager">;
+import {
+  ConfigScreen,
+  downloadCli,
+  testCli,
+  testScandManagerConnection,
+  useFeatureDispatch,
+  useFeatureSelector,
+} from "../../../features/config/slice";
+import CliVersionBanner from "../CliVersionBanner";
+import ConnectionTestBanner from "../ConnectionTestBanner";
+import ProgressBar from "../ProgressBar";
+import { Container, Test, Title } from "../layout";
 
 export function PlatformServices() {
   const dispatch = useFeatureDispatch();
@@ -25,45 +26,47 @@ export function PlatformServices() {
   const {
     scandManagerConnectionTestResult: scandManagerTestResult,
     waitingForScandManagerConnectionTest: waitingForScandManagerTest,
+    waitingForCliTest,
+    cliTestResult,
+    waitingForCliDownload,
+    cliDownloadPercent,
+    cliDownloadError,
+    data: { cli },
   } = useFeatureSelector((state) => state.config);
 
   const scanRuntime = useWatch({ name: "scanRuntime" });
   const scanAuth = useWatch({ name: "scandManager.auth" });
-  const scanImage = useWatch({ name: "scanImage" });
 
   return (
     <>
-      <Title>Runtime for scand-agent</Title>
+      <Title>Runtime for API Conformance Scan</Title>
       <Container>
-        <Banner
-          message={`Using "${scanImage}" image. It can be changed in "Docker image" section`}
-        />
-
-        <Select<Section>
+        <Select
           label="Runtime"
           name="scanRuntime"
           options={[
             { value: "docker", label: "Docker" },
             { value: "scand-manager", label: "Scand manager" },
+            { value: "cli", label: "42Crunch CLI" },
           ]}
         />
 
         {scanRuntime === "docker" && (
           <>
-            <Checkbox<Section>
+            <Input label="Docker image for 'scand-agent'" name="scanImage" />
+
+            <Checkbox
               name="docker.replaceLocalhost"
               label='Replace "localhost" hostname with "host.docker.internal" (Windows and Mac only)'
             />
-            <Checkbox<Section>
-              name="docker.useHostNetwork"
-              label='Use "host" network (Linux only)'
-            />
+            <Checkbox name="docker.useHostNetwork" label='Use "host" network (Linux only)' />
           </>
         )}
+
         {scanRuntime === "scand-manager" && (
           <>
-            <Input<Section> label="Scand manager URL" name="scandManager.url" />
-            <Select<Section>
+            <Input label="Scand manager URL" name="scandManager.url" />
+            <Select
               label="Authentication method"
               name="scandManager.auth"
               options={[
@@ -73,10 +76,13 @@ export function PlatformServices() {
             />
             {scanAuth === "header" && (
               <>
-                <Input<Section> label="Header name" name="scandManager.header.name" />
-                <Input<Section> label="Header value" name="scandManager.header.value" />
+                <Input label="Header name" name="scandManager.header.name" />
+                <Input label="Header value" name="scandManager.header.value" />
               </>
             )}
+
+            <Input label="Docker image for 'scand-agent'" name="scanImage" />
+
             <Test>
               <ValidProgressButton
                 label="Test connection"
@@ -90,6 +96,62 @@ export function PlatformServices() {
               <ConnectionTestBanner result={scandManagerTestResult} />
             </Test>
           </>
+        )}
+
+        {scanRuntime === "cli" && <Input label="Download URL" name="repository" />}
+
+        {scanRuntime === "cli" && cli.found && (
+          <>
+            <Banner message={`Using 42Crunch CLI in ${cli.location}`} />
+            <Test>
+              <ValidProgressButton
+                label="Check version"
+                waiting={waitingForCliTest}
+                onClick={(e) => {
+                  dispatch(testCli());
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              />
+
+              <CliVersionBanner result={cliTestResult} />
+            </Test>
+          </>
+        )}
+
+        {scanRuntime === "cli" && !cli.found && (
+          <>
+            <Test>
+              <ValidProgressButton
+                label="Download CLI"
+                waiting={waitingForCliDownload}
+                onClick={(e) => {
+                  dispatch(downloadCli());
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              />
+              {waitingForCliDownload && <ProgressBar progress={cliDownloadPercent} />}
+            </Test>
+            <Banner message={`Download 42Cruch CLI, the binary was not found in ${cli.location}`} />
+          </>
+        )}
+
+        {scanRuntime === "cli" && cliDownloadError !== undefined && (
+          <ErrorBanner message={cliDownloadError} />
+        )}
+
+        {scanRuntime === "cli" && (
+          <div>
+            <p>
+              In addition to running Conformance Scan, we will use the 42Crunch CLI to perform
+              Security Audit as well
+            </p>
+            <p>
+              42Crunch CLI is subject to a usage limits, find more details in{" "}
+              <a href="https://42crunch.com/free-user-faq/">Free User FAQ</a>
+            </p>
+          </div>
         )}
       </Container>
     </>

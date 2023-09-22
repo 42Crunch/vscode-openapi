@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 
 import { Config } from "@xliic/common/config";
 import { Configuration } from "../configuration";
+import { getCliInfo } from "../platform/cli-ast";
 
 export async function loadConfig(
   configuration: Configuration,
@@ -14,11 +15,12 @@ export async function loadConfig(
   const scandManager = configuration.get<Config["scandManager"]>("platformScandManager");
   const docker = configuration.get<Config["docker"]>("docker");
 
-  const scanRuntime = configuration.get<"docker" | "scand-manager">(
+  const scanRuntime = configuration.get<"docker" | "scand-manager" | "cli">(
     "platformConformanceScanRuntime"
   );
   const scanImage = configuration.get<"string">("platformConformanceScanImage");
   const scandManagerHeader = await secrets.get("platformScandManagerHeader");
+  const repository = configuration.get<"string">("platformRepository");
 
   return {
     platformUrl,
@@ -38,6 +40,8 @@ export async function loadConfig(
     scanImage,
     docker,
     platform: process.platform,
+    cli: getCliInfo(),
+    repository,
   };
 }
 
@@ -72,6 +76,11 @@ export async function saveConfig(
   await configuration.update(
     "platformConformanceScanImage",
     config.scanImage,
+    vscode.ConfigurationTarget.Global
+  );
+  await configuration.update(
+    "platformRepository",
+    config.repository,
     vscode.ConfigurationTarget.Global
   );
   // secrets

@@ -3,18 +3,19 @@ import styled from "styled-components";
 import { HttpError, HttpResponse } from "@xliic/common/http";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
-import { TestLogReport } from "@xliic/common/scan-report";
-
 import ScanIssue from "./ScanIssue";
 import FilterPanel from "./FilterPanel";
+import { RuntimeOperationReport, TestLogReport } from "./scan-report-new";
 
 export default function ScanIssues({
+  operation,
   issues,
   responses,
   errors,
   waitings,
   grouped,
 }: {
+  operation: RuntimeOperationReport;
   issues: TestLogReport[];
   responses: Record<string, HttpResponse>;
   errors: Record<string, HttpError>;
@@ -39,6 +40,7 @@ export default function ScanIssues({
             const id = `${key}-${index}`;
             return (
               <ScanIssue
+                operation={operation}
                 issue={issue}
                 httpResponse={responses[id]}
                 error={errors[id]}
