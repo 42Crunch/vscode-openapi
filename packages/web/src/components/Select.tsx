@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useSelect } from "downshift";
-import { useController, Path } from "react-hook-form";
+import { useController } from "react-hook-form";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { AngleDown } from "../icons";
 
@@ -13,13 +13,13 @@ function itemToString(item: SelectOption | null) {
   return item ? item.label : "";
 }
 
-export default function Select<T>({
+export default function Select({
   name,
   options,
   placeholder,
   label,
 }: {
-  name: Path<T>;
+  name: string;
   options: SelectOption[];
   placeholder?: string;
   label: string;
@@ -55,7 +55,7 @@ export function PlainSelect({
 }: {
   options: SelectOption[];
   placeholder?: string;
-  label: string;
+  label?: string;
   selected?: SelectOption["value"];
   onSelectedItemChange: (item: SelectOption | null | undefined) => void;
 }) {
@@ -73,7 +73,7 @@ export function PlainSelect({
   return (
     <Container>
       <SelectContainer>
-        <div>{label}</div>
+        {label !== undefined && <div>{label}</div>}
         <Input {...getToggleButtonProps()}>
           <span>{selectedItem ? selectedItem.label : placeholder ?? ""}</span>
           <AngleDown />

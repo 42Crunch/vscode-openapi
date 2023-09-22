@@ -1,7 +1,6 @@
 import { useWatch } from "react-hook-form";
 import React from "react";
 import * as z from "zod";
-import { Config } from "@xliic/common/config";
 
 import {
   ConfigScreen,
@@ -16,8 +15,6 @@ import ConnectionTestBanner from "../ConnectionTestBanner";
 import { Container, Test, Title } from "../layout";
 import ValidProgressButton from "../../../components/form/ValidProgressButton";
 import { Banner } from "../../../components/Banner";
-
-type Section = Pick<Config, "scanRuntime" | "docker" | "scandManager">;
 
 export function PlatformServices() {
   const dispatch = useFeatureDispatch();
@@ -39,7 +36,7 @@ export function PlatformServices() {
           message={`Using "${scanImage}" image. It can be changed in "Docker image" section`}
         />
 
-        <Select<Section>
+        <Select
           label="Runtime"
           name="scanRuntime"
           options={[
@@ -50,20 +47,17 @@ export function PlatformServices() {
 
         {scanRuntime === "docker" && (
           <>
-            <Checkbox<Section>
+            <Checkbox
               name="docker.replaceLocalhost"
               label='Replace "localhost" hostname with "host.docker.internal" (Windows and Mac only)'
             />
-            <Checkbox<Section>
-              name="docker.useHostNetwork"
-              label='Use "host" network (Linux only)'
-            />
+            <Checkbox name="docker.useHostNetwork" label='Use "host" network (Linux only)' />
           </>
         )}
         {scanRuntime === "scand-manager" && (
           <>
-            <Input<Section> label="Scand manager URL" name="scandManager.url" />
-            <Select<Section>
+            <Input label="Scand manager URL" name="scandManager.url" />
+            <Select
               label="Authentication method"
               name="scandManager.auth"
               options={[
@@ -73,8 +67,8 @@ export function PlatformServices() {
             />
             {scanAuth === "header" && (
               <>
-                <Input<Section> label="Header name" name="scandManager.header.name" />
-                <Input<Section> label="Header value" name="scandManager.header.value" />
+                <Input label="Header name" name="scandManager.header.name" />
+                <Input label="Header value" name="scandManager.header.value" />
               </>
             )}
             <Test>

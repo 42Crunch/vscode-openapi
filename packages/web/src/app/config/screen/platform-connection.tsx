@@ -1,5 +1,4 @@
 import * as z from "zod";
-import { Config } from "@xliic/common/config";
 
 import {
   ConfigScreen,
@@ -11,8 +10,6 @@ import Input from "../../../components/Input";
 import ConnectionTestBanner from "../ConnectionTestBanner";
 import { Container, Test, Title } from "../layout";
 import ValidProgressButton from "../../../components/form/ValidProgressButton";
-
-type Section = Pick<Config, "platformUrl" | "platformApiToken">;
 
 function PlatformConnection() {
   const dispatch = useFeatureDispatch();
@@ -26,8 +23,8 @@ function PlatformConnection() {
     <>
       <Title>Connection to 42Crunch Platform</Title>
       <Container>
-        <Input<Section> label="Platform URL" name="platformUrl" />
-        <Input<Section> label="IDE token" name="platformApiToken" password />
+        <Input label="Platform URL" name="platformUrl" />
+        <Input label="IDE token" name="platformApiToken" password />
         <Test>
           <ValidProgressButton
             label="Test connection"

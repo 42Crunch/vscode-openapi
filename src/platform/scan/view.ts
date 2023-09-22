@@ -12,18 +12,19 @@ import {
   ScandManagerConnection,
 } from "@xliic/common/scan";
 
-import { replaceEnv } from "@xliic/common/env";
 import { Preferences } from "@xliic/common/prefs";
 import { Webapp } from "@xliic/common/webapp/scan";
 import { Config } from "@xliic/common/config";
 import { GeneralError, ShowGeneralErrorMessage } from "@xliic/common/error";
 import { LogLevel } from "@xliic/common/logging";
+import { EnvData } from "@xliic/common/env";
 
 import {
   ShowHttpResponseMessage,
   ShowHttpErrorMessage,
   HttpRequest,
   HttpError,
+  HttpConfig,
 } from "@xliic/common/http";
 
 import { WebView } from "../../web-view";
@@ -110,19 +111,21 @@ export class ScanWebView extends WebView<Webapp> {
       }
     },
 
-    sendHttpRequest: async (
-      request: HttpRequest
-    ): Promise<ShowHttpResponseMessage | ShowHttpErrorMessage> => {
+    sendHttpRequest: async (payload: {
+      id: string;
+      request: HttpRequest;
+      config: HttpConfig;
+    }): Promise<ShowHttpResponseMessage | ShowHttpErrorMessage> => {
       try {
-        const response = await executeHttpRequestRaw(request);
+        const response = await executeHttpRequestRaw(payload.request, payload.config);
         return {
           command: "showHttpResponse",
-          payload: response,
+          payload: { id: payload.id, response },
         };
       } catch (e) {
         return {
           command: "showHttpError",
-          payload: e as HttpError,
+          payload: { id: payload.id, error: e as HttpError },
         };
       }
     },
@@ -353,7 +356,7 @@ async function runScanWithDocker(
 
   const env: Record<string, string> = {};
   for (const [name, value] of Object.entries(scanConfig.env)) {
-    env[name] = replaceEnv(value, await envStore.all());
+    env[name] = replaceEnvOld(value, await envStore.all());
   }
 
   const services =
@@ -389,7 +392,7 @@ async function runScanWithScandManager(
   const env: Record<string, string> = {};
 
   for (const [name, value] of Object.entries(scanConfig.env)) {
-    env[name] = replaceEnv(value, await envStore.all());
+    env[name] = replaceEnvOld(value, await envStore.all());
   }
 
   let job: ScandManagerJobStatus | undefined = undefined;
@@ -502,4 +505,16 @@ async function copyCurl(curl: string) {
   vscode.env.clipboard.writeText(curl);
   const disposable = vscode.window.setStatusBarMessage(`Curl command copied to the clipboard`);
   setTimeout(() => disposable.dispose(), 1000);
+}
+
+export function replaceEnvOld(value: string, env: EnvData): string {
+  const ENV_VAR_REGEX = /{{([\w.]+)}}/g;
+  const SECRETS_PREFIX = "secrets.";
+  return value.replace(ENV_VAR_REGEX, (match: string, name: string): string => {
+    if (name.startsWith(SECRETS_PREFIX)) {
+      const key = name.substring(SECRETS_PREFIX.length, name.length);
+      return env.secrets.hasOwnProperty(key) ? (env.secrets[key] as string) : match;
+    }
+    return env.default.hasOwnProperty(name) ? (env.default[name] as string) : match;
+  });
 }

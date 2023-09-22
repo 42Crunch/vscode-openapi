@@ -4,6 +4,7 @@ import {
   OasPathItem,
   OasParameter,
   getServerUrls as getOasServerUrls,
+  getOperations as getOasOperations,
 } from "./oas30";
 import {
   BundledSwaggerSpec,
@@ -11,6 +12,7 @@ import {
   SwaggerPathItem,
   SwaggerParameter,
   getServerUrls as getSwaggerServerUrls,
+  getOperations as getSwaggerOperations,
 } from "./swagger";
 import { HttpMethod } from "./http";
 import { deref } from "./ref";
@@ -38,6 +40,25 @@ export function getOperation(
     return undefined;
   }
   return deref(oas, oas.paths[path])?.[method];
+}
+
+export function makeOperationId(path: string, method: HttpMethod) {
+  return `${path}:${method}`;
+}
+
+export function getOperationById(
+  oas: BundledSwaggerOrOasSpec,
+  operationId: string
+): { path: string; method: HttpMethod; operation: OasOperation | SwaggerOperation } | undefined {
+  const operations = isOpenapi(oas) ? getOasOperations(oas) : getSwaggerOperations(oas);
+  for (const [path, method, operation] of operations) {
+    if (
+      operation.operationId === operationId ||
+      (operation.operationId === undefined && makeOperationId(path, method) === operationId)
+    ) {
+      return { path, method, operation };
+    }
+  }
 }
 
 export function getServerUrls(oas: BundledSwaggerOrOasSpec): string[] {

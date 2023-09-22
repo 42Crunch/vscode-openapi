@@ -19,8 +19,8 @@ function App() {
     .map((dicttionary) => ({ ...dicttionary, label: dicttionary.name }));
 
   const sections = [
-    { title: "Organization standard dictionary", items: standardDictionary },
-    { title: "Organization named dictionaries", items: userDictionaries },
+    { id: "standard", title: "Organization standard dictionary", items: standardDictionary },
+    { id: "named", title: "Organization named dictionaries", items: userDictionaries },
   ];
 
   return (
@@ -28,7 +28,7 @@ function App() {
       sections={sections}
       render={(selected) => {
         return formats
-          .filter((format) => format.dictionaryId === selected)
+          .filter((format) => format.dictionaryId === selected?.itemId)
           .map((format) => (
             <FormatCard format={format} key={`${format.dictionaryId}-${format.name}`} />
           ));

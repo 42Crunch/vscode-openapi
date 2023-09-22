@@ -10,10 +10,12 @@ import { wrapFormValues } from "./util";
 
 const sections = [
   {
+    id: "platform",
     title: "42Crunch Platform",
     items: [platformConnection, platformServices],
   },
   {
+    id: "scan",
     title: "API Conformance Scan",
     items: [scanImage, scanRuntime],
   },
@@ -37,15 +39,17 @@ export default function Config() {
     <SearchSidebar
       sections={sections}
       errors={errors}
-      defaultSelection="platform-connection"
+      defaultSelection={{ sectionId: "platform", itemId: "platform-connection" }}
       render={(selected) => {
-        const { form: Form, schema, id } = screenById[selected];
+        if (selected !== undefined) {
+          const { form: Form, schema, id } = screenById[selected.itemId];
 
-        return (
-          <ConfigurationForm id={id} values={wrapFormValues(data)} schema={schema}>
-            <Form />
-          </ConfigurationForm>
-        );
+          return (
+            <ConfigurationForm id={id} values={wrapFormValues(data)} schema={schema}>
+              <Form />
+            </ConfigurationForm>
+          );
+        }
       }}
     />
   );

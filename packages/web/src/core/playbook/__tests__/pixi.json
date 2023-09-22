@@ -1,0 +1,791 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Pixi App API",
+    "description": "Pixi Photo Sharing API",
+    "contact": {
+      "email": "nicole.becher@owasp.org"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8090"
+    },
+    {
+      "url": "https://localhost:8090"
+    },
+    {
+      "url": "http://10.42.42.198:8090"
+    }
+  ],
+  "tags": [
+    {
+      "name": "admins",
+      "description": "Secured Admin-only calls"
+    },
+    {
+      "name": "users",
+      "description": "Operations available to regular, logged in users"
+    },
+    {
+      "name": "anyone",
+      "description": "Operations available to anyone"
+    }
+  ],
+  "paths": {
+    "/api/register": {
+      "post": {
+        "tags": ["anyone"],
+        "summary": "register for an account and receive token",
+        "description": "user supplies email and password to register and receives a json web token.",
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "text/plain": {
+              "example": "foo"
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegistrationData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "successfully registered, token received",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
+                      "type": "string"
+                    },
+                    "token": {
+                      "maxLength": 700,
+                      "pattern": "^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "email address already registered",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": ["message"],
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.@:-]{1,255}$",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-42c-no-authentication": true,
+        "x-42c-sensitivity": 5,
+        "x-codegen-request-body-name": "user"
+      }
+    },
+    "/api/login": {
+      "post": {
+        "tags": ["anyone"],
+        "summary": "login successfully and receive json web token.",
+        "description": "user supplies user name and password and receives a json web token",
+        "operationId": "authenticate",
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "examples": {
+                "foo": {
+                  "description": "bar",
+                  "value": {
+                    "user": "{{user}}",
+                    "pass": "{{secrets.pass}}"
+                  }
+                },
+                "fooz": {
+                  "description": "bar",
+                  "value": {
+                    "pass": "@5paQ@ZITU3",
+                    "user": "5ZTGWv@0axK.OJhPc"
+                  }
+                }
+              },
+              "schema": {
+                "required": ["pass", "user"],
+                "type": "object",
+                "properties": {
+                  "user": {
+                    "maxLength": 50,
+                    "minLength": 4,
+                    "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$",
+                    "type": "string"
+                  },
+                  "pass": {
+                    "maxLength": 12,
+                    "minLength": 4,
+                    "pattern": "^[a-zA-Z0-9&@#!?]{4,12}$",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": ["message", "token"],
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
+                      "type": "string"
+                    },
+                    "token": {
+                      "maxLength": 700,
+                      "pattern": "^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "x-42c-local-strategy": {
+              "x-42c-strategy": {
+                "protections": [
+                  {
+                    "security-headers_0.1": {
+                      "hsts.max_age": 15400,
+                      "csp.policy": "default-src: 'self'; upgrade-insecure-requests; block-all-mixed-content"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "406": {
+            "description": "successfully request, but invalid password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": ["message"],
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "missing parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": ["message"],
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": ["message"],
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.@:-]{1,255}$",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-42c-no-authentication": true,
+        "x-42c-sensitivity": 2
+      }
+    },
+    "/api/user/info": {
+      "get": {
+        "tags": ["users"],
+        "summary": "get user information",
+        "description": "user supplies valid token and receives all user info",
+        "operationId": "userinfo",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "description": "Users JWT Token",
+            "required": true,
+            "schema": {
+              "maxLength": 700,
+              "pattern": "^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful authentication sent user information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "maxItems": 1,
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UsersItem"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": ["message"],
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": ["message"],
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/api/user/edit_info": {
+      "put": {
+        "tags": ["users"],
+        "summary": "edit user information",
+        "description": "user supplies valid token and updates all user info",
+        "operationId": "edituserinfo",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "maxLength": 700,
+              "pattern": "^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "userobject",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateData"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "successful authentication sent user information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": ["message"],
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": ["message"],
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": ["message"],
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ],
+        "x-codegen-request-body-name": "user"
+      }
+    },
+    "/api/admin/users/search": {
+      "get": {
+        "tags": ["admins"],
+        "summary": "search for a specific user",
+        "description": "search for a specific user",
+        "operationId": "userSearch",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "maxLength": 700,
+              "pattern": "^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "search query ?search=xxx",
+            "required": true,
+            "schema": {
+              "maxLength": 50,
+              "minLength": 4,
+              "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful authentication user photo json object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "maxItems": 50,
+                  "minItems": 0,
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UsersItem"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": ["message"],
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": ["message"],
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    },
+    "/api/admin/all_users": {
+      "get": {
+        "tags": ["admins"],
+        "summary": "Returns the list of ALL users. Must be admin to call.",
+        "description": "Returns the list of ALL users. Must be admin to call.",
+        "operationId": "adminallusers",
+        "parameters": [
+          {
+            "name": "x-access-token1",
+            "in": "header",
+            "schema": {
+              "maxLength": 700,
+              "pattern": "^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})",
+              "type": "string"
+            }
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "maxLength": 700,
+              "pattern": "^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "maxItems": 50,
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UsersListItem"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": ["message"],
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": ["message"],
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UsersItem": {
+        "required": ["pass", "user"],
+        "type": "object",
+        "properties": {
+          "user": {
+            "maxLength": 35,
+            "minLength": 0,
+            "pattern": "^.*$",
+            "type": "string",
+            "format": "o:standard:email",
+            "example": "email1@foo.com",
+            "x-42c-format": "o:standard:email"
+          },
+          "pass": {
+            "maxLength": 12,
+            "minLength": 4,
+            "pattern": "^[a-zA-Z0-9&@#!?]{4,12}$",
+            "type": "string",
+            "format": "string",
+            "example": "p@ssword1"
+          },
+          "name": {
+            "maxLength": 50,
+            "minLength": 5,
+            "pattern": "(^[\\w\\s\\.]{5,50}$)",
+            "type": "string",
+            "example": "Johnny Appleseed"
+          },
+          "is_admin": {
+            "type": "boolean",
+            "description": "is admin"
+          },
+          "account_balance": {
+            "maximum": 1000,
+            "minimum": 0,
+            "type": "number",
+            "description": "remaining balance",
+            "format": "float"
+          }
+        }
+      },
+      "UsersListItem": {
+        "required": ["name", "user"],
+        "type": "object",
+        "properties": {
+          "user": {
+            "maxLength": 320,
+            "minLength": 6,
+            "pattern": "^(?:[\\w\\-+!#$%&'*/=?^`|{}~]+(?:\\.[\\w\\-+!#$%&'*/=?^`|{}~]+)*)@(?:(?:[A-Za-z0-9](?:[\\w\\-]{0,61}[A-Za-z0-9])?)(?:\\.(?:[A-Za-z0-9](?:[\\w\\-]{0,61}[A-Za-z0-9])?))*\\.[A-Za-z]{2,})$",
+            "type": "string",
+            "format": "email",
+            "example": "email@email.com",
+            "x-42c-format": "o:email"
+          },
+          "name": {
+            "maxLength": 30,
+            "minLength": 5,
+            "pattern": "(^[\\w\\s\\.]{5,30}$)",
+            "type": "string",
+            "example": "Johnny Appleseed"
+          },
+          "account_balance": {
+            "maximum": 1000,
+            "minimum": 0,
+            "type": "number",
+            "description": "remaining balance",
+            "format": "float"
+          }
+        }
+      },
+      "UserUpdateData": {
+        "required": ["account_balance", "is_admin", "name", "pass", "user"],
+        "type": "object",
+        "properties": {
+          "user": {
+            "maxLength": 320,
+            "minLength": 6,
+            "pattern": "^(?:[\\w\\-+!#$%&'*/=?^`|{}~]+(?:\\.[\\w\\-+!#$%&'*/=?^`|{}~]+)*)@(?:(?:[A-Za-z0-9](?:[\\w\\-]{0,61}[A-Za-z0-9])?)(?:\\.(?:[A-Za-z0-9](?:[\\w\\-]{0,61}[A-Za-z0-9])?))*\\.[A-Za-z]{2,})$",
+            "type": "string",
+            "format": "email",
+            "example": "support@company.co.uk",
+            "x-42c-format": "o:email"
+          },
+          "pass": {
+            "maxLength": 12,
+            "minLength": 4,
+            "pattern": "^[a-zA-Z0-9&@#!?]{4,12}$",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 30,
+            "minLength": 5,
+            "pattern": "^[\\w\\s\\.]{5,30}$",
+            "type": "string"
+          },
+          "is_admin": {
+            "type": "boolean"
+          },
+          "account_balance": {
+            "maximum": 1000,
+            "minimum": 0,
+            "type": "number",
+            "format": "float"
+          }
+        }
+      },
+      "UserRegistrationData": {
+        "required": ["account_balance", "is_admin", "name", "pass", "user"],
+        "type": "object",
+        "properties": {
+          "user": {
+            "maxLength": 320,
+            "minLength": 6,
+            "pattern": "^(?:[\\w\\-+!#$%&'*/=?^`|{}~]+(?:\\.[\\w\\-+!#$%&'*/=?^`|{}~]+)*)@(?:(?:[A-Za-z0-9](?:[\\w\\-]{0,61}[A-Za-z0-9])?)(?:\\.(?:[A-Za-z0-9](?:[\\w\\-]{0,61}[A-Za-z0-9])?))*\\.[A-Za-z]{2,})$",
+            "type": "string",
+            "format": "email",
+            "example": "support@company.co.uk",
+            "x-42c-format": "o:email"
+          },
+          "pass": {
+            "maxLength": 12,
+            "minLength": 4,
+            "pattern": "^[a-zA-Z0-9&@#!?]{4,12}$",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 30,
+            "minLength": 5,
+            "pattern": "^[\\w\\s\\.]{5,30}$",
+            "type": "string"
+          },
+          "is_admin": {
+            "type": "boolean"
+          },
+          "account_balance": {
+            "maximum": 10,
+            "minimum": 0,
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "access-token": {
+        "type": "apiKey",
+        "description": "Most operations need to pass a user token retrieved calling /api/login",
+        "name": "x-access-token",
+        "in": "header"
+      },
+      "access-token2": {
+        "type": "apiKey",
+        "description": "Most operations need to pass a user token retrieved calling /api/login",
+        "name": "x-access-token2",
+        "in": "header"
+      }
+    }
+  }
+}

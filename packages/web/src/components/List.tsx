@@ -17,7 +17,7 @@ export default function List({
   errors,
 }: {
   items: ListItem[];
-  selected: string;
+  selected: string | undefined;
   setSelected: (selected: string) => void;
   filter?: string;
   errors?: Record<string, string | undefined>;
@@ -77,7 +77,7 @@ const Item = styled.li`
   height: 36px;
   border-bottom: 1px solid var(${ThemeColorVariables.border});
   cursor: pointer;
-  padding: 0 8px;
+  padding: 4px 8px;
   overflow: hidden;
   > span {
     flex: 1;

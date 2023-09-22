@@ -1,18 +1,15 @@
 import * as z from "zod";
-import { Config } from "@xliic/common/config";
 
 import Input from "../../../components/Input";
 import { Container, Title } from "../layout";
 import { ConfigScreen } from "../../../features/config/slice";
-
-type Section = Pick<Config, "scanImage">;
 
 export function PlatformServices() {
   return (
     <>
       <Title>Scand-agent Docker image</Title>
       <Container>
-        <Input<Section> label="Docker image" name="scanImage" />
+        <Input label="Docker image" name="scanImage" />
       </Container>
     </>
   );

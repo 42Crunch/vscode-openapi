@@ -2,7 +2,7 @@ import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 import { BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/common/openapi";
 import { OasWithOperation, TryitOperationValues } from "@xliic/common/tryit";
-import { HttpMethod, HttpRequest, HttpResponse, HttpError } from "@xliic/common/http";
+import { HttpMethod, HttpRequest, HttpResponse, HttpError, HttpConfig } from "@xliic/common/http";
 import { createDefaultValues } from "../../util";
 
 import { createDefaultValues as createSwaggerDefaultValues } from "../../util-swagger";
@@ -73,15 +73,15 @@ export const slice = createSlice({
       state.method = method;
     },
 
-    showHttpResponse: (state, action: PayloadAction<HttpResponse>) => {
-      state.response = action.payload;
+    showHttpResponse: (state, action: PayloadAction<{ id: string; response: HttpResponse }>) => {
+      state.response = action.payload.response;
       state.error = undefined;
       state.gerror = undefined;
       state.waiting = false;
     },
 
-    showHttpError: (state, action: PayloadAction<HttpError>) => {
-      state.error = action.payload;
+    showHttpError: (state, action: PayloadAction<{ id: string; error: HttpError }>) => {
+      state.error = action.payload.error;
       state.gerror = undefined;
       state.response = undefined;
       state.waiting = false;
@@ -97,7 +97,11 @@ export const slice = createSlice({
     // for listeners
     sendHttpRequest: (
       state,
-      action: PayloadAction<{ defaultValues: TryitOperationValues; request: HttpRequest }>
+      action: PayloadAction<{
+        defaultValues: TryitOperationValues;
+        request: HttpRequest;
+        config: HttpConfig;
+      }>
     ) => {
       state.defaultValues = action.payload.defaultValues;
       state.waiting = true;
