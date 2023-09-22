@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import { HttpRequest } from "@xliic/common/http";
+import { HttpConfig, HttpRequest } from "@xliic/common/http";
 import { useAppDispatch, useAppSelector } from "./store";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { Clone } from "../../icons";
@@ -140,18 +140,18 @@ function extract(
   scanRuntime: "docker" | "scand-manager",
   replaceLocalhost: boolean,
   platform: string
-): HttpRequest {
+): { id: string; request: HttpRequest; config: HttpConfig } {
   const parts = split(curl).slice(1);
+  const config = {
+    https: {
+      rejectUnauthorized: false,
+    },
+  };
+
   const result: HttpRequest = {
-    id,
     url: parts.pop()!,
     headers: {},
     method: "get",
-    config: {
-      https: {
-        rejectUnauthorized: false,
-      },
-    },
   };
 
   for (let i = 0; i < parts.length; i++) {
@@ -169,7 +169,7 @@ function extract(
 
   result.url = optionallyUnreplaceLocalhost(result.url, scanRuntime, replaceLocalhost, platform);
 
-  return result;
+  return { id, request: result, config };
 }
 
 function split(string: string): string[] {

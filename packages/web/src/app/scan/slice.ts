@@ -7,7 +7,14 @@ import {
   OasWithOperationAndConfig,
   SingleOperationScanReport,
 } from "@xliic/common/scan";
-import { HttpMethod, HttpRequest, HttpResponse, HttpError, HttpMethods } from "@xliic/common/http";
+import {
+  HttpMethod,
+  HttpRequest,
+  HttpResponse,
+  HttpError,
+  HttpMethods,
+  HttpConfig,
+} from "@xliic/common/http";
 import { GeneralError } from "@xliic/common/error";
 import { Preferences } from "@xliic/common/prefs";
 import { ScanReportJSONSchema, TestLogReport } from "@xliic/common/scan-report";
@@ -223,22 +230,25 @@ export const slice = createSlice({
       state.waiting = false;
     },
 
-    showHttpResponse: (state, action: PayloadAction<HttpResponse>) => {
-      const httpResponse = action.payload;
-      state.responses[httpResponse.id!] = httpResponse;
-      state.waitings[httpResponse.id!] = false;
-      delete state.errors[httpResponse.id!];
+    showHttpResponse: (state, action: PayloadAction<{ id: string; response: HttpResponse }>) => {
+      // const httpResponse = action.payload;
+      // state.responses[httpResponse.id!] = httpResponse;
+      // state.waitings[httpResponse.id!] = false;
+      // delete state.errors[httpResponse.id!];
     },
 
-    showHttpError: (state, action: PayloadAction<HttpError>) => {
-      const httpError = action.payload;
-      state.errors[httpError.id!] = httpError;
-      state.waitings[httpError.id!] = false;
-      delete state.responses[httpError.id!];
+    showHttpError: (state, action: PayloadAction<{ id: string; error: HttpError }>) => {
+      // const httpError = action.payload;
+      // state.errors[httpError.id!] = httpError;
+      // state.waitings[httpError.id!] = false;
+      // delete state.responses[httpError.id!];
     },
 
-    sendHttpRequest: (state, action: PayloadAction<HttpRequest>) => {
-      state.waitings[action.payload.id!] = true;
+    sendHttpRequest: (
+      state,
+      action: PayloadAction<{ id: string; request: HttpRequest; config: HttpConfig }>
+    ) => {
+      // state.waitings[action.payload.id!] = true;
     },
 
     sendCurlRequest: (state, action: PayloadAction<string>) => {},
