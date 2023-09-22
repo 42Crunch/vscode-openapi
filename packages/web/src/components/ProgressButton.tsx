@@ -19,7 +19,7 @@ export function ProgressButton({
   const [isWaiting, setIsWaiting] = useState(waiting);
 
   useEffect(() => {
-    let timeoutId: number | undefined;
+    let timeoutId: any;
     if (waiting) {
       setIsWaiting(true);
     } else {
