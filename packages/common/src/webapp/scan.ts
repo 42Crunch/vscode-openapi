@@ -1,6 +1,5 @@
 import { Webapp as App } from "../message";
 import {
-  RunScanMessage,
   ScanOperationMessage,
   ShowScanReportMessage,
   ShowJsonPointerMessage,
@@ -34,7 +33,6 @@ export type Webapp = App<
   | ShowHttpResponseMessage
   | ShowLogMessage,
   // produces
-  | RunScanMessage
   | ShowEnvWindow
   | SavePreferencesMessage
   | SendHttpRequestMessage

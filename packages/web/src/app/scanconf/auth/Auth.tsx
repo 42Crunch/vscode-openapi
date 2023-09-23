@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import * as playbook from "@xliic/common/playbook";
 import { useAppSelector, useAppDispatch } from "../store";
-import { addCredential, saveCredential, saveScanconf } from "./slice";
+import { addCredential, saveCredential, saveScanconf } from "../slice";
 import CredentialCard from "./CredentialCard";
 import CredentialAddNewDialog from "./CredentialAddNewDialog";
 import Button from "../../../components/Button";

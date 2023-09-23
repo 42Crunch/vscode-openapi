@@ -32,7 +32,7 @@ function renderAssignment(assignments: PlaybookVariableAssignment[]) {
         style={{
           lineBreak: "anywhere",
         }}
-      >{`${assignment.error ? assignment.error : assignment.value}`}</div>
+      >{`${assignment.error === undefined ? assignment.error : assignment.value}`}</div>
     </div>
   ));
 }

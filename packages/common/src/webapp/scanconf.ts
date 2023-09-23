@@ -1,6 +1,6 @@
 import { Webapp as App } from "../message";
 import { SaveScanconfMessage, UpdateScanconfMessage } from "../playbook";
-import { ShowScanconfAuthMessage, ShowScanconfOperationMessage } from "../scanconf";
+import { ShowScanconfAuthMessage, ShowScanconfOperationMessage, RunScanMessage } from "../scanconf";
 import { ChangeThemeMessage } from "../theme";
 import { ShowEnvWindow, LoadEnvMessage } from "../env";
 
@@ -16,5 +16,5 @@ export type Webapp = App<
   | ShowHttpErrorMessage
   | LoadEnvMessage,
   // produces
-  SaveScanconfMessage | SendHttpRequestMessage | ShowEnvWindow
+  SaveScanconfMessage | SendHttpRequestMessage | ShowEnvWindow | RunScanMessage
 >;

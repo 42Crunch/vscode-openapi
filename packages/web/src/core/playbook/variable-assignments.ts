@@ -89,9 +89,9 @@ function assignValues(
 
     if (value !== undefined) {
       env[varname] = value;
-      result.push({ name: varname, value });
+      result.push({ name: varname, value, error: undefined });
     } else {
-      result.push({ name: varname, error: "not found" });
+      result.push({ name: varname, error: "not found", value: undefined });
     }
   }
 

@@ -12,6 +12,8 @@ import { HttpMethod } from "@xliic/common/http";
 import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
 import { ScanWebView } from "./view";
 import { extractSinglePath } from "../../util/extract";
+import { basename, extname, join, dirname } from "path";
+import { TextEncoder } from "util";
 
 export default (
   cache: Cache,
@@ -59,50 +61,89 @@ async function editorRunSingleOperationScan(
 ): Promise<void> {
   await view.show();
   await view.sendColorTheme(vscode.window.activeColorTheme);
-  await view.sendStartScan(editor.document);
+  // FIXME await view.sendStartScan(editor.document);
 
   const bundle = await cache.getDocumentBundle(editor.document);
   if (bundle && !("errors" in bundle)) {
-    const oas = extractSinglePath(path as string, bundle.value);
-    const rawOas = stringify(oas);
+    // const oas = extractSinglePath(path as string, bundle.value);
+    const rawOas = stringify(bundle.value);
 
-    const tmpApi = await store.createTempApi(rawOas);
+    const scanconfUri = getScanconfUri(editor.document.uri);
 
-    const report = await store.getAuditReport(tmpApi.apiId);
+    const isScanconfExists = await exists(scanconfUri);
 
-    if (report?.data.openapiState !== "valid") {
+    if (!isScanconfExists) {
+      const tmpApi = await store.createTempApi(rawOas);
+
+      const report = await store.getAuditReport(tmpApi.apiId);
+
+      if (report?.data.openapiState !== "valid") {
+        await store.clearTempApi(tmpApi);
+        await view.show();
+        // FIXME await view.sendAuditError(editor.document, report.data, bundle.mapping);
+        return;
+      }
+
+      await store.createDefaultScanConfig(tmpApi.apiId);
+
+      const configs = await store.getScanConfigs(tmpApi.apiId);
+
+      const isNewApi = configs[0].configuration !== undefined;
+
+      const c = isNewApi
+        ? await store.readScanConfig(configs[0].configuration.id)
+        : await store.readScanConfig(configs[0].scanConfigurationId);
+
+      const config = isNewApi
+        ? JSON.parse(Buffer.from(c.file, "base64").toString("utf-8"))
+        : JSON.parse(Buffer.from(c.scanConfiguration, "base64").toString("utf-8"));
+
       await store.clearTempApi(tmpApi);
-      await view.show();
-      await view.sendAuditError(editor.document, report.data, bundle.mapping);
-      return;
+
+      if (config !== undefined) {
+        const uri = editor.document.uri;
+        const filename = basename(uri.fsPath);
+        const scanconfUri = uri.with({
+          path: join(dirname(uri.fsPath), `${filename}.scanconf.json`),
+        });
+
+        const encoder = new TextEncoder();
+        await vscode.workspace.fs.writeFile(
+          scanconfUri,
+          encoder.encode(JSON.stringify(config, null, 2))
+        );
+      }
+
+      // await view.sendScanOperation(editor.document, {
+      //   oas: bundle.value,
+      //   rawOas: rawOas,
+      //   path: path as string,
+      //   method: method as HttpMethod,
+      //   config,
+      // });
     }
 
-    await store.createDefaultScanConfig(tmpApi.apiId);
+    console.log(scanconfUri);
+    const scanconf = await vscode.workspace.openTextDocument(scanconfUri);
 
-    const configs = await store.getScanConfigs(tmpApi.apiId);
+    await view.show();
+    return view.sendScanOperation(bundle, editor.document, scanconf, path, method);
+  }
+}
 
-    const isNewApi = configs[0].configuration !== undefined;
+function getScanconfUri(openapiUri: vscode.Uri) {
+  const filename = basename(openapiUri.fsPath);
+  const scanconfUri = openapiUri.with({
+    path: join(dirname(openapiUri.fsPath), `${filename}.scanconf.json`),
+  });
+  return scanconfUri;
+}
 
-    const c = isNewApi
-      ? await store.readScanConfig(configs[0].configuration.id)
-      : await store.readScanConfig(configs[0].scanConfigurationId);
-
-    const config = isNewApi
-      ? JSON.parse(Buffer.from(c.file, "base64").toString("utf-8"))
-      : JSON.parse(Buffer.from(c.scanConfiguration, "base64").toString("utf-8"));
-
-    await store.clearTempApi(tmpApi);
-
-    if (config !== undefined) {
-      view.setNewApi(isNewApi);
-      await view.show();
-      await view.sendScanOperation(editor.document, {
-        oas: oas as BundledSwaggerOrOasSpec,
-        rawOas: rawOas,
-        path: path as string,
-        method: method as HttpMethod,
-        config,
-      });
-    }
+async function exists(uri: vscode.Uri): Promise<boolean> {
+  try {
+    const stat = await vscode.workspace.fs.stat(uri);
+    return true;
+  } catch (e) {
+    return false;
   }
 }

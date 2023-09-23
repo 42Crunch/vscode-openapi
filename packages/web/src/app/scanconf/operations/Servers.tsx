@@ -6,12 +6,14 @@ import { FileExport, Play } from "../../../icons";
 export default function Servers({
   servers,
   selected,
-  onStart,
+  onTry,
+  onScan,
   onChange,
 }: {
   servers: string[];
   selected: string;
-  onStart: (server: string) => unknown;
+  onTry: (server: string) => unknown;
+  onScan: (server: string) => unknown;
   onChange: (server: string) => void;
 }) {
   return (
@@ -36,13 +38,19 @@ export default function Servers({
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
-            onStart(selected);
+            onTry(selected);
           }}
         >
           <FileExport />
           Try
         </Action>
-        <Action>
+        <Action
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            onScan(selected);
+          }}
+        >
           <Play />
           Scan
         </Action>

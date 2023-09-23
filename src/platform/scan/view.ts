@@ -5,51 +5,52 @@
 
 import * as vscode from "vscode";
 
-import {
-  ScanRunConfig,
-  OasWithOperationAndConfig,
-  ShowScanReportMessage,
-  ScandManagerConnection,
-} from "@xliic/common/scan";
+import { ScandManagerConnection } from "@xliic/common/scan";
 
 import { Preferences } from "@xliic/common/prefs";
-import { Webapp } from "@xliic/common/webapp/scan";
+//import { Webapp } from "@xliic/common/webapp/scan";
 import { Config } from "@xliic/common/config";
-import { GeneralError, ShowGeneralErrorMessage } from "@xliic/common/error";
+import { EnvData, SimpleEnvironment } from "@xliic/common/env";
+import { GeneralError } from "@xliic/common/error";
+import { HttpMethod } from "@xliic/common/http";
 import { LogLevel } from "@xliic/common/logging";
-import { EnvData } from "@xliic/common/env";
-
-import {
-  ShowHttpResponseMessage,
-  ShowHttpErrorMessage,
-  HttpRequest,
-  HttpError,
-  HttpConfig,
-} from "@xliic/common/http";
-
-import { WebView } from "../../web-view";
+import { Webapp } from "@xliic/common/webapp/scanconf";
+import { stringify } from "@xliic/preserving-json-yaml-parser";
+import { AuditWebView } from "../../audit/view";
 import { Cache } from "../../cache";
-import { PlatformStore } from "../stores/platform-store";
 import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
-import { executeHttpRequestRaw } from "../../tryit/http-handler";
-import { getLocationByPointer } from "../../audit/util";
+import { AuditContext, Bundle, MappingNode } from "../../types";
+import { loadConfig } from "../../util/config";
+import { WebView } from "../../web-view";
 import * as managerApi from "../api-scand-manager";
 import { ScandManagerJobStatus } from "../api-scand-manager";
+import { PlatformStore } from "../stores/platform-store";
 import { Logger } from "../types";
-import { loadConfig } from "../../util/config";
-import { AuditWebView } from "../../audit/view";
-import { parseAuditReport } from "../../audit/audit";
-import { AuditContext, MappingNode } from "../../types";
-import { setAudit, clearAudit } from "../../audit/service";
+import { executeHttpRequest } from "./http-handler";
+
+export type BundleDocumentVersions = Record<string, number>;
+
+export type Target = {
+  bundle: Bundle;
+  document: vscode.TextDocument;
+  documentUri: string;
+  documentVersion: number;
+  scanconf: vscode.TextDocument;
+  scanconfUri: string;
+  scanconfVersion: number;
+  versions: BundleDocumentVersions;
+  path: string;
+  method: HttpMethod;
+};
 
 export class ScanWebView extends WebView<Webapp> {
-  private isNewApi: boolean = false;
   private document?: vscode.TextDocument;
   private auditReport?: {
     report: any;
     mapping: MappingNode;
   };
+  private target?: Target;
 
   constructor(
     extensionPath: string,
@@ -62,7 +63,7 @@ export class ScanWebView extends WebView<Webapp> {
     private auditView: AuditWebView,
     private auditContext: AuditContext
   ) {
-    super(extensionPath, "scan", "Scan", vscode.ViewColumn.Two);
+    super(extensionPath, "scanconf", "Scan configuration", vscode.ViewColumn.One);
     envStore.onEnvironmentDidChange((env) => {
       if (this.isActive()) {
         this.sendRequest({
@@ -80,19 +81,20 @@ export class ScanWebView extends WebView<Webapp> {
   }
 
   hostHandlers: Webapp["hostHandlers"] = {
-    runScan: async (
-      scanConfig: ScanRunConfig
-    ): Promise<ShowScanReportMessage | ShowGeneralErrorMessage> => {
+    saveScanconf: async () => undefined,
+
+    runScan: async ({ path, method, env }): Promise<void> => {
       try {
         const config = await loadConfig(this.configuration, this.secrets);
 
         return await runScan(
           this.store,
           this.envStore,
-          scanConfig,
+          env,
+          this.target!.bundle,
+          this.target!.scanconf,
           config,
-          makeLogger(this),
-          this.isNewApi
+          makeLogger(this)
         );
       } catch (ex: any) {
         const message =
@@ -102,85 +104,68 @@ export class ScanWebView extends WebView<Webapp> {
             ? "You have reached your maximum number of APIs. Please contact support@42crunch.com to upgrade your account."
             : "Failed to run scan: " + ex.message;
 
-        return {
-          command: "showGeneralError",
-          payload: {
-            message,
-          },
-        };
+        // return {
+        //   command: "showGeneralError",
+        //   payload: {
+        //     message,
+        //   },
+        // };
       }
     },
 
-    sendHttpRequest: async (payload: {
-      id: string;
-      request: HttpRequest;
-      config: HttpConfig;
-    }): Promise<ShowHttpResponseMessage | ShowHttpErrorMessage> => {
-      try {
-        const response = await executeHttpRequestRaw(payload.request, payload.config);
-        return {
-          command: "showHttpResponse",
-          payload: { id: payload.id, response },
-        };
-      } catch (e) {
-        return {
-          command: "showHttpError",
-          payload: { id: payload.id, error: e as HttpError },
-        };
-      }
-    },
+    sendHttpRequest: ({ id, request, config }) => executeHttpRequest(id, request, config),
 
-    sendCurlRequest: async (curl: string): Promise<void> => {
-      return copyCurl(curl);
-    },
+    // sendCurlRequest: async (curl: string): Promise<void> => {
+    //   return copyCurl(curl);
+    // },
 
-    savePrefs: async (prefs: Preferences) => {
-      if (this.document) {
-        const uri = this.document.uri.toString();
-        this.prefs[uri] = {
-          ...this.prefs[uri],
-          ...prefs,
-        };
-      }
-    },
+    // savePrefs: async (prefs: Preferences) => {
+    //   if (this.document) {
+    //     const uri = this.document.uri.toString();
+    //     this.prefs[uri] = {
+    //       ...this.prefs[uri],
+    //       ...prefs,
+    //     };
+    //   }
+    // },
 
     showEnvWindow: async () => {
       vscode.commands.executeCommand("openapi.showEnvironment");
     },
 
-    showJsonPointer: async (payload: string) => {
-      if (this.document) {
-        let editor: vscode.TextEditor | undefined = undefined;
+    // showJsonPointer: async (payload: string) => {
+    //   if (this.document) {
+    //     let editor: vscode.TextEditor | undefined = undefined;
 
-        // check if document is already open
-        for (const visibleEditor of vscode.window.visibleTextEditors) {
-          if (visibleEditor.document.uri.toString() === this.document.uri.toString()) {
-            editor = visibleEditor;
-          }
-        }
+    //     // check if document is already open
+    //     for (const visibleEditor of vscode.window.visibleTextEditors) {
+    //       if (visibleEditor.document.uri.toString() === this.document.uri.toString()) {
+    //         editor = visibleEditor;
+    //       }
+    //     }
 
-        if (!editor) {
-          editor = await vscode.window.showTextDocument(this.document, vscode.ViewColumn.One);
-        }
-        const root = this.cache.getParsedDocument(editor.document);
-        const lineNo = getLocationByPointer(editor.document, root, payload)[0];
-        const textLine = editor.document.lineAt(lineNo);
-        editor.selection = new vscode.Selection(lineNo, 0, lineNo, 0);
-        editor.revealRange(textLine.range, vscode.TextEditorRevealType.AtTop);
-      }
-    },
+    //     if (!editor) {
+    //       editor = await vscode.window.showTextDocument(this.document, vscode.ViewColumn.One);
+    //     }
+    //     const root = this.cache.getParsedDocument(editor.document);
+    //     const lineNo = getLocationByPointer(editor.document, root, payload)[0];
+    //     const textLine = editor.document.lineAt(lineNo);
+    //     editor.selection = new vscode.Selection(lineNo, 0, lineNo, 0);
+    //     editor.revealRange(textLine.range, vscode.TextEditorRevealType.AtTop);
+    //   }
+    // },
 
-    showAuditReport: async () => {
-      const uri = this.document!.uri.toString();
-      const audit = await parseAuditReport(
-        this.cache,
-        this.document!,
-        this.auditReport!.report,
-        this.auditReport!.mapping
-      );
-      setAudit(this.auditContext, uri, audit);
-      await this.auditView.showReport(audit);
-    },
+    // showAuditReport: async () => {
+    //   const uri = this.document!.uri.toString();
+    //   const audit = await parseAuditReport(
+    //     this.cache,
+    //     this.document!,
+    //     this.auditReport!.report,
+    //     this.auditReport!.mapping
+    //   );
+    //   setAudit(this.auditContext, uri, audit);
+    //   await this.auditView.showReport(audit);
+    // },
   };
 
   onDispose(): void {
@@ -188,61 +173,97 @@ export class ScanWebView extends WebView<Webapp> {
     super.onDispose();
   }
 
-  async sendStartScan(document: vscode.TextDocument) {
-    this.document = document;
-    this.auditReport = undefined;
-    return this.sendRequest({ command: "startScan", payload: undefined });
-  }
+  // async sendStartScan(document: vscode.TextDocument) {
+  //   this.document = document;
+  //   this.auditReport = undefined;
+  //   return this.sendRequest({ command: "startScan", payload: undefined });
+  // }
 
-  async sendScanOperation(document: vscode.TextDocument, payload: OasWithOperationAndConfig) {
-    this.document = document;
-    this.auditReport = undefined;
-    clearAudit(this.auditContext, this.document.uri.toString());
-    this.sendRequest({ command: "loadEnv", payload: await this.envStore.all() });
-    this.sendLoadConfig();
-    const prefs = this.prefs[this.document.uri.toString()];
-    if (prefs) {
-      this.sendRequest({ command: "loadPrefs", payload: prefs });
-    }
-    return this.sendRequest({ command: "scanOperation", payload });
-  }
-
-  async sendAuditError(document: vscode.TextDocument, report: any, mapping: MappingNode) {
-    this.document = document;
-
-    this.auditReport = {
-      report,
-      mapping,
+  async sendScanOperation(
+    bundle: Bundle,
+    document: vscode.TextDocument,
+    scanconf: vscode.TextDocument,
+    path: string,
+    method: HttpMethod
+  ) {
+    this.target = {
+      bundle,
+      document,
+      documentUri: document.uri.toString(),
+      documentVersion: document.version,
+      versions: getBundleVersions(bundle),
+      scanconf,
+      scanconfUri: scanconf.uri.toString(),
+      scanconfVersion: scanconf.version,
+      method,
+      path,
     };
 
+    await this.show();
+    await this.sendColorTheme(vscode.window.activeColorTheme);
+    await this.sendRequest({ command: "loadEnv", payload: await this.envStore.all() });
+    // const prefs = this.prefs[this.target.documentUri];
+
     return this.sendRequest({
-      command: "showGeneralError",
+      command: "showScanconfOperation",
       payload: {
-        message:
-          "OpenAPI has failed Security Audit. Please run API Security Audit, fix the issues and try running the Scan again.",
-        code: "audit-error",
+        oas: bundle.value,
+        path: this.target.path,
+        method: this.target.method,
+        scanconf: this.target.scanconf.getText(),
       },
     });
   }
 
-  async sendLoadConfig() {
-    const config = await loadConfig(this.configuration, this.secrets);
-    this.sendRequest({
-      command: "loadConfig",
-      payload: config,
-    });
-  }
+  // async sendScanOperation(document: vscode.TextDocument, payload: OasWithOperationAndConfig) {
+  //   this.document = document;
+  //   this.auditReport = undefined;
+  //   clearAudit(this.auditContext, this.document.uri.toString());
+  //   this.sendRequest({ command: "loadEnv", payload: await this.envStore.all() });
+  //   this.sendLoadConfig();
+  //   const prefs = this.prefs[this.document.uri.toString()];
+  //   if (prefs) {
+  //     this.sendRequest({ command: "loadPrefs", payload: prefs });
+  //   }
+  //   return this.sendRequest({ command: "scanOperation", payload });
+  // }
+
+  // async sendAuditError(document: vscode.TextDocument, report: any, mapping: MappingNode) {
+  //   this.document = document;
+
+  //   this.auditReport = {
+  //     report,
+  //     mapping,
+  //   };
+
+  //   return this.sendRequest({
+  //     command: "showGeneralError",
+  //     payload: {
+  //       message:
+  //         "OpenAPI has failed Security Audit. Please run API Security Audit, fix the issues and try running the Scan again.",
+  //       code: "audit-error",
+  //     },
+  //   });
+  // }
+
+  // async sendLoadConfig() {
+  //   const config = await loadConfig(this.configuration, this.secrets);
+  //   this.sendRequest({
+  //     command: "loadConfig",
+  //     payload: config,
+  //   });
+  // }
 
   async sendLogMessage(message: string, level: LogLevel) {
-    this.sendRequest({
-      command: "showLogMessage",
-      payload: { message, level, timestamp: new Date().toISOString() },
-    });
+    // this.sendRequest({
+    //   command: "showLogMessage",
+    //   payload: { message, level, timestamp: new Date().toISOString() },
+    // });
   }
 
-  setNewApi(isNewApi: boolean) {
-    this.isNewApi = isNewApi;
-  }
+  // setNewApi(isNewApi: boolean) {
+  //   this.isNewApi = isNewApi;
+  // }
 }
 
 function makeLogger(view: { sendLogMessage: (message: string, level: LogLevel) => void }): Logger {
@@ -258,48 +279,45 @@ function makeLogger(view: { sendLogMessage: (message: string, level: LogLevel) =
 async function runScan(
   store: PlatformStore,
   envStore: EnvStore,
-  scanConfig: ScanRunConfig,
+  scanEnv: SimpleEnvironment,
+  bundle: Bundle,
+  scanConfig: vscode.TextDocument,
   config: Config,
-  logger: Logger,
-  isNewApi: boolean
-): Promise<ShowScanReportMessage | ShowGeneralErrorMessage> {
+  logger: Logger
+): Promise<void> {
   logger.info(`Starting API Conformance Scan`);
-  const tmpApi = await store.createTempApi(scanConfig.rawOas);
+  const rawOas = stringify(bundle.value);
+
+  const tmpApi = await store.createTempApi(rawOas);
 
   logger.info(`Created temp API "${tmpApi.apiId}", waiting for Security Audit`);
 
   const audit = await store.getAuditReport(tmpApi.apiId);
   if (audit?.data.openapiState !== "valid") {
     await store.clearTempApi(tmpApi);
-    return {
-      command: "showGeneralError",
-      payload: {
-        message:
-          "OpenAPI has failed Security Audit. Please run API Security Audit, fix the issues and try running the Scan again.",
-      },
-    };
+    // return {
+    //   command: "showGeneralError",
+    //   payload: {
+    //     message:
+    //       "OpenAPI has failed Security Audit. Please run API Security Audit, fix the issues and try running the Scan again.",
+    //   },
+    // };
   }
 
   logger.info(`Security Audit check is successful`);
 
-  if (isNewApi) {
-    await store.createScanConfigNew(tmpApi.apiId, "updated", scanConfig.config);
-  } else {
-    await store.createScanConfig(tmpApi.apiId, "updated", scanConfig.config);
-  }
+  await store.createScanConfigNew(tmpApi.apiId, "updated", scanConfig.getText());
 
   const configs = await store.getScanConfigs(tmpApi.apiId);
 
-  const c = isNewApi
-    ? await store.readScanConfig(configs[0].configuration.id)
-    : await store.readScanConfig(configs[0].scanConfigurationId);
+  const c = await store.readScanConfig(configs[0].configuration.id);
 
-  const token = isNewApi ? c.token : c.scanConfigurationToken;
+  const token = c.token;
 
   const failure =
     config.scanRuntime === "docker"
-      ? await runScanWithDocker(envStore, scanConfig, config, token)
-      : await runScanWithScandManager(envStore, scanConfig, config, logger, token);
+      ? await runScanWithDocker(envStore, scanEnv, config, token)
+      : await runScanWithScandManager(envStore, scanEnv, config, logger, token);
 
   if (failure !== undefined) {
     // cleanup
@@ -309,24 +327,22 @@ async function runScan(
       console.log(`Failed to cleanup temp api ${tmpApi.apiId}: ${ex}`);
     }
 
-    return {
-      command: "showGeneralError",
-      payload: failure,
-    };
+    // return {
+    //   command: "showGeneralError",
+    //   payload: failure,
+    // };
   }
 
-  const reportId = await waitForReport(store, tmpApi.apiId, 30000, isNewApi);
+  const reportId = await waitForReport(store, tmpApi.apiId, 30000);
 
-  if (reportId === undefined) {
-    return {
-      command: "showGeneralError",
-      payload: { message: "Failed to load scan report from the platform" },
-    };
-  }
+  // if (reportId === undefined) {
+  //   return {
+  //     command: "showGeneralError",
+  //     payload: { message: "Failed to load scan report from the platform" },
+  //   };
+  // }
 
-  const report = isNewApi
-    ? await store.readScanReportNew(reportId!)
-    : await store.readScanReport(reportId!);
+  const report = await store.readScanReportNew(reportId!);
 
   const parsed = JSON.parse(Buffer.from(report, "base64").toString("utf-8"));
 
@@ -334,30 +350,27 @@ async function runScan(
 
   logger.info(`Finished API Conformance Scan`);
 
-  return {
-    command: "showScanReport",
-    // FIXME path and method are ignored by the UI, fix message to make 'em optionals
-    payload: {
-      path: "/",
-      method: "get",
-      report: parsed,
-      security: undefined,
-    },
-  };
+  // return {
+  //   command: "showScanReport",
+  //   // FIXME path and method are ignored by the UI, fix message to make 'em optionals
+  //   payload: {
+  //     path: "/",
+  //     method: "get",
+  //     report: parsed,
+  //     security: undefined,
+  //   },
+  // };
 }
 
 async function runScanWithDocker(
   envStore: EnvStore,
-  scanConfig: ScanRunConfig,
+  scanEnv: SimpleEnvironment,
   config: Config,
   token: string
 ) {
   const terminal = findOrCreateTerminal();
 
-  const env: Record<string, string> = {};
-  for (const [name, value] of Object.entries(scanConfig.env)) {
-    env[name] = replaceEnvOld(value, await envStore.all());
-  }
+  const env = { ...scanEnv };
 
   const services =
     config.platformServices.source === "auto"
@@ -382,7 +395,7 @@ async function runScanWithDocker(
 
 async function runScanWithScandManager(
   envStore: EnvStore,
-  scanConfig: ScanRunConfig,
+  scanEnv: SimpleEnvironment,
   config: Config,
   logger: Logger,
   token: string
@@ -391,7 +404,7 @@ async function runScanWithScandManager(
 
   const env: Record<string, string> = {};
 
-  for (const [name, value] of Object.entries(scanConfig.env)) {
+  for (const [name, value] of Object.entries(scanEnv)) {
     env[name] = replaceEnvOld(value, await envStore.all());
   }
 
@@ -441,14 +454,13 @@ async function runScanWithScandManager(
 async function waitForReport(
   store: PlatformStore,
   apiId: string,
-  maxDelay: number,
-  isNewApi: boolean
+  maxDelay: number
 ): Promise<string | undefined> {
   let currentDelay = 0;
   while (currentDelay < maxDelay) {
     const reports = await store.listScanReports(apiId);
     if (reports.length > 0) {
-      return isNewApi ? reports[0].report.taskId : reports[0].taskId;
+      return reports[0].report.taskId;
     }
     console.log("Waiting for report to become available");
     await delay(1000);
@@ -517,4 +529,14 @@ export function replaceEnvOld(value: string, env: EnvData): string {
     }
     return env.default.hasOwnProperty(name) ? (env.default[name] as string) : match;
   });
+}
+
+function getBundleVersions(bundle: Bundle) {
+  const versions: BundleDocumentVersions = {
+    [bundle.document.uri.toString()]: bundle.document.version,
+  };
+  bundle.documents.forEach((document) => {
+    versions[document.uri.toString()] = document.version;
+  });
+  return versions;
 }

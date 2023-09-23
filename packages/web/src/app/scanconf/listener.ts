@@ -10,7 +10,7 @@ import { showEnvWindow } from "../../features/env/slice";
 
 import { Routes } from "../../features/router/RouterContext";
 import { startListeners } from "../webapp";
-import { sendHttpRequest } from "./actions";
+import { sendHttpRequest, runScan } from "./actions";
 import {
   onMockExecuteScenario,
   onExecuteRequest,
@@ -25,6 +25,17 @@ const startAppListening = listenerMiddleware.startListening as AppStartListening
 
 export function createListener(host: Webapp["host"], routes: Routes) {
   const listeners: Record<keyof Webapp["hostHandlers"], () => UnsubscribeListener> = {
+    runScan: () =>
+      startAppListening({
+        actionCreator: runScan,
+        effect: async (action, listenerApi) => {
+          host.postMessage({
+            command: "runScan",
+            payload: action.payload,
+          });
+        },
+      }),
+
     saveScanconf: () =>
       startAppListening({
         actionCreator: saveScanconf,

@@ -26,20 +26,20 @@ const startAppListening = listenerMiddleware.startListening as AppStartListening
 
 export function createListener(host: Webapp["host"], routes: Routes) {
   const listeners: Record<keyof Webapp["hostHandlers"], () => UnsubscribeListener> = {
-    runScan: () =>
-      startAppListening({
-        actionCreator: runScan,
-        effect: async (action, listenerApi) => {
-          host.postMessage({
-            command: "runScan",
-            payload: {
-              config: action.payload.scanConfigRaw,
-              env: action.payload.env,
-              rawOas: action.payload.rawOas,
-            },
-          });
-        },
-      }),
+    // runScan: () =>
+    //   startAppListening({
+    //     actionCreator: runScan,
+    //     effect: async (action, listenerApi) => {
+    //       host.postMessage({
+    //         command: "runScan",
+    //         payload: {
+    //           config: action.payload.scanConfigRaw,
+    //           env: action.payload.env,
+    //           rawOas: action.payload.rawOas,
+    //         },
+    //       });
+    //     },
+    //   }),
 
     savePrefs: () =>
       startAppListening({

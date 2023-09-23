@@ -1,6 +1,6 @@
 import { HttpClient } from "@xliic/common/http";
 import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
-import { EnvData } from "@xliic/common/env";
+import { EnvData, SimpleEnvironment } from "@xliic/common/env";
 import * as playbook from "@xliic/common/playbook";
 import { Result } from "@xliic/common/result";
 
@@ -8,7 +8,7 @@ import { replaceEnv, replaceEnvVariables } from "./replace";
 import { makeHttpRequest } from "./http";
 import { PlaybookExecutorStep } from "./playbook";
 import { assignVariables } from "./variable-assignments";
-import { PlaybookEnv, PlaybookEnvStack } from "./playbook-env";
+import { PlaybookEnv, PlaybookEnvStack, PlaybookVariableAssignments } from "./playbook-env";
 import { MockHttpClient } from "./mock-http";
 
 export async function* executeAllPlaybooks(
@@ -40,7 +40,7 @@ export async function* executeAllPlaybooks(
       server,
       file,
       requests,
-      [ee, ...env, ...result]
+      [ee[0], ...env, ...result]
     );
     result.push(...playbookResult);
   }
@@ -253,15 +253,17 @@ async function* executeGetCredentialValue(
 export function makeEnvEnv(
   environment: playbook.PlaybookEnvironment,
   env: EnvData
-): Result<PlaybookEnv, string[]> {
+): Result<[PlaybookEnv, SimpleEnvironment], string[]> {
   const result: playbook.Environment = {};
+  const envEnv: SimpleEnvironment = {};
   const missing = [];
   for (const [name, variable] of Object.entries(environment.variables)) {
-    console.log("checking for", variable.name);
     if (env.secrets.hasOwnProperty(variable.name)) {
       result[name] = env.secrets[variable.name];
+      envEnv[variable.name] = env.secrets[variable.name];
     } else if (env.default.hasOwnProperty(variable.name)) {
       result[name] = env.default[variable.name];
+      envEnv[variable.name] = env.default[variable.name];
     } else if (variable.default !== undefined) {
       result[name] = variable.default;
     } else if (variable.required) {
@@ -273,5 +275,5 @@ export function makeEnvEnv(
     return [undefined, missing];
   }
 
-  return [{ id: "start", assignments: [], env: result }, undefined];
+  return [[{ id: "start", assignments: [], env: result }, envEnv], undefined];
 }

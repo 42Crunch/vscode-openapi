@@ -16,6 +16,8 @@ import { setTryitServer } from "../../../features/prefs/slice";
 import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import Responses from "../components/scenario/Responses";
 import Separator from "../../../components/Separator";
+import { runScan } from "../actions";
+import { makeEnvEnv } from "../../../core/playbook/execute";
 
 export default function Operation({ operationId }: { operationId: string }) {
   const dispatch = useAppDispatch();
@@ -23,6 +25,7 @@ export default function Operation({ operationId }: { operationId: string }) {
   const { oas, playbook, servers } = useAppSelector((state) => state.scanconf);
 
   const { mockResult, tryResult } = useAppSelector((state) => state.operations);
+  const env = useAppSelector((state) => state.env.data);
 
   const removeStage = (location: playbook.StageLocation) => dispatch(actions.removeStage(location));
 
@@ -57,12 +60,30 @@ export default function Operation({ operationId }: { operationId: string }) {
 
   const server = getPreferredServer(oas, prefs.tryitServer);
 
+  const [scanenv, scanenvError] = makeEnvEnv(playbook.environments["default"], env);
+
+  console.log("scanenv", scanenv);
+
   return (
     <Container>
       <Servers
         servers={servers}
         selected={server}
-        onStart={(server: string) => dispatch(startTryExecution(server))}
+        onTry={(server: string) => dispatch(startTryExecution(server))}
+        onScan={(server: string) => {
+          if (scanenvError == undefined) {
+            dispatch(
+              runScan({
+                path: "foo",
+                method: "get",
+                env: {
+                  SCAN42C_HOST: server,
+                  ...scanenv[1],
+                },
+              })
+            );
+          }
+        }}
         onChange={setServer}
       />
       <Header>

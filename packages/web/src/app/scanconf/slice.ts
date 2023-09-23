@@ -84,10 +84,10 @@ export const slice = createSlice({
     saveCredential: (
       state,
       {
-        payload: { id, credential },
-      }: PayloadAction<{ id: string; credential: playbook.Credential }>
+        payload: { group, id, credential },
+      }: PayloadAction<{ group: number; id: string; credential: playbook.Credential }>
     ) => {
-      state.playbook.authenticationDetails[0][id] = credential;
+      state.playbook.authenticationDetails[group][id] = credential;
       state.dirty = true;
     },
     addCredential: (

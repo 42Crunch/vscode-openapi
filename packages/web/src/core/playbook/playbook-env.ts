@@ -1,10 +1,20 @@
 import { Environment } from "@xliic/common/env";
 
-export type PlaybookVariableAssignment = {
+export type PlaybookVariableSuccessfullAssignment = {
   name: string;
-  value?: unknown;
-  error?: string;
+  value: unknown;
+  error: undefined;
 };
+
+export type PlaybookVariableFailedAssignment = {
+  name: string;
+  error: string;
+  value: undefined;
+};
+
+export type PlaybookVariableAssignment =
+  | PlaybookVariableSuccessfullAssignment
+  | PlaybookVariableFailedAssignment;
 
 export type PlaybookEnv = {
   id: string;

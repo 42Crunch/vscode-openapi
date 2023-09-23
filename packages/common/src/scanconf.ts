@@ -1,3 +1,4 @@
+import { SimpleEnvironment } from "./env";
 import { HttpMethod } from "./http";
 import { BundledSwaggerOrOasSpec } from "./openapi";
 
@@ -7,6 +8,12 @@ export type OasWithScanconf = {
 };
 
 export type OasWithScanconfPathMethod = OasWithScanconf & {
+  path: string;
+  method: HttpMethod;
+};
+
+export type ScanRunConfig = {
+  env: SimpleEnvironment;
   path: string;
   method: HttpMethod;
 };
@@ -22,3 +29,4 @@ export type UpdateScanconfMessage = { command: "updateScanconf"; payload: string
 
 // webapp to vs code responses
 export type SaveScanconfMessage = { command: "saveScanconf"; payload: string };
+export type RunScanMessage = { command: "runScan"; payload: ScanRunConfig };
