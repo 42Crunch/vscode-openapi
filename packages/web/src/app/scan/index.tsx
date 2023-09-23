@@ -41,7 +41,7 @@ const routes: Routes = [
     id: "scan",
     title: "Scan",
     element: <ScanOperation />,
-    when: scanOperation,
+    when: showScanReport,
   },
 ];
 

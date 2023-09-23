@@ -7,6 +7,7 @@ import { PlatformContext } from "../types";
 import { ScanCodelensProvider } from "./lens";
 import commands from "./commands";
 import { ScanWebView } from "./view";
+import { ScanReportWebView } from "./report-view";
 import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
 import { AuditWebView } from "../../audit/view";
@@ -43,6 +44,18 @@ export function activate(
     auditContext
   );
 
+  const reportView = new ScanReportWebView(
+    context.extensionPath,
+    cache,
+    configuration,
+    secrets,
+    store,
+    envStore,
+    prefs,
+    auditView,
+    auditContext
+  );
+
   const scanCodelensProvider = new ScanCodelensProvider(cache);
 
   function activateLens(connected: boolean, enabled: boolean) {
@@ -66,7 +79,7 @@ export function activate(
     }
   });
 
-  commands(cache, platformContext, store, view);
+  commands(cache, platformContext, store, view, reportView);
 
   return new vscode.Disposable(() => disposables.forEach((disposable) => disposable.dispose()));
 }

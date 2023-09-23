@@ -14,13 +14,24 @@ import { ScanWebView } from "./view";
 import { extractSinglePath } from "../../util/extract";
 import { basename, extname, join, dirname } from "path";
 import { TextEncoder } from "util";
+import { ScanReportWebView } from "./report-view";
 
 export default (
   cache: Cache,
   platformContext: PlatformContext,
   store: PlatformStore,
-  view: ScanWebView
+  view: ScanWebView,
+  reportView: ScanReportWebView
 ) => {
+  vscode.commands.registerCommand(
+    "openapi.platform.showScanReport",
+    async (path: string, method: HttpMethod, report: unknown, oas: unknown): Promise<void> => {
+      await reportView.show();
+      await reportView.sendColorTheme(vscode.window.activeColorTheme);
+      await reportView.showScanReport(path, method, report, oas);
+    }
+  );
+
   vscode.commands.registerTextEditorCommand(
     "openapi.platform.editorRunSingleOperationScan",
     async (

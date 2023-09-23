@@ -16,6 +16,7 @@ export type ScanRunConfig = {
   env: SimpleEnvironment;
   path: string;
   method: HttpMethod;
+  operationId: string;
 };
 
 // vs code to webapp requests

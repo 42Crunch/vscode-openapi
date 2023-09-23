@@ -73,8 +73,9 @@ export default function Operation({ operationId }: { operationId: string }) {
             // FIXME display error if env variables are not available
             dispatch(
               runScan({
-                path: "foo",
-                method: "get",
+                path: playbook.operations[operationId].request.request.path,
+                method: playbook.operations[operationId].request.request.method,
+                operationId,
                 env: {
                   SCAN42C_HOST: server,
                   ...scanenv[1],

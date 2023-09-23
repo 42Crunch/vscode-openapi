@@ -34,6 +34,7 @@ export interface SingleOperationScanReport {
   path: string;
   method: HttpMethod;
   security: TryitSecurityValues | undefined;
+  oas: BundledSwaggerOrOasSpec;
 }
 
 // requests to scan web app
