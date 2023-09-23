@@ -8,7 +8,6 @@ import * as vscode from "vscode";
 import { ScandManagerConnection } from "@xliic/common/scan";
 
 import { Preferences } from "@xliic/common/prefs";
-//import { Webapp } from "@xliic/common/webapp/scan";
 import { Config } from "@xliic/common/config";
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
 import { GeneralError } from "@xliic/common/error";
@@ -29,7 +28,7 @@ import { PlatformStore } from "../stores/platform-store";
 import { Logger } from "../types";
 import { executeHttpRequest } from "./http-handler";
 import { extractSinglePath } from "../../util/extract";
-import { TextEncoder } from "util";
+import { TextDecoder, TextEncoder } from "util";
 
 export type BundleDocumentVersions = Record<string, number>;
 
@@ -38,9 +37,8 @@ export type Target = {
   document: vscode.TextDocument;
   documentUri: string;
   documentVersion: number;
-  scanconf: vscode.TextDocument;
-  scanconfUri: string;
-  scanconfVersion: number;
+  scanconfUri: vscode.Uri;
+  //scanconfVersion: number;
   versions: BundleDocumentVersions;
   path: string;
   method: HttpMethod;
@@ -86,7 +84,7 @@ export class ScanWebView extends WebView<Webapp> {
     saveScanconf: async (scanconf: string) => {
       try {
         const encoder = new TextEncoder();
-        await vscode.workspace.fs.writeFile(this.target!.scanconf.uri, encoder.encode(scanconf));
+        await vscode.workspace.fs.writeFile(this.target!.scanconfUri, encoder.encode(scanconf));
         // const document = this.target!.scanconf;
         // const workspaceEdit = new vscode.WorkspaceEdit();
         // const fullRange = new vscode.Range(0, 0, document.lineCount, 0);
@@ -110,7 +108,7 @@ export class ScanWebView extends WebView<Webapp> {
           path,
           method,
           operationId,
-          this.target!.scanconf,
+          this.target!.scanconfUri,
           config,
           makeLogger(this)
         );
@@ -200,7 +198,7 @@ export class ScanWebView extends WebView<Webapp> {
   async sendScanOperation(
     bundle: Bundle,
     document: vscode.TextDocument,
-    scanconf: vscode.TextDocument,
+    scanconfUri: vscode.Uri,
     path: string,
     method: HttpMethod
   ) {
@@ -210,9 +208,7 @@ export class ScanWebView extends WebView<Webapp> {
       documentUri: document.uri.toString(),
       documentVersion: document.version,
       versions: getBundleVersions(bundle),
-      scanconf,
-      scanconfUri: scanconf.uri.toString(),
-      scanconfVersion: scanconf.version,
+      scanconfUri,
       method,
       path,
     };
@@ -222,13 +218,16 @@ export class ScanWebView extends WebView<Webapp> {
     await this.sendRequest({ command: "loadEnv", payload: await this.envStore.all() });
     // const prefs = this.prefs[this.target.documentUri];
 
+    const content = await vscode.workspace.fs.readFile(scanconfUri);
+    const scanconf = new TextDecoder("utf-8").decode(content);
+
     return this.sendRequest({
       command: "showScanconfOperation",
       payload: {
         oas: bundle.value,
         path: this.target.path,
         method: this.target.method,
-        scanconf: this.target.scanconf.getText(),
+        scanconf,
       },
     });
   }
@@ -302,7 +301,7 @@ async function runScan(
   path: string,
   method: HttpMethod,
   operationId: string,
-  scanConfig: vscode.TextDocument,
+  scanconfUri: vscode.Uri,
   config: Config,
   logger: Logger
 ): Promise<void> {
@@ -312,7 +311,8 @@ async function runScan(
 
   const rawOas = stringify(oas);
 
-  const scanconf = scanConfig.getText();
+  const content = await vscode.workspace.fs.readFile(scanconfUri);
+  const scanconf = new TextDecoder("utf-8").decode(content);
 
   const trimmedScanconf = extractScanconf(scanconf, operationId);
 

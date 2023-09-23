@@ -124,21 +124,10 @@ async function editorRunSingleOperationScan(
           encoder.encode(JSON.stringify(config, null, 2))
         );
       }
-
-      // await view.sendScanOperation(editor.document, {
-      //   oas: bundle.value,
-      //   rawOas: rawOas,
-      //   path: path as string,
-      //   method: method as HttpMethod,
-      //   config,
-      // });
     }
 
-    console.log(scanconfUri);
-    const scanconf = await vscode.workspace.openTextDocument(scanconfUri);
-
     await view.show();
-    return view.sendScanOperation(bundle, editor.document, scanconf, path, method);
+    return view.sendScanOperation(bundle, editor.document, scanconfUri, path, method);
   }
 }
 
