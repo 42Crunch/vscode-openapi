@@ -1,22 +1,30 @@
 import {
   createListenerMiddleware,
+  isAnyOf,
   TypedStartListening,
   UnsubscribeListener,
 } from "@reduxjs/toolkit";
 import { Webapp } from "@xliic/common/webapp/scanconf";
 import { serialize } from "../../core/playbook/scanconf-serializer";
-import { startNavigationListening } from "../../features/router/listener";
 import { showEnvWindow } from "../../features/env/slice";
-
+import { startNavigationListening } from "../../features/router/listener";
 import { Routes } from "../../features/router/RouterContext";
 import { startListeners } from "../webapp";
-import { sendHttpRequest, runScan } from "./actions";
+import { runScan, sendHttpRequest } from "./actions";
 import {
-  onMockExecuteScenario,
   onExecuteRequest,
+  onMockExecuteScenario,
   onTryExecuteScenario,
 } from "./listener-run-playbook";
-import { saveScanconf } from "./slice";
+import {
+  saveRequest,
+  saveCredential,
+  addCredential,
+  addStage,
+  moveStage,
+  removeStage,
+  saveOperationReference,
+} from "./slice";
 import { AppDispatch, RootState } from "./store";
 
 const listenerMiddleware = createListenerMiddleware();
@@ -38,7 +46,15 @@ export function createListener(host: Webapp["host"], routes: Routes) {
 
     saveScanconf: () =>
       startAppListening({
-        actionCreator: saveScanconf,
+        matcher: isAnyOf(
+          saveRequest,
+          saveCredential,
+          addCredential,
+          addStage,
+          moveStage,
+          removeStage,
+          saveOperationReference
+        ),
         effect: async (action, listenerApi) => {
           const { scanconf: state } = listenerApi.getState();
 
@@ -48,11 +64,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
             return;
           }
 
-          const scanconf = JSON.stringify(
-            { ...state.scanconf, authenticationDetails: serialized.authenticationDetails },
-            null,
-            2
-          );
+          const scanconf = JSON.stringify(serialized, null, 2);
 
           host.postMessage({
             command: "saveScanconf",

@@ -62,8 +62,6 @@ export default function Operation({ operationId }: { operationId: string }) {
 
   const [scanenv, scanenvError] = makeEnvEnv(playbook.environments["default"], env);
 
-  console.log("scanenv", scanenv);
-
   return (
     <Container>
       <Servers
@@ -72,6 +70,7 @@ export default function Operation({ operationId }: { operationId: string }) {
         onTry={(server: string) => dispatch(startTryExecution(server))}
         onScan={(server: string) => {
           if (scanenvError == undefined) {
+            // FIXME display error if env variables are not available
             dispatch(
               runScan({
                 path: "foo",

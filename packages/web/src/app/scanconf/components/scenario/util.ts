@@ -180,6 +180,10 @@ export function wrapPlaybookRequest(stage: playbook.StageContent): Record<string
     body: stage.request.body,
     environment: wrapEnvironment(stage.environment),
     defaultResponse: stage.defaultResponse,
+    injectionKey: stage.injectionKey,
+    fuzzing: stage.fuzzing,
+    operationId: stage.operationId,
+    requestOperationId: stage.request.operationId,
     responses: wrapResponses(stage.responses),
     credentialSetIndex: stage.credentialSetIndex,
     auth: stage.auth,
@@ -240,12 +244,16 @@ export function unwrapPlaybookRequest(request: FieldValues): playbook.StageConte
       method: request.method,
       parameters: unwrapFormParameters(request.parameters),
       body: request.body,
+      operationId: request.requestOperationId,
     },
+    fuzzing: request.fuzzing,
+    injectionKey: request.injectionKey,
     environment: unwrapEnvironment(request.environment),
     defaultResponse: request.defaultResponse,
     responses: unwrapResponses(request.responses),
     credentialSetIndex: request.credentialSetIndex,
     auth: request.auth,
+    operationId: request.operationId,
   };
 }
 

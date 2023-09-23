@@ -81,7 +81,18 @@ export class ScanWebView extends WebView<Webapp> {
   }
 
   hostHandlers: Webapp["hostHandlers"] = {
-    saveScanconf: async () => undefined,
+    saveScanconf: async (scanconf: string) => {
+      try {
+        const document = this.target!.scanconf;
+        const workspaceEdit = new vscode.WorkspaceEdit();
+        const fullRange = new vscode.Range(0, 0, document.lineCount, 0);
+        workspaceEdit.replace(document.uri, fullRange, scanconf);
+        await vscode.workspace.applyEdit(workspaceEdit);
+        await document.save();
+      } catch (e) {
+        console.log("e", e);
+      }
+    },
 
     runScan: async ({ path, method, env }): Promise<void> => {
       try {
