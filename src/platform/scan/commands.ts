@@ -20,18 +20,8 @@ export default (
   cache: Cache,
   platformContext: PlatformContext,
   store: PlatformStore,
-  view: ScanWebView,
-  reportView: ScanReportWebView
+  view: ScanWebView
 ) => {
-  vscode.commands.registerCommand(
-    "openapi.platform.showScanReport",
-    async (path: string, method: HttpMethod, report: unknown, oas: unknown): Promise<void> => {
-      await reportView.show();
-      await reportView.sendColorTheme(vscode.window.activeColorTheme);
-      await reportView.showScanReport(path, method, report, oas);
-    }
-  );
-
   vscode.commands.registerTextEditorCommand(
     "openapi.platform.editorRunSingleOperationScan",
     async (

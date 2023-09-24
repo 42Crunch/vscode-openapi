@@ -32,7 +32,8 @@ export function activate(
   auditContext: AuditContext
 ): vscode.Disposable {
   let disposables: vscode.Disposable[] = [];
-  const view = new ScanWebView(
+
+  const reportView = new ScanReportWebView(
     context.extensionPath,
     cache,
     configuration,
@@ -44,7 +45,7 @@ export function activate(
     auditContext
   );
 
-  const reportView = new ScanReportWebView(
+  const view = new ScanWebView(
     context.extensionPath,
     cache,
     configuration,
@@ -53,6 +54,7 @@ export function activate(
     envStore,
     prefs,
     auditView,
+    reportView,
     auditContext
   );
 
@@ -79,7 +81,7 @@ export function activate(
     }
   });
 
-  commands(cache, platformContext, store, view, reportView);
+  commands(cache, platformContext, store, view);
 
   return new vscode.Disposable(() => disposables.forEach((disposable) => disposable.dispose()));
 }

@@ -29,6 +29,7 @@ import { Logger } from "../types";
 import { executeHttpRequest } from "./http-handler";
 import { extractSinglePath } from "../../util/extract";
 import { TextDecoder, TextEncoder } from "util";
+import { ScanReportWebView } from "./report-view";
 
 export type BundleDocumentVersions = Record<string, number>;
 
@@ -61,6 +62,7 @@ export class ScanWebView extends WebView<Webapp> {
     private envStore: EnvStore,
     private prefs: Record<string, Preferences>,
     private auditView: AuditWebView,
+    private reportView: ScanReportWebView,
     private auditContext: AuditContext
   ) {
     super(extensionPath, "scanconf", "Scan configuration", vscode.ViewColumn.One);
@@ -100,6 +102,10 @@ export class ScanWebView extends WebView<Webapp> {
       try {
         const config = await loadConfig(this.configuration, this.secrets);
 
+        await this.reportView.show();
+        await this.reportView.sendColorTheme(vscode.window.activeColorTheme);
+        await this.reportView.sendStartScan(this.target!.document);
+
         return await runScan(
           this.store,
           this.envStore,
@@ -110,7 +116,8 @@ export class ScanWebView extends WebView<Webapp> {
           operationId,
           this.target!.scanconfUri,
           config,
-          makeLogger(this)
+          makeLogger(this.reportView),
+          this.reportView
         );
       } catch (ex: any) {
         const message =
@@ -303,7 +310,8 @@ async function runScan(
   operationId: string,
   scanconfUri: vscode.Uri,
   config: Config,
-  logger: Logger
+  logger: Logger,
+  reportView: ScanReportWebView
 ): Promise<void> {
   logger.info(`Starting API Conformance Scan`);
 
@@ -344,7 +352,7 @@ async function runScan(
 
   const failure =
     config.scanRuntime === "docker"
-      ? await runScanWithDocker(envStore, scanEnv, config, token)
+      ? await runScanWithDocker(envStore, scanEnv, config, logger, token)
       : await runScanWithScandManager(envStore, scanEnv, config, logger, token);
 
   if (failure !== undefined) {
@@ -355,20 +363,16 @@ async function runScan(
       console.log(`Failed to cleanup temp api ${tmpApi.apiId}: ${ex}`);
     }
 
-    // return {
-    //   command: "showGeneralError",
-    //   payload: failure,
-    // };
+    reportView.showGeneralError(failure);
   }
+
+  logger.info(`Waiting for scan report`);
 
   const reportId = await waitForReport(store, tmpApi.apiId, 30000);
 
-  // if (reportId === undefined) {
-  //   return {
-  //     command: "showGeneralError",
-  //     payload: { message: "Failed to load scan report from the platform" },
-  //   };
-  // }
+  if (reportId === undefined) {
+    reportView.showGeneralError({ message: "Failed to load scan report from the platform" });
+  }
 
   const report = await store.readScanReportNew(reportId!);
 
@@ -378,26 +382,18 @@ async function runScan(
 
   logger.info(`Finished API Conformance Scan`);
 
-  vscode.commands.executeCommand("openapi.platform.showScanReport", path, method, parsed, oas);
-
-  // return {
-  //   command: "showScanReport",
-  //   // FIXME path and method are ignored by the UI, fix message to make 'em optionals
-  //   payload: {
-  //     path: "/",
-  //     method: "get",
-  //     report: parsed,
-  //     security: undefined,
-  //   },
-  // };
+  await reportView.showScanReport(path, method, parsed, oas);
 }
 
 async function runScanWithDocker(
   envStore: EnvStore,
   scanEnv: SimpleEnvironment,
   config: Config,
+  logger: Logger,
   token: string
 ) {
+  logger.info(`Running conformance scan using docker`);
+
   const terminal = findOrCreateTerminal();
 
   const env = { ...scanEnv };
@@ -430,7 +426,7 @@ async function runScanWithScandManager(
   logger: Logger,
   token: string
 ): Promise<GeneralError | undefined> {
-  logger.info(`Using scand-manager`);
+  logger.info(`Running conformance scan using scand-manager`);
 
   const env: Record<string, string> = {};
 

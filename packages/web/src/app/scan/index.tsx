@@ -31,17 +31,17 @@ import ScanOperation from "./ScanOperation";
 import Starting from "./Starting";
 
 const routes: Routes = [
-  {
-    id: "start-scan",
-    title: "Scan is starting",
-    element: <Starting />,
-    when: startScan,
-  },
+  // {
+  //   id: "start-scan",
+  //   title: "Scan is starting",
+  //   element: <Starting />,
+  //   when: startScan,
+  // },
   {
     id: "scan",
     title: "Scan",
     element: <ScanOperation />,
-    when: showScanReport,
+    when: startScan,
   },
 ];
 

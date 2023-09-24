@@ -3,11 +3,12 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import * as vscode from "vscode";
-
+import { GeneralError } from "@xliic/common/error";
+import { HttpMethod } from "@xliic/common/http";
 import { LogLevel } from "@xliic/common/logging";
 import { Preferences } from "@xliic/common/prefs";
 import { Webapp } from "@xliic/common/webapp/scan";
+import * as vscode from "vscode";
 import { parseAuditReport } from "../../audit/audit";
 import { setAudit } from "../../audit/service";
 import { getLocationByPointer } from "../../audit/util";
@@ -20,7 +21,6 @@ import { loadConfig } from "../../util/config";
 import { WebView } from "../../web-view";
 import { PlatformStore } from "../stores/platform-store";
 import { executeHttpRequest } from "./http-handler";
-import { HttpMethod } from "@xliic/common/http";
 
 export class ScanReportWebView extends WebView<Webapp> {
   private document?: vscode.TextDocument;
@@ -154,6 +154,13 @@ export class ScanReportWebView extends WebView<Webapp> {
     this.sendRequest({
       command: "showLogMessage",
       payload: { message, level, timestamp: new Date().toISOString() },
+    });
+  }
+
+  async showGeneralError(error: GeneralError) {
+    this.sendRequest({
+      command: "showGeneralError",
+      payload: error,
     });
   }
 

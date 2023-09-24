@@ -83,7 +83,7 @@ const initialState: OasState = {
   responses: {},
   waitings: {},
   errors: {},
-  waiting: false,
+  waiting: true,
   filter: {},
   tab: "summary",
   grouped: {},
@@ -97,6 +97,10 @@ export const slice = createSlice({
   reducers: {
     startScan: (state, action: PayloadAction<undefined>) => {
       state.error = undefined;
+      state.scanReport = undefined;
+      state.waiting = true;
+      state.response = undefined;
+      state.responses = {};
     },
 
     scanOperation: (state, action: PayloadAction<OasWithOperationAndConfig>) => {},
@@ -169,25 +173,29 @@ export const slice = createSlice({
       state.waiting = false;
     },
 
-    showHttpResponse: (state, action: PayloadAction<{ id: string; response: HttpResponse }>) => {
-      // const httpResponse = action.payload;
-      // state.responses[httpResponse.id!] = httpResponse;
-      // state.waitings[httpResponse.id!] = false;
-      // delete state.errors[httpResponse.id!];
+    showHttpResponse: (
+      state,
+      { payload: { id, response } }: PayloadAction<{ id: string; response: HttpResponse }>
+    ) => {
+      state.responses[id] = response;
+      state.waitings[id] = false;
+      delete state.errors[id];
     },
 
-    showHttpError: (state, action: PayloadAction<{ id: string; error: HttpError }>) => {
-      // const httpError = action.payload;
-      // state.errors[httpError.id!] = httpError;
-      // state.waitings[httpError.id!] = false;
-      // delete state.responses[httpError.id!];
+    showHttpError: (
+      state,
+      { payload: { id, error } }: PayloadAction<{ id: string; error: HttpError }>
+    ) => {
+      state.errors[id] = error;
+      state.waitings[id] = false;
+      delete state.responses[id];
     },
 
     sendHttpRequest: (
       state,
-      action: PayloadAction<{ id: string; request: HttpRequest; config: HttpConfig }>
+      { payload: { id } }: PayloadAction<{ id: string; request: HttpRequest; config: HttpConfig }>
     ) => {
-      // state.waitings[action.payload.id!] = true;
+      state.waitings[id] = true;
     },
 
     sendCurlRequest: (state, action: PayloadAction<string>) => {},
