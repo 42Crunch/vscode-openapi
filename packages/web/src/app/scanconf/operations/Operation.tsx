@@ -97,19 +97,23 @@ export default function Operation({ operationId }: { operationId: string }) {
         title="Before"
         count={playbook.operations[operationId]?.before?.length}
       >
-        <Scenario
-          oas={oas}
-          stages={playbook.operations[operationId].before}
-          container={{ container: "operationBefore", operationId }}
-          executionResult={mockResult.operationBefore}
-          saveStage={saveStage}
-          moveStage={moveStage}
-          removeStage={removeStage}
-        />
-        <AddRequest
-          operationIds={operationIds}
-          onSelect={(selected) => addStage({ container: "operationBefore", operationId }, selected)}
-        />
+        <Content>
+          <Scenario
+            oas={oas}
+            stages={playbook.operations[operationId].before}
+            container={{ container: "operationBefore", operationId }}
+            executionResult={mockResult.operationBefore}
+            saveStage={saveStage}
+            moveStage={moveStage}
+            removeStage={removeStage}
+          />
+          <AddRequest
+            operationIds={operationIds}
+            onSelect={(selected) =>
+              addStage({ container: "operationBefore", operationId }, selected)
+            }
+          />
+        </Content>
       </CollapsibleSection>
       <CollapsibleSection
         isOpen={isScenariosOpen}
@@ -131,19 +135,23 @@ export default function Operation({ operationId }: { operationId: string }) {
         title="After"
         count={playbook.operations[operationId]?.after?.length}
       >
-        <Scenario
-          oas={oas}
-          stages={playbook.operations[operationId].after}
-          container={{ container: "operationAfter", operationId }}
-          executionResult={mockResult.operationAfter}
-          saveStage={saveStage}
-          removeStage={removeStage}
-          moveStage={moveStage}
-        />
-        <AddRequest
-          operationIds={operationIds}
-          onSelect={(selected) => addStage({ container: "operationAfter", operationId }, selected)}
-        />
+        <Content>
+          <Scenario
+            oas={oas}
+            stages={playbook.operations[operationId].after}
+            container={{ container: "operationAfter", operationId }}
+            executionResult={mockResult.operationAfter}
+            saveStage={saveStage}
+            removeStage={removeStage}
+            moveStage={moveStage}
+          />
+          <AddRequest
+            operationIds={operationIds}
+            onSelect={(selected) =>
+              addStage({ container: "operationAfter", operationId }, selected)
+            }
+          />
+        </Content>
       </CollapsibleSection>
 
       <CollapsibleSection
@@ -192,6 +200,12 @@ export default function Operation({ operationId }: { operationId: string }) {
 
 const Container = styled.div`
   padding: 8px;
+`;
+
+const Content = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 `;
 
 const Header = styled.div`

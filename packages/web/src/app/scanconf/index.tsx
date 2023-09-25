@@ -14,6 +14,7 @@ import Operations from "./operations/Operations";
 import Requests from "./requests/Requests";
 import { initStore, messageHandlers } from "./store";
 import Environments from "./environment/Environments";
+import Global from "./global/Global";
 
 const routes: Routes = [
   {
@@ -32,6 +33,11 @@ const routes: Routes = [
     title: "Authentication",
     element: <Auth />,
     when: showScanconfAuth,
+  },
+  {
+    id: "global",
+    title: "Global Context",
+    element: <Global />,
   },
   {
     id: "environments",
