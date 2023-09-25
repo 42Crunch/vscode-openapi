@@ -3,6 +3,7 @@ import { GeneralError } from "@xliic/common/error";
 import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import * as playbook from "@xliic/common/playbook";
 import { LoadScanconfMessage } from "@xliic/common/playbook";
+import { Result } from "@xliic/common/result";
 import { parse } from "../../core/playbook/scanconf-parser";
 import * as scan from "../../core/playbook/scanconfig";
 import { showScanconfAuth, showScanconfOperation } from "./actions";
@@ -41,31 +42,46 @@ export const slice = createSlice({
       state,
       { payload: { scanconf, oas } }: PayloadAction<LoadScanconfMessage["payload"]>
     ) => {
-      state.oas = oas;
-      state.scanconf = JSON.parse(scanconf);
-      const [playbook, error] = parse(oas, state.scanconf!);
+      const [parsed, parseError] = jsonParse(scanconf);
+      if (parseError !== undefined) {
+        state.gerror = { message: `Failed to parse scan configuration: ${parseError}` };
+        return;
+      }
+
+      const [playbook, error] = parse(oas, parsed);
       if (error !== undefined) {
         const message = error.map((e) => `${e.message}: ${e.pointer}`).join(" ");
         state.gerror = { message };
         return;
       }
+
+      state.oas = oas;
+      state.scanconf = parsed;
       state.playbook = playbook;
     },
+
     updateScanconf: (state, { payload: scanconf }: PayloadAction<string>) => {
       // this will cause local edits to be lost
-      state.scanconf = JSON.parse(scanconf);
-      state.dirty = false;
-      const [playbook, error] = parse(state.oas, state.scanconf!);
+      const [parsed, parseError] = jsonParse(scanconf);
+      if (parseError !== undefined) {
+        state.gerror = { message: `Failed to parse scan configuration: ${parseError}` };
+        return;
+      }
+      const [playbook, error] = parse(state.oas, parsed);
       if (error !== undefined) {
         const message = error.map((e) => `${e.message}: ${e.pointer}`).join(" ");
         state.gerror = { message };
         return;
       }
+      state.dirty = false;
+      state.scanconf = parsed;
       state.playbook = playbook;
     },
+
     saveScanconf: (state) => {
       state.dirty = false;
     },
+
     saveSettings: (state, { payload: settings }: PayloadAction<playbook.RuntimeConfiguration>) => {
       state.playbook.runtimeConfiguration = settings;
     },
@@ -143,27 +159,37 @@ export const slice = createSlice({
 
   extraReducers: (builder) => {
     builder.addCase(showScanconfAuth, (state, { payload: { oas, scanconf } }) => {
-      state.oas = oas;
-      state.scanconf = JSON.parse(scanconf);
-      const [playbook, error] = parse(oas, state.scanconf!);
+      const [parsed, parseError] = jsonParse(scanconf);
+      if (parseError !== undefined) {
+        state.gerror = { message: `Failed to parse scan configuration: ${parseError}` };
+        return;
+      }
+      const [playbook, error] = parse(oas, parsed);
       if (error !== undefined) {
         const message = error.map((e) => `${e.message}: ${e.pointer}`).join(" ");
         state.gerror = { message };
         return;
       }
+      state.oas = oas;
+      state.scanconf = parsed;
       state.playbook = playbook;
       state.servers = getServerUrls(oas);
     });
 
     builder.addCase(showScanconfOperation, (state, { payload: { oas, scanconf } }) => {
-      state.oas = oas;
-      state.scanconf = JSON.parse(scanconf);
-      const [playbook, error] = parse(oas, state.scanconf!);
+      const [parsed, parseError] = jsonParse(scanconf);
+      if (parseError !== undefined) {
+        state.gerror = { message: `Failed to parse scan configuration: ${parseError}` };
+        return;
+      }
+      const [playbook, error] = parse(oas, parsed);
       if (error !== undefined) {
         const message = error.map((e) => `${e.message}: ${e.pointer}`).join(" ");
         state.gerror = { message };
         return;
       }
+      state.oas = oas;
+      state.scanconf = parsed;
       state.playbook = playbook;
       state.servers = getServerUrls(oas);
     });
@@ -208,5 +234,13 @@ export function arrayMoveMutable(array: unknown[], fromIndex: number, toIndex: n
 
     const [item] = array.splice(fromIndex, 1);
     array.splice(endIndex, 0, item);
+  }
+}
+
+function jsonParse(value: string): Result<any, string> {
+  try {
+    return [JSON.parse(value), undefined];
+  } catch (e) {
+    return [undefined, `${e}`];
   }
 }

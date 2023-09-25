@@ -19,7 +19,7 @@ export function parse(
   return [
     undefined,
     errors.map((error) => ({
-      message: error.message.join(": "),
+      message: error.message.slice(-1).join(": "),
       pointer: joinJsonPointer(error.path),
     })),
   ];
