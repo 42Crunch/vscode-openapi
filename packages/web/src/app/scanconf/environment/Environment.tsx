@@ -26,7 +26,6 @@ export default function Environment({ name }: { name: string }) {
 }
 
 function wrapEnvironment(env: playbook.PlaybookEnvironment) {
-  console.log("wra", env);
   return {
     variables: Object.entries(env.variables).map(([key, value]) => ({ key, value })),
   };

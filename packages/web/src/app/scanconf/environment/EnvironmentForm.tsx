@@ -59,6 +59,7 @@ const Container = styled.div`
 `;
 
 const Control = styled.div`
+  padding-top: 8px;
   margin: 4px;
   display: flex;
   gap: 4px;
@@ -69,7 +70,7 @@ const Grid = styled.div`
   margin: 4px;
   display: grid;
   row-gap: 4px;
-  grid-template-columns: repeat(5, 1fr) 1em;
+  grid-template-columns: repeat(4, 1fr) 5em 1em;
 `;
 
 const Fields = styled.div`
@@ -94,12 +95,12 @@ function EnvironmentVariable({ name, remove }: { name: string; remove: () => voi
   return (
     <Row>
       <Input name={`${name}.key`} label="name" />
-      <div>environment</div>
+      <div style={{ padding: "4px 8px" }}>environment</div>
       <Input name={`${name}.value.name`} label="name" />
       <Input name={`${name}.value.default`} label="default" />
-      <div>
+      <SwitchContainer>
         <Switch value={true} onChange={() => undefined} />
-      </div>
+      </SwitchContainer>
       <Remove
         onClick={(e) => {
           e.preventDefault();
@@ -112,6 +113,11 @@ function EnvironmentVariable({ name, remove }: { name: string; remove: () => voi
     </Row>
   );
 }
+
+const SwitchContainer = styled.div`
+  display: flex;
+  // justify-content: center;
+`;
 
 const Remove = styled.button`
   background: none;
