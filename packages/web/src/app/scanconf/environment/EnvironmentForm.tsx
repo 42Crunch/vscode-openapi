@@ -39,7 +39,7 @@ export default function EnvironmentForm() {
         </Fields>
       </Grid>
       <Control>
-        <AddNewVariable append={append} />
+        {/* <AddNewVariable append={append} /> */}
         <Manage
           onClick={(e) => {
             e.stopPropagation();

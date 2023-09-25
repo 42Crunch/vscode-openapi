@@ -66,6 +66,9 @@ export const slice = createSlice({
     saveScanconf: (state) => {
       state.dirty = false;
     },
+    saveSettings: (state, { payload: settings }: PayloadAction<playbook.RuntimeConfiguration>) => {
+      state.playbook.runtimeConfiguration = settings;
+    },
     saveRequest: (
       state,
       {
@@ -183,6 +186,7 @@ function getStageContainer(
 
 export const {
   loadScanconf,
+  saveSettings,
   saveScanconf,
   addCredential,
   addStage,

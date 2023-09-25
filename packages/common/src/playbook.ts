@@ -71,7 +71,7 @@ export type SaveScanconfMessage = {
 };
 
 export type PlaybookBundle = {
-  runtimeConfiguration?: unknown;
+  runtimeConfiguration?: RuntimeConfiguration;
   customizations?: unknown;
   environments: Record<string, PlaybookEnvironment>;
   operations: Record<string, Operation>;
@@ -80,6 +80,34 @@ export type PlaybookBundle = {
   after: Stage[];
   authorizationTests?: unknown;
   requests?: Record<string, StageContent>;
+};
+
+export type RuntimeConfiguration = {
+  environment?: string;
+  logLevel?: "debug" | "info" | "error" | "critical";
+  logDestination?: string;
+  logMaxFileSize?: number;
+  requestHeaderNameRequestId?: string;
+  requestHeaderNameScenarioId?: string;
+  requestFlowrate?: number;
+  requestTimeout?: number;
+  requestTlsInsecureSkipVerify?: boolean;
+  responseFollowRedirection?: boolean;
+  happyPathOnly?: boolean;
+  maxScanDuration?: number;
+  memoryLimit?: number;
+  memoryTimeSpan?: number;
+  responseMaxBodySizeScan?: number;
+  reportIndexed?: boolean;
+  reportPrettify?: boolean;
+  reportMaxHttpResponseSizeHappyPath?: number;
+  reportMaxBodySizeHappyPath?: number;
+  reportMaxHttpResponseSizeTest?: number;
+  reportMaxBodySizeTest?: number;
+  reportIssuesOnly?: boolean;
+  reportMaxIssues?: number;
+  reportMaxSize?: number;
+  reportGenerateCurlCommand?: boolean;
 };
 
 export type PlaybookEnvironment = {

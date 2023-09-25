@@ -39,12 +39,20 @@ export function parseInternal(
       file.authenticationDetails || [],
       parseCredentials
     ),
-    runtimeConfiguration: value(file.runtimeConfiguration),
+    runtimeConfiguration: parseruntimeConfiguration(oas, file, file.runtimeConfiguration || {}),
     customizations: value(file.customizations),
     environments: parseMap(oas, file, file.environments || {}, parseEnvironmentFile),
     authorizationTests: value(file.authorizationTests),
     requests: parseMap(oas, file, file.requests || {}, parseRequestStageContent),
   });
+}
+
+function parseruntimeConfiguration(
+  oas: BundledSwaggerOrOasSpec,
+  file: scan.ConfigurationFileBundle,
+  entry: scan.RuntimeConfiguration
+): Result<playbook.RuntimeConfiguration, InternalParsingErrors> {
+  return [{ ...entry }, undefined];
 }
 
 function parseEnvironmentFile(

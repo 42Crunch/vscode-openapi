@@ -24,6 +24,7 @@ import {
   moveStage,
   removeStage,
   saveOperationReference,
+  saveSettings,
 } from "./slice";
 import { AppDispatch, RootState } from "./store";
 
@@ -48,6 +49,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
       startAppListening({
         matcher: isAnyOf(
           saveRequest,
+          saveSettings,
           saveCredential,
           addCredential,
           addStage,

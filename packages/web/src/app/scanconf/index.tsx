@@ -15,6 +15,7 @@ import Requests from "./requests/Requests";
 import { initStore, messageHandlers } from "./store";
 import Environments from "./environment/Environments";
 import Global from "./global/Global";
+import Settings from "./settings/Settings";
 
 const routes: Routes = [
   {
@@ -47,7 +48,7 @@ const routes: Routes = [
   {
     id: "settings",
     title: "Settings",
-    element: <div>Me, settings</div>,
+    element: <Settings />,
   },
 ];
 
