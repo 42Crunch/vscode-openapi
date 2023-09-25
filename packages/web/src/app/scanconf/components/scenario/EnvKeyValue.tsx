@@ -2,6 +2,7 @@ import styled from "styled-components";
 import { useFormContext, useController } from "react-hook-form";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { TrashCan, ExclamationCircle } from "../../../../icons";
+import Select from "../Select";
 
 export default function EnvKeyValue({ name, remove }: { name: string; remove: () => void }) {
   const { control } = useFormContext();
@@ -14,7 +15,7 @@ export default function EnvKeyValue({ name, remove }: { name: string; remove: ()
     control,
     rules: {
       pattern: {
-        value: /^[\w-]+$/,
+        value: /^[\w-_]+$/,
         message: "Only the alphanumeric characters, minus or the underscore",
       },
     },
@@ -25,11 +26,30 @@ export default function EnvKeyValue({ name, remove }: { name: string; remove: ()
     control,
   });
 
+  const { field: typeField } = useController({
+    name: `${name}.type`,
+    control,
+  });
+
+  const possibleTypes = getValueTypes(valueField.value);
+
   return (
     <Container>
       <KeyValue>
         <Name type="text" {...keyField} />
         <Value type="text" {...valueField} />
+        <Type {...typeField}>
+          <option value="string">string</option>
+          <option value="number" disabled={!possibleTypes.has("number")}>
+            number
+          </option>
+          <option value="boolean" disabled={!possibleTypes.has("boolean")}>
+            boolean
+          </option>
+          <option value="null" disabled={!possibleTypes.has("null")}>
+            null
+          </option>
+        </Type>
         <Remove
           onClick={(e) => {
             e.preventDefault();
@@ -50,12 +70,28 @@ export default function EnvKeyValue({ name, remove }: { name: string; remove: ()
   );
 }
 
+function getValueTypes(value: string) {
+  const types = new Set(["string"]);
+  try {
+    const parsed = JSON.parse(value);
+    const type = typeof parsed;
+    if (type === "number" || type === "boolean") {
+      types.add(type);
+    } else if (value === "null") {
+      types.add("null");
+    }
+  } catch (e) {
+    // failed to parse
+  }
+  return types;
+}
+
 const Container = styled.div`
-  margin-bottom: 10px;
+  display: contents;
 `;
 
 const KeyValue = styled.div`
-  display: flex;
+  display: contents;
   &:hover > :last-child {
     visibility: visible;
   }
@@ -67,7 +103,6 @@ const Name = styled.input`
   background: transparent;
   border-bottom: 1px solid var(${ThemeColorVariables.border});
   color: var(${ThemeColorVariables.foreground});
-  margin-right: 10px;
   padding: 4px 8px;
 `;
 
@@ -77,6 +112,14 @@ const Value = styled.input`
   background: transparent;
   border-bottom: 1px solid var(${ThemeColorVariables.border});
   color: var(${ThemeColorVariables.foreground});
+  padding: 4px 8px;
+`;
+
+const Type = styled.select`
+  border: none;
+  background: transparent;
+  color: var(${ThemeColorVariables.foreground});
+  border-bottom: 1px solid var(${ThemeColorVariables.border});
   padding: 4px 8px;
 `;
 

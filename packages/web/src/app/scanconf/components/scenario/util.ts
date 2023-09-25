@@ -195,7 +195,11 @@ export function wrapPlaybookRequest(stage: playbook.StageContent): Record<string
 }
 
 function wrapEnvironment(environment: playbook.Environment | undefined) {
-  const wrapped = Object.entries(environment || {}).map(([key, value]) => ({ key, value }));
+  const wrapped = Object.entries(environment || {}).map(([key, value]) => ({
+    key,
+    value,
+    type: typeof value,
+  }));
   return wrapped;
 }
 
@@ -264,7 +268,7 @@ export function unwrapPlaybookRequest(request: FieldValues): playbook.StageConte
 function unwrapEnvironment(data: any): playbook.Environment {
   const environment: playbook.Environment = {};
   for (const item of data) {
-    environment[item.key] = item.value;
+    environment[item.key] = convertToType(item.value, item.type);
   }
   return environment;
 }
@@ -343,4 +347,17 @@ export function escapeFieldName(name: string): string {
 function unescapeFieldName(name: string): string {
   // remove n- prefix and decode field name
   return decodeURIComponent(name.substring(2, name.length));
+}
+
+function convertToType(value: string, type: string): unknown {
+  if (type !== "string") {
+    try {
+      return JSON.parse(value);
+    } catch (e) {
+      // failed to convert, return string value
+      return value;
+    }
+  }
+
+  return `${value}`;
 }

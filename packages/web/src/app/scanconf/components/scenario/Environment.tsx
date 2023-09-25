@@ -19,59 +19,47 @@ export default function Environment({ name }: { name: string }) {
       <Header>
         <div>Name</div>
         <div>Value</div>
+        <div>Type</div>
+        <div></div>
       </Header>
       {fields.map((field, index) => (
-        <div key={field.id}>
-          <EnvKeyValue
-            name={`${name}.${index}`}
-            remove={() => {
-              remove(index);
-            }}
-          />
-        </div>
+        <EnvKeyValue
+          key={field.id}
+          name={`${name}.${index}`}
+          remove={() => {
+            remove(index);
+          }}
+        />
       ))}
-      <div>
+      <NewRow>
         <AddNewRow append={append} />
-      </div>
+      </NewRow>
     </Container>
   );
 }
 
 const Container = styled.div`
   margin: 8px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 7em 2em;
 `;
 
 const Header = styled.div`
-  display: flex;
-  div:first-child {
-    flex: 1;
-  }
-  div:last-child {
-    flex: 2;
-  }
-  & > div {
-    padding: 4px 8px;
+  display: contents;
+  > div {
     background-color: var(${ThemeColorVariables.computedOne});
+    padding: 4px 8px;
     text-transform: uppercase;
     font-size: 90%;
     font-weight: 600;
   }
 `;
 
+const NewRow = styled.div`
+  grid-column: span 4;
+`;
+
 interface Item {
   key: string;
   value: string;
-}
-
-function wrapEnvironment(environment: SimpleEnvironment): { values: Item[] } {
-  const wrapped = Object.entries(environment).map(([key, value]) => ({ key, value }));
-  return { values: wrapped };
-}
-
-function unwrapEnvironment(data: { values: Item[] }): SimpleEnvironment {
-  const environment: SimpleEnvironment = {};
-  for (const item of data.values) {
-    environment[item.key] = item.value;
-  }
-  return environment;
 }
