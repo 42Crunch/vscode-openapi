@@ -141,6 +141,8 @@ export function wrapPlaybookStage(stage: playbook.StageReference): Record<string
   stage = simpleClone(stage);
   return {
     ...stage,
+    fuzzing: stage.fuzzing === true,
+    expectedResponse: stage.expectedResponse !== undefined ? stage.expectedResponse : "",
     environment: wrapEnvironment(stage.environment),
     responses: wrapResponses(stage.responses),
   };
@@ -149,6 +151,8 @@ export function wrapPlaybookStage(stage: playbook.StageReference): Record<string
 export function unwrapPlaybookStage(stage: FieldValues): playbook.StageReference {
   return {
     ...stage,
+    fuzzing: stage.fuzzing === true ? true : undefined,
+    expectedResponse: stage.expectedResponse !== "" ? stage.expectedResponse : undefined,
     environment: unwrapEnvironment(stage.environment),
     responses: unwrapResponses(stage.responses),
   } as playbook.StageReference;

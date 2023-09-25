@@ -8,6 +8,7 @@ import ResponseProcessing from "../components/operation/ResponseProcessing";
 import Environment from "../components/scenario/Environment";
 import { OperationResult } from "../components/scenario/types";
 import MissingVariables from "./MissingVariables";
+import StageReferenceSettings from "./StageReferenceSettings";
 
 export default function StageReferenceTabs({
   oas,
@@ -16,6 +17,10 @@ export default function StageReferenceTabs({
   oas: BundledSwaggerOrOasSpec;
   result?: OperationResult;
 }) {
+  const missingVariablesCount = Array.from(
+    new Set(result?.variablesReplaced?.missing || [])
+  ).length;
+
   const tabs = [
     {
       id: "environment",
@@ -30,11 +35,17 @@ export default function StageReferenceTabs({
       enabled: true,
     },
     {
+      id: "settings",
+      title: "Settings",
+      content: <StageReferenceSettings />,
+      enabled: true,
+    },
+    {
       id: "missing-variables",
       title: "Missing Variables",
-      counter: Array.from(new Set(result?.variablesReplaced?.missing || [])).length,
+      counter: missingVariablesCount,
       content: <MissingVariables missing={result?.variablesReplaced?.missing} />,
-      enabled: true,
+      enabled: missingVariablesCount > 0,
     },
   ];
 
