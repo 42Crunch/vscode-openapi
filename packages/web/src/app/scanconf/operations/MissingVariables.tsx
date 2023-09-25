@@ -2,7 +2,7 @@ import { LookupFailure } from "@xliic/common/env";
 import styled from "styled-components";
 
 export default function MissingVariables({ missing }: { missing: LookupFailure[] | undefined }) {
-  return <Container>{missing?.map(renderMissing)}</Container>;
+  return <Container>{Array.from(new Set(missing || [])).map(renderMissing)}</Container>;
 }
 
 function renderMissing(value: string, index: number) {

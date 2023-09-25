@@ -19,12 +19,6 @@ export default function Operations() {
 
   const items = Object.keys(operations).map((id) => ({ id, label: id }));
 
-  useEffect(() => {
-    if (operationId === undefined && items.length > 0) {
-      onSetOperationId(items[0].id);
-    }
-  }, []);
-
   const sections = [
     {
       id: "operations",

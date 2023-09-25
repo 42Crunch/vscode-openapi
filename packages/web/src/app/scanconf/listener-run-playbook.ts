@@ -24,7 +24,8 @@ import {
 } from "./operations/slice";
 import { executeRequest, addExecutionStep, setRequestId } from "./requests/slice";
 import { AppDispatch, RootState } from "./store";
-import { addStage, moveStage, saveOperationReference } from "./slice";
+import { addStage, moveStage, saveOperationReference, saveRequest } from "./slice";
+import { showScanconfOperation } from "./actions";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 
@@ -39,7 +40,15 @@ export function onMockExecuteScenario(
 ) {
   return () =>
     startAppListening({
-      matcher: isAnyOf(setOperationId, setScenarioId, addStage, moveStage, saveOperationReference),
+      matcher: isAnyOf(
+        setOperationId,
+        setScenarioId,
+        addStage,
+        moveStage,
+        saveOperationReference,
+        saveRequest,
+        showScanconfOperation
+      ),
       effect: async (action, listenerApi) => {
         const {
           scanconf: { oas, playbook },

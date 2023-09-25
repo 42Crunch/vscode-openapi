@@ -32,7 +32,7 @@ export default function StageReferenceTabs({
     {
       id: "missing-variables",
       title: "Missing Variables",
-      counter: result?.variablesReplaced?.missing?.length,
+      counter: Array.from(new Set(result?.variablesReplaced?.missing || [])).length,
       content: <MissingVariables missing={result?.variablesReplaced?.missing} />,
       enabled: true,
     },
