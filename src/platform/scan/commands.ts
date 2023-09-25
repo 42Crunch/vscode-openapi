@@ -60,8 +60,6 @@ async function editorRunSingleOperationScan(
   path: string,
   method: HttpMethod
 ): Promise<void> {
-  await view.show();
-  await view.sendColorTheme(vscode.window.activeColorTheme);
   // FIXME await view.sendStartScan(editor.document);
 
   const bundle = await cache.getDocumentBundle(editor.document);
@@ -74,49 +72,59 @@ async function editorRunSingleOperationScan(
     const isScanconfExists = await exists(scanconfUri);
 
     if (!isScanconfExists) {
-      const tmpApi = await store.createTempApi(rawOas);
+      await vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: "Creating default Conformance Scan configuration...",
+          cancellable: false,
+        },
+        async () => {
+          const tmpApi = await store.createTempApi(rawOas);
 
-      const report = await store.getAuditReport(tmpApi.apiId);
+          const report = await store.getAuditReport(tmpApi.apiId);
 
-      if (report?.data.openapiState !== "valid") {
-        await store.clearTempApi(tmpApi);
-        await view.show();
-        // FIXME await view.sendAuditError(editor.document, report.data, bundle.mapping);
-        return;
-      }
+          if (report?.data.openapiState !== "valid") {
+            await store.clearTempApi(tmpApi);
+            // await view.show();
+            // FIXME await view.sendAuditError(editor.document, report.data, bundle.mapping);
+            return;
+          }
 
-      await store.createDefaultScanConfig(tmpApi.apiId);
+          await store.createDefaultScanConfig(tmpApi.apiId);
 
-      const configs = await store.getScanConfigs(tmpApi.apiId);
+          const configs = await store.getScanConfigs(tmpApi.apiId);
 
-      const isNewApi = configs[0].configuration !== undefined;
+          const isNewApi = configs[0].configuration !== undefined;
 
-      const c = isNewApi
-        ? await store.readScanConfig(configs[0].configuration.id)
-        : await store.readScanConfig(configs[0].scanConfigurationId);
+          const c = isNewApi
+            ? await store.readScanConfig(configs[0].configuration.id)
+            : await store.readScanConfig(configs[0].scanConfigurationId);
 
-      const config = isNewApi
-        ? JSON.parse(Buffer.from(c.file, "base64").toString("utf-8"))
-        : JSON.parse(Buffer.from(c.scanConfiguration, "base64").toString("utf-8"));
+          const config = isNewApi
+            ? JSON.parse(Buffer.from(c.file, "base64").toString("utf-8"))
+            : JSON.parse(Buffer.from(c.scanConfiguration, "base64").toString("utf-8"));
 
-      await store.clearTempApi(tmpApi);
+          await store.clearTempApi(tmpApi);
 
-      if (config !== undefined) {
-        const uri = editor.document.uri;
-        const filename = basename(uri.fsPath);
-        const scanconfUri = uri.with({
-          path: join(dirname(uri.fsPath), `${filename}.scanconf.json`),
-        });
+          if (config !== undefined) {
+            const uri = editor.document.uri;
+            const filename = basename(uri.fsPath);
+            const scanconfUri = uri.with({
+              path: join(dirname(uri.fsPath), `${filename}.scanconf.json`),
+            });
 
-        const encoder = new TextEncoder();
-        await vscode.workspace.fs.writeFile(
-          scanconfUri,
-          encoder.encode(JSON.stringify(config, null, 2))
-        );
-      }
+            const encoder = new TextEncoder();
+            await vscode.workspace.fs.writeFile(
+              scanconfUri,
+              encoder.encode(JSON.stringify(config, null, 2))
+            );
+          }
+        }
+      );
     }
 
     await view.show();
+    await view.sendColorTheme(vscode.window.activeColorTheme);
     return view.sendScanOperation(bundle, editor.document, scanconfUri, path, method);
   }
 }

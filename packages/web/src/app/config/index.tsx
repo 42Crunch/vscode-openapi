@@ -17,6 +17,7 @@ import {
   showScandManagerConnectionTest,
 } from "../../features/config/slice";
 import Config from "./Main";
+import styled from "styled-components";
 
 const messageHandlers: Webapp["webappHandlers"] = {
   changeTheme,
@@ -28,10 +29,10 @@ const messageHandlers: Webapp["webappHandlers"] = {
 
 function App() {
   return (
-    <>
+    <Container>
       <ThemeStyles />
       <Config />
-    </>
+    </Container>
   );
 }
 
@@ -50,3 +51,12 @@ function renderWebView(host: Webapp["host"], theme: ThemeState) {
 }
 
 (window as any).renderWebView = renderWebView;
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  > div:last-child {
+    flex: 1;
+  }
+`;
