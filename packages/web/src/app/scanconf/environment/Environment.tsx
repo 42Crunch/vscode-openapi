@@ -5,13 +5,18 @@ import { useAppSelector, useAppDispatch } from "../store";
 import Form from "../components/Form";
 import EnvironmentForm from "./EnvironmentForm";
 import * as playbook from "@xliic/common/playbook";
+import { makeEnvEnv } from "../../../core/playbook/execute";
 
 export default function Environment({ name }: { name: string }) {
   const {
-    playbook: { environments },
+    playbook: { environments, runtimeConfiguration },
   } = useAppSelector((state) => state.scanconf);
 
-  const environment = environments[name];
+  const env = useAppSelector((state) => state.env.data);
+
+  const environment = environments[runtimeConfiguration?.environment || "default"];
+
+  const [scanenv, scanenvError] = makeEnvEnv(environment, env);
 
   return (
     <Form
@@ -20,7 +25,7 @@ export default function Environment({ name }: { name: string }) {
       data={environment}
       saveData={(data) => undefined}
     >
-      <EnvironmentForm />
+      <EnvironmentForm missing={scanenvError} />
     </Form>
   );
 }

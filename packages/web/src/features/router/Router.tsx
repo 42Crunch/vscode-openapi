@@ -11,9 +11,9 @@ function InnerRouter({ routes }: { routes: Routes }) {
   const current = useFeatureSelector((state) => state.router.current);
   const route = findRoute(routes, current);
   if (!route) {
-    return <div></div>;
+    return <div />;
   }
-  return <>{route.element}</>;
+  return route.element;
 }
 
 function findRoute(routes: Routes, path: Path): Route | undefined {

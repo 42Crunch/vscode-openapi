@@ -16,6 +16,7 @@ import { initStore, messageHandlers } from "./store";
 import Environments from "./environment/Environments";
 import Global from "./global/Global";
 import Settings from "./settings/Settings";
+import EnvironmentsNavigationTab from "./environment/EnvironmentsNavigationTab";
 
 const routes: Routes = [
   {
@@ -42,7 +43,7 @@ const routes: Routes = [
   },
   {
     id: "environments",
-    title: "Environment",
+    title: <EnvironmentsNavigationTab />,
     element: <Environments />,
   },
   {

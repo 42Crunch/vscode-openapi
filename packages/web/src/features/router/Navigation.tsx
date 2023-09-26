@@ -17,17 +17,11 @@ function InnerNavigation({ routes }: { routes: Routes }) {
   const dispatch = useFeatureDispatch();
   const current = useFeatureSelector((state) => state.router.current);
 
-  const tabs = routes.map((route) => [route.id, route.title]);
-
   return (
     <NavigationContent>
-      {tabs.map(([page, title]) => (
-        <NavigationTab
-          key={page}
-          active={page === current[0]}
-          onClick={() => dispatch(goTo([page]))}
-        >
-          <div>{title}</div>
+      {routes.map(({ id, title }) => (
+        <NavigationTab key={id} active={id === current[0]} onClick={() => dispatch(goTo([id]))}>
+          {typeof title === "string" ? <div>{title}</div> : title}
         </NavigationTab>
       ))}
     </NavigationContent>

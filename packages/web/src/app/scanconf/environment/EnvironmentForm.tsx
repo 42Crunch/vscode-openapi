@@ -3,12 +3,12 @@ import styled from "styled-components";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import Input from "../components/operation/Input";
-import { AngleDown, ArrowUpRightFromSquare, TrashCan } from "../../../icons";
+import { AngleDown, ArrowUpRightFromSquare, TrashCan, TriangleExclamation } from "../../../icons";
 import Switch from "../../../components/Switch";
 import { useAppSelector, useAppDispatch } from "../store";
 import { showEnvWindow } from "../../../features/env/slice";
 
-export default function EnvironmentForm() {
+export default function EnvironmentForm({ missing }: { missing?: string[] }) {
   const dispatch = useAppDispatch();
 
   const { fields, append, remove } = useFieldArray({
@@ -21,21 +21,26 @@ export default function EnvironmentForm() {
         <Header>
           <div>Name</div>
           <div>From</div>
+          <div></div>
           <div>Environment</div>
           <div>Default</div>
           <div>Required</div>
           <div></div>
         </Header>
         <Fields>
-          {fields.map((field, index) => (
-            <EnvironmentVariable
-              key={field.id}
-              name={`variables.${index}`}
-              remove={() => {
-                remove(index);
-              }}
-            />
-          ))}
+          {fields.map((field, index) => {
+            const envMissing = missing !== undefined && missing.includes((field as any).value.name);
+            return (
+              <EnvironmentVariable
+                missing={envMissing}
+                key={field.id}
+                name={`variables.${index}`}
+                remove={() => {
+                  remove(index);
+                }}
+              />
+            );
+          })}
         </Fields>
       </Grid>
       <Control>
@@ -54,9 +59,7 @@ export default function EnvironmentForm() {
   );
 }
 
-const Container = styled.div`
-  margin: 8px 4px;
-`;
+const Container = styled.div``;
 
 const Control = styled.div`
   padding-top: 8px;
@@ -70,7 +73,7 @@ const Grid = styled.div`
   margin: 4px;
   display: grid;
   row-gap: 4px;
-  grid-template-columns: repeat(4, 1fr) 5em 1em;
+  grid-template-columns: 10em 7em 1.5em 1fr 1fr 5em 1em;
 `;
 
 const Fields = styled.div`
@@ -91,11 +94,20 @@ const Header = styled.div`
   }
 `;
 
-function EnvironmentVariable({ name, remove }: { name: string; remove: () => void }) {
+function EnvironmentVariable({
+  name,
+  remove,
+  missing,
+}: {
+  name: string;
+  missing: boolean;
+  remove: () => void;
+}) {
   return (
     <Row>
       <Input name={`${name}.key`} label="name" />
-      <div style={{ padding: "4px 8px" }}>environment</div>
+      <FromEnvironment>environment</FromEnvironment>
+      <ErrorContainer>{missing && <TriangleExclamation />}</ErrorContainer>
       <Input name={`${name}.value.name`} label="name" />
       <Input name={`${name}.value.default`} label="default" />
       <SwitchContainer>
@@ -113,6 +125,22 @@ function EnvironmentVariable({ name, remove }: { name: string; remove: () => voi
     </Row>
   );
 }
+
+const FromEnvironment = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ErrorContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  > svg {
+    fill: var(${ThemeColorVariables.errorForeground});
+    padding-right: 4px;
+  }
+`;
 
 const SwitchContainer = styled.div`
   display: flex;
