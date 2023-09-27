@@ -7,7 +7,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { unwrapPlaybookRequest, wrapPlaybookRequest } from "./util";
 import CollapsibleCard, { BottomDescription, TopDescription } from "../CollapsibleCard";
 import Operation from "../../components/operation/Operation";
-import Form from "../../components/Form";
+import Form from "../../../../new-components/Form";
 
 export default function RequestCard({
   oas,

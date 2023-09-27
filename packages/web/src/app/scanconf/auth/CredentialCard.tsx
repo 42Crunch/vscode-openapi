@@ -12,7 +12,7 @@ import CollapsibleCard, {
   TopDescription,
 } from "../../../components/CollapsibleCard";
 import Credential from "./Credential";
-import Form from "../components/Form";
+import Form from "../../../new-components/Form";
 
 export default function CredentialCard({
   credentialName,

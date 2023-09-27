@@ -8,7 +8,7 @@ import { wrapPlaybookRequest, unwrapPlaybookRequest } from "./util";
 
 import CollapsibleCard, { BottomDescription, BottomItem, TopDescription } from "../CollapsibleCard";
 import Operation from "../operation/Operation";
-import Form from "../../components/Form";
+import Form from "../../../../new-components/Form";
 
 export default function OperationCard({
   location,

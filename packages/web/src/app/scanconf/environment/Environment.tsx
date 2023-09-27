@@ -2,7 +2,7 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 import styled from "styled-components";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { useAppSelector, useAppDispatch } from "../store";
-import Form from "../components/Form";
+import Form from "../../../new-components/Form";
 import EnvironmentForm from "./EnvironmentForm";
 import * as playbook from "@xliic/common/playbook";
 import { makeEnvEnv } from "../../../core/playbook/execute";

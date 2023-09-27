@@ -1,6 +1,6 @@
 import * as playbook from "@xliic/common/playbook";
 import styled from "styled-components";
-import Form from "../components/Form";
+import Form from "../../../new-components/Form";
 import Input from "../components/Input";
 import Select from "../components/Select";
 import * as actions from "../slice";

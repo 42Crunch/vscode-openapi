@@ -7,7 +7,7 @@ import Environment from "../components/scenario/Environment";
 import RequestCard from "../components/scenario/RequestCard";
 import { PlaybookEnvStack } from "../../../core/playbook/playbook-env";
 import { replaceEnvVariables } from "../../../core/playbook/replace";
-import Form from "../components/Form";
+import Form from "../../../new-components/Form";
 import { saveRequest } from "../slice";
 import { executeRequest } from "./slice";
 import { useAppDispatch, useAppSelector } from "../store";

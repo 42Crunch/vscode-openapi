@@ -6,7 +6,7 @@ import { useDrag } from "react-dnd";
 import styled from "styled-components";
 import { OperationResult } from "../components/scenario/types";
 import { EllipsisVertical, GripVertical, TrashCan, TriangleExclamation } from "../../../icons";
-import Form from "../components/Form";
+import Form from "../../../new-components/Form";
 import StageReferenceTabs from "./StageReferenceTabs";
 import Card from "./components/Card";
 import { unwrapPlaybookStage, wrapPlaybookStage } from "../components/scenario/util";
