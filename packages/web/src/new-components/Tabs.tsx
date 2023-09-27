@@ -28,8 +28,11 @@ export function UncontrolledTabContainer({ tabs }: { tabs: Tab[] }) {
   const [activeTab, setActiveTab] = useState(activeId);
 
   useEffect(() => {
-    const activeId = tabs.filter((tab) => !tab.disabled)?.[0]?.id;
-    setActiveTab(activeId);
+    // if tabs has changed, check if the activeId is still valid and reset if not
+    if (tabs.filter((tab) => tab.id === activeId).length === 0) {
+      // make first non-disabled tab an active tab
+      setActiveTab(tabs.filter((tab) => !tab.disabled)?.[0]?.id);
+    }
   }, [tabs]);
 
   return <ControlledTabContainer tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />;

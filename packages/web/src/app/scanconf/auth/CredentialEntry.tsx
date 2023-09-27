@@ -11,7 +11,7 @@ export default function CredentialEntry({ name, remove }: { name: string; remove
     name: `${name}.key`,
     rules: {
       pattern: {
-        value: /^\w+$/,
+        value: /^[\w-]+$/,
         message: "Only the alphanumeric characters or the underscore",
       },
     },
