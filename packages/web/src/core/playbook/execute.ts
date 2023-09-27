@@ -146,7 +146,11 @@ async function* executePlaybook(
       return;
     }
 
-    yield { event: "http-request-prepared", request: httpRequest };
+    yield {
+      event: "http-request-prepared",
+      request: httpRequest,
+      operationId: request.request.operationId,
+    };
 
     const [response, error2] = await client(httpRequest);
 

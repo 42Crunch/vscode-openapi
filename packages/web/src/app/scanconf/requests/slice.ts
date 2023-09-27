@@ -88,6 +88,7 @@ const PlaybookStepHandlers: PlaybookEventHandlers = {
     event: PlaybookHttpRequestPrepared
   ): void {
     currentOperationResult(state).httpRequest = event.request;
+    currentOperationResult(state).operationId = event.operationId;
   },
   "http-request-prepare-error": function (
     state: Draft<State>,

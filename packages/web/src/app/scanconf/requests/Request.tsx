@@ -116,7 +116,7 @@ export default function Request({ requestRef }: { requestRef: RequestRef }) {
       <CollapsibleSection
         isOpen={isResponseOpen}
         onClick={() => setResponseOpen(!isResponseOpen)}
-        title="Response"
+        title="Result"
       >
         {response && <ResponseCard defaultCollapsed={false} response={response} />}
       </CollapsibleSection>

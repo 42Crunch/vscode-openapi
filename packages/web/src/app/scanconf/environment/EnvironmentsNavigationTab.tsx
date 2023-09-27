@@ -11,12 +11,13 @@ export default function EnvironmentsNavigationTab() {
 
   const env = useAppSelector((state) => state.env.data);
 
-  if (environments == undefined && runtimeConfiguration == undefined) {
+  if (environments == undefined || runtimeConfiguration == undefined) {
     return <Container>Environment</Container>;
   }
 
   const environment = environments[runtimeConfiguration?.environment || "default"];
 
+  console.log("make env env", environment, env);
   const [scanenv, scanenvError] = makeEnvEnv(environment, env);
 
   return (

@@ -6,6 +6,7 @@ import { RequestRef } from "@xliic/common/playbook";
 
 export type OperationResult = {
   ref?: RequestRef;
+  operationId?: string;
   httpRequest?: HttpRequest;
   httpRequestPrepareError?: string;
   httpResponse?: HttpResponse | MockHttpResponseType;

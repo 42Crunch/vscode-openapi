@@ -12,6 +12,7 @@ import VariableUsed from "./VariableUsed";
 import { OperationResult } from "./types";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { PlaybookEnvStack } from "../../../../core/playbook/playbook-env";
+import HttpRequest from "../http-request/HttpRequest";
 
 export default function ResponseCard({
   response,
@@ -28,6 +29,9 @@ export default function ResponseCard({
 
   return (
     <Container>
+      {response.httpRequest !== undefined && (
+        <HttpRequest operationId={response.operationId} request={response.httpRequest} />
+      )}
       <CollapsibleCard defaultCollapsed={defaultCollapsed}>
         <BottomDescription>
           <BottomItem>Status: {`${statusCode} ${statusMessage}`}</BottomItem>
@@ -116,14 +120,7 @@ function assignmentCount(env?: PlaybookEnvStack): number {
   return count;
 }
 
-const Container = styled.div`
-  display: flex;
-  margin-left: 4px;
-  margin-right: 4px;
-  > div:last-child {
-    flex: 1;
-  }
-`;
+const Container = styled.div``;
 
 const Counter = styled.span`
   background-color: var(${ThemeColorVariables.badgeBackground});

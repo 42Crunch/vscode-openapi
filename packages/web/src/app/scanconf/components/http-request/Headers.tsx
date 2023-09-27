@@ -1,15 +1,15 @@
 import styled from "styled-components";
-import { HttpResponse } from "@xliic/common/http";
+import { HttpRequest } from "@xliic/common/http";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
-export default function Headers({ headers }: { headers: HttpResponse["headers"] }) {
+export default function Headers({ headers }: { headers: HttpRequest["headers"] }) {
   return (
     <Container>
       <Header>
         <div>Name</div>
         <div>Value</div>
       </Header>
-      {headers.map(([name, value], index) => (
+      {Object.entries(headers).map(([name, value], index) => (
         <Row key={index}>
           <div>{name}</div>
           <div>{value}</div>
@@ -18,6 +18,7 @@ export default function Headers({ headers }: { headers: HttpResponse["headers"] 
     </Container>
   );
 }
+
 const Container = styled.div`
   display: grid;
   grid-template-columns: 2fr 5fr;

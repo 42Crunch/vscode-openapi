@@ -1,6 +1,43 @@
-import styled from "styled-components";
 import * as Tabs from "@radix-ui/react-tabs";
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { useState } from "react";
+import styled from "styled-components";
+
+export function TabContainer({ tabs }: { tabs: Tab[] }) {
+  const activeId = tabs.filter((tab) => !tab.disabled)?.[0]?.id;
+
+  if (activeId === undefined) {
+    return null;
+  }
+
+  const [activeTab, setActiveTab] = useState(activeId);
+
+  return (
+    <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
+      <TabList>
+        {tabs
+          .filter((tab) => !tab.disabled)
+          .map((tab) => (
+            <TabButton key={tab.id} value={tab.id}>
+              {tab.title}
+            </TabButton>
+          ))}
+      </TabList>
+      {tabs.map((tab) => (
+        <Tabs.Content key={tab.id} value={tab.id}>
+          {tab.content}
+        </Tabs.Content>
+      ))}
+    </Tabs.Root>
+  );
+}
+
+export type Tab = {
+  id: string;
+  title: string;
+  content: JSX.Element;
+  disabled?: boolean;
+};
 
 export const TabList = styled(Tabs.List)`
   display: flex;

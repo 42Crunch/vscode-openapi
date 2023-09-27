@@ -50,6 +50,7 @@ export type PlaybookPayloadVariablesReplaced = {
 export type PlaybookHttpRequestPrepared = {
   event: "http-request-prepared";
   request: HttpRequest;
+  operationId?: string;
 };
 
 export type PlaybookHttpRequestPrepareError = {
