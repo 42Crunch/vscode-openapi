@@ -3,16 +3,28 @@ import {
   ListenerMiddlewareInstance,
   StateFromReducersMapObject,
 } from "@reduxjs/toolkit";
-import logger from "redux-logger";
-
+import { Webapp } from "@xliic/common/webapp/config";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-
-import theme, { ThemeState } from "../../features/theme/slice";
-import config from "../../features/config/slice";
+import logger from "redux-logger";
+import config, {
+  loadConfig,
+  showOverlordConnectionTest,
+  showPlatformConnectionTest,
+  showScandManagerConnectionTest,
+} from "../../features/config/slice";
+import theme, { changeTheme, ThemeState } from "../../features/theme/slice";
 
 const reducer = {
   theme,
   config,
+};
+
+export const messageHandlers: Webapp["webappHandlers"] = {
+  changeTheme,
+  loadConfig,
+  showPlatformConnectionTest,
+  showOverlordConnectionTest,
+  showScandManagerConnectionTest,
 };
 
 export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme: ThemeState) =>

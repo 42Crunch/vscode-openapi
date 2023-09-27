@@ -1,20 +1,19 @@
-import { useWatch } from "react-hook-form";
 import React from "react";
+import { useWatch } from "react-hook-form";
 import * as z from "zod";
-
-import {
-  ConfigScreen,
-  useFeatureDispatch,
-  useFeatureSelector,
-  testScandManagerConnection,
-} from "../../../features/config/slice";
+import { Banner } from "../../../components/Banner";
+import { Checkbox } from "../../../components/Checkbox";
 import Input from "../../../components/Input";
 import Select from "../../../components/Select";
-import { Checkbox } from "../../../components/Checkbox";
+import ValidProgressButton from "../../../components/form/ValidProgressButton";
+import {
+  ConfigScreen,
+  testScandManagerConnection,
+  useFeatureDispatch,
+  useFeatureSelector,
+} from "../../../features/config/slice";
 import ConnectionTestBanner from "../ConnectionTestBanner";
 import { Container, Test, Title } from "../layout";
-import ValidProgressButton from "../../../components/form/ValidProgressButton";
-import { Banner } from "../../../components/Banner";
 
 export function PlatformServices() {
   const dispatch = useFeatureDispatch();

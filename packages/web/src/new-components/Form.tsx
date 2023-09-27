@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm, FormProvider, useWatch, FieldValues } from "react-hook-form";
 import diff from "microdiff";
+import { ZodObject } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 export default function Form<T extends FieldValues>({
   data,
   saveData,
   wrapFormData,
   unwrapFormData,
+  schema,
   children,
 }: {
   data: T;
@@ -14,9 +17,14 @@ export default function Form<T extends FieldValues>({
   children: React.ReactNode;
   wrapFormData: (data: T) => FieldValues;
   unwrapFormData: (data: FieldValues) => T;
+  schema?: ZodObject<any>;
 }) {
   const [formValues, setFormValues] = useState(wrapFormData(data));
-  const methods = useForm({ values: formValues, mode: "all" });
+  const methods = useForm({
+    values: formValues,
+    mode: "all",
+    resolver: schema !== undefined ? zodResolver(schema) : undefined,
+  });
   const formData = useWatch({ control: methods.control, defaultValue: formValues });
   const timeoutRef = useRef<any>(null);
   const { isValid, isValidating } = methods.formState;

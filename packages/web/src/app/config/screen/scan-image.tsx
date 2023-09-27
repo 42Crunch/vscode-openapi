@@ -1,8 +1,7 @@
 import * as z from "zod";
-
 import Input from "../../../components/Input";
-import { Container, Title } from "../layout";
 import { ConfigScreen } from "../../../features/config/slice";
+import { Container, Title } from "../layout";
 
 export function PlatformServices() {
   return (
