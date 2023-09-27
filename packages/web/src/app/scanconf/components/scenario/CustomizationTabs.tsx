@@ -2,7 +2,7 @@ import * as Tabs from "@radix-ui/react-tabs";
 
 import { useState } from "react";
 
-import { TabList, TabButton } from "../../components/Tabs";
+import { TabList, TabButton } from "../../../../new-components/Tabs";
 
 import JsonData from "./JsonData";
 

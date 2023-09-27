@@ -1,12 +1,12 @@
 import * as Tabs from "@radix-ui/react-tabs";
 import * as playbook from "@xliic/common/playbook";
 import styled from "styled-components";
-import { TabButton, TabList } from "../../../components/Tabs";
 import * as actions from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import Scenario from "./Scenario";
 import AddRequest from "./components/AddRequest";
 import * as localActions from "./slice";
+import { TabButton, TabList } from "../../../new-components/Tabs";
 
 export default function Scenarios({ operationId }: { operationId: string }) {
   const { playbook, oas } = useAppSelector((state) => state.scanconf);

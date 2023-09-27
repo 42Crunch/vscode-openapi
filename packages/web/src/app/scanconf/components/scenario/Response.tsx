@@ -6,7 +6,7 @@ import styled from "styled-components";
 import { MockHttpResponse } from "../../../../core/playbook/mock-http";
 import { CircleCheckLight, CircleExclamationSolid } from "../../../../icons";
 import CollapsibleCard, { BottomDescription, BottomItem } from "../CollapsibleCard";
-import { TabButton, TabList } from "../Tabs";
+import { TabButton, TabList } from "../../../../new-components/Tabs";
 import Body from "../response/Body";
 import Headers from "../response/Headers";
 import VariableAssignments from "./VariableAssignments";

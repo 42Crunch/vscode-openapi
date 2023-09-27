@@ -1,15 +1,11 @@
-import styled from "styled-components";
 import * as Tabs from "@radix-ui/react-tabs";
-
-import { useState } from "react";
-
-import { TabList, RoundTabButton } from "../../components/Tabs";
-
 import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
-
+import { useState } from "react";
 import { useFieldArray } from "react-hook-form";
-import VariableAssignments from "./VariableAssignments";
+import styled from "styled-components";
+import { RoundTabButton, TabList } from "../../../../new-components/Tabs";
 import AddResponse from "./AddResponse";
+import VariableAssignments from "./VariableAssignments";
 
 export default function ResponseProcessing({ oas }: { oas: BundledSwaggerOrOasSpec }) {
   const { fields, prepend } = useFieldArray({

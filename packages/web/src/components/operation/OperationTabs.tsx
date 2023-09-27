@@ -1,21 +1,13 @@
-import * as Tabs from "@radix-ui/react-tabs";
-
-import { useEffect, useState } from "react";
 import { HttpMethod } from "@xliic/common/http";
-import { deref } from "@xliic/common/ref";
-
-import { TabList, TabButton } from "../../components/Tabs";
-
-import RequestBody from "./RequestBody";
-
-import { BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/common/openapi";
 import {
   BundledOpenApiSpec,
   OasRequestBody,
   getOperation as getOasOperation,
 } from "@xliic/common/oas30";
-import { BundledSwaggerSpec, getOperation as getSwaggerOperation } from "@xliic/common/swagger";
-
+import { BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/common/openapi";
+import { deref } from "@xliic/common/ref";
+import { BundledSwaggerSpec } from "@xliic/common/swagger";
+import { Tab, TabContainer } from "../../new-components/Tabs";
 import {
   getParameters as getOasParameters,
   getSecurity as getOasSecurity,
@@ -23,13 +15,13 @@ import {
 } from "../../util";
 import {
   getParameters as getSwaggerParameters,
-  hasSecurityRequirements as hasSwaggerSecurityRequirements,
   getSecurity as getSwaggerSecurity,
+  hasSecurityRequirements as hasSwaggerSecurityRequirements,
 } from "../../util-swagger";
-
 import ParameterGroup from "../parameters/ParameterGroup";
-import Security from "./Security";
+import RequestBody from "./RequestBody";
 import RequestBodySwagger from "./RequestBodySwagger";
+import Security from "./Security";
 import SwaggerSecurity from "./SwaggerSecurity";
 
 export default function OperationTabs({
@@ -43,48 +35,19 @@ export default function OperationTabs({
   path: string;
   method: HttpMethod;
 }) {
-  const tabs = isOpenapi(oas) ? makeOasTabs(oas, path, method) : makeSwaggerTabs(oas, path, method);
+  const tabs: Tab[] = isOpenapi(oas)
+    ? makeOasTabs(oas, path, method)
+    : makeSwaggerTabs(oas, path, method);
 
   if (settings) {
     tabs.push({
       id: "settings",
       title: "Settings",
       content: settings,
-      enabled: true,
     });
   }
 
-  const activeId = tabs.filter((tab) => tab.enabled)?.[0]?.id;
-
-  if (activeId === undefined) {
-    return null;
-  }
-
-  const [activeTab, setActiveTab] = useState(activeId);
-
-  // TODO resets tabs on any change, perhaps should do it when switching beween operation os files?
-  useEffect(() => {
-    setActiveTab(tabs.filter((tab) => tab.enabled)?.[0].id);
-  }, [oas]);
-
-  return (
-    <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
-      <TabList>
-        {tabs
-          .filter((tab) => tab.enabled)
-          .map((tab) => (
-            <TabButton key={tab.id} value={tab.id}>
-              {tab.title}
-            </TabButton>
-          ))}
-      </TabList>
-      {tabs.map((tab) => (
-        <Tabs.Content key={tab.id} value={tab.id}>
-          {tab.content}
-        </Tabs.Content>
-      ))}
-    </Tabs.Root>
-  );
+  return <TabContainer tabs={tabs} />;
 }
 
 function makeOasTabs(oas: BundledOpenApiSpec, path: string, method: HttpMethod) {
@@ -97,37 +60,37 @@ function makeOasTabs(oas: BundledOpenApiSpec, path: string, method: HttpMethod) 
       id: "body",
       title: "Body",
       content: <RequestBody oas={oas} requestBody={requestBody} />,
-      enabled: requestBody !== undefined,
+      disabled: requestBody === undefined,
     },
     {
       id: "security",
       title: "Auth",
       content: <Security oas={oas} security={getOasSecurity(oas, path, method)} />,
-      enabled: hasOasSecurityRequirements(oas, path, method),
+      disabled: !hasOasSecurityRequirements(oas, path, method),
     },
     {
       id: "path",
       title: "Path",
       content: <ParameterGroup oas={oas} group={parameters.path} />,
-      enabled: hasParameters(parameters.path),
+      disabled: !hasParameters(parameters.path),
     },
     {
       id: "query",
       title: "Query",
       content: <ParameterGroup oas={oas} group={parameters.query} />,
-      enabled: hasParameters(parameters.query),
+      disabled: !hasParameters(parameters.query),
     },
     {
       id: "header",
       title: "Header",
       content: <ParameterGroup oas={oas} group={parameters.header} />,
-      enabled: hasParameters(parameters.header),
+      disabled: !hasParameters(parameters.header),
     },
     {
       id: "cookie",
       title: "Cookie",
       content: <ParameterGroup oas={oas} group={parameters.cookie} />,
-      enabled: hasParameters(parameters.cookie),
+      disabled: !hasParameters(parameters.cookie),
     },
   ];
 }
@@ -140,37 +103,37 @@ function makeSwaggerTabs(oas: BundledSwaggerSpec, path: string, method: HttpMeth
       id: "body",
       title: "Body",
       content: <RequestBodySwagger oas={oas} group={parameters.body} />,
-      enabled: hasParameters(parameters.body),
+      disabled: !hasParameters(parameters.body),
     },
     {
       id: "security",
       title: "Auth",
       content: <SwaggerSecurity oas={oas} security={getSwaggerSecurity(oas, path, method)} />,
-      enabled: hasSwaggerSecurityRequirements(oas, path, method),
+      disabled: !hasSwaggerSecurityRequirements(oas, path, method),
     },
     {
       id: "formData",
       title: "Form",
       content: <ParameterGroup oas={oas} group={parameters.formData} />,
-      enabled: hasParameters(parameters.formData),
+      disabled: !hasParameters(parameters.formData),
     },
     {
       id: "path",
       title: "Path",
       content: <ParameterGroup oas={oas} group={parameters.path} />,
-      enabled: hasParameters(parameters.path),
+      disabled: !hasParameters(parameters.path),
     },
     {
       id: "query",
       title: "Query",
       content: <ParameterGroup oas={oas} group={parameters.query} />,
-      enabled: hasParameters(parameters.query),
+      disabled: !hasParameters(parameters.query),
     },
     {
       id: "header",
       title: "Header",
       content: <ParameterGroup oas={oas} group={parameters.header} />,
-      enabled: hasParameters(parameters.header),
+      disabled: !hasParameters(parameters.header),
     },
   ];
 }

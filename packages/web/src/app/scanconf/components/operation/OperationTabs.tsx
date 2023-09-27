@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { HttpMethod } from "@xliic/common/http";
 import { deref } from "@xliic/common/ref";
 
-import { TabList, TabButton } from "../../components/Tabs";
+import { TabList, TabButton } from "../../../../new-components/Tabs";
 
 import RequestBody from "./RequestBody";
 

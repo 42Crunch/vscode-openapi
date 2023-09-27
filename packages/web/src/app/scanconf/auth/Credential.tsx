@@ -1,28 +1,17 @@
-import { useState } from "react";
 import styled from "styled-components";
-import * as Tabs from "@radix-ui/react-tabs";
-
-import { TabList, TabButton } from "../../../components/Tabs";
-import CredentialGeneral from "./CredentialGeneral";
+import { TabContainer } from "../../../new-components/Tabs";
 import CredentialCredentials from "./CredentialCredentials";
+import CredentialGeneral from "./CredentialGeneral";
 
-export default function Credential({}: {}) {
-  const [activeTab, setActiveTab] = useState("general");
-
+export default function Credential() {
   return (
     <Container>
-      <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
-        <TabList>
-          <TabButton value={"general"}>General</TabButton>
-          <TabButton value={"credentials"}>Credentials</TabButton>
-        </TabList>
-        <Tabs.Content value={"general"}>
-          <CredentialGeneral />
-        </Tabs.Content>
-        <Tabs.Content value={"credentials"}>
-          <CredentialCredentials />
-        </Tabs.Content>
-      </Tabs.Root>
+      <TabContainer
+        tabs={[
+          { id: "general", title: "General", content: <CredentialGeneral /> },
+          { id: "credentials", title: "Credentials", content: <CredentialCredentials /> },
+        ]}
+      />
     </Container>
   );
 }

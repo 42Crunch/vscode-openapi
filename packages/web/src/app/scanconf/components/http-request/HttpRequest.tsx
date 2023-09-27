@@ -2,7 +2,7 @@ import { HttpRequest as HttpRequestType } from "@xliic/common/http";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import styled from "styled-components";
 import CollapsibleCard, { BottomDescription, TopDescription } from "../CollapsibleCard";
-import { TabContainer } from "../Tabs";
+import { TabContainer } from "../../../../new-components/Tabs";
 import Body from "./Body";
 import Headers from "./Headers";
 
