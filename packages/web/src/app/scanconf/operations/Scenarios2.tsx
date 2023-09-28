@@ -9,6 +9,8 @@ import Scenario from "./Scenario";
 import AddRequest from "./components/AddRequest";
 import * as localActions from "./slice";
 import { ThemeColorVariables } from "@xliic/common/theme";
+import CollapsibleSection from "../components/CollapsibleSection";
+import { Plus } from "../../../icons";
 
 export default function Scenarios({ operationId }: { operationId: string }) {
   const { playbook, oas } = useAppSelector((state) => state.scanconf);
@@ -40,66 +42,60 @@ export default function Scenarios({ operationId }: { operationId: string }) {
   };
 
   return (
-    <Tabs.Root value={`${scenarioId}`} onValueChange={(value) => setScenarioId(parseInt(value))}>
-      <TabList>
-        {scenarios.map((scenario, index) => (
-          <TabButton key={index} value={`${index}`}>
-            {scenario.key}
-          </TabButton>
-        ))}
-        <Controls>
-          <Menu>
-            <MenuItem onSelect={() => undefined}>Delete</MenuItem>
-          </Menu>
-        </Controls>
-      </TabList>
+    <Container>
       {scenarios.map((scenario, scenarioIndex) => (
-        <TabsContent key={scenarioIndex} value={`${scenarioIndex}`}>
-          <Scenario
-            oas={oas}
-            stages={scenario.requests}
-            container={{ container: "operationScenarios", operationId, scenarioIndex }}
-            executionResult={result?.operationScenarios}
-            saveStage={saveStage}
-            moveStage={moveStage}
-            removeStage={removeStage}
-          />
-          <AddRequest
-            operationIds={operationIds}
-            onSelect={(selected) =>
-              addStage({ container: "operationScenarios", operationId, scenarioIndex }, selected)
-            }
-          />
-        </TabsContent>
+        <CollapsibleSection
+          isOpen={true}
+          title={<div>{scenario.key}</div>}
+          menu={
+            <>
+              <AddRequestButton>
+                <Plus />
+              </AddRequestButton>
+              <Menu>
+                <MenuItem onSelect={() => undefined}>Delete</MenuItem>
+              </Menu>
+            </>
+          }
+        >
+          <Content>
+            <Scenario
+              oas={oas}
+              stages={scenario.requests}
+              container={{ container: "operationScenarios", operationId, scenarioIndex }}
+              executionResult={result?.operationScenarios}
+              saveStage={saveStage}
+              moveStage={moveStage}
+              removeStage={removeStage}
+            />
+            <AddRequest
+              operationIds={operationIds}
+              onSelect={(selected) =>
+                addStage({ container: "operationScenarios", operationId, scenarioIndex }, selected)
+              }
+            />
+          </Content>
+        </CollapsibleSection>
       ))}
-    </Tabs.Root>
+    </Container>
   );
 }
 
-const Container = styled.div`
-  background-color: var(${ThemeColorVariables.background});
-  .grab,
-  .menu {
-    opacity: 0;
-  }
-  &:hover {
-    .grab,
-    .menu {
-      opacity: 1;
-    }
-  }
-`;
-
-const TabsContent = styled(Tabs.Content)`
+const Container = styled.div``;
+const Content = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding-top: 8px;
 `;
 
-const Controls = styled.div`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
+const AddRequestButton = styled.button`
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  > svg {
+    fill: var(${ThemeColorVariables.linkForeground});
+    &:hover {
+      fill: var(${ThemeColorVariables.linkActiveForeground});
+    }
+  }
 `;

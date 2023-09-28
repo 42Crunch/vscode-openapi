@@ -18,6 +18,7 @@ import Responses from "../components/scenario/Responses";
 import Separator from "../../../components/Separator";
 import { runScan } from "../actions";
 import { makeEnvEnv } from "../../../core/playbook/execute";
+import Scenarios2 from "./Scenarios2";
 
 export default function Operation({ operationId }: { operationId: string }) {
   const dispatch = useAppDispatch();
