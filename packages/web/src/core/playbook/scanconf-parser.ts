@@ -170,7 +170,10 @@ function parseCRequest(
   const effectiveOperationId = request?.details?.operationId || operationId;
 
   if (effectiveOperationId === undefined) {
-    return makeErrorResult(`Unable to parse request that has no operationId set`);
+    return [
+      undefined,
+      makeError("Unable to parse request that has no operationId set", undefined, ["details"]),
+    ];
   }
 
   const operation = getOperationById(oas, effectiveOperationId);
