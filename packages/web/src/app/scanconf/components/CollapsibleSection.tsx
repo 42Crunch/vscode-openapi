@@ -7,22 +7,25 @@ export default function CollapsibleSection({
   title,
   count,
   onClick,
+  menu,
   children,
 }: {
   isOpen: boolean;
-  title: string;
+  title: string | React.ReactNode;
   count?: number;
   onClick?: (event: React.MouseEvent<HTMLElement>) => void;
+  menu?: React.ReactNode;
   children?: React.ReactNode;
 }) {
   return (
     <Container>
       <Header onClick={onClick}>
         {isOpen ? <AngleUp /> : <AngleDown />}
-        <Title>
-          {title}
+        <Description>
+          {typeof title === "string" ? <Title>{title}</Title> : title}
           {!!count && <Counter>{count}</Counter>}
-        </Title>
+          {menu && <Menu>{menu}</Menu>}
+        </Description>
       </Header>
       {isOpen && (
         <Content>
@@ -45,17 +48,39 @@ const Header = styled.div`
   flex-direction: row;
   gap: 8px;
   align-items: center;
-  font-size: 14px;
-  font-weight: 600;
+
   margin-bottom: 4px;
   & > svg {
     fill: var(${ThemeColorVariables.foreground});
   }
+  .menu,
+  button {
+    opacity: 0;
+  }
+  &:hover {
+    .menu,
+    button {
+      opacity: 1;
+    }
+  }
+`;
+
+const Description = styled.div`
+  flex: 1;
+  display: flex;
+  gap: 8px;
 `;
 
 const Title = styled.div`
+  font-size: 14px;
+  font-weight: 600;
+`;
+
+const Menu = styled.div`
+  flex: 1;
   display: flex;
-  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
 `;
 
 const Content = styled.div`
