@@ -3,32 +3,35 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import * as vscode from "vscode";
-
-import { ScandManagerConnection } from "@xliic/common/scan";
-
-import { Preferences } from "@xliic/common/prefs";
 import { Config } from "@xliic/common/config";
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
 import { GeneralError } from "@xliic/common/error";
 import { HttpMethod } from "@xliic/common/http";
 import { LogLevel } from "@xliic/common/logging";
+import { Preferences } from "@xliic/common/prefs";
+import { ScandManagerConnection } from "@xliic/common/scan";
 import { Webapp } from "@xliic/common/webapp/scanconf";
 import { stringify } from "@xliic/preserving-json-yaml-parser";
+import { readFileSync, writeFileSync } from "fs";
+import { execFileSync } from "node:child_process";
+import { mkdtempSync } from "node:fs";
+import { homedir, tmpdir } from "node:os";
+import { join } from "path";
+import { TextDecoder, TextEncoder } from "util";
+import * as vscode from "vscode";
 import { AuditWebView } from "../../audit/view";
 import { Cache } from "../../cache";
 import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
 import { AuditContext, Bundle, MappingNode } from "../../types";
 import { loadConfig } from "../../util/config";
+import { extractSinglePath } from "../../util/extract";
 import { WebView } from "../../web-view";
 import * as managerApi from "../api-scand-manager";
 import { ScandManagerJobStatus } from "../api-scand-manager";
 import { PlatformStore } from "../stores/platform-store";
 import { Logger } from "../types";
 import { executeHttpRequest } from "./http-handler";
-import { extractSinglePath } from "../../util/extract";
-import { TextDecoder, TextEncoder } from "util";
 import { ScanReportWebView } from "./report-view";
 
 export type BundleDocumentVersions = Record<string, number>;
@@ -324,65 +327,79 @@ async function runScan(
 
   const trimmedScanconf = extractScanconf(scanconf, operationId);
 
-  const tmpApi = await store.createTempApi(rawOas);
-
-  logger.info(`Created temp API "${tmpApi.apiId}", waiting for Security Audit`);
-
-  const audit = await store.getAuditReport(tmpApi.apiId);
-  if (audit?.data.openapiState !== "valid") {
-    await store.clearTempApi(tmpApi);
-    // return {
-    //   command: "showGeneralError",
-    //   payload: {
-    //     message:
-    //       "OpenAPI has failed Security Audit. Please run API Security Audit, fix the issues and try running the Scan again.",
-    //   },
-    // };s
+  try {
+    const parsed = await runScanWithCliBinary(
+      envStore,
+      scanEnv,
+      config,
+      logger,
+      rawOas,
+      trimmedScanconf
+    );
+    await reportView.showScanReport(path, method, parsed, oas);
+  } catch (e: any) {
+    await reportView.showGeneralError({ message: "Failed to execute scan: " + e.message });
   }
 
-  logger.info(`Security Audit check is successful`);
+  // const tmpApi = await store.createTempApi(rawOas);
 
-  await store.createScanConfigNew(tmpApi.apiId, "updated", trimmedScanconf);
+  // logger.info(`Created temp API "${tmpApi.apiId}", waiting for Security Audit`);
 
-  const configs = await store.getScanConfigs(tmpApi.apiId);
+  // const audit = await store.getAuditReport(tmpApi.apiId);
+  // if (audit?.data.openapiState !== "valid") {
+  //   await store.clearTempApi(tmpApi);
+  //   // return {
+  //   //   command: "showGeneralError",
+  //   //   payload: {
+  //   //     message:
+  //   //       "OpenAPI has failed Security Audit. Please run API Security Audit, fix the issues and try running the Scan again.",
+  //   //   },
+  //   // };s
+  // }
 
-  const c = await store.readScanConfig(configs[0].configuration.id);
+  // logger.info(`Security Audit check is successful`);
 
-  const token = c.token;
+  // await store.createScanConfigNew(tmpApi.apiId, "updated", trimmedScanconf);
 
-  const failure =
-    config.scanRuntime === "docker"
-      ? await runScanWithDocker(envStore, scanEnv, config, logger, token)
-      : await runScanWithScandManager(envStore, scanEnv, config, logger, token);
+  // const configs = await store.getScanConfigs(tmpApi.apiId);
 
-  if (failure !== undefined) {
-    // cleanup
-    try {
-      await store.clearTempApi(tmpApi);
-    } catch (ex) {
-      console.log(`Failed to cleanup temp api ${tmpApi.apiId}: ${ex}`);
-    }
+  // const c = await store.readScanConfig(configs[0].configuration.id);
 
-    reportView.showGeneralError(failure);
-  }
+  // const token = c.token;
 
-  logger.info(`Waiting for scan report`);
+  // const failure =
+  //   config.scanRuntime === "docker"
+  //     ? await runScanWithDocker(envStore, scanEnv, config, logger, token)
+  //     : await runScanWithScandManager(envStore, scanEnv, config, logger, token);
 
-  const reportId = await waitForReport(store, tmpApi.apiId, 30000);
+  // if (failure !== undefined) {
+  //   // cleanup
+  //   try {
+  //     await store.clearTempApi(tmpApi);
+  //   } catch (ex) {
+  //     console.log(`Failed to cleanup temp api ${tmpApi.apiId}: ${ex}`);
+  //   }
 
-  if (reportId === undefined) {
-    reportView.showGeneralError({ message: "Failed to load scan report from the platform" });
-  }
+  //   reportView.showGeneralError(failure);
+  // }
 
-  const report = await store.readScanReportNew(reportId!);
+  // logger.info(`Waiting for scan report`);
 
-  const parsed = JSON.parse(Buffer.from(report, "base64").toString("utf-8"));
+  // const reportId = await waitForReport(store, tmpApi.apiId, 30000);
 
-  await store.clearTempApi(tmpApi);
+  // if (reportId === undefined) {
+  //   reportView.showGeneralError({ message: "Failed to load scan report from the platform" });
+  // }
 
-  logger.info(`Finished API Conformance Scan`);
+  // const report = await store.readScanReportNew(reportId!);
 
-  await reportView.showScanReport(path, method, parsed, oas);
+  // const parsed = JSON.parse(Buffer.from(report, "base64").toString("utf-8"));
+
+  // await store.clearTempApi(tmpApi);
+
+  // logger.info(`Finished API Conformance Scan`);
+
+  // await reportView.showScanReport(path, method, parsed, oas);
 }
 
 async function runScanWithDocker(
@@ -417,6 +434,51 @@ async function runScanWithDocker(
 
   terminal.sendText(`docker run ${hostNetwork} --rm ${envString} ${config.scanImage}`);
   terminal.show();
+}
+
+async function runScanWithCliBinary(
+  envStore: EnvStore,
+  scanEnv: SimpleEnvironment,
+  config: Config,
+  logger: Logger,
+  oas: string,
+  scanconf: string
+) {
+  logger.info(`Running conformance scan using 42c-ast binary`);
+
+  const tmpDir = tmpdir();
+  const dir = mkdtempSync(join(`${tmpDir}`, "scan-"));
+
+  writeFileSync(join(dir as string, "openapi.json"), oas, { encoding: "utf8" });
+  writeFileSync(join(dir as string, "scanconf.json"), scanconf, { encoding: "utf8" });
+
+  logger.info(`Written scan configuration to: ${dir}`);
+
+  const cli = join(homedir(), ".42crunch", "bin", "42c-ast");
+
+  logger.info(`Running scan using: ${cli}`);
+
+  execFileSync(
+    cli,
+    [
+      "scan",
+      "run",
+      "openapi.json",
+      "--conf-file",
+      "scanconf.json",
+      "--output",
+      "report.json",
+      "--output-format",
+      "json",
+      "--verbose",
+      "debug",
+    ],
+    { cwd: dir as string, windowsHide: true, env: scanEnv }
+  );
+
+  const encodedReport = readFileSync(join(dir as string, "report.json"), { encoding: "utf8" });
+  const parsed = JSON.parse(Buffer.from(encodedReport.slice(1, -1), "base64").toString("utf-8"));
+  return parsed;
 }
 
 async function runScanWithScandManager(

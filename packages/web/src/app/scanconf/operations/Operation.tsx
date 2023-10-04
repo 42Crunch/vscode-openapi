@@ -2,23 +2,23 @@ import * as playbook from "@xliic/common/playbook";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import styled from "styled-components";
 
+import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import { useState } from "react";
-import { FileExport, Play } from "../../../icons";
+import { ErrorBanner } from "../../../components/Banner";
+import Separator from "../../../components/Separator";
+import { makeEnvEnv } from "../../../core/playbook/execute";
+import { setTryitServer } from "../../../features/prefs/slice";
+import { goTo } from "../../../features/router/slice";
+import { runScan } from "../actions";
 import CollapsibleSection from "../components/CollapsibleSection";
+import Responses from "../components/scenario/Responses";
+import * as actions from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import Scenario from "./Scenario";
 import Scenarios from "./Scenarios";
-import AddRequest from "./components/AddRequest";
-import * as actions from "../slice";
-import { startTryExecution } from "./slice";
 import Servers from "./Servers";
-import { setTryitServer } from "../../../features/prefs/slice";
-import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
-import Responses from "../components/scenario/Responses";
-import Separator from "../../../components/Separator";
-import { runScan } from "../actions";
-import { makeEnvEnv } from "../../../core/playbook/execute";
-import Scenarios2 from "./Scenarios2";
+import AddRequest from "./components/AddRequest";
+import { startTryExecution } from "./slice";
 
 export default function Operation({ operationId }: { operationId: string }) {
   const dispatch = useAppDispatch();
@@ -87,6 +87,21 @@ export default function Operation({ operationId }: { operationId: string }) {
         }}
         onChange={setServer}
       />
+      {scanenvError && (
+        <ErrorBanner
+          message={"Please set required environment variables: " + scanenvError.join(", ")}
+        >
+          <GoTo
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              dispatch(goTo(["environments"]));
+            }}
+          >
+            Go to "Environment" tab
+          </GoTo>
+        </ErrorBanner>
+      )}
       <Header>
         <Title>{operationId}</Title>
       </Header>
@@ -154,7 +169,6 @@ export default function Operation({ operationId }: { operationId: string }) {
           />
         </Content>
       </CollapsibleSection>
-
       <CollapsibleSection
         isOpen={isResultOpen}
         onClick={(e) => {
@@ -233,6 +247,18 @@ const Action = styled.div`
   color: var(${ThemeColorVariables.linkForeground});
   > svg {
     fill: var(${ThemeColorVariables.linkForeground});
+  }
+`;
+
+const GoTo = styled.div`
+  color: var(${ThemeColorVariables.linkForeground});
+  &:hover {
+    color: var(${ThemeColorVariables.linkActiveForeground});
+  }
+  cursor: pointer;
+  & > svg {
+    width: 10px;
+    height: 10px;
   }
 `;
 

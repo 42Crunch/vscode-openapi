@@ -3,18 +3,17 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import * as vscode from "vscode";
-import { PlatformContext } from "../types";
+import { HttpMethod } from "@xliic/common/http";
 import { stringify } from "@xliic/preserving-json-yaml-parser";
+import { execFileSync } from "node:child_process";
+import { homedir } from "node:os";
+import { dirname } from "node:path";
+import { basename, join } from "path";
+import * as vscode from "vscode";
 import { Cache } from "../../cache";
 import { PlatformStore } from "../stores/platform-store";
-import { HttpMethod } from "@xliic/common/http";
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
+import { PlatformContext } from "../types";
 import { ScanWebView } from "./view";
-import { extractSinglePath } from "../../util/extract";
-import { basename, extname, join, dirname } from "path";
-import { TextEncoder } from "util";
-import { ScanReportWebView } from "./report-view";
 
 export default (
   cache: Cache,
@@ -72,60 +71,93 @@ async function editorRunSingleOperationScan(
     const isScanconfExists = await exists(scanconfUri);
 
     if (!isScanconfExists) {
-      await vscode.window.withProgress(
+      const success = await vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
           title: "Creating default Conformance Scan configuration...",
           cancellable: false,
         },
-        async () => {
-          const tmpApi = await store.createTempApi(rawOas);
+        async (): Promise<boolean> => {
+          //const execFilePm = promisify(execFile);
+          const scanconfFileName = scanconfUri.fsPath;
+          const apiFileName = editor.document.uri.fsPath;
+          const cwd = dirname(apiFileName);
+          const cli = join(homedir(), ".42crunch", "bin", "42c-ast");
 
-          const report = await store.getAuditReport(tmpApi.apiId);
-
-          if (report?.data.openapiState !== "valid") {
-            await store.clearTempApi(tmpApi);
-            // await view.show();
-            // FIXME await view.sendAuditError(editor.document, report.data, bundle.mapping);
-            return;
-          }
-
-          await store.createDefaultScanConfig(tmpApi.apiId);
-
-          const configs = await store.getScanConfigs(tmpApi.apiId);
-
-          const isNewApi = configs[0].configuration !== undefined;
-
-          const c = isNewApi
-            ? await store.readScanConfig(configs[0].configuration.id)
-            : await store.readScanConfig(configs[0].scanConfigurationId);
-
-          const config = isNewApi
-            ? JSON.parse(Buffer.from(c.file, "base64").toString("utf-8"))
-            : JSON.parse(Buffer.from(c.scanConfiguration, "base64").toString("utf-8"));
-
-          await store.clearTempApi(tmpApi);
-
-          if (config !== undefined) {
-            const uri = editor.document.uri;
-            const filename = basename(uri.fsPath);
-            const scanconfUri = uri.with({
-              path: join(dirname(uri.fsPath), `${filename}.scanconf.json`),
-            });
-
-            const encoder = new TextEncoder();
-            await vscode.workspace.fs.writeFile(
-              scanconfUri,
-              encoder.encode(JSON.stringify(config, null, 2))
+          try {
+            execFileSync(
+              cli,
+              [
+                "scan",
+                "conf",
+                "generate",
+                "--output-format",
+                "json",
+                "--output",
+                scanconfFileName,
+                apiFileName,
+              ],
+              { cwd, windowsHide: true }
             );
+          } catch (e: any) {
+            vscode.window.showErrorMessage("Failed to create default config: " + e.message);
+            return false;
           }
+          return true;
+
+          // const tmpApi = await store.createTempApi(rawOas);
+
+          // const report = await store.getAuditReport(tmpApi.apiId);
+
+          // if (report?.data.openapiState !== "valid") {
+          //   await store.clearTempApi(tmpApi);
+          //   // await view.show();
+          //   // FIXME await view.sendAuditError(editor.document, report.data, bundle.mapping);
+          //   return;
+          // }
+
+          // await store.createDefaultScanConfig(tmpApi.apiId);
+
+          // const configs = await store.getScanConfigs(tmpApi.apiId);
+
+          // const isNewApi = configs[0].configuration !== undefined;
+
+          // const c = isNewApi
+          //   ? await store.readScanConfig(configs[0].configuration.id)
+          //   : await store.readScanConfig(configs[0].scanConfigurationId);
+
+          // const config = isNewApi
+          //   ? JSON.parse(Buffer.from(c.file, "base64").toString("utf-8"))
+          //   : JSON.parse(Buffer.from(c.scanConfiguration, "base64").toString("utf-8"));
+
+          // await store.clearTempApi(tmpApi);
+
+          // if (config !== undefined) {
+          //   const uri = editor.document.uri;
+          //   const filename = basename(uri.fsPath);
+          //   const scanconfUri = uri.with({
+          //     path: join(dirname(uri.fsPath), `${filename}.scanconf.json`),
+          //   });
+
+          //   const encoder = new TextEncoder();
+          //   await vscode.workspace.fs.writeFile(
+          //     scanconfUri,
+          //     encoder.encode(JSON.stringify(config, null, 2))
+          //   );
+          // }
         }
       );
-    }
 
-    await view.show();
-    await view.sendColorTheme(vscode.window.activeColorTheme);
-    return view.sendScanOperation(bundle, editor.document, scanconfUri, path, method);
+      if (success) {
+        await view.show();
+        await view.sendColorTheme(vscode.window.activeColorTheme);
+        return view.sendScanOperation(bundle, editor.document, scanconfUri, path, method);
+      }
+    } else {
+      await view.show();
+      await view.sendColorTheme(vscode.window.activeColorTheme);
+      return view.sendScanOperation(bundle, editor.document, scanconfUri, path, method);
+    }
   }
 }
 
