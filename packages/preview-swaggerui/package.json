@@ -9,7 +9,7 @@
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "buffer": "^6.0.3",
-    "css-loader": "^6.6.0",
+    "css-loader": "^6.8.1",
     "isarray": "^2.0.5",
     "path-browserify": "^1.0.1",
     "process": "^0.11.10",
