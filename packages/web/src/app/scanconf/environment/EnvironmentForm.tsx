@@ -1,12 +1,12 @@
-import { useFieldArray, useFormContext } from "react-hook-form";
-import styled from "styled-components";
-import { ThemeColorVariables } from "@xliic/common/theme";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import Input from "../components/operation/Input";
-import { AngleDown, ArrowUpRightFromSquare, TrashCan, TriangleExclamation } from "../../../icons";
+import { ThemeColorVariables } from "@xliic/common/theme";
+import { useFieldArray } from "react-hook-form";
+import styled from "styled-components";
 import Switch from "../../../components/Switch";
-import { useAppSelector, useAppDispatch } from "../store";
 import { showEnvWindow } from "../../../features/env/slice";
+import { AngleDown, ArrowUpRightFromSquare, TrashCan, TriangleExclamation } from "../../../icons";
+import Input from "../components/operation/Input";
+import { useAppDispatch } from "../store";
 
 export default function EnvironmentForm({ missing }: { missing?: string[] }) {
   const dispatch = useAppDispatch();

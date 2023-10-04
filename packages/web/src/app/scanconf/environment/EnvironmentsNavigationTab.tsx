@@ -17,7 +17,6 @@ export default function EnvironmentsNavigationTab() {
 
   const environment = environments[runtimeConfiguration?.environment || "default"];
 
-  console.log("make env env", environment, env);
   const [scanenv, scanenvError] = makeEnvEnv(environment, env);
 
   return (
