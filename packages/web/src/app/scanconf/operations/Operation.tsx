@@ -63,13 +63,19 @@ export default function Operation({ operationId }: { operationId: string }) {
 
   const [scanenv, scanenvError] = makeEnvEnv(playbook.environments["default"], env);
 
+  const [hasTried, setHasTried] = useState(false);
+
   return (
     <Container>
       <Servers
         servers={servers}
         selected={server}
-        onTry={(server: string) => dispatch(startTryExecution(server))}
+        onTry={(server: string) => {
+          setHasTried(true);
+          dispatch(startTryExecution(server));
+        }}
         onScan={(server: string) => {
+          setHasTried(true);
           if (scanenvError == undefined) {
             // FIXME display error if env variables are not available
             dispatch(
@@ -87,7 +93,7 @@ export default function Operation({ operationId }: { operationId: string }) {
         }}
         onChange={setServer}
       />
-      {scanenvError && (
+      {scanenvError && hasTried && (
         <ErrorBanner
           message={"Please set required environment variables: " + scanenvError.join(", ")}
         >

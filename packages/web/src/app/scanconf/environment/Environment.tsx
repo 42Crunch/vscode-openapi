@@ -3,6 +3,7 @@ import { makeEnvEnv } from "../../../core/playbook/execute";
 import Form from "../../../new-components/Form";
 import { useAppSelector } from "../store";
 import EnvironmentForm from "./EnvironmentForm";
+import { ErrorBanner } from "../components/Banner";
 
 export default function Environment({ name }: { name: string }) {
   const {
@@ -23,6 +24,14 @@ export default function Environment({ name }: { name: string }) {
       saveData={(data) => undefined}
     >
       <EnvironmentForm missing={scanenvError} />
+      {scanenvError !== undefined && (
+        <ErrorBanner
+          message={
+            "Some of the required variables are not set, plesse set these in the IDE Environment: " +
+            scanenvError.join(", ")
+          }
+        ></ErrorBanner>
+      )}
     </Form>
   );
 }

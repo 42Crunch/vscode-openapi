@@ -1,13 +1,15 @@
-import styled from "styled-components";
 import { useEffect, useState } from "react";
-import { useFormContext, useController } from "react-hook-form";
+import { useController, useFormContext } from "react-hook-form";
+import styled from "styled-components";
 
 import type { BundledOpenApiSpec, OasRequestBody } from "@xliic/common/oas30";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { TriangleExclamation } from "../../../../icons";
 
-import { createBody, serializeToFormText, parseFromFormText } from "../../../../core/form/body";
+import { createBody, parseFromFormText, serializeToFormText } from "../../../../core/form/body";
+import Editor from "../../../../new-components/fields/Editor";
+import LineEditor from "../../../../new-components/fields/LineEditor";
 
 export default function RequestBody({
   oas,
@@ -78,7 +80,10 @@ export default function RequestBody({
           <option key={mediaType}>{mediaType}</option>
         ))}
       </select>
-      <textarea
+
+      <Editor knownVariables={["foo", "$random", "baz"]} name={"body.value"} />
+
+      {/* <textarea
         rows={10}
         onChange={(e) => {
           bodyValue.onChange(parseFromFormText(bodyMediaType.value, e.target.value));
@@ -87,7 +92,7 @@ export default function RequestBody({
         onBlur={bodyValue.onBlur}
         value={bodyText}
         ref={bodyValue.ref}
-      />
+      /> */}
       {error && (
         <ErrorMessage>
           <TriangleExclamation /> {error.message}

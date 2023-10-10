@@ -3,6 +3,7 @@ import { useFormContext, useController } from "react-hook-form";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { TrashCan, ExclamationCircle } from "../../../../icons";
 import Select from "../Select";
+import LineEditor from "../../../../new-components/fields/LineEditor";
 
 export default function EnvKeyValue({ name, remove }: { name: string; remove: () => void }) {
   const { control } = useFormContext();
@@ -37,7 +38,8 @@ export default function EnvKeyValue({ name, remove }: { name: string; remove: ()
     <Container>
       <KeyValue>
         <Name type="text" {...keyField} />
-        <Value type="text" {...valueField} />
+        <LineEditor variables={["foo"]} name={`${name}.value`} />
+        {/* <Value type="text" {...valueField} /> */}
         <Type {...typeField}>
           <option value="string">string</option>
           <option value="number" disabled={!possibleTypes.has("number")}>
