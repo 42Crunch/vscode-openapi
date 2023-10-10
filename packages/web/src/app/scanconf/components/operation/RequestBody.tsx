@@ -9,14 +9,15 @@ import { TriangleExclamation } from "../../../../icons";
 
 import { createBody, parseFromFormText, serializeToFormText } from "../../../../core/form/body";
 import Editor from "../../../../new-components/fields/Editor";
-import LineEditor from "../../../../new-components/fields/LineEditor";
 
 export default function RequestBody({
   oas,
   requestBody,
+  variables,
 }: {
   oas: BundledOpenApiSpec;
   requestBody?: OasRequestBody;
+  variables: string[];
 }) {
   const { control } = useFormContext();
 
@@ -81,7 +82,7 @@ export default function RequestBody({
         ))}
       </select>
 
-      <Editor knownVariables={["foo", "$random", "baz"]} name={"body.value"} />
+      <Editor variables={variables} name={"body.value"} />
 
       {/* <textarea
         rows={10}

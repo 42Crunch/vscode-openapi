@@ -17,6 +17,7 @@ import Servers from "./Servers";
 import { setTryitServer } from "../../../features/prefs/slice";
 import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import { RequestRef } from "@xliic/common/playbook";
+import { makeEnvEnv } from "../../../core/playbook/execute";
 
 export default function Request({ requestRef }: { requestRef: RequestRef }) {
   const dispatch = useAppDispatch();
@@ -57,10 +58,26 @@ export default function Request({ requestRef }: { requestRef: RequestRef }) {
     },
   ];
 
+  const eenv = useAppSelector((state) => state.env.data);
+  const [scanenv, scanenvError] = makeEnvEnv(playbook.environments["default"], eenv);
+  if (scanenvError === undefined) {
+    env.push(scanenv[0]);
+  }
+
   const replacements = replaceEnvVariables(request, [...env]);
   const authReplacements = replaceEnvVariables(requiredCredentials || {}, [...env]);
 
   const missing = [...new Set([...replacements.missing, ...authReplacements.missing])];
+
+  const variables = getVariableNamesFromEnvStack(env);
+
+  for (const entry of env) {
+    for (const name of Object.keys(entry.env)) {
+      if (!variables.includes(name)) {
+        variables.push(name);
+      }
+    }
+  }
 
   const inputs: SimpleEnvironment = {};
   for (const name of missing) {
@@ -97,6 +114,7 @@ export default function Request({ requestRef }: { requestRef: RequestRef }) {
           defaultCollapsed={false}
           oas={oas}
           credentials={credentials}
+          variables={variables}
           requestRef={requestRef}
           stage={request!}
           saveRequest={onSaveRequest}
@@ -109,7 +127,7 @@ export default function Request({ requestRef }: { requestRef: RequestRef }) {
             data={inputs}
             saveData={(data) => setInputEnv(data)}
           >
-            <Environment name="env" />
+            <Environment name="env" variables={variables} />
           </Form>
         </Inputs>
       </CollapsibleSection>
@@ -166,4 +184,17 @@ function getPreferredServer(
     return preferredServer;
   }
   return servers[0];
+}
+
+function getVariableNamesFromEnvStack(env: PlaybookEnvStack): string[] {
+  const variables: string[] = [];
+  for (const entry of env) {
+    for (const name of Object.keys(entry.env)) {
+      if (!variables.includes(name)) {
+        variables.push(name);
+      }
+    }
+  }
+  variables.sort();
+  return variables;
 }

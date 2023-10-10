@@ -13,6 +13,7 @@ export type OperationResult = {
   httpError?: HttpError;
   auth: Record<string, PlaybookResult>;
   variablesReplaced?: {
+    stack: PlaybookEnvStack;
     found: LookupResult[];
     missing: LookupFailure[];
   };

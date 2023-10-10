@@ -5,7 +5,15 @@ import { TrashCan, ExclamationCircle } from "../../../../icons";
 import Select from "../Select";
 import LineEditor from "../../../../new-components/fields/LineEditor";
 
-export default function EnvKeyValue({ name, remove }: { name: string; remove: () => void }) {
+export default function EnvKeyValue({
+  name,
+  remove,
+  variables,
+}: {
+  name: string;
+  variables: string[];
+  remove: () => void;
+}) {
   const { control } = useFormContext();
 
   const {
@@ -38,7 +46,7 @@ export default function EnvKeyValue({ name, remove }: { name: string; remove: ()
     <Container>
       <KeyValue>
         <Name type="text" {...keyField} />
-        <LineEditor variables={["foo"]} name={`${name}.value`} />
+        <LineEditor variables={variables} name={`${name}.value`} />
         {/* <Value type="text" {...valueField} /> */}
         <Type {...typeField}>
           <option value="string">string</option>

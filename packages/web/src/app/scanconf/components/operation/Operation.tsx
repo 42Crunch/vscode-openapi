@@ -12,12 +12,14 @@ export default function Operation({
   settings,
   path,
   method,
+  variables,
 }: {
   oas: BundledSwaggerOrOasSpec;
   credentials: playbook.Credentials;
   settings?: JSX.Element;
   path: string;
   method: HttpMethod;
+  variables: string[];
 }) {
   return (
     <Container>
@@ -27,6 +29,7 @@ export default function Operation({
         settings={settings}
         path={path}
         method={method}
+        variables={variables}
       />
     </Container>
   );

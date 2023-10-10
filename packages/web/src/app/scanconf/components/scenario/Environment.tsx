@@ -6,7 +6,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import EnvKeyValue from "./EnvKeyValue";
 import AddNewRow from "./AddNewRow";
 
-export default function Environment({ name }: { name: string }) {
+export default function Environment({ name, variables }: { name: string; variables: string[] }) {
   const { control } = useFormContext();
 
   const { fields, append, remove } = useFieldArray({
@@ -26,6 +26,7 @@ export default function Environment({ name }: { name: string }) {
         <EnvKeyValue
           key={field.id}
           name={`${name}.${index}`}
+          variables={variables}
           remove={() => {
             remove(index);
           }}

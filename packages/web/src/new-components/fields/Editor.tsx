@@ -13,13 +13,7 @@ import styled from "styled-components";
 import { VariableNode } from "./editor/VariableNode";
 import VariablesPlugin from "./editor/VariablesPlugin";
 
-export default function Editor({
-  name,
-  knownVariables,
-}: {
-  name: string;
-  knownVariables: string[];
-}) {
+export default function Editor({ name, variables }: { name: string; variables: string[] }) {
   const {
     field: { value },
   } = useController({
@@ -62,7 +56,7 @@ export default function Editor({
           ErrorBoundary={LexicalErrorBoundary}
         />
         <HistoryPlugin />
-        <VariablesPlugin variables={knownVariables} />
+        <VariablesPlugin variables={variables} />
         <FormPlugin name={name} />
       </LexicalComposer>
     </Container>

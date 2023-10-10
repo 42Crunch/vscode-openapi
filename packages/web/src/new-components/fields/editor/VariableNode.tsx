@@ -1,13 +1,5 @@
-/**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- */
-
+import { ThemeColorVariables } from "@xliic/common/theme";
 import type { Spread } from "lexical";
-
 import {
   TextNode,
   type DOMExportOutput,
@@ -25,8 +17,8 @@ export type SerializedVariableNode = Spread<
   SerializedTextNode
 >;
 
-const variableStyleExist = "background: rgba(24, 119, 232, 0.2); border-radius: 4px;";
-const variableStyleDoesNotExist = "background: rgba(124, 119, 232, 0.2); border-radius: 4px;";
+const variableStyleExist = `background-color: var(${ThemeColorVariables.badgeBackground}); color: var(${ThemeColorVariables.badgeForeground}); border-radius: 4px;`;
+const variableStyleDoesNotExist = `background-color: var(${ThemeColorVariables.errorBackground}); color: var(${ThemeColorVariables.errorForeground}); border-radius: 4px;`;
 
 export class VariableNode extends TextNode {
   __exists: boolean;

@@ -21,9 +21,11 @@ function parse(value: string): unknown {
 export default function RequestBodySwagger({
   oas,
   group,
+  variables,
 }: {
   oas: BundledSwaggerSpec;
   group: Record<string, ResolvedSwaggerParameter>;
+  variables: string[];
 }) {
   const { control } = useFormContext();
 

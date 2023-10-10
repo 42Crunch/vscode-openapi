@@ -10,6 +10,7 @@ import { OperationResult } from "../components/scenario/types";
 import { unwrapPlaybookStage, wrapPlaybookStage } from "../components/scenario/util";
 import StageReferenceTabs from "./StageReferenceTabs";
 import Card from "./components/Card";
+import { PlaybookEnvStack } from "../../../core/playbook/playbook-env";
 
 export default function Stage({
   stage,
@@ -36,6 +37,7 @@ export default function Stage({
 
   const missingLenghth = result?.variablesReplaced?.missing?.length;
   const hasMissingVariables = missingLenghth !== undefined && missingLenghth > 0;
+  const variables = getVariableNamesFromEnvStack(result?.variablesReplaced?.stack || []);
 
   return (
     <Form
@@ -71,11 +73,24 @@ export default function Stage({
               </Menu>
             </Icons>
           </Description>
-          <StageReferenceTabs oas={oas} result={result} />
+          <StageReferenceTabs oas={oas} result={result} variables={variables} />
         </Card>
       </Container>
     </Form>
   );
+}
+
+function getVariableNamesFromEnvStack(env: PlaybookEnvStack): string[] {
+  const variables: string[] = [];
+  for (const entry of env) {
+    for (const name of Object.keys(entry.env)) {
+      if (!variables.includes(name)) {
+        variables.push(name);
+      }
+    }
+  }
+  variables.sort();
+  return variables;
 }
 
 const Container = styled.div`

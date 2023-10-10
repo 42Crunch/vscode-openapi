@@ -40,16 +40,18 @@ export default function OperationTabs({
   method,
   credentials,
   settings,
+  variables,
 }: {
   oas: BundledSwaggerOrOasSpec;
   credentials: playbook.Credentials;
   settings?: JSX.Element;
   path: string;
   method: HttpMethod;
+  variables: string[];
 }) {
   const tabs = isOpenapi(oas)
-    ? makeOasTabs(oas, credentials, path, method)
-    : makeSwaggerTabs(oas, credentials, path, method);
+    ? makeOasTabs(oas, credentials, path, method, variables)
+    : makeSwaggerTabs(oas, credentials, path, method, variables);
 
   const activeId = tabs.filter((tab) => tab.enabled)?.[0]?.id;
 
@@ -88,7 +90,8 @@ function makeOasTabs(
   oas: BundledOpenApiSpec,
   credentials: playbook.Credentials,
   path: string,
-  method: HttpMethod
+  method: HttpMethod,
+  variables: string[]
 ) {
   const parameters = getOasParameters(oas, path, method);
   const operation = getOasOperation(oas, path, method);
@@ -98,7 +101,7 @@ function makeOasTabs(
     {
       id: "body",
       title: "Body",
-      content: <RequestBody oas={oas} requestBody={requestBody} />,
+      content: <RequestBody oas={oas} requestBody={requestBody} variables={variables} />,
       enabled: requestBody !== undefined,
     },
     {
@@ -140,7 +143,7 @@ function makeOasTabs(
     {
       id: "environment",
       title: "Environment",
-      content: <Environment name="environment" />,
+      content: <Environment name="environment" variables={variables} />,
       enabled: true,
     },
     {
@@ -156,7 +159,8 @@ function makeSwaggerTabs(
   oas: BundledSwaggerSpec,
   credentials: playbook.Credentials,
   path: string,
-  method: HttpMethod
+  method: HttpMethod,
+  variables: string[]
 ) {
   const parameters = getSwaggerParameters(oas, path, method);
 
@@ -164,7 +168,7 @@ function makeSwaggerTabs(
     {
       id: "body",
       title: "Body",
-      content: <RequestBodySwagger oas={oas} group={parameters.body} />,
+      content: <RequestBodySwagger oas={oas} group={parameters.body} variables={variables} />,
       enabled: hasParameters(parameters.body),
     },
     {
@@ -206,7 +210,7 @@ function makeSwaggerTabs(
     {
       id: "environment",
       title: "Environment",
-      content: <Environment name="environment" />,
+      content: <Environment name="environment" variables={variables} />,
       enabled: true,
     },
     {

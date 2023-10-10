@@ -114,6 +114,7 @@ const PlaybookStepHandlers: PlaybookEventHandlers = {
     event: PlaybookPayloadVariablesReplaced
   ): void {
     currentOperationResult(stateCurrent, stateResult).variablesReplaced = {
+      stack: event.stack,
       found: event.found,
       missing: event.missing,
     };

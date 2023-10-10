@@ -16,6 +16,7 @@ export default function RequestCard({
   credentials,
   saveRequest,
   defaultCollapsed,
+  variables,
 }: {
   oas: BundledSwaggerOrOasSpec;
   requestRef: playbook.RequestRef;
@@ -23,6 +24,7 @@ export default function RequestCard({
   stage: playbook.StageContent;
   saveRequest: (request: playbook.StageContent) => void;
   defaultCollapsed?: boolean;
+  variables: string[];
 }) {
   return (
     <Container>
@@ -32,7 +34,13 @@ export default function RequestCard({
           <Method>{stage.request.method}</Method>
           <Path>{stage.request.path}</Path>
         </BottomDescription>
-        <Request oas={oas} stage={stage} credentials={credentials} saveRequest={saveRequest} />
+        <Request
+          oas={oas}
+          stage={stage}
+          credentials={credentials}
+          saveRequest={saveRequest}
+          variables={variables}
+        />
       </CollapsibleCard>
     </Container>
   );
@@ -43,11 +51,13 @@ export function Request({
   oas,
   credentials,
   saveRequest,
+  variables,
 }: {
   stage: playbook.StageContent;
   oas: BundledSwaggerOrOasSpec;
   credentials: playbook.Credentials;
   saveRequest: (request: playbook.StageContent) => void;
+  variables: string[];
 }) {
   return (
     <Form
@@ -61,6 +71,7 @@ export function Request({
         credentials={credentials}
         method={stage.request.method}
         path={stage.request.path}
+        variables={variables}
       />
     </Form>
   );

@@ -9,8 +9,10 @@ import StageReferenceSettings from "./StageReferenceSettings";
 export default function StageReferenceTabs({
   oas,
   result,
+  variables,
 }: {
   oas: BundledSwaggerOrOasSpec;
+  variables: string[];
   result?: OperationResult;
 }) {
   const missingVariablesCount = Array.from(
@@ -21,7 +23,7 @@ export default function StageReferenceTabs({
     {
       id: "environment",
       title: "Environment",
-      content: <Environment name="environment" />,
+      content: <Environment name="environment" variables={variables} />,
     },
     {
       id: "responses",

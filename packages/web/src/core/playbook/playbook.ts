@@ -43,6 +43,7 @@ export type PlaybookAborted = {
 
 export type PlaybookPayloadVariablesReplaced = {
   event: "payload-variables-substituted";
+  stack: PlaybookEnvStack;
   found: LookupResult[];
   missing: LookupFailure[];
 };

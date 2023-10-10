@@ -107,11 +107,9 @@ async function* executePlaybook(
 
     console.log("me stage env", stageEnv);
 
-    const replacedRequestEnv = replaceEnvVariables(request.environment || {}, [
-      ...env,
-      ...result,
-      stageEnv,
-    ]);
+    const requestEnvStack: PlaybookEnvStack = [...env, ...result, stageEnv];
+
+    const replacedRequestEnv = replaceEnvVariables(request.environment || {}, requestEnvStack);
 
     const requestEnv: PlaybookEnv = {
       id: "request-environment",
@@ -123,6 +121,7 @@ async function* executePlaybook(
 
     yield {
       event: "payload-variables-substituted",
+      stack: requestEnvStack,
       found: [...replacedRequestEnv.found, ...replacedStageEnv.found, ...replacements.found],
       missing: [
         ...replacedRequestEnv.missing,
