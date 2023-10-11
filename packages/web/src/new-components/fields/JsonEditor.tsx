@@ -6,14 +6,15 @@ import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { $createLineBreakNode, $createParagraphNode, $createTextNode, $getRoot } from "lexical";
+import { $createLineBreakNode, $createParagraphNode, $getRoot } from "lexical";
 import { useEffect } from "react";
 import { useController } from "react-hook-form";
 import styled from "styled-components";
 import { VariableNode } from "./editor/VariableNode";
 import VariablesPlugin from "./editor/VariablesPlugin";
+import { createLineNodes } from "./editor/utils";
 
-export default function Editor({ name, variables }: { name: string; variables: string[] }) {
+export default function JsonEditor({ name, variables }: { name: string; variables: string[] }) {
   const {
     field: { value },
   } = useController({
@@ -24,19 +25,17 @@ export default function Editor({ name, variables }: { name: string; variables: s
   }
 
   const initialConfig = {
-    namespace: "MyEditor",
+    namespace: "editor",
     editorState: () => {
       const serialized = JSON.stringify(value, null, 2);
       const paragraph = $createParagraphNode();
-
       const lines = serialized.split("\n");
       for (let i = 0; i < lines.length; i++) {
-        paragraph.append($createTextNode(lines[i]));
+        paragraph.append(...createLineNodes(lines[i]));
         if (i < lines.length - 1) {
           paragraph.append($createLineBreakNode());
         }
       }
-
       $getRoot().append(paragraph);
     },
     theme: {
@@ -62,8 +61,6 @@ export default function Editor({ name, variables }: { name: string; variables: s
     </Container>
   );
 }
-
-const ENV_VAR_REGEX = /({{[\w.\-$]+}})/g;
 
 const Container = styled.div`
   padding: 4px;

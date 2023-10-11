@@ -8,7 +8,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { TriangleExclamation } from "../../../../icons";
 
 import { createBody, parseFromFormText, serializeToFormText } from "../../../../core/form/body";
-import Editor from "../../../../new-components/fields/Editor";
+import JsonEditor from "../../../../new-components/fields/JsonEditor";
 
 export default function RequestBody({
   oas,
@@ -82,7 +82,7 @@ export default function RequestBody({
         ))}
       </select>
 
-      <Editor variables={variables} name={"body.value"} />
+      <JsonEditor variables={variables} name={"body.value"} />
 
       {/* <textarea
         rows={10}

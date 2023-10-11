@@ -7,12 +7,12 @@ import {
   type LexicalNode,
   type NodeKey,
   type SerializedTextNode,
+  $applyNodeReplacement,
 } from "lexical";
 
 export type SerializedVariableNode = Spread<
   {
     exists: boolean;
-    name: string;
   },
   SerializedTextNode
 >;
@@ -28,15 +28,11 @@ export class VariableNode extends TextNode {
   }
 
   static clone(node: VariableNode): VariableNode {
-    return new VariableNode(node.__text, node.__name, node.__exists, node.__key);
+    return new VariableNode(node.__text, node.__exists, node.__key);
   }
 
   static importJSON(serializedNode: SerializedVariableNode): VariableNode {
-    const node = $createVariableNode(
-      serializedNode.text,
-      serializedNode.name,
-      serializedNode.exists
-    );
+    const node = $createVariableNode(serializedNode.text, serializedNode.exists);
     node.setFormat(serializedNode.format);
     node.setDetail(serializedNode.detail);
     node.setMode(serializedNode.mode);
@@ -44,16 +40,14 @@ export class VariableNode extends TextNode {
     return node;
   }
 
-  constructor(text: string, name: string, exists: boolean, key?: NodeKey) {
+  constructor(text: string, exists: boolean, key?: NodeKey) {
     super(text, key);
-    this.__name == name;
     this.__exists = exists;
   }
 
   exportJSON(): SerializedVariableNode {
     return {
       ...super.exportJSON(),
-      name: this.__name,
       exists: this.__exists,
       type: "variable",
       version: 1,
@@ -90,18 +84,6 @@ export class VariableNode extends TextNode {
     return true;
   }
 
-  isTextEntity(): true {
-    return true;
-  }
-
-  canInsertTextBefore(): boolean {
-    return true;
-  }
-
-  canInsertTextAfter(): boolean {
-    return true;
-  }
-
   setExists(exists: boolean) {
     const self = this.getWritable();
     self.__exists = exists;
@@ -113,8 +95,8 @@ export class VariableNode extends TextNode {
   }
 }
 
-export function $createVariableNode(text: string, name: string, exists: boolean): VariableNode {
-  return new VariableNode(text, name, exists);
+export function $createVariableNode(text: string, exists: boolean): VariableNode {
+  return new VariableNode(text, exists);
 }
 
 export function $isVariableNode(node: LexicalNode | null | undefined): node is VariableNode {

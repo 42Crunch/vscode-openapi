@@ -16,7 +16,7 @@ import { useLexicalTextEntity } from "@lexical/react/useLexicalTextEntity";
 const SUGGESTION_LIST_LENGTH_LIMIT = 10;
 
 function checkForVariables(text: string, minMatchLength: number): MenuTextMatch | null {
-  const ENV_VAR_REGEX = /({{([\w.\-$]*))/;
+  const ENV_VAR_REGEX = /({{([\w.\-$^}]*))/;
   const match = ENV_VAR_REGEX.exec(text);
 
   if (match !== null) {
@@ -89,7 +89,7 @@ export default function VariablesPlugin({
   const createVariableNode = useCallback(
     (textNode: TextNode): VariableNode => {
       const name = textNode.getTextContent().slice(2, -2);
-      return $createVariableNode(textNode.getTextContent(), name, variables.includes(name));
+      return $createVariableNode(textNode.getTextContent(), variables.includes(name));
     },
     [variables]
   );
@@ -149,11 +149,7 @@ export default function VariablesPlugin({
       closeMenu: () => void
     ) => {
       editor.update(() => {
-        const variableNode = $createVariableNode(
-          "{{" + selectedOption.name + "}}",
-          selectedOption.name,
-          true
-        );
+        const variableNode = $createVariableNode("{{" + selectedOption.name + "}}", true);
         if (nodeToReplace) {
           nodeToReplace.replace(variableNode);
         }
@@ -210,7 +206,7 @@ export default function VariablesPlugin({
   );
 }
 
-const ENV_VAR_REGEX = /({{[\w.\-$]+}})/;
+const ENV_VAR_REGEX = /({{[\w-$]+}})/;
 
 const VariablesMenu = styled.div`
   margin: 4px;

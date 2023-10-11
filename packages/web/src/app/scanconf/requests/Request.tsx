@@ -18,6 +18,7 @@ import { setTryitServer } from "../../../features/prefs/slice";
 import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import { RequestRef } from "@xliic/common/playbook";
 import { makeEnvEnv } from "../../../core/playbook/execute";
+import { createDynamicVariables } from "../../../core/playbook/builtin-variables";
 
 export default function Request({ requestRef }: { requestRef: RequestRef }) {
   const dispatch = useAppDispatch();
@@ -46,17 +47,7 @@ export default function Request({ requestRef }: { requestRef: RequestRef }) {
     }
   });
 
-  const random = Math.floor(Math.random() * 10000000);
-
-  const env: PlaybookEnvStack = [
-    {
-      id: "functions",
-      env: {
-        $random: `${random}`,
-      },
-      assignments: [],
-    },
-  ];
+  const env: PlaybookEnvStack = [createDynamicVariables()];
 
   const eenv = useAppSelector((state) => state.env.data);
   const [scanenv, scanenvError] = makeEnvEnv(playbook.environments["default"], eenv);

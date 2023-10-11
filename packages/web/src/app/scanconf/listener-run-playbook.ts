@@ -26,6 +26,7 @@ import { executeRequest, addExecutionStep, setRequestId } from "./requests/slice
 import { AppDispatch, RootState } from "./store";
 import { addStage, moveStage, saveOperationReference, saveRequest } from "./slice";
 import { showScanconfOperation } from "./actions";
+import { createDynamicVariables } from "../../core/playbook/builtin-variables";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 
@@ -63,17 +64,7 @@ export function onMockExecuteScenario(
 
         const mockHttpClient: MockHttpClient = async () => [MockHttpResponse, undefined];
 
-        const random = Math.floor(Math.random() * 10000000);
-
-        const env: PlaybookEnvStack = [
-          {
-            id: "functions",
-            env: {
-              $random: `${random}`,
-            },
-            assignments: [],
-          },
-        ];
+        const env: PlaybookEnvStack = [createDynamicVariables()];
 
         const playbooks: [string, Stage[]][] = [];
 
@@ -135,17 +126,7 @@ export function onTryExecuteScenario(
         const receive = makeReceive(listenerApi.take);
         const httpClient = makeHttpClient(send, receive);
 
-        const random = Math.floor(Math.random() * 10000000);
-
-        const env: PlaybookEnvStack = [
-          {
-            id: "functions",
-            env: {
-              $random: `${random}`,
-            },
-            assignments: [],
-          },
-        ];
+        const env: PlaybookEnvStack = [createDynamicVariables()];
 
         const playbooks: [string, Stage[]][] = [];
 

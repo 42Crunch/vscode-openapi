@@ -1,9 +1,7 @@
-import { HashtagNode } from "@lexical/hashtag";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
-import { HashtagPlugin } from "@lexical/react/LexicalHashtagPlugin";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
 import { ThemeColorVariables } from "@xliic/common/theme";
@@ -13,6 +11,8 @@ import { useController } from "react-hook-form";
 import styled from "styled-components";
 import { VariableNode } from "./editor/VariableNode";
 import VariablesPlugin from "./editor/VariablesPlugin";
+import RemoveLinebreaksPlugin from "./editor/RemoveLinebreaksPlugin";
+import { createLineNodes } from "./editor/utils";
 
 export default function LineEditor({ name, variables }: { name: string; variables: string[] }) {
   const {
@@ -20,16 +20,16 @@ export default function LineEditor({ name, variables }: { name: string; variable
   } = useController({
     name,
   });
+
   function onError(error: any) {
     console.error(error);
   }
 
   const initialConfig = {
-    namespace: "MyEditor",
+    namespace: "editor",
     editorState: () => {
       const paragraph = $createParagraphNode();
-      const textNode = $createTextNode(value);
-      paragraph.append(textNode);
+      paragraph.append(...createLineNodes(value));
       $getRoot().append(paragraph);
     },
     theme: {
@@ -37,7 +37,7 @@ export default function LineEditor({ name, variables }: { name: string; variable
       paragraph: "editor-paragraph",
     },
     onError,
-    nodes: [VariableNode, HashtagNode],
+    nodes: [VariableNode],
   };
 
   return (
@@ -51,7 +51,7 @@ export default function LineEditor({ name, variables }: { name: string; variable
         <HistoryPlugin />
         <VariablesPlugin variables={variables} />
         <FormPlugin name={name} />
-        <HashtagPlugin />
+        <RemoveLinebreaksPlugin />
       </LexicalComposer>
     </Container>
   );
@@ -96,12 +96,6 @@ function FormPlugin({ name }: { name: string }) {
       field.onChange(text);
     });
   }, [editor, field]);
-
-  useEffect(() => {
-    return editor.registerNodeTransform(LineBreakNode, (node) => {
-      node.remove();
-    });
-  }, [editor]);
 
   return null;
 }
