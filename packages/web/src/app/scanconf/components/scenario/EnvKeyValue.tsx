@@ -46,8 +46,7 @@ export default function EnvKeyValue({
     <Container>
       <KeyValue>
         <Name type="text" {...keyField} />
-        <LineEditor variables={variables} name={`${name}.value`} />
-        {/* <Value type="text" {...valueField} /> */}
+        <ValueEditor variables={variables} name={`${name}.value`} />
         <Type {...typeField}>
           <option value="string">string</option>
           <option value="number" disabled={!possibleTypes.has("number")}>
@@ -116,12 +115,9 @@ const Name = styled.input`
   padding: 4px 8px;
 `;
 
-const Value = styled.input`
+const ValueEditor = styled(LineEditor)`
   flex: 2;
-  border: none;
-  background: transparent;
   border-bottom: 1px solid var(${ThemeColorVariables.border});
-  color: var(${ThemeColorVariables.foreground});
   padding: 4px 8px;
 `;
 
