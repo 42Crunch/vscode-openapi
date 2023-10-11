@@ -109,6 +109,15 @@ export const slice = createSlice({
       state.playbook.authenticationDetails[group][id] = credential;
       state.dirty = true;
     },
+    saveEnvironment: (
+      state,
+      {
+        payload: { name, environment },
+      }: PayloadAction<{ name: string; environment: playbook.PlaybookEnvironment }>
+    ) => {
+      state.playbook.environments[name] = environment;
+      state.dirty = true;
+    },
     addCredential: (
       state,
       {
@@ -213,6 +222,7 @@ function getStageContainer(
 export const {
   loadScanconf,
   saveSettings,
+  saveEnvironment,
   saveScanconf,
   addCredential,
   addStage,

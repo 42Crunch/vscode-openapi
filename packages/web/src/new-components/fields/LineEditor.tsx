@@ -14,7 +14,7 @@ import VariablesPlugin from "./editor/VariablesPlugin";
 import RemoveLinebreaksPlugin from "./editor/RemoveLinebreaksPlugin";
 import { createLineNodes } from "./editor/utils";
 
-export default function LineEditor({ name, variables }: { name: string; variables: string[] }) {
+export default function LineEditor({ name, variables }: { name: string; variables?: string[] }) {
   const {
     field: { value },
   } = useController({
@@ -43,15 +43,17 @@ export default function LineEditor({ name, variables }: { name: string; variable
   return (
     <Container>
       <LexicalComposer initialConfig={initialConfig}>
-        <PlainTextPlugin
-          contentEditable={<ContentEditable />}
-          placeholder={<div></div>}
-          ErrorBoundary={LexicalErrorBoundary}
-        />
-        <HistoryPlugin />
-        <VariablesPlugin variables={variables} />
-        <FormPlugin name={name} />
-        <RemoveLinebreaksPlugin />
+        <>
+          <PlainTextPlugin
+            contentEditable={<ContentEditable />}
+            placeholder={<div></div>}
+            ErrorBoundary={LexicalErrorBoundary}
+          />
+          <HistoryPlugin />
+          {variables !== undefined && <VariablesPlugin variables={variables} />}
+          <FormPlugin name={name} />
+          <RemoveLinebreaksPlugin />
+        </>
       </LexicalComposer>
     </Container>
   );

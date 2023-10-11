@@ -1,14 +1,9 @@
-import styled from "styled-components";
-import { useAppSelector, useAppDispatch } from "../store";
-import { SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
 import { useState } from "react";
+import { SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
+import { useAppSelector } from "../store";
 import Environment from "./Environment";
 
 export default function Environments() {
-  const dispatch = useAppDispatch();
-
-  // const operationId = useAppSelector((state) => state.operations.operationId);
-  // const onSetOperationId = (operationId: string) => dispatch(setOperationId(operationId));
   const [environmentId, setEnvironmentId] = useState<string>("default");
 
   const {
@@ -38,12 +33,3 @@ export default function Environments() {
     />
   );
 }
-
-const Container = styled.div``;
-
-const Controls = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  margin: 4px;
-  gap: 4px;
-`;

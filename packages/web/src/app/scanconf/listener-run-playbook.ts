@@ -24,7 +24,7 @@ import {
 } from "./operations/slice";
 import { executeRequest, addExecutionStep, setRequestId } from "./requests/slice";
 import { AppDispatch, RootState } from "./store";
-import { addStage, moveStage, saveOperationReference, saveRequest } from "./slice";
+import { addStage, moveStage, saveEnvironment, saveOperationReference, saveRequest } from "./slice";
 import { showScanconfOperation } from "./actions";
 import { createDynamicVariables } from "../../core/playbook/builtin-variables";
 

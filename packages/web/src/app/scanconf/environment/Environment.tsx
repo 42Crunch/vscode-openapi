@@ -1,11 +1,14 @@
 import * as playbook from "@xliic/common/playbook";
 import { makeEnvEnv } from "../../../core/playbook/execute";
 import Form from "../../../new-components/Form";
-import { useAppSelector } from "../store";
+import { useAppDispatch, useAppSelector } from "../store";
 import EnvironmentForm from "./EnvironmentForm";
 import { ErrorBanner } from "../components/Banner";
+import { saveEnvironment } from "../slice";
 
 export default function Environment({ name }: { name: string }) {
+  const dispatch = useAppDispatch();
+
   const {
     playbook: { environments, runtimeConfiguration },
   } = useAppSelector((state) => state.scanconf);
@@ -21,7 +24,7 @@ export default function Environment({ name }: { name: string }) {
       wrapFormData={wrapEnvironment}
       unwrapFormData={unwrapEnvironment}
       data={environment}
-      saveData={(data) => undefined}
+      saveData={(environment) => dispatch(saveEnvironment({ name, environment }))}
     >
       <EnvironmentForm missing={scanenvError} />
       {scanenvError !== undefined && (
