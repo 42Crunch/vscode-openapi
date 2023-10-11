@@ -267,7 +267,9 @@ export function makeEnvEnv(
     } else if (env.default.hasOwnProperty(variable.name)) {
       result[name] = env.default[variable.name];
       envEnv[variable.name] = env.default[variable.name];
-    } else if (variable.default !== undefined) {
+    } else if (!variable.required && variable.default !== undefined) {
+      // required variables must always come from the environment, no default
+      // values is used for these
       result[name] = variable.default;
     } else if (variable.required) {
       missing.push(variable.name);
@@ -278,5 +280,5 @@ export function makeEnvEnv(
     return [undefined, missing];
   }
 
-  return [[{ id: "start", assignments: [], env: result }, envEnv], undefined];
+  return [[{ id: "environment", assignments: [], env: result }, envEnv], undefined];
 }

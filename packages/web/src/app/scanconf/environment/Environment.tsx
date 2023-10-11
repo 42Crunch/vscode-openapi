@@ -10,14 +10,16 @@ export default function Environment({ name }: { name: string }) {
   const dispatch = useAppDispatch();
 
   const {
-    playbook: { environments, runtimeConfiguration },
+    playbook: { environments },
   } = useAppSelector((state) => state.scanconf);
 
   const env = useAppSelector((state) => state.env.data);
 
-  const environment = environments[runtimeConfiguration?.environment || "default"];
+  const environment = environments[name];
 
   const [scanenv, scanenvError] = makeEnvEnv(environment, env);
+
+  console.log("make env env", scanenv, scanenvError);
 
   return (
     <Form
