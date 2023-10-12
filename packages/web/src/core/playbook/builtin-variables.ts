@@ -10,7 +10,7 @@ export function createDynamicVariables(): PlaybookEnv {
       $randomFromSchema: `${random}`,
       $randomString: generateRandomString(20),
       $randomuint: getRandomUint32(),
-      $uuid: self.crypto.randomUUID(),
+      $uuid: crypto.randomUUID(),
       $timestamp: generateTimestamp(),
       $timestamp3339: generateIsoTimestamp(),
     },
@@ -21,7 +21,7 @@ export function createDynamicVariables(): PlaybookEnv {
 function generateRandomString(length: number) {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   const randomValues = new Uint32Array(length);
-  self.crypto.getRandomValues(randomValues);
+  crypto.getRandomValues(randomValues);
 
   let result = "";
   for (let i = 0; i < length; i++) {
@@ -43,6 +43,6 @@ function generateIsoTimestamp() {
 
 function getRandomUint32() {
   const buffer = new Uint32Array(1);
-  self.crypto.getRandomValues(buffer);
+  crypto.getRandomValues(buffer);
   return buffer[0];
 }

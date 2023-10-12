@@ -1,11 +1,11 @@
-import { HttpClient } from "@xliic/common/http";
+import { HttpClient, HttpRequest } from "@xliic/common/http";
 import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
 import * as playbook from "@xliic/common/playbook";
 import { Result } from "@xliic/common/result";
 
 import { replaceEnv, replaceEnvVariables } from "./replace";
-import { makeHttpRequest } from "./http";
+import { makeExternalHttpRequest, makeHttpRequest } from "./http";
 import { PlaybookExecutorStep } from "./playbook";
 import { assignVariables } from "./variable-assignments";
 import { PlaybookEnv, PlaybookEnvStack, PlaybookVariableAssignments } from "./playbook-env";
@@ -22,10 +22,16 @@ export async function* executeAllPlaybooks(
 ): AsyncGenerator<PlaybookExecutorStep> {
   const result: PlaybookEnvStack = [];
 
-  const name = Object.keys(file.environments)?.[0];
-  const environment = file.environments[name];
+  const environmentName = file.runtimeConfiguration?.environment || "default";
+  const environment = file?.environments?.[environmentName];
 
-  const [ee, eeError] = makeEnvEnv(environment, envenv);
+  const [ee, eeError] =
+    environment !== undefined
+      ? makeEnvEnv(environment, envenv)
+      : [
+          [{ id: "empty", env: {}, assignments: [] }, {}] as [PlaybookEnv, SimpleEnvironment],
+          undefined,
+        ];
 
   if (eeError !== undefined) {
     console.log("error eeerrorr", eeError, envenv);
@@ -42,7 +48,10 @@ export async function* executeAllPlaybooks(
       requests,
       [ee[0], ...env, ...result]
     );
-    result.push(...playbookResult);
+
+    if (playbookResult !== undefined) {
+      result.push(...playbookResult);
+    }
   }
 
   return result;
@@ -85,16 +94,12 @@ async function* executePlaybook(
 
     //const operation = file.operations[step.operationId];
 
-    const security: playbook.Credentials = yield* executeAuth(
-      client,
-      oas,
-      server,
-      file,
-      request.auth,
-      [...env, ...result]
-    );
-
-    console.log("got security values", security, env);
+    // skip auth for external requests
+    const auth = request.operationId === undefined ? undefined : request.auth;
+    const security: playbook.Credentials = yield* executeAuth(client, oas, server, file, auth, [
+      ...env,
+      ...result,
+    ]);
 
     const replacedStageEnv = replaceEnvVariables(step.environment || {}, [...env, ...result]);
 
@@ -104,8 +109,6 @@ async function* executePlaybook(
       // FIXME can we make replaceEnvVariables return assignments?
       assignments: [],
     };
-
-    console.log("me stage env", stageEnv);
 
     const requestEnvStack: PlaybookEnvStack = [...env, ...result, stageEnv];
 
@@ -132,13 +135,16 @@ async function* executePlaybook(
 
     // TODO fail in case if failed to replace variables
 
-    const [httpRequest, requestError] = await makeHttpRequest(
-      oas,
-      server,
-      request.request.operationId,
-      replacements.value.request,
-      security
-    );
+    const [httpRequest, requestError] =
+      replacements.value.operationId === undefined
+        ? await makeExternalHttpRequest(replacements.value.request)
+        : await makeHttpRequest(
+            oas,
+            server,
+            request.operationId,
+            replacements.value.request,
+            security
+          );
 
     if (requestError !== undefined) {
       yield { event: "http-request-prepare-error", error: requestError };
@@ -148,12 +154,10 @@ async function* executePlaybook(
     yield {
       event: "http-request-prepared",
       request: httpRequest,
-      operationId: request.request.operationId,
+      operationId: request.operationId,
     };
 
     const [response, error2] = await client(httpRequest);
-
-    console.log("me got response", response);
 
     if (error2 !== undefined) {
       yield { event: "http-error-received", error: error2 };
@@ -234,8 +238,6 @@ async function* executeGetCredentialValue(
   const method = credential.methods[credential.default];
 
   let result: PlaybookEnvStack = [];
-
-  console.log("auth requests", method.requests);
 
   if (method.requests !== undefined) {
     result = yield* executePlaybook("auth", client, oas, server, file, method.requests, env);

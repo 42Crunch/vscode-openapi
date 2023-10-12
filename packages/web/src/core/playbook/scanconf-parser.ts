@@ -43,7 +43,7 @@ export function parseInternal(
     customizations: value(file.customizations),
     environments: parseMap(oas, file, file.environments || {}, parseEnvironmentFile),
     authorizationTests: value(file.authorizationTests),
-    requests: parseMap(oas, file, file.requests || {}, parseRequestStageContent),
+    requests: parseMap(oas, file, file.requests || {}, parseRequestFile),
   });
 }
 
@@ -87,7 +87,6 @@ function parseOperation(
   file: scan.ConfigurationFileBundle,
   operation: scan.Operation
 ): Result<playbook.Operation, InternalParsingErrors> {
-  // FIXME there is operationId and scanOperation.operationId, we need to check both
   return result<playbook.Operation>({
     request: parseRequestStageContent(oas, file, operation.request, operation.operationId),
     operationId: value(operation.operationId),
@@ -145,8 +144,34 @@ function parseRequestStageContent(
     credentialSetIndex: value(0),
     defaultResponse: value(content.defaultResponse),
     request: parseRequestRequest(oas, file, content.request, operationId),
-    operationId: value(undefined),
+    operationId: value(operationId),
   });
+}
+
+function parseRequestExternalStageContent(
+  oas: BundledSwaggerOrOasSpec,
+  file: scan.ConfigurationFileBundle,
+  content: scan.RequestStageContent
+): Result<playbook.ExternalStageContent, InternalParsingErrors> {
+  return result<playbook.ExternalStageContent>({
+    operationId: [undefined, undefined],
+    responses: parseMap(oas, file, content.responses || {}, parseResponse),
+    environment: parseCtxVariables(oas, file, content.environment || {}),
+    defaultResponse: value(content.defaultResponse),
+    request: parseExternalRequestRequest(oas, file, content.request),
+  });
+}
+
+function parseRequestFile(
+  oas: BundledSwaggerOrOasSpec,
+  file: scan.ConfigurationFileBundle,
+  content: scan.RequestFile
+): Result<playbook.StageContent | playbook.ExternalStageContent, InternalParsingErrors> {
+  if (content.external === true) {
+    return parseRequestExternalStageContent(oas, file, content);
+  } else {
+    return parseRequestStageContent(oas, file, content, content.operationId);
+  }
 }
 
 function parseRequestRequest(
@@ -155,8 +180,20 @@ function parseRequestRequest(
   request: scan.CRequest | scan.HttpRequest,
   operationId?: string
 ): Result<playbook.CRequest, InternalParsingErrors> {
+  // FIXME check that operationId is the same as request.operationId
   if (request.type === "42c") {
     return parseCRequest(oas, file, request, operationId);
+  }
+  return makeErrorResult(`unknown request type: ${request.type}`);
+}
+
+function parseExternalRequestRequest(
+  oas: BundledSwaggerOrOasSpec,
+  file: scan.ConfigurationFileBundle,
+  request: scan.CRequest | scan.HttpRequest
+): Result<playbook.ExternalCRequest, InternalParsingErrors> {
+  if (request.type === "42c") {
+    return parseExternalCRequest(oas, file, request);
   }
   return makeErrorResult(`unknown request type: ${request.type}`);
 }
@@ -188,6 +225,19 @@ function parseCRequest(
     operationId: value(effectiveOperationId),
     path: value(operation.path),
     method: value(operation.method),
+    parameters: parseParameters(oas, file, request?.details || {}),
+    body: parseRequestBody(oas, file, request?.details?.requestBody),
+  });
+}
+
+function parseExternalCRequest(
+  oas: BundledSwaggerOrOasSpec,
+  file: scan.ConfigurationFileBundle,
+  request: scan.CRequest
+): Result<playbook.ExternalCRequest, InternalParsingErrors> {
+  return result<playbook.ExternalCRequest>({
+    url: value(request.details.url),
+    method: value(request.details.method),
     parameters: parseParameters(oas, file, request?.details || {}),
     body: parseRequestBody(oas, file, request?.details?.requestBody),
   });

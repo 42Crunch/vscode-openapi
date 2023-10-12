@@ -18,7 +18,14 @@ export default function Operations() {
   } = useAppSelector((state) => state.scanconf);
 
   const operationItems = Object.keys(operations).map((id) => ({ id, label: id }));
-  const requestItems = Object.keys(requests || {}).map((id) => ({ id, label: id }));
+
+  const requestItems = Object.entries(requests || {})
+    .filter(([id, request]) => request.operationId !== undefined)
+    .map(([id, request]) => ({ id, label: id }));
+
+  const externalRequestItems = Object.entries(requests || {})
+    .filter(([id, request]) => request.operationId === undefined)
+    .map(([id, request]) => ({ id, label: id }));
 
   useEffect(() => {
     if (requestRef === undefined && operationItems.length > 0) {
@@ -36,6 +43,11 @@ export default function Operations() {
       id: "request",
       title: "Requests",
       items: requestItems,
+    },
+    {
+      id: "external",
+      title: "External Requests",
+      items: externalRequestItems,
     },
   ];
 

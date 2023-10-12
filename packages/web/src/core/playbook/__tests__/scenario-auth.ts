@@ -12,6 +12,7 @@ const credential1: scan.Credential = {
 };
 
 const register: scan.Operation = {
+  operationId: "register",
   scenarios: [],
   request: {
     request: {
@@ -61,6 +62,7 @@ const register: scan.Operation = {
 };
 
 const userinfo: scan.Operation = {
+  operationId: "userinfo",
   scenarios: [
     {
       key: "happy.path",

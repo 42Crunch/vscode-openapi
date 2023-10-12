@@ -78,6 +78,24 @@ async function makeHttpRequestForSwagger(
   return result;
 }
 
+export async function makeExternalHttpRequest(
+  request: playbook.ExternalCRequest
+): Promise<Result<HttpRequest, string>> {
+  try {
+    return [
+      {
+        method: request.method,
+        url: request.url,
+        headers: {},
+        body: request.body !== undefined ? convertBody(request.body.value) : undefined,
+      },
+      undefined,
+    ];
+  } catch (ex) {
+    return [undefined, `failed to build http request: ${ex}`];
+  }
+}
+
 export function makeHttpConfig(config: Config, request: HttpRequest): HttpConfig {
   const [https, hostname] = parseHttpsHostname(request.url);
   const rejectUnauthorized = https && !config.insecureSslHostnames.includes(hostname);

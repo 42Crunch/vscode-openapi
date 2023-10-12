@@ -91,11 +91,11 @@ export const slice = createSlice({
         payload: { ref, stage },
       }: PayloadAction<{
         ref: playbook.RequestRef;
-        stage: playbook.StageContent;
+        stage: playbook.StageContent | playbook.ExternalStageContent;
       }>
     ) => {
       if (ref.type === "operation") {
-        state.playbook.operations[ref.id].request = stage;
+        state.playbook.operations[ref.id].request = stage as playbook.StageContent;
       } else if (state.playbook.requests) {
         state.playbook.requests[ref.id] = stage;
       }

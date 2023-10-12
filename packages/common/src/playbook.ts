@@ -17,8 +17,15 @@ export interface OperationBody {
 }
 
 export type CRequest = {
-  operationId?: string;
+  operationId: string;
   path: string;
+  method: HttpMethod;
+  parameters: ParameterValues;
+  body?: OperationBody;
+};
+
+export type ExternalCRequest = {
+  url: string;
   method: HttpMethod;
   parameters: ParameterValues;
   body?: OperationBody;
@@ -79,7 +86,7 @@ export type PlaybookBundle = {
   before: Stage[];
   after: Stage[];
   authorizationTests?: unknown;
-  requests?: Record<string, StageContent>;
+  requests?: Record<string, StageContent | ExternalStageContent>;
 };
 
 export type RuntimeConfiguration = {
@@ -168,11 +175,19 @@ export type StageContent = {
   defaultResponse: string;
   injectionKey?: string;
   request: CRequest;
-  operationId?: string;
+  operationId: string;
   // OAS operation can require authentication using one or more
   // sets of credential (simpliest being single set containing single credential)
   // securityCredentialSetIndex signifies wich set of credentials is being used
   credentialSetIndex: number;
+};
+
+export type ExternalStageContent = {
+  operationId: undefined;
+  environment?: Environment;
+  responses?: Responses;
+  defaultResponse: string;
+  request: ExternalCRequest;
 };
 
 export type Stage = StageReference | StageContent;

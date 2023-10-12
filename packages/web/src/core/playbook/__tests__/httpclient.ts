@@ -1,4 +1,14 @@
-import { HttpRequest, HttpResponse, HttpConfig } from "@xliic/common/http";
+import { HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
+import { Result } from "@xliic/common/result";
+
+export async function httpClient(request: HttpRequest): Promise<Result<HttpResponse, HttpError>> {
+  try {
+    const received = await executeHttpRequest(request);
+    return [received, undefined];
+  } catch (ex) {
+    return [undefined, ex as HttpError];
+  }
+}
 
 export async function executeHttpRequest(request: HttpRequest): Promise<HttpResponse> {
   const { url, method, headers, body } = request;

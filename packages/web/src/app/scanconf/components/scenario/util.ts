@@ -194,6 +194,38 @@ export function wrapPlaybookRequest(stage: playbook.StageContent): Record<string
   };
 }
 
+export function wrapExternalPlaybookRequest(
+  stage: playbook.ExternalStageContent
+): Record<string, any> {
+  stage = simpleClone(stage);
+
+  const parameters: Record<playbook.ParameterLocation, any> = {
+    query: {},
+    header: {},
+    path: {},
+    cookie: {},
+  };
+
+  const locations = Object.keys(stage.request.parameters) as OasParameterLocation[];
+  for (const location of locations) {
+    for (const name of Object.keys(stage.request.parameters[location] ?? {})) {
+      const escapedName = escapeFieldName(name);
+      const value = stage.request.parameters[location]![name];
+      parameters[location][escapedName] = Array.isArray(value) ? wrapArray(value) : value;
+    }
+  }
+
+  return {
+    url: stage.request.url,
+    method: stage.request.method,
+    parameters,
+    body: stage.request.body,
+    environment: wrapEnvironment(stage.environment),
+    defaultResponse: stage.defaultResponse,
+    responses: wrapResponses(stage.responses),
+  };
+}
+
 function wrapEnvironment(environment: playbook.Environment | undefined) {
   const wrapped = Object.entries(environment || {}).map(([key, value]) => ({
     key,
@@ -262,6 +294,22 @@ export function unwrapPlaybookRequest(request: FieldValues): playbook.StageConte
     credentialSetIndex: request.credentialSetIndex,
     auth: request.auth,
     operationId: request.operationId,
+  };
+}
+
+export function unwrapExternalPlaybookRequest(request: FieldValues): playbook.ExternalStageContent {
+  request = simpleClone(request);
+  return {
+    request: {
+      url: request.url,
+      method: request.method,
+      parameters: unwrapFormParameters(request.parameters),
+      body: request.body,
+    },
+    environment: unwrapEnvironment(request.environment),
+    defaultResponse: request.defaultResponse,
+    responses: unwrapResponses(request.responses),
+    operationId: undefined,
   };
 }
 
