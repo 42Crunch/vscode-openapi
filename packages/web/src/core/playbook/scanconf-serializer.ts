@@ -204,7 +204,7 @@ function serializeStageContent(
   stage: playbook.StageContent,
   operationId: string | undefined
 ): Result<scan.RequestStageContent, string> {
-  const [request, requestError] = serializeCRequest(oas, file, stage.request);
+  const [request, requestError] = serializeCRequest(oas, file, stage.request, operationId);
   if (requestError !== undefined) {
     return [undefined, `failed to serialize request: ${requestError}`];
   }
@@ -382,10 +382,11 @@ function serializeEnvironment(environment?: playbook.Environment): scan.CtxVaria
 function serializeCRequest(
   oas: BundledSwaggerOrOasSpec,
   file: playbook.PlaybookBundle,
-  request: playbook.CRequest
+  request: playbook.CRequest,
+  operationId: string
 ): Result<scan.CRequest, string> {
   const details: scan.CRequest["details"] = {
-    //operationId: operation.operationId,
+    operationId,
     method: request.method.toUpperCase() as scan.CRequest["details"]["method"],
     url: `{{host}}${request.path}`,
     headers: serializeRequestParameters(oas, file, request.parameters.header) as any,

@@ -5,18 +5,12 @@ import { serialize } from "../scanconf-serializer";
 
 import oas from "./pixi/pixi.json";
 import scanconf from "./pixi/scanconf.json";
+import { parseScenario } from "./util";
 
 test("parse and serialize", async () => {
-  const [parsed, parseError] = parse(oas as any, scanconf as any);
+  const file = parseScenario(oas, scanconf as any);
 
-  //console.log("operations", JSON.stringify(parsed?.operations["register"], null, 2));
-
-  if (parseError !== undefined) {
-    assert.fail("Error parsing config");
-    return;
-  }
-
-  const [serialized, serializeError] = serialize(oas as any, parsed);
+  const [serialized, serializeError] = serialize(oas as any, file);
 
   if (serializeError !== undefined) {
     assert.fail("Error serializing config");

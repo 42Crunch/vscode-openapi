@@ -236,6 +236,7 @@
         "request": {
           "type": "42c",
           "details": {
+            "operationId": "adminallusers",
             "url": "{{host}}/admin/all_users",
             "method": "GET"
           }
@@ -279,6 +280,7 @@
         "request": {
           "type": "42c",
           "details": {
+            "operationId": "authenticate",
             "url": "{{host}}/user/login",
             "method": "POST",
             "headers": [
@@ -365,6 +367,7 @@
         "request": {
           "type": "42c",
           "details": {
+            "operationId": "deletePicture",
             "url": "{{host}}/picture/{id}",
             "method": "DELETE",
             "paths": [
@@ -415,6 +418,7 @@
         "request": {
           "type": "42c",
           "details": {
+            "operationId": "deleteUser",
             "url": "{{host}}/admin/user/{userid}",
             "method": "DELETE",
             "paths": [
@@ -475,6 +479,7 @@
         "request": {
           "type": "42c",
           "details": {
+            "operationId": "edituserinfo",
             "url": "{{host}}/user/edit_info",
             "method": "PUT",
             "headers": [
@@ -532,6 +537,7 @@
         "request": {
           "type": "42c",
           "details": {
+            "operationId": "listUserPictures",
             "url": "{{host}}/user/pictures",
             "method": "GET"
           }
@@ -581,6 +587,7 @@
         "request": {
           "type": "42c",
           "details": {
+            "operationId": "register",
             "url": "{{host}}/user/register",
             "method": "POST",
             "headers": [
@@ -670,6 +677,7 @@
         "request": {
           "type": "42c",
           "details": {
+            "operationId": "uploadPicture",
             "url": "{{host}}/picture/upload",
             "method": "POST",
             "headers": [
@@ -727,6 +735,7 @@
         "request": {
           "type": "42c",
           "details": {
+            "operationId": "userSearch",
             "url": "{{host}}/admin/users/search",
             "method": "GET",
             "queries": [
@@ -777,6 +786,7 @@
         "request": {
           "type": "42c",
           "details": {
+            "operationId": "userinfo",
             "url": "{{host}}/user/info",
             "method": "GET"
           }
