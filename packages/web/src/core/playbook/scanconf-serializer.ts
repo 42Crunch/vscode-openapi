@@ -202,7 +202,7 @@ function serializeStageContent(
   oas: BundledSwaggerOrOasSpec,
   file: playbook.PlaybookBundle,
   stage: playbook.StageContent,
-  operationId: string | undefined
+  operationId: string
 ): Result<scan.RequestStageContent, string> {
   const [request, requestError] = serializeCRequest(oas, file, stage.request, operationId);
   if (requestError !== undefined) {
@@ -312,7 +312,7 @@ function serializeRequestsStage(
         oas,
         file,
         request,
-        undefined
+        request.operationId
       );
       if (stageContentError !== undefined) {
         return [undefined, `unable to serialize stage: ${stageContentError}`];
