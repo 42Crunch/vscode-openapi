@@ -1,11 +1,14 @@
 import * as playbook from "@xliic/common/playbook";
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { HttpMethods } from "@xliic/common/http";
 import styled from "styled-components";
 import Form from "../../../../new-components/Form";
 import { TabContainer } from "../../../../new-components/Tabs";
 import JsonEditor from "../../../../new-components/fields/JsonEditor";
 import CollapsibleCard, { BottomDescription, TopDescription } from "../CollapsibleCard";
 import { unwrapExternalPlaybookRequest, wrapExternalPlaybookRequest } from "./util";
+import LineEditor from "../../../../new-components/fields/LineEditor";
+import Select from "../../../../new-components/fields/Select";
 
 export default function RequestCardExternal({
   requestRef,
@@ -24,10 +27,6 @@ export default function RequestCardExternal({
     <Container>
       <CollapsibleCard defaultCollapsed={defaultCollapsed}>
         <TopDescription>{requestRef.id}</TopDescription>
-        <BottomDescription>
-          <Method>{stage.request.method}</Method>
-          <Path>{stage.request.url}</Path>
-        </BottomDescription>
         <Request stage={stage} saveRequest={saveRequest} variables={variables} />
       </CollapsibleCard>
     </Container>
@@ -43,6 +42,8 @@ export function Request({
   saveRequest: (request: playbook.ExternalStageContent) => void;
   variables: string[];
 }) {
+  const methods = HttpMethods.map((method) => ({ value: method, label: method.toUpperCase() }));
+
   return (
     <Form
       data={stage}
@@ -50,32 +51,44 @@ export function Request({
       wrapFormData={wrapExternalPlaybookRequest}
       unwrapFormData={unwrapExternalPlaybookRequest}
     >
-      <TabContainer
-        tabs={[
-          {
-            id: "body",
-            title: "Body",
-            content: <JsonEditor variables={variables} name={"body.value"} />,
-          },
-        ]}
-      />
+      <Container>
+        <Top>
+          <Select options={methods} name="method" />
+          <Url variables={variables} name="url" />
+        </Top>
+        <TabContainer
+          tabs={[
+            {
+              id: "body",
+              title: "Body",
+              content: <JsonEditor variables={variables} name={"body.value"} />,
+            },
+          ]}
+        />
+      </Container>
     </Form>
   );
 }
 
 const Container = styled.div``;
 
-const Method = styled.div`
-  background-color: var(${ThemeColorVariables.badgeBackground});
-  color: var(${ThemeColorVariables.badgeForeground});
-  border-radius: 4px;
+const Top = styled.div`
   display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 48px;
-  height: 16px;
-  text-transform: uppercase;
-  font-size: 11px;
+  gap: 4px;
+  margin: 4px;
+  > select {
+    padding-left: 4px;
+    padding-right: 4px;
+    border: none;
+    background-color: var(${ThemeColorVariables.badgeBackground});
+    border-radius: 4px;
+    color: var(${ThemeColorVariables.badgeForeground});
+    width: 100px;
+  }
 `;
 
-const Path = styled.div``;
+const Url = styled(LineEditor)`
+  flex: 1;
+  background-color: var(${ThemeColorVariables.background});
+  border: 1px solid var(${ThemeColorVariables.border});
+`;

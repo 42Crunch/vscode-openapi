@@ -19,6 +19,7 @@ import { RequestRef } from "@xliic/common/playbook";
 import { makeEnvEnv } from "../../../core/playbook/execute";
 import { createDynamicVariables } from "../../../core/playbook/builtin-variables";
 import RequestCardExternal from "../components/scenario/RequestCardExternal";
+import { FileExport } from "../../../icons";
 
 export default function RequestExternal({
   request,
@@ -83,12 +84,18 @@ export default function RequestExternal({
 
   return (
     <Container>
-      <Servers
-        servers={servers}
-        selected={server}
-        onStart={(server: string) => onRun(server, inputEnv)}
-        onChange={setServer}
-      />
+      <Try>
+        <Action
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            onRun(server, inputEnv);
+          }}
+        >
+          <FileExport />
+          Try
+        </Action>
+      </Try>
       <CollapsibleSection
         isOpen={isRequestOpen}
         onClick={() => setRequestOpen(!isRequestOpen)}
@@ -126,6 +133,25 @@ export default function RequestExternal({
 
 const Container = styled.div`
   padding: 8px;
+`;
+
+const Try = styled.div`
+  border: 1px solid var(${ThemeColorVariables.border});
+  display: flex;
+  justify-content: flex-end;
+`;
+
+const Action = styled.div`
+  display: flex;
+  padding: 8px 12px;
+  gap: 4px;
+  cursor: pointer;
+  align-items: center;
+  cusror: pointer;
+  color: var(${ThemeColorVariables.linkForeground});
+  > svg {
+    fill: var(${ThemeColorVariables.linkForeground});
+  }
 `;
 
 function wrapEnvironment(env: SimpleEnvironment) {

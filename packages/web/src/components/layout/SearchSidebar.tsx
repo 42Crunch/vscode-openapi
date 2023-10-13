@@ -10,6 +10,7 @@ export type Section = {
   id: string;
   title: string;
   items: ListItem[];
+  menu?: React.ReactNode;
 };
 
 export type ItemId = {
@@ -65,7 +66,12 @@ export function SearchSidebarControlled({
         <Sections>
           {sections.map((section: Section) => (
             <React.Fragment key={section.title}>
-              {!noSectionTitles && <Subheader>{section.title}</Subheader>}
+              {!noSectionTitles && (
+                <Subheader>
+                  <span>{section.title}</span>
+                  {section.menu && <Menu>{section.menu}</Menu>}
+                </Subheader>
+              )}
               <List
                 selected={selected?.sectionId == section.id ? selected.itemId : undefined}
                 setSelected={(selected) =>
@@ -127,6 +133,13 @@ const Subheader = styled.div`
   overflow: hidden;
   text-overflow: ellipsis;
   color: var(${ThemeColorVariables.disabledForeground});
+`;
+
+const Menu = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 `;
 
 const Search = styled.div`
