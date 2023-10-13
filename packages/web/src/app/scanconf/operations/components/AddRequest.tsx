@@ -8,9 +8,11 @@ import { RequestRef } from "@xliic/common/playbook";
 
 export default function AddRequest({
   operationIds,
+  requestIds,
   onSelect,
 }: {
   operationIds: string[];
+  requestIds: string[];
   onSelect: (ref: RequestRef) => void;
 }) {
   const [showCombo, setShowCombo] = useState(false);
@@ -23,6 +25,7 @@ export default function AddRequest({
         }
         setShowCombo(false);
       }}
+      requestIds={requestIds}
       operationIds={operationIds}
     />
   ) : (

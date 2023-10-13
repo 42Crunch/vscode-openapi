@@ -4,17 +4,14 @@ import { HttpResponse } from "@xliic/common/http";
 export default function Body({ response }: { response: HttpResponse }) {
   const body = formatBody(response);
 
-  return (
-    <>
-      <Container>{body}</Container>
-    </>
-  );
+  return <Container>{body}</Container>;
 }
 
 const Container = styled.div`
   white-space: pre-wrap;
   word-break: break-all;
   font-family: monospace;
+  padding: 8px;
 `;
 
 function isJsonResponse(response: HttpResponse): boolean {
@@ -26,14 +23,18 @@ function isJsonResponse(response: HttpResponse): boolean {
   return false;
 }
 
-function formatBody(response: HttpResponse): string | undefined {
-  if (!isJsonResponse(response) || response.body === undefined) {
-    return response.body;
+function formatBody(response: HttpResponse): string {
+  if (response.body === undefined || response.body === "") {
+    return "";
   }
 
-  try {
-    return JSON.stringify(JSON.parse(response.body), null, 2);
-  } catch (e) {
+  if (isJsonResponse(response)) {
+    try {
+      return JSON.stringify(JSON.parse(response.body), null, 2);
+    } catch (e) {
+      return response.body;
+    }
+  } else {
     return response.body;
   }
 }

@@ -44,6 +44,7 @@ export default function Global() {
   const [isBeforeOpen, setBeforeOpen] = useState(true);
   const [isAfterOpen, setAfterOpen] = useState(true);
   const operationIds = Object.keys(playbook.operations);
+  const requestIds = Object.keys(playbook.requests || {});
 
   return (
     <Container>
@@ -67,6 +68,7 @@ export default function Global() {
           />
           <AddRequest
             operationIds={operationIds}
+            requestIds={requestIds}
             onSelect={(selected) => addStage({ container: "globalBefore" }, selected)}
           />
         </Content>
@@ -93,6 +95,7 @@ export default function Global() {
           />
           <AddRequest
             operationIds={operationIds}
+            requestIds={requestIds}
             onSelect={(selected) => addStage({ container: "globalAfter" }, selected)}
           />
         </Content>

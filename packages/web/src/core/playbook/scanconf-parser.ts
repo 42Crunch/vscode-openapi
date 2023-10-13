@@ -224,7 +224,7 @@ function parseCRequest(
   return result<playbook.CRequest>({
     operationId: value(effectiveOperationId),
     path: value(operation.path),
-    method: value(operation.method),
+    method: value(operation.method.toLowerCase()),
     parameters: parseParameters(oas, file, request?.details || {}),
     body: parseRequestBody(oas, file, request?.details?.requestBody),
   });
@@ -237,7 +237,7 @@ function parseExternalCRequest(
 ): Result<playbook.ExternalCRequest, InternalParsingErrors> {
   return result<playbook.ExternalCRequest>({
     url: value(request.details.url),
-    method: value(request.details.method),
+    method: value(request.details.method.toLowerCase()),
     parameters: parseParameters(oas, file, request?.details || {}),
     body: parseRequestBody(oas, file, request?.details?.requestBody),
   });

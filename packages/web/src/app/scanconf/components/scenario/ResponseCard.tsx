@@ -9,6 +9,7 @@ import Body from "../response/Body";
 import Headers from "../response/Headers";
 import VariableAssignments from "./VariableAssignments";
 import { OperationResult } from "./types";
+import { ErrorBanner } from "../Banner";
 
 export default function ResponseCard({
   response,
@@ -22,6 +23,12 @@ export default function ResponseCard({
 
   const statusMessage =
     response.httpResponse === MockHttpResponse ? "MOCK" : response.httpResponse?.statusMessage;
+
+  if (response.httpError) {
+    return (
+      <ErrorBanner message="Failed to send HTTP Request">{response.httpError.message}</ErrorBanner>
+    );
+  }
 
   return (
     <Container>
@@ -54,6 +61,8 @@ export function ResponseTabs({ result }: { result: OperationResult }) {
           content: <Headers headers={(result.httpResponse as HttpResponse)?.headers} />,
           disabled: result.httpResponse === MockHttpResponse || result.httpResponse === undefined,
         },
+        /*
+
         {
           id: "variables-assigned",
           title: "Variables Assigned",
@@ -63,6 +72,7 @@ export function ResponseTabs({ result }: { result: OperationResult }) {
             result.variablesAssigned === undefined ||
             assignmentCount(result?.variablesAssigned) === 0,
         },
+        */
         // {
         //   id: "variables-used",
         //   title: "Variables",

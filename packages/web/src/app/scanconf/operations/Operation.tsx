@@ -54,6 +54,7 @@ export default function Operation({ operationId }: { operationId: string }) {
   const [isResultOpen, setResultOpen] = useState(true);
 
   const operationIds = Object.keys(playbook.operations);
+  const requestIds = Object.keys(playbook.requests || {});
 
   const setServer = (server: string) => dispatch(setTryitServer(server));
 
@@ -131,6 +132,7 @@ export default function Operation({ operationId }: { operationId: string }) {
           />
           <AddRequest
             operationIds={operationIds}
+            requestIds={requestIds}
             onSelect={(selected) =>
               addStage({ container: "operationBefore", operationId }, selected)
             }
@@ -169,6 +171,7 @@ export default function Operation({ operationId }: { operationId: string }) {
           />
           <AddRequest
             operationIds={operationIds}
+            requestIds={requestIds}
             onSelect={(selected) =>
               addStage({ container: "operationAfter", operationId }, selected)
             }

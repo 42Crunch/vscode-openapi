@@ -30,7 +30,7 @@ export default function RequestExternal({
 }) {
   const dispatch = useAppDispatch();
 
-  const { oas, playbook, servers } = useAppSelector((state) => state.scanconf);
+  const { oas, playbook } = useAppSelector((state) => state.scanconf);
 
   const result = useAppSelector((state) => state.requests.result);
 
@@ -39,8 +39,6 @@ export default function RequestExternal({
 
   const onSaveRequest = (stage: playbook.ExternalStageContent) =>
     dispatch(saveRequest({ ref: requestRef, stage }));
-
-  const credentials = playbook.authenticationDetails[0];
 
   const env: PlaybookEnvStack = [createDynamicVariables()];
 
@@ -72,8 +70,6 @@ export default function RequestExternal({
   const [inputEnv, setInputEnv] = useState(inputs);
 
   const response = result.scenario?.results?.[0];
-
-  const setServer = (server: string) => dispatch(setTryitServer(server));
 
   const prefs = useAppSelector((state) => state.prefs);
 
@@ -120,13 +116,15 @@ export default function RequestExternal({
           </Form>
         </Inputs>
       </CollapsibleSection>
-      <CollapsibleSection
-        isOpen={isResponseOpen}
-        onClick={() => setResponseOpen(!isResponseOpen)}
-        title="Result"
-      >
-        {response && <ResponseCard defaultCollapsed={false} response={response} />}
-      </CollapsibleSection>
+      {response && (
+        <CollapsibleSection
+          isOpen={isResponseOpen}
+          onClick={() => setResponseOpen(!isResponseOpen)}
+          title="Result"
+        >
+          <ResponseCard defaultCollapsed={false} response={response} />
+        </CollapsibleSection>
+      )}
     </Container>
   );
 }

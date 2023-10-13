@@ -15,6 +15,7 @@ export default function Scenarios({ operationId }: { operationId: string }) {
   const { scenarioId, mockResult: result } = useAppSelector((state) => state.operations);
   const scenarios = playbook.operations[operationId].scenarios;
   const operationIds = Object.keys(playbook.operations);
+  const requestIds = Object.keys(playbook.requests || {});
 
   const dispatch = useAppDispatch();
 
@@ -66,6 +67,7 @@ export default function Scenarios({ operationId }: { operationId: string }) {
           />
           <AddRequest
             operationIds={operationIds}
+            requestIds={requestIds}
             onSelect={(selected) =>
               addStage({ container: "operationScenarios", operationId, scenarioIndex }, selected)
             }

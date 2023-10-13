@@ -185,16 +185,8 @@ export function onExecuteRequest(
         const receive = makeReceive(listenerApi.take);
         const httpClient = makeHttpClient(send, receive);
 
-        const random = Math.floor(Math.random() * 10000000);
-
         const env: PlaybookEnvStack = [
-          {
-            id: "functions",
-            env: {
-              $random: `${random}`,
-            },
-            assignments: [],
-          },
+          createDynamicVariables(),
           {
             id: "inputs",
             env: inputs,
@@ -217,7 +209,7 @@ export function onExecuteRequest(
               "scenario",
               [
                 {
-                  ref: { id: ref!.id, type: "operation" },
+                  ref: ref!,
                   credentialSetIndex: 0,
                 },
               ],

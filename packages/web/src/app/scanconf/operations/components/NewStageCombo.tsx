@@ -6,36 +6,54 @@ import { RequestRef } from "@xliic/common/playbook";
 
 export default function NewStageCombo({
   operationIds,
+  requestIds,
   onSelect,
 }: {
   operationIds: string[];
+  requestIds: string[];
   onSelect: (ref?: RequestRef) => void;
 }) {
   const value: string = "";
   const placeholder = "";
 
-  const [filter, setFilter] = useState(undefined as string | undefined);
-  const [filteredNames, setFilteredNames] = useState(operationIds);
+  const items: RequestRef[] = [];
 
-  useEffect(() => {
-    if (filter === undefined) {
-      setFilteredNames(operationIds);
-    } else {
-      setFilteredNames(
-        operationIds.filter((item) => item.toLowerCase().includes(filter.toLowerCase()))
-      );
-    }
-  }, [filter, operationIds]);
+  items.push(
+    ...operationIds.map(
+      (id): RequestRef => ({
+        type: "operation",
+        id,
+      })
+    )
+  );
+
+  items.push(
+    ...requestIds.map(
+      (id): RequestRef => ({
+        type: "request",
+        id,
+      })
+    )
+  );
+
+  const [filteredItems, setFilteredItems] = useState(items);
 
   const { isOpen, getMenuProps, getInputProps, getItemProps } = useCombobox({
     initialInputValue: value,
-    items: filteredNames,
-    onInputValueChange: ({ inputValue }) => {
-      setFilter(inputValue);
-      if (inputValue && operationIds.includes(inputValue)) {
-        onSelect({ type: "operation", id: inputValue });
+    items: filteredItems,
+    onSelectedItemChange: ({ selectedItem }) => {
+      if (selectedItem) {
+        onSelect(selectedItem);
       }
     },
+    onInputValueChange: ({ inputValue }) => {
+      setFilteredItems(
+        items.filter((item) => {
+          return !inputValue || item.id.toLowerCase().includes(inputValue);
+        })
+      );
+    },
+    itemToString: (item) => (item ? item.id : ""),
   });
 
   return (
@@ -50,29 +68,38 @@ export default function NewStageCombo({
       />
       <Dropdown>
         <DropdownList {...getMenuProps()} isOpen={isOpen}>
-          {isOpen &&
-            filteredNames.map((item, index) => (
-              <li
-                key={`${item}${index}`}
-                {...getItemProps({
-                  item,
-                  index,
-                })}
-              >
-                {item}
-              </li>
-            ))}
-          {/* {isOpen && (
-            <Manage
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                //dispatch(showAuthWindow());
-              }}
-            >
-              Manage authentication <ArrowUpRightFromSquare />
-            </Manage>
-          )} */}
+          {isOpen && (
+            <>
+              <Section>Operations</Section>
+              {filteredItems.map((item, index) => {
+                return item.type === "operation" ? (
+                  <li
+                    key={`li-${item.type}-${item.id}-${index}`}
+                    {...getItemProps({
+                      item,
+                      index,
+                    })}
+                  >
+                    {item.id}
+                  </li>
+                ) : null;
+              })}
+              <Section>Requests</Section>
+              {filteredItems.map((item, index) => {
+                return item.type === "request" ? (
+                  <li
+                    key={`li-${item.type}-${item.id}-${index}`}
+                    {...getItemProps({
+                      item,
+                      index,
+                    })}
+                  >
+                    {item.id}
+                  </li>
+                ) : null;
+              })}
+            </>
+          )}
         </DropdownList>
       </Dropdown>
     </Container>
@@ -115,20 +142,14 @@ const DropdownList = styled.ul`
   width: 100%;
   & > li {
     padding: 4px;
+    padding-left: 16px;
   }
   & > li:hover {
     background-color: var(${ThemeColorVariables.listHoverBackground});
   }
 `;
 
-const Manage = styled.li`
-  color: var(${ThemeColorVariables.linkForeground});
-  &:hover {
-    color: var(${ThemeColorVariables.linkActiveForeground});
-  }
-  cursor: pointer;
-  & > svg {
-    width: 10px;
-    height: 10px;
-  }
+const Section = styled.div`
+  font-weight: 600;
+  margin: 4px;
 `;
