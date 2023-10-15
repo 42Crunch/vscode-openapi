@@ -21,10 +21,6 @@ export function TabContainer({
 export function UncontrolledTabContainer({ tabs }: { tabs: Tab[] }) {
   const activeId = tabs.filter((tab) => !tab.disabled)?.[0]?.id;
 
-  if (activeId === undefined) {
-    return null;
-  }
-
   const [activeTab, setActiveTab] = useState(activeId);
 
   useEffect(() => {
@@ -34,6 +30,10 @@ export function UncontrolledTabContainer({ tabs }: { tabs: Tab[] }) {
       setActiveTab(tabs.filter((tab) => !tab.disabled)?.[0]?.id);
     }
   }, [tabs]);
+
+  if (activeId === undefined) {
+    return null;
+  }
 
   return <ControlledTabContainer tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />;
 }

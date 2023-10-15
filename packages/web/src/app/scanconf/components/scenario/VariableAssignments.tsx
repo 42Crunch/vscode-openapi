@@ -17,7 +17,7 @@ function renderEnv(env: PlaybookEnv) {
 
   return (
     <div key={env.id} style={{ display: "contents" }}>
-      <div style={{ gridColumn: "span 3" }}>{env.id}</div>
+      {/* <div style={{ gridColumn: "span 3" }}>{env.id}</div> */}
       {renderAssignment(env.assignments)}
     </div>
   );
@@ -32,7 +32,7 @@ function renderAssignment(assignments: PlaybookVariableAssignment[]) {
         style={{
           lineBreak: "anywhere",
         }}
-      >{`${assignment.error === undefined ? assignment.error : assignment.value}`}</div>
+      >{`${assignment.error !== undefined ? assignment.error : assignment.value}`}</div>
     </div>
   ));
 }

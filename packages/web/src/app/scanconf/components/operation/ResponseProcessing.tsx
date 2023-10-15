@@ -1,5 +1,4 @@
 import * as Tabs from "@radix-ui/react-tabs";
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
 import { useEffect, useState } from "react";
 import { useFieldArray } from "react-hook-form";
 import styled from "styled-components";

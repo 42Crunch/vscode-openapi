@@ -174,7 +174,10 @@ async function* executePlaybook(
     );
 
     if (requestAssignmentsError !== undefined) {
-      yield { event: "http-error-received", error: requestAssignmentsError as any }; // FIXME use some general error
+      yield {
+        event: "http-error-received",
+        error: { code: "VARIABLES-ASSIGN", message: requestAssignmentsError, sslError: false },
+      }; // FIXME use some general error
       return;
     }
 

@@ -61,8 +61,6 @@ export function ResponseTabs({ result }: { result: OperationResult }) {
           content: <Headers headers={(result.httpResponse as HttpResponse)?.headers} />,
           disabled: result.httpResponse === MockHttpResponse || result.httpResponse === undefined,
         },
-        /*
-
         {
           id: "variables-assigned",
           title: "Variables Assigned",
@@ -72,7 +70,6 @@ export function ResponseTabs({ result }: { result: OperationResult }) {
             result.variablesAssigned === undefined ||
             assignmentCount(result?.variablesAssigned) === 0,
         },
-        */
         // {
         //   id: "variables-used",
         //   title: "Variables",

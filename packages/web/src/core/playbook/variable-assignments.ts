@@ -113,6 +113,7 @@ function extractValue(
     if (assignment.from === "request") {
       return extractByJsonPointer(httpRequest.body as string, assignment.path.value);
     } else {
+      console.log("ass body", httpResponse, assignment);
       return extractByJsonPointer(httpResponse.body as string, assignment.path.value);
     }
   } else if (assignment.in === "body" && assignment?.path?.type == "jsonPath") {
@@ -133,15 +134,23 @@ function extractValue(
 }
 
 function extractByJsonPointer(from: string, pointer: string): NullableResult<unknown, string> {
-  const parsed = JSON.parse(from);
-  const value = find(parsed, pointer);
-  return [value, undefined];
+  try {
+    const parsed = JSON.parse(from);
+    const value = find(parsed, pointer);
+    return [value, undefined];
+  } catch (e) {
+    return [undefined, `Failed to extract value using JSON Pointer "${pointer}": ${e}`];
+  }
 }
 
 function extractByJsonPath(from: string, path: string): NullableResult<unknown, string> {
-  const parsed = JSON.parse(from);
-  const result = JSONPath({ json: parsed, path });
-  return [result?.[0], undefined];
+  try {
+    const parsed = JSON.parse(from);
+    const result = JSONPath({ json: parsed, path });
+    return [result?.[0], undefined];
+  } catch (e) {
+    return [undefined, `Failed to extract value using JSON Path "${path}": ${e}`];
+  }
 }
 
 function extractFromRequestHeaders(
@@ -154,7 +163,7 @@ function extractFromRequestHeaders(
     }
   }
 
-  return [undefined, "not found"];
+  return [undefined, `Failed to find request header name: ${name}`];
 }
 
 function extractFromResponseHeaders(
@@ -167,7 +176,7 @@ function extractFromResponseHeaders(
     }
   }
 
-  return [undefined, "not found"];
+  return [undefined, `Failed to find response header name: ${name}`];
 }
 
 function httpStatusSort(a: string, b: string): number {
