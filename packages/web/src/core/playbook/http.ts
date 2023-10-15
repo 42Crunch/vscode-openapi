@@ -205,6 +205,8 @@ function makeOasSecurities(
       result[name] = securityValue;
     }
   }
+
+  console.log("made secuirty", result);
   return { authorized: result };
 }
 

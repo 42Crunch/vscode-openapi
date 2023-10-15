@@ -1,4 +1,4 @@
-import { Draft, PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { SimpleEnvironment } from "@xliic/common/env";
 import { getOperation, makeOperationId } from "@xliic/common/openapi";
 import { RequestRef } from "@xliic/common/playbook";
@@ -20,117 +20,178 @@ import {
   RequestStarted,
 } from "../../../core/playbook/playbook";
 import { showScanconfOperation } from "../actions";
+import { StageLocationName } from "@xliic/common/playbook";
 
 type PlaybookEventHandlers = {
   [K in PlaybookExecutorStep["event"]]: (
-    state: Draft<State>,
+    stateCurrent: Current,
+    stateResult: Result,
     event: Extract<PlaybookExecutorStep, { event: K }>
   ) => void;
 };
 
-function currentPlaybookResult(state: Draft<State>): PlaybookResult {
-  const current = state.current[state.current.length - 1];
-  if (current === "scenario" || current === "before" || current === "after") {
-    return state.result[current]!;
+function currentPlaybookResult(stateCurrent: Current, stateResult: Result): PlaybookResult {
+  const name = stateCurrent[stateCurrent.length - 1];
+  if (
+    name === "operationScenarios" ||
+    name === "globalBefore" ||
+    name === "globalAfter" ||
+    name === "operationBefore" ||
+    name === "operationAfter"
+  ) {
+    return stateResult[name]!;
   } else {
-    const previous = state.current[state.current.length - 2];
-    const preprevious: "scenario" | "before" | "after" = state.current[
-      state.current.length - 3
-    ] as any;
-    if (previous == "auth") {
-      const results = state.result[preprevious]?.results!;
+    // must be in auth, "auth" is known playbook name
+    if (name == "auth") {
+      const credential = stateCurrent[stateCurrent.length - 2];
+      const previousName: StageLocationName = stateCurrent[stateCurrent.length - 3] as any;
+      const results = stateResult[previousName]?.results!;
       const result = results[results.length - 1];
-      return result.auth[current];
+      if (result.auth[credential] === undefined) {
+        result.auth[credential] = { context: {}, results: [] };
+      }
+      return result.auth[credential];
     }
   }
   return null as any;
 }
 
-function currentOperationResult(state: Draft<State>): OperationResult {
-  const results = currentPlaybookResult(state);
+function currentOperationResult(stateCurrent: Current, stateResult: Result): OperationResult {
+  const results = currentPlaybookResult(stateCurrent, stateResult);
   return results.results[results.results.length - 1];
 }
 
 const PlaybookStepHandlers: PlaybookEventHandlers = {
-  "playbook-started": function (state: Draft<State>, event: PlaybookStarted): void {
+  "playbook-started": function (
+    stateCurrent: Current,
+    stateResult: Result,
+    event: PlaybookStarted
+  ): void {
     console.log("playbook started", event.name);
-    state.current.push(event.name);
+    stateCurrent.push(event.name);
     console.log("set current to ", event.name);
     // FIXME fix when running authentication scenario
     // smthn like currentResult(state).auth[state.inAuth] = { context: {}, results: [] };
   },
-  "request-started": function (state: Draft<State>, event: RequestStarted): void {
-    currentPlaybookResult(state).results.push({ auth: {}, variablesAssigned: [] });
+  "request-started": function (
+    stateCurrent: Current,
+    stateResult: Result,
+    event: RequestStarted
+  ): void {
+    currentPlaybookResult(stateCurrent, stateResult).results.push({
+      ref: event.ref,
+      auth: {},
+      variablesAssigned: [],
+    });
   },
-  "auth-started": function (state: Draft<State>, event: AuthStarted): void {
-    //state.inAuth = event.name;
+  "auth-started": function (stateCurrent: Current, stateResult: Result, event: AuthStarted): void {
+    stateCurrent.push(event.name);
   },
-  "auth-finished": function (state: Draft<State>, event: AuthFinished): void {
-    //state.inAuth = undefined;
+  "auth-finished": function (
+    stateCurrent: Current,
+    stateResult: Result,
+    event: AuthFinished
+  ): void {
+    stateCurrent.pop();
   },
-  "playbook-finished": function (state: Draft<State>, event: PlaybookFinished): void {
-    state.current.pop();
+  "playbook-finished": function (
+    stateCurrent: Current,
+    stateResult: Result,
+    event: PlaybookFinished
+  ): void {
+    stateCurrent.pop();
     console.log("finished playbook");
   },
-  "playbook-aborted": function (state: Draft<State>, event: PlaybookAborted): void {
-    state.current.pop();
+  "playbook-aborted": function (
+    stateCurrent: Current,
+    stateResult: Result,
+    event: PlaybookAborted
+  ): void {
+    stateCurrent.pop();
   },
   "payload-variables-substituted": function (
-    state: Draft<State>,
+    stateCurrent: Current,
+    stateResult: Result,
     event: PlaybookPayloadVariablesReplaced
   ): void {
-    currentOperationResult(state).variablesReplaced = {
+    currentOperationResult(stateCurrent, stateResult).variablesReplaced = {
       stack: event.stack,
       found: event.found,
       missing: event.missing,
     };
   },
   "http-request-prepared": function (
-    state: Draft<State>,
+    stateCurrent: Current,
+    stateResult: Result,
     event: PlaybookHttpRequestPrepared
   ): void {
-    currentOperationResult(state).httpRequest = event.request;
-    currentOperationResult(state).operationId = event.operationId;
+    currentOperationResult(stateCurrent, stateResult).httpRequest = event.request;
+    currentOperationResult(stateCurrent, stateResult).operationId = event.operationId;
   },
   "http-request-prepare-error": function (
-    state: Draft<State>,
+    stateCurrent: Current,
+    stateResult: Result,
     event: PlaybookHttpRequestPrepareError
   ): void {
-    currentOperationResult(state).httpRequestPrepareError = event.error;
+    currentOperationResult(stateCurrent, stateResult).httpRequestPrepareError = event.error;
   },
   "http-response-received": function (
-    state: Draft<State>,
+    stateCurrent: Current,
+    stateResult: Result,
     event: PlaybookHttpResponseReceived
   ): void {
-    currentOperationResult(state).httpResponse = event.response;
+    currentOperationResult(stateCurrent, stateResult).httpResponse = event.response;
   },
-  "http-error-received": function (state: Draft<State>, event: PlaybookHttpErrorReceived): void {
-    currentOperationResult(state).httpError = event.error;
+  "http-error-received": function (
+    stateCurrent: Current,
+    stateResult: Result,
+    event: PlaybookHttpErrorReceived
+  ): void {
+    currentOperationResult(stateCurrent, stateResult).httpError = event.error;
   },
-  "variables-assigned": function (state: Draft<State>, event: PlaybookVariablesAssigned): void {
-    currentOperationResult(state).variablesAssigned.push(...event.assignments);
+  "variables-assigned": function (
+    stateCurrent: Current,
+    stateResult: Result,
+    event: PlaybookVariablesAssigned
+  ): void {
+    currentOperationResult(stateCurrent, stateResult).variablesAssigned.push(...event.assignments);
   },
   "variables-assignment-error": function (
-    state: Draft<State>,
+    stateCurrent: Current,
+    stateResult: Result,
     event: PlaybookVariablesAssignmentError
   ): void {
-    currentOperationResult(state).variableAssignmentError = event.error;
+    currentOperationResult(stateCurrent, stateResult).variableAssignmentError = event.error;
   },
 };
 
 export type State = {
   ref?: RequestRef;
-  current: string[];
-  result: {
-    before?: PlaybookResult;
-    scenario?: PlaybookResult;
-    after?: PlaybookResult;
-  };
+  current: Current;
+  result: Result;
+};
+
+type Current = string[];
+
+type Result = {
+  globalBefore: PlaybookResult;
+  globalAfter: PlaybookResult;
+  operationBefore: PlaybookResult;
+  operationAfter: PlaybookResult;
+  operationScenarios: PlaybookResult;
+  credential: PlaybookResult;
 };
 
 const initialState: State = {
   current: [],
-  result: {},
+  result: {
+    operationBefore: { context: {}, results: [] },
+    operationAfter: { context: {}, results: [] },
+    operationScenarios: { context: {}, results: [] },
+    globalAfter: { context: {}, results: [] },
+    globalBefore: { context: {}, results: [] },
+    credential: { context: {}, results: [] },
+  },
 };
 
 export const slice = createSlice({
@@ -140,21 +201,27 @@ export const slice = createSlice({
     setRequestId: (state, { payload }: PayloadAction<RequestRef>) => {
       state.ref = payload;
       state.result = {
-        before: { context: {}, results: [] },
-        scenario: { context: {}, results: [] },
-        after: { context: {}, results: [] },
+        operationBefore: { context: {}, results: [] },
+        operationAfter: { context: {}, results: [] },
+        operationScenarios: { context: {}, results: [] },
+        globalAfter: { context: {}, results: [] },
+        globalBefore: { context: {}, results: [] },
+        credential: { context: {}, results: [] },
       };
     },
     executeRequest: (state, action: PayloadAction<{ env: SimpleEnvironment; server: string }>) => {
       state.current = [];
       state.result = {
-        before: { context: {}, results: [] },
-        scenario: { context: {}, results: [] },
-        after: { context: {}, results: [] },
+        operationBefore: { context: {}, results: [] },
+        operationAfter: { context: {}, results: [] },
+        operationScenarios: { context: {}, results: [] },
+        globalAfter: { context: {}, results: [] },
+        globalBefore: { context: {}, results: [] },
+        credential: { context: {}, results: [] },
       };
     },
     addExecutionStep: (state, { payload: step }: PayloadAction<PlaybookExecutorStep>) => {
-      PlaybookStepHandlers[step.event](state, step as any);
+      PlaybookStepHandlers[step.event](state.current, state.result, step as any);
     },
   },
 

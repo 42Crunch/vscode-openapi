@@ -24,7 +24,15 @@ export default function ResponseCard({
   const statusMessage =
     response.httpResponse === MockHttpResponse ? "MOCK" : response.httpResponse?.statusMessage;
 
-  if (response.httpError) {
+  if (response.httpRequestPrepareError !== undefined) {
+    return (
+      <ErrorBanner message="Failed to prepare HTTP Request for sendig">
+        {response.httpRequestPrepareError}
+      </ErrorBanner>
+    );
+  }
+
+  if (response.httpError !== undefined) {
     return (
       <ErrorBanner message="Failed to send HTTP Request">{response.httpError.message}</ErrorBanner>
     );

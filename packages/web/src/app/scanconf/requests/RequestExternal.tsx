@@ -69,7 +69,7 @@ export default function RequestExternal({
 
   const [inputEnv, setInputEnv] = useState(inputs);
 
-  const response = result.scenario?.results?.[0];
+  const response = result.operationScenarios?.results?.[0];
 
   const prefs = useAppSelector((state) => state.prefs);
 

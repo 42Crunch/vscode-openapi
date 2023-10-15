@@ -206,7 +206,7 @@ export function onExecuteRequest(
           env,
           [
             [
-              "scenario",
+              "operationScenarios",
               [
                 {
                   ref: ref!,

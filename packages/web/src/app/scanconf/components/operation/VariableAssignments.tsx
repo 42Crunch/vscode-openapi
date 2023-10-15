@@ -158,8 +158,8 @@ function VariableAssignmentParameter({ name }: { name: string }) {
       <Select
         name={`${name}.value.from`}
         options={[
-          { value: "request", label: "request" },
           { value: "response", label: "response" },
+          { value: "request", label: "request" },
         ]}
       />
       <Select

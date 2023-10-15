@@ -78,7 +78,7 @@ export default function RequestInternal({
 
   const [inputEnv, setInputEnv] = useState(inputs);
 
-  const response = result.scenario?.results?.[0];
+  const response = result.operationScenarios?.results?.[0];
 
   const setServer = (server: string) => dispatch(setTryitServer(server));
 
