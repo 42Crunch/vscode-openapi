@@ -33,7 +33,15 @@ export default function AddExternalRequestDialog({
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={setOpen}>
+    <Dialog.Root
+      open={open}
+      onOpenChange={(open) => {
+        setOpen(open);
+        if (open) {
+          methods.reset();
+        }
+      }}
+    >
       <Dialog.Trigger asChild>
         <AddRequestButton>
           <Plus />

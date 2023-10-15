@@ -76,17 +76,19 @@ export default function Operations() {
                   defaultResponse: "200",
                   request: {
                     url: "http://localhost/",
-                    method: "post",
+                    method: method,
                     parameters: {
                       header: {},
                       path: {},
                       query: {},
                       cookie: {},
                     },
-                    body: {
-                      mediaType: "application/json",
-                      value: {},
-                    },
+                    body: hasBody(method)
+                      ? {
+                          mediaType: "application/json",
+                          value: {},
+                        }
+                      : undefined,
                   },
                 },
               })
@@ -114,4 +116,9 @@ export default function Operations() {
       }}
     />
   );
+}
+
+function hasBody(method: HttpMethod): boolean {
+  const withBody: HttpMethod[] = ["post", "put", "patch"];
+  return withBody.includes(method);
 }

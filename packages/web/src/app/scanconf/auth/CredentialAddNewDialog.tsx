@@ -47,7 +47,15 @@ export default function CredentialAddNewDialog({
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={setOpen}>
+    <Dialog.Root
+      open={open}
+      onOpenChange={(open) => {
+        setOpen(open);
+        if (open) {
+          methods.reset();
+        }
+      }}
+    >
       <Dialog.Trigger asChild>
         <Button style={{ width: "100%" }}>Add new credential</Button>
       </Dialog.Trigger>

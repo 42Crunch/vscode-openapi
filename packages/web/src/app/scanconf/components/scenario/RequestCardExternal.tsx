@@ -1,4 +1,3 @@
-import { HttpMethods } from "@xliic/common/http";
 import * as playbook from "@xliic/common/playbook";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import styled from "styled-components";
@@ -6,8 +5,8 @@ import Form from "../../../../new-components/Form";
 import { TabContainer } from "../../../../new-components/Tabs";
 import JsonEditor from "../../../../new-components/fields/JsonEditor";
 import LineEditor from "../../../../new-components/fields/LineEditor";
-import Select from "../../../../new-components/fields/Select";
 import CollapsibleCard, { TopDescription } from "../CollapsibleCard";
+import ExternalParameters from "./ExternalParameters";
 import { unwrapExternalPlaybookRequest, wrapExternalPlaybookRequest } from "./util";
 
 export default function RequestCardExternal({
@@ -60,6 +59,17 @@ export function Request({
               id: "body",
               title: "Body",
               content: <JsonEditor variables={variables} name={"body.value"} />,
+              disabled: stage.request.body === undefined,
+            },
+            {
+              id: "query",
+              title: "Query",
+              content: <ExternalParameters name={"parameters.query"} variables={variables} />,
+            },
+            {
+              id: "header",
+              title: "Headers",
+              content: <ExternalParameters name={"parameters.header"} variables={variables} />,
             },
           ]}
         />

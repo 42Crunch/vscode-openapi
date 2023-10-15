@@ -200,20 +200,11 @@ export function wrapExternalPlaybookRequest(
   stage = simpleClone(stage);
 
   const parameters: Record<playbook.ParameterLocation, any> = {
-    query: {},
-    header: {},
-    path: {},
-    cookie: {},
+    query: wrapObject2(stage.request.parameters.query),
+    header: wrapObject2(stage.request.parameters.header),
+    path: wrapObject2(stage.request.parameters.path),
+    cookie: wrapObject2(stage.request.parameters.cookie),
   };
-
-  const locations = Object.keys(stage.request.parameters) as OasParameterLocation[];
-  for (const location of locations) {
-    for (const name of Object.keys(stage.request.parameters[location] ?? {})) {
-      const escapedName = escapeFieldName(name);
-      const value = stage.request.parameters[location]![name];
-      parameters[location][escapedName] = Array.isArray(value) ? wrapArray(value) : value;
-    }
-  }
 
   return {
     url: stage.request.url,
@@ -303,7 +294,12 @@ export function unwrapExternalPlaybookRequest(request: FieldValues): playbook.Ex
     request: {
       url: request.url,
       method: request.method,
-      parameters: unwrapFormParameters(request.parameters),
+      parameters: {
+        query: unwrapObject2(request.parameters.query),
+        header: unwrapObject2(request.parameters.header),
+        path: unwrapObject2(request.parameters.path),
+        cookie: unwrapObject2(request.parameters.cookie),
+      },
       body: request.body,
     },
     environment: unwrapEnvironment(request.environment),
@@ -370,10 +366,25 @@ function wrapObject(object: any) {
   return wrapped;
 }
 
+function wrapObject2(object: any) {
+  return Object.entries(object || {}).map(([key, value]) => ({
+    key,
+    value,
+  }));
+}
+
 function unwrapObject(data: any): any {
   const result: any = {};
   for (const item of data) {
     result[unescapeFieldName(item.key)] = item.value;
+  }
+  return result;
+}
+
+function unwrapObject2(data: any): any {
+  const result: any = {};
+  for (const item of data) {
+    result[item.key] = item.value;
   }
   return result;
 }
