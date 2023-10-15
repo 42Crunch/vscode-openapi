@@ -35,6 +35,11 @@ export default function ResponseCard({
       {response.httpRequest !== undefined && (
         <HttpRequest operationId={response.operationId} request={response.httpRequest} />
       )}
+      {response.variableAssignmentError !== undefined && (
+        <ErrorBanner message="Failed to assign variables">
+          {response.variableAssignmentError}
+        </ErrorBanner>
+      )}
       <CollapsibleCard defaultCollapsed={defaultCollapsed}>
         <BottomDescription>
           <BottomItem>Status: {`${statusCode} ${statusMessage}`}</BottomItem>

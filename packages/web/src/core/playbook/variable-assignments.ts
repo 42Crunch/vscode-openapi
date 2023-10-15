@@ -113,7 +113,6 @@ function extractValue(
     if (assignment.from === "request") {
       return extractByJsonPointer(httpRequest.body as string, assignment.path.value);
     } else {
-      console.log("ass body", httpResponse, assignment);
       return extractByJsonPointer(httpResponse.body as string, assignment.path.value);
     }
   } else if (assignment.in === "body" && assignment?.path?.type == "jsonPath") {

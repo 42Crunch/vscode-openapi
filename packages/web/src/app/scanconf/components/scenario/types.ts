@@ -18,6 +18,7 @@ export type OperationResult = {
     missing: LookupFailure[];
   };
   variablesAssigned: PlaybookEnvStack;
+  variableAssignmentError?: string;
 };
 
 export type PlaybookResult = {

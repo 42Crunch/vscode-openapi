@@ -19,19 +19,17 @@ export function TabContainer({
 }
 
 export function UncontrolledTabContainer({ tabs }: { tabs: Tab[] }) {
-  const activeId = tabs.filter((tab) => !tab.disabled)?.[0]?.id;
-
-  const [activeTab, setActiveTab] = useState(activeId);
+  const [activeTab, setActiveTab] = useState(tabs.filter((tab) => !tab.disabled)?.[0]?.id);
 
   useEffect(() => {
-    // if tabs has changed, check if the activeId is still valid and reset if not
-    if (tabs.filter((tab) => tab.id === activeId).length === 0) {
+    // if tabs has changed, check if the activeTab is still valid and reset if not
+    if (tabs.filter((tab) => tab.id === activeTab).length === 0) {
       // make first non-disabled tab an active tab
       setActiveTab(tabs.filter((tab) => !tab.disabled)?.[0]?.id);
     }
   }, [tabs]);
 
-  if (activeId === undefined) {
+  if (activeTab === undefined) {
     return null;
   }
 
@@ -47,19 +45,19 @@ export function ControlledTabContainer({
   activeTab: string;
   setActiveTab: (activeTab: string) => void;
 }) {
+  const active = tabs.filter((tab) => !tab.disabled);
+
   return (
     <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
       <TabList>
-        {tabs
-          .filter((tab) => !tab.disabled)
-          .map((tab) => (
-            <TabButton key={tab.id} value={tab.id}>
-              {tab.title}
-              {renderCounter(tab)}
-            </TabButton>
-          ))}
+        {active.map((tab) => (
+          <TabButton key={tab.id} value={tab.id}>
+            {tab.title}
+            {renderCounter(tab)}
+          </TabButton>
+        ))}
       </TabList>
-      {tabs.map((tab) => (
+      {active.map((tab) => (
         <Tabs.Content key={tab.id} value={tab.id}>
           {tab.content}
         </Tabs.Content>

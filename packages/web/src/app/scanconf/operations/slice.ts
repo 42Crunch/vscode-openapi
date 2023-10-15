@@ -13,6 +13,7 @@ import {
   PlaybookPayloadVariablesReplaced,
   PlaybookStarted,
   PlaybookVariablesAssigned,
+  PlaybookVariablesAssignmentError,
   RequestStarted,
 } from "../../../core/playbook/playbook";
 import { showScanconfOperation } from "../actions";
@@ -154,6 +155,13 @@ const PlaybookStepHandlers: PlaybookEventHandlers = {
     event: PlaybookVariablesAssigned
   ): void {
     currentOperationResult(stateCurrent, stateResult).variablesAssigned.push(...event.assignments);
+  },
+  "variables-assignment-error": function (
+    stateCurrent: Current,
+    stateResult: Result,
+    event: PlaybookVariablesAssignmentError
+  ): void {
+    currentOperationResult(stateCurrent, stateResult).variableAssignmentError = event.error;
   },
 };
 

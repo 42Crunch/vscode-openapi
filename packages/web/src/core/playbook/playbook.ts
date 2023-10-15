@@ -74,6 +74,11 @@ export type PlaybookVariablesAssigned = {
   assignments: PlaybookEnvStack;
 };
 
+export type PlaybookVariablesAssignmentError = {
+  event: "variables-assignment-error";
+  error: string;
+};
+
 export type PlaybookExecutorStep =
   | PlaybookStarted
   | AuthStarted
@@ -86,7 +91,8 @@ export type PlaybookExecutorStep =
   | PlaybookHttpRequestPrepareError
   | PlaybookHttpResponseReceived
   | PlaybookHttpErrorReceived
-  | PlaybookVariablesAssigned;
+  | PlaybookVariablesAssigned
+  | PlaybookVariablesAssignmentError;
 
 export type Executor = (
   client: HttpClient,
