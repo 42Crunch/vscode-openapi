@@ -81,12 +81,13 @@ async function makeHttpRequestForSwagger(
 export async function makeExternalHttpRequest(
   request: playbook.ExternalCRequest
 ): Promise<Result<HttpRequest, string>> {
+  const searchParams = new URLSearchParams(request.parameters.query as any).toString();
   try {
     return [
       {
         method: request.method,
-        url: request.url,
-        headers: {},
+        url: searchParams === "" ? request.url : `${request.url}?${searchParams}`,
+        headers: request.parameters.header as any,
         body: request.body !== undefined ? convertBody(request.body.value) : undefined,
       },
       undefined,

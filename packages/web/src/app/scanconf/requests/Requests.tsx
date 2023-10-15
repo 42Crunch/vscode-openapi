@@ -75,7 +75,7 @@ export default function Operations() {
                   operationId: undefined,
                   defaultResponse: "200",
                   request: {
-                    url: "http://localhost/",
+                    url,
                     method: method,
                     parameters: {
                       header: {},

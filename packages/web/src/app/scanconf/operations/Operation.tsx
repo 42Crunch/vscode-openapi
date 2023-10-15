@@ -1,9 +1,8 @@
+import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import * as playbook from "@xliic/common/playbook";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import styled from "styled-components";
-
-import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import { useState } from "react";
+import styled from "styled-components";
 import { ErrorBanner } from "../../../components/Banner";
 import Separator from "../../../components/Separator";
 import { makeEnvEnv } from "../../../core/playbook/execute";
