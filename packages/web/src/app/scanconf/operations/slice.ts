@@ -164,6 +164,7 @@ type Result = {
   operationBefore: PlaybookResult;
   operationAfter: PlaybookResult;
   operationScenarios: PlaybookResult;
+  credential: PlaybookResult;
 };
 
 export type State = {
@@ -183,6 +184,7 @@ const initialState: State = {
     operationScenarios: { context: {}, results: [] },
     globalAfter: { context: {}, results: [] },
     globalBefore: { context: {}, results: [] },
+    credential: { context: {}, results: [] },
   },
   tryCurrent: [],
   tryResult: {
@@ -191,6 +193,7 @@ const initialState: State = {
     operationScenarios: { context: {}, results: [] },
     globalAfter: { context: {}, results: [] },
     globalBefore: { context: {}, results: [] },
+    credential: { context: {}, results: [] },
   },
   scenarioId: 0,
 };
@@ -214,6 +217,7 @@ export const slice = createSlice({
         operationScenarios: { context: {}, results: [] },
         globalAfter: { context: {}, results: [] },
         globalBefore: { context: {}, results: [] },
+        credential: { context: {}, results: [] },
       };
       state.mockCurrent = [];
     },
@@ -231,6 +235,7 @@ export const slice = createSlice({
         operationScenarios: { context: {}, results: [] },
         globalAfter: { context: {}, results: [] },
         globalBefore: { context: {}, results: [] },
+        credential: { context: {}, results: [] },
       };
       state.tryCurrent = [];
     },

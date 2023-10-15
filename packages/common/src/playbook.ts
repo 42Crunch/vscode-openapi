@@ -208,7 +208,7 @@ export type CredentialRef = {
 };
 
 export type CredentialMethod = {
-  requests?: Stage[];
+  requests: Stage[];
   credential: string;
   description?: string;
 };
@@ -244,12 +244,21 @@ export type StageLocationOperationScenarios = {
   stageIndex: number;
 };
 
+export type StageLocationCredential = {
+  container: "credential";
+  group: number;
+  credentialId: string;
+  subCredentialId: string;
+  stageIndex: number;
+};
+
 export type StageLocation =
   | StageLocationGlobalBefore
   | StageLocationGlobalAfter
   | StageLocationOperationBefore
   | StageLocationOperationAfter
-  | StageLocationOperationScenarios;
+  | StageLocationOperationScenarios
+  | StageLocationCredential;
 
 export type StageLocationName = StageLocation["container"];
 
@@ -258,4 +267,5 @@ export type StageContainer =
   | Omit<StageLocationGlobalAfter, "stageIndex">
   | Omit<StageLocationOperationBefore, "stageIndex">
   | Omit<StageLocationOperationAfter, "stageIndex">
-  | Omit<StageLocationOperationScenarios, "stageIndex">;
+  | Omit<StageLocationOperationScenarios, "stageIndex">
+  | Omit<StageLocationCredential, "stageIndex">;

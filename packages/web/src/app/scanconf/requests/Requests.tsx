@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from "../store";
 import AddExternalRequestDialog from "./AddExternalRequestDialog";
 import Request from "./Request";
 import { setRequestId } from "./slice";
+import { HttpMethod } from "@xliic/common/http";
 
 export default function Operations() {
   const dispatch = useAppDispatch();
@@ -66,7 +67,7 @@ export default function Operations() {
       items: externalRequestItems,
       menu: (
         <AddExternalRequestDialog
-          onAddExternalRequest={(id: string) => {
+          onAddExternalRequest={(id: string, method: HttpMethod, url: string) => {
             dispatch(
               saveRequest({
                 ref: { id, type: "request" },
@@ -90,7 +91,6 @@ export default function Operations() {
                 },
               })
             );
-            console.log("dispatchibg");
             dispatch(setRequestId({ type: "request", id }));
           }}
         />

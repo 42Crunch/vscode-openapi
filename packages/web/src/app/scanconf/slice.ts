@@ -215,6 +215,14 @@ function getStageContainer(
     return playbook.operations[container.operationId].before;
   } else if (container.container === "operationAfter") {
     return playbook.operations[container.operationId].after;
+  } else if (container.container === "globalBefore") {
+    return playbook.before;
+  } else if (container.container === "globalAfter") {
+    return playbook.after;
+  } else if (container.container === "credential") {
+    return playbook.authenticationDetails[container.group][container.credentialId].methods[
+      container.subCredentialId
+    ].requests;
   }
   return null as any;
 }

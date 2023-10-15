@@ -1,4 +1,5 @@
 import * as Dialog from "@radix-ui/react-dialog";
+import { HttpMethod, HttpMethods } from "@xliic/common/http";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -7,23 +8,28 @@ import Button from "../../../components/Button";
 import ButtonSecondary from "../../../components/ButtonSecondary";
 import Input from "../../../components/Input";
 import { Plus } from "../../../icons";
+import Select from "../components/Select";
 
 export default function AddExternalRequestDialog({
   onAddExternalRequest,
 }: {
-  onAddExternalRequest: (name: string) => void;
+  onAddExternalRequest: (id: string, method: HttpMethod, url: string) => void;
 }) {
   const methods = useForm({
     defaultValues: {
       id: "",
+      method: "post",
+      url: "http://localhost:8080/",
     },
     mode: "onChange",
   });
 
+  const httpMethods = HttpMethods.map((method) => ({ value: method, label: method.toUpperCase() }));
+
   const [open, setOpen] = useState(false);
 
   const onSubmit = (data: any) => {
-    onAddExternalRequest(data.id);
+    onAddExternalRequest(data.id, data.method, data.url);
   };
 
   return (
@@ -47,7 +53,8 @@ export default function AddExternalRequestDialog({
               <Dialog.Title>New External Request</Dialog.Title>
               <Dialog.Description>Add new external request</Dialog.Description>
               <Input label="Request ID" name="id" />
-
+              <Select label="Method" name="method" options={httpMethods} />
+              <Input label="URL" name="url" />
               <div style={{ display: "flex", marginTop: 25, justifyContent: "flex-end", gap: 4 }}>
                 <Button type="submit">Add</Button>
                 <Dialog.Close asChild>

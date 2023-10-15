@@ -1,14 +1,14 @@
+import { HttpMethods } from "@xliic/common/http";
 import * as playbook from "@xliic/common/playbook";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { HttpMethods } from "@xliic/common/http";
 import styled from "styled-components";
 import Form from "../../../../new-components/Form";
 import { TabContainer } from "../../../../new-components/Tabs";
 import JsonEditor from "../../../../new-components/fields/JsonEditor";
-import CollapsibleCard, { BottomDescription, TopDescription } from "../CollapsibleCard";
-import { unwrapExternalPlaybookRequest, wrapExternalPlaybookRequest } from "./util";
 import LineEditor from "../../../../new-components/fields/LineEditor";
 import Select from "../../../../new-components/fields/Select";
+import CollapsibleCard, { TopDescription } from "../CollapsibleCard";
+import { unwrapExternalPlaybookRequest, wrapExternalPlaybookRequest } from "./util";
 
 export default function RequestCardExternal({
   requestRef,
@@ -42,8 +42,6 @@ export function Request({
   saveRequest: (request: playbook.ExternalStageContent) => void;
   variables: string[];
 }) {
-  const methods = HttpMethods.map((method) => ({ value: method, label: method.toUpperCase() }));
-
   return (
     <Form
       data={stage}
@@ -53,7 +51,7 @@ export function Request({
     >
       <Container>
         <Top>
-          <Select options={methods} name="method" />
+          <Method>{stage.request.method}</Method>
           <Url variables={variables} name="url" />
         </Top>
         <TabContainer
@@ -74,7 +72,8 @@ const Container = styled.div``;
 
 const Top = styled.div`
   display: flex;
-  gap: 4px;
+  align-items: flex-start;
+  gap: 8px;
   margin: 4px;
   > select {
     padding-left: 4px;
@@ -91,4 +90,16 @@ const Url = styled(LineEditor)`
   flex: 1;
   background-color: var(${ThemeColorVariables.background});
   border: 1px solid var(${ThemeColorVariables.border});
+`;
+
+const Method = styled.div`
+  background-color: var(${ThemeColorVariables.badgeBackground});
+  color: var(${ThemeColorVariables.badgeForeground});
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
+  height: 24px;
+  text-transform: uppercase;
 `;
