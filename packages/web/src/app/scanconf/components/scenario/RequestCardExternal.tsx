@@ -8,6 +8,7 @@ import LineEditor from "../../../../new-components/fields/LineEditor";
 import CollapsibleCard, { TopDescription } from "../CollapsibleCard";
 import ExternalParameters from "./ExternalParameters";
 import { unwrapExternalPlaybookRequest, wrapExternalPlaybookRequest } from "./util";
+import ResponseProcessing from "../operation/ResponseProcessing";
 
 export default function RequestCardExternal({
   requestRef,
@@ -70,6 +71,11 @@ export function Request({
               id: "header",
               title: "Headers",
               content: <ExternalParameters name={"parameters.header"} variables={variables} />,
+            },
+            {
+              id: "responses",
+              title: "Response Processing",
+              content: <ResponseProcessing />,
             },
           ]}
         />

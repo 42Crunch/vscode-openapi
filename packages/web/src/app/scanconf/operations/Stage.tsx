@@ -98,7 +98,7 @@ export default function Stage({
               {
                 id: "responses",
                 title: "Response Processing",
-                content: <ResponseProcessing oas={oas} />,
+                content: <ResponseProcessing />,
               },
               {
                 id: "missing-variables",

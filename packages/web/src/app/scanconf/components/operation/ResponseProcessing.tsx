@@ -1,18 +1,24 @@
 import * as Tabs from "@radix-ui/react-tabs";
 import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFieldArray } from "react-hook-form";
 import styled from "styled-components";
 import { RoundTabButton, TabList } from "../../../../new-components/Tabs";
 import AddResponse from "./AddResponse";
 import VariableAssignments from "./VariableAssignments";
 
-export default function ResponseProcessing({ oas }: { oas: BundledSwaggerOrOasSpec }) {
+export default function ResponseProcessing() {
   const { fields, prepend } = useFieldArray({
     name: "responses",
   });
 
-  const [activeTab, setActiveTab] = useState(fields?.[0]?.id);
+  const [activeTab, setActiveTab] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (activeTab === undefined) {
+      setActiveTab(fields?.[0]?.id);
+    }
+  }, [fields]);
 
   return (
     <Tabs.Root value={activeTab} onValueChange={setActiveTab}>

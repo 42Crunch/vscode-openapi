@@ -149,7 +149,7 @@ function makeOasTabs(
     {
       id: "responses",
       title: "Response Processing",
-      content: <ResponseProcessing oas={oas} />,
+      content: <ResponseProcessing />,
       enabled: true,
     },
   ];
@@ -216,7 +216,7 @@ function makeSwaggerTabs(
     {
       id: "responses",
       title: "Response Processing",
-      content: <ResponseProcessing oas={oas} />,
+      content: <ResponseProcessing />,
       enabled: true,
     },
   ];

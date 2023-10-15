@@ -14,7 +14,6 @@ export default function AddResponse({ add }: { add: any }) {
   const [open, setOpen] = useState(false);
 
   const onSubmit = (data: any) => {
-    console.log("on submit", data);
     add({
       key: data.code,
       value: {
