@@ -13,12 +13,13 @@ export default function AddResponse({ add }: { add: any }) {
 
   const [open, setOpen] = useState(false);
 
+  // FIXME implement "code" validation in the form, must be a number or "2XX", "default", etc
   const onSubmit = (data: any) => {
     add({
       key: data.code,
       value: {
         expectations: {
-          httpStatus: data.code,
+          httpStatus: convertToNumberOrString(data.code),
         },
         variableAssignments: [],
       },
@@ -58,6 +59,14 @@ export default function AddResponse({ add }: { add: any }) {
       </Dialog.Portal>
     </Dialog.Root>
   );
+}
+
+function convertToNumberOrString(input: string): number | string {
+  if (/^\d+$/.test(input)) {
+    return parseInt(input, 10);
+  } else {
+    return input;
+  }
 }
 
 const Button = styled.button`

@@ -158,8 +158,8 @@ function VariableAssignmentParameter({ name }: { name: string }) {
       <Select
         name={`${name}.value.from`}
         options={[
-          { value: "response", label: "response" },
           { value: "request", label: "request" },
+          { value: "response", label: "response" },
         ]}
       />
       <Select
@@ -194,7 +194,7 @@ function AddNewVariable({ append }: { append: any }) {
                 {
                   key: "varname",
                   value: {
-                    from: "request",
+                    from: "response",
                     in: "body",
                     contentType: "json",
                     path: { type: "jsonPointer", value: "/" },
@@ -212,8 +212,8 @@ function AddNewVariable({ append }: { append: any }) {
                 {
                   key: "varname",
                   value: {
-                    from: "request",
-                    in: "query",
+                    from: "response",
+                    in: "header",
                     name: "name",
                   },
                 },
