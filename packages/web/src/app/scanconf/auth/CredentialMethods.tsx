@@ -68,7 +68,7 @@ export default function CredentialMethods({
         <TabsContent key={method} value={method}>
           <Scenario
             oas={oas}
-            stages={credential.methods[method].requests}
+            stages={credential.methods[method].requests as playbook.StageReference[]}
             container={{ container: "credential", group, credentialId, subCredentialId: method }}
             executionResult={undefined}
             saveStage={saveStage}

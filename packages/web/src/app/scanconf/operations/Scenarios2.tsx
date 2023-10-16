@@ -62,7 +62,7 @@ export default function Scenarios({ operationId }: { operationId: string }) {
           <Content>
             <Scenario
               oas={oas}
-              stages={scenario.requests}
+              stages={scenario.requests as playbook.StageReference[]}
               container={{ container: "operationScenarios", operationId, scenarioIndex }}
               executionResult={result?.operationScenarios}
               saveStage={saveStage}

@@ -59,7 +59,7 @@ export default function Global() {
         <Content>
           <Scenario
             oas={oas}
-            stages={playbook.before}
+            stages={playbook.before as playbook.StageReference[]}
             container={{ container: "globalBefore" }}
             executionResult={undefined}
             saveStage={saveStage}
@@ -86,7 +86,7 @@ export default function Global() {
         <Content>
           <Scenario
             oas={oas}
-            stages={playbook.after}
+            stages={playbook.after as playbook.StageReference[]}
             container={{ container: "globalAfter" }}
             executionResult={undefined}
             saveStage={saveStage}
