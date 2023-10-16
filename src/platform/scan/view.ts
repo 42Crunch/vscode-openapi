@@ -476,8 +476,8 @@ async function runScanWithCliBinary(
     { cwd: dir as string, windowsHide: true, env: scanEnv }
   );
 
-  const encodedReport = readFileSync(join(dir as string, "report.json"), { encoding: "utf8" });
-  const parsed = JSON.parse(Buffer.from(encodedReport.slice(1, -1), "base64").toString("utf-8"));
+  const report = readFileSync(join(dir as string, "report.json"), { encoding: "utf8" });
+  const parsed = JSON.parse(report);
   return parsed;
 }
 
