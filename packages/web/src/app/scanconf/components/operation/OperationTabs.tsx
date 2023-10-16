@@ -33,6 +33,7 @@ import RequestBodySwagger from "./RequestBodySwagger";
 import Environment from "../scenario/Environment";
 import ResponseProcessing from "./ResponseProcessing";
 import * as playbook from "@xliic/common/playbook";
+import { useFormContext } from "react-hook-form";
 
 export default function OperationTabs({
   oas,
@@ -49,9 +50,13 @@ export default function OperationTabs({
   method: HttpMethod;
   variables: string[];
 }) {
+  const { getValues } = useFormContext();
+
+  const isBodyPresent = getValues("body") !== undefined;
+
   const tabs = isOpenapi(oas)
-    ? makeOasTabs(oas, credentials, path, method, variables)
-    : makeSwaggerTabs(oas, credentials, path, method, variables);
+    ? makeOasTabs(oas, credentials, path, method, variables, isBodyPresent)
+    : makeSwaggerTabs(oas, credentials, path, method, variables, isBodyPresent);
 
   const activeId = tabs.filter((tab) => tab.enabled)?.[0]?.id;
 
@@ -91,7 +96,8 @@ function makeOasTabs(
   credentials: playbook.Credentials,
   path: string,
   method: HttpMethod,
-  variables: string[]
+  variables: string[],
+  isBodyPresent: boolean
 ) {
   const parameters = getOasParameters(oas, path, method);
   const operation = getOasOperation(oas, path, method);
@@ -102,7 +108,7 @@ function makeOasTabs(
       id: "body",
       title: "Body",
       content: <RequestBody oas={oas} requestBody={requestBody} variables={variables} />,
-      enabled: requestBody !== undefined,
+      enabled: requestBody !== undefined && isBodyPresent,
     },
     {
       id: "security",
@@ -160,7 +166,8 @@ function makeSwaggerTabs(
   credentials: playbook.Credentials,
   path: string,
   method: HttpMethod,
-  variables: string[]
+  variables: string[],
+  isBodyPresent: boolean
 ) {
   const parameters = getSwaggerParameters(oas, path, method);
 
@@ -169,7 +176,7 @@ function makeSwaggerTabs(
       id: "body",
       title: "Body",
       content: <RequestBodySwagger oas={oas} group={parameters.body} variables={variables} />,
-      enabled: hasParameters(parameters.body),
+      enabled: hasParameters(parameters.body) && isBodyPresent,
     },
     {
       id: "security",

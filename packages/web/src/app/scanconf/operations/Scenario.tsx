@@ -17,42 +17,12 @@ export default function Scenario({
   moveStage,
 }: {
   oas: BundledSwaggerOrOasSpec;
-  stages: playbook.Stage[];
-  container: playbook.StageContainer;
-  executionResult?: PlaybookResult;
-  saveStage: (location: playbook.StageLocation, stage: playbook.StageReference) => void;
-  removeStage: (location: playbook.StageLocation) => void;
-  moveStage: (location: playbook.StageLocation, to: number) => void;
-}) {
-  return (
-    <StagesList
-      oas={oas}
-      stages={stages as playbook.StageReference[]}
-      executionResult={executionResult}
-      saveStage={saveStage}
-      removeStage={removeStage}
-      moveStage={moveStage}
-      container={container}
-    />
-  );
-}
-
-function StagesList({
-  oas,
-  stages,
-  executionResult,
-  saveStage,
-  moveStage,
-  removeStage,
-  container,
-}: {
-  oas: BundledSwaggerOrOasSpec;
-  executionResult?: PlaybookResult;
   stages: playbook.StageReference[];
+  container: playbook.StageContainer;
+  executionResult?: PlaybookResult;
   saveStage: (location: playbook.StageLocation, stage: playbook.StageReference) => void;
   removeStage: (location: playbook.StageLocation) => void;
   moveStage: (location: playbook.StageLocation, to: number) => void;
-  container: playbook.StageContainer;
 }) {
   const save = (location: playbook.StageLocation) => (stage: playbook.StageReference) =>
     saveStage(location, stage);

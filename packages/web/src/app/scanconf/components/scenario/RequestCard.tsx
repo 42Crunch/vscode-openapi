@@ -6,8 +6,8 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { unwrapPlaybookRequest, wrapPlaybookRequest } from "./util";
 import CollapsibleCard, { BottomDescription, TopDescription } from "../CollapsibleCard";
-import Operation from "../../components/operation/Operation";
 import Form from "../../../../new-components/Form";
+import OperationTabs from "../operation/OperationTabs";
 
 export default function RequestCard({
   oas,
@@ -34,46 +34,22 @@ export default function RequestCard({
           <Method>{stage.request.method}</Method>
           <Path>{stage.request.path}</Path>
         </BottomDescription>
-        <Request
-          oas={oas}
-          stage={stage}
-          credentials={credentials}
-          saveRequest={saveRequest}
-          variables={variables}
-        />
+        <Form
+          data={stage}
+          saveData={saveRequest}
+          wrapFormData={wrapPlaybookRequest}
+          unwrapFormData={unwrapPlaybookRequest}
+        >
+          <OperationTabs
+            oas={oas}
+            credentials={credentials}
+            method={stage.request.method}
+            path={stage.request.path}
+            variables={variables}
+          />
+        </Form>
       </CollapsibleCard>
     </Container>
-  );
-}
-
-export function Request({
-  stage,
-  oas,
-  credentials,
-  saveRequest,
-  variables,
-}: {
-  stage: playbook.StageContent;
-  oas: BundledSwaggerOrOasSpec;
-  credentials: playbook.Credentials;
-  saveRequest: (request: playbook.StageContent) => void;
-  variables: string[];
-}) {
-  return (
-    <Form
-      data={stage}
-      saveData={saveRequest}
-      wrapFormData={wrapPlaybookRequest}
-      unwrapFormData={unwrapPlaybookRequest}
-    >
-      <Operation
-        oas={oas}
-        credentials={credentials}
-        method={stage.request.method}
-        path={stage.request.path}
-        variables={variables}
-      />
-    </Form>
   );
 }
 

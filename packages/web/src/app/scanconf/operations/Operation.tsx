@@ -122,7 +122,7 @@ export default function Operation({ operationId }: { operationId: string }) {
         <Content>
           <Scenario
             oas={oas}
-            stages={playbook.operations[operationId].before}
+            stages={playbook.operations[operationId].before as playbook.StageReference[]}
             container={{ container: "operationBefore", operationId }}
             executionResult={mockResult.operationBefore}
             saveStage={saveStage}
@@ -161,7 +161,7 @@ export default function Operation({ operationId }: { operationId: string }) {
         <Content>
           <Scenario
             oas={oas}
-            stages={playbook.operations[operationId].after}
+            stages={playbook.operations[operationId].after as playbook.StageReference[]}
             container={{ container: "operationAfter", operationId }}
             executionResult={mockResult.operationAfter}
             saveStage={saveStage}
