@@ -1,10 +1,7 @@
-import * as Tabs from "@radix-ui/react-tabs";
-
-import { useEffect, useState } from "react";
 import { HttpMethod } from "@xliic/common/http";
 import { deref } from "@xliic/common/ref";
 
-import { TabList, TabButton, TabContainer } from "../../../../new-components/Tabs";
+import { TabContainer } from "../../../../new-components/Tabs";
 
 import RequestBody from "./RequestBody";
 
@@ -28,12 +25,12 @@ import {
 } from "../scenario/util-swagger";
 
 import ParameterGroup from "../parameters/ParameterGroup";
-import Security from "./Security";
 import RequestBodySwagger from "./RequestBodySwagger";
 import Environment from "../scenario/Environment";
 import ResponseProcessing from "./ResponseProcessing";
 import * as playbook from "@xliic/common/playbook";
 import { useFormContext } from "react-hook-form";
+import Security from "../security/Security";
 
 export default function OperationTabs({
   oas,

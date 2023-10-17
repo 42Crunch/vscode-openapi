@@ -22,6 +22,9 @@ export default function Select({ name, options }: { name: string; options: Selec
   );
 }
 
-function getOptionByValue(options: SelectOption[], value: string): SelectOption | undefined {
-  return options.filter((option) => option.value === value)?.[0];
+function getOptionByValue(
+  options: SelectOption[],
+  value: string | number
+): SelectOption | undefined {
+  return options.filter((option) => option.value === value).pop();
 }
