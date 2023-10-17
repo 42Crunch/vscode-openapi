@@ -18,13 +18,26 @@ export async function makeHttpRequest(
   server: string,
   operationId: string | undefined,
   request: playbook.CRequest,
-  security: playbook.Credentials
+  security: Record<string, string>
 ): Promise<Result<HttpRequest, string>> {
   // FIXME, this can throw an exception, make sure it's handled
+
   try {
     const result = isOpenapi(oas)
-      ? await makeHttpRequestForOas(oas, server, operationId, request, security)
-      : await makeHttpRequestForSwagger(oas, server, operationId, request, security);
+      ? await makeHttpRequestForOas(
+          oas,
+          server,
+          operationId,
+          request,
+          stripCredentialMethodNames(security)
+        )
+      : await makeHttpRequestForSwagger(
+          oas,
+          server,
+          operationId,
+          request,
+          stripCredentialMethodNames(security)
+        );
 
     return [
       {
@@ -45,7 +58,7 @@ async function makeHttpRequestForOas(
   server: string,
   operationId: string | undefined,
   request: playbook.CRequest,
-  security: playbook.Credentials
+  security: Record<string, string>
 ): Promise<HttpRequest> {
   const swaggerClientOperationId = operationId || `${request.method}-${request.path}`;
   const result = SwaggerClient.buildRequest({
@@ -65,7 +78,7 @@ async function makeHttpRequestForSwagger(
   server: string,
   operationId: string | undefined,
   request: playbook.CRequest,
-  security: playbook.Credentials
+  security: Record<string, string>
 ): Promise<HttpRequest> {
   const swaggerClientOperationId = operationId || `${request.method}-${request.path}`;
   const result = SwaggerClient.buildRequest({
@@ -193,7 +206,7 @@ function makeSwaggerSwaggerClientParameters(
 
 function makeOasSecurities(
   schemes: Record<string, OasSecurityScheme>,
-  security: playbook.Credentials
+  security: Record<string, string>
 ): any {
   const result: any = {};
   for (const name of Object.keys(security)) {
@@ -212,7 +225,7 @@ function makeOasSecurities(
 
 function makeSwaggerSecurities(
   schemes: Record<string, SwaggerSecurityScheme>,
-  security: playbook.Credentials
+  security: Record<string, string>
 ): any {
   const result: any = {};
   for (const name of Object.keys(security)) {
@@ -225,4 +238,12 @@ function makeSwaggerSecurities(
     }
   }
   return { authorized: result };
+}
+function stripCredentialMethodNames(security: Record<string, string>): Record<string, string> {
+  const result: Record<string, string> = {};
+  for (const [key, value] of Object.entries(security)) {
+    const [credential, method] = key.split("/");
+    result[credential] = value;
+  }
+  return result;
 }

@@ -96,7 +96,7 @@ async function* executePlaybook(
 
     // skip auth for external requests
     const auth = request.operationId === undefined ? undefined : request.auth;
-    const security: playbook.Credentials = yield* executeAuth(client, oas, server, file, auth, [
+    const security: Record<string, string> = yield* executeAuth(client, oas, server, file, auth, [
       ...env,
       ...result,
     ]);
@@ -216,16 +216,21 @@ async function* executeAuth(
   auth: string[] | undefined,
   env: PlaybookEnvStack
 ): AsyncGenerator<PlaybookExecutorStep> {
-  const result: playbook.Credentials = {};
+  const result: Record<string, string> = {};
   if (auth === undefined) {
     return result;
   }
 
   for (const authName of auth) {
     yield { event: "auth-started", name: authName };
-    const credential = file.authenticationDetails[0][authName]; // FIXME better error handling
-    console.log("auth, processing credential", credential);
-    const value = yield* executeGetCredentialValue(client, oas, server, file, credential, env);
+    const [credentialName, methodName] = authName.split("/");
+    const credential = file.authenticationDetails[0][credentialName]; // FIXME better error handling
+    const method =
+      methodName === undefined
+        ? credential.methods[credential.default]
+        : credential.methods[methodName];
+    console.log("auth, processing credential", credential, method);
+    const value = yield* executeGetCredentialValue(client, oas, server, file, method, env);
     result[authName] = value;
     yield { event: "auth-finished" };
   }
@@ -240,11 +245,9 @@ async function* executeGetCredentialValue(
   oas: BundledSwaggerOrOasSpec,
   server: string,
   file: playbook.PlaybookBundle,
-  credential: playbook.Credential,
+  method: playbook.CredentialMethod,
   env: PlaybookEnvStack
 ): AsyncGenerator<PlaybookExecutorStep> {
-  const method = credential.methods[credential.default];
-
   let result: PlaybookEnvStack = [];
 
   if (method.requests !== undefined) {
