@@ -39,7 +39,7 @@ function getPossibleQueryMatch(text: string): MenuTextMatch | null {
 class VariableTypeaheadOption extends MenuOption {
   name: string;
 
-  constructor(name: string, picture: JSX.Element) {
+  constructor(name: string) {
     super(name);
     this.name = name;
   }
@@ -137,7 +137,7 @@ export default function VariablesPlugin({
   const options = useMemo(
     () =>
       results
-        .map((result) => new VariableTypeaheadOption(result, <i className="icon user" />))
+        .map((result) => new VariableTypeaheadOption(result))
         .slice(0, SUGGESTION_LIST_LENGTH_LIMIT),
     [results]
   );
@@ -209,7 +209,7 @@ export default function VariablesPlugin({
 const ENV_VAR_REGEX = /({{[\w-$]+}})/;
 
 const VariablesMenu = styled.div`
-  margin: 4px;
+  margin-top: 20px;
   background-color: var(${ThemeColorVariables.dropdownBackground});
   border: 1px solid var(${ThemeColorVariables.dropdownBorder});
   min-width: 150px;
