@@ -18,6 +18,8 @@ import Scenarios from "./Scenarios";
 import Servers from "./Servers";
 import AddRequest from "./components/AddRequest";
 import { startTryExecution } from "./slice";
+import { ExecutionResult } from "../components/scenario/types";
+import { findResult } from "../playbook-execution-handler";
 
 export default function Operation({ operationId }: { operationId: string }) {
   const dispatch = useAppDispatch();
@@ -124,7 +126,7 @@ export default function Operation({ operationId }: { operationId: string }) {
             oas={oas}
             stages={playbook.operations[operationId].before as playbook.StageReference[]}
             container={{ container: "operationBefore", operationId }}
-            executionResult={mockResult.operationBefore}
+            executionResult={findResult(mockResult, "operationBefore")}
             saveStage={saveStage}
             moveStage={moveStage}
             removeStage={removeStage}
@@ -163,7 +165,7 @@ export default function Operation({ operationId }: { operationId: string }) {
             oas={oas}
             stages={playbook.operations[operationId].after as playbook.StageReference[]}
             container={{ container: "operationAfter", operationId }}
-            executionResult={mockResult.operationAfter}
+            executionResult={findResult(mockResult, "operationAfter")}
             saveStage={saveStage}
             removeStage={removeStage}
             moveStage={moveStage}
@@ -186,36 +188,12 @@ export default function Operation({ operationId }: { operationId: string }) {
         }}
         title="Result"
       >
-        {tryResult.globalBefore.results.length > 0 && (
+        {tryResult.map((result) => (
           <>
-            <Separator title="Global before" />
-            <Responses result={tryResult.globalBefore} />
+            <Separator title={result.playbook} />
+            <Responses result={result} />
           </>
-        )}
-        {tryResult.operationBefore.results.length > 0 && (
-          <>
-            <Separator title="Before" />
-            <Responses result={tryResult.operationBefore} />
-          </>
-        )}
-        {tryResult.operationScenarios.results.length > 0 && (
-          <>
-            <Separator title="Scenario" />
-            <Responses result={tryResult.operationScenarios} />
-          </>
-        )}
-        {tryResult.operationAfter.results.length > 0 && (
-          <>
-            <Separator title="After" />
-            <Responses result={tryResult.operationAfter} />
-          </>
-        )}
-        {tryResult.globalAfter.results.length > 0 && (
-          <>
-            <Separator title="Global after" />
-            <Responses result={tryResult.globalAfter} />
-          </>
-        )}
+        ))}
       </CollapsibleSection>
     </Container>
   );

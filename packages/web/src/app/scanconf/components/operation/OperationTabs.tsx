@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { HttpMethod } from "@xliic/common/http";
 import { deref } from "@xliic/common/ref";
 
-import { TabList, TabButton } from "../../../../new-components/Tabs";
+import { TabList, TabButton, TabContainer } from "../../../../new-components/Tabs";
 
 import RequestBody from "./RequestBody";
 
@@ -58,37 +58,7 @@ export default function OperationTabs({
     ? makeOasTabs(oas, credentials, path, method, variables, isBodyPresent)
     : makeSwaggerTabs(oas, credentials, path, method, variables, isBodyPresent);
 
-  const activeId = tabs.filter((tab) => tab.enabled)?.[0]?.id;
-
-  if (activeId === undefined) {
-    return null;
-  }
-
-  const [activeTab, setActiveTab] = useState(activeId);
-
-  // TODO resets tabs on any change, perhaps should do it when switching beween operation os files?
-  useEffect(() => {
-    setActiveTab(tabs.filter((tab) => tab.enabled)?.[0].id);
-  }, [oas]);
-
-  return (
-    <Tabs.Root value={activeTab} onValueChange={setActiveTab}>
-      <TabList>
-        {tabs
-          .filter((tab) => tab.enabled)
-          .map((tab) => (
-            <TabButton key={tab.id} value={tab.id}>
-              {tab.title}
-            </TabButton>
-          ))}
-      </TabList>
-      {tabs.map((tab) => (
-        <Tabs.Content key={tab.id} value={tab.id}>
-          {tab.content}
-        </Tabs.Content>
-      ))}
-    </Tabs.Root>
-  );
+  return <TabContainer tabs={tabs} />;
 }
 
 function makeOasTabs(
@@ -108,7 +78,7 @@ function makeOasTabs(
       id: "body",
       title: "Body",
       content: <RequestBody oas={oas} requestBody={requestBody} variables={variables} />,
-      enabled: requestBody !== undefined && isBodyPresent,
+      disabled: requestBody === undefined || !isBodyPresent,
     },
     {
       id: "security",
@@ -120,43 +90,41 @@ function makeOasTabs(
           security={getOasSecurity(oas, path, method)}
         />
       ),
-      enabled: hasOasSecurityRequirements(oas, path, method),
+      disabled: !hasOasSecurityRequirements(oas, path, method),
     },
     {
       id: "path",
       title: "Path",
       content: <ParameterGroup oas={oas} group={parameters.path} />,
-      enabled: hasParameters(parameters.path),
+      disabled: hasNoParameters(parameters.path),
     },
     {
       id: "query",
       title: "Query",
       content: <ParameterGroup oas={oas} group={parameters.query} />,
-      enabled: hasParameters(parameters.query),
+      disabled: hasNoParameters(parameters.query),
     },
     {
       id: "header",
       title: "Header",
       content: <ParameterGroup oas={oas} group={parameters.header} />,
-      enabled: hasParameters(parameters.header),
+      disabled: hasNoParameters(parameters.header),
     },
     {
       id: "cookie",
       title: "Cookie",
       content: <ParameterGroup oas={oas} group={parameters.cookie} />,
-      enabled: hasParameters(parameters.cookie),
+      disabled: hasNoParameters(parameters.cookie),
     },
     {
       id: "environment",
       title: "Environment",
       content: <Environment name="environment" variables={variables} />,
-      enabled: true,
     },
     {
       id: "responses",
       title: "Response Processing",
       content: <ResponseProcessing />,
-      enabled: true,
     },
   ];
 }
@@ -176,7 +144,7 @@ function makeSwaggerTabs(
       id: "body",
       title: "Body",
       content: <RequestBodySwagger oas={oas} group={parameters.body} variables={variables} />,
-      enabled: hasParameters(parameters.body) && isBodyPresent,
+      disabled: hasNoParameters(parameters.body) || !isBodyPresent,
     },
     {
       id: "security",
@@ -188,47 +156,45 @@ function makeSwaggerTabs(
           security={getSwaggerSecurity(oas, path, method)}
         />
       ),
-      enabled: hasSwaggerSecurityRequirements(oas, path, method),
+      disabled: !hasSwaggerSecurityRequirements(oas, path, method),
     },
     {
       id: "formData",
       title: "Form",
       content: <ParameterGroup oas={oas} group={parameters.formData} />,
-      enabled: hasParameters(parameters.formData),
+      disabled: hasNoParameters(parameters.formData),
     },
     {
       id: "path",
       title: "Path",
       content: <ParameterGroup oas={oas} group={parameters.path} />,
-      enabled: hasParameters(parameters.path),
+      disabled: hasNoParameters(parameters.path),
     },
     {
       id: "query",
       title: "Query",
       content: <ParameterGroup oas={oas} group={parameters.query} />,
-      enabled: hasParameters(parameters.query),
+      disabled: hasNoParameters(parameters.query),
     },
     {
       id: "header",
       title: "Header",
       content: <ParameterGroup oas={oas} group={parameters.header} />,
-      enabled: hasParameters(parameters.header),
+      disabled: hasNoParameters(parameters.header),
     },
     {
       id: "environment",
       title: "Environment",
       content: <Environment name="environment" variables={variables} />,
-      enabled: true,
     },
     {
       id: "responses",
       title: "Response Processing",
       content: <ResponseProcessing />,
-      enabled: true,
     },
   ];
 }
 
-function hasParameters(parameters?: Record<string, unknown>) {
-  return parameters !== undefined && Object.keys(parameters).length > 0;
+function hasNoParameters(parameters?: Record<string, unknown>) {
+  return parameters === undefined || Object.keys(parameters).length === 0;
 }

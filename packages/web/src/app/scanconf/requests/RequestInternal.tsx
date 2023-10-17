@@ -31,7 +31,7 @@ export default function RequestInternal({
 
   const { oas, playbook, servers } = useAppSelector((state) => state.scanconf);
 
-  const result = useAppSelector((state) => state.requests.result);
+  const result = useAppSelector((state) => state.requests.result[state.requests.result.length - 1]);
 
   const onRun = (server: string, env: SimpleEnvironment) =>
     dispatch(executeRequest({ server, env }));
@@ -77,8 +77,6 @@ export default function RequestInternal({
   }
 
   const [inputEnv, setInputEnv] = useState(inputs);
-
-  const response = result.operationScenarios?.results?.[0];
 
   const setServer = (server: string) => dispatch(setTryitServer(server));
 
@@ -128,7 +126,9 @@ export default function RequestInternal({
         onClick={() => setResponseOpen(!isResponseOpen)}
         title="Result"
       >
-        {response && <ResponseCard defaultCollapsed={false} response={response} />}
+        {result?.results?.[0] && (
+          <ResponseCard defaultCollapsed={false} response={result.results[0]} />
+        )}
       </CollapsibleSection>
     </Container>
   );

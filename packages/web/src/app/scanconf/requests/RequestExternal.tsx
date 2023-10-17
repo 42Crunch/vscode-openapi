@@ -32,7 +32,7 @@ export default function RequestExternal({
 
   const { oas, playbook } = useAppSelector((state) => state.scanconf);
 
-  const result = useAppSelector((state) => state.requests.result);
+  const result = useAppSelector((state) => state.requests.result[state.requests.result.length - 1]);
 
   const onRun = (server: string, env: SimpleEnvironment) =>
     dispatch(executeRequest({ server, env }));
@@ -68,8 +68,6 @@ export default function RequestExternal({
   }
 
   const [inputEnv, setInputEnv] = useState(inputs);
-
-  const response = result.operationScenarios?.results?.[0];
 
   const prefs = useAppSelector((state) => state.prefs);
 
@@ -116,13 +114,13 @@ export default function RequestExternal({
           </Form>
         </Inputs>
       </CollapsibleSection>
-      {response && (
+      {result?.results?.[0] && (
         <CollapsibleSection
           isOpen={isResponseOpen}
           onClick={() => setResponseOpen(!isResponseOpen)}
           title="Result"
         >
-          <ResponseCard defaultCollapsed={false} response={response} />
+          <ResponseCard defaultCollapsed={false} response={result.results[0]} />
         </CollapsibleSection>
       )}
     </Container>

@@ -9,6 +9,8 @@ import Scenario from "./Scenario";
 import AddRequest from "./components/AddRequest";
 import * as localActions from "./slice";
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { ExecutionResult } from "../components/scenario/types";
+import { findResult } from "../playbook-execution-handler";
 
 export default function Scenarios({ operationId }: { operationId: string }) {
   const { playbook, oas } = useAppSelector((state) => state.scanconf);
@@ -60,7 +62,7 @@ export default function Scenarios({ operationId }: { operationId: string }) {
             oas={oas}
             stages={scenario.requests as playbook.StageReference[]}
             container={{ container: "operationScenarios", operationId, scenarioIndex }}
-            executionResult={result?.operationScenarios}
+            executionResult={findResult(result, "operationScenarios")}
             saveStage={saveStage}
             moveStage={moveStage}
             removeStage={removeStage}

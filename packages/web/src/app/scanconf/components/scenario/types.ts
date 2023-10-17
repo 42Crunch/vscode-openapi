@@ -11,7 +11,7 @@ export type OperationResult = {
   httpRequestPrepareError?: string;
   httpResponse?: HttpResponse | MockHttpResponseType;
   httpError?: HttpError;
-  auth: Record<string, PlaybookResult>;
+  auth: ExecutionResult;
   variablesReplaced?: {
     stack: PlaybookEnvStack;
     found: LookupResult[];
@@ -22,6 +22,8 @@ export type OperationResult = {
 };
 
 export type PlaybookResult = {
+  playbook: string;
   results: OperationResult[];
-  context: unknown;
 };
+
+export type ExecutionResult = PlaybookResult[];
