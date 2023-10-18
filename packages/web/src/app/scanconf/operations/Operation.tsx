@@ -3,14 +3,12 @@ import * as playbook from "@xliic/common/playbook";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { useState } from "react";
 import styled from "styled-components";
-import { ErrorBanner } from "../../../components/Banner";
-import Separator from "../../../components/Separator";
 import { makeEnvEnv } from "../../../core/playbook/execute";
 import { setTryitServer } from "../../../features/prefs/slice";
-import { goTo } from "../../../features/router/slice";
 import { runScan } from "../actions";
 import CollapsibleSection from "../components/CollapsibleSection";
-import Responses from "../components/scenario/Responses";
+import Execution from "../components/execution/Execution";
+import { findResult } from "../playbook-execution-handler";
 import * as actions from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import Scenario from "./Scenario";
@@ -18,8 +16,6 @@ import Scenarios from "./Scenarios";
 import Servers from "./Servers";
 import AddRequest from "./components/AddRequest";
 import { startTryExecution } from "./slice";
-import { findResult } from "../playbook-execution-handler";
-import Execution from "../components/execution/Execution";
 
 export default function Operation({ operationId }: { operationId: string }) {
   const dispatch = useAppDispatch();

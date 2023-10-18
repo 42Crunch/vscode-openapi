@@ -76,21 +76,21 @@ export function onMockExecuteScenario(
         const playbooks: [string, Stage[]][] = [];
 
         if (before.length > 0) {
-          playbooks.push(["Global Before", before]);
+          playbooks.push(["before", before]);
         }
 
         if (operation.before.length > 0) {
-          playbooks.push(["Before", operation.before]);
+          playbooks.push(["operationBefore", operation.before]);
         }
 
-        playbooks.push(["Scenario", operation.scenarios[scenarioId].requests]);
+        playbooks.push(["operationScenarios", operation.scenarios[scenarioId].requests]);
 
         if (operation.after.length > 0) {
-          playbooks.push(["After", operation.after]);
+          playbooks.push(["operationAfter", operation.after]);
         }
 
         if (after.length > 0) {
-          playbooks.push(["Global After", after]);
+          playbooks.push(["after", after]);
         }
 
         console.log("mock running playbook from listener");

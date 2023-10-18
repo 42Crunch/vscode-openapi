@@ -218,6 +218,7 @@ const Error = styled.div`
   align-items: center;
   gap: 4px;
   padding: 2px;
+  border-radius: 4px;
   color: var(${ThemeColorVariables.errorForeground});
   background-color: var(${ThemeColorVariables.errorBackground});
   > svg {

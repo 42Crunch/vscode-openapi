@@ -12,7 +12,7 @@ import * as localActions from "./slice";
 
 export default function Scenarios({ operationId }: { operationId: string }) {
   const { playbook, oas } = useAppSelector((state) => state.scanconf);
-  const { scenarioId, mockResult: result } = useAppSelector((state) => state.operations);
+  const { scenarioId, mockResult } = useAppSelector((state) => state.operations);
   const scenarios = playbook.operations[operationId].scenarios;
   const operationIds = Object.keys(playbook.operations);
   const requestIds = Object.keys(playbook.requests || {});
@@ -59,7 +59,7 @@ export default function Scenarios({ operationId }: { operationId: string }) {
             oas={oas}
             stages={scenario.requests as playbook.StageReference[]}
             container={{ container: "operationScenarios", operationId, scenarioIndex }}
-            executionResult={findResult(result, "operationScenarios")}
+            executionResult={findResult(mockResult, "operationScenarios")}
             saveStage={saveStage}
             moveStage={moveStage}
             removeStage={removeStage}
