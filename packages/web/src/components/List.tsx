@@ -7,6 +7,7 @@ import { TriangleExclamation } from "../icons";
 export type ListItem = {
   id: string;
   label: string;
+  menu?: JSX.Element;
 };
 
 export default function List({
@@ -34,6 +35,7 @@ export default function List({
               <SelectedItem key={item.id}>
                 <span>{item.label}</span>
                 {errors?.[item.id] !== undefined && <ErrorMarker message={errors[item.id]} />}
+                {item.menu}
               </SelectedItem>
             );
           }
@@ -41,6 +43,7 @@ export default function List({
             <Item onClick={() => setSelected(item.id)} key={item.id}>
               <span>{item.label}</span>
               {errors?.[item.id] !== undefined && <ErrorMarker message={errors[item.id]} />}
+              {item.menu}
             </Item>
           );
         })}

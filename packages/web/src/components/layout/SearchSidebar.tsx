@@ -11,6 +11,7 @@ export type Section = {
   title: string;
   items: ListItem[];
   menu?: React.ReactNode;
+  itemMenu?: React.ReactNode;
 };
 
 export type ItemId = {
@@ -111,6 +112,18 @@ const Content = styled.div`
 
 const Sections = styled.div`
   flex: 1;
+  > ul {
+    > li {
+      > .menu {
+        opacity: 0;
+      }
+    }
+    > li:hover {
+      > .menu {
+        opacity: 1;
+      }
+    }
+  }
 `;
 
 const Buttons = styled.div``;

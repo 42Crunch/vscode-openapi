@@ -100,6 +100,14 @@ export const slice = createSlice({
         state.playbook.requests[ref.id] = stage;
       }
     },
+    removeRequest: (state, { payload: ref }: PayloadAction<playbook.RequestRef>) => {
+      // only 'request' requests can be deleted
+      if (ref.type === "request") {
+        if (state.playbook.requests?.[ref.id] !== undefined) {
+          delete state.playbook.requests[ref.id];
+        }
+      }
+    },
     saveCredential: (
       state,
       {
@@ -240,6 +248,7 @@ export const {
   saveCredential,
   updateScanconf,
   saveRequest,
+  removeRequest,
 } = slice.actions;
 
 export default slice.reducer;
