@@ -18,8 +18,8 @@ import Scenarios from "./Scenarios";
 import Servers from "./Servers";
 import AddRequest from "./components/AddRequest";
 import { startTryExecution } from "./slice";
-import { ExecutionResult } from "../components/scenario/types";
 import { findResult } from "../playbook-execution-handler";
+import Execution from "../components/execution/Execution";
 
 export default function Operation({ operationId }: { operationId: string }) {
   const dispatch = useAppDispatch();
@@ -179,22 +179,16 @@ export default function Operation({ operationId }: { operationId: string }) {
           />
         </Content>
       </CollapsibleSection>
-      <CollapsibleSection
-        isOpen={isResultOpen}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setResultOpen(!isResultOpen);
-        }}
-        title="Result"
-      >
-        {tryResult.map((result) => (
-          <>
-            <Separator title={result.playbook} />
-            <Responses result={result} />
-          </>
-        ))}
-      </CollapsibleSection>
+
+      {tryResult.length > 0 && (
+        <CollapsibleSection
+          isOpen={isResultOpen}
+          onClick={() => setResultOpen(!isResultOpen)}
+          title="Result"
+        >
+          <Execution result={tryResult} />
+        </CollapsibleSection>
+      )}
     </Container>
   );
 }

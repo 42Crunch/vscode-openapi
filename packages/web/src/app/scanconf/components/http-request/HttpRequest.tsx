@@ -5,6 +5,7 @@ import CollapsibleCard, { BottomDescription, TopDescription } from "../Collapsib
 import { TabContainer } from "../../../../new-components/Tabs";
 import Body from "./Body";
 import Headers from "./Headers";
+import { ArrowRightFromBracket } from "../../../../icons";
 
 export default function HttpRequest({
   operationId,
@@ -18,7 +19,10 @@ export default function HttpRequest({
   return (
     <Container>
       <CollapsibleCard defaultCollapsed={defaultCollapsed}>
-        <BottomDescription>
+        <BottomDescription style={{ gap: "8px" }}>
+          <ArrowRightFromBracket
+            style={{ width: 14, height: 14, fill: `var(${ThemeColorVariables.foreground})` }}
+          />
           <Method>{request.method}</Method>
           <Path>{request.url}</Path>
         </BottomDescription>

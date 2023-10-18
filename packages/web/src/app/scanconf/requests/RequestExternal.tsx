@@ -20,6 +20,7 @@ import { makeEnvEnv } from "../../../core/playbook/execute";
 import { createDynamicVariables } from "../../../core/playbook/builtin-variables";
 import RequestCardExternal from "../components/scenario/RequestCardExternal";
 import { FileExport } from "../../../icons";
+import Execution from "../components/execution/Execution";
 
 export default function RequestExternal({
   request,
@@ -32,7 +33,7 @@ export default function RequestExternal({
 
   const { oas, playbook } = useAppSelector((state) => state.scanconf);
 
-  const result = useAppSelector((state) => state.requests.result[state.requests.result.length - 1]);
+  const executionResult = useAppSelector((state) => state.requests.result);
 
   const onRun = (server: string, env: SimpleEnvironment) =>
     dispatch(executeRequest({ server, env }));
@@ -114,13 +115,14 @@ export default function RequestExternal({
           </Form>
         </Inputs>
       </CollapsibleSection>
-      {result?.results?.[0] && (
+      {executionResult.length > 0 && (
         <CollapsibleSection
           isOpen={isResponseOpen}
           onClick={() => setResponseOpen(!isResponseOpen)}
           title="Result"
         >
-          <ResponseCard defaultCollapsed={false} response={result.results[0]} />
+          <Execution result={executionResult} />
+          {/* <ResponseCard defaultCollapsed={false} response={result.results[0]} /> */}
         </CollapsibleSection>
       )}
     </Container>

@@ -8,7 +8,7 @@ import { replaceEnv, replaceEnvVariables } from "./replace";
 import { makeExternalHttpRequest, makeHttpRequest } from "./http";
 import { PlaybookExecutorStep } from "./playbook";
 import { assignVariables } from "./variable-assignments";
-import { PlaybookEnv, PlaybookEnvStack, PlaybookVariableAssignments } from "./playbook-env";
+import { PlaybookEnv, PlaybookEnvStack } from "./playbook-env";
 import { MockHttpClient } from "./mock-http";
 
 export async function* executeAllPlaybooks(
@@ -230,7 +230,15 @@ async function* executeAuth(
         ? credential.methods[credential.default]
         : credential.methods[methodName];
     console.log("auth, processing credential", credential, method);
-    const value = yield* executeGetCredentialValue(client, oas, server, file, method, env);
+    const value = yield* executeGetCredentialValue(
+      client,
+      oas,
+      server,
+      file,
+      credentialName,
+      method,
+      env
+    );
     result[authName] = value;
     yield { event: "auth-finished" };
   }
@@ -245,13 +253,22 @@ async function* executeGetCredentialValue(
   oas: BundledSwaggerOrOasSpec,
   server: string,
   file: playbook.PlaybookBundle,
+  credentialName: string,
   method: playbook.CredentialMethod,
   env: PlaybookEnvStack
 ): AsyncGenerator<PlaybookExecutorStep> {
   let result: PlaybookEnvStack = [];
 
   if (method.requests !== undefined) {
-    result = yield* executePlaybook("auth", client, oas, server, file, method.requests, env);
+    result = yield* executePlaybook(
+      credentialName,
+      client,
+      oas,
+      server,
+      file,
+      method.requests,
+      env
+    );
   }
 
   if (result) {

@@ -19,10 +19,12 @@ export type OperationResult = {
   };
   variablesAssigned: PlaybookEnvStack;
   variableAssignmentError?: string;
+  status: "pending" | "success" | "failure";
 };
 
 export type PlaybookResult = {
   playbook: string;
+  status: "pending" | "success" | "failure";
   results: OperationResult[];
 };
 

@@ -27,7 +27,7 @@ test("execute auth", async () => {
 
   step({
     event: "playbook-started",
-    name: "auth",
+    name: "access-token",
   });
 
   step({

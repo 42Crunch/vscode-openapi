@@ -1,5 +1,6 @@
 export { default as AngleDown } from "./AngleDown";
 export { default as AngleUp } from "./AngleUp";
+export { default as ArrowRightFromBracket } from "./ArrowRightFromBracket";
 export { default as ArrowUpRightFromSquare } from "./ArrowUpRightFromSquare";
 export { default as Check } from "./Check";
 export { default as CircleCheckLight } from "./CircleCheckLight";
@@ -16,6 +17,7 @@ export { default as FileExport } from "./FileExport";
 export { default as Filter } from "./Filter";
 export { default as Flag } from "./Flag";
 export { default as GripVertical } from "./GripVertical";
+export { default as Key } from "./Key";
 export { default as Link } from "./Link";
 export { default as MagnifyingGlass } from "./MagnifyingGlass";
 export { default as Pen } from "./Pen";

@@ -2,9 +2,10 @@ import styled from "styled-components";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { AngleUp, AngleDown } from "../icons";
 
-export default function Separator({ title }: { title: string }) {
+export default function Separator({ title, icon }: { title: string; icon?: JSX.Element }) {
   return (
     <Container>
+      {icon}
       <div>{title}</div>
       <hr />
     </Container>

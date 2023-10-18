@@ -90,6 +90,13 @@ export default function Operations() {
                         }
                       : undefined,
                   },
+                  responses: {
+                    "200": {
+                      expectations: {
+                        httpStatus: 200,
+                      },
+                    },
+                  },
                 },
               })
             );

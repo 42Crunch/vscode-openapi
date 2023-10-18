@@ -69,21 +69,21 @@ export function onMockExecuteScenario(
         const playbooks: [string, Stage[]][] = [];
 
         if (before.length > 0) {
-          playbooks.push(["globalBefore", before]);
+          playbooks.push(["Global Before", before]);
         }
 
         if (operation.before.length > 0) {
-          playbooks.push(["operationBefore", operation.before]);
+          playbooks.push(["Before", operation.before]);
         }
 
-        playbooks.push(["operationScenarios", operation.scenarios[scenarioId].requests]);
+        playbooks.push(["Scenario", operation.scenarios[scenarioId].requests]);
 
         if (operation.after.length > 0) {
-          playbooks.push(["operationAfter", operation.after]);
+          playbooks.push(["After", operation.after]);
         }
 
         if (after.length > 0) {
-          playbooks.push(["globalAfter", after]);
+          playbooks.push(["Global After", after]);
         }
 
         console.log("mock running playbook from listener");
@@ -131,21 +131,21 @@ export function onTryExecuteScenario(
         const playbooks: [string, Stage[]][] = [];
 
         if (before.length > 0) {
-          playbooks.push(["globalBefore", before]);
+          playbooks.push(["Global Before", before]);
         }
 
         if (operation.before.length > 0) {
-          playbooks.push(["operationBefore", operation.before]);
+          playbooks.push(["Before", operation.before]);
         }
 
-        playbooks.push(["operationScenarios", operation.scenarios[scenarioId].requests]);
+        playbooks.push(["Scenario", operation.scenarios[scenarioId].requests]);
 
         if (operation.after.length > 0) {
-          playbooks.push(["operationAfter", operation.after]);
+          playbooks.push(["After", operation.after]);
         }
 
         if (after.length > 0) {
-          playbooks.push(["globalAfter", after]);
+          playbooks.push(["Global After", after]);
         }
 
         console.log("try running playbook from listener");
@@ -206,7 +206,7 @@ export function onExecuteRequest(
           env,
           [
             [
-              "operationScenarios",
+              "",
               [
                 {
                   ref: ref!,

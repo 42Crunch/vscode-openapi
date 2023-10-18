@@ -19,6 +19,7 @@ import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import { RequestRef } from "@xliic/common/playbook";
 import { makeEnvEnv } from "../../../core/playbook/execute";
 import { createDynamicVariables } from "../../../core/playbook/builtin-variables";
+import Execution from "../components/execution/Execution";
 
 export default function RequestInternal({
   request,
@@ -31,7 +32,7 @@ export default function RequestInternal({
 
   const { oas, playbook, servers } = useAppSelector((state) => state.scanconf);
 
-  const result = useAppSelector((state) => state.requests.result[state.requests.result.length - 1]);
+  const executionResult = useAppSelector((state) => state.requests.result);
 
   const onRun = (server: string, env: SimpleEnvironment) =>
     dispatch(executeRequest({ server, env }));
@@ -121,15 +122,20 @@ export default function RequestInternal({
           </Form>
         </Inputs>
       </CollapsibleSection>
-      <CollapsibleSection
-        isOpen={isResponseOpen}
-        onClick={() => setResponseOpen(!isResponseOpen)}
-        title="Result"
-      >
-        {result?.results?.[0] && (
+
+      {executionResult.length > 0 && (
+        <CollapsibleSection
+          isOpen={isResponseOpen}
+          onClick={() => setResponseOpen(!isResponseOpen)}
+          title="Result"
+        >
+          <Execution result={executionResult} />
+          {/* <ResponseCard defaultCollapsed={false} response={result.results[0]} /> */}
+        </CollapsibleSection>
+      )}
+      {/* {result?.results?.[0] && (
           <ResponseCard defaultCollapsed={false} response={result.results[0]} />
-        )}
-      </CollapsibleSection>
+        )} */}
     </Container>
   );
 }

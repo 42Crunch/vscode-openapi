@@ -72,6 +72,7 @@ export const PlaybookStepHandlers: PlaybookEventHandlers = {
     console.log("playbook started", event.name, JSON.stringify(stateCurrent));
     currentExecutionResult(stateCurrent, stateResult).push({
       playbook: event.name,
+      status: "pending",
       results: [],
     });
   },
@@ -85,6 +86,7 @@ export const PlaybookStepHandlers: PlaybookEventHandlers = {
       ref: event.ref,
       auth: [],
       variablesAssigned: [],
+      status: "pending",
     });
   },
   "auth-started": function (
@@ -107,6 +109,7 @@ export const PlaybookStepHandlers: PlaybookEventHandlers = {
     stateResult: ExecutionResult,
     event: PlaybookFinished
   ): void {
+    last(currentExecutionResult(stateCurrent, stateResult)).status = "success";
     console.log("finished playbook");
   },
   "playbook-aborted": function (
@@ -114,7 +117,7 @@ export const PlaybookStepHandlers: PlaybookEventHandlers = {
     stateResult: ExecutionResult,
     event: PlaybookAborted
   ): void {
-    //stateCurrent.pop();
+    last(currentExecutionResult(stateCurrent, stateResult)).status = "failure";
   },
   "payload-variables-substituted": function (
     stateCurrent: Current,
@@ -147,14 +150,18 @@ export const PlaybookStepHandlers: PlaybookEventHandlers = {
     stateResult: ExecutionResult,
     event: PlaybookHttpResponseReceived
   ): void {
-    currentOperationResult(stateCurrent, stateResult).httpResponse = event.response;
+    const operation = currentOperationResult(stateCurrent, stateResult);
+    operation.httpResponse = event.response;
+    operation.status = "success";
   },
   "http-error-received": function (
     stateCurrent: Current,
     stateResult: ExecutionResult,
     event: PlaybookHttpErrorReceived
   ): void {
-    currentOperationResult(stateCurrent, stateResult).httpError = event.error;
+    const operation = currentOperationResult(stateCurrent, stateResult);
+    operation.httpError = event.error;
+    operation.status = "failure";
   },
   "variables-assigned": function (
     stateCurrent: Current,
