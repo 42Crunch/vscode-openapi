@@ -44,7 +44,6 @@ export default function CredentialMethods({
         container,
         stage: {
           ref,
-          credentialSetIndex: 0,
         },
       })
     );

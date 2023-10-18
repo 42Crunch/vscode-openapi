@@ -38,7 +38,6 @@ export default function Scenarios({ operationId }: { operationId: string }) {
         container,
         stage: {
           ref,
-          credentialSetIndex: 0,
         },
       })
     );

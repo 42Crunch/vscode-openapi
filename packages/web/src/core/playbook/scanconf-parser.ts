@@ -124,7 +124,6 @@ function parseRequestStageReference(
     environment: parseCtxVariables(oas, file, reference.environment || {}),
     injectionKey: value(reference.injectionKey),
     expectedResponse: value(reference.expectedResponse),
-    credentialSetIndex: value(0),
   });
 }
 
@@ -141,7 +140,6 @@ function parseRequestStageContent(
     environment: parseCtxVariables(oas, file, content.environment || {}),
     injectionKey: value(content.injectionKey),
     ref: value(undefined),
-    credentialSetIndex: value(0),
     defaultResponse: value(content.defaultResponse),
     request: parseRequestRequest(oas, file, content.request, operationId),
     operationId: value(operationId),

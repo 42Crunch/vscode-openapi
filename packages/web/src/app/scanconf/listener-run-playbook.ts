@@ -210,7 +210,6 @@ export function onExecuteRequest(
               [
                 {
                   ref: ref!,
-                  credentialSetIndex: 0,
                 },
               ],
             ],

@@ -35,7 +35,6 @@ export default function Global() {
         container,
         stage: {
           ref,
-          credentialSetIndex: 0,
         },
       })
     );

@@ -189,7 +189,6 @@ export function wrapPlaybookRequest(stage: playbook.StageContent): Record<string
     operationId: stage.operationId,
     requestOperationId: stage.request.operationId,
     responses: wrapResponses(stage.responses),
-    credentialSetIndex: stage.credentialSetIndex,
     auth: stage.auth,
   };
 }
@@ -282,7 +281,6 @@ export function unwrapPlaybookRequest(request: FieldValues): playbook.StageConte
     environment: unwrapEnvironment(request.environment),
     defaultResponse: request.defaultResponse,
     responses: unwrapResponses(request.responses),
-    credentialSetIndex: request.credentialSetIndex,
     auth: request.auth,
     operationId: request.operationId,
   };

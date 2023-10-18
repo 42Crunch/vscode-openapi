@@ -15,6 +15,7 @@ export default function Scenario({
   saveStage,
   removeStage,
   moveStage,
+  fuzzing,
 }: {
   oas: BundledSwaggerOrOasSpec;
   stages: playbook.StageReference[];
@@ -23,6 +24,7 @@ export default function Scenario({
   saveStage: (location: playbook.StageLocation, stage: playbook.StageReference) => void;
   removeStage: (location: playbook.StageLocation) => void;
   moveStage: (location: playbook.StageLocation, to: number) => void;
+  fuzzing?: boolean;
 }) {
   const save = (location: playbook.StageLocation) => (stage: playbook.StageReference) =>
     saveStage(location, stage);
@@ -49,6 +51,7 @@ export default function Scenario({
               saveStage={save(location)}
               removeStage={remove(location)}
               location={location}
+              fuzzing={fuzzing}
             />
           </React.Fragment>
         );

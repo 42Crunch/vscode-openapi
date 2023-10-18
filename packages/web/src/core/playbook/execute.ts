@@ -101,8 +101,6 @@ async function* executePlaybook(
       ...result,
     ]);
 
-    console.log("exec security", security);
-
     const replacedStageEnv = replaceEnvVariables(step.environment || {}, [...env, ...result]);
 
     const stageEnv: PlaybookEnv = {
@@ -229,7 +227,6 @@ async function* executeAuth(
       methodName === undefined
         ? credential.methods[credential.default]
         : credential.methods[methodName];
-    console.log("auth, processing credential", credential, method);
     const value = yield* executeGetCredentialValue(
       client,
       oas,
@@ -242,8 +239,6 @@ async function* executeAuth(
     result[authName] = value;
     yield { event: "auth-finished" };
   }
-
-  console.log("a re", result);
 
   return result;
 }
@@ -274,11 +269,9 @@ async function* executeGetCredentialValue(
   if (result) {
     // FIXME -- report that the variables have been replaced
     const replacements = replaceEnv(method.credential, [...env, ...result]);
-    console.log("auth replacements", replacements);
     if (replacements.missing.length !== 0) {
       // something is not found, err
     }
-    console.log("here here", replacements.value);
     return replacements.value;
   } else {
     // err?

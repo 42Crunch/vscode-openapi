@@ -43,7 +43,6 @@ export default function Operation({ operationId }: { operationId: string }) {
         container,
         stage: {
           ref,
-          credentialSetIndex: 0,
         },
       })
     );

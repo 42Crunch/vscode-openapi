@@ -24,6 +24,7 @@ export default function Stage({
   saveStage,
   removeStage,
   location,
+  fuzzing,
 }: {
   stage: playbook.StageReference;
   location: playbook.StageLocation;
@@ -31,6 +32,7 @@ export default function Stage({
   result?: OperationResult;
   saveStage: (stage: playbook.StageReference) => void;
   removeStage: () => void;
+  fuzzing?: boolean;
 }) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "stage",
@@ -72,11 +74,12 @@ export default function Stage({
                 <span>Expected Response</span>
                 <Input name="expectedResponse" />
               </ExpectedResponse>
-              <Fuzzing>
-                <span>Fuzzing</span>
-                <Switch name="fuzzing" />
-              </Fuzzing>
-
+              {fuzzing && (
+                <Fuzzing>
+                  <span>Fuzzing</span>
+                  <Switch name="fuzzing" />
+                </Fuzzing>
+              )}
               <Grab className="grab">
                 <GripVertical />
               </Grab>

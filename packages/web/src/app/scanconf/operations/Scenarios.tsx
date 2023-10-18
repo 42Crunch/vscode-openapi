@@ -3,14 +3,12 @@ import * as playbook from "@xliic/common/playbook";
 import styled from "styled-components";
 import { Menu, MenuItem } from "../../../new-components/Menu";
 import { TabButton, TabList } from "../../../new-components/Tabs";
+import { findResult } from "../playbook-execution-handler";
 import * as actions from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import Scenario from "./Scenario";
 import AddRequest from "./components/AddRequest";
 import * as localActions from "./slice";
-import { ThemeColorVariables } from "@xliic/common/theme";
-import { ExecutionResult } from "../components/scenario/types";
-import { findResult } from "../playbook-execution-handler";
 
 export default function Scenarios({ operationId }: { operationId: string }) {
   const { playbook, oas } = useAppSelector((state) => state.scanconf);
@@ -36,7 +34,6 @@ export default function Scenarios({ operationId }: { operationId: string }) {
         container,
         stage: {
           ref,
-          credentialSetIndex: 0,
         },
       })
     );
@@ -66,6 +63,7 @@ export default function Scenarios({ operationId }: { operationId: string }) {
             saveStage={saveStage}
             moveStage={moveStage}
             removeStage={removeStage}
+            fuzzing
           />
           <AddRequest
             operationIds={operationIds}
@@ -79,20 +77,6 @@ export default function Scenarios({ operationId }: { operationId: string }) {
     </Tabs.Root>
   );
 }
-
-const Container = styled.div`
-  background-color: var(${ThemeColorVariables.background});
-  .grab,
-  .menu {
-    opacity: 0;
-  }
-  &:hover {
-    .grab,
-    .menu {
-      opacity: 1;
-    }
-  }
-`;
 
 const TabsContent = styled(Tabs.Content)`
   display: flex;
