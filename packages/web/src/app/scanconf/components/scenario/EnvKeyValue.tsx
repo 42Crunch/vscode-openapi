@@ -4,6 +4,10 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { TrashCan, ExclamationCircle } from "../../../../icons";
 import Select from "../Select";
 import LineEditor from "../../../../new-components/fields/LineEditor";
+import {
+  ENV_VAR_NAME_REGEX,
+  ENV_VAR_NAME_REGEX_MESSAGE,
+} from "../../../../core/playbook/variables";
 
 export default function EnvKeyValue({
   name,
@@ -24,8 +28,8 @@ export default function EnvKeyValue({
     control,
     rules: {
       pattern: {
-        value: /^[\w-_]+$/,
-        message: "Only the alphanumeric characters, minus or the underscore",
+        value: ENV_VAR_NAME_REGEX,
+        message: ENV_VAR_NAME_REGEX_MESSAGE,
       },
     },
   });

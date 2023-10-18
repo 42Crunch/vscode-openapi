@@ -2,6 +2,7 @@ import styled from "styled-components";
 import { useController } from "react-hook-form";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { TrashCan, ExclamationCircle } from "../../../icons";
+import { ENV_VAR_NAME_REGEX, ENV_VAR_NAME_REGEX_MESSAGE } from "../../../core/playbook/variables";
 
 export default function CredentialEntry({ name, remove }: { name: string; remove: () => void }) {
   const {
@@ -11,8 +12,8 @@ export default function CredentialEntry({ name, remove }: { name: string; remove
     name: `${name}.key`,
     rules: {
       pattern: {
-        value: /^[\w-]+$/,
-        message: "Only the alphanumeric characters or the underscore",
+        value: ENV_VAR_NAME_REGEX,
+        message: ENV_VAR_NAME_REGEX_MESSAGE,
       },
     },
   });

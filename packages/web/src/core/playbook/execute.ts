@@ -4,7 +4,7 @@ import { EnvData, SimpleEnvironment } from "@xliic/common/env";
 import * as playbook from "@xliic/common/playbook";
 import { Result } from "@xliic/common/result";
 
-import { replaceEnv, replaceEnvVariables } from "./replace";
+import { replaceEnv, replaceEnvVariables } from "./variables";
 import { makeExternalHttpRequest, makeHttpRequest } from "./http";
 import { PlaybookExecutorStep } from "./playbook";
 import { assignVariables } from "./variable-assignments";

@@ -18,6 +18,7 @@ import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 import { parseHttpsHostname } from "../../util";
 import { EnvData } from "@xliic/common/env";
 import { getParameters } from "../../util-swagger";
+import { ENV_VAR_REGEX } from "../playbook/variables";
 
 export async function makeHttpRequest(
   config: Config,
@@ -238,7 +239,6 @@ function replaceEnvVariables(body: unknown, env: EnvData) {
 }
 
 export function replaceEnvOld(value: string, env: EnvData): string {
-  const ENV_VAR_REGEX = /{{([\w.]+)}}/g;
   const SECRETS_PREFIX = "secrets.";
   return value.replace(ENV_VAR_REGEX, (match: string, name: string): string => {
     if (name.startsWith(SECRETS_PREFIX)) {

@@ -2,6 +2,12 @@ import { LookupFailure, LookupResult, ReplacementResult } from "@xliic/common/en
 import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 import { PlaybookEnvStack, lookup } from "./playbook-env";
 
+export const ENV_VAR_NAME_REGEX = /^([\w\-]+)$/;
+export const ENV_VAR_NAME_REGEX_MESSAGE = "Only the alphanumeric characters, minus or underscore";
+
+export const ENV_VAR_REGEX = /{{([\w\-$]+)}}/;
+export const ENTIRE_ENV_VAR_REGEX = /^{{([\w\-$]+)}}$/;
+
 export function replaceEnvVariables<T>(value: T, envStack: PlaybookEnvStack): ReplacementResult<T> {
   const missing: LookupFailure[] = [];
   const found: LookupResult[] = [];
@@ -24,9 +30,6 @@ export function replaceEnvVariables<T>(value: T, envStack: PlaybookEnvStack): Re
     value: replaced,
   };
 }
-
-const ENV_VAR_REGEX = /{{([\w.\-$]+)}}/g;
-const ENTIRE_ENV_VAR_REGEX = /^{{([\w.\-$]+)}}$/;
 
 export function replaceEnv(value: string, envStack: PlaybookEnvStack): ReplacementResult<unknown> {
   const missing: string[] = [];

@@ -16,8 +16,7 @@ import { useLexicalTextEntity } from "@lexical/react/useLexicalTextEntity";
 const SUGGESTION_LIST_LENGTH_LIMIT = 10;
 
 function checkForVariables(text: string, minMatchLength: number): MenuTextMatch | null {
-  const ENV_VAR_REGEX = /({{([\w.\-$^}]*))/;
-  const match = ENV_VAR_REGEX.exec(text);
+  const match = /({{([\w.\-$^}]*))/.exec(text);
 
   if (match !== null) {
     const matchingString = match[2];
@@ -95,7 +94,7 @@ export default function VariablesPlugin({
   );
 
   const getVariableMatch = useCallback((text: string) => {
-    const matchArr = ENV_VAR_REGEX.exec(text);
+    const matchArr = /({{[\w-$]+}})/.exec(text);
 
     if (matchArr === null) {
       return null;
@@ -205,8 +204,6 @@ export default function VariablesPlugin({
     />
   );
 }
-
-const ENV_VAR_REGEX = /({{[\w-$]+}})/;
 
 const VariablesMenu = styled.div`
   margin-top: 20px;

@@ -608,7 +608,7 @@ async function copyCurl(curl: string) {
 }
 
 export function replaceEnvOld(value: string, env: EnvData): string {
-  const ENV_VAR_REGEX = /{{([\w.]+)}}/g;
+  const ENV_VAR_REGEX = /{{([\w\-$]+)}}/;
   const SECRETS_PREFIX = "secrets.";
   return value.replace(ENV_VAR_REGEX, (match: string, name: string): string => {
     if (name.startsWith(SECRETS_PREFIX)) {

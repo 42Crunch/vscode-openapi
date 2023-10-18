@@ -5,7 +5,7 @@ import { useState } from "react";
 import styled from "styled-components";
 import Environment from "../components/scenario/Environment";
 import { PlaybookEnvStack } from "../../../core/playbook/playbook-env";
-import { replaceEnvVariables } from "../../../core/playbook/replace";
+import { replaceEnvVariables } from "../../../core/playbook/variables";
 import Form from "../../../new-components/Form";
 import { saveRequest } from "../slice";
 import { executeRequest } from "./slice";

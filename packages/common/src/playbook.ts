@@ -160,10 +160,6 @@ export type StageReference = {
   expectedResponse?: string;
   injectionKey?: string;
   ref: RequestRef;
-  // OAS operation can require authentication using one or more
-  // sets of credential (simpliest being single set containing single credential)
-  // securityCredentialSetIndex signifies wich set of credentials is being used
-  credentialSetIndex: number;
 };
 
 export type StageContent = {
@@ -176,10 +172,6 @@ export type StageContent = {
   injectionKey?: string;
   request: CRequest;
   operationId: string;
-  // OAS operation can require authentication using one or more
-  // sets of credential (simpliest being single set containing single credential)
-  // securityCredentialSetIndex signifies wich set of credentials is being used
-  credentialSetIndex: number;
 };
 
 export type ExternalStageContent = {
