@@ -111,7 +111,7 @@ export default function RequestExternal({
             data={inputs}
             saveData={(data) => setInputEnv(data)}
           >
-            <Environment name="env" variables={variables} />
+            <Environment name="env" variables={[]} />
           </Form>
         </Inputs>
       </CollapsibleSection>

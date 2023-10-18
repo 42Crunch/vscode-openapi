@@ -1,25 +1,24 @@
 import { SimpleEnvironment } from "@xliic/common/env";
+import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import * as playbook from "@xliic/common/playbook";
+import { RequestRef } from "@xliic/common/playbook";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { useState } from "react";
 import styled from "styled-components";
-import Environment from "../components/scenario/Environment";
-import RequestCard from "../components/scenario/RequestCard";
+import { createDynamicVariables } from "../../../core/playbook/builtin-variables";
+import { makeEnvEnv } from "../../../core/playbook/execute";
 import { PlaybookEnvStack } from "../../../core/playbook/playbook-env";
 import { replaceEnvVariables } from "../../../core/playbook/variables";
-import Form from "../../../new-components/Form";
-import { saveRequest } from "../slice";
-import { executeRequest } from "./slice";
-import { useAppDispatch, useAppSelector } from "../store";
-import CollapsibleSection from "../components/CollapsibleSection";
-import ResponseCard from "../components/scenario/ResponseCard";
-import Servers from "./Servers";
 import { setTryitServer } from "../../../features/prefs/slice";
-import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
-import { RequestRef } from "@xliic/common/playbook";
-import { makeEnvEnv } from "../../../core/playbook/execute";
-import { createDynamicVariables } from "../../../core/playbook/builtin-variables";
+import Form from "../../../new-components/Form";
+import CollapsibleSection from "../components/CollapsibleSection";
 import Execution from "../components/execution/Execution";
+import Environment from "../components/scenario/Environment";
+import RequestCard from "../components/scenario/RequestCard";
+import { saveRequest } from "../slice";
+import { useAppDispatch, useAppSelector } from "../store";
+import Servers from "./Servers";
+import { executeRequest } from "./slice";
 
 export default function RequestInternal({
   request,
@@ -118,7 +117,7 @@ export default function RequestInternal({
             data={inputs}
             saveData={(data) => setInputEnv(data)}
           >
-            <Environment name="env" variables={variables} />
+            <Environment name="env" variables={[]} />
           </Form>
         </Inputs>
       </CollapsibleSection>
