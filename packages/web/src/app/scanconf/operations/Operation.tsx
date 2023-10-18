@@ -62,7 +62,10 @@ export default function Operation({ operationId }: { operationId: string }) {
 
   const server = getPreferredServer(oas, prefs.tryitServer);
 
-  const [scanenv, scanenvError] = makeEnvEnv(playbook.environments["default"], env);
+  const [scanenv, scanenvError] = makeEnvEnv(
+    playbook.environments[playbook.runtimeConfiguration?.environment || "default"],
+    env
+  );
 
   const [hasTried, setHasTried] = useState(false);
 
@@ -129,6 +132,8 @@ export default function Operation({ operationId }: { operationId: string }) {
             saveStage={saveStage}
             moveStage={moveStage}
             removeStage={removeStage}
+            operations={playbook.operations}
+            requests={playbook.requests}
           />
           <AddRequest
             operationIds={operationIds}
@@ -168,6 +173,8 @@ export default function Operation({ operationId }: { operationId: string }) {
             saveStage={saveStage}
             removeStage={removeStage}
             moveStage={moveStage}
+            operations={playbook.operations}
+            requests={playbook.requests}
           />
           <AddRequest
             operationIds={operationIds}

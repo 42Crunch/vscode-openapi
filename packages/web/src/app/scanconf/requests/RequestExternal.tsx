@@ -1,26 +1,23 @@
 import { SimpleEnvironment } from "@xliic/common/env";
+import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import * as playbook from "@xliic/common/playbook";
+import { RequestRef } from "@xliic/common/playbook";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { useState } from "react";
 import styled from "styled-components";
-import Environment from "../components/scenario/Environment";
+import { createDynamicVariables } from "../../../core/playbook/builtin-variables";
+import { makeEnvEnv } from "../../../core/playbook/execute";
 import { PlaybookEnvStack } from "../../../core/playbook/playbook-env";
 import { replaceEnvVariables } from "../../../core/playbook/variables";
-import Form from "../../../new-components/Form";
-import { saveRequest } from "../slice";
-import { executeRequest } from "./slice";
-import { useAppDispatch, useAppSelector } from "../store";
-import CollapsibleSection from "../components/CollapsibleSection";
-import ResponseCard from "../components/scenario/ResponseCard";
-import Servers from "./Servers";
-import { setTryitServer } from "../../../features/prefs/slice";
-import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
-import { RequestRef } from "@xliic/common/playbook";
-import { makeEnvEnv } from "../../../core/playbook/execute";
-import { createDynamicVariables } from "../../../core/playbook/builtin-variables";
-import RequestCardExternal from "../components/scenario/RequestCardExternal";
 import { FileExport } from "../../../icons";
+import Form from "../../../new-components/Form";
+import CollapsibleSection from "../components/CollapsibleSection";
 import Execution from "../components/execution/Execution";
+import Environment from "../components/scenario/Environment";
+import RequestCardExternal from "../components/scenario/RequestCardExternal";
+import { saveRequest } from "../slice";
+import { useAppDispatch, useAppSelector } from "../store";
+import { executeRequest } from "./slice";
 
 export default function RequestExternal({
   request,
@@ -44,7 +41,10 @@ export default function RequestExternal({
   const env: PlaybookEnvStack = [createDynamicVariables()];
 
   const eenv = useAppSelector((state) => state.env.data);
-  const [scanenv, scanenvError] = makeEnvEnv(playbook.environments["default"], eenv);
+  const [scanenv, scanenvError] = makeEnvEnv(
+    playbook.environments[playbook.runtimeConfiguration?.environment || "default"],
+    eenv
+  );
   if (scanenvError === undefined) {
     env.push(scanenv[0]);
   }

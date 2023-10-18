@@ -69,6 +69,8 @@ export default function Scenarios({ operationId }: { operationId: string }) {
               saveStage={saveStage}
               moveStage={moveStage}
               removeStage={removeStage}
+              operations={playbook.operations}
+              requests={playbook.requests}
             />
             <AddRequest
               operationIds={operationIds}

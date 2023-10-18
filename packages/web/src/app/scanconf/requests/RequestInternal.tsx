@@ -51,7 +51,10 @@ export default function RequestInternal({
   const env: PlaybookEnvStack = [createDynamicVariables()];
 
   const eenv = useAppSelector((state) => state.env.data);
-  const [scanenv, scanenvError] = makeEnvEnv(playbook.environments["default"], eenv);
+  const [scanenv, scanenvError] = makeEnvEnv(
+    playbook.environments[playbook.runtimeConfiguration?.environment || "default"],
+    eenv
+  );
   if (scanenvError === undefined) {
     env.push(scanenv[0]);
   }

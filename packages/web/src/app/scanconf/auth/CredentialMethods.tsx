@@ -73,6 +73,8 @@ export default function CredentialMethods({
             saveStage={saveStage}
             moveStage={moveStage}
             removeStage={removeStage}
+            operations={playbook.operations}
+            requests={playbook.requests}
           />
           <AddRequest
             operationIds={operationIds}

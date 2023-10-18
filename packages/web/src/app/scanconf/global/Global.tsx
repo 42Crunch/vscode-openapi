@@ -64,6 +64,8 @@ export default function Global() {
             saveStage={saveStage}
             moveStage={moveStage}
             removeStage={removeStage}
+            operations={playbook.operations}
+            requests={playbook.requests}
           />
           <AddRequest
             operationIds={operationIds}
@@ -91,6 +93,8 @@ export default function Global() {
             saveStage={saveStage}
             removeStage={removeStage}
             moveStage={moveStage}
+            operations={playbook.operations}
+            requests={playbook.requests}
           />
           <AddRequest
             operationIds={operationIds}
