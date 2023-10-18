@@ -17,9 +17,7 @@ export default function Environment({ name }: { name: string }) {
 
   const environment = environments[name];
 
-  const [scanenv, scanenvError] = makeEnvEnv(environment, env);
-
-  console.log("make env env", scanenv, scanenvError);
+  const { missing } = makeEnvEnv(environment, env);
 
   return (
     <Form
@@ -28,12 +26,12 @@ export default function Environment({ name }: { name: string }) {
       data={environment}
       saveData={(environment) => dispatch(saveEnvironment({ name, environment }))}
     >
-      <EnvironmentForm missing={scanenvError} />
-      {scanenvError !== undefined && (
+      <EnvironmentForm missing={missing} />
+      {missing.length > 0 && (
         <ErrorBanner
           message={
             "Some of the required variables are not set, plesse set these in the IDE Environment: " +
-            scanenvError.join(", ")
+            missing.join(", ")
           }
         ></ErrorBanner>
       )}

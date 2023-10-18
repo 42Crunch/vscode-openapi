@@ -14,19 +14,26 @@ import { executeAllPlaybooks } from "../../core/playbook/execute";
 import { MockHttpClient, MockHttpResponse } from "../../core/playbook/mock-http";
 import { PlaybookEnvStack } from "../../core/playbook/playbook-env";
 import {
-  addMockExecutionStep,
+  addMockOperationExecutionStep,
   addTryExecutionStep,
-  resetMockExecution,
+  resetMockOperationExecution,
   resetTryExecution,
   setOperationId,
   setScenarioId,
   startTryExecution,
 } from "./operations/slice";
-import { executeRequest, addExecutionStep, setRequestId } from "./requests/slice";
+import {
+  executeRequest,
+  addExecutionStep,
+  setRequestId,
+  addMockRequestExecutionStep,
+  resetMockRequestExecution,
+} from "./requests/slice";
 import { AppDispatch, RootState } from "./store";
 import { addStage, moveStage, saveEnvironment, saveOperationReference, saveRequest } from "./slice";
 import { showScanconfOperation } from "./actions";
 import { createDynamicVariables } from "../../core/playbook/builtin-variables";
+import { goTo } from "../../features/router/slice";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 
@@ -87,7 +94,7 @@ export function onMockExecuteScenario(
         }
 
         console.log("mock running playbook from listener");
-        listenerApi.dispatch(resetMockExecution());
+        listenerApi.dispatch(resetMockOperationExecution());
         for await (const step of executeAllPlaybooks(
           mockHttpClient,
           oas,
@@ -97,7 +104,51 @@ export function onMockExecuteScenario(
           env,
           playbooks
         )) {
-          listenerApi.dispatch(addMockExecutionStep(step));
+          listenerApi.dispatch(addMockOperationExecutionStep(step));
+        }
+      },
+    });
+}
+
+export function onMockExecuteRequest(
+  startAppListening: AppStartListening,
+  host: HttpCapableWebappHost
+) {
+  return () =>
+    startAppListening({
+      matcher: isAnyOf(goTo, setRequestId, saveRequest),
+      effect: async (action, listenerApi) => {
+        const {
+          scanconf: { oas, playbook },
+          env: { data: envData },
+          requests: { ref },
+          router: {
+            current: [page],
+          },
+        } = listenerApi.getState();
+
+        if (page !== "requests") {
+          return;
+        }
+
+        const mockHttpClient: MockHttpClient = async () => [MockHttpResponse, undefined];
+
+        const env: PlaybookEnvStack = [createDynamicVariables()];
+
+        const playbooks: [string, Stage[]][] = [["", [{ ref: ref! }]]];
+
+        console.log("mock request running playbook from listener");
+        listenerApi.dispatch(resetMockRequestExecution());
+        for await (const step of executeAllPlaybooks(
+          mockHttpClient,
+          oas,
+          "http://localhost", // doesn't matter
+          playbook,
+          envData,
+          env,
+          playbooks
+        )) {
+          listenerApi.dispatch(addMockRequestExecutionStep(step));
         }
       },
     });
@@ -179,7 +230,7 @@ export function onExecuteRequest(
           env: { data: envData },
         } = listenerApi.getState();
 
-        const { env: inputs, server } = action.payload;
+        const { inputs, server } = action.payload;
 
         const send = makeSend(host);
         const receive = makeReceive(listenerApi.take);

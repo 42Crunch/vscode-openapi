@@ -31,53 +31,28 @@ export default function RequestInternal({
 
   const { oas, playbook, servers } = useAppSelector((state) => state.scanconf);
 
-  const executionResult = useAppSelector((state) => state.requests.result);
+  const {
+    result: executionResult,
+    mockResult,
+    mockMissingVariables: missingVariables,
+  } = useAppSelector((state) => state.requests);
 
-  const onRun = (server: string, env: SimpleEnvironment) =>
-    dispatch(executeRequest({ server, env }));
+  const onRun = (server: string, inputs: SimpleEnvironment) =>
+    dispatch(executeRequest({ server, inputs }));
 
   const onSaveRequest = (stage: playbook.StageContent) =>
     dispatch(saveRequest({ ref: requestRef, stage }));
 
   const credentials = playbook.authenticationDetails[0];
 
-  const requiredCredentials = request?.auth?.map((name) => {
-    const credential = credentials[name];
-    if (credential) {
-      return credential.methods[credential.default].credential;
-    }
-  });
-
-  const env: PlaybookEnvStack = [createDynamicVariables()];
-
-  const eenv = useAppSelector((state) => state.env.data);
-  const [scanenv, scanenvError] = makeEnvEnv(
-    playbook.environments[playbook.runtimeConfiguration?.environment || "default"],
-    eenv
-  );
-  if (scanenvError === undefined) {
-    env.push(scanenv[0]);
-  }
-
-  const replacements = replaceEnvVariables(request, [...env]);
-  const authReplacements = replaceEnvVariables(requiredCredentials || {}, [...env]);
-
-  const missing = [...new Set([...replacements.missing, ...authReplacements.missing])];
-
-  const variables = getVariableNamesFromEnvStack(env);
-
-  for (const entry of env) {
-    for (const name of Object.keys(entry.env)) {
-      if (!variables.includes(name)) {
-        variables.push(name);
-      }
-    }
-  }
-
   const inputs: SimpleEnvironment = {};
-  for (const name of missing) {
+  for (const name of missingVariables) {
     inputs[name] = "";
   }
+
+  const variables = getVariableNamesFromEnvStack(
+    mockResult?.[0]?.results?.[0]?.variablesReplaced?.stack || []
+  );
 
   const [inputEnv, setInputEnv] = useState(inputs);
 

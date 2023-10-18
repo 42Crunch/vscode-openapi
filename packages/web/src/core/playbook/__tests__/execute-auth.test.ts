@@ -60,6 +60,10 @@ test("execute auth", async () => {
   });
 
   step({
+    event: "credential-variables-substituted",
+  });
+
+  step({
     event: "auth-finished",
   });
 

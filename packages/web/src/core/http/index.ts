@@ -240,7 +240,7 @@ function replaceEnvVariables(body: unknown, env: EnvData) {
 
 export function replaceEnvOld(value: string, env: EnvData): string {
   const SECRETS_PREFIX = "secrets.";
-  return value.replace(ENV_VAR_REGEX, (match: string, name: string): string => {
+  return value.replace(ENV_VAR_REGEX(), (match: string, name: string): string => {
     if (name.startsWith(SECRETS_PREFIX)) {
       const key = name.substring(SECRETS_PREFIX.length, name.length);
       return env.secrets.hasOwnProperty(key) ? (env.secrets[key] as string) : match;

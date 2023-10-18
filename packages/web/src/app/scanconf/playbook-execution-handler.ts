@@ -13,6 +13,7 @@ import {
   PlaybookVariablesAssigned,
   PlaybookVariablesAssignmentError,
   RequestStarted,
+  PlaybookCredentialVariablesReplaced,
 } from "../../core/playbook/playbook";
 import { ExecutionResult, OperationResult, PlaybookResult } from "./components/scenario/types";
 
@@ -129,6 +130,13 @@ export const PlaybookStepHandlers: PlaybookEventHandlers = {
       found: event.found,
       missing: event.missing,
     };
+  },
+  "credential-variables-substituted": function (
+    stateCurrent: Current,
+    stateResult: ExecutionResult,
+    event: PlaybookCredentialVariablesReplaced
+  ): void {
+    // FIXME what should we do?
   },
   "http-request-prepared": function (
     stateCurrent: Current,

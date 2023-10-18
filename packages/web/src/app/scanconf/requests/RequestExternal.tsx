@@ -28,45 +28,28 @@ export default function RequestExternal({
 }) {
   const dispatch = useAppDispatch();
 
-  const { oas, playbook } = useAppSelector((state) => state.scanconf);
+  const { oas } = useAppSelector((state) => state.scanconf);
 
-  const executionResult = useAppSelector((state) => state.requests.result);
+  const {
+    result: executionResult,
+    mockResult,
+    mockMissingVariables: missingVariables,
+  } = useAppSelector((state) => state.requests);
 
-  const onRun = (server: string, env: SimpleEnvironment) =>
-    dispatch(executeRequest({ server, env }));
+  const onRun = (server: string, inputs: SimpleEnvironment) =>
+    dispatch(executeRequest({ server, inputs }));
 
   const onSaveRequest = (stage: playbook.ExternalStageContent) =>
     dispatch(saveRequest({ ref: requestRef, stage }));
 
-  const env: PlaybookEnvStack = [createDynamicVariables()];
-
-  const eenv = useAppSelector((state) => state.env.data);
-  const [scanenv, scanenvError] = makeEnvEnv(
-    playbook.environments[playbook.runtimeConfiguration?.environment || "default"],
-    eenv
-  );
-  if (scanenvError === undefined) {
-    env.push(scanenv[0]);
-  }
-
-  const replacements = replaceEnvVariables(request, [...env]);
-
-  const missing = [...new Set([...replacements.missing])];
-
-  const variables = getVariableNamesFromEnvStack(env);
-
-  for (const entry of env) {
-    for (const name of Object.keys(entry.env)) {
-      if (!variables.includes(name)) {
-        variables.push(name);
-      }
-    }
-  }
-
   const inputs: SimpleEnvironment = {};
-  for (const name of missing) {
+  for (const name of missingVariables) {
     inputs[name] = "";
   }
+
+  const variables = getVariableNamesFromEnvStack(
+    mockResult?.[0]?.results?.[0]?.variablesReplaced?.stack || []
+  );
 
   const [inputEnv, setInputEnv] = useState(inputs);
 

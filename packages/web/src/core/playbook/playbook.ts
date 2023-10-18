@@ -48,6 +48,13 @@ export type PlaybookPayloadVariablesReplaced = {
   missing: LookupFailure[];
 };
 
+export type PlaybookCredentialVariablesReplaced = {
+  event: "credential-variables-substituted";
+  stack: PlaybookEnvStack;
+  found: LookupResult[];
+  missing: LookupFailure[];
+};
+
 export type PlaybookHttpRequestPrepared = {
   event: "http-request-prepared";
   request: HttpRequest;
@@ -87,6 +94,7 @@ export type PlaybookExecutorStep =
   | PlaybookFinished
   | PlaybookAborted
   | PlaybookPayloadVariablesReplaced
+  | PlaybookCredentialVariablesReplaced
   | PlaybookHttpRequestPrepared
   | PlaybookHttpRequestPrepareError
   | PlaybookHttpResponseReceived

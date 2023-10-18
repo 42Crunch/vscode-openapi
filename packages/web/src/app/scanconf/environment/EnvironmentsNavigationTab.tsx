@@ -15,14 +15,12 @@ export default function EnvironmentsNavigationTab() {
     return <Container>Environment</Container>;
   }
 
-  const environment = environments[runtimeConfiguration?.environment || "default"];
-
-  const [scanenv, scanenvError] = makeEnvEnv(environment, env);
+  const { missing } = makeEnvEnv(environments[runtimeConfiguration?.environment || "default"], env);
 
   return (
     <Container>
       Environment
-      {scanenvError !== undefined && <TriangleExclamation />}
+      {missing.length > 0 && <TriangleExclamation />}
     </Container>
   );
 }

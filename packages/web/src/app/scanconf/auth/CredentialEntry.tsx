@@ -12,7 +12,7 @@ export default function CredentialEntry({ name, remove }: { name: string; remove
     name: `${name}.key`,
     rules: {
       pattern: {
-        value: ENV_VAR_NAME_REGEX,
+        value: ENV_VAR_NAME_REGEX(),
         message: ENV_VAR_NAME_REGEX_MESSAGE,
       },
     },

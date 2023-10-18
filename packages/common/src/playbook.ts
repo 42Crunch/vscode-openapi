@@ -86,7 +86,7 @@ export type PlaybookBundle = {
   before: Stage[];
   after: Stage[];
   authorizationTests?: unknown;
-  requests?: Record<string, StageContent | ExternalStageContent>;
+  requests: Record<string, StageContent | ExternalStageContent>;
 };
 
 export type RuntimeConfiguration = {

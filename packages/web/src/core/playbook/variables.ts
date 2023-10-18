@@ -2,11 +2,11 @@ import { LookupFailure, LookupResult, ReplacementResult } from "@xliic/common/en
 import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 import { PlaybookEnvStack, lookup } from "./playbook-env";
 
-export const ENV_VAR_NAME_REGEX = /^([\w\-]+)$/;
+export const ENV_VAR_NAME_REGEX = () => /^([\w\-]+)$/g;
 export const ENV_VAR_NAME_REGEX_MESSAGE = "Only the alphanumeric characters, minus or underscore";
 
-export const ENV_VAR_REGEX = /{{([\w\-$]+)}}/;
-export const ENTIRE_ENV_VAR_REGEX = /^{{([\w\-$]+)}}$/;
+export const ENV_VAR_REGEX = () => /{{([\w\-$]+)}}/g;
+export const ENTIRE_ENV_VAR_REGEX = () => /^{{([\w\-$]+)}}$/;
 
 export function replaceEnvVariables<T>(value: T, envStack: PlaybookEnvStack): ReplacementResult<T> {
   const missing: LookupFailure[] = [];
@@ -36,7 +36,7 @@ export function replaceEnv(value: string, envStack: PlaybookEnvStack): Replaceme
   const found: LookupResult[] = [];
 
   // ENTIRE_ENV_VAR_REGEX replaces entire value, possibly changing its type
-  const matches = value.match(ENTIRE_ENV_VAR_REGEX);
+  const matches = value.match(ENTIRE_ENV_VAR_REGEX());
   if (matches && matches.length === 2) {
     const name = matches[1];
     const result = lookup(envStack, name);
@@ -51,8 +51,9 @@ export function replaceEnv(value: string, envStack: PlaybookEnvStack): Replaceme
 
   // ENV_VAR_REGEX replaces part of a string value matched, resulting value is always a string
   const result = value.replace(
-    ENV_VAR_REGEX,
+    ENV_VAR_REGEX(),
     (match: string, name: string, offset: number): string => {
+      console.log("you replace", name);
       const result = lookup(envStack, name);
       if (result === undefined) {
         missing.push(name);

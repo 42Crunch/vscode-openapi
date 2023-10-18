@@ -1,20 +1,11 @@
 import * as playbook from "@xliic/common/playbook";
-import { ThemeColorVariables } from "@xliic/common/theme";
-import styled from "styled-components";
-
 import { useState } from "react";
-import { FileExport, Play } from "../../../icons";
+import styled from "styled-components";
 import CollapsibleSection from "../components/CollapsibleSection";
-import { useAppDispatch, useAppSelector } from "../store";
-import * as actions from "../slice";
-import { setTryitServer } from "../../../features/prefs/slice";
-import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
-import Responses from "../components/scenario/Responses";
-import Separator from "../../../components/Separator";
-import { runScan } from "../actions";
-import { makeEnvEnv } from "../../../core/playbook/execute";
 import Scenario from "../operations/Scenario";
 import AddRequest from "../operations/components/AddRequest";
+import * as actions from "../slice";
+import { useAppDispatch, useAppSelector } from "../store";
 
 export default function Global() {
   const dispatch = useAppDispatch();

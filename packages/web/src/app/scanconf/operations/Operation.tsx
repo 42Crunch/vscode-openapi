@@ -62,12 +62,10 @@ export default function Operation({ operationId }: { operationId: string }) {
 
   const server = getPreferredServer(oas, prefs.tryitServer);
 
-  const [scanenv, scanenvError] = makeEnvEnv(
+  const { simple } = makeEnvEnv(
     playbook.environments[playbook.runtimeConfiguration?.environment || "default"],
     env
   );
-
-  const [hasTried, setHasTried] = useState(false);
 
   return (
     <Container>
@@ -75,43 +73,23 @@ export default function Operation({ operationId }: { operationId: string }) {
         servers={servers}
         selected={server}
         onTry={(server: string) => {
-          setHasTried(true);
           dispatch(startTryExecution(server));
         }}
         onScan={(server: string) => {
-          setHasTried(true);
-          if (scanenvError == undefined) {
-            // FIXME display error if env variables are not available
-            dispatch(
-              runScan({
-                path: playbook.operations[operationId].request.request.path,
-                method: playbook.operations[operationId].request.request.method,
-                operationId,
-                env: {
-                  SCAN42C_HOST: server,
-                  ...scanenv[1],
-                },
-              })
-            );
-          }
+          dispatch(
+            runScan({
+              path: playbook.operations[operationId].request.request.path,
+              method: playbook.operations[operationId].request.request.method,
+              operationId,
+              env: {
+                SCAN42C_HOST: server,
+                ...simple,
+              },
+            })
+          );
         }}
         onChange={setServer}
       />
-      {scanenvError && hasTried && (
-        <ErrorBanner
-          message={"Please set required environment variables: " + scanenvError.join(", ")}
-        >
-          <GoTo
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-              dispatch(goTo(["environments"]));
-            }}
-          >
-            Go to "Environment" tab
-          </GoTo>
-        </ErrorBanner>
-      )}
       <Header>
         <Title>{operationId}</Title>
       </Header>

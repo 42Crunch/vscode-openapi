@@ -1,15 +1,13 @@
-import { HttpClient, HttpRequest } from "@xliic/common/http";
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
+import { HttpClient } from "@xliic/common/http";
+import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
 import * as playbook from "@xliic/common/playbook";
-import { Result } from "@xliic/common/result";
-
-import { replaceEnv, replaceEnvVariables } from "./variables";
 import { makeExternalHttpRequest, makeHttpRequest } from "./http";
-import { PlaybookExecutorStep } from "./playbook";
-import { assignVariables } from "./variable-assignments";
-import { PlaybookEnv, PlaybookEnvStack } from "./playbook-env";
 import { MockHttpClient } from "./mock-http";
+import { PlaybookExecutorStep } from "./playbook";
+import { PlaybookEnv, PlaybookEnvStack } from "./playbook-env";
+import { assignVariables } from "./variable-assignments";
+import { replaceEnv, replaceEnvVariables } from "./variables";
 
 export async function* executeAllPlaybooks(
   client: HttpClient | MockHttpClient,
@@ -23,20 +21,9 @@ export async function* executeAllPlaybooks(
   const result: PlaybookEnvStack = [];
 
   const environmentName = file.runtimeConfiguration?.environment || "default";
-  const environment = file?.environments?.[environmentName];
+  const environment = file?.environments?.[environmentName] || { variables: {} };
 
-  const [ee, eeError] =
-    environment !== undefined
-      ? makeEnvEnv(environment, envenv)
-      : [
-          [{ id: "empty", env: {}, assignments: [] }, {}] as [PlaybookEnv, SimpleEnvironment],
-          undefined,
-        ];
-
-  if (eeError !== undefined) {
-    console.log("error eeerrorr", eeError, envenv);
-    return; // FIXME emit error
-  }
+  const { environment: playbookEnv } = makeEnvEnv(environment, envenv);
 
   for (const [name, requests] of playbooks) {
     const playbookResult: PlaybookEnvStack = yield* executePlaybook(
@@ -46,7 +33,7 @@ export async function* executeAllPlaybooks(
       server,
       file,
       requests,
-      [ee[0], ...env, ...result]
+      [playbookEnv, ...env, ...result]
     );
 
     if (playbookResult !== undefined) {
@@ -266,12 +253,23 @@ async function* executeGetCredentialValue(
     );
   }
 
+  // FIXME what happens if we fail to execute credential requests[]?
+
   if (result) {
-    // FIXME -- report that the variables have been replaced
-    const replacements = replaceEnv(method.credential, [...env, ...result]);
+    const credentialEnvStack = [...env, ...result];
+
+    const replacements = replaceEnv(method.credential, credentialEnvStack);
     if (replacements.missing.length !== 0) {
       // something is not found, err
     }
+
+    yield {
+      event: "credential-variables-substituted",
+      stack: credentialEnvStack,
+      found: replacements.found,
+      missing: replacements.missing,
+    };
+
     return replacements.value;
   } else {
     // err?
@@ -281,17 +279,18 @@ async function* executeGetCredentialValue(
 export function makeEnvEnv(
   environment: playbook.PlaybookEnvironment,
   env: EnvData
-): Result<[PlaybookEnv, SimpleEnvironment], string[]> {
+): { environment: PlaybookEnv; simple: SimpleEnvironment; missing: string[] } {
   const result: playbook.Environment = {};
-  const envEnv: SimpleEnvironment = {};
-  const missing = [];
+  const simple: SimpleEnvironment = {};
+  const missing: string[] = [];
+  console.log("make env env", environment);
   for (const [name, variable] of Object.entries(environment.variables)) {
     if (env.secrets.hasOwnProperty(variable.name)) {
       result[name] = env.secrets[variable.name];
-      envEnv[variable.name] = env.secrets[variable.name];
+      simple[variable.name] = env.secrets[variable.name];
     } else if (env.default.hasOwnProperty(variable.name)) {
       result[name] = env.default[variable.name];
-      envEnv[variable.name] = env.default[variable.name];
+      simple[variable.name] = env.default[variable.name];
     } else if (!variable.required && variable.default !== undefined) {
       // required variables must always come from the environment, no default
       // values is used for these
@@ -301,9 +300,9 @@ export function makeEnvEnv(
     }
   }
 
-  if (missing.length > 0) {
-    return [undefined, missing];
-  }
-
-  return [[{ id: "environment", assignments: [], env: result }, envEnv], undefined];
+  return {
+    environment: { id: "environment", assignments: [], env: result },
+    simple,
+    missing,
+  };
 }

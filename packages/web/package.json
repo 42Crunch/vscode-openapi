@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "convert-icons": "svgr --icon --typescript --jsx-runtime automatic --out-dir src/icons icons",
+    "icons": "svgr --icon --typescript --jsx-runtime automatic --out-dir src/icons icons",
     "test": "vitest"
   },
   "devDependencies": {

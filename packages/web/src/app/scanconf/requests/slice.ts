@@ -11,11 +11,17 @@ export type State = {
   ref?: RequestRef;
   current: Current;
   result: ExecutionResult;
+  mockCurrent: Current;
+  mockResult: ExecutionResult;
+  mockMissingVariables: string[];
 };
 
 const initialState: State = {
   current: { auth: undefined },
   result: [],
+  mockCurrent: { auth: undefined },
+  mockResult: [],
+  mockMissingVariables: [],
 };
 
 export const slice = createSlice({
@@ -26,12 +32,36 @@ export const slice = createSlice({
       state.ref = payload;
       state.result = [];
     },
-    executeRequest: (state, action: PayloadAction<{ env: SimpleEnvironment; server: string }>) => {
+
+    executeRequest: (
+      state,
+      action: PayloadAction<{ inputs: SimpleEnvironment; server: string }>
+    ) => {
       state.current = { auth: undefined };
       state.result = [];
     },
+
     addExecutionStep: (state, { payload: step }: PayloadAction<PlaybookExecutorStep>) => {
       PlaybookStepHandlers[step.event](state.current, state.result, step as any);
+    },
+
+    resetMockRequestExecution: (state) => {
+      state.mockCurrent = { auth: undefined };
+      state.mockResult = [];
+      state.mockMissingVariables = [];
+    },
+
+    addMockRequestExecutionStep: (
+      state,
+      { payload: step }: PayloadAction<PlaybookExecutorStep>
+    ) => {
+      PlaybookStepHandlers[step.event](state.mockCurrent, state.mockResult, step as any);
+      if (
+        step.event === "payload-variables-substituted" ||
+        step.event === "credential-variables-substituted"
+      ) {
+        state.mockMissingVariables.push(...step.missing);
+      }
     },
   },
 
@@ -47,6 +77,12 @@ export const slice = createSlice({
   },
 });
 
-export const { setRequestId, addExecutionStep, executeRequest } = slice.actions;
+export const {
+  setRequestId,
+  addExecutionStep,
+  executeRequest,
+  resetMockRequestExecution,
+  addMockRequestExecutionStep,
+} = slice.actions;
 
 export default slice.reducer;

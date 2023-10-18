@@ -44,20 +44,16 @@ export const slice = createSlice({
       state.scenarioId = scenarioId;
     },
 
-    resetMockExecution: (state) => {
-      // state.mockResult = {
-      //   operationBefore: { context: {}, results: [] },
-      //   operationAfter: { context: {}, results: [] },
-      //   operationScenarios: { context: {}, results: [] },
-      //   globalAfter: { context: {}, results: [] },
-      //   globalBefore: { context: {}, results: [] },
-      //   credential: { context: {}, results: [] },
-      // };
-      // state.mockCurrent = [];
+    resetMockOperationExecution: (state) => {
+      state.mockCurrent = { auth: undefined };
+      state.mockResult = [];
     },
 
-    addMockExecutionStep: (state, { payload: step }: PayloadAction<PlaybookExecutorStep>) => {
-      // PlaybookStepHandlers[step.event](state.mockCurrent, state.mockResult, step as any);
+    addMockOperationExecutionStep: (
+      state,
+      { payload: step }: PayloadAction<PlaybookExecutorStep>
+    ) => {
+      PlaybookStepHandlers[step.event](state.mockCurrent, state.mockResult, step as any);
     },
 
     startTryExecution: (state, { payload: server }: PayloadAction<string>) => {},
@@ -87,9 +83,9 @@ export const slice = createSlice({
 export const {
   setOperationId,
   setScenarioId,
-  resetMockExecution,
+  resetMockOperationExecution,
   startTryExecution,
-  addMockExecutionStep,
+  addMockOperationExecutionStep,
   resetTryExecution,
   addTryExecutionStep,
 } = slice.actions;

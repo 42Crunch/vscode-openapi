@@ -28,7 +28,7 @@ export default function EnvKeyValue({
     control,
     rules: {
       pattern: {
-        value: ENV_VAR_NAME_REGEX,
+        value: ENV_VAR_NAME_REGEX(),
         message: ENV_VAR_NAME_REGEX_MESSAGE,
       },
     },
