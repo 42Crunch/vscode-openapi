@@ -25,6 +25,7 @@ const initialState: State = {
   },
   playbook: {
     operations: {},
+    requests: {},
     authenticationDetails: [{}],
     before: [],
     after: [],

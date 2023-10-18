@@ -25,6 +25,8 @@ export default function Stage({
   removeStage,
   location,
   fuzzing,
+  operations,
+  requests,
 }: {
   stage: playbook.StageReference;
   location: playbook.StageLocation;
@@ -33,6 +35,8 @@ export default function Stage({
   saveStage: (stage: playbook.StageReference) => void;
   removeStage: () => void;
   fuzzing?: boolean;
+  operations: playbook.PlaybookBundle["operations"];
+  requests: playbook.PlaybookBundle["requests"];
 }) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "stage",
@@ -41,6 +45,10 @@ export default function Stage({
       isDragging: !!monitor.isDragging(),
     }),
   }));
+
+  const refTargetMissing =
+    (stage.ref.type === "operation" ? operations[stage.ref.id] : requests[stage.ref.id]) ===
+    undefined;
 
   const variables = getVariableNamesFromEnvStack(result?.variablesReplaced?.stack || []);
   const missingVariablesCount = Array.from(
@@ -68,6 +76,12 @@ export default function Stage({
               {missingVariablesCount > 0 && (
                 <Error>
                   <TriangleExclamation />
+                </Error>
+              )}
+              {refTargetMissing && (
+                <Error>
+                  <TriangleExclamation />
+                  {`${stage.ref.type}/${stage.ref.id} is missing`}
                 </Error>
               )}
               <ExpectedResponse>
@@ -202,6 +216,10 @@ const Error = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  gap: 4px;
+  padding: 2px;
+  color: var(${ThemeColorVariables.errorForeground});
+  background-color: var(${ThemeColorVariables.errorBackground});
   > svg {
     fill: var(${ThemeColorVariables.errorForeground});
   }

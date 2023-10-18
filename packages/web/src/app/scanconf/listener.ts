@@ -26,6 +26,7 @@ import {
   saveOperationReference,
   saveSettings,
   saveEnvironment,
+  removeRequest,
 } from "./slice";
 import { AppDispatch, RootState } from "./store";
 
@@ -57,7 +58,8 @@ export function createListener(host: Webapp["host"], routes: Routes) {
           moveStage,
           removeStage,
           saveOperationReference,
-          saveEnvironment
+          saveEnvironment,
+          removeRequest
         ),
         effect: async (action, listenerApi) => {
           const { scanconf: state } = listenerApi.getState();
