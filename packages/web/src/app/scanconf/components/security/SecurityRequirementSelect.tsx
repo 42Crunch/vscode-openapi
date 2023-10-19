@@ -1,9 +1,7 @@
 import { ResolvedOasOperationSecurity } from "@xliic/common/oas30";
 import { ResolvedSwaggerOperationSecurity } from "@xliic/common/swagger";
-import Select from "../../../../new-components/Select";
 import DownshiftSelect from "../../../../new-components/DownshiftSelect";
 import styled from "styled-components";
-import { ThemeColorVariables } from "@xliic/common/theme";
 
 export default function SecurityRequirementsSelect({
   security,
@@ -21,23 +19,23 @@ export default function SecurityRequirementsSelect({
 
   return (
     <Container>
-      <DownshiftSelect
-        options={requirements}
-        selected={value}
-        onSelectedItemChange={(item) => item && setValue(item.value as number)}
-      />
+      <Label>Security scheme(s)</Label>
+      <div>
+        <DownshiftSelect
+          options={requirements}
+          selected={value}
+          onSelectedItemChange={(item) => item && setValue(item.value as number)}
+        />
+      </div>
     </Container>
   );
-
-  // return (
-  //   <Select
-  //     selected={value}
-  //     options={requirements}
-  //     onSelectedItemChange={}
-  //   />
-  // );
 }
 
 const Container = styled.div`
-  border-bottom: 1px solid var(${ThemeColorVariables.border});
+  display: contents;
+`;
+
+const Label = styled.div`
+  display: flex;
+  align-items: center;
 `;

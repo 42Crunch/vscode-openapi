@@ -50,33 +50,60 @@ export default function Security({
 
   return (
     <Container>
-      <SecurityRequirementsSelect
-        security={security}
-        value={selectedRequirementIndex}
-        setValue={(requirementIndex) => {
-          // new security requirement has been selected
-          // setting auth to reflect displayed values
-          setSelectedRequirementIndex(requirementIndex);
-          console.log("changing auth", Object.values(matches[requirementIndex].matches));
-          authField.onChange(Object.values(matches[requirementIndex].matches));
-        }}
-      />
-
-      <SecurityRequirement
-        requirement={security[selectedRequirementIndex]}
-        credentials={credentials}
-        values={matches[selectedRequirementIndex].matches}
-        setValues={(values) => {
-          // changing values for a currently selected security requirement
-          console.log("new values", selectedRequirementIndex, values);
-          const newAuth = Object.values(values);
-          console.log("new auth", newAuth);
-          authField.onChange(newAuth);
-        }}
-      />
+      <Header>
+        <div>Name</div>
+        <div>Value</div>
+      </Header>
+      <Fields>
+        <SecurityRequirementsSelect
+          security={security}
+          value={selectedRequirementIndex}
+          setValue={(requirementIndex) => {
+            // new security requirement has been selected
+            // setting auth to reflect displayed values
+            setSelectedRequirementIndex(requirementIndex);
+            authField.onChange(Object.values(matches[requirementIndex].matches));
+          }}
+        />
+        <SecurityRequirement
+          requirement={security[selectedRequirementIndex]}
+          credentials={credentials}
+          values={matches[selectedRequirementIndex].matches}
+          setValues={(values) => {
+            // changing values for a currently selected security requirement
+            const newAuth = Object.values(values);
+            authField.onChange(newAuth);
+          }}
+        />
+      </Fields>
     </Container>
   );
 }
+
+const Container = styled.div`
+  margin: 8px;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+`;
+
+const Header = styled.div`
+  display: contents;
+  & > div {
+    padding: 4px 8px;
+    background-color: var(${ThemeColorVariables.computedOne});
+    text-transform: uppercase;
+    font-size: 90%;
+    font-weight: 600;
+  }
+`;
+
+const Fields = styled.div`
+  display: contents;
+  & > div > div {
+    padding: 4px 8px;
+    border-bottom: 1px solid var(${ThemeColorVariables.border});
+  }
+`;
 
 function mapRequirementsToCredentials(
   security: ResolvedOasOperationSecurity | ResolvedSwaggerOperationSecurity,
@@ -159,18 +186,3 @@ function checkCredential(
 
   return false;
 }
-
-const Container = styled.div`
-  margin: 8px;
-  gap: 8px;
-  display: flex;
-  flex-flow: column;
-
-  & > select {
-    padding: 4px;
-    color: var(${ThemeColorVariables.foreground});
-    background-color: var(${ThemeColorVariables.background});
-    border: none;
-    border-bottom: 1px solid var(${ThemeColorVariables.border});
-  }
-`;

@@ -105,7 +105,6 @@ const Dropdown = styled.ul`
   overflow-y: auto;
   z-index: 1;
   position: absolute;
-  top: 24px;
   left: 0;
   right: 0;
   margin: 0;

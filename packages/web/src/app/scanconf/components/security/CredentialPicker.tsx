@@ -32,7 +32,7 @@ export default function CredentialPicker({
   return (
     <Container>
       <DownshiftSelect
-        placeholder={schemeName}
+        placeholder={""}
         options={options}
         selected={value}
         onSelectedItemChange={(item) => item && onChange(item.value as string)}
@@ -52,9 +52,7 @@ export default function CredentialPicker({
   );
 }
 
-const Container = styled.div`
-  border-bottom: 1px solid var(${ThemeColorVariables.border});
-`;
+const Container = styled.div``;
 
 const Manage = styled.li`
   color: var(${ThemeColorVariables.linkForeground});
