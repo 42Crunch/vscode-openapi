@@ -66,7 +66,7 @@ export default function Stage({
         ref={drag}
         style={{
           opacity: isDragging ? 0.5 : 1,
-          cursor: "move",
+          cursor: isDragging ? "move" : "auto",
         }}
       >
         <Card>
