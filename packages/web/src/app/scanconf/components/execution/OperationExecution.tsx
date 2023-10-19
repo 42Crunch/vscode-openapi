@@ -38,11 +38,13 @@ export default function OperationExecution({ operation }: { operation: Operation
       {operation.auth.length > 0 && (
         <CollapsibleCard>
           <BottomDescription style={{ gap: "8px" }}>
-            {operation.auth.map((e) => (
-              <BottomItem>
-                {e.status === "success" && <Key style={{ width: 14, height: 14 }} />}
-                {e.status === "failure" && <ExclamationCircle style={{ width: 14, height: 14 }} />}
-                {e.playbook}
+            {operation.auth.map((playbook, index) => (
+              <BottomItem key={index}>
+                {playbook.status === "success" && <Key style={{ width: 14, height: 14 }} />}
+                {playbook.status === "failure" && (
+                  <ExclamationCircle style={{ width: 14, height: 14 }} />
+                )}
+                {playbook.playbook}
               </BottomItem>
             ))}
           </BottomDescription>
