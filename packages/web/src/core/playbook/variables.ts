@@ -53,7 +53,6 @@ export function replaceEnv(value: string, envStack: PlaybookEnvStack): Replaceme
   const result = value.replace(
     ENV_VAR_REGEX(),
     (match: string, name: string, offset: number): string => {
-      console.log("you replace", name);
       const result = lookup(envStack, name);
       if (result === undefined) {
         missing.push(name);
