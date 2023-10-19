@@ -2,7 +2,6 @@ import styled from "styled-components";
 import { useFormContext, useController } from "react-hook-form";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { TrashCan, ExclamationCircle } from "../../../../icons";
-import Select from "../Select";
 import LineEditor from "../../../../new-components/fields/LineEditor";
 import {
   ENV_VAR_NAME_REGEX,
@@ -13,9 +12,11 @@ export default function EnvKeyValue({
   name,
   remove,
   variables,
+  names,
 }: {
   name: string;
   variables: string[];
+  names: string[];
   remove: () => void;
 }) {
   const { control } = useFormContext();

@@ -38,22 +38,40 @@ export default function OperationTabs({
   method,
   credentials,
   settings,
-  variables,
+  availableVariables,
+  requestVariables,
 }: {
   oas: BundledSwaggerOrOasSpec;
   credentials: playbook.Credentials;
   settings?: JSX.Element;
   path: string;
   method: HttpMethod;
-  variables: string[];
+  availableVariables: string[];
+  requestVariables: string[];
 }) {
   const { getValues } = useFormContext();
 
   const isBodyPresent = getValues("body") !== undefined;
 
   const tabs = isOpenapi(oas)
-    ? makeOasTabs(oas, credentials, path, method, variables, isBodyPresent)
-    : makeSwaggerTabs(oas, credentials, path, method, variables, isBodyPresent);
+    ? makeOasTabs(
+        oas,
+        credentials,
+        path,
+        method,
+        availableVariables,
+        requestVariables,
+        isBodyPresent
+      )
+    : makeSwaggerTabs(
+        oas,
+        credentials,
+        path,
+        method,
+        availableVariables,
+        requestVariables,
+        isBodyPresent
+      );
 
   return <TabContainer tabs={tabs} />;
 }
@@ -63,7 +81,8 @@ function makeOasTabs(
   credentials: playbook.Credentials,
   path: string,
   method: HttpMethod,
-  variables: string[],
+  availableVariables: string[],
+  requestVariables: string[],
   isBodyPresent: boolean
 ) {
   const parameters = getOasParameters(oas, path, method);
@@ -74,7 +93,7 @@ function makeOasTabs(
     {
       id: "body",
       title: "Body",
-      content: <RequestBody oas={oas} requestBody={requestBody} variables={variables} />,
+      content: <RequestBody oas={oas} requestBody={requestBody} variables={availableVariables} />,
       disabled: requestBody === undefined || !isBodyPresent,
     },
     {
@@ -116,7 +135,9 @@ function makeOasTabs(
     {
       id: "environment",
       title: "Environment",
-      content: <Environment name="environment" variables={variables} />,
+      content: (
+        <Environment name="environment" variables={availableVariables} names={requestVariables} />
+      ),
     },
     {
       id: "responses",
@@ -131,7 +152,8 @@ function makeSwaggerTabs(
   credentials: playbook.Credentials,
   path: string,
   method: HttpMethod,
-  variables: string[],
+  availableVariables: string[],
+  requestVariables: string[],
   isBodyPresent: boolean
 ) {
   const parameters = getSwaggerParameters(oas, path, method);
@@ -140,7 +162,9 @@ function makeSwaggerTabs(
     {
       id: "body",
       title: "Body",
-      content: <RequestBodySwagger oas={oas} group={parameters.body} variables={variables} />,
+      content: (
+        <RequestBodySwagger oas={oas} group={parameters.body} variables={availableVariables} />
+      ),
       disabled: hasNoParameters(parameters.body) || !isBodyPresent,
     },
     {
@@ -182,7 +206,9 @@ function makeSwaggerTabs(
     {
       id: "environment",
       title: "Environment",
-      content: <Environment name="environment" variables={variables} />,
+      content: (
+        <Environment name="environment" variables={availableVariables} names={requestVariables} />
+      ),
     },
     {
       id: "responses",

@@ -16,7 +16,8 @@ export default function RequestCard({
   credentials,
   saveRequest,
   defaultCollapsed,
-  variables,
+  availableVariables,
+  requestVariables,
 }: {
   oas: BundledSwaggerOrOasSpec;
   requestRef: playbook.RequestRef;
@@ -24,7 +25,8 @@ export default function RequestCard({
   stage: playbook.StageContent;
   saveRequest: (request: playbook.StageContent) => void;
   defaultCollapsed?: boolean;
-  variables: string[];
+  availableVariables: string[];
+  requestVariables: string[];
 }) {
   return (
     <Container>
@@ -45,7 +47,8 @@ export default function RequestCard({
             credentials={credentials}
             method={stage.request.method}
             path={stage.request.path}
-            variables={variables}
+            availableVariables={availableVariables}
+            requestVariables={requestVariables}
           />
         </Form>
       </CollapsibleCard>

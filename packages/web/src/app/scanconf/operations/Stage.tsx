@@ -50,10 +50,13 @@ export default function Stage({
     (stage.ref.type === "operation" ? operations[stage.ref.id] : requests[stage.ref.id]) ===
     undefined;
 
-  const variables = getVariableNamesFromEnvStack(result?.variablesReplaced?.stack || []);
-  const missingVariablesCount = Array.from(
-    new Set(result?.variablesReplaced?.missing || [])
-  ).length;
+  const availableVariables = getVariableNamesFromEnvStack(result?.variablesReplaced?.stack || []);
+  const missingVariables = result?.variablesReplaced?.missing || [];
+  const replacedVariables = Array.from(
+    new Set(result?.variablesReplaced?.found?.map((lookupResult) => lookupResult.name) || [])
+  );
+  const allRequestVariables = [...missingVariables, ...replacedVariables];
+  const missingVariablesCount = new Set(missingVariables || []).size;
 
   return (
     <Form
@@ -110,7 +113,13 @@ export default function Stage({
               {
                 id: "environment",
                 title: "Environment",
-                content: <Environment name="environment" variables={variables} />,
+                content: (
+                  <Environment
+                    name="environment"
+                    names={allRequestVariables}
+                    variables={availableVariables}
+                  />
+                ),
               },
               {
                 id: "responses",
@@ -121,7 +130,7 @@ export default function Stage({
                 id: "missing-variables",
                 title: "Missing Variables",
                 counter: missingVariablesCount,
-                content: <MissingVariables missing={result?.variablesReplaced?.missing} />,
+                content: <MissingVariables missing={missingVariables} />,
                 disabled: missingVariablesCount === 0,
                 counterKind: "error",
               },

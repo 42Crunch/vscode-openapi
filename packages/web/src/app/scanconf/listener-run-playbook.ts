@@ -49,20 +49,26 @@ export function onMockExecuteScenario(
   return () =>
     startAppListening({
       matcher: isAnyOf(
+        goTo,
         setOperationId,
         setScenarioId,
-        addStage,
-        moveStage,
         saveOperationReference,
-        saveRequest,
-        showScanconfOperation
+        addStage,
+        moveStage
       ),
       effect: async (action, listenerApi) => {
         const {
           scanconf: { oas, playbook },
           operations: { scenarioId, operationId },
           env: { data: envData },
+          router: {
+            current: [page],
+          },
         } = listenerApi.getState();
+
+        if (page !== "operations") {
+          return;
+        }
 
         const before = playbook.before;
         const after = playbook.after;
