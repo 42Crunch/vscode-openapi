@@ -1,16 +1,14 @@
-import styled from "styled-components";
 import * as playbook from "@xliic/common/playbook";
-import { useAppSelector, useAppDispatch } from "../store";
-import { addCredential, saveCredential, saveScanconf } from "../slice";
-import CredentialCard from "./CredentialCard";
-import CredentialAddNewDialog from "./CredentialAddNewDialog";
-import Button from "../../../components/Button";
-import { SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
-import { useState } from "react";
-import CollapsibleSection from "../components/CollapsibleSection";
-import CredentialMethods from "./CredentialMethods";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { FileExport } from "../../../icons";
+import { useState } from "react";
+import styled from "styled-components";
+import { SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
+import CollapsibleSection from "../components/CollapsibleSection";
+import { addCredential, saveCredential } from "../slice";
+import { useAppDispatch, useAppSelector } from "../store";
+import CredentialAddNewDialog from "./CredentialAddNewDialog";
+import CredentialCard from "./CredentialCard";
+import CredentialMethods from "./CredentialMethods";
 
 export default function Auth() {
   const dispatch = useAppDispatch();
@@ -18,12 +16,6 @@ export default function Auth() {
   const {
     playbook: { authenticationDetails },
   } = useAppSelector((state) => state.scanconf);
-
-  const onAddCredential = (id: string, credential: playbook.Credential) =>
-    dispatch(addCredential({ id, credential }));
-
-  const onUpdateCredential = (group: string, id: string, credential: playbook.Credential) =>
-    dispatch(saveCredential({ group: parseInt(group), id, credential }));
 
   const sections = authenticationDetails.map((details, index) => {
     const methods = Object.entries(details).map(([id, credential]) => ({ id, label: id }));
@@ -34,7 +26,6 @@ export default function Auth() {
       items: methods,
     };
   });
-
   const [selected, setSelected] = useState({
     sectionId: sections[0].id,
     itemId: sections[0].items[0].id,
@@ -42,6 +33,14 @@ export default function Auth() {
 
   const [isCredentialsOpen, setCredenialsOpen] = useState(true);
   const [isRequestsOpen, setRequestsOpen] = useState(true);
+
+  const onAddCredential = (id: string, credential: playbook.Credential) => {
+    dispatch(addCredential({ id, credential }));
+    setSelected({ sectionId: selected.sectionId, itemId: id });
+  };
+
+  const onUpdateCredential = (group: string, id: string, credential: playbook.Credential) =>
+    dispatch(saveCredential({ group: parseInt(group), id, credential }));
 
   return (
     <SearchSidebarControlled
