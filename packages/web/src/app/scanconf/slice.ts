@@ -122,6 +122,13 @@ export const slice = createSlice({
       }: PayloadAction<{ group: number; id: string; credential: playbook.Credential }>
     ) => {
       state.playbook.authenticationDetails[group][id] = credential;
+      if (
+        state.selectedSubcredential !== undefined &&
+        credential?.methods?.[state.selectedSubcredential] === undefined
+      ) {
+        // subcredential was deleted, select first available one
+        state.selectedSubcredential = Object.keys(credential?.methods || {})[0];
+      }
       state.dirty = true;
     },
     saveEnvironment: (
