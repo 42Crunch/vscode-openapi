@@ -3,7 +3,8 @@ import { $createVariableNode } from "./VariableNode";
 
 const VAR_REGEX = /({{[\w\-$]+}})/;
 
-export function createLineNodes(line: string): LexicalNode[] {
+export function createLineNodes(value: unknown): LexicalNode[] {
+  const line = typeof value === "string" ? value : `${value}`;
   const parts = line.split(VAR_REGEX);
 
   return parts.map((part, index) => {

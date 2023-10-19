@@ -7,7 +7,7 @@ import { Provider } from "react-redux";
 import { RouterContext, Routes } from "../../features/router/RouterContext";
 import { ThemeState } from "../../features/theme/slice";
 import { NavigationRouterApp, makeWebappMessageHandler } from "../webapp";
-import { showScanconfAuth, showScanconfOperation } from "./actions";
+import { showScanconfOperation } from "./actions";
 import Auth from "./auth/Auth";
 import { createListener } from "./listener";
 import Operations from "./operations/Operations";
@@ -34,7 +34,6 @@ const routes: Routes = [
     id: "auth",
     title: "Authentication",
     element: <Auth />,
-    when: showScanconfAuth,
   },
   {
     id: "global",

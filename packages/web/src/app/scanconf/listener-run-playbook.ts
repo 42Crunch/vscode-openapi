@@ -30,10 +30,19 @@ import {
   resetMockRequestExecution,
 } from "./requests/slice";
 import { AppDispatch, RootState } from "./store";
-import { addStage, moveStage, saveEnvironment, saveOperationReference, saveRequest } from "./slice";
-import { showScanconfOperation } from "./actions";
+import {
+  addStage,
+  moveStage,
+  removeStage,
+  saveEnvironment,
+  saveOperationReference,
+  saveRequest,
+  selectCredential,
+  selectSubcredential,
+} from "./slice";
 import { createDynamicVariables } from "../../core/playbook/builtin-variables";
 import { goTo } from "../../features/router/slice";
+import { addMockAuthRequestsExecutionStep, resetMockAuthRequestsExecution } from "./auth/slice";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 
@@ -54,7 +63,8 @@ export function onMockExecuteScenario(
         setScenarioId,
         saveOperationReference,
         addStage,
-        moveStage
+        moveStage,
+        removeStage
       ),
       effect: async (action, listenerApi) => {
         const {
@@ -155,6 +165,79 @@ export function onMockExecuteRequest(
           playbooks
         )) {
           listenerApi.dispatch(addMockRequestExecutionStep(step));
+        }
+      },
+    });
+}
+
+export function onMockExecuteAuthRequests(
+  startAppListening: AppStartListening,
+  host: HttpCapableWebappHost
+) {
+  return () =>
+    startAppListening({
+      matcher: isAnyOf(
+        goTo,
+        saveOperationReference,
+        selectCredential,
+        selectSubcredential,
+        addStage,
+        moveStage,
+        removeStage
+      ),
+      effect: async (action, listenerApi) => {
+        const {
+          scanconf: {
+            oas,
+            playbook,
+            selectedCredentialGroup,
+            selectedCredential,
+            selectedSubcredential,
+          },
+          env: { data: envData },
+          router: {
+            current: [page],
+          },
+        } = listenerApi.getState();
+
+        if (page !== "auth") {
+          return;
+        }
+
+        listenerApi.dispatch(resetMockAuthRequestsExecution());
+
+        if (selectedCredential === undefined || selectedSubcredential === undefined) {
+          return;
+        }
+
+        const subcredential =
+          playbook?.authenticationDetails?.[selectedCredentialGroup]?.[selectedCredential]
+            ?.methods?.[selectedSubcredential];
+
+        if (
+          subcredential === undefined ||
+          subcredential.requests === undefined ||
+          subcredential.requests.length === 0
+        ) {
+          return;
+        }
+
+        const mockHttpClient: MockHttpClient = async () => [MockHttpResponse, undefined];
+
+        const env: PlaybookEnvStack = [createDynamicVariables()];
+
+        console.log("mock auth requests running playbook from listener");
+        listenerApi.dispatch(resetMockRequestExecution());
+        for await (const step of executeAllPlaybooks(
+          mockHttpClient,
+          oas,
+          "http://localhost", // doesn't matter
+          playbook,
+          envData,
+          env,
+          [["", subcredential.requests]]
+        )) {
+          listenerApi.dispatch(addMockAuthRequestsExecutionStep(step));
         }
       },
     });

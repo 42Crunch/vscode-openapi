@@ -4,7 +4,7 @@ import { useState } from "react";
 import styled from "styled-components";
 import { SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
 import CollapsibleSection from "../components/CollapsibleSection";
-import { addCredential, saveCredential } from "../slice";
+import { addCredential, saveCredential, selectCredential, selectSubcredential } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import CredentialAddNewDialog from "./CredentialAddNewDialog";
 import CredentialCard from "./CredentialCard";
@@ -15,28 +15,27 @@ export default function Auth() {
 
   const {
     playbook: { authenticationDetails },
+    selectedCredentialGroup,
+    selectedCredential,
   } = useAppSelector((state) => state.scanconf);
 
-  const sections = authenticationDetails.map((details, index) => {
-    const methods = Object.entries(details).map(([id, credential]) => ({ id, label: id }));
+  const sections = authenticationDetails.map((credentials, index) => {
+    const items = Object.entries(credentials).map(([id, credential]) => ({ id, label: id }));
     const title = index === 0 ? "Default credential group" : `Credential group ${index}`;
     return {
       id: `${index}`,
       title,
-      items: methods,
+      items,
     };
-  });
-  const [selected, setSelected] = useState({
-    sectionId: sections[0].id,
-    itemId: sections[0].items[0].id,
   });
 
   const [isCredentialsOpen, setCredenialsOpen] = useState(true);
   const [isRequestsOpen, setRequestsOpen] = useState(true);
 
   const onAddCredential = (id: string, credential: playbook.Credential) => {
-    dispatch(addCredential({ id, credential }));
-    setSelected({ sectionId: selected.sectionId, itemId: id });
+    // no way to select credentialGroup for now
+    dispatch(addCredential({ credentialGroup: 0, id, credential }));
+    dispatch(selectCredential({ group: 0, credential: id }));
   };
 
   const onUpdateCredential = (group: string, id: string, credential: playbook.Credential) =>
@@ -44,9 +43,17 @@ export default function Auth() {
 
   return (
     <SearchSidebarControlled
-      selected={selected}
+      selected={
+        selectedCredential !== undefined
+          ? { sectionId: `${selectedCredentialGroup}`, itemId: selectedCredential }
+          : undefined
+      }
       sections={sections}
-      onSelected={setSelected}
+      onSelected={(selected) => {
+        dispatch(
+          selectCredential({ group: parseInt(selected.sectionId), credential: selected.itemId })
+        );
+      }}
       render={(selected) => {
         if (selected !== undefined) {
           const group = parseInt(selected.sectionId);

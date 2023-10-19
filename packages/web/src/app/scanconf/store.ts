@@ -11,21 +11,18 @@ import env, { loadEnv } from "../../features/env/slice";
 import prefs from "../../features/prefs/slice";
 import router from "../../features/router/slice";
 import theme, { changeTheme, ThemeState } from "../../features/theme/slice";
-import {
-  showHttpError,
-  showHttpResponse,
-  showScanconfAuth,
-  showScanconfOperation,
-} from "./actions";
+import { showHttpError, showHttpResponse, showScanconfOperation } from "./actions";
 import scanconf, { updateScanconf } from "./slice";
 import operations from "./operations/slice";
 import requests from "./requests/slice";
+import auth from "./auth/slice";
 
 const reducer = {
   theme,
   scanconf,
   operations,
   requests,
+  auth,
   router,
   env,
   prefs,
@@ -35,7 +32,6 @@ const reducer = {
 export const messageHandlers: Webapp["webappHandlers"] = {
   changeTheme,
   updateScanconf,
-  showScanconfAuth,
   showHttpError,
   showHttpResponse,
   showScanconfOperation,

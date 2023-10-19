@@ -111,7 +111,7 @@ async function* executePlaybook(
 
     yield {
       event: "payload-variables-substituted",
-      stack: requestEnvStack,
+      stack: [...requestEnvStack, requestEnv],
       found: [...replacedRequestEnv.found, ...replacedStageEnv.found, ...replacements.found],
       missing: [
         ...replacedRequestEnv.missing,
@@ -283,7 +283,6 @@ export function makeEnvEnv(
   const result: playbook.Environment = {};
   const simple: SimpleEnvironment = {};
   const missing: string[] = [];
-  console.log("make env env", environment);
   for (const [name, variable] of Object.entries(environment.variables)) {
     if (env.secrets.hasOwnProperty(variable.name)) {
       result[name] = env.secrets[variable.name];

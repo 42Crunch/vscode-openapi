@@ -1,10 +1,8 @@
-import { PayloadAction, createAction } from "@reduxjs/toolkit";
+import { createAction } from "@reduxjs/toolkit";
 import { HttpConfig, HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
-import { OasWithScanconf, OasWithScanconfPathMethod, ScanRunConfig } from "@xliic/common/scanconf";
+import { OasWithScanconfPathMethod, ScanRunConfig } from "@xliic/common/scanconf";
 
 export const runScan = createAction<ScanRunConfig>("scanconf/runScan");
-
-export const showScanconfAuth = createAction<OasWithScanconf>("scanconf/showScanconfAuth");
 
 export const showScanconfOperation = createAction<OasWithScanconfPathMethod>(
   "scanconf/showScanconfOperation"

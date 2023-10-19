@@ -5,15 +5,13 @@ import { Menu, MenuItem } from "../../../new-components/Menu";
 import { TabButton, TabList } from "../../../new-components/Tabs";
 import * as actions from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
-import { ThemeColorVariables } from "@xliic/common/theme";
-import { useState } from "react";
 import Scenario from "../operations/Scenario";
 import AddRequest from "../operations/components/AddRequest";
 
 export default function CredentialMethods({
+  credential,
   group,
   credentialId,
-  credential,
 }: {
   group: number;
   credentialId: string;
@@ -21,14 +19,13 @@ export default function CredentialMethods({
 }) {
   const dispatch = useAppDispatch();
 
-  const { playbook, oas } = useAppSelector((state) => state.scanconf);
-  // const { scenarioId, mockResult: result } = useAppSelector((state) => state.operations);
-  // const scenarios = playbook.operations[operationId].scenarios;
+  const { playbook, oas, selectedSubcredential } = useAppSelector((state) => state.scanconf);
+  const { mockResult } = useAppSelector((state) => state.auth);
+
+  const methods = Object.keys(credential.methods || {});
+
   const operationIds = Object.keys(playbook.operations);
   const requestIds = Object.keys(playbook.requests || {});
-
-  const methods = Object.keys(credential.methods).sort();
-  const [method, setMethod] = useState(methods[0]);
 
   const removeStage = (location: playbook.StageLocation) => dispatch(actions.removeStage(location));
 
@@ -50,7 +47,12 @@ export default function CredentialMethods({
   };
 
   return (
-    <Tabs.Root value={method} onValueChange={(value) => setMethod(value)}>
+    <Tabs.Root
+      value={selectedSubcredential}
+      onValueChange={(value) => {
+        dispatch(actions.selectSubcredential(value));
+      }}
+    >
       <TabList>
         {methods.map((method) => (
           <TabButton key={method} value={method}>
@@ -68,8 +70,13 @@ export default function CredentialMethods({
           <Scenario
             oas={oas}
             stages={credential.methods[method].requests as playbook.StageReference[]}
-            container={{ container: "credential", group, credentialId, subCredentialId: method }}
-            executionResult={undefined}
+            container={{
+              container: "credential",
+              group: group,
+              credentialId,
+              subCredentialId: method,
+            }}
+            executionResult={mockResult?.[0]}
             saveStage={saveStage}
             moveStage={moveStage}
             removeStage={removeStage}

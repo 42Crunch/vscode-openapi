@@ -20,8 +20,6 @@ export type ScanRunConfig = {
 };
 
 // vs code to webapp requests
-export type ShowScanconfAuthMessage = { command: "showScanconfAuth"; payload: OasWithScanconf };
-
 export type ShowScanconfOperationMessage = {
   command: "showScanconfOperation";
   payload: OasWithScanconfPathMethod;

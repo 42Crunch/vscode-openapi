@@ -6,7 +6,7 @@ import { LoadScanconfMessage } from "@xliic/common/playbook";
 import { Result } from "@xliic/common/result";
 import { parse } from "../../core/playbook/scanconf-parser";
 import * as scan from "../../core/playbook/scanconfig";
-import { showScanconfAuth, showScanconfOperation } from "./actions";
+import { showScanconfOperation } from "./actions";
 
 export type State = {
   oas: BundledSwaggerOrOasSpec;
@@ -15,6 +15,10 @@ export type State = {
   gerror?: GeneralError;
   dirty: boolean;
   servers: string[];
+
+  selectedCredentialGroup: number;
+  selectedCredential?: string;
+  selectedSubcredential?: string;
 };
 
 const initialState: State = {
@@ -33,6 +37,8 @@ const initialState: State = {
   },
   dirty: false,
   servers: [],
+
+  selectedCredentialGroup: 0,
 };
 
 export const slice = createSlice({
@@ -127,15 +133,32 @@ export const slice = createSlice({
       state.playbook.environments[name] = environment;
       state.dirty = true;
     },
+
     addCredential: (
       state,
       {
-        payload: { id, credential },
-      }: PayloadAction<{ id: string; credential: playbook.Credential }>
+        payload: { credentialGroup, id, credential },
+      }: PayloadAction<{ credentialGroup: number; id: string; credential: playbook.Credential }>
     ) => {
-      state.playbook.authenticationDetails[0][id] = credential;
+      state.playbook.authenticationDetails[credentialGroup][id] = credential;
       state.dirty = true;
     },
+
+    selectCredential: (
+      state,
+      { payload }: PayloadAction<{ group: number; credential: string }>
+    ) => {
+      state.selectedCredentialGroup = payload.group;
+      state.selectedCredential = payload.credential;
+      state.selectedSubcredential = Object.keys(
+        state.playbook.authenticationDetails?.[payload.group]?.[payload.credential]?.methods || {}
+      )[0];
+    },
+
+    selectSubcredential: (state, { payload }: PayloadAction<string>) => {
+      state.selectedSubcredential = payload;
+    },
+
     saveOperationReference: (
       state,
       {
@@ -176,24 +199,6 @@ export const slice = createSlice({
   },
 
   extraReducers: (builder) => {
-    builder.addCase(showScanconfAuth, (state, { payload: { oas, scanconf } }) => {
-      const [parsed, parseError] = jsonParse(scanconf);
-      if (parseError !== undefined) {
-        state.gerror = { message: `Failed to parse scan configuration: ${parseError}` };
-        return;
-      }
-      const [playbook, error] = parse(oas, parsed);
-      if (error !== undefined) {
-        const message = error.map((e) => `${e.message}: ${e.pointer}`).join(" ");
-        state.gerror = { message };
-        return;
-      }
-      state.oas = oas;
-      state.scanconf = parsed;
-      state.playbook = playbook;
-      state.servers = getServerUrls(oas);
-    });
-
     builder.addCase(showScanconfOperation, (state, { payload: { oas, scanconf } }) => {
       const [parsed, parseError] = jsonParse(scanconf);
       if (parseError !== undefined) {
@@ -210,6 +215,15 @@ export const slice = createSlice({
       state.scanconf = parsed;
       state.playbook = playbook;
       state.servers = getServerUrls(oas);
+
+      // select first credential
+      state.selectedCredentialGroup = 0;
+      state.selectedCredential = Object.keys(playbook?.authenticationDetails?.[0] || {})?.[0];
+      if (state.selectedCredential !== undefined) {
+        state.selectedSubcredential = Object.keys(
+          playbook?.authenticationDetails[0][state.selectedCredential]?.methods
+        )?.[0];
+      }
     });
   },
 });
@@ -247,6 +261,8 @@ export const {
   removeStage,
   saveOperationReference,
   saveCredential,
+  selectCredential,
+  selectSubcredential,
   updateScanconf,
   saveRequest,
   removeRequest,
