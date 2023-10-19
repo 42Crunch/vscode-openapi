@@ -4,7 +4,7 @@ import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
 import * as playbook from "@xliic/common/playbook";
 import { makeExternalHttpRequest, makeHttpRequest } from "./http";
 import { MockHttpClient } from "./mock-http";
-import { PlaybookExecutorStep } from "./playbook";
+import { AuthResult, PlaybookExecutorStep } from "./playbook";
 import { PlaybookEnv, PlaybookEnvStack } from "./playbook-env";
 import { assignVariables } from "./variable-assignments";
 import { replaceEnv, replaceEnvVariables } from "./variables";
@@ -83,7 +83,7 @@ async function* executePlaybook(
 
     // skip auth for external requests
     const auth = request.operationId === undefined ? undefined : request.auth;
-    const security: Record<string, string> = yield* executeAuth(client, oas, server, file, auth, [
+    const security: AuthResult = yield* executeAuth(client, oas, server, file, auth, [
       ...env,
       ...result,
     ]);
@@ -201,7 +201,7 @@ async function* executeAuth(
   auth: string[] | undefined,
   env: PlaybookEnvStack
 ): AsyncGenerator<PlaybookExecutorStep> {
-  const result: Record<string, string> = {};
+  const result: AuthResult = {};
   if (auth === undefined) {
     return result;
   }
@@ -214,7 +214,7 @@ async function* executeAuth(
       methodName === undefined
         ? credential.methods[credential.default]
         : credential.methods[methodName];
-    const value = yield* executeGetCredentialValue(
+    const value: string = yield* executeGetCredentialValue(
       client,
       oas,
       server,
@@ -223,7 +223,7 @@ async function* executeAuth(
       method,
       env
     );
-    result[authName] = value;
+    result[authName] = { credential, value };
     yield { event: "auth-finished" };
   }
 

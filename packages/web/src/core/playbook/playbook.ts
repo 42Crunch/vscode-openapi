@@ -1,9 +1,11 @@
 import { HttpClient, HttpError, HttpMethod, HttpRequest, HttpResponse } from "@xliic/common/http";
-import { RequestRef } from "@xliic/common/playbook";
+import { RequestRef, Credential } from "@xliic/common/playbook";
 
 import { LookupResult, LookupFailure } from "@xliic/common/env";
 import { PlaybookEnvStack } from "./playbook-env";
 import { MockHttpResponseType } from "./mock-http";
+
+export type AuthResult = Record<string, { credential: Credential; value: string }>;
 
 export type Step = {
   path: string;

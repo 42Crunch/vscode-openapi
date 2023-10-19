@@ -12,32 +12,21 @@ import * as playbook from "@xliic/common/playbook";
 import { parseHttpsHostname } from "./util";
 
 import { getParameters } from "./util-swagger";
+import { AuthResult } from "./playbook";
 
 export async function makeHttpRequest(
   oas: BundledSwaggerOrOasSpec,
   server: string,
   operationId: string | undefined,
   request: playbook.CRequest,
-  security: Record<string, string>
+  security: AuthResult
 ): Promise<Result<HttpRequest, string>> {
   // FIXME, this can throw an exception, make sure it's handled
 
   try {
     const result = isOpenapi(oas)
-      ? await makeHttpRequestForOas(
-          oas,
-          server,
-          operationId,
-          request,
-          stripCredentialMethodNames(security)
-        )
-      : await makeHttpRequestForSwagger(
-          oas,
-          server,
-          operationId,
-          request,
-          stripCredentialMethodNames(security)
-        );
+      ? await makeHttpRequestForOas(oas, server, operationId, request, security)
+      : await makeHttpRequestForSwagger(oas, server, operationId, request, security);
 
     return [
       {
@@ -58,7 +47,7 @@ async function makeHttpRequestForOas(
   server: string,
   operationId: string | undefined,
   request: playbook.CRequest,
-  security: Record<string, string>
+  security: AuthResult
 ): Promise<HttpRequest> {
   const swaggerClientOperationId = operationId || `${request.method}-${request.path}`;
   const result = SwaggerClient.buildRequest({
@@ -78,7 +67,7 @@ async function makeHttpRequestForSwagger(
   server: string,
   operationId: string | undefined,
   request: playbook.CRequest,
-  security: Record<string, string>
+  security: AuthResult
 ): Promise<HttpRequest> {
   const swaggerClientOperationId = operationId || `${request.method}-${request.path}`;
   const result = SwaggerClient.buildRequest({
@@ -204,33 +193,31 @@ function makeSwaggerSwaggerClientParameters(
   return result;
 }
 
-function makeOasSecurities(
-  schemes: Record<string, OasSecurityScheme>,
-  security: Record<string, string>
-): any {
+function makeOasSecurities(schemes: Record<string, OasSecurityScheme>, security: AuthResult): any {
+  const matches = matchSecuritySchemesToAuthResult(schemes, security);
   const result: any = {};
-  for (const name of Object.keys(security)) {
+  for (const name of Object.keys(matches)) {
     const scheme = schemes[name];
-    const securityValue = security[name];
+    const securityValue = matches[name];
     if (scheme?.type === "oauth2" || scheme?.type === "openIdConnect") {
       result[name] = { token: { access_token: securityValue } };
     } else {
       result[name] = securityValue;
     }
   }
-
   console.log("made secuirty", result);
   return { authorized: result };
 }
 
 function makeSwaggerSecurities(
   schemes: Record<string, SwaggerSecurityScheme>,
-  security: Record<string, string>
+  security: AuthResult
 ): any {
   const result: any = {};
-  for (const name of Object.keys(security)) {
+  const matches = matchSecuritySchemesToAuthResult(schemes, security);
+  for (const name of Object.keys(matches)) {
     const scheme = schemes[name];
-    const securityValue = security[name];
+    const securityValue = matches[name];
     if (scheme?.type === "oauth") {
       result[name] = { token: { access_token: securityValue } };
     } else {
@@ -239,11 +226,36 @@ function makeSwaggerSecurities(
   }
   return { authorized: result };
 }
-function stripCredentialMethodNames(security: Record<string, string>): Record<string, string> {
+
+function matchSecuritySchemesToAuthResult(
+  schemes: Record<string, OasSecurityScheme | SwaggerSecurityScheme>,
+  security: AuthResult
+): Record<string, string> {
+  const mutable = { ...security };
   const result: Record<string, string> = {};
-  for (const [key, value] of Object.entries(security)) {
-    const [credential, method] = key.split("/");
-    result[credential] = value;
+  for (const [schemeName, scheme] of Object.entries(schemes)) {
+    for (const [credentialName, { credential, value }] of Object.entries(mutable)) {
+      if (checkCredential(credential, scheme)) {
+        result[schemeName] = value;
+        delete mutable[credentialName];
+        break;
+      }
+    }
   }
   return result;
+}
+
+function checkCredential(
+  credential: playbook.Credential,
+  scheme: OasSecurityScheme | SwaggerSecurityScheme
+): boolean {
+  if (scheme.type === credential.type && scheme.in === credential.in) {
+    return true;
+  } else if (scheme.type === "http" && credential.type == "basic" && scheme.in === credential.in) {
+    return true;
+  } else if (scheme.type === "basic" && credential.type == "basic" && scheme.in === credential.in) {
+    return true;
+  }
+
+  return false;
 }
