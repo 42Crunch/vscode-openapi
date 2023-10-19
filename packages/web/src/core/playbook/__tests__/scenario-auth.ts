@@ -2,6 +2,7 @@ import * as scan from "../scanconfig";
 
 const credential1: scan.Credential = {
   type: "apiKey",
+  in: "header",
   default: "User",
   credentials: {
     User: {
