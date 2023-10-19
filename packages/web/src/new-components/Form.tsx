@@ -19,44 +19,56 @@ export default function Form<T extends FieldValues>({
   unwrapFormData: (data: FieldValues) => T;
   schema?: ZodObject<any>;
 }) {
-  const [formValues, setFormValues] = useState(wrapFormData(data));
+  function wrapFormDataVersioned(data: T, version: number) {
+    return { ...wrapFormData(data), __version: version };
+  }
+
+  function unwrapFormDataVersioned(data: FieldValues) {
+    const { __version, ...rest } = data;
+    return unwrapFormData(rest);
+  }
+
+  const [formValues, setFormValues] = useState(wrapFormDataVersioned(data, 0));
+
   const methods = useForm({
     values: formValues,
     mode: "all",
     resolver: schema !== undefined ? zodResolver(schema) : undefined,
   });
+
   const formData = useWatch({ control: methods.control, defaultValue: formValues });
+
   const timeoutRef = useRef<any>(null);
+
   const { isValid, isValidating } = methods.formState;
 
+  const version = useRef(0);
+
   useEffect(() => {
-    // save form values when 'formData' has changed (as compared to 'data' prop) and form is valid
-    // we can see changes before validation has been performed, so delay saving data
-    // so we can cancel update if the form turns out to be invalid
-    const difference = diff(data, unwrapFormData(formData));
+    const difference = diff(unwrapFormDataVersioned(formData), data);
     if (difference.length > 0) {
-      // clear timeout, prepare to schedule a new one
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      // only save if form is valid and is not being validated ATM
-      if (isValid && !isValidating) {
+      // apply every incoming changes, incrementing the current version
+      version.current = formValues.__version + 1;
+      setFormValues(wrapFormDataVersioned(data, version.current));
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (isValid && !isValidating) {
+      const difference = diff(
+        unwrapFormDataVersioned(formData),
+        unwrapFormDataVersioned(formValues)
+      );
+      if (difference.length > 0 && formData.__version === version.current) {
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
         timeoutRef.current = setTimeout(() => {
-          saveData(unwrapFormData(formData));
+          saveData(unwrapFormDataVersioned(formData));
         }, 250);
       }
     }
-    // not returning cleanup function, it's okay for the last timer to trigger
-    // even if the component has been unmounted
   }, [formData, isValid, isValidating]);
-
-  useEffect(() => {
-    // update form values only when 'data' prop changes
-    const difference = diff(data, unwrapFormData(formData));
-    if (difference.length > 0) {
-      setFormValues(wrapFormData(data));
-    }
-  }, [data]);
 
   return <FormProvider {...methods}>{children}</FormProvider>;
 }

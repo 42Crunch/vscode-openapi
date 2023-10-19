@@ -3,12 +3,9 @@ import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import * as playbook from "@xliic/common/playbook";
 import { RequestRef } from "@xliic/common/playbook";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
-import { createDynamicVariables } from "../../../core/playbook/builtin-variables";
-import { makeEnvEnv } from "../../../core/playbook/execute";
 import { PlaybookEnvStack } from "../../../core/playbook/playbook-env";
-import { replaceEnvVariables } from "../../../core/playbook/variables";
 import { FileExport } from "../../../icons";
 import Form from "../../../new-components/Form";
 import CollapsibleSection from "../components/CollapsibleSection";
@@ -42,16 +39,11 @@ export default function RequestExternal({
   const onSaveRequest = (stage: playbook.ExternalStageContent) =>
     dispatch(saveRequest({ ref: requestRef, stage }));
 
-  const inputs: SimpleEnvironment = {};
-  for (const name of missingVariables) {
-    inputs[name] = "";
-  }
-
   const variables = getVariableNamesFromEnvStack(
     mockResult?.[0]?.results?.[0]?.variablesReplaced?.stack || []
   );
 
-  const [inputEnv, setInputEnv] = useState(inputs);
+  const [inputs, setInputs] = useState<SimpleEnvironment>({});
 
   const prefs = useAppSelector((state) => state.prefs);
 
@@ -60,6 +52,23 @@ export default function RequestExternal({
   const [isRequestOpen, setRequestOpen] = useState(true);
   const [isResponseOpen, setResponseOpen] = useState(true);
 
+  useEffect(() => {
+    const updated = { ...inputs };
+    // remove stale variables
+    for (const name of Object.keys(updated)) {
+      if (!missingVariables.includes(name)) {
+        delete updated[name];
+      }
+    }
+    // create new variables
+    for (const name of missingVariables) {
+      if (updated[name] === undefined) {
+        updated[name] = "";
+      }
+    }
+    setInputs(updated);
+  }, [missingVariables]);
+
   return (
     <Container>
       <Try>
@@ -67,7 +76,7 @@ export default function RequestExternal({
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
-            onRun(server, inputEnv);
+            onRun(server, inputs);
           }}
         >
           <FileExport />
@@ -92,7 +101,7 @@ export default function RequestExternal({
             wrapFormData={wrapEnvironment}
             unwrapFormData={unwrapEnvironment}
             data={inputs}
-            saveData={(data) => setInputEnv(data)}
+            saveData={(data) => setInputs(data)}
           >
             <Environment name="env" variables={[]} />
           </Form>
@@ -105,7 +114,6 @@ export default function RequestExternal({
           title="Result"
         >
           <Execution result={executionResult} />
-          {/* <ResponseCard defaultCollapsed={false} response={result.results[0]} /> */}
         </CollapsibleSection>
       )}
     </Container>
