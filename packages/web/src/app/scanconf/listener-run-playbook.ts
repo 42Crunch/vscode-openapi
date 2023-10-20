@@ -42,7 +42,13 @@ import {
 } from "./slice";
 import { createDynamicVariables } from "../../core/playbook/builtin-variables";
 import { goTo } from "../../features/router/slice";
-import { addMockAuthRequestsExecutionStep, resetMockAuthRequestsExecution } from "./auth/slice";
+import {
+  addMockAuthRequestsExecutionStep,
+  addTryAuthenticationStep,
+  resetMockAuthRequestsExecution,
+  resetTryAuthentication,
+  startTryAuthentication,
+} from "./auth/slice";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 
@@ -109,7 +115,6 @@ export function onMockExecuteScenario(
           playbooks.push(["after", after]);
         }
 
-        console.log("mock running playbook from listener");
         listenerApi.dispatch(resetMockOperationExecution());
         for await (const step of executeAllPlaybooks(
           mockHttpClient,
@@ -153,7 +158,6 @@ export function onMockExecuteRequest(
 
         const playbooks: [string, Stage[]][] = [["", [{ ref: ref! }]]];
 
-        console.log("mock request running playbook from listener");
         listenerApi.dispatch(resetMockRequestExecution());
         for await (const step of executeAllPlaybooks(
           mockHttpClient,
@@ -226,7 +230,6 @@ export function onMockExecuteAuthRequests(
 
         const env: PlaybookEnvStack = [createDynamicVariables()];
 
-        console.log("mock auth requests running playbook from listener");
         listenerApi.dispatch(resetMockRequestExecution());
         for await (const step of executeAllPlaybooks(
           mockHttpClient,
@@ -288,7 +291,6 @@ export function onTryExecuteScenario(
           playbooks.push(["Global After", after]);
         }
 
-        console.log("try running playbook from listener");
         listenerApi.dispatch(resetTryExecution());
         for await (const step of executeAllPlaybooks(
           httpClient,
@@ -300,6 +302,63 @@ export function onTryExecuteScenario(
           playbooks
         )) {
           listenerApi.dispatch(addTryExecutionStep(step));
+        }
+      },
+    });
+}
+
+export function onExecuteAuthentication(
+  startAppListening: AppStartListening,
+  host: HttpCapableWebappHost
+) {
+  return () =>
+    startAppListening({
+      actionCreator: startTryAuthentication,
+      effect: async (action, listenerApi) => {
+        const {
+          scanconf: {
+            oas,
+            playbook,
+            selectedCredentialGroup,
+            selectedCredential,
+            selectedSubcredential,
+          },
+          env: { data: envData },
+        } = listenerApi.getState();
+
+        if (
+          selectedCredential === undefined ||
+          selectedSubcredential === undefined ||
+          playbook.authenticationDetails?.[selectedCredentialGroup]?.[selectedCredential]
+            ?.methods?.[selectedSubcredential]?.requests === undefined
+        ) {
+          return;
+        }
+
+        const server = action.payload;
+
+        const requests =
+          playbook.authenticationDetails[selectedCredentialGroup][selectedCredential].methods[
+            selectedSubcredential
+          ].requests;
+
+        const send = makeSend(host);
+        const receive = makeReceive(listenerApi.take);
+        const httpClient = makeHttpClient(send, receive);
+
+        const env: PlaybookEnvStack = [createDynamicVariables()];
+
+        listenerApi.dispatch(resetTryAuthentication());
+        for await (const step of executeAllPlaybooks(
+          httpClient,
+          oas,
+          server,
+          playbook,
+          envData,
+          env,
+          [[selectedSubcredential, requests]]
+        )) {
+          listenerApi.dispatch(addTryAuthenticationStep(step));
         }
       },
     });
@@ -334,9 +393,7 @@ export function onExecuteRequest(
           },
         ];
 
-        console.log("running request from listener");
-
-        // FIXME allow running request from requests
+        // reset is done in executeRequest
         for await (const step of executeAllPlaybooks(
           httpClient,
           oas,
@@ -357,7 +414,6 @@ export function onExecuteRequest(
         )) {
           listenerApi.dispatch(addExecutionStep(step));
         }
-        console.log("done running from listener");
       },
     });
 }

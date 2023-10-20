@@ -12,6 +12,7 @@ import { Routes } from "../../features/router/RouterContext";
 import { startListeners } from "../webapp";
 import { runScan, sendHttpRequest } from "./actions";
 import {
+  onExecuteAuthentication,
   onExecuteRequest,
   onMockExecuteAuthRequests,
   onMockExecuteRequest,
@@ -104,6 +105,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
   const executeMockRequestListener = onMockExecuteRequest(startAppListening, host);
   const executeRequestListener = onExecuteRequest(startAppListening, host);
   const executeMockAuthRequestsListener = onMockExecuteAuthRequests(startAppListening, host);
+  const executeTryAuthenticationListener = onExecuteAuthentication(startAppListening, host);
 
   startNavigationListening(startAppListening, routes);
   startListeners({
@@ -113,6 +115,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
     executeRequestListener,
     executeMockRequestListener,
     executeMockAuthRequestsListener,
+    executeTryAuthenticationListener,
   });
 
   return listenerMiddleware;

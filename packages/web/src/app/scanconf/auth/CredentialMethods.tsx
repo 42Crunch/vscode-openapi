@@ -1,12 +1,11 @@
 import * as Tabs from "@radix-ui/react-tabs";
 import * as playbook from "@xliic/common/playbook";
 import styled from "styled-components";
-import { Menu, MenuItem } from "../../../new-components/Menu";
-import { TabButton, TabList } from "../../../new-components/Tabs";
-import * as actions from "../slice";
-import { useAppDispatch, useAppSelector } from "../store";
+import { TabContainer } from "../../../new-components/Tabs";
 import Scenario from "../operations/Scenario";
 import AddRequest from "../operations/components/AddRequest";
+import * as actions from "../slice";
+import { useAppDispatch, useAppSelector } from "../store";
 
 export default function CredentialMethods({
   credential,
@@ -46,27 +45,12 @@ export default function CredentialMethods({
     );
   };
 
-  return (
-    <Tabs.Root
-      value={selectedSubcredential}
-      onValueChange={(value) => {
-        dispatch(actions.selectSubcredential(value));
-      }}
-    >
-      <TabList>
-        {methods.map((method) => (
-          <TabButton key={method} value={method}>
-            {method}
-          </TabButton>
-        ))}
-        <Controls>
-          <Menu>
-            <MenuItem onSelect={() => undefined}>Delete</MenuItem>
-          </Menu>
-        </Controls>
-      </TabList>
-      {methods.map((method) => (
-        <TabsContent key={method} value={method}>
+  const tabs = methods.map((method) => {
+    return {
+      id: method,
+      title: method,
+      content: (
+        <Requests key={method} value={method}>
           <Scenario
             oas={oas}
             stages={credential.methods[method].requests as playbook.StageReference[]}
@@ -93,22 +77,23 @@ export default function CredentialMethods({
               )
             }
           />
-        </TabsContent>
-      ))}
-    </Tabs.Root>
+        </Requests>
+      ),
+    };
+  });
+
+  return (
+    <TabContainer
+      activeTab={selectedSubcredential}
+      setActiveTab={(tab: string) => dispatch(actions.selectSubcredential(tab))}
+      tabs={tabs}
+    />
   );
 }
 
-const TabsContent = styled(Tabs.Content)`
+const Requests = styled(Tabs.Content)`
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding-top: 8px;
-`;
-
-const Controls = styled.div`
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
 `;

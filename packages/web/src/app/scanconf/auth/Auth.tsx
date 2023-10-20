@@ -9,6 +9,12 @@ import { useAppDispatch, useAppSelector } from "../store";
 import CredentialAddNewDialog from "./CredentialAddNewDialog";
 import CredentialCard from "./CredentialCard";
 import CredentialMethods from "./CredentialMethods";
+import { FileExport } from "../../../icons";
+import TryIt from "./TryIt";
+import { setTryitServer } from "../../../features/prefs/slice";
+import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
+import { startTryAuthentication } from "./slice";
+import Execution from "../components/execution/Execution";
 
 export default function Auth() {
   const dispatch = useAppDispatch();
@@ -17,7 +23,11 @@ export default function Auth() {
     playbook: { authenticationDetails },
     selectedCredentialGroup,
     selectedCredential,
+    servers,
+    oas,
   } = useAppSelector((state) => state.scanconf);
+
+  const { tryResult } = useAppSelector((state) => state.auth);
 
   const sections = authenticationDetails.map((credentials, index) => {
     const items = Object.entries(credentials).map(([id, credential]) => ({ id, label: id }));
@@ -31,6 +41,7 @@ export default function Auth() {
 
   const [isCredentialsOpen, setCredenialsOpen] = useState(true);
   const [isRequestsOpen, setRequestsOpen] = useState(true);
+  const [isResultOpen, setResultOpen] = useState(true);
 
   const onAddCredential = (id: string, credential: playbook.Credential) => {
     // no way to select credentialGroup for now
@@ -40,6 +51,12 @@ export default function Auth() {
 
   const onUpdateCredential = (group: string, id: string, credential: playbook.Credential) =>
     dispatch(saveCredential({ group: parseInt(group), id, credential }));
+
+  const setServer = (server: string) => dispatch(setTryitServer(server));
+
+  const prefs = useAppSelector((state) => state.prefs);
+
+  const server = getPreferredServer(oas, prefs.tryitServer);
 
   return (
     <SearchSidebarControlled
@@ -61,18 +78,15 @@ export default function Auth() {
           const credential = authenticationDetails[group][credentialId];
           return (
             <>
-              {/* <Try>
-                <Action
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    //onRun(server, inputEnv);
-                  }}
-                >
-                  <FileExport />
-                  Try
-                </Action>
-              </Try> */}
+              <TryIt
+                servers={servers}
+                selected={server}
+                onTry={(server: string) => {
+                  dispatch(startTryAuthentication(server));
+                }}
+                onChange={setServer}
+              />
+
               <CollapsibleSection
                 isOpen={isCredentialsOpen}
                 onClick={(e) => setCredenialsOpen(!isCredentialsOpen)}
@@ -98,6 +112,16 @@ export default function Auth() {
                   credential={credential}
                 />
               </CollapsibleSection>
+
+              {tryResult.length > 0 && (
+                <CollapsibleSection
+                  isOpen={isResultOpen}
+                  onClick={() => setResultOpen(!isResultOpen)}
+                  title="Result"
+                >
+                  <Execution result={tryResult} />
+                </CollapsibleSection>
+              )}
             </>
           );
         }
@@ -107,21 +131,15 @@ export default function Auth() {
   );
 }
 
-const Try = styled.div`
-  border: 1px solid var(${ThemeColorVariables.border});
-  display: flex;
-  justify-content: flex-end;
-`;
+function getPreferredServer(
+  oas: BundledSwaggerOrOasSpec,
+  preferredServer: string | undefined
+): string {
+  const servers = getServerUrls(oas);
 
-const Action = styled.div`
-  display: flex;
-  padding: 8px 12px;
-  gap: 4px;
-  cursor: pointer;
-  align-items: center;
-  cusror: pointer;
-  color: var(${ThemeColorVariables.linkForeground});
-  > svg {
-    fill: var(${ThemeColorVariables.linkForeground});
+  const exists = servers.some((url) => url === preferredServer);
+  if (preferredServer !== undefined && preferredServer !== "" && exists) {
+    return preferredServer;
   }
-`;
+  return servers[0];
+}
