@@ -136,6 +136,8 @@ const Container = styled.div`
     font-family: monospace;
     font-size: 13.333px;
     margin: 4px;
+    max-height: 300px;
+    overflow: scroll;
   }
   .editor-paragraph {
     margin: 0;
@@ -149,8 +151,5 @@ const StatusLine = styled.div`
   gap: 4px;
   padding: 2px 4px;
   border-top: 1px solid var(${ThemeColorVariables.border});
-  //color: var(${ThemeColorVariables.errorForeground});
-  //background-color: var(${ThemeColorVariables.errorBackground});
-  //padding: 0.75rem;
   line-break: anywhere;
 `;
