@@ -71,9 +71,7 @@ export default function CredentialAddNewDialog({
               }}
             >
               <Dialog.Title>Add credential</Dialog.Title>
-              <Dialog.Description>
-                Add response processing section for a specified response code
-              </Dialog.Description>
+              <Dialog.Description>Add new credential</Dialog.Description>
               <Input label="ID" name="id" />
               <Select
                 label="Type"

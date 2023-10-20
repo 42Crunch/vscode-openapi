@@ -46,7 +46,7 @@ function currentExecutionResult(
   } else {
     const playbook = last(stateResult);
     const operation = last(playbook.results);
-    return operation.auth;
+    return operation.auth[stateCurrent.auth].execution;
   }
 }
 
@@ -64,13 +64,20 @@ function currentOperationResult(
   return last(currentPlaybookResult(stateCurrent, stateResult).results);
 }
 
-export const PlaybookStepHandlers: PlaybookEventHandlers = {
+export function handlePlaybookStep(
+  stateCurrent: Current,
+  stateResult: ExecutionResult,
+  step: PlaybookExecutorStep
+) {
+  PlaybookStepHandlers[step.event](stateCurrent, stateResult, step as any);
+}
+
+const PlaybookStepHandlers: PlaybookEventHandlers = {
   "playbook-started": function (
     stateCurrent: Current,
     stateResult: ExecutionResult,
     event: PlaybookStarted
   ): void {
-    console.log("playbook started", event.name, JSON.stringify(stateCurrent));
     currentExecutionResult(stateCurrent, stateResult).push({
       playbook: event.name,
       status: "pending",
@@ -82,10 +89,9 @@ export const PlaybookStepHandlers: PlaybookEventHandlers = {
     stateResult: ExecutionResult,
     event: RequestStarted
   ): void {
-    console.log("adding req", JSON.stringify(stateCurrent));
     currentPlaybookResult(stateCurrent, stateResult).results.push({
       ref: event.ref,
-      auth: [],
+      auth: {},
       variablesAssigned: [],
       status: "pending",
     });
@@ -95,7 +101,9 @@ export const PlaybookStepHandlers: PlaybookEventHandlers = {
     stateResult: ExecutionResult,
     event: AuthStarted
   ): void {
-    console.log("in auth");
+    currentOperationResult(stateCurrent, stateResult).auth[event.name] = {
+      execution: [],
+    };
     stateCurrent.auth = event.name;
   },
   "auth-finished": function (
@@ -136,7 +144,13 @@ export const PlaybookStepHandlers: PlaybookEventHandlers = {
     stateResult: ExecutionResult,
     event: PlaybookCredentialVariablesReplaced
   ): void {
-    // FIXME what should we do?
+    const operation = last(last(stateResult).results);
+    operation.auth[event.name].result = event.result;
+    operation.auth[event.name].variables = {
+      missing: event.missing,
+      found: event.found,
+      stack: event.stack,
+    };
   },
   "http-request-prepared": function (
     stateCurrent: Current,

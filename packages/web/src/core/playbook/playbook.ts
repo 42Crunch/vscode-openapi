@@ -52,6 +52,8 @@ export type PlaybookPayloadVariablesReplaced = {
 
 export type PlaybookCredentialVariablesReplaced = {
   event: "credential-variables-substituted";
+  name: string;
+  result: string;
   stack: PlaybookEnvStack;
   found: LookupResult[];
   missing: LookupFailure[];

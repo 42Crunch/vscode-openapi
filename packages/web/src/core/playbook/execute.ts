@@ -219,7 +219,7 @@ async function* executeAuth(
       oas,
       server,
       file,
-      credentialName,
+      authName,
       method,
       env
     );
@@ -235,22 +235,14 @@ async function* executeGetCredentialValue(
   oas: BundledSwaggerOrOasSpec,
   server: string,
   file: playbook.PlaybookBundle,
-  credentialName: string,
+  authName: string,
   method: playbook.CredentialMethod,
   env: PlaybookEnvStack
 ): AsyncGenerator<PlaybookExecutorStep> {
   let result: PlaybookEnvStack = [];
 
   if (method.requests !== undefined) {
-    result = yield* executePlaybook(
-      credentialName,
-      client,
-      oas,
-      server,
-      file,
-      method.requests,
-      env
-    );
+    result = yield* executePlaybook(authName, client, oas, server, file, method.requests, env);
   }
 
   // FIXME what happens if we fail to execute credential requests[]?
@@ -265,6 +257,8 @@ async function* executeGetCredentialValue(
 
     yield {
       event: "credential-variables-substituted",
+      name: authName,
+      result: replacements.value as string,
       stack: credentialEnvStack,
       found: replacements.found,
       missing: replacements.missing,

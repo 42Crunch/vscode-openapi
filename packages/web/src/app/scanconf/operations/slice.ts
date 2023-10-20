@@ -4,7 +4,7 @@ import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
 import { showScanconfOperation } from "../actions";
 import { ExecutionResult } from "../components/scenario/types";
 
-import { Current, PlaybookStepHandlers } from "../playbook-execution-handler";
+import { Current, handlePlaybookStep } from "../playbook-execution-handler";
 
 export type State = {
   operationId?: string;
@@ -53,7 +53,7 @@ export const slice = createSlice({
       state,
       { payload: step }: PayloadAction<PlaybookExecutorStep>
     ) => {
-      PlaybookStepHandlers[step.event](state.mockCurrent, state.mockResult, step as any);
+      handlePlaybookStep(state.mockCurrent, state.mockResult, step);
     },
 
     startTryExecution: (state, { payload: server }: PayloadAction<string>) => {},
@@ -64,7 +64,7 @@ export const slice = createSlice({
     },
 
     addTryExecutionStep: (state, { payload: step }: PayloadAction<PlaybookExecutorStep>) => {
-      PlaybookStepHandlers[step.event](state.tryCurrent, state.tryResult, step as any);
+      handlePlaybookStep(state.tryCurrent, state.tryResult, step);
     },
   },
 

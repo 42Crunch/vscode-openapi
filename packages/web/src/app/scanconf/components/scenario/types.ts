@@ -4,6 +4,20 @@ import { PlaybookEnvStack } from "../../../../core/playbook/playbook-env";
 import { MockHttpResponseType } from "../../../../core/playbook/mock-http";
 import { RequestRef } from "@xliic/common/playbook";
 
+export type VariableReplacement = {
+  stack: PlaybookEnvStack;
+  found: LookupResult[];
+  missing: LookupFailure[];
+};
+
+export type ProgressState = "pending" | "success" | "failure";
+
+export type AuthenticationResult = {
+  execution: ExecutionResult;
+  result?: string;
+  variables?: VariableReplacement;
+};
+
 export type OperationResult = {
   ref?: RequestRef;
   operationId?: string;
@@ -11,20 +25,16 @@ export type OperationResult = {
   httpRequestPrepareError?: string;
   httpResponse?: HttpResponse | MockHttpResponseType;
   httpError?: HttpError;
-  auth: ExecutionResult;
-  variablesReplaced?: {
-    stack: PlaybookEnvStack;
-    found: LookupResult[];
-    missing: LookupFailure[];
-  };
+  auth: Record<string, AuthenticationResult>;
+  variablesReplaced?: VariableReplacement;
   variablesAssigned: PlaybookEnvStack;
   variableAssignmentError?: string;
-  status: "pending" | "success" | "failure";
+  status: ProgressState;
 };
 
 export type PlaybookResult = {
   playbook: string;
-  status: "pending" | "success" | "failure";
+  status: ProgressState;
   results: OperationResult[];
 };
 

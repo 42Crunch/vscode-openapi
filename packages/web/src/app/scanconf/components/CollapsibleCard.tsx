@@ -93,8 +93,8 @@ export const BottomItem = styled.div`
   display: flex;
   align-items: center;
   opacity: 0.8;
+  gap: 4px;
   & > svg {
-    margin-right: 4px;
     fill: var(${ThemeColorVariables.foreground});
   }
 `;

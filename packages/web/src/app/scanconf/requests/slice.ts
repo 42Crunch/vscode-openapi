@@ -5,7 +5,7 @@ import { RequestRef } from "@xliic/common/playbook";
 import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
 import { showScanconfOperation } from "../actions";
 import { ExecutionResult } from "../components/scenario/types";
-import { Current, PlaybookStepHandlers } from "../playbook-execution-handler";
+import { Current, handlePlaybookStep } from "../playbook-execution-handler";
 
 export type State = {
   ref?: RequestRef;
@@ -42,7 +42,7 @@ export const slice = createSlice({
     },
 
     addExecutionStep: (state, { payload: step }: PayloadAction<PlaybookExecutorStep>) => {
-      PlaybookStepHandlers[step.event](state.current, state.result, step as any);
+      handlePlaybookStep(state.current, state.result, step);
     },
 
     resetMockRequestExecution: (state) => {
@@ -55,7 +55,7 @@ export const slice = createSlice({
       state,
       { payload: step }: PayloadAction<PlaybookExecutorStep>
     ) => {
-      PlaybookStepHandlers[step.event](state.mockCurrent, state.mockResult, step as any);
+      handlePlaybookStep(state.mockCurrent, state.mockResult, step);
       if (
         step.event === "payload-variables-substituted" ||
         step.event === "credential-variables-substituted"

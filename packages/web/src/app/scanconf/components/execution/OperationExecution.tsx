@@ -6,6 +6,9 @@ import { MockHttpResponse } from "../../../../core/playbook/mock-http";
 import { PlaybookEnvStack } from "../../../../core/playbook/playbook-env";
 import {
   ArrowRightFromBracket,
+  BracketsCurly,
+  BracketsVariable,
+  CircleCheck,
   CircleCheckLight,
   CircleExclamationLight,
   ExclamationCircle,
@@ -18,8 +21,9 @@ import HttpRequest from "../http-request/HttpRequest";
 import Body from "../response/Body";
 import Headers from "../response/Headers";
 import VariableAssignments from "../scenario/VariableAssignments";
-import { OperationResult } from "../scenario/types";
-import Execution from "./Execution";
+import { OperationResult, AuthenticationResult, VariableReplacement } from "../scenario/types";
+import PlaybookExecution from "./PlaybookExecution";
+import React from "react";
 
 export default function OperationExecution({ operation }: { operation: OperationResult }) {
   const statusCode =
@@ -35,36 +39,16 @@ export default function OperationExecution({ operation }: { operation: Operation
       {operation.ref && (
         <Separator icon={icon} title={`${operation.ref.type}/${operation.ref.id}`} />
       )}
-      {operation.auth.length > 0 && (
-        <CollapsibleCard>
-          <BottomDescription style={{ gap: "8px" }}>
-            {operation.auth.map((playbook, index) => (
-              <BottomItem key={index}>
-                {playbook.status === "success" && <Key style={{ width: 14, height: 14 }} />}
-                {playbook.status === "failure" && (
-                  <ExclamationCircle style={{ width: 14, height: 14 }} />
-                )}
-                {playbook.playbook}
-              </BottomItem>
-            ))}
-          </BottomDescription>
-          <Execution result={operation.auth} />
-        </CollapsibleCard>
-      )}
+
+      {Object.keys(operation.auth).length > 0 && <Authentication results={operation.auth} />}
+
       {operation.httpRequest !== undefined && (
         <HttpRequest operationId={operation.operationId} request={operation.httpRequest} />
       )}
       {operation.httpResponse !== undefined && (
         <CollapsibleCard>
           <BottomDescription style={{ gap: "8px" }}>
-            <ArrowRightFromBracket
-              style={{
-                width: 14,
-                height: 14,
-                transform: "rotate(180deg)",
-                fill: `var(${ThemeColorVariables.foreground})`,
-              }}
-            />
+            <ArrowRightFromBracket style={{ transform: "rotate(180deg)" }} />
             <BottomItem>{`${statusCode} ${statusMessage}`}</BottomItem>
           </BottomDescription>
           <ResponseTabs result={operation} />
@@ -74,7 +58,53 @@ export default function OperationExecution({ operation }: { operation: Operation
   );
 }
 
-const Container = styled.div``;
+export function Authentication({ results }: { results: Record<string, AuthenticationResult> }) {
+  const entries = Object.entries(results).map(([name, result]) => {
+    const missing = result?.variables?.missing?.length;
+    return {
+      name,
+      value: result.result,
+      execution: result.execution,
+      status: result.execution?.[0]?.status || "pending",
+      hasMissingVariables: missing !== undefined && missing > 0,
+      variables: result.variables,
+    };
+  });
+
+  return (
+    <CollapsibleCard>
+      <BottomDescription style={{ gap: "8px" }}>
+        <BottomItem>
+          <Key />
+        </BottomItem>
+        {entries.map((entry, index) => (
+          <BottomItem key={index}>
+            {entry.name}
+            {entry.status === "failure" || entry.hasMissingVariables ? (
+              <ExclamationCircle style={{ fill: `var(${ThemeColorVariables.errorForeground})` }} />
+            ) : (
+              <CircleCheck />
+            )}
+            {entry.status === "pending" && <SpinningSpinner />}
+          </BottomItem>
+        ))}
+      </BottomDescription>
+      {entries.map((entry, index) => (
+        <React.Fragment key={index}>
+          {entry.execution[0] && <PlaybookExecution playbook={entry.execution[0]} />}
+          {entry.variables && (
+            <Variables
+              name={entry.name}
+              value={entry.value}
+              variables={entry.variables}
+              hasMissing={entry.hasMissingVariables}
+            />
+          )}
+        </React.Fragment>
+      ))}
+    </CollapsibleCard>
+  );
+}
 
 export function ResponseTabs({ result }: { result: OperationResult }) {
   return (
@@ -119,6 +149,59 @@ export function ResponseTabs({ result }: { result: OperationResult }) {
   );
 }
 
+export function Variables({
+  name,
+  value,
+  variables,
+  hasMissing,
+}: {
+  name: string;
+  value?: string;
+  hasMissing?: boolean;
+  variables: VariableReplacement;
+}) {
+  return (
+    <CollapsibleCard>
+      <BottomDescription style={{ gap: "8px" }}>
+        <BottomItem>
+          <BracketsCurly style={{ width: 14, height: 14 }} />
+          {name}
+          {hasMissing && (
+            <ExclamationCircle style={{ fill: `var(${ThemeColorVariables.errorForeground})` }} />
+          )}
+          {hasMissing && (
+            <Missing>
+              Missing {variables?.missing?.map((name) => `{{${name}}}`)?.join(", ")}
+            </Missing>
+          )}
+        </BottomItem>
+      </BottomDescription>
+      <CredentialValue>{value}</CredentialValue>
+    </CollapsibleCard>
+  );
+}
+
+const Container = styled.div`
+  svg {
+    width: 14px;
+    height: 14px;
+    fill: var(${ThemeColorVariables.foreground});
+  }
+`;
+
+const CredentialValue = styled.div`
+  font-family: monospace;
+  padding: 8px 4px;
+  line-break: anywhere;
+`;
+
+const Missing = styled.div`
+  //border: 1px solid var(${ThemeColorVariables.errorBorder});
+  color: var(${ThemeColorVariables.errorForeground});
+  //background-color: var(${ThemeColorVariables.errorBackground});
+  border-radius: 4px;
+`;
+
 function assignmentCount(env?: PlaybookEnvStack): number {
   if (env === undefined) {
     return 0;
@@ -134,16 +217,10 @@ function assignmentCount(env?: PlaybookEnvStack): number {
 
 function getStatusIcon(status: string) {
   if (status === "success") {
-    return (
-      <CircleCheckLight
-        style={{ width: 12, height: 12, fill: `var(${ThemeColorVariables.foreground})` }}
-      />
-    );
+    return <CircleCheckLight />;
   } else if (status === "failure") {
     return (
-      <CircleExclamationLight
-        style={{ width: 12, height: 12, fill: `var(${ThemeColorVariables.foreground})` }}
-      />
+      <CircleExclamationLight style={{ fill: `var(${ThemeColorVariables.errorForeground})` }} />
     );
   } else {
     return <SpinningSpinner />;
@@ -160,9 +237,6 @@ const rotation = keyframes`
 `;
 
 const SpinningSpinner = styled(Spinner)`
-  width: 12px;
-  height: 12px;
-  fill: var(${ThemeColorVariables.buttonForeground});
   animation: ${rotation} 2s infinite linear;
   transition: width 0.2s linear;
 `;
