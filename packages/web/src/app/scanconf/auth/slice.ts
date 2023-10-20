@@ -1,7 +1,7 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
 import { ExecutionResult } from "../components/scenario/types";
-import { Current, handlePlaybookStep } from "../playbook-execution-handler";
+import { Current, handleMockStep } from "../playbook-execution-handler";
 
 export type State = {
   mockCurrent: Current;
@@ -26,7 +26,7 @@ export const slice = createSlice({
       state,
       { payload: step }: PayloadAction<PlaybookExecutorStep>
     ) => {
-      handlePlaybookStep(state.mockCurrent, state.mockResult, step);
+      handleMockStep(state, step);
     },
   },
 });

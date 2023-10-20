@@ -5,20 +5,20 @@ import { RequestRef } from "@xliic/common/playbook";
 import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
 import { showScanconfOperation } from "../actions";
 import { ExecutionResult } from "../components/scenario/types";
-import { Current, handlePlaybookStep } from "../playbook-execution-handler";
+import { Current, handleMockStep, handleTryItStep } from "../playbook-execution-handler";
 
 export type State = {
   ref?: RequestRef;
-  current: Current;
-  result: ExecutionResult;
+  tryCurrent: Current;
+  tryResult: ExecutionResult;
   mockCurrent: Current;
   mockResult: ExecutionResult;
   mockMissingVariables: string[];
 };
 
 const initialState: State = {
-  current: { auth: undefined },
-  result: [],
+  tryCurrent: { auth: undefined },
+  tryResult: [],
   mockCurrent: { auth: undefined },
   mockResult: [],
   mockMissingVariables: [],
@@ -30,19 +30,19 @@ export const slice = createSlice({
   reducers: {
     setRequestId: (state, { payload }: PayloadAction<RequestRef>) => {
       state.ref = payload;
-      state.result = [];
+      state.tryResult = [];
     },
 
     executeRequest: (
       state,
       action: PayloadAction<{ inputs: SimpleEnvironment; server: string }>
     ) => {
-      state.current = { auth: undefined };
-      state.result = [];
+      state.tryCurrent = { auth: undefined };
+      state.tryResult = [];
     },
 
     addExecutionStep: (state, { payload: step }: PayloadAction<PlaybookExecutorStep>) => {
-      handlePlaybookStep(state.current, state.result, step);
+      handleTryItStep(state, step);
     },
 
     resetMockRequestExecution: (state) => {
@@ -55,7 +55,7 @@ export const slice = createSlice({
       state,
       { payload: step }: PayloadAction<PlaybookExecutorStep>
     ) => {
-      handlePlaybookStep(state.mockCurrent, state.mockResult, step);
+      handleMockStep(state, step);
       if (
         step.event === "payload-variables-substituted" ||
         step.event === "credential-variables-substituted"

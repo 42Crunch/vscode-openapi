@@ -29,7 +29,7 @@ export default function RequestInternal({
   const { oas, playbook, servers } = useAppSelector((state) => state.scanconf);
 
   const {
-    result: executionResult,
+    tryResult,
     mockResult,
     mockMissingVariables: missingVariables,
   } = useAppSelector((state) => state.requests);
@@ -110,13 +110,13 @@ export default function RequestInternal({
         </Inputs>
       </CollapsibleSection>
 
-      {executionResult.length > 0 && (
+      {tryResult.length > 0 && (
         <CollapsibleSection
           isOpen={isResponseOpen}
           onClick={() => setResponseOpen(!isResponseOpen)}
           title="Result"
         >
-          <Execution result={executionResult} />
+          <Execution result={tryResult} />
         </CollapsibleSection>
       )}
     </Container>

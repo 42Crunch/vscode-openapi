@@ -28,7 +28,7 @@ export default function RequestExternal({
   const { oas } = useAppSelector((state) => state.scanconf);
 
   const {
-    result: executionResult,
+    tryResult,
     mockResult,
     mockMissingVariables: missingVariables,
   } = useAppSelector((state) => state.requests);
@@ -107,13 +107,13 @@ export default function RequestExternal({
           </Form>
         </Inputs>
       </CollapsibleSection>
-      {executionResult.length > 0 && (
+      {tryResult.length > 0 && (
         <CollapsibleSection
           isOpen={isResponseOpen}
           onClick={() => setResponseOpen(!isResponseOpen)}
           title="Result"
         >
-          <Execution result={executionResult} />
+          <Execution result={tryResult} />
         </CollapsibleSection>
       )}
     </Container>

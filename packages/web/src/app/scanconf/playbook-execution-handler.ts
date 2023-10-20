@@ -17,7 +17,7 @@ import {
 } from "../../core/playbook/playbook";
 import { ExecutionResult, OperationResult, PlaybookResult } from "./components/scenario/types";
 
-export type PlaybookEventHandlers = {
+type PlaybookEventHandlers = {
   [K in PlaybookExecutorStep["event"]]: (
     stateCurrent: Current,
     stateResult: ExecutionResult,
@@ -28,6 +28,26 @@ export type PlaybookEventHandlers = {
 export type Current = {
   auth: string | undefined;
 };
+
+export function handleTryItStep(
+  {
+    tryCurrent: stateCurrent,
+    tryResult: stateResult,
+  }: { tryCurrent: Current; tryResult: ExecutionResult },
+  step: PlaybookExecutorStep
+) {
+  PlaybookStepHandlers[step.event](stateCurrent, stateResult, step as any);
+}
+
+export function handleMockStep(
+  {
+    mockCurrent: stateCurrent,
+    mockResult: stateResult,
+  }: { mockCurrent: Current; mockResult: ExecutionResult },
+  step: PlaybookExecutorStep
+) {
+  PlaybookStepHandlers[step.event](stateCurrent, stateResult, step as any);
+}
 
 function last<T>(array: T[]): T {
   return array[array.length - 1];
@@ -62,14 +82,6 @@ function currentOperationResult(
   stateResult: ExecutionResult
 ): OperationResult {
   return last(currentPlaybookResult(stateCurrent, stateResult).results);
-}
-
-export function handlePlaybookStep(
-  stateCurrent: Current,
-  stateResult: ExecutionResult,
-  step: PlaybookExecutorStep
-) {
-  PlaybookStepHandlers[step.event](stateCurrent, stateResult, step as any);
 }
 
 const PlaybookStepHandlers: PlaybookEventHandlers = {
