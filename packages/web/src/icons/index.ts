@@ -3,7 +3,6 @@ export { default as AngleUp } from "./AngleUp";
 export { default as ArrowRightFromBracket } from "./ArrowRightFromBracket";
 export { default as ArrowUpRightFromSquare } from "./ArrowUpRightFromSquare";
 export { default as BracketsCurly } from "./BracketsCurly";
-export { default as BracketsVariable } from "./BracketsVariable";
 export { default as Check } from "./Check";
 export { default as CircleCheckLight } from "./CircleCheckLight";
 export { default as CircleCheck } from "./CircleCheck";

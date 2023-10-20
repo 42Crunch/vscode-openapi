@@ -107,7 +107,7 @@ const Container = styled.div`
 const KeyValue = styled.div`
   display: contents;
   &:hover > :last-child {
-    visibility: visible;
+    opacity: 1;
   }
 `;
 
@@ -143,7 +143,7 @@ const Remove = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  visibility: hidden;
+  opacity: 0;
   > svg {
     fill: var(${ThemeColorVariables.foreground});
   }
