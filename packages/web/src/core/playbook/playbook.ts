@@ -18,7 +18,7 @@ export type Playbook = {
 
 export type PlaybookStarted = {
   event: "playbook-started";
-  name: "scenario" | "before" | "after";
+  name: string;
 };
 
 export type RequestStarted = {

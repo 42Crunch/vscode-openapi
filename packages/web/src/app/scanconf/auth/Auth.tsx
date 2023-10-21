@@ -15,6 +15,7 @@ import { setTryitServer } from "../../../features/prefs/slice";
 import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import { startTryAuthentication } from "./slice";
 import Execution from "../components/execution/Execution";
+import { OperationAuthentication } from "../components/execution/OperationAuthentication";
 
 export default function Auth() {
   const dispatch = useAppDispatch();

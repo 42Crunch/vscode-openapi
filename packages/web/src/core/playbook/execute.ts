@@ -53,7 +53,7 @@ async function* executePlaybook(
 ): AsyncGenerator<PlaybookExecutorStep> {
   const result: PlaybookEnvStack = [];
 
-  yield { event: "playbook-started", name: name as any };
+  yield { event: "playbook-started", name };
 
   for (let i = 0; i < requests.length; i++) {
     const step = requests[i];
@@ -298,7 +298,10 @@ export function makeEnvEnv(
   };
 }
 
-function getExternalEnvironment(file: playbook.PlaybookBundle, envenv: EnvData): PlaybookEnv {
+export function getExternalEnvironment(
+  file: playbook.PlaybookBundle,
+  envenv: EnvData
+): PlaybookEnv {
   const environmentName = file.runtimeConfiguration?.environment || "default";
   const { environment } = makeEnvEnv(
     file?.environments?.[environmentName] || { variables: {} },

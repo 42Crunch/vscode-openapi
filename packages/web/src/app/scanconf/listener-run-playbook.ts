@@ -13,7 +13,12 @@ import { Webapp } from "@xliic/common/message";
 import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
 import * as playbook from "@xliic/common/playbook";
 import { Result } from "@xliic/common/result";
-import { PlaybookList, executeAllPlaybooks } from "../../core/playbook/execute";
+import {
+  PlaybookList,
+  executeAllPlaybooks,
+  executeAuth,
+  getExternalEnvironment,
+} from "../../core/playbook/execute";
 import { MockHttpClient, MockHttpResponse } from "../../core/playbook/mock-http";
 import { PlaybookExecutorStep } from "../../core/playbook/playbook";
 import { PlaybookEnvStack } from "../../core/playbook/playbook-env";
@@ -52,6 +57,7 @@ import {
   selectSubcredential,
 } from "./slice";
 import { AppDispatch, RootState } from "./store";
+import { createDynamicVariables } from "../../core/playbook/builtin-variables";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 
@@ -255,37 +261,32 @@ export function onExecuteAuthentication(
       actionCreator: startTryAuthentication,
       effect: async ({ payload: server }, listenerApi) => {
         const {
-          scanconf: {
-            playbook,
-            selectedCredentialGroup,
-            selectedCredential,
-            selectedSubcredential,
-          },
+          scanconf: { oas, playbook, selectedCredential, selectedSubcredential },
+          env: { data: envenv },
         } = listenerApi.getState();
 
-        if (
-          selectedCredential === undefined ||
-          selectedSubcredential === undefined ||
-          playbook.authenticationDetails?.[selectedCredentialGroup]?.[selectedCredential]
-            ?.methods?.[selectedSubcredential]?.requests === undefined
-        ) {
+        if (selectedCredential === undefined || selectedSubcredential === undefined) {
           return;
         }
 
-        const requests =
-          playbook.authenticationDetails[selectedCredentialGroup][selectedCredential].methods[
-            selectedSubcredential
-          ].requests;
+        const env: PlaybookEnvStack = [
+          getExternalEnvironment(playbook, envenv),
+          createDynamicVariables(),
+        ];
 
-        await execute(
-          listenerApi.getState(),
+        listenerApi.dispatch(resetTryAuthentication());
+        listenerApi.dispatch(addTryAuthenticationStep({ event: "playbook-started", name: "" }));
+        listenerApi.dispatch(addTryAuthenticationStep({ event: "request-started" }));
+        for await (const step of executeAuth(
           httpClient(host, listenerApi.take),
-          listenerApi.dispatch,
-          resetTryAuthentication,
-          addTryAuthenticationStep,
-          [{ name: selectedSubcredential, requests }],
-          server
-        );
+          oas,
+          server,
+          playbook,
+          [`${selectedCredential}/${selectedSubcredential}`],
+          env
+        )) {
+          listenerApi.dispatch(addTryAuthenticationStep(step));
+        }
       },
     });
 }
