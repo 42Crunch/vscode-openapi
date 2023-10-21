@@ -8,23 +8,19 @@ import { AuthResult, PlaybookExecutorStep } from "./playbook";
 import { PlaybookEnv, PlaybookEnvStack } from "./playbook-env";
 import { assignVariables } from "./variable-assignments";
 import { replaceEnv, replaceEnvVariables } from "./variables";
+import { createDynamicVariables } from "./builtin-variables";
 
 export async function* executeAllPlaybooks(
   client: HttpClient | MockHttpClient,
   oas: BundledSwaggerOrOasSpec,
   server: string,
   file: playbook.PlaybookBundle,
+  playbooks: [string, playbook.Stage[]][],
   envenv: EnvData,
-  env: PlaybookEnvStack,
-  playbooks: [string, playbook.Stage[]][]
+  extraEnv: PlaybookEnvStack = []
 ): AsyncGenerator<PlaybookExecutorStep> {
+  const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv), createDynamicVariables()];
   const result: PlaybookEnvStack = [];
-
-  const environmentName = file.runtimeConfiguration?.environment || "default";
-  const environment = file?.environments?.[environmentName] || { variables: {} };
-
-  const { environment: playbookEnv } = makeEnvEnv(environment, envenv);
-
   for (const [name, requests] of playbooks) {
     const playbookResult: PlaybookEnvStack = yield* executePlaybook(
       name,
@@ -33,7 +29,7 @@ export async function* executeAllPlaybooks(
       server,
       file,
       requests,
-      [playbookEnv, ...env, ...result]
+      [...env, ...extraEnv, ...result]
     );
 
     if (playbookResult !== undefined) {
@@ -193,7 +189,7 @@ async function* executePlaybook(
   return result;
 }
 
-async function* executeAuth(
+export async function* executeAuth(
   client: HttpClient | MockHttpClient,
   oas: BundledSwaggerOrOasSpec,
   server: string,
@@ -298,4 +294,13 @@ export function makeEnvEnv(
     simple,
     missing,
   };
+}
+
+function getExternalEnvironment(file: playbook.PlaybookBundle, envenv: EnvData): PlaybookEnv {
+  const environmentName = file.runtimeConfiguration?.environment || "default";
+  const { environment } = makeEnvEnv(
+    file?.environments?.[environmentName] || { variables: {} },
+    envenv
+  );
+  return environment;
 }

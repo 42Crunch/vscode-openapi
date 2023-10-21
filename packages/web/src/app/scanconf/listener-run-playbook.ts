@@ -1,5 +1,6 @@
 import { TypedStartListening, isAnyOf } from "@reduxjs/toolkit";
 import {
+  HttpClient,
   HttpError,
   HttpRequest,
   HttpResponse,
@@ -12,7 +13,7 @@ import { Stage } from "@xliic/common/playbook";
 import { Result } from "@xliic/common/result";
 import { executeAllPlaybooks } from "../../core/playbook/execute";
 import { MockHttpClient, MockHttpResponse } from "../../core/playbook/mock-http";
-import { PlaybookEnvStack } from "../../core/playbook/playbook-env";
+import { PlaybookEnv, PlaybookEnvStack } from "../../core/playbook/playbook-env";
 import {
   addMockOperationExecutionStep,
   addTryExecutionStep,
@@ -91,10 +92,6 @@ export function onMockExecuteScenario(
 
         const operation = playbook.operations[operationId!];
 
-        const mockHttpClient: MockHttpClient = async () => [MockHttpResponse, undefined];
-
-        const env: PlaybookEnvStack = [createDynamicVariables()];
-
         const playbooks: [string, Stage[]][] = [];
 
         if (before.length > 0) {
@@ -117,13 +114,12 @@ export function onMockExecuteScenario(
 
         listenerApi.dispatch(resetMockOperationExecution());
         for await (const step of executeAllPlaybooks(
-          mockHttpClient,
+          mockHttpClient(),
           oas,
           "http://localhost", // doesn't matter
           playbook,
-          envData,
-          env,
-          playbooks
+          playbooks,
+          envData
         )) {
           listenerApi.dispatch(addMockOperationExecutionStep(step));
         }
@@ -152,21 +148,16 @@ export function onMockExecuteRequest(
           return;
         }
 
-        const mockHttpClient: MockHttpClient = async () => [MockHttpResponse, undefined];
-
-        const env: PlaybookEnvStack = [createDynamicVariables()];
-
         const playbooks: [string, Stage[]][] = [["", [{ ref: ref! }]]];
 
         listenerApi.dispatch(resetMockRequestExecution());
         for await (const step of executeAllPlaybooks(
-          mockHttpClient,
+          mockHttpClient(),
           oas,
           "http://localhost", // doesn't matter
           playbook,
-          envData,
-          env,
-          playbooks
+          playbooks,
+          envData
         )) {
           listenerApi.dispatch(addMockRequestExecutionStep(step));
         }
@@ -226,19 +217,14 @@ export function onMockExecuteAuthRequests(
           return;
         }
 
-        const mockHttpClient: MockHttpClient = async () => [MockHttpResponse, undefined];
-
-        const env: PlaybookEnvStack = [createDynamicVariables()];
-
         listenerApi.dispatch(resetMockRequestExecution());
         for await (const step of executeAllPlaybooks(
-          mockHttpClient,
+          mockHttpClient(),
           oas,
           "http://localhost", // doesn't matter
           playbook,
-          envData,
-          env,
-          [["", subcredential.requests]]
+          [["", subcredential.requests]],
+          envData
         )) {
           listenerApi.dispatch(addMockAuthRequestsExecutionStep(step));
         }
@@ -265,12 +251,6 @@ export function onTryExecuteScenario(
 
         const operation = playbook.operations[operationId!];
 
-        const send = makeSend(host);
-        const receive = makeReceive(listenerApi.take);
-        const httpClient = makeHttpClient(send, receive);
-
-        const env: PlaybookEnvStack = [createDynamicVariables()];
-
         const playbooks: [string, Stage[]][] = [];
 
         if (before.length > 0) {
@@ -293,13 +273,12 @@ export function onTryExecuteScenario(
 
         listenerApi.dispatch(resetTryExecution());
         for await (const step of executeAllPlaybooks(
-          httpClient,
+          httpClient(host, listenerApi.take),
           oas,
           server,
           playbook,
-          envData,
-          env,
-          playbooks
+          playbooks,
+          envData
         )) {
           listenerApi.dispatch(addTryExecutionStep(step));
         }
@@ -342,21 +321,14 @@ export function onExecuteAuthentication(
             selectedSubcredential
           ].requests;
 
-        const send = makeSend(host);
-        const receive = makeReceive(listenerApi.take);
-        const httpClient = makeHttpClient(send, receive);
-
-        const env: PlaybookEnvStack = [createDynamicVariables()];
-
         listenerApi.dispatch(resetTryAuthentication());
         for await (const step of executeAllPlaybooks(
-          httpClient,
+          httpClient(host, listenerApi.take),
           oas,
           server,
           playbook,
-          envData,
-          env,
-          [[selectedSubcredential, requests]]
+          [[selectedSubcredential, requests]],
+          envData
         )) {
           listenerApi.dispatch(addTryAuthenticationStep(step));
         }
@@ -380,27 +352,14 @@ export function onExecuteRequest(
 
         const { inputs, server } = action.payload;
 
-        const send = makeSend(host);
-        const receive = makeReceive(listenerApi.take);
-        const httpClient = makeHttpClient(send, receive);
-
-        const env: PlaybookEnvStack = [
-          createDynamicVariables(),
-          {
-            id: "inputs",
-            env: inputs,
-            assignments: [],
-          },
-        ];
+        const inputsStack: PlaybookEnvStack = [{ id: "inputs", env: inputs, assignments: [] }];
 
         // reset is done in executeRequest
         for await (const step of executeAllPlaybooks(
-          httpClient,
+          httpClient(host, listenerApi.take),
           oas,
           server,
           playbook,
-          envData,
-          env,
           [
             [
               "",
@@ -410,12 +369,24 @@ export function onExecuteRequest(
                 },
               ],
             ],
-          ]
+          ],
+          envData,
+          inputsStack
         )) {
           listenerApi.dispatch(addExecutionStep(step));
         }
       },
     });
+}
+
+function httpClient(host: HttpCapableWebappHost, take: (pattern: any) => any): HttpClient {
+  const send = makeSend(host);
+  const receive = makeReceive(take);
+  return makeHttpClient(send, receive);
+}
+
+function mockHttpClient(): MockHttpClient {
+  return async () => [MockHttpResponse, undefined];
 }
 
 function makeSend(host: HttpCapableWebappHost) {

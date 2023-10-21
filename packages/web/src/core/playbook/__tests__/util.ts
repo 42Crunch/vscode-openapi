@@ -35,12 +35,9 @@ export async function runScenario(
     oas,
     "http://localhost:8090",
     file,
-    {
-      default: {},
-      secrets: {},
-    },
-    [vars],
-    [["test", file.operations[name].scenarios[0].requests]]
+    [["test", file.operations[name].scenarios[0].requests]],
+    { default: {}, secrets: {} },
+    [vars]
   )) {
     steps.push(step);
   }
