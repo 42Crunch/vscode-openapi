@@ -10,18 +10,20 @@ import { assignVariables } from "./variable-assignments";
 import { replaceEnv, replaceEnvVariables } from "./variables";
 import { createDynamicVariables } from "./builtin-variables";
 
+export type PlaybookList = { name: string; requests: playbook.Stage[] }[];
+
 export async function* executeAllPlaybooks(
   client: HttpClient | MockHttpClient,
   oas: BundledSwaggerOrOasSpec,
   server: string,
   file: playbook.PlaybookBundle,
-  playbooks: [string, playbook.Stage[]][],
+  playbooks: PlaybookList,
   envenv: EnvData,
   extraEnv: PlaybookEnvStack = []
 ): AsyncGenerator<PlaybookExecutorStep> {
   const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv), createDynamicVariables()];
   const result: PlaybookEnvStack = [];
-  for (const [name, requests] of playbooks) {
+  for (const { name, requests } of playbooks) {
     const playbookResult: PlaybookEnvStack = yield* executePlaybook(
       name,
       client,

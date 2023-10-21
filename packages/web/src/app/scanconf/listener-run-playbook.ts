@@ -1,4 +1,5 @@
-import { TypedStartListening, isAnyOf } from "@reduxjs/toolkit";
+import { Action, TypedStartListening, isAnyOf } from "@reduxjs/toolkit";
+import { EnvData } from "@xliic/common/env";
 import {
   HttpClient,
   HttpError,
@@ -9,11 +10,21 @@ import {
   ShowHttpResponseMessage,
 } from "@xliic/common/http";
 import { Webapp } from "@xliic/common/message";
-import { Stage } from "@xliic/common/playbook";
+import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
+import * as playbook from "@xliic/common/playbook";
 import { Result } from "@xliic/common/result";
-import { executeAllPlaybooks } from "../../core/playbook/execute";
+import { PlaybookList, executeAllPlaybooks } from "../../core/playbook/execute";
 import { MockHttpClient, MockHttpResponse } from "../../core/playbook/mock-http";
-import { PlaybookEnv, PlaybookEnvStack } from "../../core/playbook/playbook-env";
+import { PlaybookExecutorStep } from "../../core/playbook/playbook";
+import { PlaybookEnvStack } from "../../core/playbook/playbook-env";
+import { goTo } from "../../features/router/slice";
+import {
+  addMockAuthRequestsExecutionStep,
+  addTryAuthenticationStep,
+  resetMockAuthRequestsExecution,
+  resetTryAuthentication,
+  startTryAuthentication,
+} from "./auth/slice";
 import {
   addMockOperationExecutionStep,
   addTryExecutionStep,
@@ -24,32 +35,23 @@ import {
   startTryExecution,
 } from "./operations/slice";
 import {
-  executeRequest,
   addExecutionStep,
-  setRequestId,
   addMockRequestExecutionStep,
+  executeRequest,
+  resetExecuteRequest,
   resetMockRequestExecution,
+  setRequestId,
 } from "./requests/slice";
-import { AppDispatch, RootState } from "./store";
 import {
   addStage,
   moveStage,
   removeStage,
-  saveEnvironment,
   saveOperationReference,
   saveRequest,
   selectCredential,
   selectSubcredential,
 } from "./slice";
-import { createDynamicVariables } from "../../core/playbook/builtin-variables";
-import { goTo } from "../../features/router/slice";
-import {
-  addMockAuthRequestsExecutionStep,
-  addTryAuthenticationStep,
-  resetMockAuthRequestsExecution,
-  resetTryAuthentication,
-  startTryAuthentication,
-} from "./auth/slice";
+import { AppDispatch, RootState } from "./store";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 
@@ -75,9 +77,10 @@ export function onMockExecuteScenario(
       ),
       effect: async (action, listenerApi) => {
         const {
-          scanconf: { oas, playbook },
+          scanconf: {
+            playbook: { before, after, operations },
+          },
           operations: { scenarioId, operationId },
-          env: { data: envData },
           router: {
             current: [page],
           },
@@ -87,42 +90,25 @@ export function onMockExecuteScenario(
           return;
         }
 
-        const before = playbook.before;
-        const after = playbook.after;
+        const operation = operations[operationId!];
 
-        const operation = playbook.operations[operationId!];
+        const playbooks: PlaybookList = [
+          { name: "before", requests: before },
+          { name: "operationBefore", requests: operation.before },
+          { name: "operationScenarios", requests: operation.scenarios[scenarioId].requests },
+          { name: "operationAfter", requests: operation.after },
+          { name: "after", requests: after },
+        ].filter((playbook) => playbook.requests.length > 0);
 
-        const playbooks: [string, Stage[]][] = [];
-
-        if (before.length > 0) {
-          playbooks.push(["before", before]);
-        }
-
-        if (operation.before.length > 0) {
-          playbooks.push(["operationBefore", operation.before]);
-        }
-
-        playbooks.push(["operationScenarios", operation.scenarios[scenarioId].requests]);
-
-        if (operation.after.length > 0) {
-          playbooks.push(["operationAfter", operation.after]);
-        }
-
-        if (after.length > 0) {
-          playbooks.push(["after", after]);
-        }
-
-        listenerApi.dispatch(resetMockOperationExecution());
-        for await (const step of executeAllPlaybooks(
+        await execute(
+          listenerApi.getState(),
           mockHttpClient(),
-          oas,
-          "http://localhost", // doesn't matter
-          playbook,
+          listenerApi.dispatch,
+          resetMockOperationExecution,
+          addMockOperationExecutionStep,
           playbooks,
-          envData
-        )) {
-          listenerApi.dispatch(addMockOperationExecutionStep(step));
-        }
+          "http://localhost"
+        );
       },
     });
 }
@@ -136,8 +122,6 @@ export function onMockExecuteRequest(
       matcher: isAnyOf(goTo, setRequestId, saveRequest),
       effect: async (action, listenerApi) => {
         const {
-          scanconf: { oas, playbook },
-          env: { data: envData },
           requests: { ref },
           router: {
             current: [page],
@@ -148,19 +132,15 @@ export function onMockExecuteRequest(
           return;
         }
 
-        const playbooks: [string, Stage[]][] = [["", [{ ref: ref! }]]];
-
-        listenerApi.dispatch(resetMockRequestExecution());
-        for await (const step of executeAllPlaybooks(
+        await execute(
+          listenerApi.getState(),
           mockHttpClient(),
-          oas,
-          "http://localhost", // doesn't matter
-          playbook,
-          playbooks,
-          envData
-        )) {
-          listenerApi.dispatch(addMockRequestExecutionStep(step));
-        }
+          listenerApi.dispatch,
+          resetMockRequestExecution,
+          addMockRequestExecutionStep,
+          [{ name: "", requests: [{ ref: ref! }] }],
+          "http://localhost"
+        );
       },
     });
 }
@@ -183,13 +163,11 @@ export function onMockExecuteAuthRequests(
       effect: async (action, listenerApi) => {
         const {
           scanconf: {
-            oas,
             playbook,
             selectedCredentialGroup,
             selectedCredential,
             selectedSubcredential,
           },
-          env: { data: envData },
           router: {
             current: [page],
           },
@@ -217,17 +195,15 @@ export function onMockExecuteAuthRequests(
           return;
         }
 
-        listenerApi.dispatch(resetMockRequestExecution());
-        for await (const step of executeAllPlaybooks(
+        await execute(
+          listenerApi.getState(),
           mockHttpClient(),
-          oas,
-          "http://localhost", // doesn't matter
-          playbook,
-          [["", subcredential.requests]],
-          envData
-        )) {
-          listenerApi.dispatch(addMockAuthRequestsExecutionStep(step));
-        }
+          listenerApi.dispatch,
+          resetMockAuthRequestsExecution,
+          addMockAuthRequestsExecutionStep,
+          [{ name: "", requests: subcredential.requests }],
+          "http://localhost"
+        );
       },
     });
 }
@@ -241,47 +217,31 @@ export function onTryExecuteScenario(
       actionCreator: startTryExecution,
       effect: async ({ payload: server }, listenerApi) => {
         const {
-          scanconf: { oas, playbook },
+          scanconf: {
+            playbook: { before, after, operations },
+          },
           operations: { scenarioId, operationId },
-          env: { data: envData },
         } = listenerApi.getState();
 
-        const before = playbook.before;
-        const after = playbook.after;
+        const operation = operations[operationId!];
 
-        const operation = playbook.operations[operationId!];
+        const playbooks: PlaybookList = [
+          { name: "Global Before", requests: before },
+          { name: "Before", requests: operation.before },
+          { name: "Scenario", requests: operation.scenarios[scenarioId].requests },
+          { name: "After", requests: operation.after },
+          { name: "Global After", requests: after },
+        ].filter((playbook) => playbook.requests.length > 0);
 
-        const playbooks: [string, Stage[]][] = [];
-
-        if (before.length > 0) {
-          playbooks.push(["Global Before", before]);
-        }
-
-        if (operation.before.length > 0) {
-          playbooks.push(["Before", operation.before]);
-        }
-
-        playbooks.push(["Scenario", operation.scenarios[scenarioId].requests]);
-
-        if (operation.after.length > 0) {
-          playbooks.push(["After", operation.after]);
-        }
-
-        if (after.length > 0) {
-          playbooks.push(["Global After", after]);
-        }
-
-        listenerApi.dispatch(resetTryExecution());
-        for await (const step of executeAllPlaybooks(
+        await execute(
+          listenerApi.getState(),
           httpClient(host, listenerApi.take),
-          oas,
-          server,
-          playbook,
+          listenerApi.dispatch,
+          resetTryExecution,
+          addTryExecutionStep,
           playbooks,
-          envData
-        )) {
-          listenerApi.dispatch(addTryExecutionStep(step));
-        }
+          server
+        );
       },
     });
 }
@@ -293,16 +253,14 @@ export function onExecuteAuthentication(
   return () =>
     startAppListening({
       actionCreator: startTryAuthentication,
-      effect: async (action, listenerApi) => {
+      effect: async ({ payload: server }, listenerApi) => {
         const {
           scanconf: {
-            oas,
             playbook,
             selectedCredentialGroup,
             selectedCredential,
             selectedSubcredential,
           },
-          env: { data: envData },
         } = listenerApi.getState();
 
         if (
@@ -314,24 +272,20 @@ export function onExecuteAuthentication(
           return;
         }
 
-        const server = action.payload;
-
         const requests =
           playbook.authenticationDetails[selectedCredentialGroup][selectedCredential].methods[
             selectedSubcredential
           ].requests;
 
-        listenerApi.dispatch(resetTryAuthentication());
-        for await (const step of executeAllPlaybooks(
+        await execute(
+          listenerApi.getState(),
           httpClient(host, listenerApi.take),
-          oas,
-          server,
-          playbook,
-          [[selectedSubcredential, requests]],
-          envData
-        )) {
-          listenerApi.dispatch(addTryAuthenticationStep(step));
-        }
+          listenerApi.dispatch,
+          resetTryAuthentication,
+          addTryAuthenticationStep,
+          [{ name: selectedSubcredential, requests }],
+          server
+        );
       },
     });
 }
@@ -343,50 +297,65 @@ export function onExecuteRequest(
   return () =>
     startAppListening({
       actionCreator: executeRequest,
-      effect: async (action, listenerApi) => {
+      effect: async ({ payload: { inputs, server } }, listenerApi) => {
         const {
-          scanconf: { oas, playbook },
           requests: { ref },
-          env: { data: envData },
         } = listenerApi.getState();
 
-        const { inputs, server } = action.payload;
-
-        const inputsStack: PlaybookEnvStack = [{ id: "inputs", env: inputs, assignments: [] }];
-
-        // reset is done in executeRequest
-        for await (const step of executeAllPlaybooks(
+        await execute(
+          listenerApi.getState(),
           httpClient(host, listenerApi.take),
-          oas,
+          listenerApi.dispatch,
+          resetExecuteRequest,
+          addExecutionStep,
+          [{ name: "", requests: [{ ref: ref! }] }],
           server,
-          playbook,
-          [
-            [
-              "",
-              [
-                {
-                  ref: ref!,
-                },
-              ],
-            ],
-          ],
-          envData,
-          inputsStack
-        )) {
-          listenerApi.dispatch(addExecutionStep(step));
-        }
+          [{ id: "inputs", env: inputs, assignments: [] }]
+        );
       },
     });
+}
+
+async function execute(
+  state: {
+    scanconf: { oas: BundledSwaggerOrOasSpec; playbook: playbook.PlaybookBundle };
+    env: { data: EnvData };
+  },
+  httpClient: HttpClient | MockHttpClient,
+  dispatch: (action: Action) => void,
+  resetAction: () => Action,
+  addExecutionStepAction: (action: PlaybookExecutorStep) => Action,
+  playbooks: PlaybookList,
+  server: string,
+  extraEnv: PlaybookEnvStack = []
+) {
+  dispatch(resetAction());
+  for await (const step of executeAllPlaybooks(
+    httpClient,
+    state.scanconf.oas,
+    server,
+    state.scanconf.playbook,
+    playbooks,
+    state.env.data,
+    extraEnv
+  )) {
+    dispatch(addExecutionStepAction(step));
+  }
+}
+
+function mockHttpClient(): MockHttpClient {
+  return async () => [MockHttpResponse, undefined];
 }
 
 function httpClient(host: HttpCapableWebappHost, take: (pattern: any) => any): HttpClient {
   const send = makeSend(host);
   const receive = makeReceive(take);
-  return makeHttpClient(send, receive);
-}
 
-function mockHttpClient(): MockHttpClient {
-  return async () => [MockHttpResponse, undefined];
+  return async function httpClient(request: HttpRequest): Promise<Result<HttpResponse, HttpError>> {
+    const id = send(request);
+    const received = await receive(id);
+    return received;
+  };
 }
 
 function makeSend(host: HttpCapableWebappHost) {
@@ -422,16 +391,5 @@ function makeReceive(take: (pattern: any) => any) {
     } else {
       return [undefined, action.payload.error];
     }
-  };
-}
-
-function makeHttpClient(
-  send: (request: HttpRequest) => string,
-  receive: (id: string) => Promise<Result<HttpResponse, HttpError>>
-) {
-  return async function httpClient(request: HttpRequest): Promise<Result<HttpResponse, HttpError>> {
-    const id = send(request);
-    const received = await receive(id);
-    return received;
   };
 }

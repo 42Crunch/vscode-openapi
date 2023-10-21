@@ -36,7 +36,9 @@ export const slice = createSlice({
     executeRequest: (
       state,
       action: PayloadAction<{ inputs: SimpleEnvironment; server: string }>
-    ) => {
+    ) => {},
+
+    resetExecuteRequest: (state) => {
       state.tryCurrent = { auth: undefined };
       state.tryResult = [];
     },
@@ -79,6 +81,7 @@ export const slice = createSlice({
 
 export const {
   setRequestId,
+  resetExecuteRequest,
   addExecutionStep,
   executeRequest,
   resetMockRequestExecution,
