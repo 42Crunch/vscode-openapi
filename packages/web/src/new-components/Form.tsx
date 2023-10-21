@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { useForm, FormProvider, useWatch, FieldValues } from "react-hook-form";
+import { useEffect, useRef } from "react";
+import { useForm, FormProvider, FieldValues } from "react-hook-form";
 import diff from "microdiff";
 import { ZodObject } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,56 +19,46 @@ export default function Form<T extends FieldValues>({
   unwrapFormData: (data: FieldValues) => T;
   schema?: ZodObject<any>;
 }) {
-  function wrapFormDataVersioned(data: T, version: number) {
-    return { ...wrapFormData(data), __version: version };
-  }
-
-  function unwrapFormDataVersioned(data: FieldValues) {
-    const { __version, ...rest } = data;
-    return unwrapFormData(rest);
-  }
-
-  const [formValues, setFormValues] = useState(wrapFormDataVersioned(data, 0));
-
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const valuesRef = useRef(data);
   const methods = useForm({
-    values: formValues,
+    defaultValues: wrapFormData(data),
     mode: "all",
     resolver: schema !== undefined ? zodResolver(schema) : undefined,
   });
 
-  const formData = useWatch({ control: methods.control, defaultValue: formValues });
-
-  const timeoutRef = useRef<any>(null);
-
-  const { isValid, isValidating } = methods.formState;
-
-  const version = useRef(0);
+  const { formState, handleSubmit, reset } = methods;
 
   useEffect(() => {
-    const difference = diff(unwrapFormDataVersioned(formData), data);
+    // update form if the "data" property changes
+    const difference = diff(valuesRef.current, data);
     if (difference.length > 0) {
-      // apply every incoming changes, incrementing the current version
-      version.current = formValues.__version + 1;
-      setFormValues(wrapFormDataVersioned(data, version.current));
+      valuesRef.current = data;
+      reset(wrapFormData(data));
     }
-  }, [data]);
+  }, [data, valuesRef]);
 
   useEffect(() => {
-    if (isValid && !isValidating) {
-      const difference = diff(
-        unwrapFormDataVersioned(formData),
-        unwrapFormDataVersioned(formValues)
-      );
-      if (difference.length > 0 && formData.__version === version.current) {
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-        }
-        timeoutRef.current = setTimeout(() => {
-          saveData(unwrapFormDataVersioned(formData));
-        }, 250);
-      }
+    // call "setData" when the form has become dirty and is valid
+    const { isDirty, isValid, isValidating } = formState;
+
+    // cancel pending update if the form value changes
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
     }
-  }, [formData, isValid, isValidating]);
+
+    // schedule a new one if form is dirty and valid
+    if (isDirty && isValid && !isValidating) {
+      timeoutRef.current = setTimeout(() => {
+        handleSubmit((data) => {
+          const updated = unwrapFormData(data);
+          valuesRef.current = updated;
+          reset(undefined, { keepValues: true });
+          saveData(updated);
+        })();
+      }, 250);
+    }
+  }, [formState, valuesRef]);
 
   return <FormProvider {...methods}>{children}</FormProvider>;
 }
