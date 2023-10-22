@@ -1,61 +1,49 @@
 import styled from "styled-components";
 import * as Dialog from "@radix-ui/react-dialog";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { useForm, FormProvider, FieldValues } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 import * as playbook from "@xliic/common/playbook";
 import Input from "../../../components/Input";
 import { useState } from "react";
 import Select from "../../../components/Select";
 import Button from "../../../components/Button";
 import ButtonSecondary from "../../../components/ButtonSecondary";
-import { Plus } from "../../../icons";
-import FormDialog from "../../../new-components/FormDialog";
 
-export default function AddNewCredentialValueDialog({
-  onAddCredentialValue,
+export default function NewCredentialDialog({
+  onAddCredential,
 }: {
-  onAddCredentialValue: (name: string, value: playbook.CredentialMethod) => void;
+  onAddCredential: (id: string, credential: playbook.Credential) => void;
 }) {
-  return (
-    <FormDialog
-      defaultValues={{ name: "", value: "" }}
-      contents={
-        <>
-          <Input label="Name" name="name" />
-          <Input label="Value" name="value" />
-        </>
-      }
-      trigger={
-        <AddRequestButton>
-          <Plus />
-        </AddRequestButton>
-      }
-      onSubmit={(values: FieldValues) => {
-        onAddCredentialValue(values.name, { credential: values.value, requests: [] });
-      }}
-    />
-  );
+  const methods = useForm({
+    defaultValues: {
+      id: "",
+      type: "apiKey",
+      in: "header",
+      name: "",
+      description: "",
+      credentialName: "",
+      credentialValue: "",
+    },
+    mode: "onChange",
+  });
 
-  /*
-  { key: "hulabub", value: { credential: "zak", requests: [] }
-  */
+  const [open, setOpen] = useState(false);
 
-  /*
   const onSubmit = (data: any) => {
-    // onAddCredential(data.id, {
-    //   type: data.type,
-    //   default: data.credentialName,
-    //   in: data.in,
-    //   name: data.name,
-    //   description: data.description,
-    //   methods: {
-    //     [data.credentialName]: {
-    //       credential: data.credentialValue,
-    //       requests: [],
-    //       description: "",
-    //     },
-    //   },
-    // });
+    onAddCredential(data.id, {
+      type: data.type,
+      default: data.credentialName,
+      in: data.in,
+      name: data.name,
+      description: data.description,
+      methods: {
+        [data.credentialName]: {
+          credential: data.credentialValue,
+          requests: [],
+          description: "",
+        },
+      },
+    });
   };
 
   return (
@@ -69,9 +57,7 @@ export default function AddNewCredentialValueDialog({
       }}
     >
       <Dialog.Trigger asChild>
-        <AddRequestButton>
-          <Plus />
-        </AddRequestButton>
+        <Button style={{ width: "100%" }}>Add new credential</Button>
       </Dialog.Trigger>
       <Dialog.Portal>
         <Overlay />
@@ -124,7 +110,6 @@ export default function AddNewCredentialValueDialog({
       </Dialog.Portal>
     </Dialog.Root>
   );
-  */
 }
 const Form = styled.form`
   margin: 8px;
@@ -153,16 +138,4 @@ const DialogContent = styled(Dialog.Content)`
   color: var(${ThemeColorVariables.foreground});
   border-radius: 6px;
   box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
-`;
-
-const AddRequestButton = styled.button`
-  border: none;
-  background-color: transparent;
-  cursor: pointer;
-  > svg {
-    fill: var(${ThemeColorVariables.linkForeground});
-    &:hover {
-      fill: var(${ThemeColorVariables.linkActiveForeground});
-    }
-  }
 `;

@@ -9,9 +9,9 @@ import Scenario from "../operations/Scenario";
 import AddRequest from "../operations/components/AddRequest";
 import * as actions from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
-import AddNewCredentialValueDialog from "./AddNewCredentialValueDialog";
+import NewValueDialog from "./NewValueDialog";
 
-export default function CredentialMethods({
+export default function CredentialValues({
   group,
   credentialId,
 }: {
@@ -100,7 +100,7 @@ export default function CredentialMethods({
       setActiveTab={(tab: string) => dispatch(actions.selectSubcredential(tab))}
       tabs={tabs}
       menu={
-        <AddNewCredentialValueDialog
+        <NewValueDialog
           onAddCredentialValue={(name: string, value: playbook.CredentialMethod) => {
             append({ key: name, value: value });
             dispatch(actions.selectSubcredential(name));
