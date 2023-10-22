@@ -156,6 +156,21 @@ export const slice = createSlice({
       state.dirty = true;
     },
 
+    removeCredential: (
+      state,
+      { payload: { credentialGroup, id } }: PayloadAction<{ credentialGroup: number; id: string }>
+    ) => {
+      delete state.playbook.authenticationDetails[credentialGroup][id];
+      if (state.selectedCredentialGroup === credentialGroup && state.selectedCredential === id) {
+        // removed currently selected credential, select first available one
+        state.selectedCredential = Object.keys(
+          state.playbook.authenticationDetails[credentialGroup]
+        )?.[0];
+        state.selectedSubcredential = undefined;
+      }
+      state.dirty = true;
+    },
+
     selectCredential: (
       state,
       { payload }: PayloadAction<{ group: number; credential: string }>
@@ -268,6 +283,7 @@ export const {
   saveEnvironment,
   saveScanconf,
   addCredential,
+  removeCredential,
   addStage,
   moveStage,
   removeStage,

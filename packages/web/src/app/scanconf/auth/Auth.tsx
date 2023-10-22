@@ -1,9 +1,10 @@
 import * as playbook from "@xliic/common/playbook";
 import { SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
-import { addCredential, selectCredential } from "../slice";
+import { addCredential, removeCredential, selectCredential } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import Credential from "./Credential";
 import NewCredentialDialog from "./NewCredentialDialog";
+import { Menu, MenuItem } from "../../../new-components/Menu";
 
 export default function Auth() {
   const dispatch = useAppDispatch();
@@ -14,21 +15,33 @@ export default function Auth() {
     selectedCredential,
   } = useAppSelector((state) => state.scanconf);
 
+  const onAddCredential = (id: string, credential: playbook.Credential) => {
+    // no way to select credentialGroup for now
+    dispatch(addCredential({ credentialGroup: 0, id, credential }));
+    dispatch(selectCredential({ group: 0, credential: id }));
+  };
+
   const sections = authenticationDetails.map((credentials, index) => {
-    const items = Object.entries(credentials).map(([id, credential]) => ({ id, label: id }));
     const title = index === 0 ? "Default credential group" : `Credential group ${index}`;
+
+    const items = Object.entries(credentials).map(([id, credential]) => ({
+      id,
+      label: id,
+      menu: (
+        <Menu>
+          <MenuItem onSelect={() => dispatch(removeCredential({ credentialGroup: index, id }))}>
+            Delete
+          </MenuItem>
+        </Menu>
+      ),
+    }));
+
     return {
       id: `${index}`,
       title,
       items,
     };
   });
-
-  const onAddCredential = (id: string, credential: playbook.Credential) => {
-    // no way to select credentialGroup for now
-    dispatch(addCredential({ credentialGroup: 0, id, credential }));
-    dispatch(selectCredential({ group: 0, credential: id }));
-  };
 
   return (
     <SearchSidebarControlled

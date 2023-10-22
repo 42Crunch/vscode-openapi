@@ -33,17 +33,17 @@ export default function List({
           if (item.id === selected) {
             return (
               <SelectedItem key={item.id}>
-                <span>{item.label}</span>
+                <span className="label">{item.label}</span>
                 {errors?.[item.id] !== undefined && <ErrorMarker message={errors[item.id]} />}
-                {item.menu}
+                {item.menu && <span className="menu">{item.menu}</span>}
               </SelectedItem>
             );
           }
           return (
             <Item onClick={() => setSelected(item.id)} key={item.id}>
-              <span>{item.label}</span>
+              <span className="label">{item.label}</span>
               {errors?.[item.id] !== undefined && <ErrorMarker message={errors[item.id]} />}
-              {item.menu}
+              {item.menu && <span className="menu">{item.menu}</span>}
             </Item>
           );
         })}
@@ -82,7 +82,7 @@ const Item = styled.li`
   cursor: pointer;
   padding: 4px 8px;
   overflow: hidden;
-  > span {
+  > span.label {
     flex: 1;
   }
 `;

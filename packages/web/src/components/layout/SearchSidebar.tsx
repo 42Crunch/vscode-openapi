@@ -11,7 +11,6 @@ export type Section = {
   title: string;
   items: ListItem[];
   menu?: React.ReactNode;
-  itemMenu?: React.ReactNode;
 };
 
 export type ItemId = {
