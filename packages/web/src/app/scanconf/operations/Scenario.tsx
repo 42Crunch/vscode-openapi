@@ -41,6 +41,10 @@ export default function Scenario({
     }),
   }));
 
+  if (stages.length === 0) {
+    return null;
+  }
+
   return (
     <Container ref={drop}>
       {stages.map((stage, stageIndex) => {

@@ -120,4 +120,7 @@ const Content = styled(Tabs.Content)`
 
 const Requests = styled.div`
   padding-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 `;
