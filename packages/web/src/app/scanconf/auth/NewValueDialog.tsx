@@ -1,5 +1,6 @@
 import { FieldValues } from "react-hook-form";
 import styled from "styled-components";
+import * as z from "zod";
 
 import * as playbook from "@xliic/common/playbook";
 import { ThemeColorVariables } from "@xliic/common/theme";
@@ -10,7 +11,9 @@ import FormDialog from "../../../new-components/FormDialog";
 
 export default function NewValueDialog({
   onAddCredentialValue,
+  existingValues,
 }: {
+  existingValues: string[];
   onAddCredentialValue: (name: string, value: playbook.CredentialMethod) => void;
 }) {
   const contents = (
@@ -26,11 +29,22 @@ export default function NewValueDialog({
     onAddCredentialValue(values.name, { credential: values.value, requests: [] });
   };
 
+  const schema = z.object({
+    name: z
+      .string()
+      .regex(/^\w+$/)
+      .refine((value) => !existingValues.includes(value), {
+        message: "Name already exists",
+      }),
+    value: z.string().min(1),
+  });
+
   return (
     <FormDialog
       defaultValues={defaultValues}
       contents={contents}
       onSubmit={onSubmit}
+      schema={schema}
       trigger={
         <AddRequestButton>
           <Plus />

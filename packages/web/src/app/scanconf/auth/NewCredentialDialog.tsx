@@ -69,11 +69,11 @@ export default function NewCredentialDialog({
 
   return (
     <FormDialog
-      title="Add credential"
+      title="New credential"
       contents={contents}
       defaultValues={defaultValues}
       onSubmit={onSubmit}
-      trigger={<Button style={{ width: "100%" }}>Add new credential</Button>}
+      trigger={<Button style={{ width: "100%" }}>New credential</Button>}
     />
   );
 }

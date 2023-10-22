@@ -1,6 +1,6 @@
 import * as Tabs from "@radix-ui/react-tabs";
 import * as playbook from "@xliic/common/playbook";
-import { useFieldArray } from "react-hook-form";
+import { useFieldArray, useFormContext } from "react-hook-form";
 import styled from "styled-components";
 import Input from "../../../components/Input";
 import { Menu, MenuItem } from "../../../new-components/Menu";
@@ -48,6 +48,8 @@ export default function CredentialValues({
   const { fields, append, remove } = useFieldArray({
     name: "methods",
   });
+
+  const { getValues } = useFormContext();
 
   const tabs = fields.map((method: any, index) => {
     return {
@@ -101,6 +103,7 @@ export default function CredentialValues({
       tabs={tabs}
       menu={
         <NewValueDialog
+          existingValues={getValues("methods").map((value: any) => value.key as string)}
           onAddCredentialValue={(name: string, value: playbook.CredentialMethod) => {
             append({ key: name, value: value });
             dispatch(actions.selectSubcredential(name));

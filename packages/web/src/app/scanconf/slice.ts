@@ -163,10 +163,21 @@ export const slice = createSlice({
       delete state.playbook.authenticationDetails[credentialGroup][id];
       if (state.selectedCredentialGroup === credentialGroup && state.selectedCredential === id) {
         // removed currently selected credential, select first available one
-        state.selectedCredential = Object.keys(
+        const firstCredential = Object.keys(
           state.playbook.authenticationDetails[credentialGroup]
         )?.[0];
-        state.selectedSubcredential = undefined;
+        if (firstCredential) {
+          state.selectedCredential = firstCredential;
+          const firstMethod = Object.keys(
+            state.playbook.authenticationDetails[credentialGroup][firstCredential].methods
+          )?.[0];
+          if (firstMethod) {
+            state.selectedSubcredential = firstMethod;
+          }
+        } else {
+          state.selectedCredential = undefined;
+          state.selectedSubcredential = undefined;
+        }
       }
       state.dirty = true;
     },

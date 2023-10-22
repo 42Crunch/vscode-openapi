@@ -2,6 +2,8 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useState } from "react";
 import { FieldValues, FormProvider, useForm } from "react-hook-form";
 import styled from "styled-components";
+import { ZodObject } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
 
@@ -15,6 +17,7 @@ export default function FormDialog({
   title,
   description,
   contents,
+  schema,
 }: {
   trigger: JSX.Element;
   contents: JSX.Element;
@@ -22,10 +25,11 @@ export default function FormDialog({
   onSubmit: (values: FieldValues) => void;
   title?: string;
   description?: string;
+  schema?: ZodObject<any>;
 }) {
   const methods = useForm({
     defaultValues,
-    mode: "onChange",
+    resolver: schema !== undefined ? zodResolver(schema) : undefined,
   });
 
   const [open, setOpen] = useState(false);
@@ -46,11 +50,10 @@ export default function FormDialog({
         <DialogContent>
           <FormProvider {...methods}>
             <Form
-              onSubmit={(event) => {
-                methods.handleSubmit(onSubmit)(event);
-                event.preventDefault();
+              onSubmit={methods.handleSubmit((data) => {
+                onSubmit(data);
                 setOpen(false);
-              }}
+              })}
             >
               {title && <Dialog.Title>{title}</Dialog.Title>}
               {description && <Dialog.Description>{description}</Dialog.Description>}

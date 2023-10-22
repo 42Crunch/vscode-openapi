@@ -42,7 +42,14 @@ export function UncontrolledTabContainer({ tabs, menu }: { tabs: Tab[]; menu?: J
     return null;
   }
 
-  return <ControlledTabContainer tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />;
+  return (
+    <ControlledTabContainer
+      tabs={tabs}
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      menu={menu}
+    />
+  );
 }
 
 export function ControlledTabContainer({
