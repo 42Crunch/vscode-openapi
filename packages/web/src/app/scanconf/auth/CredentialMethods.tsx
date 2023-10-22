@@ -1,35 +1,27 @@
 import * as Tabs from "@radix-ui/react-tabs";
 import * as playbook from "@xliic/common/playbook";
+import { useFieldArray } from "react-hook-form";
 import styled from "styled-components";
+import Input from "../../../components/Input";
+import { Menu, MenuItem } from "../../../new-components/Menu";
 import { TabContainer } from "../../../new-components/Tabs";
 import Scenario from "../operations/Scenario";
 import AddRequest from "../operations/components/AddRequest";
 import * as actions from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
-import { EllipsisVertical, Plus } from "../../../icons";
-import { ThemeColorVariables } from "@xliic/common/theme";
-import { unwrapCredential, wrapCredential } from "./form";
-import Form from "../../../new-components/Form";
-import Input from "../../../components/Input";
-import { Menu, MenuItem } from "../../../new-components/Menu";
+import AddNewCredentialValueDialog from "./AddNewCredentialValueDialog";
 
 export default function CredentialMethods({
-  credential,
   group,
   credentialId,
-  saveCredential,
 }: {
   group: number;
   credentialId: string;
-  credential: playbook.Credential;
-  saveCredential: (credential: playbook.Credential) => void;
 }) {
   const dispatch = useAppDispatch();
 
   const { playbook, oas, selectedSubcredential } = useAppSelector((state) => state.scanconf);
   const { mockResult } = useAppSelector((state) => state.auth);
-
-  const methods = Object.keys(credential.methods || {});
 
   const operationIds = Object.keys(playbook.operations);
   const requestIds = Object.keys(playbook.requests || {});
@@ -53,35 +45,31 @@ export default function CredentialMethods({
     );
   };
 
-  const tabs = methods.map((method, index) => {
+  const { fields, append, remove } = useFieldArray({
+    name: "methods",
+  });
+
+  const tabs = fields.map((method: any, index) => {
     return {
-      id: method,
-      title: method,
+      id: method.key,
+      title: method.key,
       menu: (
         <Menu>
-          <MenuItem onSelect={() => undefined}>Delete</MenuItem>
+          <MenuItem onSelect={() => remove(index)}>Delete</MenuItem>
         </Menu>
       ),
       content: (
-        <>
-          <Form
-            data={credential}
-            saveData={saveCredential}
-            wrapFormData={wrapCredential}
-            unwrapFormData={unwrapCredential}
-          >
-            <div>.</div>
-            <Input label="Credential value" name={`methods.${index}.value.credential`} />
-          </Form>
-          <Requests key={method} value={method}>
+        <Content value={method.key}>
+          <Input label="Credential value" name={`methods.${index}.value.credential`} />
+          <Requests>
             <Scenario
               oas={oas}
-              stages={credential.methods[method].requests as playbook.StageReference[]}
+              stages={method.value.requests as playbook.StageReference[]}
               container={{
                 container: "credential",
                 group: group,
                 credentialId,
-                subCredentialId: method,
+                subCredentialId: method.key,
               }}
               executionResult={mockResult?.[0]}
               saveStage={saveStage}
@@ -95,13 +83,13 @@ export default function CredentialMethods({
               requestIds={requestIds}
               onSelect={(selected) =>
                 addStage(
-                  { container: "credential", group, credentialId, subCredentialId: method },
+                  { container: "credential", group, credentialId, subCredentialId: method.key },
                   selected
                 )
               }
             />
           </Requests>
-        </>
+        </Content>
       ),
     };
   });
@@ -112,29 +100,24 @@ export default function CredentialMethods({
       setActiveTab={(tab: string) => dispatch(actions.selectSubcredential(tab))}
       tabs={tabs}
       menu={
-        <AddRequestButton>
-          <Plus />
-        </AddRequestButton>
+        <AddNewCredentialValueDialog
+          onAddCredentialValue={(name: string, value: playbook.CredentialMethod) => {
+            append({ key: name, value: value });
+            dispatch(actions.selectSubcredential(name));
+          }}
+        />
       }
     />
   );
 }
 
-const Requests = styled(Tabs.Content)`
+const Content = styled(Tabs.Content)`
   display: flex;
   flex-direction: column;
   gap: 8px;
   padding-top: 8px;
 `;
 
-const AddRequestButton = styled.button`
-  border: none;
-  background-color: transparent;
-  cursor: pointer;
-  > svg {
-    fill: var(${ThemeColorVariables.linkForeground});
-    &:hover {
-      fill: var(${ThemeColorVariables.linkActiveForeground});
-    }
-  }
+const Requests = styled.div`
+  padding-top: 8px;
 `;

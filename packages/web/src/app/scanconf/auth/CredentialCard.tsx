@@ -38,4 +38,6 @@ export default function CredentialCard({
   );
 }
 
-const Container = styled.div``;
+const Container = styled.div`
+  padding-top: 8px;
+`;

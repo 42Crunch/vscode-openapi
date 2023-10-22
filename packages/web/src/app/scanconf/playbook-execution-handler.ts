@@ -14,6 +14,7 @@ import {
   PlaybookVariablesAssignmentError,
   RequestStarted,
   PlaybookCredentialVariablesReplaced,
+  AuthAborted,
 } from "../../core/playbook/playbook";
 import { ExecutionResult, OperationResult, PlaybookResult } from "./components/scenario/types";
 
@@ -123,6 +124,14 @@ const PlaybookStepHandlers: PlaybookEventHandlers = {
     stateResult: ExecutionResult,
     event: AuthFinished
   ): void {
+    stateCurrent.auth = undefined;
+  },
+  "auth-aborted": function (
+    stateCurrent: Current,
+    stateResult: ExecutionResult,
+    event: AuthAborted
+  ): void {
+    last(last(stateResult).results).auth[stateCurrent.auth!].error = event.error;
     stateCurrent.auth = undefined;
   },
   "playbook-finished": function (

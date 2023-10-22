@@ -121,14 +121,19 @@ export const slice = createSlice({
         payload: { group, id, credential },
       }: PayloadAction<{ group: number; id: string; credential: playbook.Credential }>
     ) => {
-      state.playbook.authenticationDetails[group][id] = credential;
+      const firstAvailable = Object.keys(credential.methods || {})[0];
       if (
         state.selectedSubcredential !== undefined &&
         credential?.methods?.[state.selectedSubcredential] === undefined
       ) {
         // subcredential was deleted, select first available one
-        state.selectedSubcredential = Object.keys(credential?.methods || {})[0];
+        state.selectedSubcredential = firstAvailable;
       }
+      if (credential.methods[credential.default] === undefined) {
+        // no default credential, use the first available one
+        credential.default = firstAvailable;
+      }
+      state.playbook.authenticationDetails[group][id] = credential;
       state.dirty = true;
     },
     saveEnvironment: (

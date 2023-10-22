@@ -207,11 +207,29 @@ export async function* executeAuth(
   for (const authName of auth) {
     yield { event: "auth-started", name: authName };
     const [credentialName, methodName] = authName.split("/");
-    const credential = file.authenticationDetails[0][credentialName]; // FIXME better error handling
-    const method =
-      methodName === undefined
-        ? credential.methods[credential.default]
-        : credential.methods[methodName];
+    const credential = file.authenticationDetails[0][credentialName];
+
+    if (credential === undefined) {
+      yield { event: "auth-aborted", error: `credential: "${credentialName}" is not found` };
+    }
+
+    const effectiveMethodName = methodName === undefined ? credential.default : methodName;
+
+    const method = credential.methods[effectiveMethodName];
+
+    if (method === undefined) {
+      yield {
+        event: "auth-aborted",
+        error: `credential value: "${credentialName}/${effectiveMethodName}" is not found`,
+      };
+      return;
+    }
+
+    if (credential === undefined) {
+      yield { event: "auth-aborted", error: `credential: "${credentialName}" is not found` };
+      return;
+    }
+
     const value: string = yield* executeGetCredentialValue(
       client,
       oas,
@@ -221,7 +239,9 @@ export async function* executeAuth(
       method,
       env
     );
+
     result[authName] = { credential, value };
+
     yield { event: "auth-finished" };
   }
 

@@ -35,6 +35,11 @@ export type AuthFinished = {
   event: "auth-finished";
 };
 
+export type AuthAborted = {
+  event: "auth-aborted";
+  error: string;
+};
+
 export type PlaybookFinished = {
   event: "playbook-finished";
 };
@@ -94,6 +99,7 @@ export type PlaybookExecutorStep =
   | PlaybookStarted
   | AuthStarted
   | AuthFinished
+  | AuthAborted
   | RequestStarted
   | PlaybookFinished
   | PlaybookAborted

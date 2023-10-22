@@ -1,6 +1,5 @@
 import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import * as playbook from "@xliic/common/playbook";
-import { useState } from "react";
 import { SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
 import { setTryitServer } from "../../../features/prefs/slice";
 import CollapsibleSection from "../components/CollapsibleSection";
@@ -12,6 +11,8 @@ import CredentialCard from "./CredentialCard";
 import CredentialMethods from "./CredentialMethods";
 import TryIt from "./TryIt";
 import { startTryAuthentication } from "./slice";
+import { unwrapCredential, wrapCredential } from "./form";
+import Form from "../../../new-components/Form";
 
 export default function Auth() {
   const dispatch = useAppDispatch();
@@ -95,14 +96,16 @@ export default function Auth() {
                 title="Credential values"
                 count={Object.keys(credential.methods).length}
               >
-                <CredentialMethods
-                  group={group}
-                  credentialId={credentialId}
-                  credential={credential}
-                  saveCredential={(credential) =>
+                <Form
+                  data={credential}
+                  saveData={(credential) =>
                     onUpdateCredential(selected.sectionId, selected.itemId, credential)
                   }
-                />
+                  wrapFormData={wrapCredential}
+                  unwrapFormData={unwrapCredential}
+                >
+                  <CredentialMethods group={group} credentialId={credentialId} />
+                </Form>
               </CollapsibleSection>
 
               {tryResult.length > 0 && (

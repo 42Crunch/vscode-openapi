@@ -21,7 +21,7 @@ export function Menu({ children }: { children: React.ReactNode }) {
   );
 }
 
-const IconButton = styled.button`
+const IconButton = styled.span`
   background-color: transparent;
   color: transparent;
   border: none;

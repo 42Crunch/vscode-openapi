@@ -16,6 +16,7 @@ export type AuthenticationResult = {
   execution: ExecutionResult;
   result?: string;
   variables?: VariableReplacement;
+  error?: string;
 };
 
 export type OperationResult = {
