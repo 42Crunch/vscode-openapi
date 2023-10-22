@@ -1,21 +1,17 @@
+import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import * as playbook from "@xliic/common/playbook";
-import { ThemeColorVariables } from "@xliic/common/theme";
 import { useState } from "react";
-import styled from "styled-components";
 import { SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
+import { setTryitServer } from "../../../features/prefs/slice";
 import CollapsibleSection from "../components/CollapsibleSection";
-import { addCredential, saveCredential, selectCredential, selectSubcredential } from "../slice";
+import Execution from "../components/execution/Execution";
+import { addCredential, saveCredential, selectCredential } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import CredentialAddNewDialog from "./CredentialAddNewDialog";
 import CredentialCard from "./CredentialCard";
 import CredentialMethods from "./CredentialMethods";
-import { FileExport } from "../../../icons";
 import TryIt from "./TryIt";
-import { setTryitServer } from "../../../features/prefs/slice";
-import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import { startTryAuthentication } from "./slice";
-import Execution from "../components/execution/Execution";
-import { OperationAuthentication } from "../components/execution/OperationAuthentication";
 
 export default function Auth() {
   const dispatch = useAppDispatch();
@@ -41,7 +37,7 @@ export default function Auth() {
   });
 
   const [isCredentialsOpen, setCredenialsOpen] = useState(true);
-  const [isRequestsOpen, setRequestsOpen] = useState(true);
+  const [isValuesOpen, setValuesOpen] = useState(false);
   const [isResultOpen, setResultOpen] = useState(true);
 
   const onAddCredential = (id: string, credential: playbook.Credential) => {
@@ -103,14 +99,18 @@ export default function Auth() {
                 />
               </CollapsibleSection>
               <CollapsibleSection
-                isOpen={isRequestsOpen}
-                onClick={(e) => setRequestsOpen(!isRequestsOpen)}
-                title="Requests"
+                isOpen={isValuesOpen}
+                onClick={(e) => setValuesOpen(!isValuesOpen)}
+                title="Credential values"
+                count={Object.keys(credential.methods).length}
               >
                 <CredentialMethods
                   group={group}
                   credentialId={credentialId}
                   credential={credential}
+                  saveCredential={(credential) =>
+                    onUpdateCredential(selected.sectionId, selected.itemId, credential)
+                  }
                 />
               </CollapsibleSection>
 

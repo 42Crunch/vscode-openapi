@@ -13,6 +13,7 @@ import CollapsibleCard, {
 } from "../../../components/CollapsibleCard";
 import Credential from "./Credential";
 import Form from "../../../new-components/Form";
+import CredentialGeneral from "./CredentialGeneral";
 
 export default function CredentialCard({
   credentialName,
@@ -25,22 +26,14 @@ export default function CredentialCard({
 }) {
   return (
     <Container>
-      <CollapsibleCard defaultCollapsed={false}>
-        <TopDescription>{credentialName}</TopDescription>
-        <BottomDescription>
-          <BottomItem>Type: {credential.type}</BottomItem>
-          <BottomItem>Location: {credential.in}</BottomItem>
-          <BottomItem>Name: {credential.name}</BottomItem>
-        </BottomDescription>
-        <Form
-          data={credential}
-          saveData={saveCredential}
-          wrapFormData={wrapCredential}
-          unwrapFormData={unwrapCredential}
-        >
-          <Credential />
-        </Form>
-      </CollapsibleCard>
+      <Form
+        data={credential}
+        saveData={saveCredential}
+        wrapFormData={wrapCredential}
+        unwrapFormData={unwrapCredential}
+      >
+        <CredentialGeneral />
+      </Form>
     </Container>
   );
 }

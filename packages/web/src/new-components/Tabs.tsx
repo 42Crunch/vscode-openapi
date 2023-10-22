@@ -7,18 +7,27 @@ export function TabContainer({
   tabs,
   activeTab,
   setActiveTab,
+  menu,
 }: {
   tabs: Tab[];
   activeTab?: string;
   setActiveTab?: (activeTab: string) => void;
+  menu?: JSX.Element;
 }) {
   if (setActiveTab !== undefined && activeTab !== undefined) {
-    return <ControlledTabContainer tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />;
+    return (
+      <ControlledTabContainer
+        tabs={tabs}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        menu={menu}
+      />
+    );
   }
-  return <UncontrolledTabContainer tabs={tabs} />;
+  return <UncontrolledTabContainer tabs={tabs} menu={menu} />;
 }
 
-export function UncontrolledTabContainer({ tabs }: { tabs: Tab[] }) {
+export function UncontrolledTabContainer({ tabs, menu }: { tabs: Tab[]; menu?: JSX.Element }) {
   const [activeTab, setActiveTab] = useState(tabs.filter((tab) => !tab.disabled)?.[0]?.id);
 
   useEffect(() => {
@@ -40,10 +49,12 @@ export function ControlledTabContainer({
   tabs,
   activeTab,
   setActiveTab,
+  menu,
 }: {
   tabs: Tab[];
   activeTab: string;
   setActiveTab: (activeTab: string) => void;
+  menu?: JSX.Element;
 }) {
   const active = tabs.filter((tab) => !tab.disabled);
 
@@ -54,8 +65,10 @@ export function ControlledTabContainer({
           <TabButton key={tab.id} value={tab.id}>
             {tab.title}
             {renderCounter(tab)}
+            {tab.menu && <TabMenu className="menu">{tab.menu}</TabMenu>}
           </TabButton>
         ))}
+        {menu && <Menu>{menu}</Menu>}
       </TabList>
       {active.map((tab) => (
         <Tabs.Content key={tab.id} value={tab.id}>
@@ -82,6 +95,7 @@ export type Tab = {
   id: string;
   title: string;
   content: JSX.Element;
+  menu?: JSX.Element;
   disabled?: boolean;
   counter?: number;
   counterKind?: "normal" | "error";
@@ -95,7 +109,10 @@ export const TabList = styled(Tabs.List)`
 
 export const TabButton = styled(Tabs.Trigger)`
   border: none;
-  padding: 0.25rem 1rem;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 16px;
+  padding-right: 8px;
   color: var(${ThemeColorVariables.tabInactiveForeground});
   background: none;
   border-bottom: 3px solid transparent;
@@ -109,6 +126,11 @@ export const TabButton = styled(Tabs.Trigger)`
     color: var(${ThemeColorVariables.tabActiveForeground});
     border-bottom: 3px solid var(${ThemeColorVariables.buttonBackground});
     cursor: inherit;
+  }
+
+  &[data-state="active"] > span.menu {
+    opacity: 1;
+    display
   }
 `;
 
@@ -159,4 +181,24 @@ const ErrorCounter = styled.span`
   align-items: center;
   font-size: 10px;
   padding: 2px 4px;
+`;
+
+const Menu = styled.div`
+  flex: 1;
+  display: flex;
+  justify-content: end;
+`;
+
+const TabMenu = styled.span`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  cursor: pointer;
+  padding-left: 4px;
+  > svg {
+    width: 14px;
+    height: 14px;
+    fill: var(${ThemeColorVariables.foreground});
+  }
 `;

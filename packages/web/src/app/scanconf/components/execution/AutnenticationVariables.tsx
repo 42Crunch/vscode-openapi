@@ -20,7 +20,7 @@ export function AuthenticationVariables({
       <BottomDescription style={{ gap: "8px" }}>
         <BottomItem>
           <BracketsCurly />
-          {name}
+          Credential value
           {hasMissing && (
             <ExclamationCircle style={{ fill: `var(${ThemeColorVariables.errorForeground})` }} />
           )}

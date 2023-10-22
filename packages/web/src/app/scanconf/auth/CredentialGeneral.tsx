@@ -11,7 +11,7 @@ export default function CredentialGeneral() {
   return (
     <Container>
       <Select
-        label="Default credential"
+        label="Default credential value"
         name="default"
         options={methods.map((method: any) => ({ label: method.key, value: method.key }))}
       />
