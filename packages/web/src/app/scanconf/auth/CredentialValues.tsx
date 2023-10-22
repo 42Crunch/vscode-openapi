@@ -103,7 +103,7 @@ export default function CredentialValues({
       tabs={tabs}
       menu={
         <NewValueDialog
-          existingValues={getValues("methods").map((value: any) => value.key as string)}
+          existing={getValues("methods").map((value: any) => value.key as string)}
           onAddCredentialValue={(name: string, value: playbook.CredentialMethod) => {
             append({ key: name, value: value });
             dispatch(actions.selectSubcredential(name));

@@ -1,14 +1,19 @@
+import * as z from "zod";
+
 import * as playbook from "@xliic/common/playbook";
 
 import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import Select from "../../../components/Select";
 import FormDialog from "../../../new-components/FormDialog";
+import { s } from "vitest/dist/reporters-5f784f42";
 
 export default function NewCredentialDialog({
   onAddCredential,
+  existing,
 }: {
   onAddCredential: (id: string, credential: playbook.Credential) => void;
+  existing: string[];
 }) {
   const contents = (
     <>
@@ -50,6 +55,18 @@ export default function NewCredentialDialog({
     credentialValue: "",
   };
 
+  const schema = z.object({
+    id: z
+      .string()
+      .regex(/^\w+$/)
+      .refine((value) => !existing.includes(value), {
+        message: "Already exists",
+      }),
+    name: z.string().min(1),
+    credentialName: z.string().regex(/^\w+$/),
+    credentialValue: z.string().min(1),
+  });
+
   const onSubmit = (data: any) => {
     onAddCredential(data.id, {
       type: data.type,
@@ -72,6 +89,7 @@ export default function NewCredentialDialog({
       title="New credential"
       contents={contents}
       defaultValues={defaultValues}
+      schema={schema}
       onSubmit={onSubmit}
       trigger={<Button style={{ width: "100%" }}>New credential</Button>}
     />

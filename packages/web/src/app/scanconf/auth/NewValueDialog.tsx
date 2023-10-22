@@ -11,9 +11,9 @@ import FormDialog from "../../../new-components/FormDialog";
 
 export default function NewValueDialog({
   onAddCredentialValue,
-  existingValues,
+  existing,
 }: {
-  existingValues: string[];
+  existing: string[];
   onAddCredentialValue: (name: string, value: playbook.CredentialMethod) => void;
 }) {
   const contents = (
@@ -33,8 +33,8 @@ export default function NewValueDialog({
     name: z
       .string()
       .regex(/^\w+$/)
-      .refine((value) => !existingValues.includes(value), {
-        message: "Name already exists",
+      .refine((value) => !existing.includes(value), {
+        message: "Already exists",
       }),
     value: z.string().min(1),
   });

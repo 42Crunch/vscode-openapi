@@ -47,7 +47,12 @@ export default function Auth() {
     <SearchSidebarControlled
       sections={sections}
       render={(selected) => (selected === undefined ? null : <Credential selected={selected} />)}
-      renderButtons={() => <NewCredentialDialog onAddCredential={onAddCredential} />}
+      renderButtons={() => (
+        <NewCredentialDialog
+          existing={Object.keys(authenticationDetails[0])}
+          onAddCredential={onAddCredential}
+        />
+      )}
       selected={
         selectedCredential !== undefined
           ? { sectionId: `${selectedCredentialGroup}`, itemId: selectedCredential }

@@ -1,7 +1,8 @@
-import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice, isAnyOf } from "@reduxjs/toolkit";
 import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
 import { ExecutionResult } from "../components/scenario/types";
 import { Current, handleMockStep, handleTryItStep } from "../playbook-execution-handler";
+import * as scanconf from "../slice";
 
 export type State = {
   mockCurrent: Current;
@@ -43,6 +44,21 @@ export const slice = createSlice({
     ) => {
       handleMockStep(state, step);
     },
+  },
+  extraReducers: (builder) => {
+    builder.addMatcher(
+      isAnyOf(
+        scanconf.selectCredential,
+        scanconf.selectSubcredential,
+        scanconf.saveCredential,
+        scanconf.addCredential,
+        scanconf.removeCredential
+      ),
+      (state, action) => {
+        state.tryCurrent = { auth: undefined };
+        state.tryResult = [];
+      }
+    );
   },
 });
 
