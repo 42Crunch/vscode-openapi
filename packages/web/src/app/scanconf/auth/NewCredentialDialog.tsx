@@ -6,7 +6,6 @@ import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import Select from "../../../components/Select";
 import FormDialog from "../../../new-components/FormDialog";
-import { s } from "vitest/dist/reporters-5f784f42";
 
 export default function NewCredentialDialog({
   onAddCredential,

@@ -1,11 +1,12 @@
 import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import * as playbook from "@xliic/common/playbook";
+
 import { ItemId } from "../../../components/layout/SearchSidebar";
 import { setTryitServer } from "../../../features/prefs/slice";
 import Form from "../../../new-components/Form";
 import CollapsibleSection from "../components/CollapsibleSection";
 import Execution from "../components/execution/Execution";
-import { addCredential, saveCredential, selectCredential } from "../slice";
+import { saveCredential } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import CredentialDetails from "./CredentialDetails";
 import CredentialValues from "./CredentialValues";

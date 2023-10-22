@@ -1,6 +1,8 @@
 import styled from "styled-components";
+
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { FileExport, Play } from "../../../icons";
+
+import { FileExport } from "../../../icons";
 
 export default function TryIt({
   servers,
