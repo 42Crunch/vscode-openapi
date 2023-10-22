@@ -31,21 +31,12 @@ export default function Global() {
     );
   };
 
-  const [isBeforeOpen, setBeforeOpen] = useState(true);
-  const [isAfterOpen, setAfterOpen] = useState(true);
   const operationIds = Object.keys(playbook.operations);
   const requestIds = Object.keys(playbook.requests || {});
 
   return (
     <Container>
-      <CollapsibleSection
-        isOpen={isBeforeOpen}
-        onClick={(e) => {
-          setBeforeOpen(!isBeforeOpen);
-        }}
-        title="Before"
-        count={playbook?.before?.length}
-      >
+      <CollapsibleSection title="Before" count={playbook?.before?.length}>
         <Content>
           <Scenario
             oas={oas}
@@ -65,16 +56,7 @@ export default function Global() {
           />
         </Content>
       </CollapsibleSection>
-      <CollapsibleSection
-        isOpen={isAfterOpen}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setAfterOpen(!isAfterOpen);
-        }}
-        title="After"
-        count={playbook.after?.length}
-      >
+      <CollapsibleSection title="After" count={playbook.after?.length}>
         <Content>
           <Scenario
             oas={oas}

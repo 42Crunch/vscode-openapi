@@ -49,9 +49,6 @@ export default function RequestExternal({
 
   const server = getPreferredServer(oas, prefs.tryitServer);
 
-  const [isRequestOpen, setRequestOpen] = useState(true);
-  const [isResponseOpen, setResponseOpen] = useState(true);
-
   useEffect(() => {
     const updated = { ...inputs };
     // remove stale variables
@@ -83,11 +80,7 @@ export default function RequestExternal({
           Try
         </Action>
       </Try>
-      <CollapsibleSection
-        isOpen={isRequestOpen}
-        onClick={() => setRequestOpen(!isRequestOpen)}
-        title="Request"
-      >
+      <CollapsibleSection title="Request">
         <RequestCardExternal
           defaultCollapsed={false}
           variables={variables}
@@ -108,11 +101,7 @@ export default function RequestExternal({
         </Inputs>
       </CollapsibleSection>
       {tryResult.length > 0 && (
-        <CollapsibleSection
-          isOpen={isResponseOpen}
-          onClick={() => setResponseOpen(!isResponseOpen)}
-          title="Result"
-        >
+        <CollapsibleSection title="Result">
           <Execution result={tryResult} />
         </CollapsibleSection>
       )}

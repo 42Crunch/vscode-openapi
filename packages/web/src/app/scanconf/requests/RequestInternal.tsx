@@ -54,9 +54,6 @@ export default function RequestInternal({
 
   const server = getPreferredServer(oas, prefs.tryitServer);
 
-  const [isRequestOpen, setRequestOpen] = useState(true);
-  const [isResponseOpen, setResponseOpen] = useState(true);
-
   useEffect(() => {
     const updated = { ...inputs };
     // remove stale variables
@@ -82,11 +79,7 @@ export default function RequestInternal({
         onStart={(server: string) => onRun(server, inputs)}
         onChange={setServer}
       />
-      <CollapsibleSection
-        isOpen={isRequestOpen}
-        onClick={() => setRequestOpen(!isRequestOpen)}
-        title="Request"
-      >
+      <CollapsibleSection title="Request">
         <RequestCard
           defaultCollapsed={false}
           oas={oas}
@@ -111,11 +104,7 @@ export default function RequestInternal({
       </CollapsibleSection>
 
       {tryResult.length > 0 && (
-        <CollapsibleSection
-          isOpen={isResponseOpen}
-          onClick={() => setResponseOpen(!isResponseOpen)}
-          title="Result"
-        >
+        <CollapsibleSection title="Result">
           <Execution result={tryResult} />
         </CollapsibleSection>
       )}

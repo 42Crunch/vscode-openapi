@@ -1,7 +1,6 @@
 import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import * as playbook from "@xliic/common/playbook";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { useState } from "react";
 import styled from "styled-components";
 import { makeEnvEnv } from "../../../core/playbook/execute";
 import { setTryitServer } from "../../../features/prefs/slice";
@@ -44,11 +43,6 @@ export default function Operation({ operationId }: { operationId: string }) {
     );
   };
 
-  const [isBeforeOpen, setBeforeOpen] = useState(false);
-  const [isAfterOpen, setAfterOpen] = useState(false);
-  const [isScenariosOpen, setScenariosOpen] = useState(true);
-  const [isResultOpen, setResultOpen] = useState(true);
-
   const operationIds = Object.keys(playbook.operations);
   const requestIds = Object.keys(playbook.requests || {});
 
@@ -90,10 +84,7 @@ export default function Operation({ operationId }: { operationId: string }) {
         <Title>{operationId}</Title>
       </Header>
       <CollapsibleSection
-        isOpen={isBeforeOpen}
-        onClick={(e) => {
-          setBeforeOpen(!isBeforeOpen);
-        }}
+        defaultOpen={false}
         title="Before"
         count={playbook.operations[operationId]?.before?.length}
       >
@@ -119,22 +110,13 @@ export default function Operation({ operationId }: { operationId: string }) {
         </Content>
       </CollapsibleSection>
       <CollapsibleSection
-        isOpen={isScenariosOpen}
-        onClick={(e) => {
-          setScenariosOpen(!isScenariosOpen);
-        }}
         title="Scenarios"
         count={playbook.operations[operationId]?.scenarios?.length}
       >
         <Scenarios operationId={operationId} />
       </CollapsibleSection>
       <CollapsibleSection
-        isOpen={isAfterOpen}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setAfterOpen(!isAfterOpen);
-        }}
+        defaultOpen={false}
         title="After"
         count={playbook.operations[operationId]?.after?.length}
       >
@@ -161,11 +143,7 @@ export default function Operation({ operationId }: { operationId: string }) {
       </CollapsibleSection>
 
       {tryResult.length > 0 && (
-        <CollapsibleSection
-          isOpen={isResultOpen}
-          onClick={() => setResultOpen(!isResultOpen)}
-          title="Result"
-        >
+        <CollapsibleSection title="Result">
           <Execution result={tryResult} />
         </CollapsibleSection>
       )}

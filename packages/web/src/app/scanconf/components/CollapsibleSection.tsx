@@ -1,25 +1,53 @@
 import styled from "styled-components";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { AngleUp, AngleDown } from "../../../icons";
+import type { SetRequired } from "type-fest";
+import { useState } from "react";
 
-export default function CollapsibleSection({
-  isOpen,
-  title,
-  count,
-  onClick,
-  menu,
-  children,
-}: {
-  isOpen: boolean;
+type CollapsibleSectionProps = {
   title: string | React.ReactNode;
   count?: number;
-  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
+  isOpen?: boolean;
+  setOpen?: (open: boolean) => void;
+  defaultOpen?: boolean;
   menu?: React.ReactNode;
   children?: React.ReactNode;
-}) {
+};
+
+export default function CollapsibleSection({ isOpen, setOpen, ...rest }: CollapsibleSectionProps) {
+  if (setOpen !== undefined && isOpen !== undefined) {
+    return ControlledCollapsibleSection({ ...rest, isOpen, setOpen });
+  } else {
+    return UncontrolledCollapsibleSection({ ...rest });
+  }
+}
+
+export function UncontrolledCollapsibleSection({
+  defaultOpen,
+  ...rest
+}: Omit<CollapsibleSectionProps, "setOpen" | "isOpen">) {
+  const [isOpen, setOpen] = useState(defaultOpen !== undefined ? defaultOpen : true);
+
+  return ControlledCollapsibleSection({ ...rest, isOpen, setOpen });
+}
+
+export function ControlledCollapsibleSection({
+  isOpen,
+  setOpen,
+  title,
+  count,
+  menu,
+  children,
+}: SetRequired<Omit<CollapsibleSectionProps, "defaultOpen">, "setOpen" | "isOpen">) {
   return (
     <Container>
-      <Header onClick={onClick}>
+      <Header
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setOpen(!isOpen);
+        }}
+      >
         {isOpen ? <AngleUp /> : <AngleDown />}
         <Description>
           {typeof title === "string" ? <Title>{title}</Title> : title}

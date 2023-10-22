@@ -36,10 +36,6 @@ export default function Auth() {
     };
   });
 
-  const [isCredentialsOpen, setCredenialsOpen] = useState(true);
-  const [isValuesOpen, setValuesOpen] = useState(false);
-  const [isResultOpen, setResultOpen] = useState(true);
-
   const onAddCredential = (id: string, credential: playbook.Credential) => {
     // no way to select credentialGroup for now
     dispatch(addCredential({ credentialGroup: 0, id, credential }));
@@ -84,11 +80,7 @@ export default function Auth() {
                 onChange={setServer}
               />
 
-              <CollapsibleSection
-                isOpen={isCredentialsOpen}
-                onClick={(e) => setCredenialsOpen(!isCredentialsOpen)}
-                title="Credential"
-              >
+              <CollapsibleSection title="Credential">
                 <CredentialCard
                   credentialName={selected.itemId}
                   credential={credential}
@@ -99,8 +91,7 @@ export default function Auth() {
                 />
               </CollapsibleSection>
               <CollapsibleSection
-                isOpen={isValuesOpen}
-                onClick={(e) => setValuesOpen(!isValuesOpen)}
+                defaultOpen={false}
                 title="Credential values"
                 count={Object.keys(credential.methods).length}
               >
@@ -115,11 +106,7 @@ export default function Auth() {
               </CollapsibleSection>
 
               {tryResult.length > 0 && (
-                <CollapsibleSection
-                  isOpen={isResultOpen}
-                  onClick={() => setResultOpen(!isResultOpen)}
-                  title="Result"
-                >
+                <CollapsibleSection title="Result">
                   <Execution result={tryResult} />
                 </CollapsibleSection>
               )}
