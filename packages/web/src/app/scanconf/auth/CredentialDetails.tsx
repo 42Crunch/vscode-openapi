@@ -33,14 +33,14 @@ export function CredentialGeneral() {
 
   return (
     <Container>
+      <Input label="Type" name="type" disabled />
+      <Input label="Location" name="in" disabled />
+      <Input label="Name" name="name" disabled />
       <Select
         label="Default credential value"
         name="default"
         options={methods.map((method: any) => ({ label: method.key, value: method.key }))}
       />
-      <Input label="Type" name="type" disabled />
-      <Input label="Location" name="in" disabled />
-      <Input label="Name" name="name" disabled />
     </Container>
   );
 }

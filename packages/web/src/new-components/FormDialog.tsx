@@ -1,8 +1,10 @@
-import styled from "styled-components";
 import * as Dialog from "@radix-ui/react-dialog";
-import { ThemeColorVariables } from "@xliic/common/theme";
-import { useForm, FormProvider, FieldValues } from "react-hook-form";
 import { useState } from "react";
+import { FieldValues, FormProvider, useForm } from "react-hook-form";
+import styled from "styled-components";
+
+import { ThemeColorVariables } from "@xliic/common/theme";
+
 import Button from "./Button";
 import ButtonSecondary from "./ButtonSecondary";
 
@@ -28,23 +30,6 @@ export default function FormDialog({
 
   const [open, setOpen] = useState(false);
 
-  //const onSubmit = (data: any) => {
-  // onAddCredential(data.id, {
-  //   type: data.type,
-  //   default: data.credentialName,
-  //   in: data.in,
-  //   name: data.name,
-  //   description: data.description,
-  //   methods: {
-  //     [data.credentialName]: {
-  //       credential: data.credentialValue,
-  //       requests: [],
-  //       description: "",
-  //     },
-  //   },
-  // });
-  //};
-
   return (
     <Dialog.Root
       open={open}
@@ -69,7 +54,7 @@ export default function FormDialog({
             >
               {title && <Dialog.Title>{title}</Dialog.Title>}
               {description && <Dialog.Description>{description}</Dialog.Description>}
-              {contents}
+              <FormContents>{contents}</FormContents>
               <div style={{ display: "flex", marginTop: 25, justifyContent: "flex-end", gap: 4 }}>
                 <Button type="submit">Ok</Button>
                 <Dialog.Close asChild>
@@ -83,6 +68,7 @@ export default function FormDialog({
     </Dialog.Root>
   );
 }
+
 const Form = styled.form`
   margin: 8px;
   display: flex;
@@ -106,8 +92,17 @@ const DialogContent = styled(Dialog.Content)`
   max-height: 85vh;
   padding: 25px;
 
+  overflow-y: auto;
+
   background-color: var(${ThemeColorVariables.background});
   color: var(${ThemeColorVariables.foreground});
   border-radius: 6px;
   box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+`;
+
+const FormContents = styled.div`
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
 `;
