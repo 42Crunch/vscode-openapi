@@ -45,7 +45,7 @@ export async function replaceKey(editor: vscode.TextEditor, pointer: string, key
   };
 
   const edit = new vscode.WorkspaceEdit();
-  if (editor.document.languageId === "json") {
+  if (editor.document.languageId === "json" || editor.document.languageId === "jsonc") {
     edit.replace(editor.document.uri, renameKeyNode(context), getFixAsJsonString(context));
   } else {
     edit.replace(editor.document.uri, renameKeyNode(context), getFixAsYamlString(context));

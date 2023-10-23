@@ -94,7 +94,7 @@ export function activate(
   );
   registerFocusSecurityAudit(context, cache, auditContext, reportWebView);
   registerFocusSecurityAuditById(context, auditContext, reportWebView);
-  registerQuickfixes(context, cache, auditContext, reportWebView);
+  registerQuickfixes(context, cache, auditContext, store, reportWebView);
 
   return new vscode.Disposable(() => disposables.forEach((disposable) => disposable.dispose()));
 }

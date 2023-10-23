@@ -19,7 +19,8 @@ function securitySchemes(
   parameter: FixParameter,
   version: OpenApiVersion,
   bundle: BundleResult,
-  document: vscode.TextDocument
+  document: vscode.TextDocument,
+  formatMap?: Map<string, DataDictionaryFormat>
 ): any[] {
   if ("errors" in bundle) {
     return [];
@@ -42,17 +43,49 @@ function mostUsedByName(
   parameter: FixParameter,
   version: OpenApiVersion,
   bundle: BundleResult,
-  document: vscode.TextDocument
+  document: vscode.TextDocument,
+  formatMap?: Map<string, DataDictionaryFormat>
 ): any[] {
-  const propertyHints = buildPropertyHints(bundle);
   const issuePointer = parseJsonPointer(issue.pointer);
   const parameterPointer = parseJsonPointer(parameter.path);
   const name = issuePointer[issuePointer.length - 1];
   const property = parameterPointer[parameterPointer.length - 1];
+  if (usePropertyHints(issuePointer, property) || !formatMap || formatMap.size === 0) {
+    return getPropertyHints(bundle, name, property);
+  }
+  let container = bundle.value;
+  for (const segment of issuePointer) {
+    if (container) {
+      container = container[segment];
+    }
+  }
+  const format = container?.format;
+  if (!format || !formatMap.has(format)) {
+    return getPropertyHints(bundle, name, property);
+  }
+  const { format: dataFormat } = formatMap.get(format)!;
+  if (!dataFormat.hasOwnProperty(property)) {
+    return getPropertyHints(bundle, name, property);
+  }
+  return [(dataFormat as any)[property]];
+}
+
+function usePropertyHints(path: string[], property: string): boolean {
+  return (
+    property === "example" ||
+    property === "x-42c-sample" ||
+    property === "format" ||
+    path.includes("example") ||
+    path.includes("examples") ||
+    path.includes("x-42c-sample")
+  );
+}
+
+function getPropertyHints(bundle: BundleResult, name: string, property: string): any[] {
+  const propertyHints = buildPropertyHints(bundle);
   if (propertyHints[name] && propertyHints[name][property] !== undefined) {
     return [propertyHints[name][property]];
   }
-
   return [];
 }
 
@@ -72,7 +105,8 @@ function schemaRefByResponseCode(
   parameter: FixParameter,
   version: OpenApiVersion,
   bundle: BundleResult,
-  document: vscode.TextDocument
+  document: vscode.TextDocument,
+  formatMap?: Map<string, DataDictionaryFormat>
 ): any[] {
   const schemaRefs = buildSchemaRefByResponseCode(version, bundle);
   // FIXME maybe should account for fix.path?
