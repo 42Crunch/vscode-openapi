@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { Audit, Issue } from "@xliic/common/audit";
 
 import { JsonNodeValue } from "./json-utils";
+import { DataDictionaryFormat } from "./platform/stores/platform-store";
 
 export const configId = "openapi";
 export const extensionQualifiedId = "42Crunch.vscode-openapi";
@@ -136,7 +137,8 @@ export interface FixParameterSource {
     parameter: FixParameter,
     version: OpenApiVersion,
     bundle: BundleResult,
-    document: vscode.TextDocument
+    document: vscode.TextDocument,
+    formatMap?: Map<string, DataDictionaryFormat>
   ): any[];
 }
 
@@ -157,6 +159,7 @@ export interface FixContext {
   anchor?: JsonNodeValue;
   document: vscode.TextDocument;
   dropBrackets?: number[];
+  formatMap?: Map<string, DataDictionaryFormat>;
 }
 
 export interface FixSnippetParameters {

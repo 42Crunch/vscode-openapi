@@ -44,7 +44,7 @@ import { getLocationByPointer } from "./util";
 import { generateSchemaFixCommand, createGenerateSchemaAction } from "./quickfix-schema";
 import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 import { findJsonNodeValue } from "../json-utils";
-import { setAudit } from "./service";
+import { DataDictionaryFormat, PlatformStore } from "../platform/stores/platform-store";
 
 const registeredQuickFixes: { [key: string]: Fix } = {};
 
@@ -204,7 +204,9 @@ async function quickFixCommand(
   issues: Issue[],
   fix: InsertReplaceRenameFix | RegexReplaceFix | DeleteFix,
   auditContext: AuditContext,
-  cache: Cache
+  store: PlatformStore,
+  cache: Cache,
+  reportWebView: AuditReportWebView | undefined
 ) {
   let edit: vscode.WorkspaceEdit = null;
   let snippetParameters: FixSnippetParameters = null;
@@ -229,6 +231,14 @@ async function quickFixCommand(
   // Bulk means all issues share same id, but have different pointers
   const bulk = Object.keys(issuesByPointer).length > 1;
 
+  const formatMap = new Map<string, DataDictionaryFormat>();
+  if (store.isConnected) {
+    const formats = await store.getDataDictionaryFormats();
+    for (const format of formats) {
+      formatMap.set(format.name, format);
+    }
+  }
+
   for (const issuePointer of Object.keys(issuesByPointer)) {
     // if fix.pointer exists, append it to diagnostic.pointer
     const pointer = fix.pointer ? `${issuePointer}${fix.pointer}` : issuePointer;
@@ -247,6 +257,7 @@ async function quickFixCommand(
       root: root,
       target: target,
       document: document,
+      formatMap: formatMap,
     };
 
     switch (fix.type) {
@@ -299,7 +310,7 @@ export function updateReport(
   issues: Issue[],
   auditContext: AuditContext,
   cache: Cache,
-  reportWebView: AuditReportWebView
+  reportWebView: AuditReportWebView | undefined
 ): void {
   const document = editor.document;
   const uri = document.uri.toString();
@@ -334,18 +345,22 @@ export function updateReport(
   updateDiagnostics(auditContext.diagnostics, audit.filename, audit.issues);
   updateDecorations(auditContext.decorations, audit.summary.documentUri, audit.issues);
   setDecorations(editor, auditContext);
-  reportWebView.showIfVisible(audit);
+  if (reportWebView) {
+    reportWebView.showIfVisible(audit);
+  }
 }
 
 export function registerQuickfixes(
   context: vscode.ExtensionContext,
   cache: Cache,
   auditContext: AuditContext,
+  store: PlatformStore,
   reportWebView: AuditReportWebView
 ) {
   vscode.commands.registerTextEditorCommand(
     "openapi.simpleQuickFix",
-    async (editor, edit, issues, fix) => quickFixCommand(editor, issues, fix, auditContext, cache)
+    async (editor, edit, issues, fix) =>
+      quickFixCommand(editor, issues, fix, auditContext, store, cache, reportWebView)
   );
 
   vscode.commands.registerTextEditorCommand(

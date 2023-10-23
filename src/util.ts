@@ -424,7 +424,7 @@ export function getFixAsYamlString(context: FixContext): string {
 
 function handleParameters(context: FixContext, text: string): string {
   const replacements = [];
-  const { issues, fix, version, bundle, document, snippet } = context;
+  const { issues, fix, version, bundle, document, snippet, formatMap } = context;
   const languageId = context.document.languageId;
 
   const root = safeParse(text, languageId);
@@ -448,7 +448,21 @@ function handleParameters(context: FixContext, text: string): string {
     if (parameter.source && parameterSources[parameter.source]) {
       const source = parameterSources[parameter.source];
       const issue = parameter.fixIndex ? issues[parameter.fixIndex] : issues[0];
-      cacheValues = source(issue, fix, parameter, version, bundle, document);
+      cacheValues = source(issue, fix, parameter, version, bundle, document, formatMap);
+      if (cacheValues && document.languageId === "json") {
+        const safeValues = [];
+        cacheValues.forEach((value: any) => {
+          let safeValue = value;
+          if (typeof safeValue === "string") {
+            safeValue = escapeJson(safeValue);
+            if (context.snippet) {
+              safeValue = escapeJson(safeValue);
+            }
+          }
+          safeValues.push(safeValue);
+        });
+        cacheValues = safeValues;
+      }
     }
 
     let finalValue: string;
@@ -551,4 +565,11 @@ function getAnchor(context: FixContext): JsonNodeValue | undefined {
     }
   }
   return undefined;
+}
+
+function escapeJson(jsonText: string): string {
+  // JSON.stringify("abc") returns '"abc"'
+  // JSON.stringify("(^[\\w\\s\\.]{5,50}$)") returns '"(^[\\\\w\\\\s\\\\.]{5,50}$)"'
+  const res = JSON.stringify(jsonText);
+  return res.substring(1, res.length - 1);
 }
