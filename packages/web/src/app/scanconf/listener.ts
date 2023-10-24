@@ -13,8 +13,10 @@ import { startListeners } from "../webapp";
 import { runScan, sendHttpRequest } from "./actions";
 import {
   onExecuteAuthentication,
+  onExecuteGlobal,
   onExecuteRequest,
   onMockExecuteAuthRequests,
+  onMockExecuteGlobal,
   onMockExecuteRequest,
   onMockExecuteScenario,
   onTryExecuteScenario,
@@ -106,6 +108,8 @@ export function createListener(host: Webapp["host"], routes: Routes) {
   const executeRequestListener = onExecuteRequest(startAppListening, host);
   const executeMockAuthRequestsListener = onMockExecuteAuthRequests(startAppListening, host);
   const executeTryAuthenticationListener = onExecuteAuthentication(startAppListening, host);
+  const executeTryGlobalListener = onExecuteGlobal(startAppListening, host);
+  const executeMockGlobalListener = onMockExecuteGlobal(startAppListening, host);
 
   startNavigationListening(startAppListening, routes);
   startListeners({
@@ -116,6 +120,8 @@ export function createListener(host: Webapp["host"], routes: Routes) {
     executeMockRequestListener,
     executeMockAuthRequestsListener,
     executeTryAuthenticationListener,
+    executeTryGlobalListener,
+    executeMockGlobalListener,
   });
 
   return listenerMiddleware;

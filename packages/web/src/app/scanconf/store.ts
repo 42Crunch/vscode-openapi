@@ -16,6 +16,7 @@ import scanconf, { updateScanconf } from "./slice";
 import operations from "./operations/slice";
 import requests from "./requests/slice";
 import auth from "./auth/slice";
+import global from "./global/slice";
 
 const reducer = {
   theme,
@@ -27,6 +28,7 @@ const reducer = {
   env,
   prefs,
   config,
+  global,
 };
 
 export const messageHandlers: Webapp["webappHandlers"] = {

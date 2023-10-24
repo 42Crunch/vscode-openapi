@@ -57,6 +57,14 @@ import {
   selectSubcredential,
 } from "./slice";
 import { AppDispatch, RootState } from "./store";
+import {
+  addMockGlobalStep,
+  addTryGlobalStep,
+  resetMockGlobal,
+  resetTryGlobal,
+  selectGlobal,
+  startTryGlobal,
+} from "./global/slice";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 
@@ -213,6 +221,53 @@ export function onMockExecuteAuthRequests(
     });
 }
 
+export function onMockExecuteGlobal(
+  startAppListening: AppStartListening,
+  host: HttpCapableWebappHost
+) {
+  return () =>
+    startAppListening({
+      matcher: isAnyOf(
+        goTo,
+        selectGlobal,
+        addStage,
+        moveStage,
+        removeStage,
+        saveOperationReference
+      ),
+      effect: async (action, listenerApi) => {
+        const {
+          scanconf: {
+            playbook: { before, after },
+          },
+          global: { selected },
+          router: {
+            current: [page],
+          },
+        } = listenerApi.getState();
+
+        if (page !== "global") {
+          return;
+        }
+
+        const playbooks =
+          selected === "before"
+            ? [{ name: "Global Before", requests: before }]
+            : [{ name: "Global After", requests: after }];
+
+        await execute(
+          listenerApi.getState(),
+          mockHttpClient(),
+          listenerApi.dispatch,
+          resetMockGlobal,
+          addMockGlobalStep,
+          playbooks,
+          "http://localhost"
+        );
+      },
+    });
+}
+
 export function onTryExecuteScenario(
   startAppListening: AppStartListening,
   host: HttpCapableWebappHost
@@ -308,6 +363,36 @@ export function onExecuteRequest(
           [{ name: "", requests: [{ ref: ref! }] }],
           server,
           [{ id: "inputs", env: inputs, assignments: [] }]
+        );
+      },
+    });
+}
+
+export function onExecuteGlobal(startAppListening: AppStartListening, host: HttpCapableWebappHost) {
+  return () =>
+    startAppListening({
+      actionCreator: startTryGlobal,
+      effect: async ({ payload: server }, listenerApi) => {
+        const {
+          scanconf: {
+            playbook: { before, after },
+          },
+          global: { selected },
+        } = listenerApi.getState();
+
+        const playbooks =
+          selected === "before"
+            ? [{ name: "Global Before", requests: before }]
+            : [{ name: "Global After", requests: after }];
+
+        await execute(
+          listenerApi.getState(),
+          httpClient(host, listenerApi.take),
+          listenerApi.dispatch,
+          resetTryGlobal,
+          addTryGlobalStep,
+          playbooks,
+          server
         );
       },
     });
