@@ -15,37 +15,30 @@ import * as vscode from "vscode";
 import { EnvStore } from "../../../envstore";
 import { Logger } from "../../types";
 
-export async function createScanConfig(
-  apiFileName: string,
-  scanconfFileName: string
-): Promise<boolean> {
-  const cwd = dirname(apiFileName);
+export async function createScanConfigWithCliBinary(
+  apiUri: vscode.Uri,
+  scanconfUri: vscode.Uri
+): Promise<void> {
+  const cwd = dirname(apiUri.fsPath);
   const cli = join(homedir(), ".42crunch", "bin", "42c-ast");
 
-  try {
-    execFileSync(
-      cli,
-      [
-        "scan",
-        "conf",
-        "generate",
-        "--output-format",
-        "json",
-        "--output",
-        scanconfFileName,
-        apiFileName,
-      ],
-      { cwd, windowsHide: true }
-    );
-  } catch (e: any) {
-    vscode.window.showErrorMessage("Failed to create scan config: " + e.message);
-    return false;
-  }
-
-  return true;
+  execFileSync(
+    cli,
+    [
+      "scan",
+      "conf",
+      "generate",
+      "--output-format",
+      "json",
+      "--output",
+      scanconfUri.fsPath,
+      apiUri.fsPath,
+    ],
+    { cwd, windowsHide: true }
+  );
 }
 
-export async function runScan(
+export async function runScanWithCliBinary(
   envStore: EnvStore,
   scanEnv: SimpleEnvironment,
   config: Config,

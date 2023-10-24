@@ -33,6 +33,7 @@ import { PlatformStore } from "../stores/platform-store";
 import { Logger } from "../types";
 import { executeHttpRequest } from "./http-handler";
 import { ScanReportWebView } from "./report-view";
+import { runScanWithCliBinary } from "./runtime/cli-ast";
 
 export type BundleDocumentVersions = Record<string, number>;
 
@@ -402,143 +403,7 @@ async function runScan(
   // await reportView.showScanReport(path, method, parsed, oas);
 }
 
-async function runScanWithDocker(
-  envStore: EnvStore,
-  scanEnv: SimpleEnvironment,
-  config: Config,
-  logger: Logger,
-  token: string
-) {
-  logger.info(`Running conformance scan using docker`);
-
-  const terminal = findOrCreateTerminal();
-
-  const env = { ...scanEnv };
-
-  const services =
-    config.platformServices.source === "auto"
-      ? config.platformServices.auto
-      : config.platformServices.manual;
-
-  env["SCAN_TOKEN"] = token;
-  env["PLATFORM_SERVICE"] = services!;
-
-  const envString = Object.entries(env)
-    .map(([key, value]) => `-e ${key}='${value}'`)
-    .join(" ");
-
-  const hostNetwork =
-    config.docker.useHostNetwork && (config.platform == "linux" || config.platform == "freebsd")
-      ? "--network host"
-      : "";
-
-  terminal.sendText(`docker run ${hostNetwork} --rm ${envString} ${config.scanImage}`);
-  terminal.show();
-}
-
-async function runScanWithCliBinary(
-  envStore: EnvStore,
-  scanEnv: SimpleEnvironment,
-  config: Config,
-  logger: Logger,
-  oas: string,
-  scanconf: string
-) {
-  logger.info(`Running conformance scan using 42c-ast binary`);
-
-  const tmpDir = tmpdir();
-  const dir = mkdtempSync(join(`${tmpDir}`, "scan-"));
-
-  writeFileSync(join(dir as string, "openapi.json"), oas, { encoding: "utf8" });
-  writeFileSync(join(dir as string, "scanconf.json"), scanconf, { encoding: "utf8" });
-
-  logger.info(`Written scan configuration to: ${dir}`);
-
-  const cli = join(homedir(), ".42crunch", "bin", "42c-ast");
-
-  logger.info(`Running scan using: ${cli}`);
-
-  execFileSync(
-    cli,
-    [
-      "scan",
-      "run",
-      "openapi.json",
-      "--conf-file",
-      "scanconf.json",
-      "--output",
-      "report.json",
-      "--output-format",
-      "json",
-      "--verbose",
-      "debug",
-    ],
-    { cwd: dir as string, windowsHide: true, env: scanEnv }
-  );
-
-  const report = readFileSync(join(dir as string, "report.json"), { encoding: "utf8" });
-  const parsed = JSON.parse(report);
-  return parsed;
-}
-
-async function runScanWithScandManager(
-  envStore: EnvStore,
-  scanEnv: SimpleEnvironment,
-  config: Config,
-  logger: Logger,
-  token: string
-): Promise<GeneralError | undefined> {
-  logger.info(`Running conformance scan using scand-manager`);
-
-  const env: Record<string, string> = {};
-
-  for (const [name, value] of Object.entries(scanEnv)) {
-    env[name] = replaceEnvOld(value, await envStore.all());
-  }
-
-  let job: ScandManagerJobStatus | undefined = undefined;
-
-  const services =
-    config.platformServices.source === "auto"
-      ? config.platformServices.auto
-      : config.platformServices.manual;
-
-  try {
-    job = await managerApi.createJob(
-      token,
-      services!,
-      config.scanImage,
-      env,
-      config.scandManager,
-      logger
-    );
-  } catch (ex) {
-    return {
-      message: `Failed to create scand-manager job: ${ex}`,
-    };
-  }
-
-  logger.info(`Created scand-manager job: "${job.name}"`);
-
-  if (job.status === "failed") {
-    // TODO introduce settings whether delete failed jobs or not
-    return {
-      message: `Failed to create scand-manager job "${job.name}", received unexpected status: ${job.status}`,
-    };
-  }
-
-  const error = await waitForScandJob(job.name, config.scandManager, logger, 30000);
-
-  if (error) {
-    return error;
-  }
-
-  // job has completed, remove it
-  await managerApi.deleteJobStatus(job.name, config.scandManager, logger);
-
-  return undefined;
-}
-
+/*
 async function waitForReport(
   store: PlatformStore,
   apiId: string,
@@ -557,55 +422,19 @@ async function waitForReport(
   console.log("Failed to read report");
   return undefined;
 }
+*/
 
-async function waitForScandJob(
-  name: string,
-  manager: ScandManagerConnection,
-  logger: Logger,
-  maxDelay: number
-): Promise<GeneralError | undefined> {
-  let currentDelay = 0;
-  while (currentDelay < maxDelay) {
-    const status = await managerApi.readJobStatus(name, manager, logger);
-    // Status unknown may mean the job is not finished, keep waiting
-    if (status.status === "succeeded") {
-      return undefined;
-    } else if (status.status === "failed") {
-      const log = await managerApi.readJobLog(name, manager, logger);
-      return { message: `Scand-manager job "${name}" has failed`, details: log };
-    }
-    logger.info(`Waiting for job: "${name}", status: "${status.status}"`);
-    await delay(1000);
-    currentDelay = currentDelay + 1000;
-  }
-  return { message: `Timed out waiting for scand-manager job "${name}" to finish` };
-}
+// async function runCurl(curl: string) {
+//   const terminal = findOrCreateTerminal();
+//   terminal.sendText(curl);
+//   terminal.show();
+// }
 
-async function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function findOrCreateTerminal() {
-  const name = "scan";
-  for (const terminal of vscode.window.terminals) {
-    if (terminal.name === name && terminal.exitStatus === undefined) {
-      return terminal;
-    }
-  }
-  return vscode.window.createTerminal({ name });
-}
-
-async function runCurl(curl: string) {
-  const terminal = findOrCreateTerminal();
-  terminal.sendText(curl);
-  terminal.show();
-}
-
-async function copyCurl(curl: string) {
-  vscode.env.clipboard.writeText(curl);
-  const disposable = vscode.window.setStatusBarMessage(`Curl command copied to the clipboard`);
-  setTimeout(() => disposable.dispose(), 1000);
-}
+// async function copyCurl(curl: string) {
+//   vscode.env.clipboard.writeText(curl);
+//   const disposable = vscode.window.setStatusBarMessage(`Curl command copied to the clipboard`);
+//   setTimeout(() => disposable.dispose(), 1000);
+// }
 
 export function replaceEnvOld(value: string, env: EnvData): string {
   const ENV_VAR_REGEX = /{{([\w\-$]+)}}/;

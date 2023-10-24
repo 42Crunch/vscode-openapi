@@ -14,6 +14,7 @@ import { Cache } from "../../cache";
 import { PlatformStore } from "../stores/platform-store";
 import { PlatformContext } from "../types";
 import { ScanWebView } from "./view";
+import { createScanConfigWithCliBinary } from "./runtime/cli-ast";
 
 export default (
   cache: Cache,
@@ -78,27 +79,8 @@ async function editorRunSingleOperationScan(
           cancellable: false,
         },
         async (): Promise<boolean> => {
-          //const execFilePm = promisify(execFile);
-          const scanconfFileName = scanconfUri.fsPath;
-          const apiFileName = editor.document.uri.fsPath;
-          const cwd = dirname(apiFileName);
-          const cli = join(homedir(), ".42crunch", "bin", "42c-ast");
-
           try {
-            execFileSync(
-              cli,
-              [
-                "scan",
-                "conf",
-                "generate",
-                "--output-format",
-                "json",
-                "--output",
-                scanconfFileName,
-                apiFileName,
-              ],
-              { cwd, windowsHide: true }
-            );
+            await createScanConfigWithCliBinary(editor.document.uri, scanconfUri);
           } catch (e: any) {
             vscode.window.showErrorMessage("Failed to create default config: " + e.message);
             return false;
