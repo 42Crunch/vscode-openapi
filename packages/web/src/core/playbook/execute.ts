@@ -1,14 +1,18 @@
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
 import { HttpClient } from "@xliic/common/http";
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
+import { BundledSwaggerOrOasSpec, getOperationById } from "@xliic/common/openapi";
 import * as playbook from "@xliic/common/playbook";
+
 import { makeExternalHttpRequest, makeHttpRequest } from "./http";
 import { MockHttpClient } from "./mock-http";
 import { AuthResult, PlaybookExecutorStep } from "./playbook";
 import { PlaybookEnv, PlaybookEnvStack } from "./playbook-env";
 import { assignVariables } from "./variable-assignments";
-import { replaceEnv, replaceEnvVariables } from "./variables";
-import { createDynamicVariables } from "./builtin-variables";
+import {
+  replaceCredentialVariables,
+  replaceEnvironmentVariables,
+  replaceRequestVariables,
+} from "./variables";
 
 export type PlaybookList = { name: string; requests: playbook.Stage[] }[];
 
@@ -21,7 +25,7 @@ export async function* executeAllPlaybooks(
   envenv: EnvData,
   extraEnv: PlaybookEnvStack = []
 ): AsyncGenerator<PlaybookExecutorStep> {
-  const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv), createDynamicVariables()];
+  const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv)];
   const result: PlaybookEnvStack = [];
   for (const { name, requests } of playbooks) {
     const playbookResult: PlaybookEnvStack = yield* executePlaybook(
@@ -60,24 +64,23 @@ async function* executePlaybook(
 
     if (step.ref === undefined) {
       yield {
-        event: "http-request-prepare-error",
+        event: "playbook-aborted",
         error: "non-reference requests are not supported",
       };
       return;
     }
 
-    const request =
-      step.ref.type === "operation"
-        ? file.operations[step.ref.id].request
-        : file.requests?.[step.ref.id];
-
-    yield { event: "request-started", ref: step.ref };
+    const request = getRequestByRef(file, step.ref);
 
     if (request === undefined) {
-      return; // FIXME error request not found
+      yield {
+        event: "playbook-aborted",
+        error: `request not found: ${step.ref.type}/${step.ref.id}`,
+      };
+      return;
     }
 
-    //const operation = file.operations[step.operationId];
+    yield { event: "request-started", ref: step.ref };
 
     // skip auth for external requests
     const auth = request.operationId === undefined ? undefined : request.auth;
@@ -86,7 +89,10 @@ async function* executePlaybook(
       ...result,
     ]);
 
-    const replacedStageEnv = replaceEnvVariables(step.environment || {}, [...env, ...result]);
+    const replacedStageEnv = replaceEnvironmentVariables(step.environment || {}, [
+      ...env,
+      ...result,
+    ]);
 
     const stageEnv: PlaybookEnv = {
       id: "stage-environment",
@@ -97,7 +103,10 @@ async function* executePlaybook(
 
     const requestEnvStack: PlaybookEnvStack = [...env, ...result, stageEnv];
 
-    const replacedRequestEnv = replaceEnvVariables(request.environment || {}, requestEnvStack);
+    const replacedRequestEnv = replaceEnvironmentVariables(
+      request.environment || {},
+      requestEnvStack
+    );
 
     const requestEnv: PlaybookEnv = {
       id: "request-environment",
@@ -105,7 +114,17 @@ async function* executePlaybook(
       assignments: [],
     };
 
-    const replacements = replaceEnvVariables(request, [...env, ...result, requestEnv, stageEnv]);
+    const operation =
+      request.operationId !== undefined
+        ? getOperationById(oas, request.operationId)?.operation
+        : undefined;
+
+    const replacements = replaceRequestVariables(oas, request.request, operation, [
+      ...env,
+      ...result,
+      requestEnv,
+      stageEnv,
+    ]);
 
     yield {
       event: "payload-variables-substituted",
@@ -121,15 +140,9 @@ async function* executePlaybook(
     // TODO fail in case if failed to replace variables
 
     const [httpRequest, requestError] =
-      replacements.value.operationId === undefined
-        ? await makeExternalHttpRequest(replacements.value.request)
-        : await makeHttpRequest(
-            oas,
-            server,
-            request.operationId,
-            replacements.value.request,
-            security
-          );
+      "operationId" in replacements.value
+        ? await makeHttpRequest(oas, server, request.operationId, replacements.value, security)
+        : await makeExternalHttpRequest(replacements.value);
 
     if (requestError !== undefined) {
       yield { event: "http-request-prepare-error", error: requestError };
@@ -183,6 +196,7 @@ async function* executePlaybook(
     }
 
     yield { event: "variables-assigned", assignments: stepAssignments };
+
     result.push(...stepAssignments);
   }
 
@@ -268,7 +282,7 @@ async function* executeGetCredentialValue(
   if (result) {
     const credentialEnvStack = [...env, ...result];
 
-    const replacements = replaceEnv(method.credential, credentialEnvStack);
+    const replacements = replaceCredentialVariables(method.credential, credentialEnvStack);
     if (replacements.missing.length !== 0) {
       // something is not found, err
     }
@@ -328,4 +342,8 @@ export function getExternalEnvironment(
     envenv
   );
   return environment;
+}
+
+function getRequestByRef(file: playbook.PlaybookBundle, ref: playbook.RequestRef) {
+  return ref.type === "operation" ? file.operations[ref.id]?.request : file.requests?.[ref.id];
 }

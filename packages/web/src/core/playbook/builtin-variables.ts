@@ -1,21 +1,49 @@
-import { PlaybookEnv } from "./playbook-env";
+import { Path, findByPath } from "@xliic/preserving-json-yaml-parser";
 
-export function createDynamicVariables(): PlaybookEnv {
-  const random = Math.floor(Math.random() * 10000000);
+// export function createDynamicVariables(): PlaybookEnv {
+//   const random = Math.floor(Math.random() * 10000000);
 
-  return {
-    id: "dynamic",
-    env: {
-      $random: `${random}`,
-      $randomFromSchema: `${random}`,
-      $randomString: generateRandomString(20),
-      $randomuint: getRandomUint32(),
-      $uuid: crypto.randomUUID(),
-      $timestamp: generateTimestamp(),
-      $timestamp3339: generateIsoTimestamp(),
-    },
-    assignments: [],
-  };
+//   return {
+//     id: "dynamic",
+//     env: {
+//       $randomFromSchema: () => `${random}`,
+//       $randomString: generateRandomString(20),
+//       $randomuint: getRandomUint32(),
+//       $uuid: crypto.randomUUID(),
+//       $timestamp: generateTimestamp(),
+//       $timestamp3339: generateIsoTimestamp(),
+//     },
+//     assignments: [],
+//   };
+// }
+
+export const DynamicVariableNames = [
+  "$randomString",
+  "$randomuint",
+  "$uuid",
+  "$timestamp",
+  "$timestamp3339",
+  "$randomFromSchema",
+] as const;
+
+export type DynamicVariableName = (typeof DynamicVariableNames)[number];
+
+export const DynamicVariables: Record<
+  DynamicVariableName,
+  (location: Path, fakerMaker: (location: Path) => unknown) => void
+> = {
+  $randomString: () => generateRandomString(20),
+  $randomuint: () => getRandomUint32(),
+  $uuid: () => crypto.randomUUID(),
+  $timestamp: () => generateTimestamp(),
+  $timestamp3339: () => generateIsoTimestamp(),
+  $randomFromSchema: randomFromSchema,
+};
+
+function randomFromSchema(location: Path, fakerMaker: (location: Path) => unknown): unknown {
+  const fake = fakerMaker(location);
+  const zzz = findByPath(fake as any, location.slice(2)); // trim body, value
+  return zzz;
 }
 
 function generateRandomString(length: number) {

@@ -15,6 +15,7 @@ import RequestCardExternal from "../components/scenario/RequestCardExternal";
 import { saveRequest } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import { executeRequest } from "./slice";
+import { DynamicVariableNames } from "../../../core/playbook/builtin-variables";
 
 export default function RequestExternal({
   request,
@@ -39,9 +40,10 @@ export default function RequestExternal({
   const onSaveRequest = (stage: playbook.ExternalStageContent) =>
     dispatch(saveRequest({ ref: requestRef, stage }));
 
-  const variables = getVariableNamesFromEnvStack(
-    mockResult?.[0]?.results?.[0]?.variablesReplaced?.stack || []
-  );
+  const variables = [
+    ...DynamicVariableNames,
+    ...getVariableNamesFromEnvStack(mockResult?.[0]?.results?.[0]?.variablesReplaced?.stack || []),
+  ];
 
   const [inputs, setInputs] = useState<SimpleEnvironment>({});
 

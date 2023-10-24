@@ -17,13 +17,13 @@ export default function VariableAssignments({
   );
 }
 
-function renderMissing(value: string, index: number) {
+function renderMissing(value: LookupFailure, index: number) {
   return (
     <Row key={index}>
       <div>
         <TriangleExclamation />
       </div>
-      <div>{value}</div>
+      <div>{value.name}</div>
       <div>missing</div>
     </Row>
   );

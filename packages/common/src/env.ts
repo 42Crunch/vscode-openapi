@@ -1,3 +1,5 @@
+import { Path } from "@xliic/preserving-json-yaml-parser";
+
 export type Environment = Record<string, unknown>;
 export type SimpleEnvironment = Record<string, string>;
 
@@ -6,13 +8,17 @@ export type NamedEnvironment = { name: string; environment: Environment };
 export type EnvironmentStack = NamedEnvironment[];
 
 export type LookupResult = {
-  context: string;
-  offset: number;
   name: string;
   value: unknown;
+  location: Path;
+  offset: number;
+  context: string;
 };
 
-export type LookupFailure = string;
+export type LookupFailure = {
+  name: string;
+  location: Path;
+};
 
 export type ReplacementResult<T> = {
   value: T;

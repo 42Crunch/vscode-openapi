@@ -205,7 +205,7 @@ function makeOasSecurities(schemes: Record<string, OasSecurityScheme>, security:
       result[name] = securityValue;
     }
   }
-  console.log("made secuirty", result);
+
   return { authorized: result };
 }
 

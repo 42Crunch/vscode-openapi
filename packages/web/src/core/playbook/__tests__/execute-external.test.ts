@@ -1,13 +1,11 @@
 import { test } from "vitest";
-import { createDynamicVariables } from "../builtin-variables";
 import oas from "./pixi.json";
 import scenario from "./scenario-external";
 import { makeStepAssert, parseScenario, runScenario } from "./util";
 
 test("execute external", async () => {
   const file = parseScenario(oas, scenario);
-  const vars = createDynamicVariables();
-  const steps = await runScenario(oas, file, vars, "userinfo");
+  const steps = await runScenario(oas, file, "userinfo");
   const step = makeStepAssert(steps);
 
   step({

@@ -5,10 +5,10 @@ export default function MissingVariables({ missing }: { missing: LookupFailure[]
   return <Container>{Array.from(new Set(missing || [])).map(renderMissing)}</Container>;
 }
 
-function renderMissing(value: string, index: number) {
+function renderMissing(value: LookupFailure, index: number) {
   return (
     <Row key={index}>
-      <div>{value}</div>
+      <div>{value.name}</div>
     </Row>
   );
 }

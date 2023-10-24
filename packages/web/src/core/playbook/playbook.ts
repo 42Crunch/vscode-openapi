@@ -46,6 +46,7 @@ export type PlaybookFinished = {
 
 export type PlaybookAborted = {
   event: "playbook-aborted";
+  error: string;
 };
 
 export type PlaybookPayloadVariablesReplaced = {

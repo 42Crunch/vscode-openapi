@@ -57,7 +57,6 @@ import {
   selectSubcredential,
 } from "./slice";
 import { AppDispatch, RootState } from "./store";
-import { createDynamicVariables } from "../../core/playbook/builtin-variables";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 
@@ -269,10 +268,7 @@ export function onExecuteAuthentication(
           return;
         }
 
-        const env: PlaybookEnvStack = [
-          getExternalEnvironment(playbook, envenv),
-          createDynamicVariables(),
-        ];
+        const env: PlaybookEnvStack = [getExternalEnvironment(playbook, envenv)];
 
         listenerApi.dispatch(resetTryAuthentication());
         listenerApi.dispatch(addTryAuthenticationStep({ event: "playbook-started", name: "" }));

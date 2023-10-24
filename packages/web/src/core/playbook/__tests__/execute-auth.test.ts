@@ -1,13 +1,11 @@
 import { test } from "vitest";
-import { createDynamicVariables } from "../builtin-variables";
 import oas from "./pixi.json";
 import scenarioAuth from "./scenario-auth";
 import { makeStepAssert, parseScenario, runScenario } from "./util";
 
 test("execute auth", async () => {
   const file = parseScenario(oas, scenarioAuth);
-  const vars = createDynamicVariables();
-  const steps = await runScenario(oas, file, vars, "userinfo");
+  const steps = await runScenario(oas, file, "userinfo");
   const step = makeStepAssert(steps);
 
   step({

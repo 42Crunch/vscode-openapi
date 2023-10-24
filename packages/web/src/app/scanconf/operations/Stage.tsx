@@ -16,6 +16,7 @@ import { OperationResult } from "../components/scenario/types";
 import { unwrapPlaybookStage, wrapPlaybookStage } from "../components/scenario/util";
 import MissingVariables from "./MissingVariables";
 import Card from "./components/Card";
+import { DynamicVariableNames } from "../../../core/playbook/builtin-variables";
 
 export default function Stage({
   stage,
@@ -50,12 +51,16 @@ export default function Stage({
     (stage.ref.type === "operation" ? operations[stage.ref.id] : requests[stage.ref.id]) ===
     undefined;
 
-  const availableVariables = getVariableNamesFromEnvStack(result?.variablesReplaced?.stack || []);
+  const availableVariables = [
+    ...DynamicVariableNames,
+    ...getVariableNamesFromEnvStack(result?.variablesReplaced?.stack || []),
+  ];
+
   const missingVariables = result?.variablesReplaced?.missing || [];
   const replacedVariables = Array.from(
     new Set(result?.variablesReplaced?.found?.map((lookupResult) => lookupResult.name) || [])
   );
-  const allRequestVariables = [...missingVariables, ...replacedVariables];
+  const allRequestVariables = [...missingVariables.map((m) => m.name), ...replacedVariables];
   const missingVariablesCount = new Set(missingVariables || []).size;
 
   return (

@@ -16,6 +16,7 @@ import { saveRequest } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import Servers from "./Servers";
 import { executeRequest } from "./slice";
+import { DynamicVariableNames } from "../../../core/playbook/builtin-variables";
 
 export default function RequestInternal({
   request,
@@ -42,9 +43,10 @@ export default function RequestInternal({
 
   const credentials = playbook.authenticationDetails[0];
 
-  const variables = getVariableNamesFromEnvStack(
-    mockResult?.[0]?.results?.[0]?.variablesReplaced?.stack || []
-  );
+  const variables = [
+    ...DynamicVariableNames,
+    ...getVariableNamesFromEnvStack(mockResult?.[0]?.results?.[0]?.variablesReplaced?.stack || []),
+  ];
 
   const [inputs, setInputs] = useState<SimpleEnvironment>({});
 

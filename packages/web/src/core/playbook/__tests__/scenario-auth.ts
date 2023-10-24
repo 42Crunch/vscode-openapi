@@ -33,9 +33,9 @@ const register: scan.Operation = {
           json: {
             account_balance: 9,
             is_admin: true,
-            name: "foo{{$random}}",
+            name: "foo{{$randomuint}}",
             pass: "1afNp3FXC",
-            user: "foo{{$random}}@company.co.uk",
+            user: "foo{{$randomuint}}@company.co.uk",
           },
         },
       },

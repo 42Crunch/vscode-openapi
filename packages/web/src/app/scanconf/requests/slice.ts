@@ -62,7 +62,7 @@ export const slice = createSlice({
         step.event === "payload-variables-substituted" ||
         step.event === "credential-variables-substituted"
       ) {
-        state.mockMissingVariables.push(...step.missing);
+        state.mockMissingVariables.push(...step.missing.map((m) => m.name));
       }
     },
   },

@@ -25,10 +25,12 @@ export type PlaybookVariableAssignments = PlaybookVariableAssignment[];
 
 export type PlaybookEnvStack = PlaybookEnv[];
 
+export type EnvStackLookupResult = { context: string; value: unknown; name: string };
+
 export function lookup(
   envStack: PlaybookEnvStack,
   varname: string
-): { context: string; value: unknown; name: string } | undefined {
+): EnvStackLookupResult | undefined {
   for (let i = envStack.length - 1; i >= 0; i--) {
     // traverse from the end
     const { id, env } = envStack[i];
