@@ -1,10 +1,8 @@
-import { useEffect } from "react";
-import Button from "../../../components/Button";
 import { SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
+import GeneralError from "../components/GeneralError";
 import { useAppDispatch, useAppSelector } from "../store";
 import Operation from "./Operation";
 import { setOperationId } from "./slice";
-import GeneralError from "../components/GeneralError";
 
 export default function Operations() {
   const dispatch = useAppDispatch();

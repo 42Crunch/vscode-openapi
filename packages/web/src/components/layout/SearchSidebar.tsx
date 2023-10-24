@@ -57,7 +57,7 @@ export function SearchSidebarControlled({
   const [search, setSearch] = useState("");
 
   return (
-    <Container>
+    <>
       <Sidebar>
         <Search>
           <input placeholder="Search" value={search} onChange={(e) => setSearch(e.target.value)} />
@@ -87,26 +87,33 @@ export function SearchSidebarControlled({
         {renderButtons && <Buttons>{renderButtons()}</Buttons>}
       </Sidebar>
       <Content>{render(selected)}</Content>
-    </Container>
+    </>
   );
 }
 
-const Container = styled.div`
-  display: flex;
-  background-color: var(${ThemeColorVariables.background});
-  > :first-child {
-    width: 240px;
-    overflow-y: auto;
-  }
-  > :last-child {
-    flex: 1;
-    overflow-y: auto;
-  }
-`;
-
 const Content = styled.div`
+  position: absolute;
+  left: 320px;
+  top: 0;
+  right: 0;
+  bottom: 0;
   background-color: var(${ThemeColorVariables.computedOne});
   padding: 16px;
+  overflow-y: auto;
+`;
+
+const Sidebar = styled.div`
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 288px;
+  overflow-y: scroll;
+  bottom: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background-color: var(${ThemeColorVariables.background});
 `;
 
 const Sections = styled.div`
@@ -126,13 +133,6 @@ const Sections = styled.div`
 `;
 
 const Buttons = styled.div``;
-
-const Sidebar = styled.div`
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-`;
 
 const Subheader = styled.div`
   display: flex;

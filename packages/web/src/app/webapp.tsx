@@ -38,19 +38,30 @@ export function RouterApp() {
 
 export function NavigationRouterApp() {
   return (
-    <Container>
+    <>
       <ThemeStyles />
-      <Navigation />
-      <Router />
-    </Container>
+      <NavigationContainer>
+        <Navigation />
+      </NavigationContainer>
+      <ContentContainer>
+        <Router />
+      </ContentContainer>
+    </>
   );
 }
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  > div:last-child {
-    flex: 1;
-  }
+const NavigationContainer = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 35px;
+`;
+
+const ContentContainer = styled.div`
+  position: fixed;
+  top: 35px;
+  left: 0;
+  right: 0;
+  bottom: 0;
 `;

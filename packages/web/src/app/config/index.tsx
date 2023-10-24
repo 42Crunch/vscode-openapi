@@ -16,10 +16,8 @@ function renderWebView(host: Webapp["host"], theme: ThemeState) {
   createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
       <Provider store={store}>
-        <App>
-          <ThemeStyles />
-          <Config />
-        </App>
+        <ThemeStyles />
+        <Config />
       </Provider>
     </React.StrictMode>
   );
@@ -28,12 +26,3 @@ function renderWebView(host: Webapp["host"], theme: ThemeState) {
 }
 
 (window as any).renderWebView = renderWebView;
-
-const App = styled.div`
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  > div:last-child {
-    flex: 1;
-  }
-`;
