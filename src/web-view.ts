@@ -127,6 +127,10 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
       </script>
       <script type="module" src="/@vite/client"></script>
       <style>
+        body {
+          height: 100vh;
+          width: 100vw;
+        }
         #root {
           display: contents;
         }
@@ -167,6 +171,10 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
       <meta http-equiv="Content-Security-Policy"  content="default-src 'none';  img-src ${cspSource} https: data:; script-src ${cspSource} 'unsafe-inline'; style-src ${cspSource}  'unsafe-inline'; connect-src http: https:">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style type="text/css">
+        body {
+          height: 100vh;
+          width: 100vw;
+        }
         #root {
           display: contents;
         }
