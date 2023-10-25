@@ -8,6 +8,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import Input from "../../../components/Input";
 import { Plus } from "../../../icons";
 import FormDialog from "../../../new-components/FormDialog";
+import { ENV_VAR_NAME_REGEX, ENV_VAR_NAME_REGEX_MESSAGE } from "../../../core/playbook/variables";
 
 export default function NewValueDialog({
   onAddCredentialValue,
@@ -32,7 +33,9 @@ export default function NewValueDialog({
   const schema = z.object({
     name: z
       .string()
-      .regex(/^\w+$/)
+      .regex(ENV_VAR_NAME_REGEX(), {
+        message: ENV_VAR_NAME_REGEX_MESSAGE,
+      })
       .refine((value) => !existing.includes(value), {
         message: "Already exists",
       }),

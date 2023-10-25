@@ -6,6 +6,7 @@ import Button from "../../../components/Button";
 import Input from "../../../components/Input";
 import Select from "../../../components/Select";
 import FormDialog from "../../../new-components/FormDialog";
+import { ENV_VAR_NAME_REGEX, ENV_VAR_NAME_REGEX_MESSAGE } from "../../../core/playbook/variables";
 
 export default function NewCredentialDialog({
   onAddCredential,
@@ -57,7 +58,9 @@ export default function NewCredentialDialog({
   const schema = z.object({
     id: z
       .string()
-      .regex(/^\w+$/)
+      .regex(ENV_VAR_NAME_REGEX(), {
+        message: ENV_VAR_NAME_REGEX_MESSAGE,
+      })
       .refine((value) => !existing.includes(value), {
         message: "Already exists",
       }),
