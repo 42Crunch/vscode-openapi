@@ -5,6 +5,7 @@ import {
   replaceKey,
   replaceValue,
   withRandomFileEditor,
+  wrap,
 } from "../utils";
 import {
   addBasePath,
@@ -93,7 +94,7 @@ suite("Snippets For YAML with Edit", () => {
       await addPath(cache, true);
 
       assert.ok(doc.isDirty);
-      assert.strictEqual(doc.getText(), expected);
+      assert.strictEqual(wrap(doc.getText()), wrap(expected));
     });
   });
 
@@ -144,7 +145,7 @@ suite("Snippets For YAML with Edit", () => {
       await addPath(cache, true);
 
       assert.ok(doc.isDirty);
-      assert.strictEqual(ignoreYamlTextFeatures(doc.getText()), expected);
+      assert.strictEqual(ignoreYamlTextFeatures(wrap(doc.getText())), wrap(expected));
     });
   });
 
@@ -196,7 +197,7 @@ suite("Snippets For YAML with Edit", () => {
       await addPath(cache, true);
 
       assert.ok(doc.isDirty);
-      assert.strictEqual(doc.getText(), expected);
+      assert.strictEqual(wrap(doc.getText()), wrap(expected));
     });
   });
 
@@ -251,7 +252,7 @@ suite("Snippets For YAML with Edit", () => {
       await addPath(cache, true);
 
       assert.ok(doc.isDirty);
-      assert.strictEqual(ignoreYamlTextFeatures(doc.getText()), expected);
+      assert.strictEqual(ignoreYamlTextFeatures(wrap(doc.getText())), wrap(expected));
     });
   });
 });

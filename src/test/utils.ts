@@ -9,8 +9,9 @@ import * as vscode from "vscode";
 import { TestFS } from "./memfs";
 import * as assert from "assert";
 import { readFileSync } from "fs";
+import { resolve } from "path";
 import { workspace, window, TextEditor, TextDocument } from "vscode";
-import { FixContext, FixType } from "../types";
+import { FixContext, FixType, OpenApiVersion } from "../types";
 import { Parsed, parseJson, parseYaml } from "@xliic/preserving-json-yaml-parser";
 import { findJsonNodeValue, getRootAsJsonNodeValue, JsonNodeValue } from "../json-utils";
 import {
@@ -21,6 +22,9 @@ import {
   safeParse,
 } from "../util";
 import { componentsTags, topTags } from "../audit/quickfix";
+import { safeParse } from "../util";
+import { getAllComponentPointers, getPointersByComponents, cmpSets } from "../commands";
+import { getDeadRefs, fixDelete, fixDeleteApplyIfNeeded } from "../audit/quickfix";
 
 export async function replaceKey(editor: vscode.TextEditor, pointer: string, key: string) {
   const root = safeParse(editor.document.getText(), editor.document.languageId);
@@ -231,4 +235,65 @@ export function assertTagsOrder(root: Parsed) {
       assert.deepStrictEqual(ids, idsSorted);
     }
   }
+}
+
+export async function testDeleteNode(
+  file: string,
+  expFile: string,
+  languageId: string,
+  version: OpenApiVersion,
+  pointer: string
+) {
+  const text = readFileSync(resolve(__dirname, file), {
+    encoding: "utf8",
+  });
+  const expected = readFileSync(resolve(__dirname, expFile), {
+    encoding: "utf8",
+  });
+  await withRandomFileEditor(text, languageId, async (editor, doc) => {
+    const root = safeParse(editor.document.getText(), editor.document.languageId);
+    const bundle = { value: root };
+    const edit = new vscode.WorkspaceEdit();
+    const context: FixContext = {
+      editor: editor,
+      edit: edit,
+      issues: [],
+      fix: {
+        problem: [],
+        type: FixType.Delete,
+        title: "",
+      },
+      bulk: false,
+      snippet: false,
+      auditContext: null,
+      version: version,
+      bundle: bundle,
+      root: root,
+      target: findJsonNodeValue(root, pointer),
+      document: editor.document,
+    };
+    const deadRefs = getDeadRefs(pointer, context);
+    assert.ok(deadRefs.length > 0);
+    fixDelete(context);
+    let pointers = deadRefs.map((ref) => ref.replace("#/", "/"));
+    const compsToRemove = getPointersByComponents(pointers, version);
+    const allComps = getPointersByComponents(getAllComponentPointers(root, version), version);
+    for (const [c, cPointers] of Object.entries(compsToRemove)) {
+      if (c in allComps && cmpSets(allComps[c], cPointers)) {
+        pointers = pointers.filter((p) => !cPointers.has(p));
+        pointers.push(version === OpenApiVersion.V3 ? "/components/" + c : "/" + c);
+      }
+    }
+    context.pointersToRemove = new Set<string>(pointers);
+    for (const pointer of pointers) {
+      context.target = findJsonNodeValue(root, pointer);
+      fixDelete(context);
+    }
+    fixDeleteApplyIfNeeded(context);
+    return vscode.workspace.applyEdit(edit).then(() => {
+      assert.ok(doc.isDirty);
+      //console.info(doc.getText());
+      assert.strictEqual(wrap(doc.getText()), wrap(expected));
+    });
+  });
 }

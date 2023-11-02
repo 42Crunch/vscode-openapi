@@ -3,6 +3,8 @@ import { posix } from "path";
 import * as vscode from "vscode";
 import { findMapping } from "../bundler";
 import { parseJsonPointer } from "../pointer";
+import { walk } from "../util/extract";
+
 import {
   Fix,
   FixParameter,
@@ -184,17 +186,6 @@ function buildPropertyHints(bundled: BundleResult): any {
   }
 
   return hints;
-}
-
-function walk(current: any, parent: any, path: string[], visitor: any) {
-  for (const key of Object.keys(current)) {
-    const value = current[key];
-    if (typeof value === "object" && value !== null) {
-      walk(value, current, [key, ...path], visitor);
-    } else {
-      visitor(parent, path, key, value);
-    }
-  }
 }
 
 function mode(arr) {

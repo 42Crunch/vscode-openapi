@@ -45,6 +45,9 @@ import { generateSchemaFixCommand, createGenerateSchemaAction } from "./quickfix
 import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 import { findJsonNodeValue } from "../json-utils";
 import { DataDictionaryFormat, PlatformStore } from "../platform/stores/platform-store";
+import { setAudit } from "./service";
+import { walk } from "../util/extract";
+import { encodeJsonPointerSegment, joinJsonPointer } from "../pointer";
 
 const registeredQuickFixes: { [key: string]: Fix } = {};
 
@@ -160,7 +163,7 @@ function fixRenameKey(context: FixContext) {
   edit.replace(document.uri, range, value);
 }
 
-function fixDelete(context: FixContext) {
+export function fixDelete(context: FixContext) {
   const document = context.document;
   let range: vscode.Range;
   context.snippet = false;
@@ -169,8 +172,52 @@ function fixDelete(context: FixContext) {
   } else {
     range = deleteJsonNode(context);
   }
-  const edit = getWorkspaceEdit(context);
-  edit.delete(document.uri, range);
+  if (!range) {
+    return;
+  }
+  if (!context["rangesToRemove"]) {
+    context["rangesToRemove"] = [range];
+    return;
+  }
+  const nonOpRanges = context["rangesToRemove"];
+  if (nonOpRanges.some((r) => r.contains(range))) {
+    return;
+  }
+  const ranges = [];
+  nonOpRanges.forEach((r) => ranges.push(r));
+  for (const r of nonOpRanges) {
+    if (range.contains(r)) {
+      removeRange(ranges, r);
+    } else if (r.intersection(range)) {
+      removeRange(ranges, r);
+      range = r.union(range);
+    }
+  }
+  ranges.push(range);
+  context["rangesToRemove"] = ranges;
+}
+
+export function fixDeleteApplyIfNeeded(context: FixContext) {
+  if (context.positionsToInsert) {
+    for (const range of context.positionsToInsert) {
+      context.edit.insert(context.document.uri, range[0], range[1]);
+    }
+    context.positionsToInsert = [];
+  }
+  if (context.rangesToRemove) {
+    for (const range of context.rangesToRemove) {
+      context.edit.delete(context.document.uri, range);
+    }
+    context.rangesToRemove = [];
+  }
+}
+
+function removeRange(ranges: vscode.Range[], rangeToRemove: vscode.Range) {
+  ranges.forEach((range, index) => {
+    if (range === rangeToRemove) {
+      ranges.splice(index, 1);
+    }
+  });
 }
 
 function transformInsertToReplaceIfExists(context: FixContext): boolean {
@@ -295,6 +342,7 @@ async function quickFixCommand(
 
   // Apply only if has anything to apply
   if (edit) {
+    fixDeleteApplyIfNeeded(context);
     await vscode.workspace.applyEdit(edit);
   } else if (snippetParameters) {
     await processSnippetParameters(editor, snippetParameters, dropBrackets);
@@ -656,4 +704,43 @@ function getIssuesByPointers(issues: Issue[]): { [key: string]: Issue[] } {
 
 function getIssueUniqueId(issue: Issue): string {
   return issue.id + issue.pointer;
+}
+
+export function getDeadRefs(targetPointer: string, context: FixContext): [] {
+  const refDeps = {};
+  const bundle = context.bundle;
+  walk(bundle.value, null, [], (_parent, path, key, value) => {
+    if (key === "$ref" && typeof value === "string" && value.startsWith("#/")) {
+      const pointer = joinJsonPointer(path.reverse());
+      if (!(value in refDeps)) {
+        refDeps[value] = new Set<string>();
+      }
+      refDeps[value].add(pointer);
+    }
+  });
+  const myRefs = new Set<string>();
+  refWalk(context.root, context.target, myRefs);
+  if (myRefs.size === 0) {
+    return [];
+  }
+  const deadRefs = [];
+  for (const myRef of myRefs) {
+    const pointers = [...refDeps[myRef]].filter((p) => !p.startsWith(targetPointer));
+    if (pointers.length === 0) {
+      deadRefs.push(myRef);
+    }
+  }
+  return deadRefs;
+}
+
+function refWalk(root: any, target: any, refs: Set<string>) {
+  walk(target, null, [], (_parent, _path, key, value) => {
+    if (key === "$ref" && typeof value === "string" && value.startsWith("#/") && !(value in refs)) {
+      refs.add(value);
+      const refTarget = findJsonNodeValue(root, value.replace("#/", "/"));
+      if (refTarget) {
+        refWalk(root, refTarget, refs);
+      }
+    }
+  });
 }

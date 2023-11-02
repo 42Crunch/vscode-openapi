@@ -3,6 +3,7 @@ import { Container, Location, Parsed, getLocation } from "@xliic/preserving-json
 import { find, parse } from "@xliic/preserving-json-yaml-parser";
 import { getPointerChild, getPointerLastSegment, getPointerParent } from "./pointer";
 import { parserOptions } from "./parser-options";
+import { getPreservedRootRange } from "@xliic/preserving-json-yaml-parser/lib/preserve";
 
 export type Range = [number, number]; // start, end
 
@@ -101,8 +102,10 @@ export class JsonNodeValue {
           }
         }
       }
+    } else if (this.pointer === "") {
+      const range = getPreservedRootRange(root);
+      return [range.start, range.end];
     }
-
     return undefined;
   }
 

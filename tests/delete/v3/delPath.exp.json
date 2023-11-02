@@ -1,0 +1,30 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Pixi App API",
+    "description": "Pixi Photo Sharing API",
+    "contact": {
+      "email": "nicole.becher@owasp.org"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://localhost:4443/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "admins",
+      "description": "Secured Admin-only calls"
+    }
+  ],
+  "paths": {
+  },
+  "components": {
+  }
+}

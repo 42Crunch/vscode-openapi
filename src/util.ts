@@ -10,7 +10,7 @@ import {
   FixSnippetParameters,
 } from "./types";
 import parameterSources from "./audit/quickfix-sources";
-import { parse, Parsed } from "@xliic/preserving-json-yaml-parser";
+import { parse, Parsed, simpleClone } from "@xliic/preserving-json-yaml-parser";
 import { findJsonNodeValue, getRootAsJsonNodeValue, JsonNodeValue, replace } from "./json-utils";
 import { componentsTags, topTags } from "./audit/quickfix";
 
@@ -144,65 +144,90 @@ export function renameKeyNode(context: FixContext): vscode.Range {
 }
 
 export function deleteJsonNode(context: FixContext): vscode.Range {
+  const root = context.root;
   const document = context.document;
   const target = context.target;
-  let startPosition: vscode.Position;
-  const prevTarget = target.prev(context.root);
-
-  if (prevTarget) {
-    const [, end] = prevTarget.getRange(context.root);
-    const line = getLineByOffset(document, end);
-    const nextTarget = target.next(context.root);
-    startPosition = new vscode.Position(line.lineNumber, line.text.length + (nextTarget ? 0 : -1));
+  const prev = target.prev(root);
+  const next = target.next(root);
+  const parent = target.getParent(root);
+  let startPos: vscode.Position;
+  if (prev) {
+    const [, end] = prev.getRange(root);
+    let hasNext = next !== undefined;
+    const pointers = context.pointersToRemove;
+    if (hasNext && pointers && pointers.size > 0) {
+      hasNext = hasNextTarget(parent, target, pointers);
+    }
+    if (hasNext) {
+      const [toOffset] = target.getRange(root);
+      startPos = getPosAfterComma(document, end, toOffset);
+    } else {
+      startPos = document.positionAt(end);
+    }
   } else {
-    const parent = target.getParent(context.root);
-    const [start] = parent.getRange(context.root);
-    const line = getLineByOffset(document, start);
-    startPosition = new vscode.Position(line.lineNumber, line.text.length);
+    const [start] = parent.getValueRange(root);
+    startPos = document.positionAt(start + 1);
   }
+  let toOffset: number;
+  const [, end] = target.getRange(root);
+  if (next) {
+    const [start] = next.getRange(root);
+    toOffset = start;
+  } else {
+    const [, end] = parent.getRange(root);
+    toOffset = end;
+  }
+  const endPos = getPosAfterComma(document, end, toOffset);
+  return new vscode.Range(startPos, endPos);
+}
 
-  const [, end] = target.getRange(context.root);
-  const line = getLineByOffset(document, end);
-  const endPosition = new vscode.Position(line.lineNumber, line.text.length);
+function getPosAfterComma(
+  document: vscode.TextDocument,
+  fromOffset: number,
+  toOffset: number
+): vscode.Position {
+  const fromPos = document.positionAt(fromOffset);
+  const toPos = document.positionAt(toOffset);
+  const text = document.getText(new vscode.Range(fromPos, toPos));
+  return document.positionAt(fromOffset + text.indexOf(",") + 1);
+}
 
-  return new vscode.Range(startPosition, endPosition);
+function hasNextTarget(parent: any, target: any, pointersToRemove: Set<string>): boolean {
+  const pointers = [];
+  for (const child of parent.getChildren()) {
+    const pointer = child.pointer;
+    if (!pointersToRemove.has(pointer) || target.pointer === pointer) {
+      pointers.push(pointer);
+    }
+  }
+  return pointers.indexOf(target.pointer) !== pointers.length - 1;
 }
 
 export function deleteYamlNode(context: FixContext): vscode.Range {
+  const root = context.root;
   const document = context.document;
   const target = context.target;
-  const [start, end] = target.getRange(context.root);
-
-  let apply = false;
-  let startPosition = document.positionAt(start);
-  let endPosition = document.positionAt(end);
-  const parent = target.getParent(context.root);
-
-  if (parent.isArray()) {
-    const nextTarget = target.next(context.root);
-    if (nextTarget) {
-      const line = getLineByOffset(document, nextTarget.getRange(context.root)[0]);
-      startPosition = document.positionAt(start - "- ".length);
-      endPosition = new vscode.Position(line.lineNumber, line.firstNonWhitespaceCharacterIndex);
-    } else {
-      startPosition = new vscode.Position(getLineByOffset(document, start).lineNumber, 0);
-      endPosition = new vscode.Position(getLineByOffset(document, end).lineNumber + 1, 0);
+  const [start, end] = target.getRange(root);
+  let startPos = document.positionAt(start);
+  let endPos = document.positionAt(end);
+  const parent = target.getParent(root);
+  const children = parent.getChildren();
+  const insertEmptyStub = children.length === 1 && children[0].value === target.value;
+  const isArray = parent.isArray();
+  const isObject = parent.isObject();
+  if (isArray || isObject) {
+    startPos = new vscode.Position(getLineByOffset(document, start).lineNumber, 0);
+    endPos = new vscode.Position(getLineByOffset(document, end).lineNumber + 1, 0);
+    if (insertEmptyStub) {
+      if (!context["positionsToInsert"]) {
+        context["positionsToInsert"] = [];
+      }
+      const [, end] = parent.getKeyRange(root);
+      const line = getLineByOffset(document, end);
+      const insPos = new vscode.Position(line.lineNumber, line.text.indexOf(":") + 1);
+      context["positionsToInsert"].push([insPos, isObject ? " {}" : " []"]);
     }
-    apply = true;
-  } else if (parent.isObject()) {
-    const nextTarget = target.next(context.root);
-    if (nextTarget) {
-      const line = getLineByOffset(document, nextTarget.getRange(context.root)[0]);
-      endPosition = new vscode.Position(line.lineNumber, line.firstNonWhitespaceCharacterIndex);
-    } else {
-      startPosition = new vscode.Position(getLineByOffset(document, start).lineNumber, 0);
-      endPosition = new vscode.Position(getLineByOffset(document, end).lineNumber + 1, 0);
-    }
-    apply = true;
-  }
-
-  if (apply) {
-    return new vscode.Range(startPosition, endPosition);
+    return new vscode.Range(startPos, endPos);
   }
 }
 

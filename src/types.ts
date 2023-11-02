@@ -160,6 +160,9 @@ export interface FixContext {
   document: vscode.TextDocument;
   dropBrackets?: number[];
   formatMap?: Map<string, DataDictionaryFormat>;
+  rangesToRemove?: vscode.Range[];
+  positionsToInsert?: [string, vscode.Position][];
+  pointersToRemove?: Set<string>;
 }
 
 export interface FixSnippetParameters {

@@ -14,7 +14,13 @@ import * as snippets from "./generated/snippets.json";
 import { Cache } from "./cache";
 import { Fix, FixContext, FixType, OpenApiVersion } from "./types";
 import { findJsonNodeValue } from "./json-utils";
-import { fixInsert } from "./audit/quickfix";
+import {
+  fixInsert,
+  fixDelete,
+  fixDeleteApplyIfNeeded,
+  getDeadRefs,
+  getDeadRefs,
+} from "./audit/quickfix";
 import { getPointerLastSegment, getPointerParent } from "./pointer";
 import { processSnippetParameters } from "./util";
 import { OutlineNode } from "./outlines/nodes/base";
@@ -41,6 +47,8 @@ const commands: { [key: string]: Function } = {
   addParameterPath,
   addParameterOther,
   addResponse,
+  deleteOperation,
+  deletePath,
 
   v3addInfo,
   v3addComponentsResponse,
@@ -293,6 +301,14 @@ async function addOperation(cache: Cache, node: any) {
   await snippetCommand(fix, cache);
 }
 
+async function deleteOperation(cache: Cache, node: any) {
+  deleteSnippetCommand(cache, node);
+}
+
+async function deletePath(cache: Cache, node: any) {
+  deleteSnippetCommand(cache, node);
+}
+
 function noActiveOpenApiEditorGuard(cache: Cache) {
   const document = vscode.window.activeTextEditor?.document;
   if (!document || cache.getDocumentVersion(document) === OpenApiVersion.Unknown) {
@@ -382,6 +398,130 @@ export async function snippetCommand(fix: Fix, cache: Cache, useEdit?: boolean) 
   }
 }
 
+async function deleteSnippetCommand(cache: Cache, node: any) {
+  const editor = vscode.window.activeTextEditor;
+  if (noActiveOpenApiEditorGuard(cache) || !editor) {
+    return;
+  }
+  const document = editor.document;
+  const root = cache.getLastGoodParsedDocument(document);
+  if (!root) {
+    return;
+  }
+  const bundle = await cache.getDocumentBundle(document);
+  if ("errors" in bundle) {
+    return;
+  }
+  const version = cache.getDocumentVersion(document);
+  const pointer = node.id;
+  const target = findJsonNodeValue(root, pointer);
+  const context: FixContext = {
+    editor: editor,
+    edit: new vscode.WorkspaceEdit(),
+    issues: [],
+    fix: {
+      problem: [],
+      type: FixType.Delete,
+      title: "",
+    },
+    bulk: false,
+    auditContext: null,
+    version: version,
+    bundle: bundle,
+    root: root,
+    target: target,
+    document: document,
+  };
+  const deadRefs = getDeadRefs(pointer, context);
+  if (deadRefs.length > 0) {
+    fixDelete(context);
+    const prompt = "Are you sure you want to delete unused schemas?";
+    const confirmation = await vscode.window.showInformationMessage(prompt, "Yes", "No");
+    if (confirmation && confirmation === "Yes") {
+      let pointers = deadRefs.map((ref) => ref.replace("#/", "/"));
+      const compsToRemove = getPointersByComponents(pointers, version);
+      const allComps = getPointersByComponents(getAllComponentPointers(root, version), version);
+      for (const [c, cPointers] of Object.entries(compsToRemove)) {
+        if (c in allComps && cmpSets(allComps[c], cPointers)) {
+          pointers = pointers.filter((p) => !cPointers.has(p));
+          pointers.push(version === OpenApiVersion.V3 ? "/components/" + c : "/" + c);
+        }
+      }
+      context.pointersToRemove = new Set<string>(pointers);
+      for (const pointer of pointers) {
+        context.target = findJsonNodeValue(root, pointer);
+        fixDelete(context);
+      }
+    }
+  } else {
+    fixDelete(context);
+  }
+  fixDeleteApplyIfNeeded(context);
+  await vscode.workspace.applyEdit(context.edit);
+}
+
 function isArray(key: string): boolean {
   return key === "security" || key === "servers";
+}
+
+export function getAllComponentPointers(
+  root: any,
+  version: OpenApiVersion
+): Map<string, Set<string>> {
+  const res = [];
+  if (version === OpenApiVersion.V3) {
+    const components = findJsonNodeValue(root, "/components");
+    if (components) {
+      for (const component of components.getChildren()) {
+        for (const item of component.getChildren()) {
+          res.push(item.pointer);
+        }
+      }
+    }
+  } else {
+    const components = new Set([
+      "responses",
+      "parameters",
+      "definitions",
+      "securityDefinitions",
+      "security",
+    ]);
+    for (const componentName of components) {
+      const component = findJsonNodeValue(root, "/" + componentName);
+      if (component) {
+        for (const item of component.getChildren()) {
+          res.push(item.pointer);
+        }
+      }
+    }
+  }
+  return res;
+}
+
+export function getPointersByComponents(
+  pointers: string[],
+  version: OpenApiVersion
+): Map<string, Set<string>> {
+  const res = {};
+  const index = version === OpenApiVersion.V3 ? 2 : 1;
+  for (const pointer of pointers) {
+    const component = pointer.split("/")[index];
+    if (!(component in res)) {
+      res[component] = new Set<string>();
+    }
+    res[component].add(pointer);
+  }
+  return res;
+}
+
+export function cmpSets(set1: Set<string>, set2: Set<string>): boolean {
+  if (set1.size !== set2.size) {
+    return false;
+  }
+  for (const item in set1) {
+    if (!set2.has(item)) {
+      return false;
+    }
+  }
+  return true;
 }

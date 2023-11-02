@@ -5,6 +5,7 @@ import {
   replaceKey,
   replaceValue,
   withRandomFileEditor,
+  wrap,
 } from "../utils";
 import {
   addBasePath,
@@ -92,7 +93,7 @@ suite("Snippets For JSON with Edit", () => {
       await addPath(cache, true);
 
       assert.ok(doc.isDirty);
-      assert.strictEqual(doc.getText(), expected);
+      assert.strictEqual(wrap(doc.getText()), wrap(expected));
     });
   });
 
@@ -143,7 +144,7 @@ suite("Snippets For JSON with Edit", () => {
       await addPath(cache, true);
 
       assert.ok(doc.isDirty);
-      assert.strictEqual(ignoreJsonTextFeatures(doc.getText()), expected);
+      assert.strictEqual(ignoreJsonTextFeatures(wrap(doc.getText())), wrap(expected));
     });
   });
 
@@ -196,7 +197,7 @@ suite("Snippets For JSON with Edit", () => {
       await addPath(cache, true);
 
       assert.ok(doc.isDirty);
-      assert.strictEqual(doc.getText(), expected);
+      assert.strictEqual(wrap(doc.getText()), wrap(expected));
     });
   });
 
@@ -251,7 +252,7 @@ suite("Snippets For JSON with Edit", () => {
       await addPath(cache, true);
 
       assert.ok(doc.isDirty);
-      assert.strictEqual(ignoreJsonTextFeatures(doc.getText()), expected);
+      assert.strictEqual(ignoreJsonTextFeatures(wrap(doc.getText())), wrap(expected));
     });
   });
 });

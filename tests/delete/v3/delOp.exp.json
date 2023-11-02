@@ -1,0 +1,166 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Pixi App API",
+    "description": "Pixi Photo Sharing API",
+    "contact": {
+      "email": "nicole.becher@owasp.org"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8090/"
+    },
+    {
+      "url": "https://localhost:4443/"
+    }
+  ],
+  "tags": [
+    {
+      "name": "admins",
+      "description": "Secured Admin-only calls"
+    },
+    {
+      "name": "users",
+      "description": "Operations available to regular, logged in users"
+    },
+    {
+      "name": "anyone",
+      "description": "Operations available to anyone"
+    }
+  ],
+  "paths": {
+    "/api/register": {
+      "get": {
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "put": {
+        "description": "",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsersItem"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "head": {
+        "description": "",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsersItem"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "successfully registered, token received",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ABC"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ABC": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
+            "type": "string"
+          },
+          "token": {
+            "maxLength": 700,
+            "pattern": "^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})",
+            "type": "string"
+          }
+        }
+      },
+      "UsersItem": {
+        "required": [
+          "pass",
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "user": {
+            "maxLength": 50,
+            "minLength": 4,
+            "pattern": "^([a-zA-Z0-9_\\-\\.]+)(@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5}))?$",
+            "type": "string",
+            "format": "email",
+            "example": "email@email.com"
+          },
+          "pass": {
+            "maxLength": 12,
+            "minLength": 4,
+            "pattern": "^[a-zA-Z0-9&@#!?]{4,12}$",
+            "type": "string",
+            "format": "string",
+            "example": "p@ssword1"
+          },
+          "name": {
+            "maxLength": 50,
+            "minLength": 5,
+            "pattern": "(^[\\w\\s\\.]{5,50}$)",
+            "type": "string",
+            "example": "Johnny Appleseed"
+          },
+          "is_admin": {
+            "type": "boolean",
+            "description": "is admin"
+          },
+          "account_balance": {
+            "maximum": 1000,
+            "minimum": 0,
+            "type": "number",
+            "description": "remaining balance",
+            "format": "float"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "access-token": {
+        "type": "apiKey",
+        "description": "Most operations need to pass a user token retrieved calling /api/login",
+        "name": "x-access-token",
+        "in": "header"
+      }
+    }
+  }
+}

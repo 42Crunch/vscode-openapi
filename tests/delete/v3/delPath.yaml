@@ -1,0 +1,93 @@
+---
+openapi: 3.0.1
+info:
+  title: Pixi App API
+  description: Pixi Photo Sharing API
+  contact:
+    email: nicole.becher@owasp.org
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+- url: https://localhost:4443/
+tags:
+- name: admins
+  description: Secured Admin-only calls
+paths:
+  "/api/register":
+    post:
+      tags:
+      - anyone
+      summary: register for an account and receive token
+      description: user supplies email and password to register and receives a json
+        web token.
+      operationId: register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UserRegistrationData"
+        required: true
+      responses:
+        '200':
+          description: successfully registered, token received
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/PrevUnusedSchema"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/NextUnusedSchema"
+      x-42c-no-authentication: true
+      x-42c-sensitivity: 5
+      x-codegen-request-body-name: user
+    get:
+      description: ''
+      parameters: []
+      responses:
+        '200':
+          description: OK
+components:
+  schemas:
+    PrevUnusedSchema:
+      type: object
+      properties:
+        message:
+          maxLength: 255
+          minLength: 1
+          pattern: "^[\\w\\s\\.\\-@:,;]{1,255}$"
+          type: string
+    UserRegistrationData:
+      required:
+      - pass
+      - user
+      type: object
+      properties:
+        user:
+          maxLength: 50
+          minLength: 4
+          pattern: "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
+          type: string
+          format: email
+        pass:
+          maxLength: 12
+          minLength: 4
+          pattern: "^[a-zA-Z0-9&@#!?]{4,12}$"
+          type: string
+    NextUnusedSchema:
+      required:
+      - pass
+      - user
+      type: object
+      properties:
+        user:
+          maxLength: 50
+          minLength: 4
+          pattern: "^([a-zA-Z0-9_\\-\\.]+)(@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5}))?$"
+          type: string
+          format: email
+          example: email@email.com

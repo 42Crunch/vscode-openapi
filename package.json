@@ -249,6 +249,14 @@
           "group": "inline"
         },
         {
+          "command": "openapi.deletePath",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == path"
+        },
+        {
+          "command": "openapi.deleteOperation",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == operation"
+        },
+        {
           "command": "openapi.platform.createCollection",
           "when": "view == platformExplorer && viewItem == collections"
         },
@@ -583,6 +591,16 @@
         "command": "openapi.addOperation",
         "enablement": "view == openapiOutline",
         "title": "Add operation"
+      },
+      {
+        "command": "openapi.deleteOperation",
+        "enablement": "view == openapiOutline",
+        "title": "Delete operation"
+      },
+      {
+        "command": "openapi.deletePath",
+        "enablement": "view == openapiOutline",
+        "title": "Delete path"
       },
       {
         "command": "openapi.createNewTwo",

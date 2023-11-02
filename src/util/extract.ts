@@ -7,6 +7,17 @@ import { parseJsonPointer, Path, simpleClone } from "@xliic/preserving-json-yaml
 import { HttpMethod } from "@xliic/common/http";
 import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
 
+export function walk(current: any, parent: any, path: string[], visitor: any) {
+  for (const key of Object.keys(current)) {
+    const value = current[key];
+    if (typeof value === "object" && value !== null) {
+      walk(value, current, [key, ...path], visitor);
+    } else {
+      visitor(parent, path, key, value);
+    }
+  }
+}
+
 export function extractSinglePath(path: string, oas: any): BundledSwaggerOrOasSpec {
   const visited = new Set<string>();
   crawl(oas, oas["paths"][path], visited);
