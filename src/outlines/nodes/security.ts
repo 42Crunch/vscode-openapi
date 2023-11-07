@@ -2,14 +2,13 @@ import * as vscode from "vscode";
 
 import { AbstractOutlineNode, OutlineNode } from "./base";
 import { SimpleNode } from "./simple";
-import { encodeJsonPointerSegment } from "../../pointer";
 
 export class SecurityNode extends AbstractOutlineNode {
   constructor(parent: OutlineNode, node: any) {
     super(
       parent,
       "/security",
-      "security",
+      "Security",
       vscode.TreeItemCollapsibleState.Expanded,
       node,
       parent.context

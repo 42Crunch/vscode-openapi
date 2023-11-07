@@ -8,7 +8,7 @@ export class PathsNode extends AbstractOutlineNode {
     super(
       parent,
       "/paths",
-      "paths",
+      "Paths",
       vscode.TreeItemCollapsibleState.Expanded,
       node,
       parent.context

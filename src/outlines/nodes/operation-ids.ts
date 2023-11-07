@@ -10,7 +10,7 @@ export class OperationIdsNode extends AbstractOutlineNode {
     super(
       parent,
       "",
-      "operation id",
+      "Operation ID",
       vscode.TreeItemCollapsibleState.Expanded,
       node,
       parent.context

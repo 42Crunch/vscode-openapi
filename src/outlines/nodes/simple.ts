@@ -10,7 +10,7 @@ const icons: any = {
   links: "link-simple.svg",
   callbacks: "phone-arrow-up-right.svg",
   examples: "message-code.svg",
-  responses: "arrow-right-from-bracket.svg",
+  responses: "arrow-left-from-bracket.svg",
 };
 
 const contextValues: any = {

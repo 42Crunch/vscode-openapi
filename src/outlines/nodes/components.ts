@@ -8,7 +8,7 @@ export class ComponentsNode extends AbstractOutlineNode {
     super(
       parent,
       "/components",
-      "components",
+      "Components",
       vscode.TreeItemCollapsibleState.Expanded,
       node,
       parent.context

@@ -8,7 +8,7 @@ export class ServersNode extends AbstractOutlineNode {
     super(
       parent,
       "/servers",
-      "servers",
+      "Servers",
       vscode.TreeItemCollapsibleState.Expanded,
       node,
       parent.context

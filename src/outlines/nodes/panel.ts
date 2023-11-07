@@ -6,7 +6,7 @@ import { SimpleNode } from "./simple";
 export const panelsVer2 = ["responses", "parameters", "definitions", "securityDefinitions"];
 
 const icons: any = {
-  responses: "arrow-right-from-bracket.svg",
+  responses: "arrow-left-from-bracket.svg",
   parameters: "sliders.svg",
   securityDefinitions: "shield-halved.svg",
 };
@@ -16,7 +16,7 @@ export class PanelNode extends AbstractOutlineNode {
     super(
       parent,
       "/" + key,
-      key === "securityDefinitions" ? "security definitions" : key,
+      key === "securityDefinitions" ? "Security Definitions" : key,
       vscode.TreeItemCollapsibleState.Expanded,
       node,
       parent.context
