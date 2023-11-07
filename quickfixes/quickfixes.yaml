@@ -1,19 +1,5 @@
 fixes:
   - problem:
-      - global-security
-      - v3-global-security
-    title: Add 'security' property
-    type: insert
-    fix:
-      security:
-        - securityRequirement: []
-    parameters:
-      - name: name
-        path: /security/0/securityRequirement
-        type: key
-        source: securitySchemes
-
-  - problem:
       - parameter-array-maxitems
       - response-header-array-maxitems
       - schema-request-array-maxitems
