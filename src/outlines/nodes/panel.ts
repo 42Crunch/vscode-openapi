@@ -8,7 +8,15 @@ export const panelsVer2 = ["responses", "parameters", "definitions", "securityDe
 const icons: any = {
   responses: "arrow-left-from-bracket.svg",
   parameters: "sliders.svg",
+  definitions: "sitemap.svg",
   securityDefinitions: "shield-halved.svg",
+};
+
+const titles: any = {
+  parameters: "Parameters",
+  responses: "Responses",
+  definitions: "Definitions",
+  securityDefinitions: "Security Definition",
 };
 
 export class PanelNode extends AbstractOutlineNode {
@@ -16,7 +24,7 @@ export class PanelNode extends AbstractOutlineNode {
     super(
       parent,
       "/" + key,
-      key === "securityDefinitions" ? "Security Definitions" : key,
+      capitalize(key),
       vscode.TreeItemCollapsibleState.Expanded,
       node,
       parent.context
@@ -31,4 +39,8 @@ export class PanelNode extends AbstractOutlineNode {
       (key, pointer, node) => new SimpleNode(this, pointer, key, node, 0)
     );
   }
+}
+
+function capitalize(title: string): string {
+  return title in titles ? titles[title] : title;
 }

@@ -11,6 +11,7 @@ const icons: any = {
   callbacks: "phone-arrow-up-right.svg",
   examples: "message-code.svg",
   responses: "arrow-left-from-bracket.svg",
+  parameters: "sliders.svg",
 };
 
 const contextValues: any = {
@@ -20,6 +21,13 @@ const contextValues: any = {
   security: "securityItem",
   securityDefinitions: "securityDefinition",
   servers: "server",
+};
+
+const titles: any = {
+  parameters: "Parameters",
+  responses: "Responses",
+  securitySchemes: "Security Schemes",
+  schemas: "Schemas",
 };
 
 export class SimpleNode extends AbstractOutlineNode {
@@ -37,7 +45,7 @@ export class SimpleNode extends AbstractOutlineNode {
     super(
       parent,
       pointer,
-      key,
+      capitalize(key, pointer),
       depth == 0 ? vscode.TreeItemCollapsibleState.None : vscode.TreeItemCollapsibleState.Collapsed,
       node,
       parent.context
@@ -80,4 +88,11 @@ export class SimpleNode extends AbstractOutlineNode {
     }
     return res;
   }
+}
+
+function capitalize(title: string, pointer: string): string {
+  if (pointer.startsWith("/paths")) {
+    return title;
+  }
+  return title in titles ? titles[title] : title;
 }
