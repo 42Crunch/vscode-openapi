@@ -9,7 +9,7 @@ export class ServersNode extends AbstractOutlineNode {
       parent,
       "/servers",
       "Servers",
-      vscode.TreeItemCollapsibleState.Expanded,
+      vscode.TreeItemCollapsibleState.Collapsed,
       node,
       parent.context
     );

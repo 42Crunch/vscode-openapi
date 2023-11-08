@@ -9,11 +9,11 @@ export class SecurityNode extends AbstractOutlineNode {
       parent,
       "/security",
       "Security",
-      vscode.TreeItemCollapsibleState.Expanded,
+      vscode.TreeItemCollapsibleState.Collapsed,
       node,
       parent.context
     );
-    this.icon = "shield-check.svg";
+    this.icon = "key.svg";
     this.contextValue = "security";
     this.searchable = false;
   }

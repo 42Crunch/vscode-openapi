@@ -25,7 +25,7 @@ export class ComponentsNode extends AbstractOutlineNode {
       node,
       parent.context
     );
-    this.icon = "gear.svg";
+    this.icon = "box.svg";
     this.contextValue = "components";
     this.searchable = false;
   }

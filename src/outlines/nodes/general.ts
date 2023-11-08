@@ -21,7 +21,7 @@ const targetsVer3 = ["openapi", "info", "externalDocs"];
 
 export class GeneralNode extends AbstractOutlineNode {
   constructor(parent: OutlineNode, node: any) {
-    super(parent, "", "General", vscode.TreeItemCollapsibleState.Expanded, node, parent.context);
+    super(parent, "", "General", vscode.TreeItemCollapsibleState.Collapsed, node, parent.context);
     this.icon = "bars.svg";
     this.contextValue = "general";
     this.searchable = false;
