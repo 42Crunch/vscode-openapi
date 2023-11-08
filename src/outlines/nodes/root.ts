@@ -26,23 +26,14 @@ export class RootNode extends AbstractOutlineNode {
       res.push(new GeneralNode(this, this.node));
       res.push(new TagsNode(this, this.node["tags"], this.node["paths"]));
       res.push(new OperationIdsNode(this, this.node["paths"]));
-      for (const key of Object.keys(this.node)) {
-        if (key === "paths") {
-          res.push(new PathsNode(this, this.node[key]));
-        } else if (key === "security") {
-          res.push(new SecurityNode(this, this.node[key]));
-        } else {
-          if (this.context.version == OpenApiVersion.V3) {
-            if (key === "servers") {
-              res.push(new ServersNode(this, this.node[key]));
-            } else if (key === "components") {
-              res.push(new ComponentsNode(this, this.node[key]));
-            }
-          } else {
-            if (panelsVer2.includes(key)) {
-              res.push(new PanelNode(this, key, this.node[key]));
-            }
-          }
+      res.push(new PathsNode(this, this.node["paths"]));
+      res.push(new SecurityNode(this, this.node["security"]));
+      if (this.context.version == OpenApiVersion.V3) {
+        res.push(new ServersNode(this, this.node["servers"]));
+        res.push(new ComponentsNode(this, this.node["components"]));
+      } else {
+        for (const key of panelsVer2) {
+          res.push(new PanelNode(this, key, this.node[key]));
         }
       }
     }
