@@ -3,6 +3,18 @@ import * as vscode from "vscode";
 import { AbstractOutlineNode, OutlineNode } from "./base";
 import { SimpleNode } from "./simple";
 
+const subComponents = new Set([
+  "schemas",
+  "responses",
+  "parameters",
+  "examples",
+  "requestBodies",
+  "headers",
+  "securitySchemes",
+  "links",
+  "callbacks",
+]);
+
 export class ComponentsNode extends AbstractOutlineNode {
   constructor(parent: OutlineNode, node: any) {
     super(
@@ -19,8 +31,10 @@ export class ComponentsNode extends AbstractOutlineNode {
   }
 
   getChildren(): OutlineNode[] {
-    return this.getChildrenByKey(
-      (key, pointer, node) => new SimpleNode(this, pointer, key, node, 1)
-    );
+    return this.getChildrenByKey((key, pointer, node) => {
+      if (subComponents.has(key)) {
+        return new SimpleNode(this, pointer, key, node, 1);
+      }
+    });
   }
 }

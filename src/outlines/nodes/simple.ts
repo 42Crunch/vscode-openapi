@@ -12,6 +12,7 @@ const icons: any = {
   examples: "message-code.svg",
   responses: "arrow-left-from-bracket.svg",
   parameters: "sliders.svg",
+  requestBodies: "arrow-right-to-bracket.svg",
 };
 
 const contextValues: any = {
@@ -28,6 +29,11 @@ const titles: any = {
   responses: "Responses",
   securitySchemes: "Security Schemes",
   schemas: "Schemas",
+  requestBodies: "Request Bodies",
+  headers: "Headers",
+  links: "Links",
+  callbacks: "Callbacks",
+  examples: "Examples",
 };
 
 export class SimpleNode extends AbstractOutlineNode {
