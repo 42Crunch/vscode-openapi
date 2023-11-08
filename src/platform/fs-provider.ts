@@ -53,7 +53,7 @@ export class PlatformFS implements vscode.FileSystemProvider {
   ): Promise<void> {
     const apiId = getApiId(uri)!;
     if (this.store.readonlyApis.has(apiId)) {
-      throw new Error("Readonly file");
+      throw vscode.FileSystemError.NoPermissions("Readonly file");
     }
 
     const proceed = await vscode.commands.executeCommand(
