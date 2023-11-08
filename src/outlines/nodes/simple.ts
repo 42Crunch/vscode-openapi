@@ -59,15 +59,7 @@ export class SimpleNode extends AbstractOutlineNode {
     this.icon = icons[key];
     this.depth = depth;
     this.getTitle = getTitle;
-    const parentContextValue = parent.contextValue;
-    if (parentContextValue && contextValues[parentContextValue]) {
-      this.contextValue = contextValues[parentContextValue];
-    } else if (this.context.version === OpenApiVersion.V3) {
-      const grandParent = parent.parent;
-      if (grandParent && grandParent.contextValue === "components") {
-        this.contextValue = "component";
-      }
-    }
+    this.contextValue = getContextValue(key, parent);
     this.searchable = !(parent.id === "/components" || parent.contextValue === "general");
   }
 
@@ -101,4 +93,18 @@ function capitalize(title: string, pointer: string): string {
     return title;
   }
   return title in titles ? titles[title] : title;
+}
+
+function getContextValue(key: string, parent: OutlineNode): string | undefined {
+  const parentCv = parent.contextValue;
+  if (parentCv && contextValues[parentCv]) {
+    return contextValues[parentCv];
+  }
+  if (parentCv === "components") {
+    return key;
+  }
+  if (parent?.parent?.contextValue === "components") {
+    return "component";
+  }
+  return undefined;
 }

@@ -170,31 +170,31 @@
         },
         {
           "command": "openapi.v3addComponentsParameter",
-          "when": "!openapiErrors && view == openapiOutline && viewItem == components && openapiThreeEnabled"
+          "when": "!openapiErrors && view == openapiOutline && (viewItem == components || viewItem == parameters) && openapiThreeEnabled"
         },
         {
           "command": "openapi.v3addComponentsResponse",
-          "when": "!openapiErrors && view == openapiOutline && viewItem == components && openapiThreeEnabled"
+          "when": "!openapiErrors && view == openapiOutline && (viewItem == components || viewItem == responses) && openapiThreeEnabled"
         },
         {
           "command": "openapi.v3addComponentsSchema",
-          "when": "!openapiErrors && view == openapiOutline && viewItem == components && openapiThreeEnabled"
+          "when": "!openapiErrors && view == openapiOutline && (viewItem == components || viewItem == schemas) && openapiThreeEnabled"
         },
         {
           "command": "openapi.v3addSecuritySchemeBasic",
-          "when": "!openapiErrors && view == openapiOutline && viewItem == components && openapiThreeEnabled"
+          "when": "!openapiErrors && view == openapiOutline && (viewItem == components || viewItem == securitySchemes) && openapiThreeEnabled"
         },
         {
           "command": "openapi.v3addSecuritySchemeApiKey",
-          "when": "!openapiErrors && view == openapiOutline && viewItem == components && openapiThreeEnabled"
+          "when": "!openapiErrors && view == openapiOutline && (viewItem == components || viewItem == securitySchemes) && openapiThreeEnabled"
         },
         {
           "command": "openapi.v3addSecuritySchemeJWT",
-          "when": "!openapiErrors && view == openapiOutline && viewItem == components && openapiThreeEnabled"
+          "when": "!openapiErrors && view == openapiOutline && (viewItem == components || viewItem == securitySchemes) && openapiThreeEnabled"
         },
         {
           "command": "openapi.v3addSecuritySchemeOauth2Access",
-          "when": "!openapiErrors && view == openapiOutline && viewItem == components && openapiThreeEnabled"
+          "when": "!openapiErrors && view == openapiOutline && (viewItem == components || viewItem == securitySchemes) && openapiThreeEnabled"
         },
         {
           "command": "openapi.addParameterPath",
