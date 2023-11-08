@@ -46,7 +46,7 @@ export class DocumentIndent {
 
 function getBasicIndent(document: vscode.TextDocument, root: Parsed): DocumentIndent {
   const children = getRootAsJsonNodeValue(root).getChildren();
-  if (document.languageId === "json") {
+  if (document.languageId === "json" || document.languageId === "jsonc") {
     if (children.length > 0) {
       const position = document.positionAt(children[0].getRange(root)[0]);
       const index = document.lineAt(position.line).firstNonWhitespaceCharacterIndex;
@@ -449,7 +449,7 @@ function handleParameters(context: FixContext, text: string): string {
       const source = parameterSources[parameter.source];
       const issue = parameter.fixIndex ? issues[parameter.fixIndex] : issues[0];
       cacheValues = source(issue, fix, parameter, version, bundle, document, formatMap);
-      if (cacheValues && document.languageId === "json") {
+      if (cacheValues && (document.languageId === "json" || document.languageId === "jsonc")) {
         const safeValues = [];
         cacheValues.forEach((value: any) => {
           let safeValue = value;

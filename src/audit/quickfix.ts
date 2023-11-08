@@ -232,7 +232,7 @@ async function quickFixCommand(
   const bulk = Object.keys(issuesByPointer).length > 1;
 
   const formatMap = new Map<string, DataDictionaryFormat>();
-  if (store.isConnected) {
+  if (store.isConnected()) {
     const formats = await store.getDataDictionaryFormats();
     for (const format of formats) {
       formatMap.set(format.name, format);
