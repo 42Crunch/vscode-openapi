@@ -27,7 +27,7 @@ export function registerOutlines(
 
 async function search(provider: OutlineProvider) {
   const name = await vscode.window.showInputBox({
-    prompt: "Search by name",
+    prompt: "Search OpenAPI outline",
   });
   if (name !== undefined) {
     if (name !== "") {
