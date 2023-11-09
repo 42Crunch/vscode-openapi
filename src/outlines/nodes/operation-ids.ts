@@ -11,7 +11,9 @@ export class OperationIdsNode extends AbstractOutlineNode {
       parent,
       "",
       "Operation ID",
-      vscode.TreeItemCollapsibleState.Collapsed,
+      hasOperationIds(node)
+        ? vscode.TreeItemCollapsibleState.Collapsed
+        : vscode.TreeItemCollapsibleState.None,
       node,
       parent.context
     );
@@ -45,4 +47,18 @@ export class OperationIdsNode extends AbstractOutlineNode {
     }
     return operations;
   }
+}
+
+function hasOperationIds(node: any): boolean {
+  if (node) {
+    for (const pathName of Object.keys(node)) {
+      const path = node[pathName];
+      for (const opName of Object.keys(path)) {
+        if (HTTP_METHODS.includes(opName) && path[opName]["operationId"]) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }

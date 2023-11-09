@@ -43,7 +43,10 @@ export abstract class AbstractOutlineNode implements OutlineNode {
     readonly node: any,
     readonly context: OutlineContext
   ) {
-    this.item = new vscode.TreeItem(title, collapsible);
+    this.item = new vscode.TreeItem(
+      title,
+      node == undefined ? vscode.TreeItemCollapsibleState.None : collapsible
+    );
     if (this.parent) {
       const key = getPointerLastSegment(this.id);
       this.location = getLocation(this.parent.node as Container, key);
