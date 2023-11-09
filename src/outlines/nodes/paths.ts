@@ -13,7 +13,7 @@ export class PathsNode extends AbstractOutlineNode {
       node,
       parent.context
     );
-    this.icon = "code.svg";
+    this.icon = "swap-arrows.svg";
     this.contextValue = "paths";
     this.searchable = false;
   }
