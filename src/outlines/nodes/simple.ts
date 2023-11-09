@@ -1,12 +1,11 @@
 import * as vscode from "vscode";
 
 import { AbstractOutlineNode, OutlineNode } from "./base";
-import { OpenApiVersion } from "../../types";
 
 const icons: any = {
   schemas: "sitemap.svg",
   headers: "line-columns.svg",
-  securitySchemes: "shield-halved.svg",
+  securitySchemes: "shield-keyhole.svg",
   links: "link-simple.svg",
   callbacks: "phone-arrow-up-right.svg",
   examples: "message-code.svg",

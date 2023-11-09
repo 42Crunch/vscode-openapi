@@ -31,7 +31,7 @@ export class TagsNode extends AbstractOutlineNode {
   constructor(parent: OutlineNode, tags: any, paths: any) {
     super(parent, "/tags", "Tags", vscode.TreeItemCollapsibleState.Collapsed, tags, parent.context);
     this.paths = paths;
-    this.icon = "tag.svg";
+    this.icon = "tags.svg";
     this.searchable = false;
   }
 
