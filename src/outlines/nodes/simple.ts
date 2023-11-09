@@ -9,9 +9,9 @@ const icons: any = {
   links: "link-simple.svg",
   callbacks: "phone-arrow-up-right.svg",
   examples: "message-code.svg",
-  responses: "arrow-left-from-bracket.svg",
+  responses: "response.svg",
   parameters: "sliders.svg",
-  requestBodies: "arrow-right-to-bracket.svg",
+  requestBodies: "request.svg",
 };
 
 const contextValues: any = {
