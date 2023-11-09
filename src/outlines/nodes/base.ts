@@ -19,11 +19,13 @@ export interface OutlineNode {
   readonly location: Location | undefined;
   readonly context: OutlineContext;
   readonly searchable: boolean;
+  skipDeepSearch: boolean;
 
   getChildren(): OutlineNode[];
+  getAndFilterChildren(): OutlineNode[];
   getOffset(): number;
   getLabel(): string;
-  passSearch(value: string): boolean;
+  passFilter(value: string): boolean;
 }
 
 export const HTTP_METHODS = ["get", "put", "post", "delete", "options", "head", "patch", "trace"];
@@ -34,6 +36,7 @@ export abstract class AbstractOutlineNode implements OutlineNode {
   location: Location | undefined;
   icon: { dark: string; light: string } | string | undefined;
   searchable: boolean; // false if not affected by search (always visible)
+  skipDeepSearch: boolean;
 
   constructor(
     readonly parent: OutlineNode | undefined,
@@ -53,24 +56,39 @@ export abstract class AbstractOutlineNode implements OutlineNode {
     }
     this.item.command = this.getCommand();
     this.searchable = true;
+    this.skipDeepSearch = parent?.skipDeepSearch || false;
   }
 
   getChildren(): OutlineNode[] {
     return [];
   }
 
-  // This recursive function helps to understand if this node contains any descendant that meets search criteria
-  passSearch(value: string): boolean {
-    for (const child of this.getChildren()) {
-      if (
-        !child.searchable ||
-        child.getLabel().toLowerCase().includes(value) ||
-        child.passSearch(value)
-      ) {
-        return true;
+  getAndFilterChildren(): OutlineNode[] {
+    const children = this.getChildren();
+    const searchValue = this.context.search?.toLowerCase();
+    if (!searchValue || this.parent?.skipDeepSearch) {
+      return children;
+    }
+    const res = [];
+    for (const child of children) {
+      // Pass filtering if node's passFilter API returns true
+      if (child.passFilter(searchValue)) {
+        res.push(child);
+        if (child.contextValue == "path" || child.contextValue == "operation") {
+          child.skipDeepSearch = true;
+        }
+        // or node has a descendant that meets search criteria
+      } else if (child.getAndFilterChildren().length > 0) {
+        res.push(child);
       }
     }
-    return false;
+    return res;
+  }
+
+  passFilter(value: string): boolean {
+    // Pass filtering if node is configured as not searchable (paths, components, ...)
+    // or node's tree title includes search value
+    return !this.searchable || this.getLabel().toLowerCase().includes(value);
   }
 
   getCommand(): vscode.Command | undefined {

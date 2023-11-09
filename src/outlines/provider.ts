@@ -108,7 +108,7 @@ export class OutlineProvider implements vscode.TreeDataProvider<OutlineNode> {
 
   getChildren(node?: OutlineNode): OutlineNode[] {
     if (node) {
-      const children = this.applySearch(node.getChildren());
+      const children = node.getAndFilterChildren();
       if (children.length > 2) {
         return this.sortChildren(children);
       }
@@ -118,28 +118,6 @@ export class OutlineProvider implements vscode.TreeDataProvider<OutlineNode> {
       return this.sortRootChildren(this.rootNode.getChildren());
     }
     return [];
-  }
-
-  applySearch(nodes: OutlineNode[]): OutlineNode[] {
-    const searchValue = this.rootNode?.context.search?.toLowerCase();
-    if (!searchValue) {
-      return nodes;
-    }
-    const res = [];
-    for (const node of nodes) {
-      // During the search we show node if:
-      // 1 It is not searchable (like paths, components, ...)
-      // 2 Its tree title includes search value
-      // 3 It has a descendant that meets search criteria
-      if (
-        !node.searchable ||
-        node.getLabel().toLowerCase().includes(searchValue) ||
-        node.passSearch(searchValue)
-      ) {
-        res.push(node);
-      }
-    }
-    return res;
   }
 
   sortChildren(children: OutlineNode[]) {
