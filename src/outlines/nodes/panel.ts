@@ -16,7 +16,7 @@ const titles: any = {
   parameters: "Parameters",
   responses: "Responses",
   definitions: "Definitions",
-  securityDefinitions: "Security Definition",
+  securityDefinitions: "Security Definitions",
 };
 
 export class PanelNode extends AbstractOutlineNode {
