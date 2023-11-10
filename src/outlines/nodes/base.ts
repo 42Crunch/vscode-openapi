@@ -46,10 +46,7 @@ export abstract class AbstractOutlineNode implements OutlineNode {
     readonly node: any,
     readonly context: OutlineContext
   ) {
-    this.item = new vscode.TreeItem(
-      title,
-      node == undefined ? vscode.TreeItemCollapsibleState.None : collapsible
-    );
+    this.item = new vscode.TreeItem(title, getCollapsibleState(parent, id, collapsible, node));
     if (this.parent) {
       const key = getPointerLastSegment(this.id);
       this.location = getLocation(this.parent.node as Container, key);
@@ -168,4 +165,16 @@ export abstract class AbstractOutlineNode implements OutlineNode {
     }
     return res;
   }
+}
+
+function getCollapsibleState(
+  parent: OutlineNode | undefined,
+  id: string,
+  defaultState: vscode.TreeItemCollapsibleState,
+  node: any
+): vscode.TreeItemCollapsibleState {
+  if (id === "/tags" || parent?.id === "/tags") {
+    return defaultState;
+  }
+  return node === undefined ? vscode.TreeItemCollapsibleState.None : defaultState;
 }

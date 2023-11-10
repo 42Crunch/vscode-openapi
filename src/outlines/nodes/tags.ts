@@ -29,7 +29,16 @@ export class TagsNode extends AbstractOutlineNode {
   readonly paths: any[];
 
   constructor(parent: OutlineNode, tags: any, paths: any) {
-    super(parent, "/tags", "Tags", vscode.TreeItemCollapsibleState.Collapsed, tags, parent.context);
+    super(
+      parent,
+      "/tags",
+      "Tags",
+      hasTags(tags, paths)
+        ? vscode.TreeItemCollapsibleState.Collapsed
+        : vscode.TreeItemCollapsibleState.None,
+      tags,
+      parent.context
+    );
     this.paths = paths;
     this.icon = "tags.svg";
     this.searchable = false;
@@ -170,4 +179,24 @@ function getUniqueName(path: string, method: string, operation: any): UniqueOper
     method,
     path,
   };
+}
+
+function hasTags(tags: any, paths: any): boolean {
+  if (tags && Array.isArray(tags) && tags.length > 0) {
+    return true;
+  }
+  if (paths) {
+    for (const [, path] of Object.entries(paths)) {
+      for (const [opName, operation] of Object.entries(path as any)) {
+        if (!HTTP_METHODS.includes(opName)) {
+          continue;
+        }
+        const tags = (operation as any)["tags"];
+        if (Array.isArray(tags) && tags.length > 0) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }
