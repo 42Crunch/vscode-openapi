@@ -46,7 +46,13 @@ export abstract class AbstractOutlineNode implements OutlineNode {
     readonly node: any,
     readonly context: OutlineContext
   ) {
-    this.item = new vscode.TreeItem(title, getCollapsibleState(parent, id, collapsible, node));
+    this.item = new vscode.TreeItem(
+      {
+        label: title,
+        highlights: getHighlights(id, title, context),
+      },
+      getCollapsibleState(parent, id, collapsible, node)
+    );
     if (this.parent) {
       const key = getPointerLastSegment(this.id);
       this.location = getLocation(this.parent.node as Container, key);
@@ -123,7 +129,10 @@ export abstract class AbstractOutlineNode implements OutlineNode {
   }
 
   getLabel(): string {
-    return this.item.label as string;
+    if (typeof this.item.label === "string") {
+      return this.item.label as string;
+    }
+    return this.item.label?.label as string;
   }
 
   nextPointer(segment: string | number): string {
@@ -177,4 +186,20 @@ function getCollapsibleState(
     return defaultState;
   }
   return node === undefined ? vscode.TreeItemCollapsibleState.None : defaultState;
+}
+
+function getHighlights(id: string, title: string, context: OutlineContext): [number, number][] {
+  if (id === "oultine-search") {
+    return [];
+  }
+  const searchValue = context.search?.toLowerCase();
+  if (!searchValue) {
+    return [];
+  }
+  let i = -1;
+  const ranges: [number, number][] = [];
+  while ((i = title.toLowerCase().indexOf(searchValue, i + 1)) != -1) {
+    ranges.push([i, i + searchValue.length]);
+  }
+  return ranges;
 }
