@@ -125,11 +125,6 @@
           "group": "navigation"
         },
         {
-          "command": "openapi.searchPlatformExplorerOutline",
-          "when": "view == platformExplorer",
-          "group": "navigation"
-        },
-        {
           "command": "openapi.searchOutline",
           "when": "view == openapiOutline",
           "group": "navigation"
@@ -409,11 +404,6 @@
           "light": "resources/light/refresh.svg",
           "dark": "resources/dark/refresh.svg"
         }
-      },
-      {
-        "command": "openapi.searchPlatformExplorerOutline",
-        "title": "Search",
-        "icon": "$(search-view-icon)"
       },
       {
         "command": "openapi.searchOutline",
