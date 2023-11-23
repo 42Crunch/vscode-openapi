@@ -211,6 +211,7 @@ const ExpectedResponse = styled.div`
   align-items: center;
   > div {
     width: 60px;
+    border: 1px solid var(${ThemeColorVariables.dropdownBorder});
   }
 `;
 
