@@ -11,7 +11,6 @@ import { GripVertical, TrashCan, TriangleExclamation } from "../../../icons";
 import Form from "../../../new-components/Form";
 import { Menu, MenuItem } from "../../../new-components/Menu";
 import { TabContainer } from "../../../new-components/Tabs";
-import Input from "../../../new-components/fields/Input";
 import Switch from "../../../new-components/fields/Switch";
 import ResponseProcessing from "../components/operation/ResponseProcessing";
 import Environment from "../components/scenario/Environment";
@@ -19,6 +18,8 @@ import { OperationResult } from "../components/scenario/types";
 import { unwrapPlaybookStage, wrapPlaybookStage } from "../components/scenario/util";
 import MissingVariables from "./MissingVariables";
 import CollapsibleCard from "../components/CollapsibleCard";
+import DownshiftSelect from "../../../new-components/fields/DownshiftSelect";
+import { SelectOption } from "../../../new-components/DownshiftSelect";
 
 export default function Stage({
   stage,
@@ -49,9 +50,10 @@ export default function Stage({
     }),
   }));
 
-  const refTargetMissing =
-    (stage.ref.type === "operation" ? operations[stage.ref.id] : requests[stage.ref.id]) ===
-    undefined;
+  const refTarget =
+    stage.ref.type === "operation" ? operations[stage.ref.id] : requests[stage.ref.id];
+
+  const expectedResponseOptions: SelectOption<string>[] = getExpectedResponseOptions(refTarget);
 
   const availableVariables = [
     ...DynamicVariableNames,
@@ -88,7 +90,7 @@ export default function Stage({
                   <TriangleExclamation />
                 </Error>
               )}
-              {refTargetMissing && (
+              {refTarget === undefined && (
                 <Error>
                   <TriangleExclamation />
                   {`${stage.ref.type}/${stage.ref.id} is missing`}
@@ -96,7 +98,7 @@ export default function Stage({
               )}
               <ExpectedResponse>
                 <span>Expected Response</span>
-                <Input name="expectedResponse" />
+                <DownshiftSelect name="expectedResponse" options={expectedResponseOptions} />
               </ExpectedResponse>
               {fuzzing && (
                 <Fuzzing>
@@ -162,6 +164,14 @@ function getVariableNamesFromEnvStack(env: PlaybookEnvStack): string[] {
   return variables;
 }
 
+function getExpectedResponseOptions(
+  target: playbook.Operation | playbook.StageContent | playbook.ExternalStageContent
+): SelectOption<string>[] {
+  const responses = "scenarios" in target ? target.request.responses : target.responses;
+  const options = Object.keys(responses || {}).map((key) => ({ value: key, label: key }));
+  return [{ label: "\u00A0", value: "" }, ...options];
+}
+
 const Container = styled.div`
   background-color: var(${ThemeColorVariables.background});
   .grab,
@@ -199,18 +209,8 @@ const ExpectedResponse = styled.div`
   flex-direction: row;
   gap: 4px;
   align-items: center;
-  > input {
-    width: 30px;
-    background: transparent;
-    border: 1px solid var(${ThemeColorVariables.border});
-    padding: 2px;
-    color: var(${ThemeColorVariables.foreground});
-    &::placeholder {
-      color: var(${ThemeColorVariables.inputPlaceholderForeground});
-    }
-    &:focus {
-      outline: none;
-    }
+  > div {
+    width: 60px;
   }
 `;
 
