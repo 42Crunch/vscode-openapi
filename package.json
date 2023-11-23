@@ -682,9 +682,9 @@
             "cli"
           ],
           "enumDescriptions": [
-            "Use Docker to execute 42Crunch API Conformance Scan",
-            "Use Scand-Manager to execute 42Crunch API Conformance Scan",
-            "Use AST CLI binary to execute 42Crunch API Conformance Scan"
+            "Use Docker to run 42Crunch API Conformance Scan",
+            "Use Scand-Manager to run 42Crunch API Conformance Scan",
+            "Use 42Crunch CLI to run Conformance Scan and Security Audit"
           ]
         },
         "openapi.docker": {
