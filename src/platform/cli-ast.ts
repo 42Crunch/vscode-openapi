@@ -33,6 +33,7 @@ import { getAnondCredentials, getPlatformCredentials, hasCredentials } from "../
 import { EnvStore } from "../envstore";
 import { Logger } from "./types";
 import { loadConfig } from "../util/config";
+import { delay } from "../time-util";
 
 const asyncExecFile = promisify(execFile);
 
@@ -104,6 +105,7 @@ export async function ensureCliDownloaded(
     return true;
   }
 
+  await delay(100); // workaround for #133073
   const answer = await vscode.window.showInformationMessage(
     "42Crunch CLI is not found, download?",
     { modal: true },

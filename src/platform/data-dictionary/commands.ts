@@ -15,6 +15,7 @@ import { replaceObject } from "../../edits/replace";
 import { DataDictionaryFormat, PlatformStore } from "../stores/platform-store";
 import { DataDictionaryDiagnostic, OpenApiVersion } from "../../types";
 import { getOpenApiVersion } from "../../parsers";
+import { delay } from "../../time-util";
 
 export default (
   cache: Cache,
@@ -148,6 +149,7 @@ const schemaProps = [
 async function shouldFixDataDictionaryErrros(): Promise<"fix" | "skip" | "cancel"> {
   const config = configuration.get<"ask" | "always" | "never">("dataDictionaryPreAuditFix");
 
+  await delay(100); // workaround for #133073
   if (config === "ask") {
     const choice = await vscode.window.showInformationMessage(
       "Found Data Dictionary mismatch, update the document with Data Dictionary properties?",

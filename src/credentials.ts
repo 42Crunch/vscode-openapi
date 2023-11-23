@@ -3,6 +3,7 @@ import { requestToken } from "./audit/client";
 import { Configuration } from "./configuration";
 import { PlatformConnection } from "./platform/types";
 import { deriveServices } from "./util/config";
+import { delay } from "./time-util";
 
 export async function hasCredentials(
   configuration: Configuration,
@@ -83,6 +84,7 @@ export async function configureCredentials(
 }
 
 async function chooseNewOrExisting(): Promise<"existing" | "new" | undefined> {
+  await delay(100); // workaround for #133073
   const options = [
     "I have an existing 42Crunch Platform account",
     "I'm a new user, please email me the token",
@@ -207,8 +209,4 @@ export async function configurePlatformUser(
   await secrets.store("platformApiToken", token);
 
   return true;
-}
-
-async function delay(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
