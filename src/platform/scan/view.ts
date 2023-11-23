@@ -251,7 +251,7 @@ async function runScan(
           await offerUpgrade();
           return;
         } else {
-          throw new Error(`Unexpected error running CLI Scan: ${error}`);
+          throw new Error(`Unexpected error running Conformance Scan: ${JSON.stringify(error)}`);
         }
       }
 

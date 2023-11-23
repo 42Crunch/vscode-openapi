@@ -43,7 +43,7 @@ export async function runCliAudit(
       await offerUpgrade();
       return;
     } else {
-      throw new Error(`Unexpected error running CLI Audit: ${error}`);
+      throw new Error(`Unexpected error running Security Audit: ${JSON.stringify(error)}`);
     }
   }
 
