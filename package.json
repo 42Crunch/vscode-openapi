@@ -79,84 +79,9 @@
       ],
       "openapi-explorer": [
         {
-          "id": "openapiTwoSpecOutline",
-          "name": "General",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiTwoPathOutline",
-          "name": "Paths",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiTwoTagsOutline",
-          "name": "Tags",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiTwoOperationIdOutline",
-          "name": "Operation ID",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiTwoParametersOutline",
-          "name": "Parameters",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiTwoResponsesOutline",
-          "name": "Responses",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiTwoDefinitionOutline",
-          "name": "Definitions",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiTwoSecurityOutline",
-          "name": "Security",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiTwoSecurityDefinitionOutline",
-          "name": "Security Definitions",
-          "when": "openapiTwoEnabled"
-        },
-        {
-          "id": "openapiThreeSpecOutline",
-          "name": "General",
-          "when": "openapiThreeEnabled"
-        },
-        {
-          "id": "openapiThreePathOutline",
-          "name": "Paths",
-          "when": "openapiThreeEnabled"
-        },
-        {
-          "id": "openapiThreeTagsOutline",
-          "name": "Tags",
-          "when": "openapiThreeEnabled"
-        },
-        {
-          "id": "openapiThreeOperationIdOutline",
-          "name": "Operation ID",
-          "when": "openapiThreeEnabled"
-        },
-        {
-          "id": "openapiThreeServersOutline",
-          "name": "Servers",
-          "when": "openapiThreeEnabled"
-        },
-        {
-          "id": "openapiThreeComponentsOutline",
-          "name": "Components",
-          "when": "openapiThreeEnabled"
-        },
-        {
-          "id": "openapiThreeSecurityOutline",
-          "name": "Security",
-          "when": "openapiThreeEnabled"
+          "id": "openapiOutline",
+          "name": "Outline",
+          "when": "openapiThreeEnabled || openapiTwoEnabled"
         },
         {
           "id": "openapiNotSelectedOutline",
@@ -195,157 +120,150 @@
       ],
       "view/title": [
         {
-          "command": "openapi.addHost",
-          "when": "!openapiErrors && view == openapiTwoSpecOutline && openapiMissingHost"
-        },
-        {
-          "command": "openapi.addBasePath",
-          "when": "!openapiErrors && view == openapiTwoSpecOutline && openapiMissingBasePath"
-        },
-        {
-          "command": "openapi.addInfo",
-          "when": "!openapiErrors && view == openapiTwoSpecOutline && openapiMissingInfo"
-        },
-        {
-          "command": "openapi.addSecurity",
-          "when": "!openapiErrors && view == openapiTwoSecurityOutline"
-        },
-        {
-          "command": "openapi.addSecurity",
-          "when": "!openapiErrors && view == openapiThreeSecurityOutline"
-        },
-        {
-          "command": "openapi.addPath",
-          "when": "!openapiErrors && view == openapiTwoPathOutline"
-        },
-        {
-          "command": "openapi.addPath",
-          "when": "!openapiErrors && view == openapiThreePathOutline"
-        },
-        {
-          "command": "openapi.addParameterPath",
-          "when": "!openapiErrors && view == openapiTwoParametersOutline"
-        },
-        {
-          "command": "openapi.addParameterBody",
-          "when": "!openapiErrors && view == openapiTwoParametersOutline"
-        },
-        {
-          "command": "openapi.addParameterOther",
-          "when": "!openapiErrors && view == openapiTwoParametersOutline"
-        },
-        {
-          "command": "openapi.addResponse",
-          "when": "!openapiErrors && view == openapiTwoResponsesOutline"
-        },
-        {
-          "command": "openapi.addDefinitionObject",
-          "when": "!openapiErrors && view == openapiTwoDefinitionOutline"
-        },
-        {
-          "command": "openapi.addSecurityDefinitionBasic",
-          "when": "!openapiErrors && view == openapiTwoSecurityDefinitionOutline"
-        },
-        {
-          "command": "openapi.addSecurityDefinitionOauth2Access",
-          "when": "!openapiErrors && view == openapiTwoSecurityDefinitionOutline"
-        },
-        {
-          "command": "openapi.addSecurityDefinitionApiKey",
-          "when": "!openapiErrors && view == openapiTwoSecurityDefinitionOutline"
-        },
-        {
-          "command": "openapi.v3addInfo",
-          "when": "!openapiErrors && view == openapiThreeSpecOutline && openapiMissingInfo"
-        },
-        {
-          "command": "openapi.v3addServer",
-          "when": "!openapiErrors && view == openapiThreeServersOutline"
-        },
-        {
-          "command": "openapi.v3addComponentsParameter",
-          "when": "!openapiErrors && view == openapiThreeComponentsOutline"
-        },
-        {
-          "command": "openapi.v3addComponentsResponse",
-          "when": "!openapiErrors && view == openapiThreeComponentsOutline"
-        },
-        {
-          "command": "openapi.v3addComponentsSchema",
-          "when": "!openapiErrors && view == openapiThreeComponentsOutline"
-        },
-        {
-          "command": "openapi.v3addSecuritySchemeBasic",
-          "when": "!openapiErrors && view == openapiThreeComponentsOutline"
-        },
-        {
-          "command": "openapi.v3addSecuritySchemeApiKey",
-          "when": "!openapiErrors && view == openapiThreeComponentsOutline"
-        },
-        {
-          "command": "openapi.v3addSecuritySchemeJWT",
-          "when": "!openapiErrors && view == openapiThreeComponentsOutline"
-        },
-        {
-          "command": "openapi.v3addSecuritySchemeOauth2Access",
-          "when": "!openapiErrors && view == openapiThreeComponentsOutline"
-        },
-        {
-          "command": "openapi.copySelectedTwoPathOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiTwoPathOutline"
-        },
-        {
-          "command": "openapi.copySelectedTwoParametersOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiTwoParametersOutline"
-        },
-        {
-          "command": "openapi.copySelectedTwoResponsesOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiTwoResponsesOutline"
-        },
-        {
-          "command": "openapi.copySelectedTwoDefinitionOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiTwoDefinitionOutline"
-        },
-        {
-          "command": "openapi.copySelectedTwoSecurityOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiTwoSecurityOutline"
-        },
-        {
-          "command": "openapi.copySelectedTwoSecurityDefinitionOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiTwoSecurityDefinitionOutline"
-        },
-        {
-          "command": "openapi.copySelectedThreePathOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiThreePathOutline"
-        },
-        {
-          "command": "openapi.copySelectedThreeServersOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiThreeServersOutline"
-        },
-        {
-          "command": "openapi.copySelectedThreeComponentsOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiThreeComponentsOutline"
-        },
-        {
-          "command": "openapi.copySelectedThreeSecurityOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiThreeSecurityOutline"
-        },
-        {
           "command": "openapi.platform.refreshCollections",
-          "when": "view == platformExplorer",
+          "when": "view == platformExplorer || view == openapiThreePathOutline",
+          "group": "navigation"
+        },
+        {
+          "command": "openapi.searchOutline",
+          "when": "view == openapiOutline",
           "group": "navigation"
         }
       ],
       "view/item/context": [
         {
-          "command": "openapi.addOperation",
-          "group": "inline",
-          "when": "!openapiErrors && view == openapiTwoPathOutline && viewItem == path"
+          "command": "openapi.addHost",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == general && openapiTwoEnabled && openapiMissingHost"
+        },
+        {
+          "command": "openapi.addBasePath",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == general && openapiTwoEnabled && openapiMissingBasePath"
+        },
+        {
+          "command": "openapi.addInfo",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == general && openapiTwoEnabled && openapiMissingInfo"
+        },
+        {
+          "command": "openapi.v3addInfo",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == general && openapiThreeEnabled && openapiMissingInfo"
+        },
+        {
+          "command": "openapi.addPath",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == paths"
         },
         {
           "command": "openapi.addOperation",
-          "group": "inline",
-          "when": "!openapiErrors && view == openapiThreePathOutline && viewItem == path"
+          "when": "!openapiErrors && view == openapiOutline && viewItem == path"
+        },
+        {
+          "command": "openapi.v3addServer",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == servers"
+        },
+        {
+          "command": "openapi.addSecurity",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == security"
+        },
+        {
+          "command": "openapi.v3addComponentsParameter",
+          "when": "!openapiErrors && view == openapiOutline && (viewItem == components || viewItem == parameters) && openapiThreeEnabled"
+        },
+        {
+          "command": "openapi.v3addComponentsResponse",
+          "when": "!openapiErrors && view == openapiOutline && (viewItem == components || viewItem == responses) && openapiThreeEnabled"
+        },
+        {
+          "command": "openapi.v3addComponentsSchema",
+          "when": "!openapiErrors && view == openapiOutline && (viewItem == components || viewItem == schemas) && openapiThreeEnabled"
+        },
+        {
+          "command": "openapi.v3addSecuritySchemeBasic",
+          "when": "!openapiErrors && view == openapiOutline && (viewItem == components || viewItem == securitySchemes) && openapiThreeEnabled"
+        },
+        {
+          "command": "openapi.v3addSecuritySchemeApiKey",
+          "when": "!openapiErrors && view == openapiOutline && (viewItem == components || viewItem == securitySchemes) && openapiThreeEnabled"
+        },
+        {
+          "command": "openapi.v3addSecuritySchemeJWT",
+          "when": "!openapiErrors && view == openapiOutline && (viewItem == components || viewItem == securitySchemes) && openapiThreeEnabled"
+        },
+        {
+          "command": "openapi.v3addSecuritySchemeOauth2Access",
+          "when": "!openapiErrors && view == openapiOutline && (viewItem == components || viewItem == securitySchemes) && openapiThreeEnabled"
+        },
+        {
+          "command": "openapi.addParameterPath",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == parameters && openapiTwoEnabled"
+        },
+        {
+          "command": "openapi.addParameterBody",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == parameters && openapiTwoEnabled"
+        },
+        {
+          "command": "openapi.addParameterOther",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == parameters && openapiTwoEnabled"
+        },
+        {
+          "command": "openapi.addResponse",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == responses && openapiTwoEnabled"
+        },
+        {
+          "command": "openapi.addDefinitionObject",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == definitions && openapiTwoEnabled"
+        },
+        {
+          "command": "openapi.addSecurityDefinitionBasic",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == securityDefinitions && openapiTwoEnabled"
+        },
+        {
+          "command": "openapi.addSecurityDefinitionOauth2Access",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == securityDefinitions && openapiTwoEnabled"
+        },
+        {
+          "command": "openapi.addSecurityDefinitionApiKey",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == securityDefinitions && openapiTwoEnabled"
+        },
+        {
+          "command": "openapi.copySelectedTwoPathOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == path"
+        },
+        {
+          "command": "openapi.copySelectedTwoParametersOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == parameter && openapiTwoEnabled"
+        },
+        {
+          "command": "openapi.copySelectedTwoResponsesOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == response && openapiTwoEnabled"
+        },
+        {
+          "command": "openapi.copySelectedTwoDefinitionOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == definition && openapiTwoEnabled"
+        },
+        {
+          "command": "openapi.copySelectedTwoSecurityOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == securityItem && openapiTwoEnabled"
+        },
+        {
+          "command": "openapi.copySelectedTwoSecurityDefinitionOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == securityDefinition && openapiTwoEnabled"
+        },
+        {
+          "command": "openapi.copySelectedThreeServersOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == server && openapiThreeEnabled"
+        },
+        {
+          "command": "openapi.copySelectedThreeComponentsOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == component && openapiThreeEnabled"
+        },
+        {
+          "command": "openapi.copySelectedThreeSecurityOutlineJsonReference",
+          "when": "!openapiErrors && view == openapiOutline && viewItem == securityItem && openapiThreeEnabled"
+        },
+        {
+          "command": "openapi.outline.resetSearch",
+          "title": "Remove search filter",
+          "when": "view == openapiOutline && viewItem == outlineSearch",
+          "group": "inline"
         },
         {
           "command": "openapi.platform.createCollection",
@@ -432,6 +350,12 @@
         "title": "42Crunch: Open Settings"
       },
       {
+        "command": "openapi.outline.resetSearch",
+        "title": "Remove search filter",
+        "enablement": "view == openapiOutline && viewItem == outlineSearch",
+        "icon": "$(close)"
+      },
+      {
         "command": "openapi.platform.editorDataDictionaryBulkUpdateProperties",
         "title": "42Crunch: Update Data Dictionary properties everywhere in the document",
         "enablement": "openapi.platform.credentials == present"
@@ -480,6 +404,11 @@
           "light": "resources/light/refresh.svg",
           "dark": "resources/dark/refresh.svg"
         }
+      },
+      {
+        "command": "openapi.searchOutline",
+        "title": "Search",
+        "icon": "$(search-view-icon)"
       },
       {
         "command": "openapi.platform.deleteCollection",
@@ -681,53 +610,43 @@
       },
       {
         "command": "openapi.copySelectedTwoPathOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer",
-        "enablement": "openapiTwoPathOutlineSelected"
+        "title": "OpenAPI: copy JSON Pointer"
       },
       {
         "command": "openapi.copySelectedTwoParametersOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer",
-        "enablement": "openapiTwoParametersOutlineSelected"
+        "title": "OpenAPI: copy JSON Pointer"
       },
       {
         "command": "openapi.copySelectedTwoResponsesOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer",
-        "enablement": "openapiTwoResponsesOutlineSelected"
+        "title": "OpenAPI: copy JSON Pointer"
       },
       {
         "command": "openapi.copySelectedTwoDefinitionOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer",
-        "enablement": "openapiTwoDefinitionOutlineSelected"
+        "title": "OpenAPI: copy JSON Pointer"
       },
       {
         "command": "openapi.copySelectedTwoSecurityOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer",
-        "enablement": "openapiTwoSecurityOutlineSelected"
+        "title": "OpenAPI: copy JSON Pointer"
       },
       {
         "command": "openapi.copySelectedTwoSecurityDefinitionOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer",
-        "enablement": "openapiTwoSecurityDefinitionOutlineSelected"
+        "title": "OpenAPI: copy JSON Pointer"
       },
       {
         "command": "openapi.copySelectedThreePathOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer",
-        "enablement": "openapiThreePathOutlineSelected"
+        "title": "OpenAPI: copy JSON Pointer"
       },
       {
         "command": "openapi.copySelectedThreeServersOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer",
-        "enablement": "openapiThreeServersOutlineSelected"
+        "title": "OpenAPI: copy JSON Pointer"
       },
       {
         "command": "openapi.copySelectedThreeComponentsOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer",
-        "enablement": "openapiThreeComponentsOutlineSelected"
+        "title": "OpenAPI: copy JSON Pointer"
       },
       {
         "command": "openapi.copySelectedThreeSecurityOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer",
-        "enablement": "openapiThreeSecurityOutlineSelected"
+        "title": "OpenAPI: copy JSON Pointer"
       },
       {
         "command": "openapi.platform.editorLoadAuditReportFromFile",

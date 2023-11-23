@@ -113,63 +113,53 @@ async function copyJsonReference(cache: Cache, range: vscode.Range) {
   }
 }
 
-function copySelectedTwoPathOutlineJsonReference(cache: Cache) {
-  copySelectedJsonReference("openapiTwoPathOutline");
+function copySelectedTwoPathOutlineJsonReference(cache: Cache, ...args) {
+  copySelectedJsonReference(args[0]);
 }
 
-function copySelectedTwoParametersOutlineJsonReference(cache: Cache) {
-  copySelectedJsonReference("openapiTwoParametersOutline");
+function copySelectedTwoParametersOutlineJsonReference(cache: Cache, ...args) {
+  copySelectedJsonReference(args[0]);
 }
 
-function copySelectedTwoResponsesOutlineJsonReference(cache: Cache) {
-  copySelectedJsonReference("openapiTwoResponsesOutline");
+function copySelectedTwoResponsesOutlineJsonReference(cache: Cache, ...args) {
+  copySelectedJsonReference(args[0]);
 }
 
-function copySelectedTwoDefinitionOutlineJsonReference(cache: Cache) {
-  copySelectedJsonReference("openapiTwoDefinitionOutline");
+function copySelectedTwoDefinitionOutlineJsonReference(cache: Cache, ...args) {
+  copySelectedJsonReference(args[0]);
 }
 
-function copySelectedTwoSecurityOutlineJsonReference(cache: Cache) {
-  copySelectedJsonReference("openapiTwoSecurityOutline");
+function copySelectedTwoSecurityOutlineJsonReference(cache: Cache, ...args) {
+  copySelectedJsonReference(args[0]);
 }
 
-function copySelectedTwoSecurityDefinitionOutlineJsonReference(cache: Cache) {
-  copySelectedJsonReference("openapiTwoSecurityDefinitionOutline");
+function copySelectedTwoSecurityDefinitionOutlineJsonReference(cache: Cache, ...args) {
+  copySelectedJsonReference(args[0]);
 }
 
-function copySelectedThreePathOutlineJsonReference(cache: Cache) {
-  copySelectedJsonReference("openapiThreePathOutline");
+function copySelectedThreePathOutlineJsonReference(cache: Cache, ...args) {
+  copySelectedJsonReference(args[0]);
 }
 
-function copySelectedThreeServersOutlineJsonReference(cache: Cache) {
-  copySelectedJsonReference("openapiThreeServersOutline");
+function copySelectedThreeServersOutlineJsonReference(cache: Cache, ...args) {
+  copySelectedJsonReference(args[0]);
 }
 
-function copySelectedThreeComponentsOutlineJsonReference(cache: Cache) {
-  copySelectedJsonReference("openapiThreeComponentsOutline");
+function copySelectedThreeComponentsOutlineJsonReference(cache: Cache, ...args) {
+  copySelectedJsonReference(args[0]);
 }
 
-function copySelectedThreeSecurityOutlineJsonReference(cache: Cache) {
-  copySelectedJsonReference("openapiThreeSecurityOutline");
+function copySelectedThreeSecurityOutlineJsonReference(cache: Cache, ...args) {
+  copySelectedJsonReference(args[0]);
 }
 
-function copySelectedJsonReference(viewId: string) {
-  copyNodeJsonReference(outlines[viewId].selection[0]);
+function copySelectedJsonReference(node: OutlineNode) {
+  copyNodeJsonReference(node);
 }
 
-function copyNodeJsonReference(node: Node) {
+function copyNodeJsonReference(node: OutlineNode) {
   if (node) {
-    const path = [];
-    for (let current = node; current.key !== undefined; current = current.parent) {
-      path.unshift(current.key);
-    }
-    const pointer = joinJsonPointer(path);
-    // JSON Pointer is allowed to have special chars, but JSON Reference
-    // requires these to be encoded
-    const encoded = pointer
-      .split("/")
-      .map((segment) => encodeURIComponent(segment))
-      .join("/");
+    const encoded = node.id;
     vscode.env.clipboard.writeText(`#${encoded}`);
     const disposable = vscode.window.setStatusBarMessage(`Copied Reference: #${encoded}`);
     setTimeout(() => disposable.dispose(), 1000);
@@ -352,7 +342,7 @@ async function v3addServer(cache: Cache) {
 
 async function addOperation(cache: Cache, node: any) {
   const fix = registeredSnippetQuickFixes["operation"];
-  fix.pointer = joinJsonPointer(["paths", node.key]);
+  fix.pointer = node.id;
   await snippetCommand(fix, cache);
 }
 
