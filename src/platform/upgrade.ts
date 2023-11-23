@@ -14,7 +14,7 @@ export async function offerUpgrade(): Promise<unknown> {
     )
     .then((choice) => {
       if (choice?.id === "upgrade") {
-        vscode.env.openExternal(vscode.Uri.parse("https://42crunch.com/github-upgrade/"));
+        vscode.env.openExternal(vscode.Uri.parse("https://42crunch.com/ide-upgrade/"));
       }
     });
 }
