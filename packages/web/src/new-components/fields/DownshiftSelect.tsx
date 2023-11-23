@@ -10,7 +10,6 @@ export default function DownshiftSelect<T>({
 }) {
   const { field } = useController({
     name,
-    rules: { required: true },
   });
 
   return (
