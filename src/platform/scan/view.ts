@@ -30,6 +30,7 @@ import { runScanWithCliBinary } from "../cli-ast";
 import { runScanWithDocker } from "./runtime/docker";
 import { runScanWithScandManager } from "./runtime/scand-manager";
 import { UPGRADE_WARN_LIMIT, offerUpgrade, warnScans } from "../upgrade";
+import { getAnondCredentials } from "../../credentials";
 
 export type BundleDocumentVersions = Record<string, number>;
 
@@ -114,6 +115,7 @@ export class ScanWebView extends WebView<Webapp> {
         await reportView.sendStartScan(this.target!.document);
 
         return await runScan(
+          this.configuration,
           this.secrets,
           this.store,
           this.envStore,
@@ -212,6 +214,7 @@ function makeLogger(view: { sendLogMessage: (message: string, level: LogLevel) =
 }
 
 async function runScan(
+  configuration: Configuration,
   secrets: vscode.SecretStorage,
   store: PlatformStore,
   envStore: EnvStore,
@@ -232,7 +235,7 @@ async function runScan(
   const stringOas = stringify(bundle.value);
 
   try {
-    if (config.scanRuntime === "cli") {
+    if (config.scanRuntime === "cli" && getAnondCredentials(configuration)) {
       const [result, error] = await runScanWithCliBinary(
         secrets,
         envStore,

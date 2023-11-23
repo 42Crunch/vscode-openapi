@@ -223,7 +223,7 @@ async function chooseAuditRuntime(
   const anondCredentials = getAnondCredentials(configuration);
   const hasCli = configuration.get("platformConformanceScanRuntime") === "cli";
 
-  if (anondCredentials !== undefined && hasCli) {
+  if (anondCredentials && hasCli) {
     return "cli";
   }
 
