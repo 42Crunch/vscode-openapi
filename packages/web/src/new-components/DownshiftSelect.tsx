@@ -44,7 +44,7 @@ export default function DownshiftSelect<T>({
   });
 
   return (
-    <Container>
+    <Container onClick={(e) => e.stopPropagation()}>
       <SelectContainer>
         <Input {...getToggleButtonProps()}>
           {selectedItem === undefined && placeholder !== undefined && (

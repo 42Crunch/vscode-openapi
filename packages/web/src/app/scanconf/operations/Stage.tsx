@@ -19,7 +19,6 @@ import { unwrapPlaybookStage, wrapPlaybookStage } from "../components/scenario/u
 import MissingVariables from "./MissingVariables";
 import CollapsibleCard from "../components/CollapsibleCard";
 import DownshiftSelect from "../../../new-components/fields/DownshiftSelect";
-import { SelectOption } from "../../../new-components/DownshiftSelect";
 
 export default function Stage({
   stage,
@@ -53,7 +52,11 @@ export default function Stage({
   const refTarget =
     stage.ref.type === "operation" ? operations[stage.ref.id] : requests[stage.ref.id];
 
-  const expectedResponseOptions: SelectOption<string>[] = getExpectedResponseOptions(refTarget);
+  const responseCodes = getResponseCodes(refTarget);
+  const responseCodeOptions = [
+    { label: "\u00A0", value: "" },
+    ...responseCodes.map((value) => ({ label: value, value: value })),
+  ];
 
   const availableVariables = [
     ...DynamicVariableNames,
@@ -98,7 +101,7 @@ export default function Stage({
               )}
               <ExpectedResponse>
                 <span>Expected Response</span>
-                <DownshiftSelect name="expectedResponse" options={expectedResponseOptions} />
+                <DownshiftSelect name="expectedResponse" options={responseCodeOptions} />
               </ExpectedResponse>
               {fuzzing && (
                 <Fuzzing>
@@ -133,7 +136,7 @@ export default function Stage({
               {
                 id: "responses",
                 title: "Response processing",
-                content: <ResponseProcessing />,
+                content: <ResponseProcessing editable responseCodes={responseCodes} />,
               },
               {
                 id: "missing-variables",
@@ -164,12 +167,12 @@ function getVariableNamesFromEnvStack(env: PlaybookEnvStack): string[] {
   return variables;
 }
 
-function getExpectedResponseOptions(
+function getResponseCodes(
   target: playbook.Operation | playbook.StageContent | playbook.ExternalStageContent
-): SelectOption<string>[] {
+): string[] {
   const responses = "scenarios" in target ? target.request.responses : target.responses;
-  const options = Object.keys(responses || {}).map((key) => ({ value: key, label: key }));
-  return [{ label: "\u00A0", value: "" }, ...options];
+  const codes = Object.keys(responses || {}).map((key) => key);
+  return codes;
 }
 
 const Container = styled.div`
@@ -211,7 +214,7 @@ const ExpectedResponse = styled.div`
   align-items: center;
   > div {
     width: 60px;
-    border: 1px solid var(${ThemeColorVariables.dropdownBorder});
+    border: 1px solid var(${ThemeColorVariables.inputBorder});
   }
 `;
 

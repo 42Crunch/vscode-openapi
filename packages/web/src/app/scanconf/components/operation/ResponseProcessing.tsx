@@ -7,7 +7,13 @@ import AddResponseDialog from "./AddResponseDialog";
 import VariableAssignments from "./VariableAssignments";
 import { Menu, MenuItem } from "../../../../new-components/Menu";
 
-export default function ResponseProcessing() {
+export default function ResponseProcessing({
+  responseCodes,
+  editable,
+}: {
+  responseCodes?: string[];
+  editable?: boolean;
+}) {
   const { fields, prepend, remove } = useFieldArray({
     name: "responses",
   });
@@ -23,11 +29,11 @@ export default function ResponseProcessing() {
   const tabs = fields.map((field: any, index) => ({
     id: field.id,
     title: field.key,
-    menu: (
+    menu: editable ? (
       <Menu>
         <MenuItem onSelect={() => remove(index)}>Delete</MenuItem>
       </Menu>
-    ),
+    ) : undefined,
     content: <VariableAssignments name={field.key} index={index} />,
   }));
 
@@ -38,7 +44,15 @@ export default function ResponseProcessing() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         tabs={tabs}
-        menu={<AddResponseDialog add={prepend} existingCodes={existingCodes} />}
+        menu={
+          editable ? (
+            <AddResponseDialog
+              add={prepend}
+              responseCodes={responseCodes!}
+              existingCodes={existingCodes}
+            />
+          ) : undefined
+        }
       />
     </Container>
   );
