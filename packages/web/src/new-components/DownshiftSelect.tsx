@@ -106,7 +106,7 @@ const Placeholder = styled.span`
 const SelectedItem = styled.span``;
 
 const Dropdown = styled.ul`
-  max-height: 350px;
+  max-height: 250px;
   overflow-y: auto;
   z-index: 1;
   position: absolute;

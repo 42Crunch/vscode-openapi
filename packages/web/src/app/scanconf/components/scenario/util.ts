@@ -1,29 +1,25 @@
-import jsf from "json-schema-faker";
-import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 import { deref } from "@xliic/common/ref";
-import { makeOperationId } from "@xliic/common/openapi";
+import { simpleClone } from "@xliic/preserving-json-yaml-parser";
+import jsf from "json-schema-faker";
 
+import { HttpMethod } from "@xliic/common/http";
 import {
   BundledOpenApiSpec,
   OasParameterLocation,
+  OasSecurityScheme,
   OperationParametersMap,
-  getPathItemParameters,
+  ResolvedOasOperationSecurity,
   getOperation,
   getOperationParameters,
   getParametersMap,
-  OasSecurityScheme,
-  getServerUrls,
-  OasOperation,
-  ResolvedOasOperationSecurity,
+  getPathItemParameters,
 } from "@xliic/common/oas30";
-import {
-  TryItParameterLocation,
-  TryitParameterValues,
-  TryitSecurityValue,
-  TryitSecurityAllValues,
-} from "@xliic/common/tryit";
-import { HttpMethod } from "@xliic/common/http";
 import * as playbook from "@xliic/common/playbook";
+import {
+  TryitParameterValues,
+  TryitSecurityAllValues,
+  TryitSecurityValue,
+} from "@xliic/common/tryit";
 
 import { FieldValues } from "react-hook-form";
 
@@ -182,17 +178,10 @@ export function wrapExternalPlaybookRequest(
 ): Record<string, any> {
   stage = simpleClone(stage);
 
-  const parameters: Record<playbook.ParameterLocation, any> = {
-    query: wrapObject2(stage.request.parameters.query),
-    header: wrapObject2(stage.request.parameters.header),
-    path: wrapObject2(stage.request.parameters.path),
-    cookie: wrapObject2(stage.request.parameters.cookie),
-  };
-
   return {
     url: stage.request.url,
     method: stage.request.method,
-    parameters,
+    parameters: stage.request.parameters,
     body: stage.request.body,
     environment: wrapEnvironment(stage.environment),
     defaultResponse: stage.defaultResponse,
@@ -276,12 +265,7 @@ export function unwrapExternalPlaybookRequest(request: FieldValues): playbook.Ex
     request: {
       url: request.url,
       method: request.method,
-      parameters: {
-        query: unwrapObject2(request.parameters.query),
-        header: unwrapObject2(request.parameters.header),
-        path: unwrapObject2(request.parameters.path),
-        cookie: unwrapObject2(request.parameters.cookie),
-      },
+      parameters: request.parameters,
       body: request.body,
     },
     environment: unwrapEnvironment(request.environment),
@@ -299,36 +283,6 @@ function unwrapEnvironment(data: any): playbook.Environment {
   return environment;
 }
 
-function unwrapFormSecurity(values: Record<string, any>[]): TryitSecurityAllValues {
-  const result: TryitSecurityAllValues = [];
-  for (const requirement of values) {
-    const unwrapped: Record<string, TryitSecurityValue> = {};
-    for (const [name, value] of Object.entries(requirement as Record<string, TryitSecurityValue>)) {
-      unwrapped[unescapeFieldName(name)] = value;
-    }
-    result.push(unwrapped);
-  }
-  return result;
-}
-
-function unwrapFormParameters(values: Record<string, any>): TryitParameterValues {
-  const result: TryitParameterValues = {
-    query: {},
-    header: {},
-    path: {},
-    cookie: {},
-  };
-  const locations = Object.keys(values) as OasParameterLocation[];
-  for (const location of locations) {
-    for (const name of Object.keys(values[location])) {
-      const unescapedName = unescapeFieldName(name);
-      const value = values[location][name];
-      result[location]![unescapedName] = Array.isArray(value) ? unwrapArray(value) : value;
-    }
-  }
-  return result;
-}
-
 export function parseHttpsHostname(url: string): [boolean, string] {
   try {
     const urlObj = new URL(url);
@@ -340,64 +294,9 @@ export function parseHttpsHostname(url: string): [boolean, string] {
   }
 }
 
-function wrapObject(object: any) {
-  const wrapped = Object.entries(object || {}).map(([key, value]) => ({
-    key: escapeFieldName(key),
-    value,
-  }));
-  return wrapped;
-}
-
-function wrapObject2(object: any) {
-  return Object.entries(object || {}).map(([key, value]) => ({
-    key,
-    value,
-  }));
-}
-
-function maybeWrapArray(value: any) {
-  if (Array.isArray(value)) {
-    return value.map((v) => {
-      value: v;
-    });
-  } else {
-    return value;
-  }
-}
-
-function unwrapObject(data: any): any {
-  const result: any = {};
-  for (const item of data) {
-    result[unescapeFieldName(item.key)] = item.value;
-  }
-  return result;
-}
-
-function unwrapObject2(data: any): any {
-  const result: any = {};
-  for (const item of data) {
-    result[item.key] = item.value;
-  }
-  return result;
-}
-
-// arrays must be wrapped for react form hook
-function wrapArray(array: unknown[] | undefined): unknown {
-  return (array || []).map((value) => ({ value }));
-}
-
-function unwrapArray(array: unknown[]): unknown {
-  return array.map((element) => (element as any)["value"]);
-}
-
 export function escapeFieldName(name: string): string {
   // escape field name for react form hook, dots and numbers at the start of the name are not allowed
   return "n-" + encodeURIComponent(name).replace(/\./g, "%2E");
-}
-
-function unescapeFieldName(name: string): string {
-  // remove n- prefix and decode field name
-  return decodeURIComponent(name.substring(2, name.length));
 }
 
 function convertToType(value: string, type: string): unknown {

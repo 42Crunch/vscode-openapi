@@ -81,7 +81,7 @@ export default function RequestInternal({
           stage={request!}
           saveRequest={onSaveRequest}
         />
-        <Title>Required variables</Title>
+        <Title>Test inputs: provide values for the required variables</Title>
         <Inputs>
           <Form
             wrapFormData={wrapEnvironment}

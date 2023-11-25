@@ -55,7 +55,9 @@ export default function Stage({
   const responseCodes = getResponseCodes(refTarget);
   const responseCodeOptions = [
     { label: "\u00A0", value: "" },
-    ...responseCodes.map((value) => ({ label: value, value: value })),
+    ...responseCodes
+      .filter((value) => value !== "default")
+      .map((value) => ({ label: value, value: value })),
   ];
 
   const availableVariables = [
