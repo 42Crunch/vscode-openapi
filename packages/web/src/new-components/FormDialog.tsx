@@ -18,6 +18,7 @@ export default function FormDialog({
   description,
   schema,
   children,
+  noOverflow,
 }: {
   trigger: JSX.Element;
   defaultValues: FieldValues;
@@ -26,6 +27,7 @@ export default function FormDialog({
   description?: string;
   schema?: ZodObject<any>;
   children: ReactNode;
+  noOverflow?: boolean;
 }) {
   const methods = useForm({
     defaultValues,
@@ -47,7 +49,7 @@ export default function FormDialog({
       <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>
       <Dialog.Portal>
         <Overlay />
-        <DialogContent>
+        <DialogContent noOverflow={noOverflow}>
           <FormProvider {...methods}>
             <Form
               onSubmit={methods.handleSubmit((data) => {
@@ -94,9 +96,7 @@ const DialogContent = styled(Dialog.Content)`
   max-width: 450px;
   max-height: 85vh;
   padding: 25px;
-
-  overflow-y: auto;
-
+  ${({ noOverflow }: { noOverflow?: boolean }) => !noOverflow && "overflow-y: auto;"}
   background-color: var(${ThemeColorVariables.background});
   color: var(${ThemeColorVariables.foreground});
   border-radius: 6px;

@@ -35,6 +35,7 @@ export default function AddResponseDialog({
       title="Add response processing"
       defaultValues={defaultValues}
       onSubmit={onSubmit}
+      noOverflow
       trigger={
         <AddButton>
           <Plus />
