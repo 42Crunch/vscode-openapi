@@ -186,7 +186,6 @@ function makeSwaggerTabs(
   isBodyPresent: boolean
 ) {
   const parameters = getSwaggerParameters(oas, path, method);
-
   return [
     {
       id: "body",
@@ -208,20 +207,21 @@ function makeSwaggerTabs(
       ),
       disabled: !hasSwaggerSecurityRequirements(oas, path, method),
     },
-    {
-      id: "formData",
-      title: "Form",
-      content: (
-        <ParameterGroup
-          oas={oas}
-          group={parameters.formData}
-          name={"parameters.formData"}
-          placeholder="Add new entry"
-          variables={availableVariables}
-        />
-      ),
-      disabled: hasNoParameters(parameters.formData),
-    },
+    // multipart form-data are not supported for now
+    // {
+    //   id: "formData",
+    //   title: "Form",
+    //   content: (
+    //     <ParameterGroup
+    //       oas={oas}
+    //       group={parameters.formData}
+    //       name={"parameters.formData"}
+    //       placeholder="Add new entry"
+    //       variables={availableVariables}
+    //     />
+    //   ),
+    //   disabled: hasNoParameters(parameters.formData) || !isBodyPresent,
+    // },
     {
       id: "path",
       title: "Path",
