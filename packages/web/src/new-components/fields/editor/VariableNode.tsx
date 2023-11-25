@@ -18,7 +18,7 @@ export type SerializedVariableNode = Spread<
 >;
 
 const variableStyleExist = `background-color: var(${ThemeColorVariables.badgeBackground}); color: var(${ThemeColorVariables.badgeForeground}); border-radius: 4px;`;
-const variableStyleDoesNotExist = `background-color: var(${ThemeColorVariables.errorBackground}); color: var(${ThemeColorVariables.errorForeground}); border-radius: 4px;`;
+const variableStyleDoesNotExist = `background-color: var(${ThemeColorVariables.badgeBackground}); color: var(${ThemeColorVariables.badgeForeground}); border-radius: 4px;`;
 
 export class VariableNode extends TextNode {
   __exists: boolean;

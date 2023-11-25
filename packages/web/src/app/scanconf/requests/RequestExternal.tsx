@@ -92,7 +92,7 @@ export default function RequestExternal({
           stage={request!}
           saveRequest={onSaveRequest}
         />
-        <Title>Test inputs, provide values for the required variables</Title>
+        <Title>Test inputs, provide values for the unassigned variables</Title>
         <Inputs>
           <Form
             wrapFormData={wrapEnvironment}
