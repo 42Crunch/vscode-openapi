@@ -148,7 +148,7 @@ export function PlatformServices() {
               Security Audit as well
             </p>
             <p>
-              42Crunch CLI is subject to a usage limits, find more details in{" "}
+              42Crunch CLI is subject to usage limits, find more details at{" "}
               <a href="https://42crunch.com/free-user-faq/">Free User FAQ</a>
             </p>
           </div>
