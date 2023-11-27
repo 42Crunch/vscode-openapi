@@ -1,5 +1,6 @@
 import { useDrag } from "react-dnd";
 import styled from "styled-components";
+import * as Tooltip from "@radix-ui/react-tooltip";
 
 import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
 import * as playbook from "@xliic/common/playbook";
@@ -16,7 +17,6 @@ import ResponseProcessing from "../components/operation/ResponseProcessing";
 import Environment from "../components/scenario/Environment";
 import { OperationResult } from "../components/scenario/types";
 import { unwrapPlaybookStage, wrapPlaybookStage } from "../components/scenario/util";
-import MissingVariables from "./MissingVariables";
 import CollapsibleCard from "../components/CollapsibleCard";
 import DownshiftSelect from "../../../new-components/fields/DownshiftSelect";
 
@@ -52,9 +52,11 @@ export default function Stage({
   const refTarget =
     stage.ref.type === "operation" ? operations[stage.ref.id] : requests[stage.ref.id];
 
+  const defaultResponseCode = getDefaultResponseCode(refTarget);
+
   const responseCodes = getResponseCodes(refTarget);
+
   const responseCodeOptions = [
-    { label: "\u00A0", value: "" },
     ...responseCodes
       .filter((value) => value !== "default")
       .map((value) => ({ label: value, value: value })),
@@ -65,12 +67,15 @@ export default function Stage({
     ...getVariableNamesFromEnvStack(result?.variablesReplaced?.stack || []),
   ];
 
-  const missingVariables = result?.variablesReplaced?.missing || [];
+  const missingVariables = Array.from(new Set(result?.variablesReplaced?.missing || [])).map(
+    (e) => e.name
+  );
+
   const replacedVariables = Array.from(
     new Set(result?.variablesReplaced?.found?.map((lookupResult) => lookupResult.name) || [])
   );
-  const allRequestVariables = [...missingVariables.map((m) => m.name), ...replacedVariables];
-  const missingVariablesCount = new Set(missingVariables || []).size;
+
+  const allRequestVariables = [...missingVariables, ...replacedVariables];
 
   return (
     <Form
@@ -90,20 +95,25 @@ export default function Stage({
           <Description>
             <span>{stage.ref.id}</span>
             <Icons onClick={(e) => e.stopPropagation()}>
-              {missingVariablesCount > 0 && (
-                <Error>
-                  <TriangleExclamation />
-                </Error>
+              {missingVariables.length > 0 && (
+                <StageError
+                  message="Unset variables"
+                  description={`There are unset variables in this step of the scenario. You can set their values in the 'Environment' section of the step, or in the 'Response processing' section of the previous steps.`}
+                />
               )}
               {refTarget === undefined && (
-                <Error>
-                  <TriangleExclamation />
-                  {`${stage.ref.type}/${stage.ref.id} is missing`}
-                </Error>
+                <StageError
+                  message={`${stage.ref.type}/${stage.ref.id} is missing`}
+                  description="Target of a reference is missing"
+                />
               )}
               <ExpectedResponse>
                 <span>Expected Response</span>
-                <DownshiftSelect name="expectedResponse" options={responseCodeOptions} />
+                <DownshiftSelect
+                  name="expectedResponse"
+                  options={responseCodeOptions}
+                  placeholder={defaultResponseCode}
+                />
               </ExpectedResponse>
               {fuzzing && (
                 <Fuzzing>
@@ -132,21 +142,16 @@ export default function Stage({
                     name="environment"
                     names={allRequestVariables}
                     variables={availableVariables}
+                    missing={missingVariables}
                   />
                 ),
+                counter: missingVariables.length,
+                counterKind: "error",
               },
               {
                 id: "responses",
                 title: "Response processing",
                 content: <ResponseProcessing editable responseCodes={responseCodes} />,
-              },
-              {
-                id: "missing-variables",
-                title: "Missing Variables",
-                counter: missingVariablesCount,
-                content: <MissingVariables missing={missingVariables} />,
-                disabled: missingVariablesCount === 0,
-                counterKind: "error",
               },
             ]}
           />
@@ -175,6 +180,13 @@ function getResponseCodes(
   const responses = "scenarios" in target ? target.request.responses : target.responses;
   const codes = Object.keys(responses || {}).map((key) => key);
   return codes;
+}
+
+function getDefaultResponseCode(
+  target: playbook.Operation | playbook.StageContent | playbook.ExternalStageContent
+): string {
+  const stageContent = "scenarios" in target ? target.request : target;
+  return stageContent.defaultResponse;
 }
 
 const Container = styled.div`
@@ -216,7 +228,7 @@ const ExpectedResponse = styled.div`
   align-items: center;
   > div {
     width: 60px;
-    border: 1px solid var(${ThemeColorVariables.inputBorder});
+    border: 1px solid var(${ThemeColorVariables.border});
   }
 `;
 
@@ -234,16 +246,43 @@ const Grab = styled.div`
   }
 `;
 
-const Error = styled.div`
+function StageError({ message, description }: { message: string; description: string }) {
+  return (
+    <Tooltip.Provider>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          <MissingVariableMessage>
+            <TriangleExclamation /> <span>{message}</span>
+          </MissingVariableMessage>
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <TooltipContent>{description}</TooltipContent>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
+  );
+}
+
+const MissingVariableMessage = styled.div`
+  cursor: help;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 4px;
-  padding: 2px;
+  padding: 2px 8px;
   border-radius: 4px;
-  color: var(${ThemeColorVariables.errorForeground});
-  background-color: var(${ThemeColorVariables.errorBackground});
+  color: var(${ThemeColorVariables.foreground});
   > svg {
-    fill: var(${ThemeColorVariables.errorForeground});
+    fill: var(${ThemeColorVariables.foreground});
   }
+`;
+
+const TooltipContent = styled(Tooltip.Content)`
+  max-width: 400px;
+  color: var(${ThemeColorVariables.notificationsForeground});
+  background-color: var(${ThemeColorVariables.notificationsBackground});
+  border: 1px solid var(${ThemeColorVariables.notificationsBorder});
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin-right: 16px;
 `;

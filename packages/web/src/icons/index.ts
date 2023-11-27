@@ -30,6 +30,7 @@ export { default as Play } from "./Play";
 export { default as Plus } from "./Plus";
 export { default as Spinner } from "./Spinner";
 export { default as SquareCheck } from "./SquareCheck";
+export { default as SquarePlus } from "./SquarePlus";
 export { default as TrashCan } from "./TrashCan";
 export { default as Trash } from "./Trash";
 export { default as TriangleExclamation } from "./TriangleExclamation";

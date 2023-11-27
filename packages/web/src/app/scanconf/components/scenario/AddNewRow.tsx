@@ -17,11 +17,10 @@ export default function AddNewRow({ append }: { append: any }) {
 }
 
 const Container = styled.div`
-  display: flex;
+  display: contents;
 `;
 
 const Name = styled.input`
-  flex: 1;
   background: transparent;
   border: none;
   border-bottom: 1px solid var(${ThemeColorVariables.border});
@@ -34,10 +33,5 @@ const Name = styled.input`
 `;
 
 const Placeholder = styled.div`
-  flex: 2;
-  border: none;
-  background: transparent;
-  border-bottom: 1px solid var(${ThemeColorVariables.border});
-  margin-right: 1.5em;
-  padding: 4px 8px;
+  grid-column: span 3;
 `;

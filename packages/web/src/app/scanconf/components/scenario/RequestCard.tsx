@@ -100,6 +100,6 @@ const DefaultResponse = styled.div`
   justify-content: end;
   > div {
     width: 80px;
-    border: 1px solid var(${ThemeColorVariables.inputBorder});
+    border: 1px solid var(${ThemeColorVariables.border});
   }
 `;

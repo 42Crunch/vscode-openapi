@@ -5,15 +5,19 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 
 import AddNewRow from "./AddNewRow";
 import EnvKeyValue from "./EnvKeyValue";
+import { TriangleExclamation } from "../../../../icons";
+import { MissingVariable } from "./MissingVariable";
 
 export default function Environment({
   name,
   names,
   variables,
+  missing,
 }: {
   name: string;
   names: string[];
   variables: string[];
+  missing?: string[];
 }) {
   const { control } = useFormContext();
 
@@ -41,9 +45,15 @@ export default function Environment({
           }}
         />
       ))}
-      <NewRow>
-        <AddNewRow append={append} />
-      </NewRow>
+      <AddNewRow append={append} />
+      {missing && missing?.length > 0 && (
+        <Missing>
+          <TriangleExclamation /> <span className="message">Unset variables</span>
+          {missing.map((name) => (
+            <MissingVariable key={name} name={name} append={append} />
+          ))}
+        </Missing>
+      )}
     </Container>
   );
 }
@@ -65,6 +75,18 @@ const Header = styled.div`
   }
 `;
 
-const NewRow = styled.div`
-  grid-column: span 4;
+const Missing = styled.div`
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid var(${ThemeColorVariables.border});
+  grid-column: span 3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  > svg {
+    fill: var(${ThemeColorVariables.errorForeground});
+  }
+  > span.message {
+    color: var(${ThemeColorVariables.errorForeground});
+  }
 `;

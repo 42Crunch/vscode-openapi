@@ -3,15 +3,20 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { CircleInfo, TriangleExclamation } from "../../../icons";
 import { HTMLAttributes, ReactNode } from "react";
 
-export function Banner({ message }: { message: string }) {
+export function Banner({
+  message,
+  children,
+  ...attrs
+}: { message: string; children?: ReactNode } & HTMLAttributes<HTMLDivElement>) {
   return (
-    <Container>
+    <Container {...attrs}>
       <div>
         <div>
           <CircleInfo />
         </div>
         <span>{message}</span>
       </div>
+      {children && <div>{children}</div>}
     </Container>
   );
 }
@@ -41,6 +46,7 @@ const Container = styled.div`
     display: flex;
     align-items: center;
     gap: 8px;
+    ,
     > div {
       display: flex;
       align-items: center;
