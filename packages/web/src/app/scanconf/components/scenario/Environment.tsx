@@ -61,6 +61,7 @@ export default function Environment({
 const Container = styled.div`
   margin: 8px;
   display: grid;
+  row-gap: 4px;
   grid-template-columns: 1fr 1fr 7em 2em;
 `;
 
