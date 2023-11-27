@@ -236,7 +236,8 @@ async function* executePlaybook(
       `playbook-${name}-step-${i}-request`,
       request.responses,
       httpRequest,
-      response
+      response,
+      replacements.value.parameters
     );
 
     if (requestAssignmentsError !== undefined) {
@@ -255,7 +256,8 @@ async function* executePlaybook(
       `playbook-${name}-step-${i}`,
       step.responses,
       httpRequest,
-      response
+      response,
+      replacements.value.parameters
     );
 
     if (stepAssignmentsError !== undefined) {

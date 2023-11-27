@@ -14,7 +14,8 @@ export function assignVariables(
   id: string,
   responses: playbook.Responses | undefined,
   httpRequest: HttpRequest,
-  httpResponse: HttpResponse | MockHttpResponseType
+  httpResponse: HttpResponse | MockHttpResponseType,
+  parameters: playbook.ParameterValues
 ): Result<PlaybookEnvStack, string> {
   const result: PlaybookEnvStack = [];
 
@@ -29,7 +30,8 @@ export function assignVariables(
       `${id}-${code}`,
       response,
       httpRequest,
-      httpResponse
+      httpResponse,
+      parameters
     );
 
     if (assignmentError !== undefined) {
@@ -75,12 +77,13 @@ function assignValues(
   id: string,
   response: playbook.Response,
   httpRequest: HttpRequest,
-  httpResponse: HttpResponse | MockHttpResponseType
+  httpResponse: HttpResponse | MockHttpResponseType,
+  parameters: playbook.ParameterValues
 ): Result<PlaybookEnv, string> {
   const env: Environment = {};
   const result: PlaybookVariableAssignments = [];
   for (const [varname, assignment] of Object.entries(response.variableAssignments || {})) {
-    const [value, valueError] = extractValue(assignment, httpRequest, httpResponse);
+    const [value, valueError] = extractValue(assignment, httpRequest, httpResponse, parameters);
     if (valueError !== undefined) {
       return [
         undefined,
@@ -102,7 +105,8 @@ function assignValues(
 function extractValue(
   assignment: playbook.VariableAssignment,
   httpRequest: HttpRequest,
-  httpResponse: HttpResponse | MockHttpResponseType
+  httpResponse: HttpResponse | MockHttpResponseType,
+  parameters: playbook.ParameterValues
 ): NullableResult<unknown, string> {
   // in case of mock response simply pretend that we've successfully extracted
   // a value for any given assignment
@@ -136,11 +140,13 @@ function extractValue(
     }
   } else if (assignment.in === "query") {
     if (assignment.from === "request") {
+      return extractFromRequestParameters(parameters.query, assignment.name);
     } else {
       // not allowed
     }
   } else if (assignment.in === "path") {
     if (assignment.from === "request") {
+      return extractFromRequestParameters(parameters.path, assignment.name);
     } else {
       // not allowed
     }
@@ -228,6 +234,18 @@ function extractFromRequestCookies(
   }
 
   return [undefined, `Failed to find request cookie name: ${name}`];
+}
+
+function extractFromRequestParameters(
+  container: playbook.ParameterList,
+  name: string
+): NullableResult<unknown, string> {
+  for (const { key, value } of container) {
+    if (key === name) {
+      return [value, undefined];
+    }
+  }
+  return [undefined, `Failed to find request query parameter name: ${name}`];
 }
 
 function httpStatusSort(a: string, b: string): number {
