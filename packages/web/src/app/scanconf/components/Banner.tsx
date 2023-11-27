@@ -46,11 +46,9 @@ const Container = styled.div`
     display: flex;
     align-items: center;
     gap: 8px;
-    ,
     > div {
       display: flex;
       align-items: center;
-      justify-content: center;
     }
     > div > svg {
       fill: var(${ThemeColorVariables.foreground});
@@ -71,7 +69,6 @@ const ErrorContainer = styled(Container)`
     > div {
       display: flex;
       align-items: center;
-      justify-content: center;
     }
     > div > svg {
       fill: var(${ThemeColorVariables.errorForeground});
