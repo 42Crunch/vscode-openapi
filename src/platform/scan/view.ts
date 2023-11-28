@@ -261,12 +261,19 @@ async function runScan(
 
       await reportView.showScanReport(path, method, result.scan, oas);
     } else {
+      if (config.scanRuntime === "cli") {
+        vscode.window.showInformationMessage(
+          "Security Audit Token required by 42Crunch CLI is not found, using docker instead."
+        );
+      }
+
       const { token, tmpApi } = await createScanconfToken(store, stringOas, scanconf, logger);
 
+      // fall back to docker if no anond token, and cli is configured
       const failure =
-        config.scanRuntime === "docker"
-          ? await runScanWithDocker(envStore, scanEnv, config, logger, token)
-          : await runScanWithScandManager(envStore, scanEnv, config, logger, token);
+        config.scanRuntime === "scand-manager"
+          ? await runScanWithScandManager(envStore, scanEnv, config, logger, token)
+          : await runScanWithDocker(envStore, scanEnv, config, logger, token);
 
       if (failure !== undefined) {
         // cleanup

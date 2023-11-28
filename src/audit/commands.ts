@@ -11,13 +11,7 @@ import { stringify } from "@xliic/preserving-json-yaml-parser";
 
 import { Cache } from "../cache";
 import { Configuration, configuration } from "../configuration";
-import {
-  configureCredentials,
-  ensureHasCredentials,
-  getAnondCredentials,
-  getPlatformCredentials,
-  hasCredentials,
-} from "../credentials";
+import { ensureHasCredentials, getAnondCredentials, getPlatformCredentials } from "../credentials";
 import { PlatformStore } from "../platform/stores/platform-store";
 import { AuditContext, Bundle, PendingAudits } from "../types";
 import { extractSingleOperation } from "../util/extract";
@@ -222,6 +216,12 @@ async function chooseAuditRuntime(
   const platformCredentials = await getPlatformCredentials(configuration, secrets);
   const anondCredentials = getAnondCredentials(configuration);
   const hasCli = configuration.get("platformConformanceScanRuntime") === "cli";
+
+  if (hasCli && anondCredentials === "") {
+    vscode.window.showInformationMessage(
+      "Security Audit Token required by 42Crunch CLI is not found, using platform connection instead."
+    );
+  }
 
   if (anondCredentials && hasCli) {
     return "cli";
