@@ -48,9 +48,9 @@ export async function runCliAudit(
   }
 
   if (isSingleOperationAudit && result.cli.remainingPerOperationAudit < UPGRADE_WARN_LIMIT) {
-    await warnOperationAudits(result.cli.remainingPerOperationAudit);
+    warnOperationAudits(result.cli.remainingPerOperationAudit);
   } else if (!isSingleOperationAudit && result.cli.remainingFullAudit < UPGRADE_WARN_LIMIT) {
-    await warnAudits(result.cli.remainingFullAudit);
+    warnAudits(result.cli.remainingFullAudit);
   }
 
   return await parseAuditReport(cache, document, result.audit, mapping);

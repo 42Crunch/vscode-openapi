@@ -256,7 +256,7 @@ async function runScan(
       }
 
       if (result.cli.remainingPerOperationScan < UPGRADE_WARN_LIMIT) {
-        await warnScans(result.cli.remainingPerOperationScan);
+        warnScans(result.cli.remainingPerOperationScan);
       }
 
       await reportView.showScanReport(path, method, result.scan, oas);
