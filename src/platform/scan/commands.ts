@@ -22,6 +22,7 @@ import { createScanConfigWithPlatform } from "./runtime/platform";
 import { ScanWebView } from "./view";
 import { getScanconfUri } from "./config";
 import { ensureHasCredentials, getAnondCredentials } from "../../credentials";
+import { offerUpgrade } from "../upgrade";
 
 export default (
   cache: Cache,
@@ -148,8 +149,14 @@ async function createDefaultScanConfig(
             false
           );
           if (reportError !== undefined) {
-            // xxxx
-            return false;
+            if (reportError.statusCode === 3 && reportError.statusMessage === "limits_reached") {
+              await offerUpgrade();
+              return false;
+            } else {
+              throw new Error(
+                reportError.statusMessage ? reportError.statusMessage : JSON.stringify(reportError)
+              );
+            }
           }
           if ((report.audit as any).openapiState !== "valid") {
             throw new Error(
