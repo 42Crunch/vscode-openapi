@@ -21,7 +21,7 @@ import {
 import { createScanConfigWithPlatform } from "./runtime/platform";
 import { ScanWebView } from "./view";
 import { getScanconfUri } from "./config";
-import { ensureHasCredentials } from "../../credentials";
+import { ensureHasCredentials, getAnondCredentials } from "../../credentials";
 
 export default (
   cache: Cache,
@@ -105,7 +105,14 @@ async function editorRunSingleOperationScan(
 
   if (
     (scanconfUri === undefined || !(await exists(scanconfUri))) &&
-    !(await createDefaultScanConfig(store, secrets, hasCli, scanconfUri, stringify(bundle.value)))
+    !(await createDefaultScanConfig(
+      store,
+      configuration,
+      secrets,
+      hasCli,
+      scanconfUri,
+      stringify(bundle.value)
+    ))
   ) {
     return;
   }
@@ -118,6 +125,7 @@ async function editorRunSingleOperationScan(
 
 async function createDefaultScanConfig(
   store: PlatformStore,
+  configuration: Configuration,
   secrets: vscode.SecretStorage,
   hasCli: boolean,
   scanconfUri: vscode.Uri,
@@ -131,7 +139,7 @@ async function createDefaultScanConfig(
     },
     async (progress, cancellationToken): Promise<boolean> => {
       try {
-        if (hasCli) {
+        if (hasCli && getAnondCredentials(configuration)) {
           //const oas = stringify(bundle.value);
           const [report, reportError] = await runAuditWithCliBinary(
             secrets,
@@ -150,6 +158,11 @@ async function createDefaultScanConfig(
           }
           await createScanConfigWithCliBinary(scanconfUri, oas);
         } else {
+          if (hasCli) {
+            vscode.window.showInformationMessage(
+              "Security Audit Token required by 42Crunch CLI is not found, using platform connection instead."
+            );
+          }
           await createScanConfigWithPlatform(store, scanconfUri, oas);
         }
         vscode.window.showInformationMessage(
