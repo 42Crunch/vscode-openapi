@@ -144,9 +144,15 @@ export function PlatformServices() {
         {scanRuntime === "cli" && (
           <div>
             <p>
-              In addition to running Conformance Scan, we will use the 42Crunch CLI to perform
-              Security Audit as well
+              In addition to to executing the Conformance Scan, we will use the CLI to perform
+              Security Audit.
             </p>
+
+            <p>
+              A Security Audit Token is required for the CLI, IDE Tokens are not currently
+              supported.
+            </p>
+
             <p>
               42Crunch CLI is subject to usage limits, find more details at{" "}
               <a href="https://42crunch.com/free-user-faq/">Free User FAQ</a>
