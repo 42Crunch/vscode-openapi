@@ -92,12 +92,16 @@ async function startPreview(
   renderer: PreviewType,
   document: vscode.TextDocument
 ) {
-  const bundle = await cache.getDocumentBundle(document);
-  if (!bundle || "errors" in bundle) {
-    vscode.commands.executeCommand("workbench.action.problems.focus");
-    vscode.window.showErrorMessage("Failed to generate preview, check OpenAPI file for errors.");
-  } else {
-    showPreview(context, previews, renderer, document.uri, bundle);
+  try {
+    const bundle = await cache.getDocumentBundle(document);
+    if (!bundle || "errors" in bundle) {
+      vscode.commands.executeCommand("workbench.action.problems.focus");
+      vscode.window.showErrorMessage("Failed to generate preview, check OpenAPI file for errors.");
+    } else {
+      showPreview(context, previews, renderer, document.uri, bundle);
+    }
+  } catch (ex: any) {
+    vscode.window.showErrorMessage(`Unexpected error trying to generate preview: ${ex}`);
   }
 }
 
