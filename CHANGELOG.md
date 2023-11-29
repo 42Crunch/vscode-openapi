@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 4.19.0 (November 29, 2023)
+
+- New OpenAPI tree, with individual sections merged into one tree and new Search functionality.
+- Support for running Security Audit and Conformance Scan locally, using 42Crunch CLI binaries.
+- New UI for API Conformance Scan with support for scenarios, authentication, etc.
+
 ## Version 4.18.6 (August 2, 2023)
 
 - Fixes to support updated scan report
