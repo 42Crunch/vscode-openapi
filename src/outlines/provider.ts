@@ -57,7 +57,11 @@ export class OutlineProvider implements vscode.TreeDataProvider<OutlineNode> {
           this.rootNode = new RootNode(root, context);
         }
         this.refresh();
-      } else {
+      }
+    });
+
+    vscode.workspace.onDidCloseTextDocument((document) => {
+      if (this.documentUri === document.uri.toString()) {
         this.rootNode = undefined;
         this.documentUri = undefined;
         this.search = {};
@@ -65,6 +69,7 @@ export class OutlineProvider implements vscode.TreeDataProvider<OutlineNode> {
         vscode.commands.executeCommand("setContext", "openapiThreeEnabled", false);
       }
     });
+
     this.sort = configuration.get<boolean>("sortOutlines");
     configuration.onDidChange(this.onConfigurationChanged, this);
   }
