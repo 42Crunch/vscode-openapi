@@ -235,7 +235,7 @@ Once the scan has run, you are presented with a results page. The summary shows 
 
 ## Network requirements
 
-To exdecute the 42Crunch Freemium services, we need access to the following URL: https://stateless.42crunch.com. You may need to ask your administrators to add a firewall rule to allow the connection.
+To execute the 42Crunch Freemium services, you need access to the following URL: https://stateless.42crunch.com. You may need to ask your administrators to add a firewall rule to allow the connection.
 
 ## Known issues
 
