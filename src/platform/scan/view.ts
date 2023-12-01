@@ -259,6 +259,12 @@ async function runScan(
         warnScans(result.cli.remainingPerOperationScan);
       }
 
+      if (result.cli.scanLogs) {
+        for (const entry of result.cli.scanLogs) {
+          await reportView.sendLogMessage(entry.message, entry.level as LogLevel);
+        }
+      }
+
       await reportView.showScanReport(path, method, result.scan, oas);
     } else {
       if (config.scanRuntime === "cli") {

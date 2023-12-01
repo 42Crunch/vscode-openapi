@@ -406,6 +406,13 @@ export type CliResponse = {
   remainingPerOperationAudit: number;
   remainingFullScan: number;
   remainingPerOperationScan: number;
+  scanLogs?: CliLogEntry[];
+};
+
+export type CliLogEntry = {
+  time: string;
+  level: string;
+  message: string;
 };
 
 export type CliError = {
