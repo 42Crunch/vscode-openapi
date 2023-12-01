@@ -164,6 +164,10 @@
           "when": "view == openapiOutline && viewItem == operation && openapiScanEnabled"
         },
         {
+          "command": "openapi.outlineTryOperation",
+          "when": "view == openapiOutline && viewItem == operation"
+        },
+        {
           "command": "openapi.v3addServer",
           "when": "!openapiErrors && view == openapiOutline && viewItem == servers"
         },
@@ -500,6 +504,11 @@
       {
         "command": "openapi.outlineSingleOperationScan",
         "title": "Scan",
+        "enablement": "view == openapiOutline && viewItem == operation"
+      },
+      {
+        "command": "openapi.outlineTryOperation",
+        "title": "Try it",
         "enablement": "view == openapiOutline && viewItem == operation"
       },
       {
