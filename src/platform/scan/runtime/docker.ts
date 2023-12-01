@@ -27,7 +27,7 @@ export async function runScanWithDocker(
       ? config.platformServices.auto
       : config.platformServices.manual;
 
-  env["SCAN_TOKEN"] = token;
+  env["SCAN_TOKEN"] = token.trim();
   env["PLATFORM_SERVICE"] = services!;
 
   const envString = Object.entries(env)
