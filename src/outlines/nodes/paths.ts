@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 
+import { HttpMethod } from "@xliic/common/http";
+
 import { AbstractOutlineNode, HTTP_METHODS, OutlineNode } from "./base";
 import { SimpleNode } from "./simple";
 
@@ -24,9 +26,11 @@ export class PathsNode extends AbstractOutlineNode {
 }
 
 export class PathNode extends AbstractOutlineNode {
+  path: string;
   constructor(parent: OutlineNode, pointer: string, key: string, node: any) {
     super(parent, pointer, key, vscode.TreeItemCollapsibleState.Collapsed, node, parent.context);
     this.contextValue = "path";
+    this.path = key;
   }
 
   getChildren(): OutlineNode[] {
@@ -39,9 +43,11 @@ export class PathNode extends AbstractOutlineNode {
 }
 
 export class OperationNode extends AbstractOutlineNode {
+  method: HttpMethod;
   constructor(parent: OutlineNode, pointer: string, key: string, node: any) {
     super(parent, pointer, key, vscode.TreeItemCollapsibleState.Collapsed, node, parent.context);
     this.contextValue = "operation";
+    this.method = key as HttpMethod;
   }
 
   getChildren(): OutlineNode[] {

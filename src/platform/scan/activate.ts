@@ -83,9 +83,9 @@ export function activate(
 
   const scanCodelensProvider = new ScanCodelensProvider(cache);
 
-  function activateLens(connected: boolean, hasCli: boolean, enabled: boolean) {
+  function activateLens(connected: boolean, configuration: Configuration) {
     disposables.forEach((disposable) => disposable.dispose());
-    if ((connected || hasCli) && enabled) {
+    if (isCodeLensEnabled(connected, configuration)) {
       disposables = Object.values(selectors).map((selector) =>
         vscode.languages.registerCodeLensProvider(selector, scanCodelensProvider)
       );
@@ -95,10 +95,11 @@ export function activate(
   }
 
   store.onConnectionDidChange(({ connected }) => {
-    activateLens(
-      connected,
-      configuration.get("platformConformanceScanRuntime") === "cli",
-      configuration.get("codeLens")
+    activateLens(connected, configuration);
+    vscode.commands.executeCommand(
+      "setContext",
+      "openapiScanEnabled",
+      isScanEnabled(store.isConnected(), configuration)
     );
   });
 
@@ -107,10 +108,11 @@ export function activate(
       configuration.changed(e, "codeLens") ||
       configuration.changed(e, "platformConformanceScanRuntime")
     ) {
-      activateLens(
-        store.isConnected(),
-        configuration.get("platformConformanceScanRuntime") === "cli",
-        configuration.get("codeLens")
+      activateLens(store.isConnected(), configuration);
+      vscode.commands.executeCommand(
+        "setContext",
+        "openapiScanEnabled",
+        isScanEnabled(store.isConnected(), configuration)
       );
     }
   });
@@ -118,4 +120,12 @@ export function activate(
   commands(cache, platformContext, store, configuration, secrets, getScanView);
 
   return new vscode.Disposable(() => disposables.forEach((disposable) => disposable.dispose()));
+}
+
+function isScanEnabled(isConnected: boolean, configuration: Configuration): boolean {
+  return isConnected || configuration.get("platformConformanceScanRuntime") === "cli";
+}
+
+function isCodeLensEnabled(isConnected: boolean, configuration: Configuration): boolean {
+  return isScanEnabled(isConnected, configuration) && configuration.get("codeLens");
 }

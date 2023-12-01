@@ -13,7 +13,7 @@ import { Cache } from "../cache";
 import { Configuration, configuration } from "../configuration";
 import { ensureHasCredentials, getAnondCredentials, getPlatformCredentials } from "../credentials";
 import { PlatformStore } from "../platform/stores/platform-store";
-import { AuditContext, Bundle, PendingAudits } from "../types";
+import { AuditContext, Bundle, OpenApiVersion, PendingAudits } from "../types";
 import { extractSingleOperation } from "../util/extract";
 import { setDecorations } from "./decoration";
 import { runAnondAudit } from "./runtime/anond";
@@ -22,6 +22,7 @@ import { runPlatformAudit } from "./runtime/platform";
 import { setAudit } from "./service";
 import { AuditWebView } from "./view";
 import { ensureCliDownloaded } from "../platform/cli-ast";
+import { OperationNode, PathNode } from "../outlines/nodes/paths";
 
 export function registerSecurityAudit(
   context: vscode.ExtensionContext,
@@ -68,6 +69,44 @@ export function registerSingleOperationAudit(
         textEditor,
         path,
         method
+      );
+    }
+  );
+}
+
+export function registerOutlineSingleOperationAudit(
+  context: vscode.ExtensionContext,
+  cache: Cache,
+  auditContext: AuditContext,
+  pendingAudits: PendingAudits,
+  reportWebView: AuditWebView,
+  store: PlatformStore
+) {
+  return vscode.commands.registerCommand(
+    "openapi.outlineSingleOperationAudit",
+    async (operation: OperationNode) => {
+      if (!vscode.window.activeTextEditor) {
+        vscode.window.showErrorMessage("No OpenAPI found in the active editor");
+        return;
+      }
+
+      const version = cache.getDocumentVersion(vscode.window.activeTextEditor.document);
+
+      if (version === OpenApiVersion.Unknown) {
+        vscode.window.showErrorMessage("No OpenAPI found in the active editor");
+        return;
+      }
+
+      await securityAudit(
+        context.secrets,
+        cache,
+        auditContext,
+        pendingAudits,
+        reportWebView,
+        store,
+        vscode.window.activeTextEditor,
+        (operation.parent as PathNode).path,
+        operation.method
       );
     }
   );

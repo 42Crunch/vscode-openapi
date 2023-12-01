@@ -156,6 +156,14 @@
           "when": "!openapiErrors && view == openapiOutline && viewItem == path"
         },
         {
+          "command": "openapi.outlineSingleOperationAudit",
+          "when": "view == openapiOutline && viewItem == operation"
+        },
+        {
+          "command": "openapi.outlineSingleOperationScan",
+          "when": "view == openapiOutline && viewItem == operation && openapiScanEnabled"
+        },
+        {
           "command": "openapi.v3addServer",
           "when": "!openapiErrors && view == openapiOutline && viewItem == servers"
         },
@@ -506,6 +514,16 @@
           "light": "./resources/42crunch_icon.svg",
           "dark": "./resources/42crunch_icon.svg"
         }
+      },
+      {
+        "command": "openapi.outlineSingleOperationAudit",
+        "title": "42Crunch API Audit",
+        "enablement": "view == openapiOutline && viewItem == operation"
+      },
+      {
+        "command": "openapi.outlineSingleOperationScan",
+        "title": "42Crunch API Scan",
+        "enablement": "view == openapiOutline && viewItem == operation"
       },
       {
         "command": "openapi.addHost",

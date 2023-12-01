@@ -23,6 +23,8 @@ import { ScanWebView } from "./view";
 import { getScanconfUri } from "./config";
 import { ensureHasCredentials, getAnondCredentials } from "../../credentials";
 import { offerUpgrade } from "../upgrade";
+import { OperationNode, PathNode } from "../../outlines/nodes/paths";
+import { OpenApiVersion } from "../../types";
 
 export default (
   cache: Cache,
@@ -44,15 +46,55 @@ export default (
       try {
         await editorRunSingleOperationScan(
           editor,
-          edit,
           cache,
           store,
           configuration,
           secrets,
           getScanView,
-          uri,
           path,
           method
+        );
+      } catch (ex: any) {
+        if (
+          ex?.response?.statusCode === 409 &&
+          ex?.response?.body?.code === 109 &&
+          ex?.response?.body?.message === "limit reached"
+        ) {
+          vscode.window.showErrorMessage(
+            "You have reached your maximum number of APIs. Please contact support@42crunch.com to upgrade your account."
+          );
+        } else {
+          vscode.window.showErrorMessage("Failed to scan: " + ex.message);
+        }
+      }
+    }
+  );
+
+  vscode.commands.registerCommand(
+    "openapi.outlineSingleOperationScan",
+    async (operation: OperationNode): Promise<void> => {
+      if (!vscode.window.activeTextEditor) {
+        vscode.window.showErrorMessage("No OpenAPI found in the active editor");
+        return;
+      }
+
+      const version = cache.getDocumentVersion(vscode.window.activeTextEditor.document);
+
+      if (version === OpenApiVersion.Unknown) {
+        vscode.window.showErrorMessage("No OpenAPI found in the active editor");
+        return;
+      }
+
+      try {
+        await editorRunSingleOperationScan(
+          vscode.window.activeTextEditor,
+          cache,
+          store,
+          configuration,
+          secrets,
+          getScanView,
+          (operation.parent as PathNode).path,
+          operation.method
         );
       } catch (ex: any) {
         if (
@@ -73,13 +115,11 @@ export default (
 
 async function editorRunSingleOperationScan(
   editor: vscode.TextEditor,
-  edit: vscode.TextEditorEdit,
   cache: Cache,
   store: PlatformStore,
   configuration: Configuration,
   secrets: vscode.SecretStorage,
   getScanView: (uri: vscode.Uri) => ScanWebView,
-  uri: string,
   path: string,
   method: HttpMethod
 ): Promise<void> {

@@ -9,6 +9,7 @@ import {
   registerFocusSecurityAudit,
   registerFocusSecurityAuditById,
   registerSingleOperationAudit,
+  registerOutlineSingleOperationAudit,
 } from "./commands";
 import { AuditWebView } from "./view";
 import { AuditContext, PendingAudits } from "../types";
@@ -83,6 +84,14 @@ export function activate(
 
   registerSecurityAudit(context, cache, auditContext, pendingAudits, reportWebView, store);
   registerSingleOperationAudit(context, cache, auditContext, pendingAudits, reportWebView, store);
+  registerOutlineSingleOperationAudit(
+    context,
+    cache,
+    auditContext,
+    pendingAudits,
+    reportWebView,
+    store
+  );
   registerFocusSecurityAudit(context, cache, auditContext, reportWebView);
   registerFocusSecurityAuditById(context, auditContext, reportWebView);
   registerQuickfixes(context, cache, auditContext, reportWebView);
