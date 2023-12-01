@@ -17,7 +17,7 @@ import { findJsonNodeValue } from "./json-utils";
 import { fixInsert } from "./audit/quickfix";
 import { getPointerLastSegment, getPointerParent } from "./pointer";
 import { processSnippetParameters } from "./util";
-import { Node, outlines } from "./outline";
+import { OutlineNode } from "./outlines/nodes/base";
 
 const commands: { [key: string]: Function } = {
   goToLine,
@@ -52,16 +52,7 @@ const commands: { [key: string]: Function } = {
   v3addSecuritySchemeJWT,
   v3addSecuritySchemeOauth2Access,
 
-  copySelectedTwoPathOutlineJsonReference,
-  copySelectedTwoParametersOutlineJsonReference,
-  copySelectedTwoResponsesOutlineJsonReference,
-  copySelectedTwoDefinitionOutlineJsonReference,
-  copySelectedTwoSecurityOutlineJsonReference,
-  copySelectedTwoSecurityDefinitionOutlineJsonReference,
-  copySelectedThreePathOutlineJsonReference,
-  copySelectedThreeServersOutlineJsonReference,
-  copySelectedThreeComponentsOutlineJsonReference,
-  copySelectedThreeSecurityOutlineJsonReference,
+  copyNodeJsonReference,
 };
 
 export const registeredSnippetQuickFixes: { [key: string]: Fix } = {};
@@ -113,51 +104,7 @@ async function copyJsonReference(cache: Cache, range: vscode.Range) {
   }
 }
 
-function copySelectedTwoPathOutlineJsonReference(cache: Cache, ...args) {
-  copySelectedJsonReference(args[0]);
-}
-
-function copySelectedTwoParametersOutlineJsonReference(cache: Cache, ...args) {
-  copySelectedJsonReference(args[0]);
-}
-
-function copySelectedTwoResponsesOutlineJsonReference(cache: Cache, ...args) {
-  copySelectedJsonReference(args[0]);
-}
-
-function copySelectedTwoDefinitionOutlineJsonReference(cache: Cache, ...args) {
-  copySelectedJsonReference(args[0]);
-}
-
-function copySelectedTwoSecurityOutlineJsonReference(cache: Cache, ...args) {
-  copySelectedJsonReference(args[0]);
-}
-
-function copySelectedTwoSecurityDefinitionOutlineJsonReference(cache: Cache, ...args) {
-  copySelectedJsonReference(args[0]);
-}
-
-function copySelectedThreePathOutlineJsonReference(cache: Cache, ...args) {
-  copySelectedJsonReference(args[0]);
-}
-
-function copySelectedThreeServersOutlineJsonReference(cache: Cache, ...args) {
-  copySelectedJsonReference(args[0]);
-}
-
-function copySelectedThreeComponentsOutlineJsonReference(cache: Cache, ...args) {
-  copySelectedJsonReference(args[0]);
-}
-
-function copySelectedThreeSecurityOutlineJsonReference(cache: Cache, ...args) {
-  copySelectedJsonReference(args[0]);
-}
-
-function copySelectedJsonReference(node: OutlineNode) {
-  copyNodeJsonReference(node);
-}
-
-function copyNodeJsonReference(node: OutlineNode) {
+function copyNodeJsonReference(cache: Cache, node: OutlineNode) {
   if (node) {
     const encoded = node.id;
     vscode.env.clipboard.writeText(`#${encoded}`);

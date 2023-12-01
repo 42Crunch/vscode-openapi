@@ -232,40 +232,8 @@
           "when": "!openapiErrors && view == openapiOutline && viewItem == securityDefinitions && openapiTwoEnabled"
         },
         {
-          "command": "openapi.copySelectedTwoPathOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiOutline && viewItem == path"
-        },
-        {
-          "command": "openapi.copySelectedTwoParametersOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiOutline && viewItem == parameter && openapiTwoEnabled"
-        },
-        {
-          "command": "openapi.copySelectedTwoResponsesOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiOutline && viewItem == response && openapiTwoEnabled"
-        },
-        {
-          "command": "openapi.copySelectedTwoDefinitionOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiOutline && viewItem == definition && openapiTwoEnabled"
-        },
-        {
-          "command": "openapi.copySelectedTwoSecurityOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiOutline && viewItem == securityItem && openapiTwoEnabled"
-        },
-        {
-          "command": "openapi.copySelectedTwoSecurityDefinitionOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiOutline && viewItem == securityDefinition && openapiTwoEnabled"
-        },
-        {
-          "command": "openapi.copySelectedThreeServersOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiOutline && viewItem == server && openapiThreeEnabled"
-        },
-        {
-          "command": "openapi.copySelectedThreeComponentsOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiOutline && viewItem == component && openapiThreeEnabled"
-        },
-        {
-          "command": "openapi.copySelectedThreeSecurityOutlineJsonReference",
-          "when": "!openapiErrors && view == openapiOutline && viewItem == securityItem && openapiThreeEnabled"
+          "command": "openapi.copyNodeJsonReference",
+          "when": "view == openapiOutline && (viewItem == path || viewItem == operation || viewItem == general || viewItem == component || viewItem == parameter || viewItem == response || viewItem == definition || viewItem == securityItem || viewItem == securityDefinition || viewItem == server || viewItem == simple-child)"
         },
         {
           "command": "openapi.outline.resetSearch",
@@ -627,44 +595,9 @@
         }
       },
       {
-        "command": "openapi.copySelectedTwoPathOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer"
-      },
-      {
-        "command": "openapi.copySelectedTwoParametersOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer"
-      },
-      {
-        "command": "openapi.copySelectedTwoResponsesOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer"
-      },
-      {
-        "command": "openapi.copySelectedTwoDefinitionOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer"
-      },
-      {
-        "command": "openapi.copySelectedTwoSecurityOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer"
-      },
-      {
-        "command": "openapi.copySelectedTwoSecurityDefinitionOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer"
-      },
-      {
-        "command": "openapi.copySelectedThreePathOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer"
-      },
-      {
-        "command": "openapi.copySelectedThreeServersOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer"
-      },
-      {
-        "command": "openapi.copySelectedThreeComponentsOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer"
-      },
-      {
-        "command": "openapi.copySelectedThreeSecurityOutlineJsonReference",
-        "title": "OpenAPI: copy JSON Pointer"
+        "command": "openapi.copyNodeJsonReference",
+        "title": "Copy JSON Pointer",
+        "enablement": "view == openapiOutline "
       },
       {
         "command": "openapi.platform.editorLoadAuditReportFromFile",

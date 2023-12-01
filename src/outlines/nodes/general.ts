@@ -23,7 +23,7 @@ export class GeneralNode extends AbstractOutlineNode {
   constructor(parent: OutlineNode, node: any) {
     super(parent, "", "General", vscode.TreeItemCollapsibleState.Collapsed, node, parent.context);
     this.icon = "file-lines.svg";
-    this.contextValue = "general";
+    this.contextValue = "top-general";
     this.searchable = false;
   }
 

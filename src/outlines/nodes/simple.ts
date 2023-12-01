@@ -105,5 +105,5 @@ function getContextValue(key: string, parent: OutlineNode): string | undefined {
   if (parent?.parent?.contextValue === "components") {
     return "component";
   }
-  return undefined;
+  return "simple-child";
 }
