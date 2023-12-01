@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 
+import { HttpMethod } from "@xliic/common/http";
+
 import { AbstractOutlineNode, HTTP_METHODS, OutlineNode } from "./base";
 import { Container, Location, getLocation } from "@xliic/preserving-json-yaml-parser";
 
@@ -7,13 +9,13 @@ type OperationId = {
   type: "operationId";
   operationId: string;
   path: string;
-  method: string;
+  method: HttpMethod;
 };
 
 type PathMethodId = {
   type: "pathMethod";
   path: string;
-  method: string;
+  method: HttpMethod;
 };
 
 export type UniqueOperationName = OperationId | PathMethodId;
@@ -64,7 +66,7 @@ export class TagsNode extends AbstractOutlineNode {
               }
               const opId = operation as any["operationId"];
               if (opId) {
-                const name = getUniqueName(pathName, opName, operation);
+                const name = getUniqueName(pathName, opName as HttpMethod, operation);
                 const location = getLocation(<Container>path, opName)!;
                 const tagOperation: TagOperation = {
                   type: "operation",
@@ -158,6 +160,7 @@ export class TagChildNode extends AbstractOutlineNode {
     if (tagOp.name.type === "operationId") {
       this.item.tooltip = getTooltip(tagOp.name);
     }
+    this.contextValue = "tag-child";
   }
 }
 
@@ -169,7 +172,7 @@ function uniqueNameToString(name: UniqueOperationName) {
   return name.type === "operationId" ? name.operationId : getTooltip(name);
 }
 
-function getUniqueName(path: string, method: string, operation: any): UniqueOperationName {
+function getUniqueName(path: string, method: HttpMethod, operation: any): UniqueOperationName {
   const operationId = operation["operationId"];
   if (operationId && operationId !== "") {
     return { type: "operationId", operationId, path, method };

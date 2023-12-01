@@ -5,7 +5,7 @@
 
 import * as vscode from "vscode";
 import { Preferences } from "@xliic/common/prefs";
-import { Bundle, OpenApiVersion } from "../types";
+import { Bundle } from "../types";
 import { Cache } from "../cache";
 import { HttpMethod } from "@xliic/common/http";
 import { BundleDocumentVersions, TryItWebView } from "./view";
@@ -14,6 +14,9 @@ import { Configuration } from "../configuration";
 import { EnvStore } from "../envstore";
 import { DebounceDelay, debounce } from "../util/debounce";
 import { OperationNode, PathNode } from "../outlines/nodes/paths";
+import { TagChildNode, TagNode } from "../outlines/nodes/tags";
+import { OperationIdNode } from "../outlines/nodes/operation-ids";
+import { getPathAndMethod } from "../outlines/util";
 
 const selectors = {
   json: { language: "json" },
@@ -100,26 +103,13 @@ export function activate(
 
   vscode.commands.registerCommand(
     "openapi.outlineTryOperation",
-    async (operation: OperationNode) => {
+    async (node: OperationNode | TagChildNode | OperationIdNode) => {
       if (!vscode.window.activeTextEditor) {
-        vscode.window.showErrorMessage("No OpenAPI found in the active editor");
+        vscode.window.showErrorMessage("No active editor");
         return;
       }
-
-      const version = cache.getDocumentVersion(vscode.window.activeTextEditor.document);
-
-      if (version === OpenApiVersion.Unknown) {
-        vscode.window.showErrorMessage("No OpenAPI found in the active editor");
-        return;
-      }
-
-      await startTryIt(
-        vscode.window.activeTextEditor.document,
-        cache,
-        view,
-        (operation.parent as PathNode).path,
-        operation.method
-      );
+      const { path, method } = getPathAndMethod(node);
+      await startTryIt(vscode.window.activeTextEditor.document, cache, view, path, method);
     }
   );
 

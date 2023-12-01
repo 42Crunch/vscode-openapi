@@ -10,21 +10,22 @@ import { stringify } from "@xliic/preserving-json-yaml-parser";
 
 import { Cache } from "../../cache";
 import { Configuration } from "../../configuration";
-import { loadConfig } from "../../util/config";
-import { PlatformStore } from "../stores/platform-store";
-import { Logger, PlatformContext } from "../types";
+import { ensureHasCredentials, getAnondCredentials } from "../../credentials";
+import { OperationIdNode } from "../../outlines/nodes/operation-ids";
+import { OperationNode } from "../../outlines/nodes/paths";
+import { TagChildNode } from "../../outlines/nodes/tags";
+import { getPathAndMethod } from "../../outlines/util";
 import {
   createScanConfigWithCliBinary,
   ensureCliDownloaded,
   runAuditWithCliBinary,
 } from "../cli-ast";
+import { PlatformStore } from "../stores/platform-store";
+import { Logger, PlatformContext } from "../types";
+import { offerUpgrade } from "../upgrade";
+import { getScanconfUri } from "./config";
 import { createScanConfigWithPlatform } from "./runtime/platform";
 import { ScanWebView } from "./view";
-import { getScanconfUri } from "./config";
-import { ensureHasCredentials, getAnondCredentials } from "../../credentials";
-import { offerUpgrade } from "../upgrade";
-import { OperationNode, PathNode } from "../../outlines/nodes/paths";
-import { OpenApiVersion } from "../../types";
 
 export default (
   cache: Cache,
@@ -72,18 +73,13 @@ export default (
 
   vscode.commands.registerCommand(
     "openapi.outlineSingleOperationScan",
-    async (operation: OperationNode): Promise<void> => {
+    async (node: OperationNode | TagChildNode | OperationIdNode): Promise<void> => {
       if (!vscode.window.activeTextEditor) {
-        vscode.window.showErrorMessage("No OpenAPI found in the active editor");
+        vscode.window.showErrorMessage("No active editor");
         return;
       }
 
-      const version = cache.getDocumentVersion(vscode.window.activeTextEditor.document);
-
-      if (version === OpenApiVersion.Unknown) {
-        vscode.window.showErrorMessage("No OpenAPI found in the active editor");
-        return;
-      }
+      const { path, method } = getPathAndMethod(node);
 
       try {
         await editorRunSingleOperationScan(
@@ -93,8 +89,8 @@ export default (
           configuration,
           secrets,
           getScanView,
-          (operation.parent as PathNode).path,
-          operation.method
+          path,
+          method
         );
       } catch (ex: any) {
         if (

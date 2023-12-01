@@ -1,9 +1,10 @@
 import * as vscode from "vscode";
 
-import { AbstractOutlineNode, HTTP_METHODS, OutlineNode } from "./base";
-import { SimpleNode } from "./simple";
+import { HttpMethod } from "@xliic/common/http";
+import { Container, getLocation } from "@xliic/preserving-json-yaml-parser";
+
 import { encodeJsonPointerSegment } from "../../pointer";
-import { Container, Location, getLocation } from "@xliic/preserving-json-yaml-parser";
+import { AbstractOutlineNode, HTTP_METHODS, OutlineNode } from "./base";
 
 export class OperationIdsNode extends AbstractOutlineNode {
   constructor(parent: OutlineNode, node: any) {
@@ -35,7 +36,14 @@ export class OperationIdsNode extends AbstractOutlineNode {
           const operationId = operation["operationId"];
           if (operationId) {
             id += "/" + encodeJsonPointerSegment(opName) + "/operationId";
-            const opNode = new SimpleNode(this, id, operationId, operation, 0);
+            const opNode = new OperationIdNode(
+              this,
+              id,
+              operationId,
+              operation,
+              pathName,
+              opName as HttpMethod
+            );
             const location = getLocation(path as Container, opName);
             if (location) {
               opNode.updateLocation(location);
@@ -46,6 +54,26 @@ export class OperationIdsNode extends AbstractOutlineNode {
       }
     }
     return operations;
+  }
+}
+
+export class OperationIdNode extends AbstractOutlineNode {
+  readonly path: string;
+  readonly method: HttpMethod;
+
+  constructor(
+    parent: OutlineNode,
+    pointer: string,
+    key: string,
+    node: any,
+    path: string,
+    method: HttpMethod
+  ) {
+    super(parent, pointer, key, vscode.TreeItemCollapsibleState.None, node, parent.context);
+    this.path = path;
+    this.method = method;
+    this.contextValue = "operation-id";
+    this.searchable = false;
   }
 }
 

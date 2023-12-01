@@ -12,8 +12,13 @@ import { stringify } from "@xliic/preserving-json-yaml-parser";
 import { Cache } from "../cache";
 import { Configuration, configuration } from "../configuration";
 import { ensureHasCredentials, getAnondCredentials, getPlatformCredentials } from "../credentials";
+import { OperationIdNode } from "../outlines/nodes/operation-ids";
+import { OperationNode } from "../outlines/nodes/paths";
+import { TagChildNode } from "../outlines/nodes/tags";
+import { getPathAndMethod } from "../outlines/util";
+import { ensureCliDownloaded } from "../platform/cli-ast";
 import { PlatformStore } from "../platform/stores/platform-store";
-import { AuditContext, Bundle, OpenApiVersion, PendingAudits } from "../types";
+import { AuditContext, Bundle, PendingAudits } from "../types";
 import { extractSingleOperation } from "../util/extract";
 import { setDecorations } from "./decoration";
 import { runAnondAudit } from "./runtime/anond";
@@ -21,8 +26,6 @@ import { runCliAudit } from "./runtime/cli";
 import { runPlatformAudit } from "./runtime/platform";
 import { setAudit } from "./service";
 import { AuditWebView } from "./view";
-import { ensureCliDownloaded } from "../platform/cli-ast";
-import { OperationNode, PathNode } from "../outlines/nodes/paths";
 
 export function registerSecurityAudit(
   context: vscode.ExtensionContext,
@@ -84,18 +87,13 @@ export function registerOutlineSingleOperationAudit(
 ) {
   return vscode.commands.registerCommand(
     "openapi.outlineSingleOperationAudit",
-    async (operation: OperationNode) => {
+    async (node: OperationNode | TagChildNode | OperationIdNode) => {
       if (!vscode.window.activeTextEditor) {
-        vscode.window.showErrorMessage("No OpenAPI found in the active editor");
+        vscode.window.showErrorMessage("No active editor");
         return;
       }
 
-      const version = cache.getDocumentVersion(vscode.window.activeTextEditor.document);
-
-      if (version === OpenApiVersion.Unknown) {
-        vscode.window.showErrorMessage("No OpenAPI found in the active editor");
-        return;
-      }
+      const { path, method } = getPathAndMethod(node);
 
       await securityAudit(
         context.secrets,
@@ -105,8 +103,8 @@ export function registerOutlineSingleOperationAudit(
         reportWebView,
         store,
         vscode.window.activeTextEditor,
-        (operation.parent as PathNode).path,
-        operation.method
+        path,
+        method
       );
     }
   );

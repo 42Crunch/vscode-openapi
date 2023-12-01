@@ -157,15 +157,15 @@
         },
         {
           "command": "openapi.outlineSingleOperationAudit",
-          "when": "view == openapiOutline && viewItem == operation"
+          "when": "view == openapiOutline && (viewItem == operation || viewItem == tag-child || viewItem == operation-id)"
         },
         {
           "command": "openapi.outlineSingleOperationScan",
-          "when": "view == openapiOutline && viewItem == operation && openapiScanEnabled"
+          "when": "view == openapiOutline && openapiScanEnabled && (viewItem == operation || viewItem == tag-child || viewItem == operation-id)"
         },
         {
           "command": "openapi.outlineTryOperation",
-          "when": "view == openapiOutline && viewItem == operation"
+          "when": "view == openapiOutline && (viewItem == operation || viewItem == tag-child || viewItem == operation-id)"
         },
         {
           "command": "openapi.v3addServer",
@@ -499,17 +499,17 @@
       {
         "command": "openapi.outlineSingleOperationAudit",
         "title": "Audit",
-        "enablement": "view == openapiOutline && viewItem == operation"
+        "enablement": "view == openapiOutline"
       },
       {
         "command": "openapi.outlineSingleOperationScan",
         "title": "Scan",
-        "enablement": "view == openapiOutline && viewItem == operation"
+        "enablement": "view == openapiOutline"
       },
       {
         "command": "openapi.outlineTryOperation",
         "title": "Try it",
-        "enablement": "view == openapiOutline && viewItem == operation"
+        "enablement": "view == openapiOutline"
       },
       {
         "command": "openapi.addHost",
