@@ -384,7 +384,8 @@
       {
         "command": "openapi.searchOutline",
         "title": "Search",
-        "icon": "$(search-view-icon)"
+        "icon": "$(search-view-icon)",
+        "enablement": "view == openapiOutline"
       },
       {
         "command": "openapi.platform.deleteCollection",
@@ -444,35 +445,43 @@
       },
       {
         "command": "openapi.v3addServer",
-        "title": "OpenAPI: add server"
+        "enablement": "view == openapiOutline",
+        "title": "Add server"
       },
       {
         "command": "openapi.v3addComponentsParameter",
-        "title": "OpenAPI: add parameter"
+        "enablement": "view == openapiOutline",
+        "title": "Add parameter"
       },
       {
         "command": "openapi.v3addComponentsResponse",
-        "title": "OpenAPI: add response"
+        "enablement": "view == openapiOutline",
+        "title": "Add response"
       },
       {
         "command": "openapi.v3addComponentsSchema",
-        "title": "OpenAPI: add 'object' scheme"
+        "enablement": "view == openapiOutline",
+        "title": "Add 'object' scheme"
       },
       {
         "command": "openapi.v3addSecuritySchemeBasic",
-        "title": "OpenAPI: add security scheme 'Basic'"
+        "enablement": "view == openapiOutline",
+        "title": "Add security scheme 'Basic'"
       },
       {
         "command": "openapi.v3addSecuritySchemeApiKey",
-        "title": "OpenAPI: add security scheme 'API Key'"
+        "enablement": "view == openapiOutline",
+        "title": "Add security scheme 'API Key'"
       },
       {
         "command": "openapi.v3addSecuritySchemeJWT",
-        "title": "OpenAPI: add security scheme 'JWT Bearer'"
+        "enablement": "view == openapiOutline",
+        "title": "Add security scheme 'JWT Bearer'"
       },
       {
         "command": "openapi.v3addSecuritySchemeOauth2Access",
-        "title": "OpenAPI: add security scheme 'Oauth2 Authorization Code'"
+        "enablement": "view == openapiOutline",
+        "title": "Add security scheme 'Oauth2 Authorization Code'"
       },
       {
         "command": "openapi.securityAudit",
@@ -485,73 +494,83 @@
       },
       {
         "command": "openapi.outlineSingleOperationAudit",
-        "title": "42Crunch API Audit",
+        "title": "Audit",
         "enablement": "view == openapiOutline && viewItem == operation"
       },
       {
         "command": "openapi.outlineSingleOperationScan",
-        "title": "42Crunch API Scan",
+        "title": "Scan",
         "enablement": "view == openapiOutline && viewItem == operation"
       },
       {
         "command": "openapi.addHost",
-        "title": "OpenAPI: add 'host' entry"
+        "enablement": "view == openapiOutline",
+        "title": "Add 'host' entry"
       },
       {
         "command": "openapi.addBasePath",
-        "title": "OpenAPI: add 'basePath' entry"
+        "enablement": "view == openapiOutline",
+        "title": "Add 'basePath' entry"
       },
       {
         "command": "openapi.addInfo",
-        "title": "OpenAPI: add 'info' entry"
+        "enablement": "view == openapiOutline",
+        "title": "Add 'info' entry"
       },
       {
         "command": "openapi.v3addInfo",
-        "title": "OpenAPI: add 'info' entry"
+        "enablement": "view == openapiOutline",
+        "title": "Add 'info' entry"
       },
       {
         "command": "openapi.addSecurityDefinitionBasic",
-        "title": "OpenAPI: add security scheme 'Basic'"
+        "enablement": "view == openapiOutline",
+        "title": "Add security scheme 'Basic'"
       },
       {
         "command": "openapi.addSecurityDefinitionOauth2Access",
-        "title": "OpenAPI: add security scheme 'OAuth2 Authorization Code'"
+        "enablement": "view == openapiOutline",
+        "title": "Add security scheme 'OAuth2 Authorization Code'"
       },
       {
         "command": "openapi.addSecurityDefinitionApiKey",
-        "title": "OpenAPI: add security scheme 'API Key'"
+        "enablement": "view == openapiOutline",
+        "title": "Add security scheme 'API Key'"
       },
       {
         "command": "openapi.addDefinitionObject",
-        "title": "OpenAPI: add 'object' definition"
+        "enablement": "view == openapiOutline",
+        "title": "Add 'object' definition"
       },
       {
         "command": "openapi.addParameterPath",
-        "title": "OpenAPI: add 'path' parameter"
+        "enablement": "view == openapiOutline",
+        "title": "Add 'path' parameter"
       },
       {
         "command": "openapi.addParameterBody",
-        "title": "OpenAPI: add 'body' parameter"
+        "enablement": "view == openapiOutline",
+        "title": "Add 'body' parameter"
       },
       {
         "command": "openapi.addParameterOther",
-        "title": "OpenAPI: add 'query', 'header' or 'formData' parameter"
+        "enablement": "view == openapiOutline",
+        "title": "Add 'query', 'header' or 'formData' parameter"
       },
       {
         "command": "openapi.addResponse",
-        "title": "OpenAPI: add response definition"
+        "enablement": "view == openapiOutline",
+        "title": "Add response definition"
       },
       {
         "command": "openapi.addPath",
-        "title": "OpenAPI: add new path"
+        "enablement": "view == openapiOutline",
+        "title": "Add path"
       },
       {
         "command": "openapi.addOperation",
-        "title": "OpenAPI: add operation",
-        "icon": {
-          "light": "resources/icons/icon_plus_black.svg",
-          "dark": "resources/icons/icon_plus_white.svg"
-        }
+        "enablement": "view == openapiOutline",
+        "title": "Add operation"
       },
       {
         "command": "openapi.createNewTwo",
@@ -571,7 +590,8 @@
       },
       {
         "command": "openapi.addSecurity",
-        "title": "OpenAPI: add new security entry"
+        "enablement": "view == openapiOutline",
+        "title": "Add security entry"
       },
       {
         "command": "openapi.copyJsonReference",
@@ -597,7 +617,7 @@
       {
         "command": "openapi.copyNodeJsonReference",
         "title": "Copy JSON Pointer",
-        "enablement": "view == openapiOutline "
+        "enablement": "view == openapiOutline"
       },
       {
         "command": "openapi.platform.editorLoadAuditReportFromFile",
