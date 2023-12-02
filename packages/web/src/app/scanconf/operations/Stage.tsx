@@ -175,18 +175,23 @@ function getVariableNamesFromEnvStack(env: PlaybookEnvStack): string[] {
 }
 
 function getResponseCodes(
-  target: playbook.Operation | playbook.StageContent | playbook.ExternalStageContent
+  target: playbook.Operation | playbook.StageContent | playbook.ExternalStageContent | undefined
 ): string[] {
-  const responses = "scenarios" in target ? target.request.responses : target.responses;
-  const codes = Object.keys(responses || {}).map((key) => key);
-  return codes;
+  if (target !== undefined) {
+    const responses = "scenarios" in target ? target.request.responses : target.responses;
+    const codes = Object.keys(responses || {}).map((key) => key);
+    return codes;
+  }
+  return [];
 }
 
 function getDefaultResponseCode(
-  target: playbook.Operation | playbook.StageContent | playbook.ExternalStageContent
-): string {
-  const stageContent = "scenarios" in target ? target.request : target;
-  return stageContent.defaultResponse;
+  target: playbook.Operation | playbook.StageContent | playbook.ExternalStageContent | undefined
+): string | undefined {
+  if (target !== undefined) {
+    const stageContent = "scenarios" in target ? target.request : target;
+    return stageContent.defaultResponse;
+  }
 }
 
 const Container = styled.div`
