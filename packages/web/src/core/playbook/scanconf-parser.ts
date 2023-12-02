@@ -357,10 +357,14 @@ function parseRequestRef(
     return [undefined, undefined];
   }
 
-  const target = find(file, ref);
-  if (target === undefined) {
-    return makeErrorResult(`unable to resolve ref: ${ref}`);
-  }
+  // FIXME, do not fails on a missing references in the stages
+  // UI is able to cope with this
+  // instead we should log 'error' and show logs somewhere
+
+  // const target = find(file, ref);
+  // if (target === undefined) {
+  //   return makeErrorResult(`unable to resolve ref: ${ref}`);
+  // }
 
   const path = parseJsonPointer(ref);
   if (path.length === 2 && path[0] === "requests") {
