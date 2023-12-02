@@ -119,16 +119,6 @@ export async function makeExternalHttpRequest(
   }
 }
 
-export function makeHttpConfig(config: Config, request: HttpRequest): HttpConfig {
-  const [https, hostname] = parseHttpsHostname(request.url);
-  const rejectUnauthorized = https && !config.insecureSslHostnames.includes(hostname);
-  return {
-    https: {
-      rejectUnauthorized,
-    },
-  };
-}
-
 async function buildOasSpecWithServers(
   oas: BundledOpenApiSpec,
   server: string,
