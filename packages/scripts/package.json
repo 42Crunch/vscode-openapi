@@ -1,0 +1,9 @@
+{
+  "name": "@xliic/scripts",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "build": "tsc -b",
+    "convert": "tsc -b && node dist/build-protections.js"
+  }
+}

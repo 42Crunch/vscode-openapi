@@ -1,8 +1,4 @@
 {
-  "id": "https://spec.openapis.org/oas/3.0/schema/2019-04-02",
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "description": "Validation schema for OpenAPI Specification Extensions",
-  "title": "Validation schema for OpenAPI Specification Extensions",
   "type": "object",
   "definitions": {
     "X42cLocalStrategy": {
@@ -22,7 +18,16 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": ["get", "put", "post", "delete", "options", "head", "patch", "trace"]
+              "enum": [
+                "get",
+                "put",
+                "post",
+                "delete",
+                "options",
+                "head",
+                "patch",
+                "trace"
+              ]
             }
           },
           "x-42c-strategy": {
@@ -60,70 +65,82 @@
                 "$ref": "#/definitions/X42cDeactivateAllowList"
               },
               {
-                "$ref": "#/definitions/X42cRequestAllowList"
+                "$ref": "#/definitions/x-42c-access-control-based-on-ip-range_0.1"
               },
               {
-                "$ref": "#/definitions/X42cResponseAllowList"
+                "$ref": "#/definitions/x-42c-forward-client-certificate_0.1"
               },
               {
-                "$ref": "#/definitions/X42cAccessControlBasedOnIPAddressRange"
+                "$ref": "#/definitions/x-42c-ip-allowlist_0.1"
               },
               {
-                "$ref": "#/definitions/X42cSetClientIp"
+                "$ref": "#/definitions/x-42c-jws-validation_0.1"
               },
               {
-                "$ref": "#/definitions/X42cJwtValidation"
+                "$ref": "#/definitions/x-42c-request-allowlist_0.1"
               },
               {
-                "$ref": "#/definitions/X42cJwtValidationV2"
+                "$ref": "#/definitions/x-42c-request-limiter-based-on-ip_0.1"
               },
               {
-                "$ref": "#/definitions/X42cJwtValidationEc"
+                "$ref": "#/definitions/x-42c-request-limiter_0.1"
               },
               {
-                "$ref": "#/definitions/X42cJwtValidationEcV2"
+                "$ref": "#/definitions/x-42c-response-allowlist_0.1"
               },
               {
-                "$ref": "#/definitions/X42cJwtValidationHmac"
+                "$ref": "#/definitions/x-42c-security-headers_0.1"
               },
               {
-                "$ref": "#/definitions/X42cJwtValidationHmacV2"
+                "$ref": "#/definitions/x-42c-set-client-ip_0.1"
               },
               {
-                "$ref": "#/definitions/X42cJwtVvalidationRsa"
+                "$ref": "#/definitions/x-42c-jwt-validation-ec_0.1"
               },
               {
-                "$ref": "#/definitions/X42cJwtVvalidationRsaV2"
+                "$ref": "#/definitions/x-42c-jwt-validation-ec_0.2"
               },
               {
-                "$ref": "#/definitions/X42cJwtValidationRsaNoSigCheck"
+                "$ref": "#/definitions/x-42c-jwt-validation-ec_0.3"
               },
               {
-                "$ref": "#/definitions/X42cJwtValidationNoSigCheck"
+                "$ref": "#/definitions/x-42c-jwt-validation-hmac_0.1"
               },
               {
-                "$ref": "#/definitions/X42cRateLimitingByIPAddress"
+                "$ref": "#/definitions/x-42c-jwt-validation-hmac_0.2"
               },
               {
-                "$ref": "#/definitions/X42cRateLimitingByKey"
+                "$ref": "#/definitions/x-42c-jwt-validation-hmac_0.3"
               },
               {
-                "$ref": "#/definitions/X42cSecurityHeaders"
+                "$ref": "#/definitions/x-42c-jwt-validation-no-sig-check_0.1"
               },
               {
-                "$ref": "#/definitions/X42cForwardClientCertificate"
+                "$ref": "#/definitions/x-42c-jwt-validation-no-sig-check_0.3"
               },
               {
-                "$ref": "#/definitions/X42cIpAllowList"
+                "$ref": "#/definitions/x-42c-jwt-validation-rsa-no-sig-check_0.1"
               },
               {
-                "$ref": "#/definitions/X42cJwsValidation"
+                "$ref": "#/definitions/x-42c-jwt-validation-rsa-no-sig-check_0.3"
               },
               {
-                "$ref": "#/definitions/X42cRequestBola"
+                "$ref": "#/definitions/x-42c-jwt-validation-rsa_0.1"
               },
               {
-                "$ref": "#/definitions/X42cResponseBola"
+                "$ref": "#/definitions/x-42c-jwt-validation-rsa_0.2"
+              },
+              {
+                "$ref": "#/definitions/x-42c-jwt-validation-rsa_0.3"
+              },
+              {
+                "$ref": "#/definitions/x-42c-jwt-validation_0.1"
+              },
+              {
+                "$ref": "#/definitions/x-42c-jwt-validation_0.2"
+              },
+              {
+                "$ref": "#/definitions/x-42c-jwt-validation_0.3"
               }
             ]
           }
@@ -210,7 +227,9 @@
     },
     "X42cDeactivateAllowList": {
       "type": "object",
-      "required": ["x-42c-deactivate-allowlist"],
+      "required": [
+        "x-42c-deactivate-allowlist"
+      ],
       "properties": {
         "x-42c-deactivate-allowlist": {
           "type": "boolean",
@@ -219,35 +238,18 @@
       },
       "additionalProperties": false
     },
-    "X42cRequestAllowList": {
+    "x-42c-access-control-based-on-ip-range_0.1": {
       "type": "object",
-      "required": ["x-42c-request-allowlist_0.1"],
-      "properties": {
-        "x-42c-request-allowlist_0.1": {
-          "type": "boolean",
-          "default": true
-        }
-      },
-      "additionalProperties": false
-    },
-    "X42cResponseAllowList": {
-      "type": "object",
-      "required": ["x-42c-response-allowlist_0.1"],
-      "properties": {
-        "x-42c-response-allowlist_0.1": {
-          "type": "boolean",
-          "default": true
-        }
-      },
-      "additionalProperties": false
-    },
-    "X42cAccessControlBasedOnIPAddressRange": {
-      "type": "object",
-      "required": ["x-42c-access-control-based-on-ip-range_0.1"],
+      "required": [
+        "x-42c-access-control-based-on-ip-range_0.1"
+      ],
       "properties": {
         "x-42c-access-control-based-on-ip-range_0.1": {
           "type": "object",
-          "required": ["ip.range.list"],
+          "additionalProperties": false,
+          "required": [
+            "ip.range.list"
+          ],
           "properties": {
             "ip.range.list": {
               "type": "array",
@@ -256,964 +258,342 @@
               },
               "minItems": 1,
               "maxItems": 10,
-              "additionalItems": false
+              "additionalItems": false,
+              "description": "IP Range list"
             }
           },
-          "additionalProperties": false
+          "description": "Access Control based on IP"
         }
       },
       "additionalProperties": false
     },
-    "X42cSetClientIp": {
+    "x-42c-forward-client-certificate_0.1": {
       "type": "object",
-      "required": ["x-42c-set-client-ip_0.1"],
+      "required": [
+        "x-42c-forward-client-certificate_0.1"
+      ],
       "properties": {
-        "x-42c-set-client-ip_0.1": {
+        "x-42c-forward-client-certificate_0.1": {
           "type": "object",
-          "required": ["ip.header.name", "ip.header.mandatory"],
+          "additionalProperties": false,
+          "required": [
+            "backend.header.name"
+          ],
           "properties": {
-            "ip.header.name": {
+            "backend.header.name": {
               "type": "string",
-              "enum": ["X-Forwarded-For", "X-REAL-IP", "true_client_ip"]
+              "pattern": "",
+              "minLength": 1,
+              "maxLength": 9999,
+              "description": "Client certificate"
+            }
+          },
+          "description": "Forward client certificate to backend service"
+        }
+      },
+      "additionalProperties": false
+    },
+    "x-42c-ip-allowlist_0.1": {
+      "type": "object",
+      "required": [
+        "x-42c-ip-allowlist_0.1"
+      ],
+      "properties": {
+        "x-42c-ip-allowlist_0.1": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "ip.allow.list"
+          ],
+          "properties": {
+            "ip.allow.list": {
+              "type": "array",
+              "additionalItems": false,
+              "items": {
+                "type": "string",
+                "pattern": "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}",
+                "minLength": 7,
+                "maxLength": 15
+              }
+            }
+          },
+          "description": "Automatic allowlist protection based on the client ip"
+        }
+      },
+      "additionalProperties": false
+    },
+    "x-42c-jws-validation_0.1": {
+      "type": "object",
+      "required": [
+        "x-42c-jws-validation_0.1"
+      ],
+      "properties": {
+        "x-42c-jws-validation_0.1": {
+          "type": "object",
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Header name"
             },
-            "ip.header.mandatory": {
-              "type": "boolean",
-              "default": true
+            "jp.signed.data": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 500,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "Signed data"
             },
-            "remote.ip.allowlist": {
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "JWK env variable name"
+            },
+            "authorized.algorithms": {
               "type": "array",
               "items": {
                 "type": "string",
-                "minLength": 10,
-                "maxLength": 255
+                "enum": [
+                  "HS256",
+                  "HS384",
+                  "HS512",
+                  "RS256",
+                  "RS384",
+                  "RS512",
+                  "PS256",
+                  "PS384",
+                  "PS512",
+                  "ES256",
+                  "ES384",
+                  "ES512"
+                ]
               },
-              "maxItems": 10
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "additionalProperties": false
-    },
-    "X42cJwtValidation": {
-      "type": "object",
-      "required": ["x-42c-jwt-validation_0.1"],
-      "properties": {
-        "x-42c-jwt-validation_0.1": {
-          "type": "object",
-          "required": ["header.name", "authorized.algorithms"],
-          "properties": {
-            "header.name": {
-              "type": "string",
-              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
-              "minLength": 1,
-              "maxLength": 100
-            },
-            "jwk.envvar": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 100,
-              "default": "JWK"
-            },
-            "forward.jwt": {
-              "type": "boolean",
-              "default": true
-            },
-            "lifetime": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 99999999,
-              "default": 5
-            },
-            "drift": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 86400,
-              "default": 10
-            },
-            "authorized.algorithms": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "HS256",
-                  "HS384",
-                  "HS512",
-                  "RS256",
-                  "RS384",
-                  "RS512",
-                  "PS256",
-                  "PS384",
-                  "PS512",
-                  "ES256",
-                  "ES384",
-                  "ES512"
-                ]
-              }
-            },
-            "jti.timeout": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 99999999,
-              "default": 86400
-            },
-            "jp.claims.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "claims.schema": {
-              "type": "object",
-              "default": {}
+              "description": "Authorized algorithms"
             },
             "jp.jose.header.schema": {
               "type": "string",
               "minLength": 1,
               "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer jose header schema"
             },
             "jose.header.schema": {
               "type": "object",
-              "default": {}
+              "description": "JOSE header schema"
             }
           },
-          "additionalProperties": false
+          "required": [
+            "header.name",
+            "authorized.algorithms"
+          ],
+          "additionalProperties": false,
+          "description": "JWS validation"
         }
       },
       "additionalProperties": false
     },
-    "X42cJwtValidationV2": {
+    "x-42c-request-allowlist_0.1": {
       "type": "object",
-      "required": ["x-42c-jwt-validation_0.2"],
+      "required": [
+        "x-42c-request-allowlist_0.1"
+      ],
       "properties": {
-        "x-42c-jwt-validation_0.2": {
+        "x-42c-request-allowlist_0.1": {
           "type": "object",
-          "required": ["header.name", "authorized.algorithms"],
-          "properties": {
-            "header.name": {
-              "type": "string",
-              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
-              "minLength": 1,
-              "maxLength": 100
-            },
-            "allow.basic.value": {
-              "type": "boolean",
-              "default": false
-            },
-            "jwk.envvar": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 100,
-              "default": "JWK"
-            },
-            "jwks.uri": {
-              "schema": {
-                "type": "string",
-                "pattern": "((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\\+\\$,\\w]+@)[A-Za-z0-9.-]+)((?:\\/[\\+~%/.\\w-_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[.\\!/\\w]*))?)",
-                "minLength": 1,
-                "maxLength": 500,
-                "default": ""
-              }
-            },
-            "forward.jwt": {
-              "type": "boolean",
-              "default": true
-            },
-            "lifetime": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 99999999,
-              "default": 5
-            },
-            "drift": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 86400,
-              "default": 10
-            },
-            "authorized.algorithms": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "HS256",
-                  "HS384",
-                  "HS512",
-                  "RS256",
-                  "RS384",
-                  "RS512",
-                  "PS256",
-                  "PS384",
-                  "PS512",
-                  "ES256",
-                  "ES384",
-                  "ES512"
-                ]
-              }
-            },
-            "jti.timeout": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 99999999,
-              "default": 86400
-            },
-            "jp.claims.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "claims.schema": {
-              "type": "object",
-              "default": {}
-            },
-            "jp.jose.header.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "jose.header.schema": {
-              "type": "object",
-              "default": {}
-            }
-          },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "properties": {},
+          "description": "Automatic allowlist protection on the incoming request sent by the client"
         }
       },
       "additionalProperties": false
     },
-    "X42cJwtValidationEc": {
+    "x-42c-request-limiter-based-on-ip_0.1": {
       "type": "object",
-      "required": ["x-42c-jwt-validation-ec_0.1"],
-      "properties": {
-        "x-42c-jwt-validation-ec_0.1": {
-          "type": "object",
-          "required": ["header.name"],
-          "properties": {
-            "header.name": {
-              "type": "string",
-              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
-              "minLength": 1,
-              "maxLength": 100
-            },
-            "jwk.envvar": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 100,
-              "default": "JWK"
-            },
-            "forward.jwt": {
-              "type": "boolean",
-              "default": true
-            },
-            "lifetime": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 99999999,
-              "default": 5
-            },
-            "drift": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 86400,
-              "default": 10
-            },
-            "jti.timeout": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 99999999,
-              "default": 86400
-            },
-            "jp.claims.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "claims.schema": {
-              "type": "object",
-              "default": {}
-            },
-            "jp.jose.header.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "jose.header.schema": {
-              "type": "object",
-              "default": {}
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "additionalProperties": false
-    },
-    "X42cJwtValidationEcV2": {
-      "type": "object",
-      "required": ["x-42c-jwt-validation-ec_0.2"],
-      "properties": {
-        "x-42c-jwt-validation-ec_0.2": {
-          "type": "object",
-          "required": ["header.name"],
-          "properties": {
-            "header.name": {
-              "type": "string",
-              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
-              "minLength": 1,
-              "maxLength": 100
-            },
-            "allow.basic.value": {
-              "type": "boolean",
-              "default": false
-            },
-            "jwk.envvar": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 100,
-              "default": "JWK"
-            },
-            "jwks.uri": {
-              "schema": {
-                "type": "string",
-                "pattern": "((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\\+\\$,\\w]+@)[A-Za-z0-9.-]+)((?:\\/[\\+~%/.\\w-_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[.\\!/\\w]*))?)",
-                "minLength": 1,
-                "maxLength": 500,
-                "default": ""
-              }
-            },
-            "forward.jwt": {
-              "type": "boolean",
-              "default": true
-            },
-            "lifetime": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 99999999,
-              "default": 5
-            },
-            "drift": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 86400,
-              "default": 10
-            },
-            "jti.timeout": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 99999999,
-              "default": 86400
-            },
-            "jp.claims.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "claims.schema": {
-              "type": "object",
-              "default": {}
-            },
-            "jp.jose.header.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "jose.header.schema": {
-              "type": "object",
-              "default": {}
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "additionalProperties": false
-    },
-    "X42cJwtValidationHmac": {
-      "type": "object",
-      "required": ["x-42c-jwt-validation-hmac_0.1"],
-      "properties": {
-        "x-42c-jwt-validation-hmac_0.1": {
-          "type": "object",
-          "required": ["header.name"],
-          "properties": {
-            "header.name": {
-              "type": "string",
-              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
-              "minLength": 1,
-              "maxLength": 100
-            },
-            "jwk.envvar": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 100,
-              "default": "JWK"
-            },
-            "forward.jwt": {
-              "type": "boolean",
-              "default": true
-            },
-            "lifetime": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 99999999,
-              "default": 5
-            },
-            "drift": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 86400,
-              "default": 10
-            },
-            "jti.timeout": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 99999999,
-              "default": 86400
-            },
-            "jp.claims.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "claims.schema": {
-              "type": "object",
-              "default": {}
-            },
-            "jp.jose.header.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "jose.header.schema": {
-              "type": "object",
-              "default": {}
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "additionalProperties": false
-    },
-    "X42cJwtValidationHmacV2": {
-      "type": "object",
-      "required": ["x-42c-jwt-validation-hmac_0.2"],
-      "properties": {
-        "x-42c-jwt-validation-hmac_0.2": {
-          "type": "object",
-          "required": ["header.name"],
-          "properties": {
-            "header.name": {
-              "type": "string",
-              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
-              "minLength": 1,
-              "maxLength": 100
-            },
-            "allow.basic.value": {
-              "type": "boolean",
-              "default": false
-            },
-            "jwk.envvar": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 100,
-              "default": "JWK"
-            },
-            "jwks.uri": {
-              "schema": {
-                "type": "string",
-                "pattern": "((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\\+\\$,\\w]+@)[A-Za-z0-9.-]+)((?:\\/[\\+~%/.\\w-_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[.\\!/\\w]*))?)",
-                "minLength": 1,
-                "maxLength": 500,
-                "default": ""
-              }
-            },
-            "forward.jwt": {
-              "type": "boolean",
-              "default": true
-            },
-            "lifetime": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 99999999,
-              "default": 5
-            },
-            "drift": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 86400,
-              "default": 10
-            },
-            "jti.timeout": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 99999999,
-              "default": 86400
-            },
-            "jp.claims.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "claims.schema": {
-              "type": "object",
-              "default": {}
-            },
-            "jp.jose.header.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "jose.header.schema": {
-              "type": "object",
-              "default": {}
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "additionalProperties": false
-    },
-    "X42cJwtVvalidationRsa": {
-      "type": "object",
-      "required": ["x-42c-jwt-validation-rsa_0.1"],
-      "properties": {
-        "x-42c-jwt-validation-rsa_0.1": {
-          "type": "object",
-          "required": ["header.name"],
-          "properties": {
-            "header.name": {
-              "type": "string",
-              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
-              "minLength": 1,
-              "maxLength": 100
-            },
-            "jwk.envvar": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 100,
-              "default": "JWK"
-            },
-            "forward.jwt": {
-              "type": "boolean",
-              "default": true
-            },
-            "lifetime": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 99999999,
-              "default": 5
-            },
-            "drift": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 86400,
-              "default": 10
-            },
-            "jti.timeout": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 99999999,
-              "default": 86400
-            },
-            "jp.claims.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "claims.schema": {
-              "type": "object",
-              "default": {}
-            },
-            "jp.jose.header.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "jose.header.schema": {
-              "type": "object",
-              "default": {}
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "additionalProperties": false
-    },
-    "X42cJwtVvalidationRsaV2": {
-      "type": "object",
-      "required": ["x-42c-jwt-validation-rsa_0.2"],
-      "properties": {
-        "x-42c-jwt-validation-rsa_0.2": {
-          "type": "object",
-          "required": ["header.name"],
-          "properties": {
-            "header.name": {
-              "type": "string",
-              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
-              "minLength": 1,
-              "maxLength": 100
-            },
-            "allow.basic.value": {
-              "type": "boolean",
-              "default": false
-            },
-            "jwk.envvar": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 100,
-              "default": "JWK"
-            },
-            "jwks.uri": {
-              "schema": {
-                "type": "string",
-                "pattern": "((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\\+\\$,\\w]+@)[A-Za-z0-9.-]+)((?:\\/[\\+~%/.\\w-_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[.\\!/\\w]*))?)",
-                "minLength": 1,
-                "maxLength": 500,
-                "default": ""
-              }
-            },
-            "forward.jwt": {
-              "type": "boolean",
-              "default": true
-            },
-            "lifetime": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 99999999,
-              "default": 5
-            },
-            "drift": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 86400,
-              "default": 10
-            },
-            "jti.timeout": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 99999999,
-              "default": 86400
-            },
-            "jp.claims.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "claims.schema": {
-              "type": "object",
-              "default": {}
-            },
-            "jp.jose.header.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "jose.header.schema": {
-              "type": "object",
-              "default": {}
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "additionalProperties": false
-    },
-    "X42cJwtValidationRsaNoSigCheck": {
-      "type": "object",
-      "required": ["x-42c-jwt-validation-rsa-no-sig-check_0.1"],
-      "properties": {
-        "x-42c-jwt-validation-rsa-no-sig-check_0.1": {
-          "type": "object",
-          "required": ["header.name"],
-          "properties": {
-            "header.name": {
-              "type": "string",
-              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
-              "minLength": 1,
-              "maxLength": 100
-            },
-            "forward.jwt": {
-              "type": "boolean",
-              "default": true
-            },
-            "lifetime": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 99999999,
-              "default": 5
-            },
-            "drift": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 86400,
-              "default": 10
-            },
-            "jti.timeout": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 99999999,
-              "default": 86400
-            },
-            "jp.claims.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "claims.schema": {
-              "type": "object",
-              "default": {}
-            },
-            "jp.jose.header.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "jose.header.schema": {
-              "type": "object",
-              "default": {}
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "additionalProperties": false
-    },
-    "X42cJwtValidationNoSigCheck": {
-      "type": "object",
-      "required": ["x-42c-jwt-validation-no-sig-check_0.1"],
-      "properties": {
-        "x-42c-jwt-validation-no-sig-check_0.1": {
-          "type": "object",
-          "required": ["header.name", "authorized.algorithms"],
-          "properties": {
-            "header.name": {
-              "type": "string",
-              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
-              "minLength": 1,
-              "maxLength": 100
-            },
-            "forward.jwt": {
-              "type": "boolean",
-              "default": true
-            },
-            "lifetime": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 99999999,
-              "default": 5
-            },
-            "drift": {
-              "type": "number",
-              "minimum": 0,
-              "maximum": 86400,
-              "default": 10
-            },
-            "authorized.algorithms": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "HS256",
-                  "HS384",
-                  "HS512",
-                  "RS256",
-                  "RS384",
-                  "RS512",
-                  "PS256",
-                  "PS384",
-                  "PS512",
-                  "ES256",
-                  "ES384",
-                  "ES512"
-                ]
-              }
-            },
-            "jti.timeout": {
-              "type": "integer",
-              "minimum": 1,
-              "maximum": 99999999,
-              "default": 86400
-            },
-            "jp.claims.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "claims.schema": {
-              "type": "object",
-              "default": {}
-            },
-            "jp.jose.header.schema": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
-            },
-            "jose.header.schema": {
-              "type": "object",
-              "default": {}
-            }
-          },
-          "additionalProperties": false
-        }
-      },
-      "additionalProperties": false
-    },
-    "X42cRateLimitingByIPAddress": {
-      "type": "object",
-      "required": ["x-42c-request-limiter-based-on-ip_0.1"],
+      "required": [
+        "x-42c-request-limiter-based-on-ip_0.1"
+      ],
       "properties": {
         "x-42c-request-limiter-based-on-ip_0.1": {
           "type": "object",
-          "required": ["window", "hits"],
+          "additionalProperties": false,
+          "required": [
+            "hits",
+            "window"
+          ],
           "properties": {
             "hits": {
               "type": "integer",
               "minimum": 0,
-              "maximum": 999999999
+              "maximum": 999999999,
+              "description": "Max request number"
             },
             "window": {
               "type": "integer",
               "minimum": 0,
-              "maximum": 999999999
+              "maximum": 999999999,
+              "description": "Window"
             },
             "burst.enabled": {
               "type": "boolean",
-              "default": false
+              "description": "Activate 'burst'"
             },
             "burst.hits": {
               "type": "integer",
               "minimum": 0,
               "maximum": 999999999,
-              "default": 5
+              "description": "Max burst request number"
             },
             "burst.window": {
               "type": "integer",
               "minimum": 0,
               "maximum": 999999999,
-              "default": 2
+              "description": "Burst window size"
             },
             "cache.name": {
               "type": "string",
               "minLength": 1,
               "maxLength": 255,
               "pattern": "^[a-zA-Z0-9_]{1,255}$",
-              "default": "default"
+              "description": "Cache name"
             },
             "cache.type": {
               "type": "string",
-              "enum": ["MEMORY"],
-              "default": "MEMORY"
+              "enum": [
+                "MEMORY"
+              ],
+              "description": "Cache type"
             },
             "add.retry_after": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Add 'Retry-After' header"
             }
           },
-          "additionalProperties": false
+          "description": "Request limiter"
         }
       },
       "additionalProperties": false
     },
-    "X42cRateLimitingByKey": {
+    "x-42c-request-limiter_0.1": {
       "type": "object",
-      "required": ["x-42c-request-limiter_0.1"],
+      "required": [
+        "x-42c-request-limiter_0.1"
+      ],
       "properties": {
         "x-42c-request-limiter_0.1": {
           "type": "object",
-          "required": ["window", "hits", "key"],
+          "additionalProperties": false,
+          "required": [
+            "key"
+          ],
           "properties": {
             "hits": {
               "type": "integer",
               "minimum": 0,
-              "maximum": 999999999
+              "maximum": 999999999,
+              "description": "Max request number"
             },
             "window": {
               "type": "integer",
               "minimum": 0,
-              "maximum": 999999999
+              "maximum": 999999999,
+              "description": "Window"
             },
             "burst.enabled": {
               "type": "boolean",
-              "default": false
+              "description": "Activate 'burst'"
             },
             "burst.hits": {
               "type": "integer",
               "minimum": 0,
               "maximum": 999999999,
-              "default": 5
+              "description": "Max burst request number"
             },
             "burst.window": {
               "type": "integer",
               "minimum": 0,
               "maximum": 999999999,
-              "default": 2
+              "description": "Burst window size"
             },
             "cache.name": {
               "type": "string",
               "minLength": 1,
               "maxLength": 255,
               "pattern": "^[a-zA-Z0-9_]{1,255}$",
-              "default": "default"
+              "description": "Cache name"
             },
             "cache.type": {
               "type": "string",
-              "enum": ["MEMORY"],
-              "default": "MEMORY"
+              "enum": [
+                "MEMORY"
+              ],
+              "description": "Cache type"
             },
             "key": {
               "type": "string",
               "minLength": 1,
               "maxLength": 255,
-              "pattern": "^[a-zA-Z0-9_]{1,255}$"
+              "pattern": "^[a-zA-Z0-9_]{1,255}$",
+              "description": "Key"
             },
             "add.retry_after": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Add 'Retry-After' header"
             }
           },
-          "additionalProperties": false
+          "description": "Request limiter"
         }
       },
       "additionalProperties": false
     },
-    "X42cSecurityHeaders": {
+    "x-42c-response-allowlist_0.1": {
       "type": "object",
-      "required": ["x-42c-security-headers_0.1"],
+      "required": [
+        "x-42c-response-allowlist_0.1"
+      ],
+      "properties": {
+        "x-42c-response-allowlist_0.1": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {},
+          "description": "Automatic allowlist protection on the response sent by the backend service"
+        }
+      },
+      "additionalProperties": false
+    },
+    "x-42c-security-headers_0.1": {
+      "type": "object",
+      "required": [
+        "x-42c-security-headers_0.1"
+      ],
       "properties": {
         "x-42c-security-headers_0.1": {
           "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode"
+          ],
           "properties": {
             "hsts.max_age": {
               "type": "integer",
               "minimum": 0,
               "maximum": 999999999,
-              "default": 3600
+              "description": "HSTS max age"
             },
             "csp.policy": {
               "type": "string",
               "minLength": 1,
               "maxLength": 1000,
-              "default": "default-src: 'self'; upgrade-insecure-requests; referrer no-referrer"
+              "description": "Content Security Policy"
             },
             "mode": {
               "type": "string",
-              "enum": ["add-only", "add-replace"],
-              "default": "add-only"
+              "enum": [
+                "add-only",
+                "add-replace"
+              ],
+              "description": "Mode"
             },
             "remove.headers": {
               "type": "array",
@@ -1222,80 +602,637 @@
               },
               "minItems": 0,
               "maxItems": 99,
-              "default": ["X-Powered-By", "X-AspNet-Version", "X-AspNetMvc-Version"],
-              "additionalItems": false
+              "additionalItems": false,
+              "description": "Headers to remove"
             }
-          }
+          },
+          "description": "Add HTTP security headers in response"
         }
       },
       "additionalProperties": false
     },
-    "X42cForwardClientCertificate": {
+    "x-42c-set-client-ip_0.1": {
       "type": "object",
-      "required": ["x-42c-forward-client-certificate_0.1"],
+      "required": [
+        "x-42c-set-client-ip_0.1"
+      ],
       "properties": {
-        "x-42c-forward-client-certificate_0.1": {
+        "x-42c-set-client-ip_0.1": {
           "type": "object",
-          "required": ["backend.header.name"],
+          "additionalProperties": false,
+          "required": [
+            "ip.header.name",
+            "ip.header.mandatory"
+          ],
           "properties": {
-            "backend.header.name": {
+            "ip.header.name": {
               "type": "string",
-              "pattern": "",
+              "maxLength": 128,
               "minLength": 1,
-              "maxLength": 9999
-            }
-          }
-        }
-      },
-      "additionalProperties": false
-    },
-    "X42cIpAllowList": {
-      "type": "object",
-      "required": ["x-42c-ip-allowlist_0.1"],
-      "properties": {
-        "x-42c-ip-allowlist_0.1": {
-          "type": "object",
-          "required": ["ip.allow.list"],
-          "properties": {
-            "ip.allow.list": {
+              "pattern": "^[a-zA-Z_\\-]+$",
+              "description": "IP Header name"
+            },
+            "ip.header.mandatory": {
+              "type": "boolean",
+              "description": "IP Header must be present "
+            },
+            "remote.ip.allowlist": {
               "type": "array",
               "items": {
                 "type": "string",
-                "pattern": "[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}",
-                "minLength": 7,
-                "maxLength": 15
-              }
+                "minLength": 10,
+                "maxLength": 255
+              },
+              "maxItems": 10,
+              "description": "IPs/Network addresses of trusted network frontends"
             }
-          }
+          },
+          "description": "Set Client IP"
         }
       },
       "additionalProperties": false
     },
-    "X42cJwsValidation": {
+    "x-42c-jwt-validation-ec_0.1": {
       "type": "object",
-      "required": ["x-42c-jws-validation_0.1"],
+      "required": [
+        "x-42c-jwt-validation-ec_0.1"
+      ],
       "properties": {
-        "x-42c-jws-validation_0.1": {
+        "x-42c-jwt-validation-ec_0.1": {
           "type": "object",
-          "required": ["header.name", "authorized.algorithms"],
           "properties": {
             "header.name": {
               "type": "string",
               "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
               "minLength": 1,
-              "maxLength": 100
-            },
-            "jp.signed.data": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 500,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+              "maxLength": 100,
+              "description": "Header name"
             },
             "jwk.envvar": {
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
-              "default": "JWK"
+              "description": "JWK env variable name"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "description": "Forward the JWT to backend"
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "description": "Token lifetime (seconds)"
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "description": "Drift time (in seconds)"
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "description": "JTI timeout (seconds)"
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer claims schema"
+            },
+            "claims.schema": {
+              "type": "object",
+              "description": "Claims schema"
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer jose header schema"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "description": "JOSE header schema"
+            }
+          },
+          "required": [
+            "header.name"
+          ],
+          "additionalProperties": false,
+          "description": "JWT Elliptic Curve validation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "x-42c-jwt-validation-ec_0.2": {
+      "type": "object",
+      "required": [
+        "x-42c-jwt-validation-ec_0.2"
+      ],
+      "properties": {
+        "x-42c-jwt-validation-ec_0.2": {
+          "type": "object",
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Header name"
+            },
+            "allow.basic.value": {
+              "type": "boolean",
+              "description": "Is Basic or Digest Allowed"
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "JWK env variable name"
+            },
+            "jwks.uri": {
+              "schema": {
+                "type": "string",
+                "pattern": "((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\\+\\$,\\w]+@)[A-Za-z0-9.-]+)((?:\\/[\\+~%/.\\w-_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[.\\!/\\w]*))?)",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "description": "JWKS endpoint"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "description": "Forward the JWT to backend"
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "description": "Token lifetime (seconds)"
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "description": "Drift time (in seconds)"
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "description": "JTI timeout (seconds)"
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer claims schema"
+            },
+            "claims.schema": {
+              "type": "object",
+              "description": "Claims schema"
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer jose header schema"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "description": "JOSE header schema"
+            },
+            "jwk.cache.timeout": {
+              "type": "number",
+              "minimum": 60,
+              "maximum": 28000,
+              "description": "Cache expiration time for JWK entry"
+            }
+          },
+          "required": [
+            "header.name"
+          ],
+          "additionalProperties": false,
+          "description": "JWT Elliptic Curve validation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "x-42c-jwt-validation-ec_0.3": {
+      "type": "object",
+      "required": [
+        "x-42c-jwt-validation-ec_0.3"
+      ],
+      "properties": {
+        "x-42c-jwt-validation-ec_0.3": {
+          "type": "object",
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Header name"
+            },
+            "allow.basic.value": {
+              "type": "boolean",
+              "description": "Is Basic or Digest Allowed"
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "JWK env variable name"
+            },
+            "jwks.uri": {
+              "schema": {
+                "type": "string",
+                "pattern": "^(?:https?://\\w+(?:[\\-.]\\w+)*(?::\\d+)?/(?:\\.?\\w[\\w\\-./+%]*)?(?:[?;][\\w\\-./+%&=;,@]*)?)$",
+                "minLength": 9,
+                "maxLength": 500
+              },
+              "description": "JWKS endpoint"
+            },
+            "jwks.proxy": {
+              "schema": {
+                "type": "string",
+                "pattern": "^(?:\\w+(?:[\\-.]\\w+)*:\\d+)$",
+                "minLength": 3,
+                "maxLength": 250
+              },
+              "description": "JWKS connect proxy"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "description": "Forward the JWT to backend"
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "description": "Token lifetime (seconds)"
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "description": "Drift time (in seconds)"
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "description": "JTI timeout (seconds)"
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer claims schema"
+            },
+            "claims.schema": {
+              "type": "object",
+              "description": "Claims schema"
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer jose header schema"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "description": "JOSE header schema"
+            },
+            "jwk.cache.timeout": {
+              "type": "number",
+              "minimum": 60,
+              "maximum": 28000,
+              "description": "Cache expiration time for JWK entry"
+            }
+          },
+          "required": [
+            "header.name"
+          ],
+          "additionalProperties": false,
+          "description": "JWT Elliptic Curve validation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "x-42c-jwt-validation-hmac_0.1": {
+      "type": "object",
+      "required": [
+        "x-42c-jwt-validation-hmac_0.1"
+      ],
+      "properties": {
+        "x-42c-jwt-validation-hmac_0.1": {
+          "type": "object",
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Header name"
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "JWK env variable name"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "description": "Forward the JWT to backend"
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "description": "Token lifetime (seconds)"
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "description": "Drift time (in seconds)"
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "description": "JTI timeout (seconds)"
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer claims schema"
+            },
+            "claims.schema": {
+              "type": "object",
+              "description": "Claims schema"
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer jose header schema"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "description": "JOSE header schema"
+            }
+          },
+          "required": [
+            "header.name"
+          ],
+          "additionalProperties": false,
+          "description": "JWT HMAC validation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "x-42c-jwt-validation-hmac_0.2": {
+      "type": "object",
+      "required": [
+        "x-42c-jwt-validation-hmac_0.2"
+      ],
+      "properties": {
+        "x-42c-jwt-validation-hmac_0.2": {
+          "type": "object",
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Header name"
+            },
+            "allow.basic.value": {
+              "type": "boolean",
+              "description": "Is Basic or Digest value Allowed"
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "JWK env variable name"
+            },
+            "jwks.uri": {
+              "schema": {
+                "type": "string",
+                "pattern": "((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\\+\\$,\\w]+@)[A-Za-z0-9.-]+)((?:\\/[\\+~%/.\\w-_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[.\\!/\\w]*))?)",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "description": "JWKS endpoint"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "description": "Forward the JWT to backend"
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "description": "Token lifetime (seconds)"
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "description": "Drift time (in seconds)"
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "description": "JTI timeout (seconds)"
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer claims schema"
+            },
+            "claims.schema": {
+              "type": "object",
+              "description": "Claims schema"
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer jose header schema"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "description": "JOSE header schema"
+            },
+            "jwk.cache.timeout": {
+              "type": "number",
+              "minimum": 60,
+              "maximum": 28000,
+              "description": "Cache expiration time for JWK entry"
+            }
+          },
+          "required": [
+            "header.name"
+          ],
+          "additionalProperties": false,
+          "description": "JWT HMAC validation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "x-42c-jwt-validation-hmac_0.3": {
+      "type": "object",
+      "required": [
+        "x-42c-jwt-validation-hmac_0.3"
+      ],
+      "properties": {
+        "x-42c-jwt-validation-hmac_0.3": {
+          "type": "object",
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Header name"
+            },
+            "allow.basic.value": {
+              "type": "boolean",
+              "description": "Is Basic or Digest value Allowed"
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "JWK env variable name"
+            },
+            "jwks.uri": {
+              "schema": {
+                "type": "string",
+                "pattern": "^(?:https?://\\w+(?:[\\-.]\\w+)*(?::\\d+)?/(?:\\.?\\w[\\w\\-./+%]*)?(?:[?;][\\w\\-./+%&=;,@]*)?)$",
+                "minLength": 9,
+                "maxLength": 500
+              },
+              "description": "JWKS endpoint"
+            },
+            "jwks.proxy": {
+              "schema": {
+                "type": "string",
+                "pattern": "^(?:\\w+(?:[\\-.]\\w+)*:\\d+)$",
+                "minLength": 3,
+                "maxLength": 250
+              },
+              "description": "JWKS connect proxy"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "description": "Forward the JWT to backend"
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "description": "Token lifetime (seconds)"
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "description": "Drift time (in seconds)"
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "description": "JTI timeout (seconds)"
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer claims schema"
+            },
+            "claims.schema": {
+              "type": "object",
+              "description": "Claims schema"
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer jose header schema"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "description": "JOSE header schema"
+            },
+            "jwk.cache.timeout": {
+              "type": "number",
+              "minimum": 60,
+              "maximum": 28000,
+              "description": "Cache expiration time for JWK entry"
+            }
+          },
+          "required": [
+            "header.name"
+          ],
+          "additionalProperties": false,
+          "description": "JWT HMAC validation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "x-42c-jwt-validation-no-sig-check_0.1": {
+      "type": "object",
+      "required": [
+        "x-42c-jwt-validation-no-sig-check_0.1"
+      ],
+      "properties": {
+        "x-42c-jwt-validation-no-sig-check_0.1": {
+          "type": "object",
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Header name"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "description": "Forward the JWT to backend"
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "description": "Token lifetime (seconds)"
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "description": "Drift time (in seconds)"
             },
             "authorized.algorithms": {
               "type": "array",
@@ -1315,63 +1252,892 @@
                   "ES384",
                   "ES512"
                 ]
-              }
+              },
+              "description": "Authorized algorithms"
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "description": "JTI timeout (seconds)"
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer claims schema"
+            },
+            "claims.schema": {
+              "type": "object",
+              "description": "Claims schema"
             },
             "jp.jose.header.schema": {
               "type": "string",
               "minLength": 1,
               "maxLength": 50000,
-              "pattern": "^\\#(/([^/~]+|~[01])+)*$"
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer jose header schema"
             },
             "jose.header.schema": {
               "type": "object",
-              "default": {}
+              "description": "JOSE header schema"
             }
           },
-          "additionalProperties": false
+          "required": [
+            "header.name",
+            "authorized.algorithms"
+          ],
+          "additionalProperties": false,
+          "description": "JWT validation (no signature check)"
         }
       },
       "additionalProperties": false
     },
-    "X42cRequestBola": {
+    "x-42c-jwt-validation-no-sig-check_0.3": {
       "type": "object",
-      "required": ["x-42c-request-bola_0.1"],
+      "required": [
+        "x-42c-jwt-validation-no-sig-check_0.3"
+      ],
       "properties": {
-        "x-42c-request-bola_0.1": {
+        "x-42c-jwt-validation-no-sig-check_0.3": {
           "type": "object",
           "properties": {
-            "id.location": {
-              "type": "string"
-            },
-            "cache.name": {
+            "header.name": {
               "type": "string",
-              "default": "default"
-            }
-          }
-        }
-      },
-      "additionalProperties": false
-    },
-    "X42cResponseBola": {
-      "type": "object",
-      "required": ["x-42c-response-bola_0.1"],
-      "properties": {
-        "x-42c-response-bola_0.1": {
-          "type": "object",
-          "required": ["id.location.jpointer"],
-          "properties": {
-            "load.identifiers": {
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Header name"
+            },
+            "forward.jwt": {
               "type": "boolean",
-              "default": false
+              "description": "Forward the JWT to backend"
             },
-            "id.location.jpointer": {
-              "type": "string"
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "description": "Token lifetime (seconds)"
             },
-            "cache.name": {
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "description": "Drift time (in seconds)"
+            },
+            "authorized.algorithms": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "HS256",
+                  "HS384",
+                  "HS512",
+                  "RS256",
+                  "RS384",
+                  "RS512",
+                  "PS256",
+                  "PS384",
+                  "PS512",
+                  "ES256",
+                  "ES384",
+                  "ES512"
+                ]
+              },
+              "description": "Authorized algorithms"
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "description": "JTI timeout (seconds)"
+            },
+            "jp.claims.schema": {
               "type": "string",
-              "default": "default"
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer claims schema"
+            },
+            "claims.schema": {
+              "type": "object",
+              "description": "Claims schema"
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer jose header schema"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "description": "JOSE header schema"
             }
-          }
+          },
+          "required": [
+            "header.name",
+            "authorized.algorithms"
+          ],
+          "additionalProperties": false,
+          "description": "JWT validation (no signature check)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "x-42c-jwt-validation-rsa-no-sig-check_0.1": {
+      "type": "object",
+      "required": [
+        "x-42c-jwt-validation-rsa-no-sig-check_0.1"
+      ],
+      "properties": {
+        "x-42c-jwt-validation-rsa-no-sig-check_0.1": {
+          "type": "object",
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Header name"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "description": "Forward the JWT to backend"
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "description": "Token lifetime (seconds)"
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "description": "Drift time (in seconds)"
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "description": "JTI timeout (seconds)"
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer claims schema"
+            },
+            "claims.schema": {
+              "type": "object",
+              "description": "Claims schema"
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer jose header schema"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "description": "JOSE header schema"
+            }
+          },
+          "required": [
+            "header.name"
+          ],
+          "additionalProperties": false,
+          "description": "JWT RSA validation (no sig check)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "x-42c-jwt-validation-rsa-no-sig-check_0.3": {
+      "type": "object",
+      "required": [
+        "x-42c-jwt-validation-rsa-no-sig-check_0.3"
+      ],
+      "properties": {
+        "x-42c-jwt-validation-rsa-no-sig-check_0.3": {
+          "type": "object",
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Header name"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "description": "Forward the JWT to backend"
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "description": "Token lifetime (seconds)"
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "description": "Drift time (in seconds)"
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "description": "JTI timeout (seconds)"
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer claims schema"
+            },
+            "claims.schema": {
+              "type": "object",
+              "description": "Claims schema"
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer jose header schema"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "description": "JOSE header schema"
+            }
+          },
+          "required": [
+            "header.name"
+          ],
+          "additionalProperties": false,
+          "description": "JWT RSA validation (no sig check)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "x-42c-jwt-validation-rsa_0.1": {
+      "type": "object",
+      "required": [
+        "x-42c-jwt-validation-rsa_0.1"
+      ],
+      "properties": {
+        "x-42c-jwt-validation-rsa_0.1": {
+          "type": "object",
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Header name"
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "JWK env variable name"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "description": "Forward the JWT to backend"
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "description": "Token lifetime (seconds)"
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "description": "Drift time (in seconds)"
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "description": "JTI timeout (seconds)"
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer claims schema"
+            },
+            "claims.schema": {
+              "type": "object",
+              "description": "Claims schema"
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer jose header schema"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "description": "JOSE header schema"
+            }
+          },
+          "required": [
+            "header.name"
+          ],
+          "additionalProperties": false,
+          "description": "JWT RSA validation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "x-42c-jwt-validation-rsa_0.2": {
+      "type": "object",
+      "required": [
+        "x-42c-jwt-validation-rsa_0.2"
+      ],
+      "properties": {
+        "x-42c-jwt-validation-rsa_0.2": {
+          "type": "object",
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Header name"
+            },
+            "allow.basic.value": {
+              "type": "boolean",
+              "description": "Is Basic or Digest value allowed"
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "JWK env variable name"
+            },
+            "jwks.uri": {
+              "schema": {
+                "type": "string",
+                "pattern": "((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\\+\\$,\\w]+@)[A-Za-z0-9.-]+)((?:\\/[\\+~%/.\\w-_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[.\\!/\\w]*))?)",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "description": "JWKS endpoint"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "description": "Forward the JWT to backend"
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "description": "Token lifetime (seconds)"
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "description": "Drift time (in seconds)"
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "description": "JTI timeout (seconds)"
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer claims schema"
+            },
+            "claims.schema": {
+              "type": "object",
+              "description": "Claims schema"
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer jose header schema"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "description": "JOSE header schema"
+            },
+            "jwk.cache.timeout": {
+              "type": "number",
+              "minimum": 60,
+              "maximum": 28000,
+              "description": "Cache expiration time for JWK entry"
+            }
+          },
+          "required": [
+            "header.name"
+          ],
+          "additionalProperties": false,
+          "description": "JWT RSA validation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "x-42c-jwt-validation-rsa_0.3": {
+      "type": "object",
+      "required": [
+        "x-42c-jwt-validation-rsa_0.3"
+      ],
+      "properties": {
+        "x-42c-jwt-validation-rsa_0.3": {
+          "type": "object",
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Header name"
+            },
+            "allow.basic.value": {
+              "type": "boolean",
+              "description": "Is Basic or Digest value allowed"
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "JWK env variable name"
+            },
+            "jwks.uri": {
+              "schema": {
+                "type": "string",
+                "pattern": "^(?:https?://\\w+(?:[\\-.]\\w+)*(?::\\d+)?/(?:\\.?\\w[\\w\\-./+%]*)?(?:[?;][\\w\\-./+%&=;,@]*)?)$",
+                "minLength": 9,
+                "maxLength": 500
+              },
+              "description": "JWKS endpoint"
+            },
+            "jwks.proxy": {
+              "schema": {
+                "type": "string",
+                "pattern": "^(?:\\w+(?:[\\-.]\\w+)*:\\d+)$",
+                "minLength": 3,
+                "maxLength": 250
+              },
+              "description": "JWKS connect proxy"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "description": "Forward the JWT to backend"
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "description": "Token lifetime (seconds)"
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "description": "Drift time (in seconds)"
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "description": "JTI timeout (seconds)"
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer claims schema"
+            },
+            "claims.schema": {
+              "type": "object",
+              "description": "Claims schema"
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer jose header schema"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "description": "JOSE header schema"
+            },
+            "jwk.cache.timeout": {
+              "type": "number",
+              "minimum": 60,
+              "maximum": 28000,
+              "description": "Cache expiration time for JWK entry"
+            }
+          },
+          "required": [
+            "header.name"
+          ],
+          "additionalProperties": false,
+          "description": "JWT RSA validation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "x-42c-jwt-validation_0.1": {
+      "type": "object",
+      "required": [
+        "x-42c-jwt-validation_0.1"
+      ],
+      "properties": {
+        "x-42c-jwt-validation_0.1": {
+          "type": "object",
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Header name"
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "JWK env variable name"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "description": "Forward the JWT to backend"
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "description": "Token lifetime (seconds)"
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "description": "Drift time (in seconds)"
+            },
+            "authorized.algorithms": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "HS256",
+                  "HS384",
+                  "HS512",
+                  "RS256",
+                  "RS384",
+                  "RS512",
+                  "PS256",
+                  "PS384",
+                  "PS512",
+                  "ES256",
+                  "ES384",
+                  "ES512"
+                ]
+              },
+              "description": "Authorized algorithms"
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "description": "JTI timeout (seconds)"
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer claims schema"
+            },
+            "claims.schema": {
+              "type": "object",
+              "description": "Claims schema"
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer jose header schema"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "description": "JOSE header schema"
+            }
+          },
+          "required": [
+            "header.name",
+            "authorized.algorithms"
+          ],
+          "additionalProperties": false,
+          "description": "JWT validation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "x-42c-jwt-validation_0.2": {
+      "type": "object",
+      "required": [
+        "x-42c-jwt-validation_0.2"
+      ],
+      "properties": {
+        "x-42c-jwt-validation_0.2": {
+          "type": "object",
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Header name"
+            },
+            "allow.basic.value": {
+              "type": "boolean",
+              "description": "Is Basic or Digest value allowed"
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "JWK env variable name"
+            },
+            "jwks.uri": {
+              "schema": {
+                "type": "string",
+                "pattern": "((([A-Za-z]{3,9}:(?:\\/\\/)?)(?:[-;:&=\\+\\$,\\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&=\\+\\$,\\w]+@)[A-Za-z0-9.-]+)((?:\\/[\\+~%/.\\w-_]*)?\\??(?:[-\\+=&;%@.\\w_]*)#?(?:[.\\!/\\w]*))?)",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "description": "JWKS endpoint"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "description": "Forward the JWT to backend"
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "description": "Token lifetime (seconds)"
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "description": "Drift time (in seconds)"
+            },
+            "authorized.algorithms": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "HS256",
+                  "HS384",
+                  "HS512",
+                  "RS256",
+                  "RS384",
+                  "RS512",
+                  "PS256",
+                  "PS384",
+                  "PS512",
+                  "ES256",
+                  "ES384",
+                  "ES512"
+                ]
+              },
+              "description": "Authorized algorithms"
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "description": "JTI timeout (seconds)"
+            },
+            "jwk.cache.timeout": {
+              "type": "number",
+              "minimum": 60,
+              "maximum": 28000,
+              "description": "Cache expiration time for JWK entry"
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer claims schema"
+            },
+            "claims.schema": {
+              "type": "object",
+              "description": "Claims schema"
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer jose header schema"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "description": "JOSE header schema"
+            }
+          },
+          "required": [
+            "header.name",
+            "authorized.algorithms"
+          ],
+          "additionalProperties": false,
+          "description": "JWT validation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "x-42c-jwt-validation_0.3": {
+      "type": "object",
+      "required": [
+        "x-42c-jwt-validation_0.3"
+      ],
+      "properties": {
+        "x-42c-jwt-validation_0.3": {
+          "type": "object",
+          "properties": {
+            "header.name": {
+              "type": "string",
+              "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Header name"
+            },
+            "allow.basic.value": {
+              "type": "boolean",
+              "description": "Is Basic or Digest value allowed"
+            },
+            "jwk.envvar": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "JWK env variable name"
+            },
+            "jwks.uri": {
+              "schema": {
+                "type": "string",
+                "pattern": "^(?:https?://\\w+(?:[\\-.]\\w+)*(?::\\d+)?/(?:\\.?\\w[\\w\\-./+%]*)?(?:[?;][\\w\\-./+%&=;,@]*)?)$",
+                "minLength": 9,
+                "maxLength": 500
+              },
+              "description": "JWKS endpoint"
+            },
+            "jwks.proxy": {
+              "schema": {
+                "type": "string",
+                "pattern": "^(?:\\w+(?:[\\-.]\\w+)*:\\d+)$",
+                "minLength": 3,
+                "maxLength": 250
+              },
+              "description": "JWKS connect proxy"
+            },
+            "forward.jwt": {
+              "type": "boolean",
+              "description": "Forward the JWT to backend"
+            },
+            "lifetime": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 99999999,
+              "description": "Token lifetime (seconds)"
+            },
+            "drift": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 86400,
+              "description": "Drift time (in seconds)"
+            },
+            "authorized.algorithms": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "HS256",
+                  "HS384",
+                  "HS512",
+                  "RS256",
+                  "RS384",
+                  "RS512",
+                  "PS256",
+                  "PS384",
+                  "PS512",
+                  "ES256",
+                  "ES384",
+                  "ES512"
+                ]
+              },
+              "description": "Authorized algorithms"
+            },
+            "jti.timeout": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 99999999,
+              "description": "JTI timeout (seconds)"
+            },
+            "jwk.cache.timeout": {
+              "type": "number",
+              "minimum": 60,
+              "maximum": 28000,
+              "description": "Cache expiration time for JWK entry"
+            },
+            "jp.claims.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer claims schema"
+            },
+            "claims.schema": {
+              "type": "object",
+              "description": "Claims schema"
+            },
+            "jp.jose.header.schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 50000,
+              "pattern": "^\\#(/([^/~]+|~[01])+)*$",
+              "description": "JPointer jose header schema"
+            },
+            "jose.header.schema": {
+              "type": "object",
+              "description": "JOSE header schema"
+            }
+          },
+          "required": [
+            "header.name",
+            "authorized.algorithms"
+          ],
+          "additionalProperties": false,
+          "description": "JWT validation"
         }
       },
       "additionalProperties": false

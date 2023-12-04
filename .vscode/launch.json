@@ -2,6 +2,14 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Launch Build Protections script",
+      "program": "${workspaceFolder}/packages/scripts/dist/build-protections.js",
+      "cwd": "${workspaceFolder}/packages/scripts/",
+      "request": "launch",
+      "skipFiles": ["<node_internals>/**"],
+      "type": "node"
+    },
+    {
       "type": "extensionHost",
       "request": "launch",
       "name": "Launch Dev Webapps",

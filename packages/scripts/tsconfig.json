@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.base",
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "NodeNext",
+    "outDir": "dist",
+    "rootDir": "src"
+  }
+}

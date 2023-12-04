@@ -1,0 +1,153 @@
+{
+  "type": "object",
+  "definitions": {
+    "X42cLocalStrategy": {
+      "type": "object",
+      "properties": {
+        "x-42c-strategy": {
+          "$ref": "#/definitions/X42cStrategy"
+        }
+      }
+    },
+    "X42cRequestStrategies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "operations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["get", "put", "post", "delete", "options", "head", "patch", "trace"]
+            }
+          },
+          "x-42c-strategy": {
+            "$ref": "#/definitions/X42cStrategy"
+          }
+        }
+      }
+    },
+    "X42cResponseStrategies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "responses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^([1-5](?:\\d{2}|XX)|default)$"
+            }
+          },
+          "x-42c-strategy": {
+            "$ref": "#/definitions/X42cStrategy"
+          }
+        }
+      }
+    },
+    "X42cStrategy": {
+      "type": "object",
+      "properties": {
+        "protections": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/definitions/X42cDeactivateAllowList"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "X42cNoAuthentication": {
+      "type": "boolean",
+      "default": false
+    },
+    "X42cMTLS": {
+      "type": "boolean",
+      "default": false
+    },
+    "X42cSensitivity": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "default": 3
+    },
+    "X42cSensitivityData": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "default": 3
+    },
+    "X42cSkipIssues": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "X42cWeightContent": {
+      "type": "integer",
+      "default": 80,
+      "maximum": 100,
+      "minimum": 0
+    },
+    "X42cWeightHeader": {
+      "type": "integer",
+      "default": 20,
+      "maximum": 100,
+      "minimum": 0
+    },
+    "X42cWeightSuccess": {
+      "type": "integer",
+      "default": 70,
+      "maximum": 100,
+      "minimum": 0
+    },
+    "X42cWeightFail": {
+      "type": "integer",
+      "default": 30,
+      "maximum": 100,
+      "minimum": 0
+    },
+    "X42cWeightInput": {
+      "type": "integer",
+      "default": 80,
+      "maximum": 100,
+      "minimum": 0
+    },
+    "X42cWeightOutput": {
+      "type": "integer",
+      "default": 20,
+      "maximum": 100,
+      "minimum": 0
+    },
+    "X42cWeightParameters": {
+      "type": "integer",
+      "default": 50,
+      "maximum": 100,
+      "minimum": 0
+    },
+    "X42cWeightRequestBody": {
+      "type": "integer",
+      "default": 50,
+      "maximum": 100,
+      "minimum": 0
+    },
+    "X42cSample": {
+      "additionalProperties": true,
+      "additionalItems": true
+    },
+    "X42cDeactivateAllowList": {
+      "type": "object",
+      "required": ["x-42c-deactivate-allowlist"],
+      "properties": {
+        "x-42c-deactivate-allowlist": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
