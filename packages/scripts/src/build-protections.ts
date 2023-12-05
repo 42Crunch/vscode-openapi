@@ -3,6 +3,7 @@ import * as path from "path";
 
 type Param = {
   label: string;
+  default?: unknown;
 };
 
 type Protection = {
@@ -66,9 +67,9 @@ function extractDefinitions(protections: Protection[]): Definitions {
       schema.properties[name].description = protection.metadata.title;
     }
 
-    // use params label to set property description
     if (schema.properties[name].properties && protection.interface.params) {
       for (const property of Object.keys(schema.properties[name].properties)) {
+        // use params label to set property description
         if (
           protection.interface.params[property] &&
           schema.properties[name].properties?.[property] &&
@@ -76,6 +77,17 @@ function extractDefinitions(protections: Protection[]): Definitions {
         ) {
           schema.properties[name].properties[property].description =
             protection.interface.params[property].label;
+        }
+        // use default from params if available
+        if (
+          protection.interface.params[property] &&
+          schema.properties[name].properties?.[property] &&
+          "default" in protection.interface.params[property] &&
+          schema.properties[name].properties?.[property]?.default === undefined &&
+          protection.interface.params[property].default !== null
+        ) {
+          schema.properties[name].properties[property].default =
+            protection.interface.params[property].default;
         }
       }
     }
@@ -123,13 +135,9 @@ async function writeSchema(schema: any): Promise<void> {
 }
 
 async function convert() {
-  const basic = await readProtections(
-    "protection-types/basic-protections"
-  );
+  const basic = await readProtections("protection-types/basic-protections");
 
-  const composite = await readProtections(
-    "protection-types/composite-protections"
-  );
+  const composite = await readProtections("protection-types/composite-protections");
 
   const definitions = extractDefinitions([...basic, ...composite]);
 

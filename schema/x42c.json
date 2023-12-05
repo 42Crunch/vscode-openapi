@@ -349,7 +349,8 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
-              "description": "JWK env variable name"
+              "description": "JWK env variable name",
+              "default": "JWK"
             },
             "authorized.algorithms": {
               "type": "array",
@@ -437,37 +438,43 @@
             },
             "burst.enabled": {
               "type": "boolean",
-              "description": "Activate 'burst'"
+              "description": "Activate 'burst'",
+              "default": false
             },
             "burst.hits": {
               "type": "integer",
               "minimum": 0,
               "maximum": 999999999,
-              "description": "Max burst request number"
+              "description": "Max burst request number",
+              "default": 5
             },
             "burst.window": {
               "type": "integer",
               "minimum": 0,
               "maximum": 999999999,
-              "description": "Burst window size"
+              "description": "Burst window size",
+              "default": 2
             },
             "cache.name": {
               "type": "string",
               "minLength": 1,
               "maxLength": 255,
               "pattern": "^[a-zA-Z0-9_]{1,255}$",
-              "description": "Cache name"
+              "description": "Cache name",
+              "default": "default"
             },
             "cache.type": {
               "type": "string",
               "enum": [
                 "MEMORY"
               ],
-              "description": "Cache type"
+              "description": "Cache type",
+              "default": "MEMORY"
             },
             "add.retry_after": {
               "type": "boolean",
-              "description": "Add 'Retry-After' header"
+              "description": "Add 'Retry-After' header",
+              "default": false
             }
           },
           "description": "Request limiter"
@@ -502,33 +509,38 @@
             },
             "burst.enabled": {
               "type": "boolean",
-              "description": "Activate 'burst'"
+              "description": "Activate 'burst'",
+              "default": false
             },
             "burst.hits": {
               "type": "integer",
               "minimum": 0,
               "maximum": 999999999,
-              "description": "Max burst request number"
+              "description": "Max burst request number",
+              "default": 5
             },
             "burst.window": {
               "type": "integer",
               "minimum": 0,
               "maximum": 999999999,
-              "description": "Burst window size"
+              "description": "Burst window size",
+              "default": 2
             },
             "cache.name": {
               "type": "string",
               "minLength": 1,
               "maxLength": 255,
               "pattern": "^[a-zA-Z0-9_]{1,255}$",
-              "description": "Cache name"
+              "description": "Cache name",
+              "default": "default"
             },
             "cache.type": {
               "type": "string",
               "enum": [
                 "MEMORY"
               ],
-              "description": "Cache type"
+              "description": "Cache type",
+              "default": "MEMORY"
             },
             "key": {
               "type": "string",
@@ -539,7 +551,8 @@
             },
             "add.retry_after": {
               "type": "boolean",
-              "description": "Add 'Retry-After' header"
+              "description": "Add 'Retry-After' header",
+              "default": false
             }
           },
           "description": "Request limiter"
@@ -579,13 +592,15 @@
               "type": "integer",
               "minimum": 0,
               "maximum": 999999999,
-              "description": "HSTS max age"
+              "description": "HSTS max age",
+              "default": 3600
             },
             "csp.policy": {
               "type": "string",
               "minLength": 1,
               "maxLength": 1000,
-              "description": "Content Security Policy"
+              "description": "Content Security Policy",
+              "default": "default-src: 'self'; upgrade-insecure-requests; referrer no-referrer"
             },
             "mode": {
               "type": "string",
@@ -593,7 +608,8 @@
                 "add-only",
                 "add-replace"
               ],
-              "description": "Mode"
+              "description": "Mode",
+              "default": "add-only"
             },
             "remove.headers": {
               "type": "array",
@@ -603,7 +619,12 @@
               "minItems": 0,
               "maxItems": 99,
               "additionalItems": false,
-              "description": "Headers to remove"
+              "description": "Headers to remove",
+              "default": [
+                "X-Powered-By",
+                "X-AspNet-Version",
+                "X-AspNetMvc-Version"
+              ]
             }
           },
           "description": "Add HTTP security headers in response"
@@ -634,7 +655,8 @@
             },
             "ip.header.mandatory": {
               "type": "boolean",
-              "description": "IP Header must be present "
+              "description": "IP Header must be present ",
+              "default": true
             },
             "remote.ip.allowlist": {
               "type": "array",
@@ -644,7 +666,8 @@
                 "maxLength": 255
               },
               "maxItems": 10,
-              "description": "IPs/Network addresses of trusted network frontends"
+              "description": "IPs/Network addresses of trusted network frontends",
+              "default": []
             }
           },
           "description": "Set Client IP"
@@ -672,29 +695,34 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
-              "description": "JWK env variable name"
+              "description": "JWK env variable name",
+              "default": "JWK"
             },
             "forward.jwt": {
               "type": "boolean",
-              "description": "Forward the JWT to backend"
+              "description": "Forward the JWT to backend",
+              "default": true
             },
             "lifetime": {
               "type": "number",
               "minimum": 0,
               "maximum": 99999999,
-              "description": "Token lifetime (seconds)"
+              "description": "Token lifetime (seconds)",
+              "default": 5
             },
             "drift": {
               "type": "number",
               "minimum": 0,
               "maximum": 86400,
-              "description": "Drift time (in seconds)"
+              "description": "Drift time (in seconds)",
+              "default": 10
             },
             "jti.timeout": {
               "type": "integer",
               "minimum": 1,
               "maximum": 99999999,
-              "description": "JTI timeout (seconds)"
+              "description": "JTI timeout (seconds)",
+              "default": 86400
             },
             "jp.claims.schema": {
               "type": "string",
@@ -746,13 +774,15 @@
             },
             "allow.basic.value": {
               "type": "boolean",
-              "description": "Is Basic or Digest Allowed"
+              "description": "Is Basic or Digest Allowed",
+              "default": false
             },
             "jwk.envvar": {
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
-              "description": "JWK env variable name"
+              "description": "JWK env variable name",
+              "default": "JWK"
             },
             "jwks.uri": {
               "schema": {
@@ -765,25 +795,29 @@
             },
             "forward.jwt": {
               "type": "boolean",
-              "description": "Forward the JWT to backend"
+              "description": "Forward the JWT to backend",
+              "default": true
             },
             "lifetime": {
               "type": "number",
               "minimum": 0,
               "maximum": 99999999,
-              "description": "Token lifetime (seconds)"
+              "description": "Token lifetime (seconds)",
+              "default": 5
             },
             "drift": {
               "type": "number",
               "minimum": 0,
               "maximum": 86400,
-              "description": "Drift time (in seconds)"
+              "description": "Drift time (in seconds)",
+              "default": 10
             },
             "jti.timeout": {
               "type": "integer",
               "minimum": 1,
               "maximum": 99999999,
-              "description": "JTI timeout (seconds)"
+              "description": "JTI timeout (seconds)",
+              "default": 86400
             },
             "jp.claims.schema": {
               "type": "string",
@@ -811,7 +845,8 @@
               "type": "number",
               "minimum": 60,
               "maximum": 28000,
-              "description": "Cache expiration time for JWK entry"
+              "description": "Cache expiration time for JWK entry",
+              "default": 3600
             }
           },
           "required": [
@@ -841,13 +876,15 @@
             },
             "allow.basic.value": {
               "type": "boolean",
-              "description": "Is Basic or Digest Allowed"
+              "description": "Is Basic or Digest Allowed",
+              "default": false
             },
             "jwk.envvar": {
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
-              "description": "JWK env variable name"
+              "description": "JWK env variable name",
+              "default": "JWK"
             },
             "jwks.uri": {
               "schema": {
@@ -869,25 +906,29 @@
             },
             "forward.jwt": {
               "type": "boolean",
-              "description": "Forward the JWT to backend"
+              "description": "Forward the JWT to backend",
+              "default": true
             },
             "lifetime": {
               "type": "number",
               "minimum": 0,
               "maximum": 99999999,
-              "description": "Token lifetime (seconds)"
+              "description": "Token lifetime (seconds)",
+              "default": 5
             },
             "drift": {
               "type": "number",
               "minimum": 0,
               "maximum": 86400,
-              "description": "Drift time (in seconds)"
+              "description": "Drift time (in seconds)",
+              "default": 10
             },
             "jti.timeout": {
               "type": "integer",
               "minimum": 1,
               "maximum": 99999999,
-              "description": "JTI timeout (seconds)"
+              "description": "JTI timeout (seconds)",
+              "default": 86400
             },
             "jp.claims.schema": {
               "type": "string",
@@ -915,7 +956,8 @@
               "type": "number",
               "minimum": 60,
               "maximum": 28000,
-              "description": "Cache expiration time for JWK entry"
+              "description": "Cache expiration time for JWK entry",
+              "default": 3600
             }
           },
           "required": [
@@ -947,29 +989,34 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
-              "description": "JWK env variable name"
+              "description": "JWK env variable name",
+              "default": "JWK"
             },
             "forward.jwt": {
               "type": "boolean",
-              "description": "Forward the JWT to backend"
+              "description": "Forward the JWT to backend",
+              "default": true
             },
             "lifetime": {
               "type": "number",
               "minimum": 0,
               "maximum": 99999999,
-              "description": "Token lifetime (seconds)"
+              "description": "Token lifetime (seconds)",
+              "default": 5
             },
             "drift": {
               "type": "number",
               "minimum": 0,
               "maximum": 86400,
-              "description": "Drift time (in seconds)"
+              "description": "Drift time (in seconds)",
+              "default": 10
             },
             "jti.timeout": {
               "type": "integer",
               "minimum": 1,
               "maximum": 99999999,
-              "description": "JTI timeout (seconds)"
+              "description": "JTI timeout (seconds)",
+              "default": 86400
             },
             "jp.claims.schema": {
               "type": "string",
@@ -1021,13 +1068,15 @@
             },
             "allow.basic.value": {
               "type": "boolean",
-              "description": "Is Basic or Digest value Allowed"
+              "description": "Is Basic or Digest value Allowed",
+              "default": false
             },
             "jwk.envvar": {
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
-              "description": "JWK env variable name"
+              "description": "JWK env variable name",
+              "default": "JWK"
             },
             "jwks.uri": {
               "schema": {
@@ -1040,25 +1089,29 @@
             },
             "forward.jwt": {
               "type": "boolean",
-              "description": "Forward the JWT to backend"
+              "description": "Forward the JWT to backend",
+              "default": true
             },
             "lifetime": {
               "type": "number",
               "minimum": 0,
               "maximum": 99999999,
-              "description": "Token lifetime (seconds)"
+              "description": "Token lifetime (seconds)",
+              "default": 5
             },
             "drift": {
               "type": "number",
               "minimum": 0,
               "maximum": 86400,
-              "description": "Drift time (in seconds)"
+              "description": "Drift time (in seconds)",
+              "default": 10
             },
             "jti.timeout": {
               "type": "integer",
               "minimum": 1,
               "maximum": 99999999,
-              "description": "JTI timeout (seconds)"
+              "description": "JTI timeout (seconds)",
+              "default": 86400
             },
             "jp.claims.schema": {
               "type": "string",
@@ -1086,7 +1139,8 @@
               "type": "number",
               "minimum": 60,
               "maximum": 28000,
-              "description": "Cache expiration time for JWK entry"
+              "description": "Cache expiration time for JWK entry",
+              "default": 3600
             }
           },
           "required": [
@@ -1116,13 +1170,15 @@
             },
             "allow.basic.value": {
               "type": "boolean",
-              "description": "Is Basic or Digest value Allowed"
+              "description": "Is Basic or Digest value Allowed",
+              "default": false
             },
             "jwk.envvar": {
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
-              "description": "JWK env variable name"
+              "description": "JWK env variable name",
+              "default": "JWK"
             },
             "jwks.uri": {
               "schema": {
@@ -1144,25 +1200,29 @@
             },
             "forward.jwt": {
               "type": "boolean",
-              "description": "Forward the JWT to backend"
+              "description": "Forward the JWT to backend",
+              "default": true
             },
             "lifetime": {
               "type": "number",
               "minimum": 0,
               "maximum": 99999999,
-              "description": "Token lifetime (seconds)"
+              "description": "Token lifetime (seconds)",
+              "default": 5
             },
             "drift": {
               "type": "number",
               "minimum": 0,
               "maximum": 86400,
-              "description": "Drift time (in seconds)"
+              "description": "Drift time (in seconds)",
+              "default": 10
             },
             "jti.timeout": {
               "type": "integer",
               "minimum": 1,
               "maximum": 99999999,
-              "description": "JTI timeout (seconds)"
+              "description": "JTI timeout (seconds)",
+              "default": 86400
             },
             "jp.claims.schema": {
               "type": "string",
@@ -1190,7 +1250,8 @@
               "type": "number",
               "minimum": 60,
               "maximum": 28000,
-              "description": "Cache expiration time for JWK entry"
+              "description": "Cache expiration time for JWK entry",
+              "default": 3600
             }
           },
           "required": [
@@ -1220,19 +1281,22 @@
             },
             "forward.jwt": {
               "type": "boolean",
-              "description": "Forward the JWT to backend"
+              "description": "Forward the JWT to backend",
+              "default": true
             },
             "lifetime": {
               "type": "number",
               "minimum": 0,
               "maximum": 99999999,
-              "description": "Token lifetime (seconds)"
+              "description": "Token lifetime (seconds)",
+              "default": 5
             },
             "drift": {
               "type": "number",
               "minimum": 0,
               "maximum": 86400,
-              "description": "Drift time (in seconds)"
+              "description": "Drift time (in seconds)",
+              "default": 10
             },
             "authorized.algorithms": {
               "type": "array",
@@ -1312,19 +1376,22 @@
             },
             "forward.jwt": {
               "type": "boolean",
-              "description": "Forward the JWT to backend"
+              "description": "Forward the JWT to backend",
+              "default": true
             },
             "lifetime": {
               "type": "number",
               "minimum": 0,
               "maximum": 99999999,
-              "description": "Token lifetime (seconds)"
+              "description": "Token lifetime (seconds)",
+              "default": 5
             },
             "drift": {
               "type": "number",
               "minimum": 0,
               "maximum": 86400,
-              "description": "Drift time (in seconds)"
+              "description": "Drift time (in seconds)",
+              "default": 10
             },
             "authorized.algorithms": {
               "type": "array",
@@ -1404,25 +1471,29 @@
             },
             "forward.jwt": {
               "type": "boolean",
-              "description": "Forward the JWT to backend"
+              "description": "Forward the JWT to backend",
+              "default": true
             },
             "lifetime": {
               "type": "number",
               "minimum": 0,
               "maximum": 99999999,
-              "description": "Token lifetime (seconds)"
+              "description": "Token lifetime (seconds)",
+              "default": 5
             },
             "drift": {
               "type": "number",
               "minimum": 0,
               "maximum": 86400,
-              "description": "Drift time (in seconds)"
+              "description": "Drift time (in seconds)",
+              "default": 10
             },
             "jti.timeout": {
               "type": "integer",
               "minimum": 1,
               "maximum": 99999999,
-              "description": "JTI timeout (seconds)"
+              "description": "JTI timeout (seconds)",
+              "default": 86400
             },
             "jp.claims.schema": {
               "type": "string",
@@ -1474,25 +1545,29 @@
             },
             "forward.jwt": {
               "type": "boolean",
-              "description": "Forward the JWT to backend"
+              "description": "Forward the JWT to backend",
+              "default": true
             },
             "lifetime": {
               "type": "number",
               "minimum": 0,
               "maximum": 99999999,
-              "description": "Token lifetime (seconds)"
+              "description": "Token lifetime (seconds)",
+              "default": 5
             },
             "drift": {
               "type": "number",
               "minimum": 0,
               "maximum": 86400,
-              "description": "Drift time (in seconds)"
+              "description": "Drift time (in seconds)",
+              "default": 10
             },
             "jti.timeout": {
               "type": "integer",
               "minimum": 1,
               "maximum": 99999999,
-              "description": "JTI timeout (seconds)"
+              "description": "JTI timeout (seconds)",
+              "default": 86400
             },
             "jp.claims.schema": {
               "type": "string",
@@ -1546,29 +1621,34 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
-              "description": "JWK env variable name"
+              "description": "JWK env variable name",
+              "default": "JWK"
             },
             "forward.jwt": {
               "type": "boolean",
-              "description": "Forward the JWT to backend"
+              "description": "Forward the JWT to backend",
+              "default": true
             },
             "lifetime": {
               "type": "number",
               "minimum": 0,
               "maximum": 99999999,
-              "description": "Token lifetime (seconds)"
+              "description": "Token lifetime (seconds)",
+              "default": 5
             },
             "drift": {
               "type": "number",
               "minimum": 0,
               "maximum": 86400,
-              "description": "Drift time (in seconds)"
+              "description": "Drift time (in seconds)",
+              "default": 10
             },
             "jti.timeout": {
               "type": "integer",
               "minimum": 1,
               "maximum": 99999999,
-              "description": "JTI timeout (seconds)"
+              "description": "JTI timeout (seconds)",
+              "default": 86400
             },
             "jp.claims.schema": {
               "type": "string",
@@ -1616,17 +1696,20 @@
               "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
               "minLength": 1,
               "maxLength": 100,
-              "description": "Header name"
+              "description": "Header name",
+              "default": "Authorization"
             },
             "allow.basic.value": {
               "type": "boolean",
-              "description": "Is Basic or Digest value allowed"
+              "description": "Is Basic or Digest value allowed",
+              "default": false
             },
             "jwk.envvar": {
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
-              "description": "JWK env variable name"
+              "description": "JWK env variable name",
+              "default": "JWK"
             },
             "jwks.uri": {
               "schema": {
@@ -1639,25 +1722,29 @@
             },
             "forward.jwt": {
               "type": "boolean",
-              "description": "Forward the JWT to backend"
+              "description": "Forward the JWT to backend",
+              "default": true
             },
             "lifetime": {
               "type": "number",
               "minimum": 0,
               "maximum": 99999999,
-              "description": "Token lifetime (seconds)"
+              "description": "Token lifetime (seconds)",
+              "default": 5
             },
             "drift": {
               "type": "number",
               "minimum": 0,
               "maximum": 86400,
-              "description": "Drift time (in seconds)"
+              "description": "Drift time (in seconds)",
+              "default": 10
             },
             "jti.timeout": {
               "type": "integer",
               "minimum": 1,
               "maximum": 99999999,
-              "description": "JTI timeout (seconds)"
+              "description": "JTI timeout (seconds)",
+              "default": 86400
             },
             "jp.claims.schema": {
               "type": "string",
@@ -1685,7 +1772,8 @@
               "type": "number",
               "minimum": 60,
               "maximum": 28000,
-              "description": "Cache expiration time for JWK entry"
+              "description": "Cache expiration time for JWK entry",
+              "default": 3600
             }
           },
           "required": [
@@ -1711,17 +1799,20 @@
               "pattern": "^[0-9a-zA-Z\\-_]{1,100}$",
               "minLength": 1,
               "maxLength": 100,
-              "description": "Header name"
+              "description": "Header name",
+              "default": "Authorization"
             },
             "allow.basic.value": {
               "type": "boolean",
-              "description": "Is Basic or Digest value allowed"
+              "description": "Is Basic or Digest value allowed",
+              "default": false
             },
             "jwk.envvar": {
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
-              "description": "JWK env variable name"
+              "description": "JWK env variable name",
+              "default": "JWK"
             },
             "jwks.uri": {
               "schema": {
@@ -1743,25 +1834,29 @@
             },
             "forward.jwt": {
               "type": "boolean",
-              "description": "Forward the JWT to backend"
+              "description": "Forward the JWT to backend",
+              "default": true
             },
             "lifetime": {
               "type": "number",
               "minimum": 0,
               "maximum": 99999999,
-              "description": "Token lifetime (seconds)"
+              "description": "Token lifetime (seconds)",
+              "default": 5
             },
             "drift": {
               "type": "number",
               "minimum": 0,
               "maximum": 86400,
-              "description": "Drift time (in seconds)"
+              "description": "Drift time (in seconds)",
+              "default": 10
             },
             "jti.timeout": {
               "type": "integer",
               "minimum": 1,
               "maximum": 99999999,
-              "description": "JTI timeout (seconds)"
+              "description": "JTI timeout (seconds)",
+              "default": 86400
             },
             "jp.claims.schema": {
               "type": "string",
@@ -1789,7 +1884,8 @@
               "type": "number",
               "minimum": 60,
               "maximum": 28000,
-              "description": "Cache expiration time for JWK entry"
+              "description": "Cache expiration time for JWK entry",
+              "default": 3600
             }
           },
           "required": [
@@ -1821,23 +1917,27 @@
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
-              "description": "JWK env variable name"
+              "description": "JWK env variable name",
+              "default": "JWK"
             },
             "forward.jwt": {
               "type": "boolean",
-              "description": "Forward the JWT to backend"
+              "description": "Forward the JWT to backend",
+              "default": true
             },
             "lifetime": {
               "type": "number",
               "minimum": 0,
               "maximum": 99999999,
-              "description": "Token lifetime (seconds)"
+              "description": "Token lifetime (seconds)",
+              "default": 5
             },
             "drift": {
               "type": "number",
               "minimum": 0,
               "maximum": 86400,
-              "description": "Drift time (in seconds)"
+              "description": "Drift time (in seconds)",
+              "default": 10
             },
             "authorized.algorithms": {
               "type": "array",
@@ -1917,13 +2017,15 @@
             },
             "allow.basic.value": {
               "type": "boolean",
-              "description": "Is Basic or Digest value allowed"
+              "description": "Is Basic or Digest value allowed",
+              "default": false
             },
             "jwk.envvar": {
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
-              "description": "JWK env variable name"
+              "description": "JWK env variable name",
+              "default": "JWK"
             },
             "jwks.uri": {
               "schema": {
@@ -1936,19 +2038,22 @@
             },
             "forward.jwt": {
               "type": "boolean",
-              "description": "Forward the JWT to backend"
+              "description": "Forward the JWT to backend",
+              "default": true
             },
             "lifetime": {
               "type": "number",
               "minimum": 0,
               "maximum": 99999999,
-              "description": "Token lifetime (seconds)"
+              "description": "Token lifetime (seconds)",
+              "default": 5
             },
             "drift": {
               "type": "number",
               "minimum": 0,
               "maximum": 86400,
-              "description": "Drift time (in seconds)"
+              "description": "Drift time (in seconds)",
+              "default": 10
             },
             "authorized.algorithms": {
               "type": "array",
@@ -1981,7 +2086,8 @@
               "type": "number",
               "minimum": 60,
               "maximum": 28000,
-              "description": "Cache expiration time for JWK entry"
+              "description": "Cache expiration time for JWK entry",
+              "default": 3600
             },
             "jp.claims.schema": {
               "type": "string",
@@ -2034,13 +2140,15 @@
             },
             "allow.basic.value": {
               "type": "boolean",
-              "description": "Is Basic or Digest value allowed"
+              "description": "Is Basic or Digest value allowed",
+              "default": false
             },
             "jwk.envvar": {
               "type": "string",
               "minLength": 1,
               "maxLength": 100,
-              "description": "JWK env variable name"
+              "description": "JWK env variable name",
+              "default": "JWK"
             },
             "jwks.uri": {
               "schema": {
@@ -2062,19 +2170,22 @@
             },
             "forward.jwt": {
               "type": "boolean",
-              "description": "Forward the JWT to backend"
+              "description": "Forward the JWT to backend",
+              "default": true
             },
             "lifetime": {
               "type": "number",
               "minimum": 0,
               "maximum": 99999999,
-              "description": "Token lifetime (seconds)"
+              "description": "Token lifetime (seconds)",
+              "default": 5
             },
             "drift": {
               "type": "number",
               "minimum": 0,
               "maximum": 86400,
-              "description": "Drift time (in seconds)"
+              "description": "Drift time (in seconds)",
+              "default": 10
             },
             "authorized.algorithms": {
               "type": "array",
@@ -2107,7 +2218,8 @@
               "type": "number",
               "minimum": 60,
               "maximum": 28000,
-              "description": "Cache expiration time for JWK entry"
+              "description": "Cache expiration time for JWK entry",
+              "default": 3600
             },
             "jp.claims.schema": {
               "type": "string",
