@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 4.19.2 (December 5, 2023)
+
+- Add Scan/Audit/Try it commands to the context menu in the OpenAPI tree
+- Cleanup context menu titles removing 'OpenAPI:' prefix
+- Update schemas for 42Crunch protection-types extensions
+- Show extra logs when running Conformance Scan
+
 ## Version 4.19.0 (November 29, 2023)
 
 - New OpenAPI tree, with individual sections merged into one tree and new Search functionality.
