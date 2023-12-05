@@ -647,13 +647,13 @@
       "title": "OpenAPI",
       "properties": {
         "openapi.platformUrl": {
-          "scope": "machine",
+          "scope": "workbench",
           "type": "string",
           "default": "https://platform.42crunch.com",
           "description": "42Crunch platform URL"
         },
         "openapi.platformConformanceScanRuntime": {
-          "scope": "machine",
+          "scope": "workbench",
           "type": "string",
           "default": "docker",
           "enum": [
@@ -668,7 +668,7 @@
           ]
         },
         "openapi.docker": {
-          "scope": "machine",
+          "scope": "workbench",
           "type": "object",
           "description": "Docker",
           "properties": {
@@ -691,7 +691,7 @@
           }
         },
         "openapi.platformScandManager": {
-          "scope": "machine",
+          "scope": "workbench",
           "type": "object",
           "description": "Scand Manager",
           "properties": {
@@ -716,38 +716,38 @@
           }
         },
         "openapi.platformServices": {
-          "scope": "machine",
+          "scope": "workbench",
           "type": "string",
           "default": "",
           "description": "42Crunch platform Services in hostname:port format"
         },
         "openapi.platformConformanceScanImage": {
-          "scope": "machine",
+          "scope": "workbench",
           "type": "string",
           "default": "42crunch/scand-agent:v2",
           "description": "Docker image for 42Crunch Conformance Scan"
         },
         "openapi.platformRepository": {
-          "scope": "machine",
+          "scope": "workbench",
           "type": "string",
           "format": "uri",
           "default": "https://repo.42crunch.com/downloads",
           "description": "Repository URL for 42Crunch CLI binaries"
         },
         "openapi.securityAuditToken": {
-          "scope": "machine",
+          "scope": "workbench",
           "type": "string",
           "default": null,
           "description": "Authentication token for Security Audit"
         },
         "openapi.sortOutlines": {
-          "scope": "application",
+          "scope": "workbench",
           "type": "boolean",
           "default": true,
           "description": "Alphabetically sort contents of OpenAPI explorer outlines"
         },
         "openapi.defaultPreviewRenderer": {
-          "scope": "application",
+          "scope": "workbench",
           "type": "string",
           "default": "swaggerui",
           "enum": [
@@ -760,13 +760,13 @@
           ]
         },
         "openapi.previewUpdateDelay": {
-          "scope": "application",
+          "scope": "workbench",
           "type": "integer",
           "default": 1000,
           "description": "Preview update delay (in milliseconds after the last document change)"
         },
         "openapi.approvedHostnames": {
-          "scope": "application",
+          "scope": "workbench",
           "type": "array",
           "items": {
             "type": "string"
@@ -775,7 +775,7 @@
           "description": "List of hostnames approved for resolving external http:// and https:// references"
         },
         "openapi.tryit.insecureSslHostnames": {
-          "scope": "application",
+          "scope": "workbench",
           "type": "array",
           "items": {
             "type": "string"
@@ -784,7 +784,7 @@
           "description": "List of hostnames TryIt is allowed to connect ignoring SSL certificate errors"
         },
         "openapi.dataDictionaryPreAuditFix": {
-          "scope": "application",
+          "scope": "workbench",
           "type": "string",
           "description": "Update document to match Data Dictionary definitions before running Security Audit",
           "default": "ask",
@@ -800,7 +800,7 @@
           ]
         },
         "openapi.codeLens": {
-          "scope": "application",
+          "scope": "workbench",
           "type": "boolean",
           "default": true,
           "description": "Show TryIt/Audit/Scan CodeLenses"
