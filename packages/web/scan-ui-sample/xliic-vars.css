@@ -1,0 +1,45 @@
+:root {
+  --xliic-foreground: var(--vscode-foreground);
+  --xliic-disabledForeground: var(--vscode-disabledForeground);
+  --xliic-background: var(--vscode-editor-background);
+  --xliic-border: var(--vscode-editorGroup-border);
+  --xliic-focusBorder: var(--vscode-focusBorder);
+  --xliic-buttonBorder: var(--vscode-button-border);
+  --xliic-buttonBackground: var(--vscode-button-background);
+  --xliic-buttonForeground: var(--vscode-button-foreground);
+  --xliic-buttonHoverBackground: var(--vscode-button-hoverBackground);
+  --xliic-buttonSecondaryBackground: var(--vscode-button-secondaryBackground);
+  --xliic-buttonSecondaryForeground: var(--vscode-button-secondaryForeground);
+  --xliic-buttonSecondaryHoverBackground: var(--vscode-button-secondaryHoverBackground);
+  --xliic-inputBackground: var(--vscode-input-background);
+  --xliic-inputForeground: var(--vscode-input-foreground);
+  --xliic-inputBorder: var(--vscode-input-border);
+  --xliic-inputPlaceholderForeground: var(--vscode-input-placeholderForeground);
+  --xliic-tabBorder: var(--vscode-tab-border);
+  --xliic-tabActiveBackground: var(--vscode-tab-activeBackground);
+  --xliic-tabActiveForeground: var(--vscode-tab-activeForeground);
+  --xliic-tabInactiveBackground: var(--vscode-tab-inactiveBackground);
+  --xliic-tabInactiveForeground: var(--vscode-tab-inactiveForeground);
+  --xliic-dropdownBackground: var(--vscode-dropdown-background);
+  --xliic-dropdownBorder: var(--vscode-dropdown-border);
+  --xliic-dropdownForeground: var(--vscode-dropdown-foreground);
+  --xliic-checkboxBackground: var(--vscode-checkbox-background);
+  --xliic-checkboxBorder: var(--vscode-checkbox-border);
+  --xliic-checkboxForeground: var(--vscode-checkbox-foreground);
+  --xliic-errorForeground: var(--vscode-errorForeground);
+  --xliic-errorBackground: var(--vscode-inputValidation-errorBackground);
+  --xliic-errorBorder: var(--vscode-inputValidation-errorBorder);
+  --xliic-listActiveSelectionBackground: var(--vscode-list-activeSelectionBackground);
+  --xliic-listActiveSelectionForeground: var(--vscode-list-activeSelectionForeground);
+  --xliic-listHoverBackground: var(--vscode-list-hoverBackground);
+  --xliic-contrastActiveBorder: var(--vscode-contrastActiveBorder);
+  --xliic-linkForeground: var(--vscode-textLink-foreground);
+  --xliic-linkActiveForeground: var(--vscode-textLink-activeForeground);
+
+  --xliic-badgeForeground: var(--vscode-badge-foreground);
+  --xliic-badgeBackground: var(--vscode-badge-background);
+  --xliic-notificationsForeground: var(--vscode-notifications-foreground);
+  --xliic-notificationsBackground: var(--vscode-notifications-background);
+  --xliic-notificationsBorder: var(--vscode-notifications-border);
+  --xliic-fontSize: var(--vscode-font-size);
+}

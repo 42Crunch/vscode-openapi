@@ -1,0 +1,328 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "Pixi Photo Sharing API",
+    "version": "1.0.0",
+    "title": "Pixi App API",
+    "contact": {
+      "email": "nicole.becher@owasp.org"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "tags": [
+    {
+      "name": "admins",
+      "description": "Secured Admin-only calls"
+    },
+    {
+      "name": "users",
+      "description": "Operations available to regular, logged in users"
+    },
+    {
+      "name": "anyone",
+      "description": "Operations available to anyone"
+    }
+  ],
+  "paths": {
+    "/api/register": {
+      "post": {
+        "operationId": "register",
+        "tags": ["anyone"],
+        "x-42c-no-authentication": true,
+        "summary": "register for an account and receive token",
+        "description": "user supplies email and password to register and receives a json web\ntoken.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "account_balance": 9,
+                "is_admin": false,
+                "name": "0jc2Go3n.celtuuGMT pgPD1BQ2",
+                "pass": "&GTleRP",
+                "user": "support@company.co.uk"
+              },
+              "schema": {
+                "$ref": "#/components/schemas/UserRegistrationData"
+              }
+            }
+          },
+
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "successfully registered, token received",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenMessage"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "successfully registered, token received",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenMessage"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/info": {
+      "get": {
+        "tags": ["users"],
+        "summary": "get user information",
+        "operationId": "userinfo",
+        "description": "user supplies valid token and receives all user info",
+        "responses": {
+          "200": {
+            "description": "successful authentication sent user information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "minItems": 0,
+                  "maxItems": 50,
+                  "items": {
+                    "$ref": "#/components/schemas/UsersItem"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "pattern": "^[\\w\\s\\.@:-]{1,255}$",
+                      "minLength": 1,
+                      "maxLength": 255
+                    },
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "pattern": "^[\\w\\s\\.@:-]{1,255}$",
+                      "minLength": 1,
+                      "maxLength": 255
+                    }
+                  },
+                  "required": ["message"]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access-token": []
+          }
+        ]
+      }
+    }
+  },
+
+  "servers": [
+    {
+      "url": "http://localhost:8090"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "access-token": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-access-token",
+        "description": "Most operations need to pass a user token retrieved calling /api/login"
+      }
+    },
+    "schemas": {
+      "UsersItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "_id": {
+            "type": "number",
+            "format": "integer",
+            "minimum": 0,
+            "maximum": 999999,
+            "example": 1
+          },
+          "pic": {
+            "type": "string",
+            "format": "uri",
+            "pattern": "\\w+:(\\/?\\/?)[^\\s]+",
+            "maxLength": 200,
+            "example": 1
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$",
+            "minLength": 10,
+            "maxLength": 50,
+            "example": "email@email.com"
+          },
+          "password": {
+            "type": "string",
+            "format": "string",
+            "pattern": "^[a-zA-Z0-9&@#!?]{1,12}$",
+            "maxLength": 12,
+            "example": "p@ssword1"
+          },
+          "name": {
+            "type": "string",
+            "example": "Johnny Appleseed",
+            "pattern": "^[a-zA-Z0-9 ]{1,30}$",
+            "maxLength": 50
+          },
+          "is_admin": {
+            "description": "is admin",
+            "type": "boolean"
+          },
+          "account_balance": {
+            "description": "remaining balance",
+            "type": "number",
+            "format": "float",
+            "minimum": 0,
+            "maximum": 999999
+          }
+        },
+        "required": ["email", "password"]
+      },
+      "UserRegistrationData": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "user",
+          "pass",
+          "name",
+          "is_admin",
+          "account_balance"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 99999999999
+          },
+          "user": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "pass": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9&@#!?]{1,12}$",
+            "minLength": 1,
+            "maxLength": 12
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9 ]{1,30}$",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "is_admin": {
+            "type": "boolean"
+          },
+          "account_balance": {
+            "type": "number",
+            "format": "float",
+            "minimum": 1,
+            "maximum": 1000
+          }
+        }
+      },
+      "ErrorMessage": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "pattern": "^[\\w\\s\\.@:-]{1,255}$",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "success": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TokenMessage": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "pattern": "^[\\w\\s\\.@:-]{1,255}$",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "token": {
+            "type": "string",
+            "pattern": "^([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_=]{4,})\\.([a-zA-Z0-9_\\-\\+\\/=]{4,})",
+            "maxLength": 1000
+          }
+        }
+      },
+      "GeneratedSchemaName1": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer"
+          },
+          "title": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "uuid": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "required": ["status", "title", "detail", "uuid"]
+      }
+    },
+    "responses": {
+      "name": {
+        "description": "",
+        "content": {
+          "application/json": {
+            "schema": {}
+          }
+        }
+      }
+    }
+  }
+}
