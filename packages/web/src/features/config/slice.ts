@@ -190,6 +190,10 @@ export const slice = createSlice({
         state.cliDownloadPercent = action.payload.progress.percent;
       }
     },
+
+    openLink: (state, action: PayloadAction<string>) => {
+      // hook for a listener
+    },
   },
 });
 
@@ -225,6 +229,7 @@ export const {
   showCliTest,
   downloadCli,
   showCliDownload,
+  openLink,
 } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<

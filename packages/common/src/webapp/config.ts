@@ -14,6 +14,7 @@ import {
   ShowCliDownloadMessage,
 } from "../config";
 import { ChangeThemeMessage } from "../theme";
+import { OpenLinkMessage } from "../link";
 
 export type Webapp = App<
   // consumes
@@ -31,4 +32,5 @@ export type Webapp = App<
   | TestScandManagerConnectionMessage
   | TestCliMessage
   | DownloadCliMessage
+  | OpenLinkMessage
 >;

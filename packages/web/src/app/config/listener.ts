@@ -20,6 +20,7 @@ export function createListener(host: Webapp["host"]) {
     testPlatformConnection: listener.onTestPlatformConnection(startAppListening, host),
     testCli: listener.onTestCli(startAppListening, host),
     downloadCli: listener.onDownloadCli(startAppListening, host),
+    openLink: listener.onOpenLink(startAppListening, host),
   };
 
   startListeners(listeners);

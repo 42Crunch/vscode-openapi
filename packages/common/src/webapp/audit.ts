@@ -1,6 +1,7 @@
 import { Webapp as App } from "../message";
 import { ChangeThemeMessage } from "../theme";
 import { Audit, Kdb } from "../audit";
+import { OpenLinkMessage } from "../link";
 
 export type StartAuditMessage = {
   command: "startAudit";
@@ -39,11 +40,6 @@ type GoToLineMessage = {
 
 type CopyIssueIdMessage = {
   command: "copyIssueId";
-  payload: string;
-};
-
-type OpenLinkMessage = {
-  command: "openLink";
   payload: string;
 };
 

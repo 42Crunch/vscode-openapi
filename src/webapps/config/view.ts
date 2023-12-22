@@ -111,6 +111,10 @@ export class ConfigWebView extends WebView<Webapp> {
     },
 
     downloadCli: () => downloadCliHandler(this.config?.repository),
+
+    openLink: async (url: string) => {
+      vscode.env.openExternal(vscode.Uri.parse(url));
+    },
   };
 
   async sendLoadConfig() {

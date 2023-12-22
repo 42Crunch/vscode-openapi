@@ -14,6 +14,7 @@ import {
   testScandManagerConnection,
   useFeatureDispatch,
   useFeatureSelector,
+  openLink,
 } from "../../../features/config/slice";
 import CliVersionBanner from "../CliVersionBanner";
 import ConnectionTestBanner from "../ConnectionTestBanner";
@@ -133,7 +134,9 @@ export function PlatformServices() {
               />
               {waitingForCliDownload && <ProgressBar progress={cliDownloadPercent} />}
             </Test>
-            <Banner message={`Download 42Cruch CLI, the binary was not found in ${cli.location}`} />
+            <Banner
+              message={`Download 42Crunch CLI, the binary was not found in ${cli.location}`}
+            />
           </>
         )}
 
@@ -155,7 +158,16 @@ export function PlatformServices() {
 
             <p>
               42Crunch CLI is subject to usage limits, find more details at{" "}
-              <a href="https://42crunch.com/free-user-faq/">Free User FAQ</a>
+              <a
+                href="https://42crunch.com/free-user-faq/"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  dispatch(openLink("https://42crunch.com/free-user-faq/"));
+                }}
+              >
+                Free User FAQ
+              </a>
             </p>
           </div>
         )}

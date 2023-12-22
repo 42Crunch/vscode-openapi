@@ -15,6 +15,8 @@ import {
   DownloadCliMessage,
 } from "@xliic/common/config";
 
+import { OpenLinkMessage } from "@xliic/common/link";
+
 import {
   saveConfig,
   addInsecureSslHostname,
@@ -24,6 +26,7 @@ import {
   testScandManagerConnection,
   testCli,
   downloadCli,
+  openLink,
 } from "./slice";
 
 import config from "./slice";
@@ -155,6 +158,22 @@ export function onDownloadCli(
         host.postMessage({
           command: "downloadCli",
           payload: undefined,
+        });
+      },
+    });
+}
+
+export function onOpenLink(
+  startAppListening: FeatureListening,
+  host: Webapp<NoopMessage, OpenLinkMessage>["host"]
+) {
+  return () =>
+    startAppListening({
+      actionCreator: openLink,
+      effect: async (action, listenerApi) => {
+        host.postMessage({
+          command: "openLink",
+          payload: action.payload,
         });
       },
     });
