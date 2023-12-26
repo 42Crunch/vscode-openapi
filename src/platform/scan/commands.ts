@@ -26,6 +26,7 @@ import { offerUpgrade } from "../upgrade";
 import { getScanconfUri } from "./config";
 import { createScanConfigWithPlatform } from "./runtime/platform";
 import { ScanWebView } from "./view";
+import { formatException } from "../util";
 
 export default (
   cache: Cache,
@@ -65,7 +66,7 @@ export default (
             "You have reached your maximum number of APIs. Please contact support@42crunch.com to upgrade your account."
           );
         } else {
-          vscode.window.showErrorMessage("Failed to scan: " + ex.message);
+          vscode.window.showErrorMessage(formatException("Failed to scan:", ex));
         }
       }
     }
@@ -102,7 +103,7 @@ export default (
             "You have reached your maximum number of APIs. Please contact support@42crunch.com to upgrade your account."
           );
         } else {
-          vscode.window.showErrorMessage("Failed to scan: " + ex.message);
+          vscode.window.showErrorMessage(formatException("Failed to scan:", ex));
         }
       }
     }

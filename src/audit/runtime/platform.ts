@@ -10,6 +10,7 @@ import { Cache } from "../../cache";
 import { PlatformStore } from "../../platform/stores/platform-store";
 import { MappingNode } from "../../types";
 import { parseAuditReport } from "../audit";
+import { formatException } from "../../platform/util";
 
 export async function runPlatformAudit(
   document: vscode.TextDocument,
@@ -40,9 +41,7 @@ export async function runPlatformAudit(
       );
     } else {
       vscode.window.showErrorMessage(
-        `Unexpected error when trying to audit API using the platform: ${ex} ${
-          ex?.response?.body ? JSON.stringify(ex.response.body) : ""
-        }`
+        formatException("Unexpected error when trying to audit API using the platform:", ex)
       );
     }
   }

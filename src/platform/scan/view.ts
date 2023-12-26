@@ -31,6 +31,7 @@ import { runScanWithDocker } from "./runtime/docker";
 import { runScanWithScandManager } from "./runtime/scand-manager";
 import { UPGRADE_WARN_LIMIT, offerUpgrade, warnScans } from "../upgrade";
 import { getAnondCredentials } from "../../credentials";
+import { formatException } from "../util";
 
 export type BundleDocumentVersions = Record<string, number>;
 
@@ -136,7 +137,8 @@ export class ScanWebView extends WebView<Webapp> {
           ex?.response?.body?.code === 109 &&
           ex?.response?.body?.message === "limit reached"
             ? "You have reached your maximum number of APIs. Please contact support@42crunch.com to upgrade your account."
-            : "Failed to run scan: " + ex.message;
+            : formatException("Failed to run scan:", ex);
+        vscode.window.showErrorMessage(message);
       }
     },
 
