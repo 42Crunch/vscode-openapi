@@ -4,7 +4,7 @@
   "displayName": "OpenAPI (Swagger) Editor",
   "description": "OpenAPI extension for Visual Studio Code",
   "license": "AGPL-3.0-only",
-  "version": "4.19.3",
+  "version": "4.20.0",
   "publisher": "42Crunch",
   "repository": {
     "type": "git",
@@ -838,6 +838,6 @@
     "glob": "^7.1.4",
     "marked": "^4.0.10",
     "mocha": "^10.2.0",
-    "typescript": "^5.0.2"
+    "typescript": "^5.3.3"
   }
 }
