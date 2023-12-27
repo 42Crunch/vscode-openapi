@@ -35,9 +35,6 @@
     "onFileSystem:openapi-42crunch"
   ],
   "capabilities": {
-    "untrustedWorkspaces": {
-      "supported": true
-    },
     "virtualWorkspaces": true
   },
   "main": "./out/extension",
