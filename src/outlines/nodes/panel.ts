@@ -6,7 +6,7 @@ import { SimpleNode } from "./simple";
 export const panelsVer2 = ["responses", "parameters", "definitions", "securityDefinitions"];
 
 const icons: any = {
-  responses: "arrow-left-from-bracket.svg",
+  responses: "response.svg",
   parameters: "sliders.svg",
   definitions: "sitemap.svg",
   securityDefinitions: "shield-halved.svg",
