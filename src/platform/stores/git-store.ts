@@ -40,16 +40,27 @@ export type GitChangeEvent = {
 };
 
 export class GitManager {
-  private extension;
+  private extension: any;
   private api: any;
   private info: GitInfo = {};
   private _onDidChange = new EventEmitter<GitChangeEvent>();
 
   constructor() {
-    this.extension = vscode.extensions.getExtension("vscode.git")!.exports;
-    this.api = this.extension.getAPI(1);
-    this.api.onDidChangeState(this.onDidChangeState.bind(this));
-    this.extension.onDidChangeEnablement(this.onDidChangeEnablement.bind(this));
+    this.extension = { enabled: false };
+    this.init();
+  }
+
+  private async init() {
+    const extension = vscode.extensions.getExtension("vscode.git");
+    if (extension !== undefined) {
+      if (!extension.isActive) {
+        await extension.activate();
+      }
+      this.extension = extension.exports;
+      this.api = this.extension.getAPI(1);
+      this.api.onDidChangeState(this.onDidChangeState.bind(this));
+      this.extension.onDidChangeEnablement(this.onDidChangeEnablement.bind(this));
+    }
   }
 
   get onDidChange(): Event<GitChangeEvent> {

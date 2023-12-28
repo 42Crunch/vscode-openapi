@@ -27,7 +27,9 @@
     "vscode": "^1.61.0"
   },
   "extensionDependencies": [
-    "redhat.vscode-yaml",
+    "redhat.vscode-yaml"
+  ],
+  "extensionPack": [
     "vscode.git"
   ],
   "activationEvents": [
@@ -35,6 +37,9 @@
     "onFileSystem:openapi-42crunch"
   ],
   "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true
+    },
     "virtualWorkspaces": true
   },
   "main": "./out/extension",
