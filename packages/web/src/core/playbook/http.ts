@@ -1,15 +1,14 @@
 //@ts-ignore
 import SwaggerClient from "swagger-client";
-import { BundledOpenApiSpec, OasSecurityScheme, OasServer } from "@xliic/common/oas30";
+import { BundledOpenApiSpec, OasSecurityScheme } from "@xliic/common/oas30";
 import { BundledSwaggerOrOasSpec, getOperation, isOpenapi } from "@xliic/common/openapi";
 import { BundledSwaggerSpec, SwaggerSecurityScheme } from "@xliic/common/swagger";
-import { HttpConfig, HttpRequest } from "@xliic/common/http";
-import { Config } from "@xliic/common/config";
+import { HttpRequest } from "@xliic/common/http";
 import { Result } from "@xliic/common/result";
 
 import * as playbook from "@xliic/common/playbook";
 
-import { checkCredential, parseHttpsHostname } from "./util";
+import { checkCredential } from "./util";
 
 import { getParameters } from "./util-swagger";
 import { AuthResult } from "./playbook";
@@ -124,7 +123,6 @@ async function buildOasSpecWithServers(
   server: string,
   request: playbook.CRequest
 ): Promise<unknown> {
-  // FIXME servers info should be passed from outside
   const servers = [{ url: server }];
 
   // stringify/parse to make the spec mutable
@@ -140,12 +138,11 @@ async function buildSwaggerSpecWithServers(
   server: string,
   request: playbook.CRequest
 ): Promise<unknown> {
-  // FIXME servers info should be passed from outside
-  const host = swagger.host || "localhost";
-
+  const urlObj = new URL(server);
+  const schemes = urlObj.protocol === "https:" ? ["https"] : ["http"];
   // stringify/parse to make the spec mutable
   const { spec, errors } = await SwaggerClient.resolve({
-    spec: JSON.parse(JSON.stringify({ ...swagger, host })),
+    spec: JSON.parse(JSON.stringify({ ...swagger, host: urlObj.host, schemes })),
   });
 
   return spec;
@@ -161,31 +158,12 @@ function convertBody(body: unknown): unknown {
   return JSON.stringify(body);
 }
 
-function pickServer(servers: OasServer[], server: string): OasServer[] {
-  return servers.filter((s) => s.url === server);
-}
-
 function makeOpenApiSwaggerClientParameters(
   parameters: playbook.ParameterValues,
   security: AuthResult
 ): Record<string, unknown> {
   const locations: playbook.ParameterLocation[] = ["query", "header", "path", "cookie"];
-  const result: Record<string, unknown> = {};
-  for (const location of locations) {
-    for (const { key, value } of parameters[location]) {
-      const name = `${location}.${key}`;
-      if (result[name] === undefined) {
-        // value does not exist
-        result[name] = value;
-      } else if (Array.isArray(result[name])) {
-        // array value
-        (result[name] as any).push(value);
-      } else {
-        // second occurence of a value with the same name, convert to array
-        result[name] = [result[name], value];
-      }
-    }
-  }
+  const result = collectParameters(parameters, locations);
   // this is a workaround for having duplicate required header, etc names
   // to supply schema validation to the security scheme
   // swagger client breaks on these, thinking required values are not required
@@ -204,13 +182,9 @@ function makeSwaggerSwaggerClientParameters(
   request: playbook.CRequest
 ): Record<string, unknown> {
   const locations: playbook.ParameterLocation[] = ["query", "header", "path"];
-  const result: Record<string, unknown> = {};
-  for (const location of locations) {
-    for (const [name, value] of Object.entries(request.parameters[location] ?? {})) {
-      result[`${location}.${name}`] = value;
-    }
-  }
+  const result = collectParameters(request.parameters, locations);
 
+  // add request body if defined
   const parameters = getParameters(oas, request.path, request.method);
   const bodyParams = Object.keys(parameters.body);
   if (bodyParams.length > 0) {
@@ -226,6 +200,29 @@ function makeSwaggerSwaggerClientParameters(
 
   // FIXME support formData
 
+  return result;
+}
+
+function collectParameters(
+  parameters: playbook.ParameterValues,
+  locations: playbook.ParameterLocation[]
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const location of locations) {
+    for (const { key, value } of parameters[location]) {
+      const name = `${location}.${key}`;
+      if (result[name] === undefined) {
+        // value does not exist
+        result[name] = value;
+      } else if (Array.isArray(result[name])) {
+        // array value
+        (result[name] as any).push(value);
+      } else {
+        // second occurence of a value with the same name, convert to array
+        result[name] = [result[name], value];
+      }
+    }
+  }
   return result;
 }
 

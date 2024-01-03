@@ -24,6 +24,8 @@ export default function TryAndServerSelector({
   const allServers =
     servers.includes(scanServer) || scanServer === "" ? servers : [...servers, scanServer];
 
+  // TODO validate free-form server, make sure it's a valid URL
+
   return (
     <Container>
       <Operation>
