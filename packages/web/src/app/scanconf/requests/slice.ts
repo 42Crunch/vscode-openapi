@@ -1,5 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { SimpleEnvironment } from "@xliic/common/env";
+import { Environment, SimpleEnvironment } from "@xliic/common/env";
 import { getOperation, makeOperationId } from "@xliic/common/openapi";
 import { RequestRef } from "@xliic/common/playbook";
 import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
@@ -33,10 +33,7 @@ export const slice = createSlice({
       state.tryResult = [];
     },
 
-    executeRequest: (
-      state,
-      action: PayloadAction<{ inputs: SimpleEnvironment; server: string }>
-    ) => {},
+    executeRequest: (state, action: PayloadAction<{ inputs: Environment; server: string }>) => {},
 
     resetExecuteRequest: (state) => {
       state.tryCurrent = { auth: [] };

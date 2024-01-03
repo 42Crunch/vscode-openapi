@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 
-import { SimpleEnvironment } from "@xliic/common/env";
+import { Environment as UnknownEnvironment } from "@xliic/common/env";
 import * as playbook from "@xliic/common/playbook";
 import { RequestRef } from "@xliic/common/playbook";
 import { ThemeColorVariables } from "@xliic/common/theme";
@@ -35,7 +35,7 @@ export default function RequestInternal({
     mockMissingVariables: missingVariables,
   } = useAppSelector((state) => state.requests);
 
-  const onRun = (server: string, inputs: SimpleEnvironment) =>
+  const onRun = (server: string, inputs: UnknownEnvironment) =>
     dispatch(executeRequest({ server, inputs }));
 
   const onSaveRequest = (stage: playbook.StageContent) =>
@@ -48,7 +48,7 @@ export default function RequestInternal({
     ...getVariableNamesFromEnvStack(mockResult?.[0]?.results?.[0]?.variablesReplaced?.stack || []),
   ];
 
-  const [inputs, setInputs] = useState<SimpleEnvironment>({});
+  const [inputs, setInputs] = useState<UnknownEnvironment>({});
 
   useEffect(() => {
     const updated = { ...inputs };
@@ -106,18 +106,30 @@ const Container = styled.div`
   padding: 8px;
 `;
 
-function wrapEnvironment(env: SimpleEnvironment) {
+function wrapEnvironment(env: UnknownEnvironment) {
   return {
-    env: Object.entries(env).map(([key, value]) => ({ key, value })),
+    env: Object.entries(env).map(([key, value]) => ({ key, value, type: typeof value })),
   };
 }
 
-function unwrapEnvironment(data: any): SimpleEnvironment {
-  const env: SimpleEnvironment = {};
-  for (const { key, value } of data.env) {
-    env[key] = value;
+function unwrapEnvironment(data: any): UnknownEnvironment {
+  const env: UnknownEnvironment = {};
+  for (const { key, value, type } of data.env) {
+    env[key] = convertToType(value, type);
   }
   return env;
+}
+
+function convertToType(value: string, type: string): unknown {
+  if (type !== "string") {
+    try {
+      return JSON.parse(value);
+    } catch (e) {
+      // failed to convert, return string value
+      return value;
+    }
+  }
+  return `${value}`;
 }
 
 const Inputs = styled.div`
