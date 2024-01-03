@@ -15,9 +15,9 @@ import { AuditContext } from "../../types";
 import { getOpenapiAlias } from "./config";
 
 const selectors = {
-  json: { language: "json" },
-  jsonc: { language: "jsonc" },
-  yaml: { language: "yaml" },
+  json: { scheme: "file", language: "json" },
+  jsonc: { scheme: "file", language: "jsonc" },
+  yaml: { scheme: "file", language: "yaml" },
 };
 
 export function activate(
