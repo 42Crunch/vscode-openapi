@@ -10,13 +10,11 @@ import { MissingVariable } from "./MissingVariable";
 
 export default function Environment({
   name,
-  names,
   variables,
   missing,
 }: {
   name: string;
-  names: string[];
-  variables: string[];
+  variables?: string[];
   missing?: string[];
 }) {
   const { control } = useFormContext();
@@ -39,7 +37,6 @@ export default function Environment({
           key={field.id}
           name={`${name}.${index}`}
           variables={variables}
-          names={names}
           remove={() => {
             remove(index);
           }}

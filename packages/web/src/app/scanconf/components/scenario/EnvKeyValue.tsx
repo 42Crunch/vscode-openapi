@@ -12,11 +12,9 @@ export default function EnvKeyValue({
   name,
   remove,
   variables,
-  names,
 }: {
   name: string;
-  variables: string[];
-  names: string[];
+  variables?: string[];
   remove: () => void;
 }) {
   const { control } = useFormContext();
