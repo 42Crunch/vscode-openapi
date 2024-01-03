@@ -76,7 +76,6 @@ export default function RequestInternal({
           oas={oas}
           credentials={credentials}
           availableVariables={variables}
-          requestVariables={[]}
           requestRef={requestRef}
           stage={request!}
           saveRequest={onSaveRequest}
@@ -89,7 +88,7 @@ export default function RequestInternal({
             data={inputs}
             saveData={(data) => setInputs(data)}
           >
-            <Environment name="env" variables={[]} names={[]} />
+            <Environment name="env" />
           </Form>
         </Inputs>
       </CollapsibleSection>

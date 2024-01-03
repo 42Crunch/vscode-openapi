@@ -36,7 +36,6 @@ export default function OperationTabs({
   credentials,
   settings,
   availableVariables,
-  requestVariables,
 }: {
   oas: BundledSwaggerOrOasSpec;
   credentials: playbook.Credentials;
@@ -44,31 +43,14 @@ export default function OperationTabs({
   path: string;
   method: HttpMethod;
   availableVariables: string[];
-  requestVariables: string[];
 }) {
   const { getValues } = useFormContext();
 
   const isBodyPresent = getValues("body") !== undefined;
 
   const tabs = isOpenapi(oas)
-    ? makeOasTabs(
-        oas,
-        credentials,
-        path,
-        method,
-        availableVariables,
-        requestVariables,
-        isBodyPresent
-      )
-    : makeSwaggerTabs(
-        oas,
-        credentials,
-        path,
-        method,
-        availableVariables,
-        requestVariables,
-        isBodyPresent
-      );
+    ? makeOasTabs(oas, credentials, path, method, availableVariables, isBodyPresent)
+    : makeSwaggerTabs(oas, credentials, path, method, availableVariables, isBodyPresent);
 
   return <TabContainer tabs={tabs} />;
 }
@@ -79,7 +61,6 @@ function makeOasTabs(
   path: string,
   method: HttpMethod,
   availableVariables: string[],
-  requestVariables: string[],
   isBodyPresent: boolean
 ) {
   const parameters = getOasParameters(oas, path, method);
@@ -164,9 +145,7 @@ function makeOasTabs(
     {
       id: "environment",
       title: "Environment",
-      content: (
-        <Environment name="environment" variables={availableVariables} names={requestVariables} />
-      ),
+      content: <Environment name="environment" variables={availableVariables} />,
     },
     {
       id: "responses",
@@ -182,7 +161,6 @@ function makeSwaggerTabs(
   path: string,
   method: HttpMethod,
   availableVariables: string[],
-  requestVariables: string[],
   isBodyPresent: boolean
 ) {
   const parameters = getSwaggerParameters(oas, path, method);
@@ -267,9 +245,7 @@ function makeSwaggerTabs(
     {
       id: "environment",
       title: "Environment",
-      content: (
-        <Environment name="environment" variables={availableVariables} names={requestVariables} />
-      ),
+      content: <Environment name="environment" variables={availableVariables} />,
     },
     {
       id: "responses",

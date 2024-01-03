@@ -71,12 +71,6 @@ export default function Stage({
     (e) => e.name
   );
 
-  const replacedVariables = Array.from(
-    new Set(result?.variablesReplaced?.found?.map((lookupResult) => lookupResult.name) || [])
-  );
-
-  const allRequestVariables = [...missingVariables, ...replacedVariables];
-
   return (
     <Form
       data={stage}
@@ -140,7 +134,6 @@ export default function Stage({
                 content: (
                   <Environment
                     name="environment"
-                    names={allRequestVariables}
                     variables={availableVariables}
                     missing={missingVariables}
                   />

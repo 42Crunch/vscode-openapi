@@ -18,7 +18,6 @@ export default function RequestCard({
   saveRequest,
   defaultCollapsed,
   availableVariables,
-  requestVariables,
 }: {
   oas: BundledSwaggerOrOasSpec;
   requestRef: playbook.RequestRef;
@@ -27,7 +26,6 @@ export default function RequestCard({
   saveRequest: (request: playbook.StageContent) => void;
   defaultCollapsed?: boolean;
   availableVariables: string[];
-  requestVariables: string[];
 }) {
   const responseCodeOptions = getResponseCodeOptions(stage);
 
@@ -57,7 +55,6 @@ export default function RequestCard({
             method={stage.request.method}
             path={stage.request.path}
             availableVariables={availableVariables}
-            requestVariables={requestVariables}
           />
         </CollapsibleCard>
       </Form>
