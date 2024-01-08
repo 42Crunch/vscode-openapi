@@ -12,6 +12,8 @@ import {
 import Form from "../../new-components/Form";
 import platformConnection from "./screen/platform-connection";
 import platformServices from "./screen/platform-services";
+import temporaryCollection from "./screen/temporary-collection";
+import mandatoryTags from "./screen/mandatory-tags";
 import scanRuntime from "./screen/scan-runtime";
 import { unwrapFormValues, wrapFormValues } from "./util";
 
@@ -19,7 +21,7 @@ const sections = [
   {
     id: "platform",
     title: "42Crunch Platform",
-    items: [platformConnection, platformServices],
+    items: [platformConnection, platformServices, temporaryCollection, mandatoryTags],
   },
   {
     id: "scan",
@@ -32,6 +34,8 @@ const screenById = {
   [platformConnection.id]: platformConnection,
   [platformServices.id]: platformServices,
   [scanRuntime.id]: scanRuntime,
+  [temporaryCollection.id]: temporaryCollection,
+  [mandatoryTags.id]: mandatoryTags,
 };
 
 export default function Config() {

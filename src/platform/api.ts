@@ -293,6 +293,11 @@ export async function getDataDictionaryFormats(
   return formats as DataFormats;
 }
 
+export async function getTags(options: PlatformConnection, logger: Logger): Promise<any> {
+  const { body } = await got(`api/v2/tags`, gotOptions("GET", options, logger));
+  return <NamingConvention>body;
+}
+
 export async function createDefaultScanConfig(
   apiId: string,
   options: PlatformConnection,

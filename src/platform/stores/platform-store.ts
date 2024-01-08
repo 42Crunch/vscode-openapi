@@ -32,6 +32,7 @@ import {
   testConnection,
   readAuditCompliance,
   readAuditReportSqgTodo,
+  getTags,
 } from "../api";
 import {
   Api,
@@ -405,6 +406,11 @@ export class PlatformStore {
     return this.formats;
   }
 
+  async getTags(): Promise<any> {
+    const tags = await getTags(this.getConnection(), this.logger);
+    return tags;
+  }
+
   async refresh(): Promise<void> {
     this.formats = undefined;
     this.gitManager.refresh();
@@ -478,6 +484,7 @@ export class PlatformStore {
   }
 
   async findOrCreateTempCollection(): Promise<string> {
+    // FIXME make sure that collection is owned by the user
     const collectionName = "IDE Temp Collection";
     const collections = await this.searchCollections(collectionName);
     if (collections.list.length === 0) {

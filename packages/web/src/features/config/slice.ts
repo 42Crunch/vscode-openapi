@@ -29,6 +29,8 @@ export interface ConfigState {
 export type ConfigScreen =
   | "platform-connection"
   | "platform-services"
+  | "temporary-collection"
+  | "mandatory-tags"
   | "scan-runtime"
   | "scan-image";
 
@@ -74,6 +76,8 @@ const initialState: ConfigState = {
   errors: {
     "platform-connection": undefined,
     "platform-services": undefined,
+    "temporary-collection": undefined,
+    "mandatory-tags": undefined,
     "scan-image": undefined,
     "scan-runtime": undefined,
   },
