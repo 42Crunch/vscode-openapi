@@ -62,7 +62,7 @@ async function makeHttpRequestForOas(
 
   const result = SwaggerClient.buildRequest({
     spec: await buildOasSpecWithServers(oas, server, request),
-    operationId: swaggerClientOperationId,
+    operationId: swaggerClientEscapeString(swaggerClientOperationId),
     parameters: makeOpenApiSwaggerClientParameters(request.parameters, security),
     securities: makeOasSecurities(oas?.components?.securitySchemes || {}, security),
     requestContentType: request.body?.mediaType,
@@ -88,7 +88,7 @@ async function makeHttpRequestForSwagger(
 
   const result = SwaggerClient.buildRequest({
     spec: await buildSwaggerSpecWithServers(oas, server, request),
-    operationId: swaggerClientOperationId,
+    operationId: swaggerClientEscapeString(swaggerClientOperationId),
     parameters: makeSwaggerSwaggerClientParameters(oas, request),
     securities: makeSwaggerSecurities(oas?.securityDefinitions || {}, security),
   });
@@ -297,3 +297,6 @@ function makeUrlencodedBody(body: unknown): unknown {
   }
   return result;
 }
+
+// escapng the string same as swaggerclient does
+const swaggerClientEscapeString = (str: string) => str.replace(/[^\w]/gi, "_");
