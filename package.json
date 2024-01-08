@@ -711,6 +711,12 @@
             "useHostNetwork": true
           }
         },
+        "openapi.platformTemporaryCollectionName": {
+          "scope": "machine",
+          "type": "string",
+          "description": "Temporary Collection Name",
+          "default": "IDE Temp Collection"
+        },
         "openapi.platformScandManager": {
           "scope": "workbench",
           "type": "object",
