@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.19.5 (January 8, 2024)
+
+- Fix issue when dots in operationId prevented 'Try' in Scan UI from sending the request
+
 ## Version 4.19.2 (December 5, 2023)
 
 - Add Scan/Audit/Try it commands to the context menu in the OpenAPI tree
