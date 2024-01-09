@@ -118,7 +118,7 @@ function parseRequestStageReference(
 ): Result<playbook.StageReference, InternalParsingErrors> {
   return result<playbook.StageReference>({
     responses: parseMap(oas, file, reference.responses || {}, parseResponse),
-    auth: value(reference.auth),
+    auth: value(reference.auth || []),
     ref: parseRequestRef(oas, file, reference.$ref as string),
     fuzzing: value(reference.fuzzing),
     environment: parseCtxVariables(oas, file, reference.environment || {}),
@@ -136,7 +136,7 @@ function parseRequestStageContent(
   return result<playbook.StageContent>({
     responses: parseMap(oas, file, content.responses || {}, parseResponse),
     fuzzing: value(content.fuzzing),
-    auth: value(content.auth),
+    auth: value(content.auth || []),
     environment: parseCtxVariables(oas, file, content.environment || {}),
     injectionKey: value(content.injectionKey),
     ref: value(undefined),
