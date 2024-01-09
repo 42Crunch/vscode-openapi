@@ -89,7 +89,7 @@ async function makeHttpRequestForSwagger(
   const result = SwaggerClient.buildRequest({
     spec: await buildSwaggerSpecWithServers(oas, server, request),
     operationId: swaggerClientEscapeString(swaggerClientOperationId),
-    parameters: makeSwaggerSwaggerClientParameters(oas, request),
+    parameters: makeSwaggerSwaggerClientParameters(oas, request, security),
     securities: makeSwaggerSecurities(oas?.securityDefinitions || {}, security),
   });
   // FIXME return replacements
@@ -162,7 +162,7 @@ function makeOpenApiSwaggerClientParameters(
   parameters: playbook.ParameterValues,
   security: AuthResult
 ): Record<string, unknown> {
-  const locations: playbook.ParameterLocation[] = ["query", "header", "path", "cookie"];
+  const locations: playbook.ParameterLocation[] = ["query", "header", "cookie"];
   const result = collectParameters(parameters, locations);
   // this is a workaround for having duplicate required header, etc names
   // to supply schema validation to the security scheme
@@ -173,16 +173,26 @@ function makeOpenApiSwaggerClientParameters(
       result[`${credential.in}.${credential.name}`] = value;
     }
   }
-
   return result;
 }
 
 function makeSwaggerSwaggerClientParameters(
   oas: BundledSwaggerSpec,
-  request: playbook.CRequest
+  request: playbook.CRequest,
+  security: AuthResult
 ): Record<string, unknown> {
-  const locations: playbook.ParameterLocation[] = ["query", "header", "path"];
+  const locations: playbook.ParameterLocation[] = ["query", "header"];
   const result = collectParameters(request.parameters, locations);
+
+  // this is a workaround for having duplicate required header, etc names
+  // to supply schema validation to the security scheme
+  // swagger client breaks on these, thinking required values are not required
+  // remove once we start to use a custom extension in the security schema to specify schema
+  for (const { credential, value } of Object.values(security)) {
+    if (locations.includes(credential.in as any) && credential.name !== undefined) {
+      result[`${credential.in}.${credential.name}`] = value;
+    }
+  }
 
   // add request body if defined
   const parameters = getParameters(oas, request.path, request.method);
