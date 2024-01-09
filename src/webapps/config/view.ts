@@ -118,10 +118,13 @@ export class ConfigWebView extends WebView<Webapp> {
   };
 
   async sendLoadConfig() {
-    // TODO load tags
-    const tags = this.platform.isConnected() ? await this.platform.getTags() : [];
-    console.log(tags);
     const config = await loadConfig(this.configuration, this.secrets);
+    if (this.platform.isConnected()) {
+      const convention = await this.platform.getCollectionNamingConvention();
+      if (convention.pattern !== "") {
+        config.platformCollectionNamingConvention = convention;
+      }
+    }
     this.sendRequest({
       command: "loadConfig",
       payload: config,

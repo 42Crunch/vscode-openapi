@@ -22,6 +22,10 @@ export async function loadConfig(
   const scandManagerHeader = await secrets.get("platformScandManagerHeader");
   const repository = configuration.get<"string">("platformRepository");
 
+  const platformTemporaryCollectionName = configuration.get<"string">(
+    "platformTemporaryCollectionName"
+  );
+
   return {
     platformUrl,
     platformApiToken: apiToken,
@@ -42,6 +46,7 @@ export async function loadConfig(
     platform: process.platform,
     cli: getCliInfo(),
     repository,
+    platformTemporaryCollectionName,
   };
 }
 
@@ -81,6 +86,11 @@ export async function saveConfig(
   await configuration.update(
     "platformRepository",
     config.repository,
+    vscode.ConfigurationTarget.Global
+  );
+  await configuration.update(
+    "platformTemporaryCollectionName",
+    config.platformTemporaryCollectionName,
     vscode.ConfigurationTarget.Global
   );
   // secrets

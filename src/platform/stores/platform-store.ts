@@ -1,5 +1,7 @@
 import { Event, EventEmitter } from "vscode";
 import { DataFormat, FullDataDictionary } from "@xliic/common/data-dictionary";
+import { NamingConvention, DefaultCollectionNamingPattern } from "@xliic/common/platform";
+import { Configuration } from "../../configuration";
 
 import {
   collectionUpdate,
@@ -41,7 +43,6 @@ import {
   CollectionData,
   CollectionFilter,
   Logger,
-  NamingConvention,
   PlatformConnection,
   UserData,
 } from "../types";
@@ -134,7 +135,7 @@ export class PlatformStore {
   private connected = false;
   readonly gitManager: GitManager = new GitManager();
 
-  constructor(private logger: Logger) {}
+  constructor(private configuration: Configuration, private logger: Logger) {}
 
   get onConnectionDidChange(): Event<PlatformConnectionEvent> {
     return this._onConnectionDidChange.event;
@@ -240,7 +241,22 @@ export class PlatformStore {
   }
 
   async createTempApi(json: string): Promise<{ apiId: string; collectionId: string }> {
-    const collectionId = await this.findOrCreateTempCollection();
+    const namingConvention = await this.getCollectionNamingConvention();
+    const collectionName = this.configuration.get<"string">("platformTemporaryCollectionName");
+
+    if (namingConvention.pattern !== "" && !collectionName.match(namingConvention.pattern)) {
+      throw new Error(
+        `The temporary collection name does not match the expected pattern defined in your organization. Please change the temporary collection name in your settings.`
+      );
+    }
+
+    if (!collectionName.match(DefaultCollectionNamingPattern)) {
+      throw new Error(
+        `The temporary collection name does not match the expected pattern. Please change the temporary collection name in your settings.`
+      );
+    }
+
+    const collectionId = await this.findOrCreateTempCollection(collectionName);
     const apiName = `tmp-${Date.now()}`;
     const api = await createApi(
       collectionId,
@@ -483,15 +499,18 @@ export class PlatformStore {
     return readAuditReportSqgTodo(taskId, this.getConnection(), this.logger);
   }
 
-  async findOrCreateTempCollection(): Promise<string> {
-    // FIXME make sure that collection is owned by the user
-    const collectionName = "IDE Temp Collection";
+  async findOrCreateTempCollection(collectionName: string): Promise<string> {
     const collections = await this.searchCollections(collectionName);
-    if (collections.list.length === 0) {
+    // FIXME make sure that collection is owned by the user, for now take first accessible collection
+    const writable = collections.list.filter(
+      (cl) => cl.read && cl.write && cl.writeApis && cl.deleteApis
+    );
+    if (writable.length > 0) {
+      return writable[0].id;
+    } else {
       const collection = await this.createCollection(collectionName);
       return collection.desc.id;
     }
-    return collections.list[0].id;
   }
 }
 

@@ -5,8 +5,9 @@
 
 import got, { Method, OptionsOfJSONResponseBody, HTTPError } from "got";
 import { AuditCompliance } from "@xliic/common/audit";
+import { NamingConvention } from "@xliic/common/platform";
 
-import { ApiAuditReport, NamingConvention, SearchCollectionsResponse } from "./types";
+import { ApiAuditReport, SearchCollectionsResponse } from "./types";
 import {
   Api,
   ListCollectionsResponse,

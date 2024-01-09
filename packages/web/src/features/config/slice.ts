@@ -62,6 +62,7 @@ const initialState: ConfigState = {
     platform: "",
     cli: { found: false, location: "" },
     repository: "",
+    platformTemporaryCollectionName: "",
   },
   platformConnectionTestResult: undefined,
   waitingForPlatformConnectionTest: false,

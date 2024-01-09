@@ -1,3 +1,4 @@
+import { NamingConvention } from "./platform";
 import { ScandManagerConnection } from "./scan";
 
 export type Config = {
@@ -9,6 +10,8 @@ export type Config = {
     manual: string | undefined;
     auto: string;
   };
+  platformCollectionNamingConvention?: NamingConvention;
+  platformTemporaryCollectionName: string;
   docker: {
     replaceLocalhost: boolean;
     useHostNetwork: boolean;
