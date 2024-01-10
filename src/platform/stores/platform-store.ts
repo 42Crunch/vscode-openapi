@@ -45,6 +45,7 @@ import {
   Logger,
   PlatformConnection,
   UserData,
+  Tag,
 } from "../types";
 import { GitManager } from "./git-store";
 
@@ -230,10 +231,17 @@ export class PlatformStore {
   }
 
   async createApi(collectionId: string, name: string, json: string): Promise<Api> {
+    const tagIds: string[] = [];
+    const mandatoryTags = getMandatoryTags(this.configuration);
+    if (mandatoryTags.length > 0) {
+      const platformTags = await getTags(this.getConnection(), this.logger);
+      tagIds.push(...getMandatoryTagsIds(mandatoryTags, platformTags));
+    }
+
     const api = await createApi(
       collectionId,
       name,
-      [],
+      tagIds,
       Buffer.from(json),
       this.getConnection(),
       this.logger
@@ -244,30 +252,11 @@ export class PlatformStore {
   async createTempApi(json: string): Promise<{ apiId: string; collectionId: string }> {
     const collectionId = await this.findOrCreateTempCollection();
 
-    const tags: string[] = [];
     const tagIds: string[] = [];
-
-    const platformMandatoryTags = this.configuration.get<string>("platformMandatoryTags");
-    if (platformMandatoryTags !== "" && platformMandatoryTags.match(TagRegex) !== null) {
-      for (const tag of platformMandatoryTags.split(/\s+/)) {
-        tags.push(tag);
-      }
-    }
-
-    if (tags.length > 0) {
+    const mandatoryTags = getMandatoryTags(this.configuration);
+    if (mandatoryTags.length > 0) {
       const platformTags = await getTags(this.getConnection(), this.logger);
-      for (const tag of tags) {
-        const found = platformTags.filter(
-          (platformTag) => tag === `${platformTag.categoryName}:${platformTag.tagName}`
-        );
-        if (found.length > 0) {
-          tagIds.push(found[0].tagId);
-        } else {
-          throw new Error(
-            `The mandatory tag "${tag}" is not found. Please change the mandatory tags in your settings.`
-          );
-        }
-      }
+      tagIds.push(...getMandatoryTagsIds(mandatoryTags, platformTags));
     }
 
     const apiName = `tmp-${Date.now()}`;
@@ -541,6 +530,36 @@ export class PlatformStore {
       return collection.desc.id;
     }
   }
+}
+
+function getMandatoryTags(configuration: Configuration): string[] {
+  const tags: string[] = [];
+
+  const platformMandatoryTags = configuration.get<string>("platformMandatoryTags");
+  if (platformMandatoryTags !== "" && platformMandatoryTags.match(TagRegex) !== null) {
+    for (const tag of platformMandatoryTags.split(/\s+/)) {
+      tags.push(tag);
+    }
+  }
+
+  return tags;
+}
+
+function getMandatoryTagsIds(tags: string[], platformTags: Tag[]): string[] {
+  const tagIds: string[] = [];
+  for (const tag of tags) {
+    const found = platformTags.filter(
+      (platformTag) => tag === `${platformTag.categoryName}:${platformTag.tagName}`
+    );
+    if (found.length > 0) {
+      tagIds.push(found[0].tagId);
+    } else {
+      throw new Error(
+        `The mandatory tag "${tag}" is not found. Please change the mandatory tags in your settings.`
+      );
+    }
+  }
+  return tagIds;
 }
 
 function delay(ms: number) {
