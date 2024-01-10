@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { SeverityLevel, SeverityLevels, Sqg } from "@xliic/common/audit";
+import { SeverityLevel, SeverityLevelOrNone, SeverityLevels, Sqg } from "@xliic/common/audit";
 import { changeTab, changeFilter, SeverityStats, Stats, Filter } from "./slice";
 import { useAppDispatch } from "./store";
 
@@ -98,7 +98,7 @@ export default function SqgLevelViolations({ sqg, stats }: { sqg: Sqg; stats: St
         .map((entry, index) => (
           <Content key={index}>
             <div>{entry.name}</div>
-            <div>{entry.level}</div>
+            <div>{getLevelDescription(entry.level)}</div>
             <a
               href="#"
               onClick={(e) => {
@@ -125,7 +125,7 @@ export default function SqgLevelViolations({ sqg, stats }: { sqg: Sqg; stats: St
         .map((entry, index) => (
           <Content key={index}>
             <div>{entry.name}</div>
-            <div>{entry.level}</div>
+            <div>{getLevelDescription(entry.level)}</div>
             <a
               href="#"
               onClick={(e) => {
@@ -178,18 +178,25 @@ const Subheader = styled.div`
 
 const Content = styled.div`
   display: flex;
-  > a,
-  div {
+  > a {
     flex: 1;
     text-transform: capitalize;
+    margin: 8px;
+  }
+  > div {
+    flex: 1;
     margin: 8px;
   }
 `;
 
 function checkViolations(
-  level: SeverityLevel,
+  level: SeverityLevelOrNone,
   stats: SeverityStats
 ): { level: SeverityLevel; count: number }[] {
+  if (level === "none") {
+    // there could be no violations at level none
+    return [];
+  }
   const start = SeverityLevels.indexOf(level);
   const result = [];
   for (const name of SeverityLevels.slice(start)) {
@@ -198,4 +205,17 @@ function checkViolations(
     }
   }
   return result;
+}
+
+const levelDescriptions = {
+  info: "All issues are rejected",
+  low: "Issues up to level Info allowed, levels Low to Critical rejected",
+  medium: "Issues up to level Low allowed, levels Medium to Critical rejected",
+  high: "Issues up to level Medium allowed, levels High to Critical rejected",
+  critical: "Only Critical issues are rejected",
+  none: "No restrictions",
+};
+
+function getLevelDescription(level: SeverityLevelOrNone) {
+  return levelDescriptions[level];
 }

@@ -73,16 +73,16 @@ export type Sqg = {
     minimumAssessmentScores: { global: number; security: number; dataValidation: number };
     subcategoryRules: {
       dataValidation: {
-        parameters: SeverityLevel;
-        responseHeaders: SeverityLevel;
-        responseDefinition: SeverityLevel;
-        schema: SeverityLevel;
-        paths: SeverityLevel;
+        parameters: SeverityLevelOrNone;
+        responseHeaders: SeverityLevelOrNone;
+        responseDefinition: SeverityLevelOrNone;
+        schema: SeverityLevelOrNone;
+        paths: SeverityLevelOrNone;
       };
       security: {
-        authentication: SeverityLevel;
-        authorization: SeverityLevel;
-        transport: SeverityLevel;
+        authentication: SeverityLevelOrNone;
+        authorization: SeverityLevelOrNone;
+        transport: SeverityLevelOrNone;
       };
     };
     issueRules: string[];
@@ -108,6 +108,8 @@ export type CriticalityLevel = 1 | 2 | 3 | 4 | 5;
 
 export const SeverityLevels = ["info", "low", "medium", "high", "critical"] as const;
 export type SeverityLevel = (typeof SeverityLevels)[number];
+
+export type SeverityLevelOrNone = "info" | "low" | "medium" | "high" | "critical" | "none";
 
 export const Criticality = {
   Info: 1,
