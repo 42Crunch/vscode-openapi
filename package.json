@@ -714,8 +714,16 @@
         "openapi.platformTemporaryCollectionName": {
           "scope": "machine",
           "type": "string",
-          "description": "Temporary Collection Name",
+          "description": "42Crunch platform temporary Collection name",
           "default": "IDE Temp Collection"
+        },
+        "openapi.platformMandatoryTags": {
+          "scope": "machine",
+          "type": "string",
+          "editPresentation": "multilineText",
+          "description": "42Crunch platform mandatory tags, these tags will be added to every API created on the platform.",
+          "default": "",
+          "pattern": "^(\\w+:\\w+\\s*)*$"
         },
         "openapi.platformScandManager": {
           "scope": "workbench",

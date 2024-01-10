@@ -1,6 +1,6 @@
 import { Event, EventEmitter } from "vscode";
 import { DataFormat, FullDataDictionary } from "@xliic/common/data-dictionary";
-import { NamingConvention, DefaultCollectionNamingPattern } from "@xliic/common/platform";
+import { NamingConvention, DefaultCollectionNamingPattern, TagRegex } from "@xliic/common/platform";
 import { Configuration } from "../../configuration";
 
 import {
@@ -233,6 +233,7 @@ export class PlatformStore {
     const api = await createApi(
       collectionId,
       name,
+      [],
       Buffer.from(json),
       this.getConnection(),
       this.logger
@@ -241,26 +242,39 @@ export class PlatformStore {
   }
 
   async createTempApi(json: string): Promise<{ apiId: string; collectionId: string }> {
-    const namingConvention = await this.getCollectionNamingConvention();
-    const collectionName = this.configuration.get<"string">("platformTemporaryCollectionName");
+    const collectionId = await this.findOrCreateTempCollection();
 
-    if (namingConvention.pattern !== "" && !collectionName.match(namingConvention.pattern)) {
-      throw new Error(
-        `The temporary collection name does not match the expected pattern defined in your organization. Please change the temporary collection name in your settings.`
-      );
+    const tags: string[] = [];
+    const tagIds: string[] = [];
+
+    const platformMandatoryTags = this.configuration.get<string>("platformMandatoryTags");
+    if (platformMandatoryTags !== "" && platformMandatoryTags.match(TagRegex) !== null) {
+      for (const tag of platformMandatoryTags.split(/\s+/)) {
+        tags.push(tag);
+      }
     }
 
-    if (!collectionName.match(DefaultCollectionNamingPattern)) {
-      throw new Error(
-        `The temporary collection name does not match the expected pattern. Please change the temporary collection name in your settings.`
-      );
+    if (tags.length > 0) {
+      const platformTags = await getTags(this.getConnection(), this.logger);
+      for (const tag of tags) {
+        const found = platformTags.filter(
+          (platformTag) => tag === `${platformTag.categoryName}:${platformTag.tagName}`
+        );
+        if (found.length > 0) {
+          tagIds.push(found[0].tagId);
+        } else {
+          throw new Error(
+            `The mandatory tag "${tag}" is not found. Please change the mandatory tags in your settings.`
+          );
+        }
+      }
     }
 
-    const collectionId = await this.findOrCreateTempCollection(collectionName);
     const apiName = `tmp-${Date.now()}`;
     const api = await createApi(
       collectionId,
       apiName,
+      tagIds,
       Buffer.from(json),
       this.getConnection(),
       this.logger
@@ -499,7 +513,22 @@ export class PlatformStore {
     return readAuditReportSqgTodo(taskId, this.getConnection(), this.logger);
   }
 
-  async findOrCreateTempCollection(collectionName: string): Promise<string> {
+  async findOrCreateTempCollection(): Promise<string> {
+    const namingConvention = await this.getCollectionNamingConvention();
+    const collectionName = this.configuration.get<string>("platformTemporaryCollectionName");
+
+    if (namingConvention.pattern !== "" && !collectionName.match(namingConvention.pattern)) {
+      throw new Error(
+        `The temporary collection name does not match the expected pattern defined in your organization. Please change the temporary collection name in your settings.`
+      );
+    }
+
+    if (!collectionName.match(DefaultCollectionNamingPattern)) {
+      throw new Error(
+        `The temporary collection name does not match the expected pattern. Please change the temporary collection name in your settings.`
+      );
+    }
+
     const collections = await this.searchCollections(collectionName);
     // FIXME make sure that collection is owned by the user, for now take first accessible collection
     const writable = collections.list.filter(

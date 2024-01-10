@@ -12,6 +12,7 @@ export type Config = {
   };
   platformCollectionNamingConvention?: NamingConvention;
   platformTemporaryCollectionName: string;
+  platformMandatoryTags: string;
   docker: {
     replaceLocalhost: boolean;
     useHostNetwork: boolean;

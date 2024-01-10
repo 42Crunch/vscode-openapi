@@ -104,3 +104,9 @@ export type ApiAuditReport = {
   tid: string;
   data: any;
 };
+
+export type Tag = {
+  categoryName: string;
+  tagName: string;
+  tagId: string;
+};
