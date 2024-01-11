@@ -22,6 +22,12 @@ export async function loadConfig(
   const scandManagerHeader = await secrets.get("platformScandManagerHeader");
   const repository = configuration.get<"string">("platformRepository");
 
+  const platformTemporaryCollectionName = configuration.get<"string">(
+    "platformTemporaryCollectionName"
+  );
+
+  const platformMandatoryTags = configuration.get<"string">("platformMandatoryTags");
+
   return {
     platformUrl,
     platformApiToken: apiToken,
@@ -42,6 +48,8 @@ export async function loadConfig(
     platform: process.platform,
     cli: getCliInfo(),
     repository,
+    platformTemporaryCollectionName,
+    platformMandatoryTags,
   };
 }
 
@@ -83,6 +91,17 @@ export async function saveConfig(
     config.repository,
     vscode.ConfigurationTarget.Global
   );
+  await configuration.update(
+    "platformTemporaryCollectionName",
+    config.platformTemporaryCollectionName,
+    vscode.ConfigurationTarget.Global
+  );
+  await configuration.update(
+    "platformMandatoryTags",
+    config.platformMandatoryTags,
+    vscode.ConfigurationTarget.Global
+  );
+
   // secrets
   await secrets.store("platformApiToken", config.platformApiToken);
   if (config.scandManager.auth == "header") {

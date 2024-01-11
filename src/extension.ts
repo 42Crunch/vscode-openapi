@@ -109,7 +109,7 @@ export async function activate(context: vscode.ExtensionContext) {
     debug: (message: string) => null,
   };
 
-  const platformStore = new PlatformStore(logger);
+  const platformStore = new PlatformStore(configuration, logger);
 
   const envStore = new EnvStore(context.workspaceState, context.secrets);
 

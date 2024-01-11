@@ -14,7 +14,7 @@ export interface ListCollectionsResponse {
 }
 
 export interface SearchCollectionsResponse {
-  list: { id: string }[];
+  list: { id: string; write: boolean; writeApis: boolean; read: boolean; deleteApis: boolean }[];
 }
 
 export interface ListApisResponse {
@@ -100,13 +100,13 @@ export interface Logger {
   debug(message: string): void;
 }
 
-export interface NamingConvention {
-  pattern: string;
-  description: string;
-  example: string;
-}
-
 export type ApiAuditReport = {
   tid: string;
   data: any;
+};
+
+export type Tag = {
+  categoryName: string;
+  tagName: string;
+  tagId: string;
 };

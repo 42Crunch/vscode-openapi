@@ -119,6 +119,12 @@ export class ConfigWebView extends WebView<Webapp> {
 
   async sendLoadConfig() {
     const config = await loadConfig(this.configuration, this.secrets);
+    if (this.platform.isConnected()) {
+      const convention = await this.platform.getCollectionNamingConvention();
+      if (convention.pattern !== "") {
+        config.platformCollectionNamingConvention = convention;
+      }
+    }
     this.sendRequest({
       command: "loadConfig",
       payload: config,

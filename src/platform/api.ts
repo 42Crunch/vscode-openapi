@@ -5,8 +5,9 @@
 
 import got, { Method, OptionsOfJSONResponseBody, HTTPError } from "got";
 import { AuditCompliance } from "@xliic/common/audit";
+import { NamingConvention } from "@xliic/common/platform";
 
-import { ApiAuditReport, NamingConvention, SearchCollectionsResponse } from "./types";
+import { ApiAuditReport, SearchCollectionsResponse } from "./types";
 import {
   Api,
   ListCollectionsResponse,
@@ -16,6 +17,7 @@ import {
   Logger,
   CollectionFilter,
   UserData,
+  Tag,
 } from "./types";
 
 import { DataDictionary, DataFormats } from "@xliic/common/data-dictionary";
@@ -150,6 +152,7 @@ export async function deleteApi(apiId: string, options: PlatformConnection, logg
 export async function createApi(
   collectionId: string,
   name: string,
+  tags: string[],
   contents: Buffer,
   options: PlatformConnection,
   logger: Logger
@@ -158,6 +161,7 @@ export async function createApi(
     ...gotOptions("POST", options, logger),
     json: {
       cid: collectionId,
+      tags,
       name,
       specfile: contents.toString("base64"),
     },
@@ -291,6 +295,11 @@ export async function getDataDictionaryFormats(
   }
 
   return formats as DataFormats;
+}
+
+export async function getTags(options: PlatformConnection, logger: Logger): Promise<Tag[]> {
+  const { body } = await got(`api/v2/tags`, gotOptions("GET", options, logger));
+  return <Tag[]>(body as any).list;
 }
 
 export async function createDefaultScanConfig(

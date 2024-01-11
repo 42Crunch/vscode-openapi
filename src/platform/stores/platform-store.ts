@@ -1,5 +1,7 @@
 import { Event, EventEmitter } from "vscode";
 import { DataFormat, FullDataDictionary } from "@xliic/common/data-dictionary";
+import { NamingConvention, DefaultCollectionNamingPattern, TagRegex } from "@xliic/common/platform";
+import { Configuration } from "../../configuration";
 
 import {
   collectionUpdate,
@@ -32,6 +34,7 @@ import {
   testConnection,
   readAuditCompliance,
   readAuditReportSqgTodo,
+  getTags,
 } from "../api";
 import {
   Api,
@@ -40,9 +43,9 @@ import {
   CollectionData,
   CollectionFilter,
   Logger,
-  NamingConvention,
   PlatformConnection,
   UserData,
+  Tag,
 } from "../types";
 import { GitManager } from "./git-store";
 
@@ -133,7 +136,7 @@ export class PlatformStore {
   private connected = false;
   readonly gitManager: GitManager = new GitManager();
 
-  constructor(private logger: Logger) {}
+  constructor(private configuration: Configuration, private logger: Logger) {}
 
   get onConnectionDidChange(): Event<PlatformConnectionEvent> {
     return this._onConnectionDidChange.event;
@@ -228,9 +231,17 @@ export class PlatformStore {
   }
 
   async createApi(collectionId: string, name: string, json: string): Promise<Api> {
+    const tagIds: string[] = [];
+    const mandatoryTags = getMandatoryTags(this.configuration);
+    if (mandatoryTags.length > 0) {
+      const platformTags = await getTags(this.getConnection(), this.logger);
+      tagIds.push(...getMandatoryTagsIds(mandatoryTags, platformTags));
+    }
+
     const api = await createApi(
       collectionId,
       name,
+      tagIds,
       Buffer.from(json),
       this.getConnection(),
       this.logger
@@ -240,10 +251,19 @@ export class PlatformStore {
 
   async createTempApi(json: string): Promise<{ apiId: string; collectionId: string }> {
     const collectionId = await this.findOrCreateTempCollection();
+
+    const tagIds: string[] = [];
+    const mandatoryTags = getMandatoryTags(this.configuration);
+    if (mandatoryTags.length > 0) {
+      const platformTags = await getTags(this.getConnection(), this.logger);
+      tagIds.push(...getMandatoryTagsIds(mandatoryTags, platformTags));
+    }
+
     const apiName = `tmp-${Date.now()}`;
     const api = await createApi(
       collectionId,
       apiName,
+      tagIds,
       Buffer.from(json),
       this.getConnection(),
       this.logger
@@ -405,6 +425,11 @@ export class PlatformStore {
     return this.formats;
   }
 
+  async getTags(): Promise<any> {
+    const tags = await getTags(this.getConnection(), this.logger);
+    return tags;
+  }
+
   async refresh(): Promise<void> {
     this.formats = undefined;
     this.gitManager.refresh();
@@ -478,14 +503,63 @@ export class PlatformStore {
   }
 
   async findOrCreateTempCollection(): Promise<string> {
-    const collectionName = "IDE Temp Collection";
+    const namingConvention = await this.getCollectionNamingConvention();
+    const collectionName = this.configuration.get<string>("platformTemporaryCollectionName");
+
+    if (namingConvention.pattern !== "" && !collectionName.match(namingConvention.pattern)) {
+      throw new Error(
+        `The temporary collection name does not match the expected pattern defined in your organization. Please change the temporary collection name in your settings.`
+      );
+    }
+
+    if (!collectionName.match(DefaultCollectionNamingPattern)) {
+      throw new Error(
+        `The temporary collection name does not match the expected pattern. Please change the temporary collection name in your settings.`
+      );
+    }
+
     const collections = await this.searchCollections(collectionName);
-    if (collections.list.length === 0) {
+    // FIXME make sure that collection is owned by the user, for now take first accessible collection
+    const writable = collections.list.filter(
+      (cl) => cl.read && cl.write && cl.writeApis && cl.deleteApis
+    );
+    if (writable.length > 0) {
+      return writable[0].id;
+    } else {
       const collection = await this.createCollection(collectionName);
       return collection.desc.id;
     }
-    return collections.list[0].id;
   }
+}
+
+function getMandatoryTags(configuration: Configuration): string[] {
+  const tags: string[] = [];
+
+  const platformMandatoryTags = configuration.get<string>("platformMandatoryTags");
+  if (platformMandatoryTags !== "" && platformMandatoryTags.match(TagRegex) !== null) {
+    for (const tag of platformMandatoryTags.split(/\s+/)) {
+      tags.push(tag);
+    }
+  }
+
+  return tags;
+}
+
+function getMandatoryTagsIds(tags: string[], platformTags: Tag[]): string[] {
+  const tagIds: string[] = [];
+  for (const tag of tags) {
+    const found = platformTags.filter(
+      (platformTag) => tag === `${platformTag.categoryName}:${platformTag.tagName}`
+    );
+    if (found.length > 0) {
+      tagIds.push(found[0].tagId);
+    } else {
+      throw new Error(
+        `The mandatory tag "${tag}" is not found. Please change the mandatory tags in your settings.`
+      );
+    }
+  }
+  return tagIds;
 }
 
 function delay(ms: number) {
