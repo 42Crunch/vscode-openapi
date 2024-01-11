@@ -1,5 +1,15 @@
 # Changelog
 
+## Version 4.20.0 (January 11, 2024)
+
+- Implement context menu command to remove operations and paths in OpenAPI Explorer view
+- Allow configuring name of a temporary collection when using 42Crunch Platform for performing Security Audit,
+  and make sure it matches org's collection naming convention
+- Allow specifying a list of tags to be automatically added to all APIs created by the extention on 42Crunch platform
+- Fix display of SQG configuration for audits executed using 42Crunch Platform
+- In 42Crunch Platform explorer view, APIs with 'technical names' are made read-only, and if possible a link
+  to a filesystem location for relevant OpenAPI file is provided
+
 ## Version 4.19.5 (January 8, 2024)
 
 - Fix issue when dots in operationId prevented 'Try' in Scan UI from sending the request
