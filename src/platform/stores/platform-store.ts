@@ -537,8 +537,10 @@ function getMandatoryTags(configuration: Configuration): string[] {
 
   const platformMandatoryTags = configuration.get<string>("platformMandatoryTags");
   if (platformMandatoryTags !== "" && platformMandatoryTags.match(TagRegex) !== null) {
-    for (const tag of platformMandatoryTags.split(/\s+/)) {
-      tags.push(tag);
+    for (const tag of platformMandatoryTags.split(/[\s,]+/)) {
+      if (tag !== "") {
+        tags.push(tag);
+      }
     }
   }
 

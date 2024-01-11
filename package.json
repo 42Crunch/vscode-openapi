@@ -723,7 +723,7 @@
           "editPresentation": "multilineText",
           "description": "42Crunch platform mandatory tags, these tags will be added to every API created on the platform.",
           "default": "",
-          "pattern": "^(\\w+:\\w+\\s*)*$"
+          "pattern": "^([\\w\\-@.+]{1,255}:[\\w\\-@.+]{1,255}[\\s,]*)*$"
         },
         "openapi.platformScandManager": {
           "scope": "workbench",
