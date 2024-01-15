@@ -714,7 +714,7 @@
         "openapi.platformTemporaryCollectionName": {
           "scope": "machine",
           "type": "string",
-          "description": "42Crunch platform temporary Collection name",
+          "description": "42Crunch platform temporary collection name. WARNING: Do not use existing collection name, all APIs in this collection will be deleted!",
           "default": "IDE Temp Collection"
         },
         "openapi.platformMandatoryTags": {

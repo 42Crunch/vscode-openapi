@@ -25,7 +25,14 @@ export function TemporaryCollection() {
   return (
     <>
       <Title>Temporary Collection Name</Title>
-
+      <p>
+        The name of the collection for temporary APIs. Make sure that the name matches the
+        collection naming pattern defined in your organization.
+      </p>
+      <p>
+        WARNING: Do not use existing collection name. This collection will be used for temporary
+        APIs, and all existing APIs in this collection will be deleted.
+      </p>
       <Container>
         <Input label="Collection Name" name="platformTemporaryCollectionName" />
         {conventionRegex && !conventionRegex.test(name) && (
