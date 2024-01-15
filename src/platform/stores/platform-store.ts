@@ -536,11 +536,17 @@ function getMandatoryTags(configuration: Configuration): string[] {
   const tags: string[] = [];
 
   const platformMandatoryTags = configuration.get<string>("platformMandatoryTags");
-  if (platformMandatoryTags !== "" && platformMandatoryTags.match(TagRegex) !== null) {
-    for (const tag of platformMandatoryTags.split(/[\s,]+/)) {
-      if (tag !== "") {
-        tags.push(tag);
+  if (platformMandatoryTags !== "") {
+    if (platformMandatoryTags.match(TagRegex) !== null) {
+      for (const tag of platformMandatoryTags.split(/[\s,]+/)) {
+        if (tag !== "") {
+          tags.push(tag);
+        }
       }
+    } else {
+      throw new Error(
+        `The mandatory tags "${platformMandatoryTags}" do not match the expected pattern. Please change the mandatory tags in your settings.`
+      );
     }
   }
 
