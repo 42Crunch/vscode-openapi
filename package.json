@@ -650,9 +650,8 @@
         "enablement": "view == openapiOutline"
       },
       {
-        "command": "openapi.platform.editorLoadAuditReportFromFile",
-        "title": "42Crunch: Load Security Audit report from file",
-        "enablement": "openapiTwoEnabled || openapiThreeEnabled"
+        "command": "openapi.platform.loadAuditReportFromFile",
+        "title": "42Crunch: Load Security Audit report from file"
       }
     ],
     "keybindings": [

@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { PlatformStore } from "../stores/platform-store";
 import { Cache } from "../../cache";
 import { refreshAuditReport } from "../audit";
-import { AuditContext } from "../../types";
+import { AuditContext, OpenApiVersion } from "../../types";
 import { makePlatformUri } from "../util";
 import { AuditWebView } from "../../audit/view";
 import { parseAuditReport } from "../../audit/audit";
@@ -39,7 +39,18 @@ export default (
     );
   },
 
-  editorLoadAuditReportFromFile: async (editor: vscode.TextEditor, edit: vscode.TextEditorEdit) => {
+  loadAuditReportFromFile: async () => {
+    const editor = vscode.window.activeTextEditor;
+    if (
+      editor === undefined ||
+      cache.getDocumentVersion(editor.document) === OpenApiVersion.Unknown
+    ) {
+      vscode.window.showErrorMessage(
+        "Can't load Security Audit report for this document. Please open an OpenAPI document first."
+      );
+      return;
+    }
+
     const selection = await vscode.window.showOpenDialog({
       title: "Load Security Audit report",
       canSelectFiles: true,
