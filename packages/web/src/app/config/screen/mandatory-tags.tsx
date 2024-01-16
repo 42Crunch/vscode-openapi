@@ -1,4 +1,3 @@
-import React from "react";
 import * as z from "zod";
 
 import { TagRegex } from "@xliic/common/platform";
@@ -30,16 +29,11 @@ const schema = z
   })
   .catchall(z.unknown());
 
-const screen: {
-  id: ConfigScreen;
-  label: string;
-  schema: z.ZodObject<any>;
-  form: React.FC;
-} = {
-  id: "mandatory-tags",
-  label: "Mandatory Tags",
-  schema,
-  form: MandatoryTags,
-};
-
-export default screen;
+export default function screen(): ConfigScreen {
+  return {
+    id: "mandatory-tags",
+    label: "Mandatory Tags",
+    schema,
+    form: MandatoryTags,
+  };
+}

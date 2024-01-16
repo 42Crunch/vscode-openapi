@@ -52,12 +52,7 @@ const schema = z.object({
     .or(z.literal("")),
 });
 
-const screen: {
-  id: ConfigScreen;
-  label: string;
-  schema: z.ZodObject<any>;
-  form: React.FC;
-} = {
+const screen: ConfigScreen = {
   id: "platform-connection",
   label: "Connection",
   schema,
