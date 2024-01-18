@@ -1,5 +1,12 @@
 # Changelog
 
+
+## Version 4.21.0 (January 18, 2024)
+
+- Change scope of a number of configuration settings to "machine", to disallow overriding
+  this in a workspace, as having different per-workspace settings for likes of "platformUrl"
+  was very confusing.
+
 ## Version 4.20.0 (January 11, 2024)
 
 - Implement context menu command to remove operations and paths in OpenAPI Explorer view
