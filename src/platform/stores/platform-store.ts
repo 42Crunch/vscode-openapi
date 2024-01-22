@@ -259,7 +259,11 @@ export class PlatformStore {
       tagIds.push(...getMandatoryTagsIds(mandatoryTags, platformTags));
     }
 
-    const apiName = `tmp-${Date.now()}`;
+    // if the api naming convention is configured, use its example as the api name
+    // this way we don't have to come up with a name that matches its pattern
+    const convention = await this.getApiNamingConvention();
+    const apiName = convention.pattern !== "" ? convention.example : `tmp-${Date.now()}`;
+
     const api = await createApi(
       collectionId,
       apiName,
@@ -272,10 +276,10 @@ export class PlatformStore {
   }
 
   async clearTempApi(tmp: { apiId: string; collectionId: string }): Promise<void> {
-    await deleteApi(tmp.apiId, this.getConnection(), this.logger);
     // check if any of the old apis have to be deleted
     const current = new Date().getTime();
     const response = await listApis(tmp.collectionId, this.getConnection(), this.logger);
+    const convention = await this.getApiNamingConvention();
     for (const api of response.list) {
       const name = api.desc.name;
       if (name.startsWith("tmp-")) {
@@ -283,6 +287,9 @@ export class PlatformStore {
         if (current - timestamp > 600000) {
           await deleteApi(api.desc.id, this.getConnection(), this.logger);
         }
+      } else if (convention.pattern !== "" && name === convention.example) {
+        // if the api naming convention is configured, we don't have timestamps in the name
+        await deleteApi(api.desc.id, this.getConnection(), this.logger);
       }
     }
   }
