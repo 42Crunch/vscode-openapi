@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.21.1 (January 22, 2024)
+
+- Fix for creating temp APIs when API Naming Convention is configured
+- Fixes for form validation in Settings webapp
 
 ## Version 4.21.0 (January 18, 2024)
 
