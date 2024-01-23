@@ -113,6 +113,14 @@ Try it comes with a number of limitations:
 
 ![TryIt response tools](images/tryit-schema.png)
 
+### Configure authentication for external references in OpenAPI files
+
+If you use references to schemas served by an authenticated HTTP service (such as an Schema Registry service or a repository), you can configure authentication for a specific host in the Approved Hosts section of the extension configuration:
+
+![Configure approved hosts and authentication](./images/Configure%20approved%20hosts%20and%20authentication.png)
+
+After configuring all hosts you need to refer to, all OpenAPI references to any of the approved hosts will be dynamically resolved for linting and previewing your API.
+
 ## Static API Security Testing
 
 You can use this OpenAPI extension to check the quality and security of your API definition as you work on it. This feature is powered by 42Crunch [Audit](https://docs.42crunch.com/latest/content/concepts/api_contract_security_audit.htm?utm_campaign=IDE&utm_medium=referral&utm_source=vscode). 42Crunch Audit performs a static analysis of the API definition that includes more than 300 checks on best practices and potential vulnerabilities related to authentication, authorization as well as data constraints.

@@ -4,7 +4,7 @@
 */
 
 import * as vscode from "vscode";
-import got from "got";
+import got, { OptionsOfTextResponseBody } from "got";
 import { configuration } from "./configuration";
 
 export const INTERNAL_SCHEMES: { [key: string]: string } = {
@@ -60,6 +60,82 @@ function getLanguageId(uri: string, contentType: string | undefined): string | u
   return undefined;
 }
 
+interface ApprovedHostsConfiguration {
+  [host: string]: string|undefined;
+}
+
+
+function getApprovedHostsConfiguration(): ApprovedHostsConfiguration | undefined {
+  if (configuration.get("approvedHosts") === undefined) {
+    return undefined;
+  }
+
+  let approvedHosts: ApprovedHostsConfiguration | undefined;
+  try {
+    approvedHosts = configuration.get<ApprovedHostsConfiguration>("approvedHosts");
+  }
+  catch (e) {
+    console.error("Unexpected error processing 'OpenAPI Approved Hosts' configuration:", e);
+    return undefined;
+  }
+
+  if (! approvedHosts) {
+    return undefined;
+  }
+  return approvedHosts;
+}
+
+
+function getApprovedHostConfigurationEntry(authority : string): {host: string, authorization?: string} | undefined {
+  const approvedHosts = getApprovedHostsConfiguration();
+
+  if (! approvedHosts) {
+    return undefined;
+  }
+
+  for (const host of Object.keys(approvedHosts)) {
+    if (host.toLowerCase() === authority.toLowerCase()) {
+      return {
+        host: host,
+        authorization: approvedHosts[host]?.trim() || undefined
+      }
+    }
+  }
+  return undefined;
+}
+
+function isHostApproved(authority: string): boolean {
+  return getApprovedHostConfigurationEntry(authority) !== undefined;
+}
+
+
+function getHostAuthorization(authority: string) {
+  const hostConfiguration = getApprovedHostConfigurationEntry(authority);
+
+  if (hostConfiguration === undefined) {
+    return undefined;
+  }
+
+  if (hostConfiguration.authorization) {
+    return ( hostConfiguration.authorization.indexOf(" ") != -1
+        ? hostConfiguration.authorization
+        : `Bearer ${hostConfiguration.authorization}`
+      );
+  }
+
+  return undefined;
+}
+
+
+export function getApprovedHosts(): string[] {
+  const approvedHosts = getApprovedHostsConfiguration();
+  if (! approvedHosts) {
+    return [];
+  }
+  return Object.keys(approvedHosts);
+}
+
+
 export class ExternalRefDocumentProvider implements vscode.TextDocumentContentProvider {
   private cache: { [uri: string]: string } = {};
 
@@ -72,20 +148,24 @@ export class ExternalRefDocumentProvider implements vscode.TextDocumentContentPr
     uri: vscode.Uri,
     token: vscode.CancellationToken
   ): Promise<string> {
-    const approvedHosts = configuration.get<string[]>("approvedHostnames");
-
-    const approved = approvedHosts.some(
-      (approvedHostname) => approvedHostname.toLowerCase() === uri.authority.toLowerCase()
-    );
-
-    if (!approved) {
-      throw new Error(`Hostname ${uri.authority}" is not in the list of approved hosts`);
+    if (! isHostApproved(uri.authority)) {
+      throw new Error(`Hostname "${uri.authority}" is not in the list of approved hosts`);
     }
 
     const actualUri = fromInternalUri(uri);
-    const { body, headers } = await got(actualUri.toString());
 
-    const languageId = getLanguageId(actualUri.toString(), headers["content-type"]);
+    const requestOptions : OptionsOfTextResponseBody = {};
+    requestOptions.headers = {};
+
+    const authorization = getHostAuthorization(uri.authority);
+    if (authorization) {
+      requestOptions.headers.Authorization = authorization;
+    }
+
+    const { body, headers } = await got(actualUri.toString(), requestOptions);
+
+    const actualUriWithoutQueryAndFragment = actualUri.with({ query: "", fragment: "" });
+    const languageId = getLanguageId(actualUriWithoutQueryAndFragment.toString(), headers["content-type"]);
 
     if (languageId) {
       this.cache[actualUri.toString()] = languageId;
