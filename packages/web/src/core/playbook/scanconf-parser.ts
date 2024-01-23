@@ -165,7 +165,7 @@ function parseRequestFile(
   file: scan.ConfigurationFileBundle,
   content: scan.RequestFile
 ): Result<playbook.StageContent | playbook.ExternalStageContent, InternalParsingErrors> {
-  if (content.external === true) {
+  if (content.operationId === undefined) {
     return parseRequestExternalStageContent(oas, file, content);
   } else {
     return parseRequestStageContent(oas, file, content, content.operationId);

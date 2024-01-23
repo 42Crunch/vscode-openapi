@@ -261,7 +261,6 @@ function serializeExternalStageContent(
     defaultResponse: stage.defaultResponse,
     environment: serializeEnvironment(stage.environment),
     responses: responses!,
-    external: true,
   };
 
   return [result, undefined];
