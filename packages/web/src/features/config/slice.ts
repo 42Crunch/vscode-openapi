@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
+import * as z from "zod";
 
 import {
   CliDownloadResult,
@@ -11,7 +12,7 @@ import {
 export interface ConfigState {
   ready: boolean;
   data: Config;
-  errors: Record<ConfigScreen, string | undefined>;
+  errors: Record<ConfigScreenId, string | undefined>;
   hasErrors: boolean;
   platformConnectionTestResult?: ConnectionTestResult;
   waitingForPlatformConnectionTest: boolean;
@@ -26,13 +27,20 @@ export interface ConfigState {
   cliDownloadError?: string;
 }
 
-export type ConfigScreen =
+export type ConfigScreenId =
   | "platform-connection"
   | "platform-services"
   | "temporary-collection"
   | "mandatory-tags"
   | "scan-runtime"
   | "scan-image";
+
+export type ConfigScreen = {
+  id: ConfigScreenId;
+  label: string;
+  schema: z.ZodObject<any>;
+  form: React.FC;
+};
 
 const initialState: ConfigState = {
   ready: false,
@@ -104,13 +112,13 @@ export const slice = createSlice({
       state.scandManagerConnectionTestResult = undefined;
     },
 
-    setError: (state, action: PayloadAction<{ screen: ConfigScreen; error: string }>) => {
+    setError: (state, action: PayloadAction<{ screen: ConfigScreenId; error: string }>) => {
       const { screen, error } = action.payload;
       state.errors[screen] = error;
       state.hasErrors = Object.values(state.errors).some((error) => error !== undefined);
     },
 
-    clearError: (state, action: PayloadAction<ConfigScreen>) => {
+    clearError: (state, action: PayloadAction<ConfigScreenId>) => {
       state.errors[action.payload] = undefined;
       state.hasErrors = Object.values(state.errors).some((error) => error !== undefined);
     },

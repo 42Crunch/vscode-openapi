@@ -1,4 +1,3 @@
-import React from "react";
 import { useWatch } from "react-hook-form";
 import * as z from "zod";
 
@@ -8,13 +7,13 @@ import Input from "../../../components/Input";
 import Select from "../../../components/Select";
 import ValidProgressButton from "../../../components/form/ValidProgressButton";
 import {
-  ConfigScreen,
   downloadCli,
   testCli,
   testScandManagerConnection,
   useFeatureDispatch,
   useFeatureSelector,
   openLink,
+  ConfigScreen,
 } from "../../../features/config/slice";
 import CliVersionBanner from "../CliVersionBanner";
 import ConnectionTestBanner from "../ConnectionTestBanner";
@@ -178,12 +177,7 @@ export function PlatformServices() {
 
 const schema = z.object({}).catchall(z.unknown());
 
-const screen: {
-  id: ConfigScreen;
-  label: string;
-  schema: z.ZodObject<any>;
-  form: React.FC;
-} = {
+const screen: ConfigScreen = {
   id: "scan-runtime",
   label: "Runtime",
   schema,

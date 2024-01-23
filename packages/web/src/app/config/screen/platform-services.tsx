@@ -1,4 +1,3 @@
-import React from "react";
 import { useWatch } from "react-hook-form";
 import * as z from "zod";
 import Input from "../../../components/Input";
@@ -60,12 +59,7 @@ export function PlatformServices() {
 
 const schema = z.object({}).catchall(z.unknown());
 
-const screen: {
-  id: ConfigScreen;
-  label: string;
-  schema: z.ZodObject<any>;
-  form: React.FC;
-} = {
+const screen: ConfigScreen = {
   id: "platform-services",
   label: "Services",
   schema,

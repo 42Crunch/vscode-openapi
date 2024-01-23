@@ -7,40 +7,60 @@ import {
   clearError,
   useFeatureDispatch,
   useFeatureSelector,
-  ConfigScreen,
+  ConfigScreenId,
 } from "../../features/config/slice";
 import Form from "../../new-components/Form";
 import platformConnection from "./screen/platform-connection";
 import platformServices from "./screen/platform-services";
-import temporaryCollection from "./screen/temporary-collection";
-import mandatoryTags from "./screen/mandatory-tags";
+import temporaryCollectionMaker from "./screen/temporary-collection";
+import mandatoryTagsMaker from "./screen/mandatory-tags";
 import scanRuntime from "./screen/scan-runtime";
 import { unwrapFormValues, wrapFormValues } from "./util";
-
-const sections = [
-  {
-    id: "platform",
-    title: "42Crunch Platform",
-    items: [platformConnection, platformServices, temporaryCollection, mandatoryTags],
-  },
-  {
-    id: "scan",
-    title: "API Conformance Scan",
-    items: [scanRuntime],
-  },
-];
-
-const screenById = {
-  [platformConnection.id]: platformConnection,
-  [platformServices.id]: platformServices,
-  [scanRuntime.id]: scanRuntime,
-  [temporaryCollection.id]: temporaryCollection,
-  [mandatoryTags.id]: mandatoryTags,
-};
 
 export default function Config() {
   const dispatch = useFeatureDispatch();
   const { ready, errors, data } = useFeatureSelector((state) => state.config);
+
+  const mandatoryTags = mandatoryTagsMaker();
+  const temporaryCollection = temporaryCollectionMaker(data.platformCollectionNamingConvention);
+
+  const sections = [
+    {
+      id: "platform",
+      title: "42Crunch Platform",
+      items: [platformConnection, platformServices, temporaryCollection, mandatoryTags],
+    },
+    {
+      id: "scan",
+      title: "API Conformance Scan",
+      items: [scanRuntime],
+    },
+  ];
+
+  const screenById = {
+    [platformConnection.id]: platformConnection,
+    [platformServices.id]: platformServices,
+    [scanRuntime.id]: scanRuntime,
+    [temporaryCollection.id]: temporaryCollection,
+    [mandatoryTags.id]: mandatoryTags,
+  };
+
+  useEffect(() => {
+    const formData = wrapFormValues(data);
+    for (const screenId of Object.keys(screenById)) {
+      const { success } = screenById[screenId].schema.safeParse(formData);
+      if (success) {
+        dispatch(clearError(screenId as ConfigScreenId));
+      } else {
+        dispatch(
+          setError({
+            screen: screenId as ConfigScreenId,
+            error: "Validation errors, configuration is not being saved",
+          })
+        );
+      }
+    }
+  }, [data]);
 
   if (!ready) {
     return null;
@@ -72,7 +92,7 @@ export default function Config() {
   );
 }
 
-function TriggerValidation({ id }: { id: ConfigScreen }) {
+function TriggerValidation({ id }: { id: ConfigScreenId }) {
   const dispatch = useFeatureDispatch();
 
   const {
