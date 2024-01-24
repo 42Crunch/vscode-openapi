@@ -34,8 +34,12 @@ import { EnvStore } from "../envstore";
 import { Logger } from "./types";
 import { loadConfig } from "../util/config";
 import { delay } from "../time-util";
+import { CliAstManifestEntry, getCliUpdate } from "./cli-ast-update";
 
 const asyncExecFile = promisify(execFile);
+
+let lastCliUpdateCheckTime = 0;
+const cliUpdateCheckInterval = 1000 * 60 * 60 * 8; // 8 hours
 
 export async function createScanConfigWithCliBinary(
   scanconfUri: vscode.Uri,
@@ -83,7 +87,11 @@ export async function testCli(): Promise<CliTestResult> {
     try {
       const { stdout } = await asyncExecFile(cli.location, ["--version"], { windowsHide: true });
       const version = stdout.split("\n")?.[0]; // get the first line only
-      return { success: true, version };
+      const match = version.match(/(\d+\.\d+\.\d+)$/);
+      if (match !== null) {
+        return { success: true, version: match[1] };
+      }
+      return { success: true, version: "0.0.0" };
     } catch (e: any) {
       return { success: false, message: String(e.message ? e.message : e) };
     }
@@ -101,47 +109,78 @@ export async function ensureCliDownloaded(
   const config = await loadConfig(configuration, secrets);
   const info = getCliInfo();
 
-  if (info.found) {
-    return true;
-  }
-
-  await delay(100); // workaround for #133073
-  const answer = await vscode.window.showInformationMessage(
-    "42Crunch CLI is not found, download?",
-    { modal: true },
-    { title: "Download", id: "download" }
-  );
-
-  if (answer?.id === "download") {
-    const downloaded = await vscode.window.withProgress(
-      {
-        location: vscode.ProgressLocation.Notification,
-        title: "Downloading 42Crunch CLI",
-        cancellable: false,
-      },
-      async (progress, cancellationToken): Promise<boolean> => {
-        let previous = 0;
-        for await (const downloadProgress of downloadCli(config.repository)) {
-          const increment = (downloadProgress.percent - previous) * 100;
-          previous = downloadProgress.percent;
-          progress.report({ increment });
-        }
-        return true;
-      }
+  if (!info.found) {
+    // offer to download
+    await delay(100); // workaround for #133073
+    const answer = await vscode.window.showInformationMessage(
+      "42Crunch CLI is not found, download?",
+      { modal: true },
+      { title: "Download", id: "download" }
     );
-    return downloaded;
+
+    if (answer?.id === "download") {
+      const manifest = await getCliUpdate(config.repository, "0.0.0");
+      if (manifest === undefined) {
+        vscode.window.showErrorMessage("Failed to download 42Crunch CLI, manifest not found");
+        return false;
+      }
+      return downloadCliWithProgress(manifest);
+    }
+    return false;
   }
-  return false;
+
+  const currentTime = Date.now();
+  if (currentTime - lastCliUpdateCheckTime > cliUpdateCheckInterval) {
+    lastCliUpdateCheckTime = currentTime;
+    // get the version
+    const test = await testCli();
+    if (test.success) {
+      const manifest = await getCliUpdate(config.repository, test.version);
+      if (manifest !== undefined) {
+        await delay(100); // workaround for #133073
+        const answer = await vscode.window.showInformationMessage(
+          `New version ${manifest.version} of 42Crunch CLI is available, download?`,
+          { modal: true },
+          { title: "Download", id: "download" }
+        );
+
+        if (answer?.id === "download") {
+          return downloadCliWithProgress(manifest);
+        }
+      }
+      return true;
+    } else {
+      // lets try to re-download
+    }
+  }
+
+  return true;
+}
+
+function downloadCliWithProgress(manifest: CliAstManifestEntry) {
+  return vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: "Downloading 42Crunch CLI",
+      cancellable: false,
+    },
+    async (progress, cancellationToken): Promise<boolean> => {
+      let previous = 0;
+      for await (const downloadProgress of downloadCli(manifest)) {
+        const increment = (downloadProgress.percent - previous) * 100;
+        previous = downloadProgress.percent;
+        progress.report({ increment });
+      }
+      return true;
+    }
+  );
 }
 
 export async function* downloadCli(
-  repository: string
+  manifest: CliAstManifestEntry
 ): AsyncGenerator<CliDownloadProgress, string, unknown> {
-  if (repository === undefined || repository === "") {
-    throw new Error("Repository URL is not set");
-  }
   ensureDirectories();
-  const tmpCli = yield* downloadToTempFile(repository);
+  const tmpCli = yield* downloadToTempFile(manifest);
   const destinationCli = join(getBinDirectory(), getCliFilename());
   renameSync(tmpCli, destinationCli);
   rmdirSync(dirname(tmpCli));
@@ -332,40 +371,19 @@ function getCliFilename() {
   }
 }
 
-function getRepoCliFilename() {
-  if (process.platform === "win32") {
-    return "42c-ast-windows-amd64.exe";
-  } else if (process.platform === "darwin" && process.arch == "arm64") {
-    return "42c-ast-darwin-arm64";
-  } else if (process.platform === "darwin" && process.arch == "x64") {
-    return "42c-ast-darwin-amd64";
-  } else if (process.platform === "linux" && process.arch == "x64") {
-    return "42c-ast-linux-amd64";
-  }
-}
-
-function getRepoUrl(repository: string) {
-  if (repository.endsWith("/")) {
-    return repository;
-  } else {
-    return `${repository}/`;
-  }
-}
-
 function ensureDirectories() {
   mkdirSync(getBinDirectory(), { recursive: true });
 }
 
 async function* downloadToTempFile(
-  repository: string
+  manifest: CliAstManifestEntry
 ): AsyncGenerator<CliDownloadProgress, string, unknown> {
   const asyncFinished = promisify(finished);
   const cliFilename = getCliFilename();
   const tmpdir = createTempDirectory("42c-ast-download-");
   const tmpfile = join(tmpdir, cliFilename);
   const fileWriterStream = createWriteStream(tmpfile);
-  const downloadUrl = getRepoUrl(repository) + getRepoCliFilename();
-  const downloadStream = got.stream(downloadUrl);
+  const downloadStream = got.stream(manifest.downloadUrl);
 
   for await (const chunk of downloadStream) {
     yield downloadStream.downloadProgress;
@@ -374,8 +392,11 @@ async function* downloadToTempFile(
       await once(fileWriterStream, "drain");
     }
   }
+
   fileWriterStream.end();
   await asyncFinished(fileWriterStream);
+
+  // TODO check SHA256
 
   return tmpfile;
 }
