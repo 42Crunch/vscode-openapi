@@ -34,6 +34,7 @@ const initialState: State = {
     before: [],
     after: [],
     environments: {},
+    authorizationTests: {},
   },
   dirty: false,
   servers: [],

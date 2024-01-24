@@ -49,14 +49,24 @@ export function serialize(
       customizations,
       environments,
       operations,
-      before: before.length > 0 ? before : undefined,
-      after: after.length > 0 ? after : undefined,
+      before: undefinedIfEmpty(before),
+      after: undefinedIfEmpty(after),
       authenticationDetails,
-      authorizationTests: file.authorizationTests as any,
-      requests: Object.keys(requests).length > 0 ? requests : undefined,
+      authorizationTests: undefinedIfEmpty(file.authorizationTests),
+      requests: undefinedIfEmpty(requests),
     },
     undefined,
   ];
+}
+
+function undefinedIfEmpty<T extends Array<unknown> | Record<string, unknown>>(
+  value: T
+): T | undefined {
+  if (value instanceof Array) {
+    return value.length > 0 ? value : undefined;
+  } else {
+    return Object.keys(value).length > 0 ? value : undefined;
+  }
 }
 
 function serializeAuthenticationDetails(

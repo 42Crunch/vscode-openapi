@@ -86,7 +86,7 @@ export type PlaybookBundle = {
   authenticationDetails: Credentials[];
   before: Stage[];
   after: Stage[];
-  authorizationTests?: unknown;
+  authorizationTests: AuthorizationTests;
   requests: Record<string, StageContent | ExternalStageContent>;
 };
 
@@ -207,6 +207,16 @@ export type CredentialMethod = {
 };
 
 export type Credentials = Record<string, Credential>;
+
+export type AuthArray = string[]; // for now Credentials are not supported in AuthArray, just strings
+
+export type AuthenticationSwappingTest = {
+  key: "authentication-swapping-bola" | "authentication-swapping-bfla";
+  source: AuthArray;
+  target: AuthArray;
+};
+
+export type AuthorizationTests = Record<string, AuthenticationSwappingTest>;
 
 export type StageLocationGlobalBefore = {
   container: "globalBefore";
