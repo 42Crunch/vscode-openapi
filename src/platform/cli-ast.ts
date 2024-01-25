@@ -267,6 +267,57 @@ export async function runScanWithCliBinary(
   }
 }
 
+export async function runValidateScanConfigWithCliBinary(
+  secrets: vscode.SecretStorage,
+  envStore: EnvStore,
+  scanEnv: SimpleEnvironment,
+  config: Config,
+  logger: Logger,
+  oas: string,
+  scanconf: string
+): Promise<Result<CliValidateResponse, CliError>> {
+  logger.info(`Running Validate Scan Config using 42Crunch CLI`);
+
+  const tmpDir = tmpdir();
+  const dir = mkdtempSync(join(`${tmpDir}`, "scan-"));
+  const oasFilename = join(dir as string, "openapi.json");
+  const scanconfFilename = join(dir as string, "scanconf.json");
+
+  await writeFile(oasFilename, oas, { encoding: "utf8" });
+  await writeFile(scanconfFilename, scanconf, { encoding: "utf8" });
+
+  logger.info(`Wrote scan configuration to: ${dir}`);
+
+  const cli = join(getBinDirectory(), getCliFilename());
+
+  logger.info(`Running validate using: ${cli}`);
+
+  try {
+    const output = await asyncExecFile(
+      cli,
+      ["scan", "conf", "validate", "openapi.json", "--conf-file", "scanconf.json"],
+      { cwd: dir as string, windowsHide: true, env: scanEnv }
+    );
+
+    const cliResponse = JSON.parse(output.stdout);
+
+    // clean the temp directory
+    unlinkSync(oasFilename);
+    unlinkSync(scanconfFilename);
+    rmdirSync(dir);
+
+    return [cliResponse, undefined];
+  } catch (ex: any) {
+    const error = readException(ex);
+    const json = parseCliJsonResponse(error.stdout);
+    if (json !== undefined) {
+      return [undefined, json];
+    } else {
+      throw new Error(formatException(error));
+    }
+  }
+}
+
 export async function runAuditWithCliBinary(
   secrets: vscode.SecretStorage,
   logger: Logger,
@@ -434,6 +485,16 @@ export type CliResponse = {
   remainingFullScan: number;
   remainingPerOperationScan: number;
   scanLogs?: CliLogEntry[];
+};
+
+export type CliValidateResponse = {
+  statusCode: number;
+  statusMessage: string;
+  report: {
+    runnable: boolean;
+    valid: boolean;
+    errors: string[];
+  };
 };
 
 export type CliLogEntry = {

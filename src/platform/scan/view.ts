@@ -26,7 +26,7 @@ import { PlatformStore } from "../stores/platform-store";
 import { Logger } from "../types";
 import { executeHttpRequest } from "./http-handler";
 import { ScanReportWebView } from "./report-view";
-import { runScanWithCliBinary } from "../cli-ast";
+import { runScanWithCliBinary, runValidateScanConfigWithCliBinary } from "../cli-ast";
 import { runScanWithDocker } from "./runtime/docker";
 import { runScanWithScandManager } from "./runtime/scand-manager";
 import { UPGRADE_WARN_LIMIT, offerUpgrade, warnScans } from "../upgrade";
@@ -238,6 +238,29 @@ async function runScan(
 
   try {
     if (config.scanRuntime === "cli" && getAnondCredentials(configuration)) {
+      const [validateReport, validateError] = await runValidateScanConfigWithCliBinary(
+        secrets,
+        envStore,
+        scanEnv,
+        config,
+        logger,
+        stringOas,
+        scanconf
+      );
+
+      if (validateError !== undefined) {
+        throw new Error(
+          `Unexpected error running scan config validation: ${JSON.stringify(validateError)}`
+        );
+      }
+
+      if (validateReport.report.errors.length > 0) {
+        await reportView.sendLogMessage("Scan configuration has failed validation", "error");
+        for (const message of validateReport.report.errors) {
+          await reportView.sendLogMessage(message, "error");
+        }
+      }
+
       const [result, error] = await runScanWithCliBinary(
         secrets,
         envStore,
