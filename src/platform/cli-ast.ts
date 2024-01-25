@@ -22,6 +22,7 @@ import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { finished } from "node:stream";
 import { promisify } from "node:util";
+import { createHash } from "node:crypto";
 import * as vscode from "vscode";
 
 import { CliDownloadProgress, CliTestResult, Config } from "@xliic/common/config";
@@ -385,9 +386,12 @@ async function* downloadToTempFile(
   const fileWriterStream = createWriteStream(tmpfile);
   const downloadStream = got.stream(manifest.downloadUrl);
 
+  const hash = createHash("sha256");
+
   for await (const chunk of downloadStream) {
     yield downloadStream.downloadProgress;
 
+    hash.update(chunk);
     if (!fileWriterStream.write(chunk)) {
       await once(fileWriterStream, "drain");
     }
@@ -396,7 +400,9 @@ async function* downloadToTempFile(
   fileWriterStream.end();
   await asyncFinished(fileWriterStream);
 
-  // TODO check SHA256
+  if (manifest.sha256 !== hash.digest("hex")) {
+    throw new Error(`SHA256 hash mismatch for ${manifest.downloadUrl}`);
+  }
 
   return tmpfile;
 }
