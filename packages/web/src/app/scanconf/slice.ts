@@ -19,6 +19,7 @@ export type State = {
   selectedCredentialGroup: number;
   selectedCredential?: string;
   selectedSubcredential?: string;
+  selectedAuthorizationTest?: string;
 };
 
 const initialState: State = {
@@ -201,6 +202,33 @@ export const slice = createSlice({
       state.selectedSubcredential = payload;
     },
 
+    addAuthorizationTest: (
+      state,
+      {
+        payload: { id, test },
+      }: PayloadAction<{ id: string; test: playbook.AuthenticationSwappingTest }>
+    ) => {
+      state.playbook.authorizationTests[id] = test;
+    },
+
+    saveAuthorizationTest: (
+      state,
+      {
+        payload: { id, test },
+      }: PayloadAction<{ id: string; test: playbook.AuthenticationSwappingTest }>
+    ) => {
+      state.playbook.authorizationTests[id] = test;
+    },
+
+    removeAuthorizationTest: (state, { payload: { id } }: PayloadAction<{ id: string }>) => {
+      delete state.playbook.authorizationTests[id];
+      state.selectedAuthorizationTest = Object.keys(state.playbook.authorizationTests)?.[0];
+    },
+
+    selectAuthorizationTest: (state, { payload: { id } }: PayloadAction<{ id: string }>) => {
+      state.selectedAuthorizationTest = id;
+    },
+
     saveOperationReference: (
       state,
       {
@@ -265,6 +293,8 @@ export const slice = createSlice({
           playbook?.authenticationDetails[0][state.selectedCredential]?.methods
         )?.[0];
       }
+      // select first authorization test
+      state.selectedAuthorizationTest = Object.keys(playbook?.authorizationTests || {})?.[0];
     });
   },
 });
@@ -305,6 +335,10 @@ export const {
   saveCredential,
   selectCredential,
   selectSubcredential,
+  addAuthorizationTest,
+  saveAuthorizationTest,
+  removeAuthorizationTest,
+  selectAuthorizationTest,
   updateScanconf,
   saveRequest,
   removeRequest,

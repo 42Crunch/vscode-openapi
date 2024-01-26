@@ -17,6 +17,7 @@ import Environments from "./environment/Environments";
 import Global from "./global/Global";
 import Settings from "./settings/Settings";
 import EnvironmentsNavigationTab from "./environment/EnvironmentsNavigationTab";
+import AuthorizationTests from "./authorizationTests/AuthorizationTests";
 
 const routes: Routes = [
   {
@@ -39,6 +40,11 @@ const routes: Routes = [
     id: "auth",
     title: "Authentication",
     element: <Auth />,
+  },
+  {
+    id: "authorizationTests",
+    title: "Tests",
+    element: <AuthorizationTests />,
   },
   {
     id: "environments",
