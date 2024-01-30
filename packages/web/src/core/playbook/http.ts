@@ -162,7 +162,7 @@ function makeOpenApiSwaggerClientParameters(
   parameters: playbook.ParameterValues,
   security: AuthResult
 ): Record<string, unknown> {
-  const locations: playbook.ParameterLocation[] = ["query", "header", "cookie"];
+  const locations: playbook.ParameterLocation[] = ["path", "query", "header", "cookie"];
   const result = collectParameters(parameters, locations);
   // this is a workaround for having duplicate required header, etc names
   // to supply schema validation to the security scheme
@@ -181,7 +181,7 @@ function makeSwaggerSwaggerClientParameters(
   request: playbook.CRequest,
   security: AuthResult
 ): Record<string, unknown> {
-  const locations: playbook.ParameterLocation[] = ["query", "header"];
+  const locations: playbook.ParameterLocation[] = ["path", "query", "header"];
   const result = collectParameters(request.parameters, locations);
 
   // this is a workaround for having duplicate required header, etc names
