@@ -493,7 +493,7 @@ export type CliValidateResponse = {
   report: {
     runnable: boolean;
     valid: boolean;
-    errors: string[];
+    errors?: string[];
   };
 };
 

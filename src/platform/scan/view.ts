@@ -254,7 +254,7 @@ async function runScan(
         );
       }
 
-      if (validateReport.report.errors.length > 0) {
+      if (validateReport.report.errors !== undefined && validateReport.report.errors.length > 0) {
         await reportView.sendLogMessage("Scan configuration has failed validation", "error");
         for (const message of validateReport.report.errors) {
           await reportView.sendLogMessage(message, "error");
