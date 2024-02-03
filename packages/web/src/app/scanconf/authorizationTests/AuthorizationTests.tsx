@@ -1,11 +1,6 @@
 import * as playbook from "@xliic/common/playbook";
 import { SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
-import {
-  addAuthorizationTest,
-  removeAuthorizationTest,
-  selectAuthorizationTest,
-  saveAuthorizationTest,
-} from "../slice";
+import { addAuthorizationTest, removeAuthorizationTest, selectAuthorizationTest } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import { Menu, MenuItem } from "../../../new-components/Menu";
 import Test from "./Test";
@@ -29,7 +24,12 @@ export default function AuthorizationTests() {
     label: id,
     menu: (
       <Menu>
-        <MenuItem onSelect={() => dispatch(removeAuthorizationTest({ id }))}>Delete</MenuItem>
+        <MenuItem
+          onClick={(e) => e.stopPropagation()}
+          onSelect={() => dispatch(removeAuthorizationTest({ id }))}
+        >
+          Delete
+        </MenuItem>
       </Menu>
     ),
   }));

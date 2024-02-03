@@ -57,7 +57,9 @@ export default function CredentialValues({
       title: method.key,
       menu: (
         <Menu>
-          <MenuItem onSelect={() => remove(index)}>Delete</MenuItem>
+          <MenuItem onClick={(e) => e.stopPropagation()} onSelect={() => remove(index)}>
+            Delete
+          </MenuItem>
         </Menu>
       ),
       content: (

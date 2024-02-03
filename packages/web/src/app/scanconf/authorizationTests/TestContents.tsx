@@ -1,5 +1,3 @@
-import styled from "styled-components";
-
 import * as playbook from "@xliic/common/playbook";
 
 import DownshiftSelect from "../../../new-components/fat-fields/DownshiftSelect";
@@ -29,8 +27,7 @@ function flattenCredentials(credentials: playbook.Credentials) {
   return Object.entries(credentials)
     .map(([credentialName, credential]) => {
       return Object.entries(credential.methods || {}).map(([methodName, method]) => {
-        const name =
-          credential.default === methodName ? credentialName : `${credentialName}/${methodName}`;
+        const name = `${credentialName}/${methodName}`;
         return { name, credential };
       });
     })

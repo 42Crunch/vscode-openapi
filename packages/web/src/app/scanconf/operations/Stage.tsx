@@ -119,7 +119,7 @@ export default function Stage({
                 <GripVertical />
               </Grab>
               <Menu>
-                <MenuItem onSelect={removeStage}>
+                <MenuItem onClick={(e) => e.stopPropagation()} onSelect={removeStage}>
                   <TrashCan />
                   Delete
                 </MenuItem>

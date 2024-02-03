@@ -29,7 +29,10 @@ export default function Auth() {
       label: id,
       menu: (
         <Menu>
-          <MenuItem onSelect={() => dispatch(removeCredential({ credentialGroup: index, id }))}>
+          <MenuItem
+            onClick={(e) => e.stopPropagation()}
+            onSelect={() => dispatch(removeCredential({ credentialGroup: index, id }))}
+          >
             Delete
           </MenuItem>
         </Menu>
