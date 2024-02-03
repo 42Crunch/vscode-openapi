@@ -254,11 +254,13 @@ async function runScan(
         );
       }
 
-      if (validateReport.report.errors !== undefined && validateReport.report.errors.length > 0) {
+      if (validateReport.report.errors?.length) {
         await reportView.sendLogMessage("Scan configuration has failed validation", "error");
         for (const message of validateReport.report.errors) {
           await reportView.sendLogMessage(message, "error");
         }
+        await reportView.sendLogMessage("Please fix the scan configuration and try again", "error");
+        return;
       }
 
       const [result, error] = await runScanWithCliBinary(
