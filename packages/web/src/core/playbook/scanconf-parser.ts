@@ -97,7 +97,7 @@ function parseOperation(
     operationId: value(operation.operationId),
     before: parseArray(oas, file, operation.before || [], parseRequestStage),
     after: parseArray(oas, file, operation.after || [], parseRequestStage),
-    authorizationTests: value(operation.authorizationTests),
+    authorizationTests: value(operation.authorizationTests || []),
     scenarios: parseArray(oas, file, operation.scenarios || [], parseScenario),
     customTests: value(operation.customTests),
   });

@@ -135,7 +135,7 @@ export type Operation = {
   scenarios: Scenario[];
   before: Stage[];
   after: Stage[];
-  authorizationTests?: unknown;
+  authorizationTests: string[];
   customTests?: unknown;
 };
 

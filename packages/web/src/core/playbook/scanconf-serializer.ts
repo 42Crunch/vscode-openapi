@@ -187,7 +187,7 @@ function serializeOperation(
       after: after.length > 0 ? after : undefined,
       ...scenarios,
       customTests: operation.customTests as any,
-      authorizationTests: operation.authorizationTests as any,
+      authorizationTests: undefinedIfEmpty(operation.authorizationTests),
     },
     undefined,
   ];
