@@ -5,7 +5,7 @@ import * as playbook from "@xliic/common/playbook";
 import { ItemId } from "../../../components/layout/SearchSidebar";
 import Form from "../../../new-components/Form";
 
-import { saveAuthorizationTest, saveCredential } from "../slice";
+import { saveAuthorizationTest } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import TestContents from "./TestContents";
 
