@@ -1,8 +1,6 @@
 import styled from "styled-components";
 
-import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
 import * as playbook from "@xliic/common/playbook";
-import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { makeEnvEnv } from "../../../core/playbook/execute";
 import { serialize } from "../../../core/playbook/scanconf-serializer";
@@ -18,6 +16,8 @@ import Scenario from "./Scenario";
 import Scenarios from "./Scenarios";
 import AddRequest from "./components/AddRequest";
 import { startTryExecution } from "./slice";
+import AddAuthorizationTest from "./components/AddAuthorizationTest";
+import AuthorizationTests from "./AuthorizationTests";
 
 export default function Operation({ operationId }: { operationId: string }) {
   const dispatch = useAppDispatch();
@@ -95,6 +95,45 @@ export default function Operation({ operationId }: { operationId: string }) {
       <Header>
         <Title>{operationId}</Title>
       </Header>
+
+      <CollapsibleSection
+        defaultOpen={false}
+        title="Authorization Tests"
+        count={playbook.operations[operationId].authorizationTests.length}
+      >
+        <Content>
+          <AuthorizationTests
+            authorizationTests={playbook.operations[operationId].authorizationTests}
+            removeTest={(test) => {
+              const updated = playbook.operations[operationId].authorizationTests.filter(
+                (existing) => existing !== test
+              );
+              dispatch(
+                actions.updateOperationAuthorizationTests({
+                  operationId,
+                  authorizationTests: updated,
+                })
+              );
+            }}
+          />
+
+          <AddAuthorizationTest
+            authorizationTests={Object.keys(playbook.authorizationTests)}
+            existing={playbook.operations[operationId].authorizationTests}
+            onSelect={(selected) => {
+              dispatch(
+                actions.updateOperationAuthorizationTests({
+                  operationId,
+                  authorizationTests: [
+                    ...playbook.operations[operationId].authorizationTests,
+                    selected,
+                  ],
+                })
+              );
+            }}
+          />
+        </Content>
+      </CollapsibleSection>
 
       <CollapsibleSection
         defaultOpen={false}
