@@ -6,6 +6,8 @@
 import * as vscode from "vscode";
 import got, { OptionsOfTextResponseBody } from "got";
 import { configuration } from "./configuration";
+import { getApprovedHostConfiguration, getApprovedHostnames } from "./util/config";
+import { ApprovedHostConfiguration } from "../packages/common/src/config";
 
 export const INTERNAL_SCHEMES: { [key: string]: string } = {
   http: "openapi-internal-http",
@@ -60,95 +62,49 @@ function getLanguageId(uri: string, contentType: string | undefined): string | u
   return undefined;
 }
 
-interface ApprovedHostsConfiguration {
-  [host: string]: string|undefined;
-}
-
-
-function getApprovedHostsConfiguration(): ApprovedHostsConfiguration | undefined {
-  if (configuration.get("approvedHosts") === undefined) {
-    return undefined;
-  }
-
-  let approvedHosts: ApprovedHostsConfiguration | undefined;
-  try {
-    approvedHosts = configuration.get<ApprovedHostsConfiguration>("approvedHosts");
-  }
-  catch (e) {
-    console.error("Unexpected error processing 'OpenAPI Approved Hosts' configuration:", e);
-    return undefined;
-  }
-
-  if (! approvedHosts) {
-    return undefined;
-  }
-  return approvedHosts;
-}
-
-
-function getApprovedHostConfigurationEntry(authority : string): {host: string, authorization?: string} | undefined {
-  const approvedHosts = getApprovedHostsConfiguration();
-
-  if (! approvedHosts) {
-    return undefined;
-  }
-
-  for (const host of Object.keys(approvedHosts)) {
-    if (host.toLowerCase() === authority.toLowerCase()) {
-      return {
-        host: host,
-        authorization: approvedHosts[host]?.trim() || undefined
-      }
-    }
-  }
-  return undefined;
-}
-
-function isHostApproved(authority: string): boolean {
-  return getApprovedHostConfigurationEntry(authority) !== undefined;
-}
-
-
-function getHostAuthorization(authority: string) {
-  const hostConfiguration = getApprovedHostConfigurationEntry(authority);
-
-  if (hostConfiguration === undefined) {
-    return undefined;
-  }
-
-  if (hostConfiguration.authorization) {
-    return ( hostConfiguration.authorization.indexOf(" ") != -1
-        ? hostConfiguration.authorization
-        : `Bearer ${hostConfiguration.authorization}`
-      );
-  }
-
-  return undefined;
-}
-
-
-export function getApprovedHosts(): string[] {
-  const approvedHosts = getApprovedHostsConfiguration();
-  if (! approvedHosts) {
-    return [];
-  }
-  return Object.keys(approvedHosts);
-}
-
 
 export class ExternalRefDocumentProvider implements vscode.TextDocumentContentProvider {
   private cache: { [uri: string]: string } = {};
+  private secrets: vscode.SecretStorage;
+
+  constructor(secrets: vscode.SecretStorage) {
+    this.secrets = secrets;
+  }
 
   getLanguageId(uri: vscode.Uri): string | undefined {
     const actualUri = fromInternalUri(uri);
     return this.cache[actualUri.toString()];
   }
 
+  async getApprovedHostnames(): Promise<string[]> {
+    return await getApprovedHostnames(this.secrets);
+  }
+
+  async isHostApproved(authority: string): Promise<boolean> {
+    const sanitizedAuthority = authority.trim().toLowerCase();
+    if (! sanitizedAuthority) {
+      return false;
+    }
+    return (await this.getApprovedHostnames()).find(hostname => hostname.toLowerCase() === sanitizedAuthority) !== undefined;
+  }
+
+
+  async getHostConfiguration(authority: string): Promise<ApprovedHostConfiguration | undefined> {
+    const sanitizedAuthority = authority.trim().toLowerCase();
+    if (!sanitizedAuthority) {
+      return undefined;
+    }
+    if (await this.isHostApproved(sanitizedAuthority)) {
+      return await getApprovedHostConfiguration(this.secrets, sanitizedAuthority);
+    }
+    return undefined;
+  }
+
   async provideTextDocumentContent(
     uri: vscode.Uri,
     token: vscode.CancellationToken
   ): Promise<string> {
-    if (! isHostApproved(uri.authority)) {
+    if (! await this.isHostApproved(uri.authority)) {
       throw new Error(`Hostname "${uri.authority}" is not in the list of approved hosts`);
     }
 
@@ -157,9 +113,9 @@ export class ExternalRefDocumentProvider implements vscode.TextDocumentContentPr
     const requestOptions : OptionsOfTextResponseBody = {};
     requestOptions.headers = {};
 
-    const authorization = getHostAuthorization(uri.authority);
-    if (authorization) {
-      requestOptions.headers.Authorization = authorization;
+    const hostConfig = await this.getHostConfiguration(uri.authority);
+    if (hostConfig?.token) {
+      requestOptions.headers[hostConfig.header || "Authorization"] = `${hostConfig.prefix || "Bearer"} ${hostConfig.token}`;
     }
 
     const { body, headers } = await got(actualUri.toString(), requestOptions);

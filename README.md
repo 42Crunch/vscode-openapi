@@ -115,11 +115,19 @@ Try it comes with a number of limitations:
 
 ### Configure authentication for external references in OpenAPI files
 
-If you use references to schemas served by an authenticated HTTP service (such as an Schema Registry service or a repository), you can configure authentication for a specific host in the Approved Hosts section of the extension configuration:
+If you use references to schemas served by an authenticated HTTP service (such as an Schema Registry service or a repository), you can configure authentication for a specific host in the OpenAPI > External References section of the `42Crunch: Open Settings` command view:
 
 ![Configure approved hosts and authentication](./images/Configure%20approved%20hosts%20and%20authentication.png)
 
-After configuring all hosts you need to refer to, all OpenAPI references to any of the approved hosts will be dynamically resolved for linting and previewing your API.
+<br>
+
+> To open this view, go to `View > Command Palette...` in VSCode menu and type in `42Crunch`, you'll see the Open Settings command listed below:
+> ![42Crunch: Open Settings](./images/42Crunch%20Open%20Settings.png)
+> You can also use keyboard shortcuts for the Command Palette **Ctrl+Shift+P**, or **Cmd+Shift+P** for Mac users.
+
+<br>
+
+After configuring all hosts you need to refer to, all OpenAPI references to any of the approved hosts will be dynamically resolved when linting or previewing your API.
 
 ## Static API Security Testing
 

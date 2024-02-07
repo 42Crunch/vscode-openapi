@@ -4,7 +4,7 @@
   "displayName": "OpenAPI (Swagger) Editor",
   "description": "OpenAPI extension for Visual Studio Code",
   "license": "AGPL-3.0-only",
-  "version": "4.21.1",
+  "version": "4.22.0",
   "publisher": "42Crunch",
   "repository": {
     "type": "git",
@@ -799,25 +799,6 @@
           "type": "integer",
           "default": 1000,
           "description": "Preview update delay (in milliseconds after the last document change)"
-        },
-        "openapi.approvedHosts": {
-          "scope": "application",
-          "type": "object",
-          "additionalProperties": {
-            "type": "string",
-            "minLength": 0,
-            "maxLength": 1024,
-            "format": "password",
-            "description": "Contents of the Authorization header to send when resolving HTTP or HTTPS references",
-            "examples": [
-              "",
-              "aaaa1234",
-              "Token aaaa1234",
-              "Bearer aaaa1234"
-            ]
-          },
-          "description": "List of approved hostnames and authorization token/header for resolving external http:// and https:// references",
-          "markdownDescription": "#### List of approved hostnames and authorization token/header for resolving external http:// and https:// references.\r\nYou can either leave the token empty if no authorization is required for this host, provide a plain token to be sent as Bearer (for example: `aaaatoken1234`), or provide the entire contents for the Authorization header (for example: `Basic dXNlcjpwYXNzd29yZA==`)."
         },
         "openapi.tryit.insecureSslHostnames": {
           "scope": "application",

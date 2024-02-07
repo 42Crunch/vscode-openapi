@@ -4,7 +4,7 @@
 */
 
 import * as vscode from "vscode";
-import { ExternalRefDocumentProvider, getApprovedHosts } from "./external-refs";
+import { ExternalRefDocumentProvider } from "./external-refs";
 import { ParserOptions } from "./parser-options";
 import { BundleResult, BundlingError, OpenApiVersion } from "./types";
 import { parseDocument } from "./parsers";
@@ -233,7 +233,7 @@ class BundledDocumentCache implements vscode.Disposable {
   }
 
   private async bundle(document: vscode.TextDocument): Promise<BundleResult | undefined> {
-    const approvedHosts = getApprovedHosts();
+    const approvedHosts = await this.externalRefProvider.getApprovedHostnames();
     const parsed = this.documentParser(document);
     if (parsed.errors.length === 0 && parsed.parsed) {
       return await bundle(

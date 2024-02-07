@@ -35,6 +35,7 @@ import { Logger } from "./platform/types";
 import { getPlatformCredentials } from "./credentials";
 import { EnvStore } from "./envstore";
 import { debounce } from "./util/debounce";
+import { getApprovedHostnames, processApprovedHosts } from "./util/config";
 
 export async function activate(context: vscode.ExtensionContext) {
   const versionProperty = "openapiVersion";
@@ -53,7 +54,20 @@ export async function activate(context: vscode.ExtensionContext) {
     yaml: { language: "yaml" },
   };
 
-  const externalRefProvider = new ExternalRefDocumentProvider();
+  // move old openapi.approvedHostnames configuration setting to the new model
+  const moveOldApprovedHostnamesConfiguration = async () => {
+    const oldApprovedHostnamesConfiguration = configuration.get<string[]|undefined>("approvedHostnames")?.map(host => host.trim());
+    const newApprovedHostnamesConfiguration = await getApprovedHostnames(context.secrets);
+    if (newApprovedHostnamesConfiguration.length == 0 && oldApprovedHostnamesConfiguration && oldApprovedHostnamesConfiguration.length >= 1) {
+      await processApprovedHosts(context.secrets, oldApprovedHostnamesConfiguration.map( host => ({ host }) ));
+    }
+    if (oldApprovedHostnamesConfiguration) {
+      configuration.update("approvedHostnames", undefined, vscode.ConfigurationTarget.Global);
+    }
+  };
+  await moveOldApprovedHostnamesConfiguration();
+
+  const externalRefProvider = new ExternalRefDocumentProvider(context.secrets);
   vscode.workspace.registerTextDocumentContentProvider(INTERNAL_SCHEMES.http, externalRefProvider);
   vscode.workspace.registerTextDocumentContentProvider(INTERNAL_SCHEMES.https, externalRefProvider);
 

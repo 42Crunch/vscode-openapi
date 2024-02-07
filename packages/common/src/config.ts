@@ -26,6 +26,7 @@ export type Config = {
     found: boolean;
   };
   repository: string;
+  approvedHosts: ApprovedHostConfiguration[];
 };
 
 export type ConnectionTestResult = { success: true } | { success: false; message: string };
@@ -97,4 +98,11 @@ export type DownloadCliMessage = {
 export type ShowCliDownloadMessage = {
   command: "showCliDownload";
   payload: CliDownloadResult;
+};
+
+export type ApprovedHostConfiguration = {
+  host: string;
+  header?: string;
+  prefix?: string;
+  token?: string;
 };

@@ -33,7 +33,8 @@ export type ConfigScreenId =
   | "temporary-collection"
   | "mandatory-tags"
   | "scan-runtime"
-  | "scan-image";
+  | "scan-image"
+  | "openapi-external-refs";
 
 export type ConfigScreen = {
   id: ConfigScreenId;
@@ -72,6 +73,7 @@ const initialState: ConfigState = {
     repository: "",
     platformTemporaryCollectionName: "",
     platformMandatoryTags: "",
+    approvedHosts: [],
   },
   platformConnectionTestResult: undefined,
   waitingForPlatformConnectionTest: false,
@@ -90,6 +92,7 @@ const initialState: ConfigState = {
     "mandatory-tags": undefined,
     "scan-image": undefined,
     "scan-runtime": undefined,
+    "openapi-external-refs": undefined,
   },
   hasErrors: false,
 };
