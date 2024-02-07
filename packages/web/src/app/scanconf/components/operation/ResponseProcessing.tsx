@@ -31,7 +31,9 @@ export default function ResponseProcessing({
     title: field.key,
     menu: editable ? (
       <Menu>
-        <MenuItem onSelect={() => remove(index)}>Delete</MenuItem>
+        <MenuItem onClick={(e) => e.stopPropagation()} onSelect={() => remove(index)}>
+          Delete
+        </MenuItem>
       </Menu>
     ) : undefined,
     content: <VariableAssignments name={field.key} index={index} />,

@@ -38,7 +38,6 @@ export default function DownshiftSelect<T>({
 }
 
 const Container = styled.div`
-  height: 60px;
   background-color: var(${ThemeColorVariables.inputBackground});
   border-radius: 2px;
   border: 1px solid var(${ThemeColorVariables.border});

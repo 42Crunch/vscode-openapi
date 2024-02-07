@@ -42,7 +42,12 @@ export function parseInternal(
     runtimeConfiguration: parseruntimeConfiguration(oas, file, file.runtimeConfiguration || {}),
     customizations: value(file.customizations),
     environments: parseMap(oas, file, file.environments || {}, parseEnvironmentFile),
-    authorizationTests: value(file.authorizationTests),
+    authorizationTests: parseMap(
+      oas,
+      file,
+      file.authorizationTests || {},
+      parseAuthenticationSwappingTest
+    ),
     requests: parseMap(oas, file, file.requests || {}, parseRequestFile),
   });
 }
@@ -92,7 +97,7 @@ function parseOperation(
     operationId: value(operation.operationId),
     before: parseArray(oas, file, operation.before || [], parseRequestStage),
     after: parseArray(oas, file, operation.after || [], parseRequestStage),
-    authorizationTests: value(operation.authorizationTests),
+    authorizationTests: value(operation.authorizationTests || []),
     scenarios: parseArray(oas, file, operation.scenarios || [], parseScenario),
     customTests: value(operation.customTests),
   });
@@ -165,7 +170,7 @@ function parseRequestFile(
   file: scan.ConfigurationFileBundle,
   content: scan.RequestFile
 ): Result<playbook.StageContent | playbook.ExternalStageContent, InternalParsingErrors> {
-  if (content.external === true) {
+  if (content.operationId === undefined) {
     return parseRequestExternalStageContent(oas, file, content);
   } else {
     return parseRequestStageContent(oas, file, content, content.operationId);
@@ -426,6 +431,30 @@ function parseScenario(
     requests: parseArray(oas, file, scenario.requests || [], parseRequestStage),
     key: value(scenario.key),
     fuzzing: value((scenario as scan.HappyPathScenario).fuzzing),
+  });
+}
+
+function parseAuthenticationSwappingTest(
+  oas: BundledSwaggerOrOasSpec,
+  file: scan.ConfigurationFileBundle,
+  test: scan.AuthenticationSwappingTest
+): Result<playbook.AuthenticationSwappingTest, InternalParsingErrors> {
+  const source = test.source === null ? [] : test.source;
+  const target = test.target === null ? [] : test.target;
+
+  if (
+    source.some((auth) => typeof auth !== "string") ||
+    target.some((auth) => typeof auth !== "string")
+  ) {
+    return makeErrorResult(
+      "only strings are allowed, embedding Credential objects is not supported yet"
+    );
+  }
+
+  return result<playbook.AuthenticationSwappingTest>({
+    key: value(test.key),
+    source: value(source),
+    target: value(target),
   });
 }
 

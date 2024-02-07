@@ -19,6 +19,7 @@ export type State = {
   selectedCredentialGroup: number;
   selectedCredential?: string;
   selectedSubcredential?: string;
+  selectedAuthorizationTest?: string;
 };
 
 const initialState: State = {
@@ -34,6 +35,7 @@ const initialState: State = {
     before: [],
     after: [],
     environments: {},
+    authorizationTests: {},
   },
   dirty: false,
   servers: [],
@@ -79,17 +81,15 @@ export const slice = createSlice({
         state.gerror = { message };
         return;
       }
-      state.dirty = false;
       state.playbook = playbook;
     },
 
-    saveScanconf: (state) => {
-      state.dirty = false;
-    },
+    saveScanconf: (state) => {},
 
     saveSettings: (state, { payload: settings }: PayloadAction<playbook.RuntimeConfiguration>) => {
       state.playbook.runtimeConfiguration = settings;
     },
+
     saveRequest: (
       state,
       {
@@ -105,6 +105,7 @@ export const slice = createSlice({
         state.playbook.requests[ref.id] = stage;
       }
     },
+
     removeRequest: (state, { payload: ref }: PayloadAction<playbook.RequestRef>) => {
       // only 'request' requests can be deleted
       if (ref.type === "request") {
@@ -113,6 +114,7 @@ export const slice = createSlice({
         }
       }
     },
+
     saveCredential: (
       state,
       {
@@ -132,8 +134,8 @@ export const slice = createSlice({
         credential.default = firstAvailable;
       }
       state.playbook.authenticationDetails[group][id] = credential;
-      state.dirty = true;
     },
+
     saveEnvironment: (
       state,
       {
@@ -141,7 +143,6 @@ export const slice = createSlice({
       }: PayloadAction<{ name: string; environment: playbook.PlaybookEnvironment }>
     ) => {
       state.playbook.environments[name] = environment;
-      state.dirty = true;
     },
 
     addCredential: (
@@ -156,7 +157,6 @@ export const slice = createSlice({
       }
       // add credential
       state.playbook.authenticationDetails[credentialGroup][id] = credential;
-      state.dirty = true;
     },
 
     removeCredential: (
@@ -182,7 +182,6 @@ export const slice = createSlice({
           state.selectedSubcredential = undefined;
         }
       }
-      state.dirty = true;
     },
 
     selectCredential: (
@@ -198,6 +197,33 @@ export const slice = createSlice({
 
     selectSubcredential: (state, { payload }: PayloadAction<string>) => {
       state.selectedSubcredential = payload;
+    },
+
+    addAuthorizationTest: (
+      state,
+      {
+        payload: { id, test },
+      }: PayloadAction<{ id: string; test: playbook.AuthenticationSwappingTest }>
+    ) => {
+      state.playbook.authorizationTests[id] = test;
+    },
+
+    saveAuthorizationTest: (
+      state,
+      {
+        payload: { id, test },
+      }: PayloadAction<{ id: string; test: playbook.AuthenticationSwappingTest }>
+    ) => {
+      state.playbook.authorizationTests[id] = test;
+    },
+
+    removeAuthorizationTest: (state, { payload: { id } }: PayloadAction<{ id: string }>) => {
+      delete state.playbook.authorizationTests[id];
+      state.selectedAuthorizationTest = Object.keys(state.playbook.authorizationTests)?.[0];
+    },
+
+    selectAuthorizationTest: (state, { payload: { id } }: PayloadAction<{ id: string }>) => {
+      state.selectedAuthorizationTest = id;
     },
 
     saveOperationReference: (
@@ -218,8 +244,8 @@ export const slice = createSlice({
       }: PayloadAction<{ container: playbook.StageContainer; stage: playbook.StageReference }>
     ) => {
       getStageContainer(state.playbook, container).push(stage);
-      state.dirty = true;
     },
+
     moveStage: (
       state,
       {
@@ -230,12 +256,20 @@ export const slice = createSlice({
       }>
     ) => {
       arrayMoveMutable(getStageContainer(state.playbook, location), location.stageIndex, to);
-      state.dirty = true;
     },
+
     removeStage: (state, { payload }: PayloadAction<playbook.StageLocation>) => {
       const container = getStageContainer(state.playbook, payload);
       container.splice(payload.stageIndex, 1);
-      state.dirty = true;
+    },
+
+    updateOperationAuthorizationTests: (
+      state,
+      {
+        payload: { operationId, authorizationTests },
+      }: PayloadAction<{ operationId: string; authorizationTests: string[] }>
+    ) => {
+      state.playbook.operations[operationId].authorizationTests = authorizationTests;
     },
   },
 
@@ -264,6 +298,8 @@ export const slice = createSlice({
           playbook?.authenticationDetails[0][state.selectedCredential]?.methods
         )?.[0];
       }
+      // select first authorization test
+      state.selectedAuthorizationTest = Object.keys(playbook?.authorizationTests || {})?.[0];
     });
   },
 });
@@ -304,9 +340,14 @@ export const {
   saveCredential,
   selectCredential,
   selectSubcredential,
+  addAuthorizationTest,
+  saveAuthorizationTest,
+  removeAuthorizationTest,
+  selectAuthorizationTest,
   updateScanconf,
   saveRequest,
   removeRequest,
+  updateOperationAuthorizationTests,
 } = slice.actions;
 
 export default slice.reducer;

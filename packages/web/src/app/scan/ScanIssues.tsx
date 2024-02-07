@@ -73,35 +73,51 @@ const GroupTitle = styled.div`
 `;
 
 const kdbTitles: Record<string, string> = {
-  "path-item-method-not-allowed-scan": "Scan sends a request using an undefined verb",
-  "parameter-required-scan": "Scan sends a request that is missing a required parameter",
-  "parameter-header-contenttype-wrong-scan": "Scan sends a request with wrong content type",
-  "schema-multipleof-scan":
-    "Scan sends a request containing a numeric value conflicting with multipleOf",
-  "schema-maximum-scan": "Scan sends a request containing a numeric value overflowing maximum",
-  "schema-minimum-scan": "Scan sends a request containing a numeric value under the minimum",
-  "schema-minlength-scan": "Scan sends a request containing a string value that is too short",
-  "schema-maxlength-scan": "Scan sends a request containing a string value that is too long",
-  "schema-pattern-scan": "Scan sends a request containing a string value with wrong pattern",
-  "schema-maxitems-scan": "Scan sends a request containing an array with too many items",
-  "schema-minitems-scan": "Scan sends a request containing an array with too few items",
-  "schema-uniqueitems-unique-scan":
-    "Scan sends a request containing an array value that conflicts with ‘uniqueItems’",
-  "schema-required-scan": "Scan sends a request that is missing a required property",
-  "schema-enum-scan":
-    "Scan sends a request containing a value not present in the constraining enum",
-  "schema-additionalproperties-scan": "Scan sends a request that contains an undefined property",
+  "authentication-swapping-bfla":
+    "Broken Function Level Access test performed by swapping user credentials",
+  "authentication-swapping-bola":
+    "Broken Object Access Level Authorization test performed swapping user credentials.",
+  "custom-request": "Custom client request",
+  "parameter-header-contenttype-wrong-scan":
+    "Scan sends a request where the request body does not match the 'Content-Type' specified in the header.",
+  "parameter-required-scan":
+    "Scan sends a request that is missing a parameter that has been defined as required in the OpenAPI definition.",
+  "partial-security-accepted":
+    "Scan sends a request where a required security requirement is missing",
+  "path-item-method-not-allowed-scan":
+    "Scan sends a request using a verb (method) that is not defined for the path in the OpenAPI definition.",
+  "schema-additionalproperties-scan": "Scan sends a request that contains an undefined property.",
+  "schema-enum-scan": "API accepts a value that is not specified in the enum array",
   "schema-format-scan": "Scan sends a request containing a string value with wrong format",
-  "schema-type-wrong-string-scan":
-    "Scan sends a request containing a string value instead of the expected type",
-  "schema-type-wrong-bool-scan":
-    "Scan sends a request containing a Boolean value instead of the expected type",
-  "schema-type-wrong-integer-scan":
-    "Scan sends a request containing an integer value instead of the expected type",
-  "schema-type-wrong-number-scan":
-    "Scan sends a request containing a number value instead of the expected type",
+  "schema-maxitems-scan":
+    "Scan sends a request containing an array which has more items than what is defined by the property 'maxItems'",
+  "schema-maxlength-scan":
+    "Scan sends a request containing a string where length is greater than the value set by 'maxLength'",
+  "schema-maximum-scan":
+    "Scan sends a request containing an integer or number value larger than the defined maximum for it.",
+  "schema-minitems-scan":
+    "Scan sends a request containing an array value with less items than defined in the property 'minItems' constraining it.",
+  "schema-minlength-scan":
+    "Scan sends a request containing a string value that is shorter than the set 'minLength'.",
+  "schema-minimum-scan":
+    "Scan sends a request containing an integer or number value smaller than the defined minimum for it.",
+  "schema-multipleof-scan":
+    "Scan sends a request containing an integer or number value that does not follow the property 'multipleOf' defined for it.",
+  "schema-pattern-scan":
+    "Scan sends a request containing a string value that does not match the regular expression pattern defined for it.",
+  "schema-required-scan": "Scan sends a request that is missing a property defined as 'required'.",
   "schema-type-wrong-array-scan":
-    "Scan sends a request containing an array instead of the expected type",
+    "Scan sends a request containing an array instead of the value type that the OpenAPI definition expects.",
+  "schema-type-wrong-bool-scan":
+    "Scan sends a request containing a Boolean value instead of the type that the OpenAPI definition expects.",
+  "schema-type-wrong-integer-scan":
+    "Scan sends a request containing an integer value instead of the type that the OpenAPI definition expects.",
+  "schema-type-wrong-number-scan":
+    "Scan sends a request containing a number value instead of the type that the OpenAPI definition expects.",
   "schema-type-wrong-object-scan":
-    "Scan sends a request containing an object instead of the expected type",
+    "Scan sends a request containing an object instead of the value type that the OpenAPI definition expects.",
+  "schema-type-wrong-string-scan":
+    "Scan sends a request containing a string value instead of the type that the OpenAPI definition expects.",
+  "schema-uniqueitems-unique-scan":
+    "Scan sends a request containing an array value that does not follow the property 'uniqueItems' that constrains this value.",
 };

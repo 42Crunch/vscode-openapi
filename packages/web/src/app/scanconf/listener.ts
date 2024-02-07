@@ -32,6 +32,10 @@ import {
   saveSettings,
   saveEnvironment,
   removeRequest,
+  saveAuthorizationTest,
+  removeAuthorizationTest,
+  addAuthorizationTest,
+  updateOperationAuthorizationTests,
 } from "./slice";
 import { AppDispatch, RootState } from "./store";
 import { setScanServer } from "../../features/prefs/slice";
@@ -65,7 +69,11 @@ export function createListener(host: Webapp["host"], routes: Routes) {
           removeStage,
           saveOperationReference,
           saveEnvironment,
-          removeRequest
+          removeRequest,
+          saveAuthorizationTest,
+          removeAuthorizationTest,
+          addAuthorizationTest,
+          updateOperationAuthorizationTests
         ),
         effect: async (action, listenerApi) => {
           const { scanconf: state } = listenerApi.getState();

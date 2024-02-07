@@ -21,6 +21,7 @@ import { Logger } from "../../platform/types";
 import { loadConfig, saveConfig } from "../../util/config";
 import { downloadCli, testCli } from "../../platform/cli-ast";
 import { transformValues } from "./utils-gen";
+import { getCliUpdate } from "../../platform/cli-ast-update";
 
 export class ConfigWebView extends WebView<Webapp> {
   private config?: Config;
@@ -140,8 +141,14 @@ async function* downloadCliHandler(
       throw new Error("Repository URL is not set");
     }
 
+    const manifest = await getCliUpdate(repository, "0.0.0");
+
+    if (manifest === undefined) {
+      throw new Error("Failed to download 42Crunch CLI, manifest not found");
+    }
+
     const location = yield* transformValues(
-      downloadCli(repository),
+      downloadCli(manifest),
       (progress: CliDownloadProgress): ShowCliDownloadMessage => ({
         command: "showCliDownload",
         payload: { completed: false, progress },

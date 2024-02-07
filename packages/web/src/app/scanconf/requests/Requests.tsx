@@ -47,15 +47,7 @@ export default function Operations() {
       label: id,
       menu: (
         <Menu>
-          <MenuItem
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            onSelect={(e) => {
-              e.stopPropagation();
-              onRemoveRequest(id);
-            }}
-          >
+          <MenuItem onClick={(e) => e.stopPropagation()} onSelect={() => onRemoveRequest(id)}>
             Delete
           </MenuItem>
         </Menu>

@@ -7,7 +7,7 @@ import { useEffect, useRef, useState } from "react";
 export default function SmallLogMessages() {
   const messages = useFeatureSelector((state) => state.logging.messages);
 
-  const filtered = messages.filter((message) => message.level == "info");
+  const filtered = messages.filter((message) => true);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrolledManually, setScrolledManually] = useState(false);
