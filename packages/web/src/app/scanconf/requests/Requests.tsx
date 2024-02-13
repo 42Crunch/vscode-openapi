@@ -128,6 +128,7 @@ export default function Operations() {
       selected={selected}
       sections={sections}
       onSelected={onSetOperationId}
+      hideEmptySections={true}
       render={(selected) => {
         if (selected !== undefined)
           return (
