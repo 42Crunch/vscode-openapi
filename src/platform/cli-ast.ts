@@ -130,32 +130,35 @@ export async function ensureCliDownloaded(
     return false;
   }
 
+  // check for CLI update
   const currentTime = Date.now();
   if (currentTime - lastCliUpdateCheckTime > cliUpdateCheckInterval) {
     lastCliUpdateCheckTime = currentTime;
-    // get the version
-    const test = await testCli();
-    if (test.success) {
-      const manifest = await getCliUpdate(config.repository, test.version);
-      if (manifest !== undefined) {
-        await delay(100); // workaround for #133073
-        const answer = await vscode.window.showInformationMessage(
-          `New version ${manifest.version} of 42Crunch CLI is available, download?`,
-          { modal: true },
-          { title: "Download", id: "download" }
-        );
-
-        if (answer?.id === "download") {
-          return downloadCliWithProgress(manifest);
-        }
-      }
-      return true;
-    } else {
-      // lets try to re-download
-    }
+    checkForCliUpdate(config.repository);
   }
 
   return true;
+}
+
+async function checkForCliUpdate(repository: string): Promise<boolean> {
+  const test = await testCli();
+  if (test.success) {
+    const manifest = await getCliUpdate(repository, test.version);
+    if (manifest !== undefined) {
+      await delay(100); // workaround for #133073
+      const answer = await vscode.window.showInformationMessage(
+        `New version ${manifest.version} of 42Crunch CLI is available, download?`,
+        { modal: true },
+        { title: "Download", id: "download" }
+      );
+
+      if (answer?.id === "download") {
+        return downloadCliWithProgress(manifest);
+      }
+    }
+  }
+
+  return false;
 }
 
 function downloadCliWithProgress(manifest: CliAstManifestEntry) {
