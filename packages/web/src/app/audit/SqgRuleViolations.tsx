@@ -19,17 +19,19 @@ export default function SqgLevelViolations({ sqg, stats }: { sqg: Sqg; stats: St
     <Container>
       <h4>Forbidden issues with problem found</h4>
       {found.map((issue) => (
-        <a
-          href="#"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            dispatch(changeTab("issues"));
-            dispatch(changeFilter({ rule: issue.id }));
-          }}
-        >
-          {issue.title}
-        </a>
+        <div>
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              dispatch(changeTab("issues"));
+              dispatch(changeFilter({ rule: issue.id }));
+            }}
+          >
+            {issue.title}
+          </a>
+        </div>
       ))}
     </Container>
   );
