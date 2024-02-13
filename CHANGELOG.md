@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.22.0 (February 13, 2024)
+
+- Check for updates of the 42Crunch AST binary and prompt user to upgrade
+- Add support for BOLA/BFLA tests in Scan UI
+
 ## Version 4.21.1 (January 22, 2024)
 
 - Fix for creating temp APIs when API Naming Convention is configured
