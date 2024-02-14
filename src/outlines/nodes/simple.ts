@@ -12,6 +12,7 @@ const icons: any = {
   responses: "response.svg",
   parameters: "sliders.svg",
   requestBodies: "request.svg",
+  requestBody: "request.svg",
 };
 
 const contextValues: any = {
@@ -88,7 +89,7 @@ export class SimpleNode extends AbstractOutlineNode {
 }
 
 function capitalize(title: string, pointer: string): string {
-  if (pointer.startsWith("/paths")) {
+  if (pointer.startsWith("/paths") || pointer.startsWith("/tags")) {
     return title;
   }
   return title in titles ? titles[title] : title;
@@ -106,4 +107,13 @@ function getContextValue(key: string, parent: OutlineNode): string | undefined {
     return "component";
   }
   return "simple-child";
+}
+
+export function getParameterLabel(_key: string, value: any): string {
+  // return label for a parameter
+  const label = value["$ref"] || value["name"];
+  if (!label) {
+    return "<unknown>";
+  }
+  return label;
 }

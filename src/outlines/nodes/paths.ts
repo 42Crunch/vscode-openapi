@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { HttpMethod } from "@xliic/common/http";
 
 import { AbstractOutlineNode, HTTP_METHODS, OutlineNode } from "./base";
-import { SimpleNode } from "./simple";
+import { SimpleNode, getParameterLabel } from "./simple";
 
 export class PathsNode extends AbstractOutlineNode {
   constructor(parent: OutlineNode, node: any) {
@@ -52,22 +52,13 @@ export class OperationNode extends AbstractOutlineNode {
 
   getChildren(): OutlineNode[] {
     return this.getChildrenByKey((key, pointer, node) => {
-      if (["responses", "parameters"].includes(key)) {
+      if (["responses", "parameters", "requestBody"].includes(key)) {
         if (key == "parameters") {
-          return new SimpleNode(this, pointer, key, node, 1, this.getParameterLabel);
+          return new SimpleNode(this, pointer, key, node, 1, getParameterLabel);
         } else {
           return new SimpleNode(this, pointer, key, node, 1);
         }
       }
     });
-  }
-
-  getParameterLabel(_key: string, value: any): string {
-    // return label for a parameter
-    const label = value["$ref"] || value["name"];
-    if (!label) {
-      return "<unknown>";
-    }
-    return label;
   }
 }
