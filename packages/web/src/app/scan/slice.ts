@@ -308,9 +308,16 @@ function groupIssues(issues: TestLogReport[]): {
 
 function flattenIssuesNew(scanReport: ScanReportJSONSchemaNew, path: string, operationId: string) {
   const issues: TestLogReportNew[] = [];
+
   const conformanceIssues = scanReport?.operations?.[operationId]?.conformanceRequestsResults;
   if (conformanceIssues !== undefined) {
     issues.push(...conformanceIssues);
+  }
+
+  const authorizationRequestsResults =
+    scanReport?.operations?.[operationId]?.authorizationRequestsResults;
+  if (authorizationRequestsResults !== undefined) {
+    issues.push(...authorizationRequestsResults);
   }
 
   const methodNotAllowed = scanReport?.methodNotAllowed;
