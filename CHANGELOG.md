@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.22.1 (February 13, 2024)
+
+- Fix issue where the temp apis on the platform were not properly cleaned up
+
 ## Version 4.22.0 (February 13, 2024)
 
 - Check for updates of the 42Crunch AST binary and prompt user to upgrade
