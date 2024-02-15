@@ -10,10 +10,12 @@ export function ScanSummary({
   global,
   operation,
   issues,
+  scanVersion,
 }: {
   global: GlobalSummary;
   operation: OperationSummary;
   issues: TestLogReport[];
+  scanVersion: string;
 }) {
   const dispatch = useAppDispatch();
 
@@ -42,6 +44,7 @@ export function ScanSummary({
             .diff(DateTime.fromISO(global.startDate))
             .toFormat("mm:ss.SSS")}
         </div>
+        <div>Scan version: {scanVersion}</div>
       </Stats>
       <Tiles>
         <div

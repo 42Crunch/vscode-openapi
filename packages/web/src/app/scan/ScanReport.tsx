@@ -37,7 +37,8 @@ export default function ScanReport() {
             <>
               <ScanSummary
                 issues={issues as any}
-                global={scanReport.summary as GlobalSummary}
+                global={scanReport.summary}
+                scanVersion={scanReport.scanVersion}
                 operation={operation?.summary!}
               />
               {happyPath && (
