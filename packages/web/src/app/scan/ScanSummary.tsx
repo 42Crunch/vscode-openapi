@@ -17,11 +17,10 @@ export function ScanSummary({
 }) {
   const dispatch = useAppDispatch();
 
-  const critical = global.issues.critical ?? 0;
-  const high = global.issues.high ?? 0;
-
   const executed =
     (global.conformanceTestRequests.executed.total ?? 0) +
+    (global.authorizationTestRequests.executed.total ?? 0) +
+    (global.customTestRequests.executed.total ?? 0) +
     (global.methodNotAllowedTestRequests?.executed.total ?? 0);
 
   const issuesNumber = issues?.length | 0;
