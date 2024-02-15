@@ -55,18 +55,13 @@ async function makeHttpRequestForOas(
       ? operation?.operationId
       : `${request.method}-${request.path}`;
 
-  const requestBody =
-    request.body?.mediaType === "application/x-www-form-urlencoded"
-      ? makeUrlencodedBody(request.body?.value)
-      : request.body?.value;
-
   const result = SwaggerClient.buildRequest({
     spec: await buildOasSpecWithServers(oas, server, request),
     operationId: swaggerClientEscapeString(swaggerClientOperationId),
     parameters: makeOpenApiSwaggerClientParameters(request.parameters, security),
     securities: makeOasSecurities(oas?.components?.securitySchemes || {}, security),
     requestContentType: request.body?.mediaType,
-    requestBody: requestBody,
+    requestBody: request.body?.value,
   });
 
   return result;
@@ -102,18 +97,23 @@ export async function makeExternalHttpRequest(
   const searchParams = new URLSearchParams(
     playbookParameterValueToObject(request.parameters.query)
   ).toString();
+
   try {
+    const headers = playbookParameterValueToObject(request.parameters.header);
+    if (request.body?.mediaType !== undefined) {
+      headers["Content-Type"] = request.body?.mediaType;
+    }
+
     return [
       {
         method: request.method,
         url: searchParams === "" ? request.url : `${request.url}?${searchParams}`,
-        headers: playbookParameterValueToObject(request.parameters.header),
-        body: request.body !== undefined ? convertBody(request.body.value) : undefined,
+        headers,
+        body: convertBody(request?.body?.value),
       },
       undefined,
     ];
   } catch (ex) {
-    console.log("chatch ed", ex);
     return [undefined, `failed to build http request: ${ex}`];
   }
 }
@@ -149,7 +149,9 @@ async function buildSwaggerSpecWithServers(
 }
 
 function convertBody(body: unknown): unknown {
-  if (typeof body === "string") {
+  if (body === undefined) {
+    return undefined;
+  } else if (typeof body === "string") {
     return body;
   } else if (body instanceof FormData) {
     // FIXME replace env vars as well
@@ -297,7 +299,8 @@ function playbookParameterValueToObject(parameterValue: playbook.ParameterList) 
   }
   return result;
 }
-function makeUrlencodedBody(body: unknown): unknown {
+
+function makeUrlencodedBody(body: Record<string, unknown>): unknown {
   const result: any = {};
   for (const [key, value] of Object.entries(body as any)) {
     const valueValue = (value as any)["value"];

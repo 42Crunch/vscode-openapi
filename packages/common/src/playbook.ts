@@ -12,10 +12,15 @@ export type ParameterLocation = "query" | "header" | "path" | "cookie";
 export type ParameterList = { key: string; value: unknown }[];
 export type ParameterValues = Record<ParameterLocation, ParameterList>;
 
-export interface OperationBody {
-  mediaType: string;
-  value: unknown;
-}
+export type OperationBody =
+  | {
+      mediaType: "application/json";
+      value: unknown;
+    }
+  | {
+      mediaType: "application/x-www-form-urlencoded";
+      value: Record<string, unknown>;
+    };
 
 export type CRequest = {
   operationId: string;

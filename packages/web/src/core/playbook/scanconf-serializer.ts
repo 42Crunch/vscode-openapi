@@ -455,12 +455,18 @@ function serializeExternalCRequest(
     cookies: serializeRequestParameters(oas, file, request.parameters.cookie) as any,
   };
 
-  // FIXME better body handling
   if (request.body !== undefined) {
-    details.requestBody = {
-      mode: "json",
-      json: request.body.value as any,
-    };
+    if (request.body.mediaType === "application/json") {
+      details.requestBody = {
+        mode: "json",
+        json: request.body.value as any,
+      };
+    } else if (request.body.mediaType === "application/x-www-form-urlencoded") {
+      details.requestBody = {
+        mode: "urlencoded",
+        urlencoded: serializeUrlencoded(request.body.value as object),
+      };
+    }
   }
 
   return [
@@ -510,4 +516,8 @@ function serializeVariableAssignments(
     return undefined;
   }
   return assignments as scan.VariableAssignments;
+}
+
+function serializeUrlencoded(value: object): Record<string, scan.UrlencodedObject> {
+  return Object.fromEntries(Object.entries(value).map(([key, value]) => [key, { value }]));
 }

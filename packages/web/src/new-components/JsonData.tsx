@@ -59,5 +59,8 @@ function PrimitiveRenderer({ value }: { value: any }) {
 const Container = styled.div`
   code {
     color: var(${ThemeColorVariables.foreground});
+    background-color: var(${ThemeColorVariables.background});
+    border: none;
+    padding: none;
   }
 `;

@@ -96,6 +96,10 @@ function isMultipartFormData(body: unknown, contentType: string | undefined) {
   return body && contentType === "multipart/form-data";
 }
 
+function isUrlencoded(body: unknown, contentType: string | undefined) {
+  return body && contentType === "application/x-www-form-urlencoded";
+}
+
 function restoreBody(body: unknown, contentType: string | undefined): any {
   if (isMultipartFormData(body, contentType)) {
     const form = new FormData();
@@ -103,6 +107,12 @@ function restoreBody(body: unknown, contentType: string | undefined): any {
       form.append(key, value);
     }
     return form;
+  } else if (isUrlencoded(body, contentType)) {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(JSON.parse(body as string))) {
+      params.append(key, `${value}`);
+    }
+    return params.toString();
   }
   return body;
 }

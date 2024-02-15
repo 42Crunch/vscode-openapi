@@ -82,7 +82,12 @@ export default function Operations() {
       items: externalRequestItems,
       menu: (
         <AddExternalRequestDialog
-          onAddExternalRequest={(id: string, method: HttpMethod, url: string) => {
+          onAddExternalRequest={(
+            id: string,
+            method: HttpMethod,
+            url: string,
+            mode: "json" | "urlencoded"
+          ) => {
             dispatch(
               saveRequest({
                 ref: { id, type: "request" },
@@ -100,7 +105,10 @@ export default function Operations() {
                     },
                     body: hasBody(method)
                       ? {
-                          mediaType: "application/json",
+                          mediaType:
+                            mode === "urlencoded"
+                              ? "application/x-www-form-urlencoded"
+                              : "application/json",
                           value: {},
                         }
                       : undefined,

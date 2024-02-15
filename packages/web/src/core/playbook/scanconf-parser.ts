@@ -258,10 +258,19 @@ function parseRequestBody(
   if (body.mode === "json") {
     return [{ mediaType: "application/json", value: body.json }, undefined];
   } else if (body.mode === "urlencoded") {
-    return [{ mediaType: "application/x-www-form-urlencoded", value: body.urlencoded }, undefined];
+    return [
+      { mediaType: "application/x-www-form-urlencoded", value: parseUrlencoded(body.urlencoded) },
+      undefined,
+    ];
   }
 
   return [undefined, undefined];
+}
+
+function parseUrlencoded(
+  urlencoded: Record<string, scan.UrlencodedObject>
+): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(urlencoded).map(([key, value]) => [key, value.value]));
 }
 
 function parseParameters(
