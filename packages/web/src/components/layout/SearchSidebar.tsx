@@ -105,7 +105,7 @@ export function SearchSidebarControlled({
           </Search>
           <Sections>
             {sections.map((section: Section) => {
-              if (section.items.length === 0 && hideEmptySections) {
+              if (section.items.length === 0 && hideEmptySections && section.menu === undefined) {
                 return null;
               }
               return (
