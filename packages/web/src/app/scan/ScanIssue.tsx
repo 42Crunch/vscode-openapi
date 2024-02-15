@@ -268,10 +268,11 @@ const Item = styled.div`
 
 const criticalityNames: Record<number, string> = {
   0: "None",
-  1: "Low",
-  2: "Medium",
-  3: "High",
-  4: "Critical",
+  1: "Info",
+  2: "Low",
+  3: "Medium",
+  4: "High",
+  5: "Critical",
 };
 
 const criticalityWeights: Record<number, number> = {
@@ -280,4 +281,5 @@ const criticalityWeights: Record<number, number> = {
   2: 500,
   3: 700,
   4: 700,
+  5: 700,
 };
