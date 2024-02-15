@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 4.23.0 (February 15, 2024)
+
+- Display 'requestBody' in the operation node OpenAPI Explorer
+- Display operation child nodes in OperationID / Tag nodes in OpenAPI Explorer
+- Fix labels of issue severity in the Scan report
+- Stop hiding debug logs in the Logging view in the Scan report
+
 ## Version 4.22.1 (February 13, 2024)
 
 - Fix issue where the temp apis on the platform were not properly cleaned up
