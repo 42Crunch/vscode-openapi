@@ -1,12 +1,10 @@
 import styled from "styled-components";
-import * as Tabs from "@radix-ui/react-tabs";
-import { ThemeColorVariables } from "@xliic/common/theme";
 import { useAppDispatch, useAppSelector } from "./store";
-import { HttpMethods } from "@xliic/common/http";
 import LogMessages from "../../features/logging/LogMessages";
 import { HappyPath } from "./HappyPath";
 import { OasState, changeTab } from "./slice";
-import { GlobalSummary, ScanReportJSONSchema, TestLogReport } from "./scan-report-new";
+import { GlobalSummary, ScanReportJSONSchema, TestLogReport } from "@xliic/common/scan-report";
+
 import { ScanSummary } from "./ScanSummary";
 import ScanIssues from "./ScanIssues";
 import { TabContainer } from "../../new-components/Tabs";

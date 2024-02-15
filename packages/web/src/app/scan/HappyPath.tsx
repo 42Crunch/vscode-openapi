@@ -1,13 +1,12 @@
 import styled from "styled-components";
-import { Buffer } from "buffer";
 
 import { HttpError, HttpResponse } from "@xliic/common/http";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
 import Response from "../../components/response/Response";
-import { parseResponse, safeParseResponse } from "../../http-parser";
+import { safeParseResponse } from "../../http-parser";
 import CurlRequest from "./CurlRequest";
-import { HappyPathReport, RuntimeOperationReport } from "./scan-report-new";
+import { HappyPathReport, RuntimeOperationReport } from "@xliic/common/scan-report";
 
 export function HappyPath({
   operation,

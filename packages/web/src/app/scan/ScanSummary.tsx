@@ -4,7 +4,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { ArrowUpRightFromSquare } from "../../icons";
 import { useAppDispatch } from "./store";
 import { changeFilter, changeTab } from "./slice";
-import { GlobalSummary, OperationSummary, TestLogReport } from "./scan-report-new";
+import { GlobalSummary, OperationSummary, TestLogReport } from "@xliic/common/scan-report";
 
 export function ScanSummary({
   global,

@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { Buffer } from "buffer";
 
 import { HttpError, HttpResponse } from "@xliic/common/http";
 
@@ -10,10 +9,10 @@ import CurlRequest from "./CurlRequest";
 import Response from "../../components/response/Response";
 import { showJsonPointer } from "./slice";
 
-import { parseResponse, safeParseResponse } from "../../http-parser";
+import { safeParseResponse } from "../../http-parser";
 import { useState } from "react";
-import { useAppDispatch, useAppSelector } from "./store";
-import { RuntimeOperationReport, TestLogReport } from "./scan-report-new";
+import { useAppDispatch } from "./store";
+import { RuntimeOperationReport, TestLogReport } from "@xliic/common/scan-report";
 
 export default function ScanIssue({
   operation,
