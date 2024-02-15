@@ -6,7 +6,7 @@ import { useFeatureSelector } from "./slice";
 export default function LogMessages() {
   const messages = useFeatureSelector((state) => state.logging.messages);
 
-  const filtered = messages.filter((message) => message.level == "info");
+  const filtered = messages.filter((message) => true); // FIXME implement filtering
 
   if (filtered.length === 0) {
     return null;
