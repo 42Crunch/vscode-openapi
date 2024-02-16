@@ -100,16 +100,22 @@ export async function makeExternalHttpRequest(
 
   try {
     const headers = playbookParameterValueToObject(request.parameters.header);
+
     if (request.body?.mediaType !== undefined) {
       headers["Content-Type"] = request.body?.mediaType;
     }
+
+    const body =
+      request.body?.mediaType === "application/x-www-form-urlencoded"
+        ? makeUrlencodedBody(request.body.value)
+        : request.body?.value;
 
     return [
       {
         method: request.method,
         url: searchParams === "" ? request.url : `${request.url}?${searchParams}`,
         headers,
-        body: convertBody(request?.body?.value),
+        body: convertBody(body),
       },
       undefined,
     ];
@@ -201,13 +207,7 @@ function makeSwaggerSwaggerClientParameters(
   const bodyParams = Object.keys(parameters.body);
   if (bodyParams.length > 0) {
     const name = bodyParams[0];
-
-    const requestBody =
-      request.body?.mediaType === "application/x-www-form-urlencoded"
-        ? makeUrlencodedBody(request.body?.value)
-        : request.body?.value;
-
-    result[`body.${name}`] = requestBody;
+    result[`body.${name}`] = request.body?.value;
   }
 
   // FIXME support formData
@@ -300,15 +300,12 @@ function playbookParameterValueToObject(parameterValue: playbook.ParameterList) 
   return result;
 }
 
-function makeUrlencodedBody(body: Record<string, unknown>): unknown {
-  const result: any = {};
-  for (const [key, value] of Object.entries(body as any)) {
-    const valueValue = (value as any)["value"];
-    if (valueValue !== undefined) {
-      result[key] = valueValue;
-    }
+function makeUrlencodedBody(body: Record<string, unknown>): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(body)) {
+    params.append(key, `${value}`);
   }
-  return result;
+  return params.toString();
 }
 
 // escapng the string same as swaggerclient does
