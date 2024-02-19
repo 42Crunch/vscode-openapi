@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.24.0 (February 19, 2024)
+
+- Updated to the lastest SwaggerUI version for OpenAPI preview
+- Support form/urlencoded bodies in external requests in Scan UI
+
 ## Version 4.23.0 (February 15, 2024)
 
 - Display 'requestBody' in the operation node OpenAPI Explorer
