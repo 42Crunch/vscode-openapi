@@ -68,7 +68,6 @@ export default function JsonEditor({ name, variables }: { name: string; variable
         <HistoryPlugin />
         {hasFocus && <VariablesPlugin variables={variables} />}
         <FormPlugin name={name} />
-        // workaround for https://github.com/facebook/lexical/issues/4853
         <EditorFocusPlugin onFocus={(focus) => setFocus(focus)} />
       </LexicalComposer>
     </Container>
@@ -130,6 +129,7 @@ function FormPlugin({ name }: { name: string }) {
   }
 }
 
+// this is a workaround for https://github.com/facebook/lexical/issues/4853
 const EditorFocusPlugin = ({ onFocus }: { onFocus: (focus: boolean) => void }) => {
   const [editor] = useLexicalComposerContext();
 
