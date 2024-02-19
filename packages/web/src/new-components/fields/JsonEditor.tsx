@@ -6,7 +6,15 @@ import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { $createLineBreakNode, $createParagraphNode, $getRoot } from "lexical";
+import {
+  $createLineBreakNode,
+  $createParagraphNode,
+  $getRoot,
+  BLUR_COMMAND,
+  FOCUS_COMMAND,
+  COMMAND_PRIORITY_EDITOR,
+} from "lexical";
+
 import { useEffect, useState } from "react";
 import { useController } from "react-hook-form";
 import styled from "styled-components";
@@ -47,6 +55,8 @@ export default function JsonEditor({ name, variables }: { name: string; variable
     nodes: [VariableNode, HashtagNode],
   };
 
+  const [hasFocus, setFocus] = useState(false);
+
   return (
     <Container>
       <LexicalComposer initialConfig={initialConfig}>
@@ -56,8 +66,10 @@ export default function JsonEditor({ name, variables }: { name: string; variable
           ErrorBoundary={LexicalErrorBoundary}
         />
         <HistoryPlugin />
-        <VariablesPlugin variables={variables} />
+        {hasFocus && <VariablesPlugin variables={variables} />}
         <FormPlugin name={name} />
+        // workaround for https://github.com/facebook/lexical/issues/4853
+        <EditorFocusPlugin onFocus={(focus) => setFocus(focus)} />
       </LexicalComposer>
     </Container>
   );
@@ -117,6 +129,42 @@ function FormPlugin({ name }: { name: string }) {
     );
   }
 }
+
+const EditorFocusPlugin = ({ onFocus }: { onFocus: (focus: boolean) => void }) => {
+  const [editor] = useLexicalComposerContext();
+
+  useEffect(() => {
+    let timer: any = null;
+
+    editor.registerCommand(
+      BLUR_COMMAND,
+      () => {
+        if (timer !== null) {
+          clearTimeout(timer);
+        }
+        timer = setTimeout(() => {
+          onFocus(false);
+        }, 100);
+        return false;
+      },
+      COMMAND_PRIORITY_EDITOR
+    );
+    editor.registerCommand(
+      FOCUS_COMMAND,
+      () => {
+        if (timer !== null) {
+          clearTimeout(timer);
+          timer = null;
+        }
+        onFocus(true);
+        return false;
+      },
+      COMMAND_PRIORITY_EDITOR
+    );
+  }, []);
+
+  return null;
+};
 
 const Container = styled.div`
   //padding: 4px;
