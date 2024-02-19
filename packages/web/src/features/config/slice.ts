@@ -184,6 +184,7 @@ export const slice = createSlice({
     downloadCli: (state, action: PayloadAction<undefined>) => {
       state.waitingForCliDownload = true;
       state.cliTestResult = undefined;
+      state.cliDownloadError = undefined;
       // hook for a listener
     },
 
