@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { AngleDown, AngleUp } from "../icons";
 
+// TODO get rid of this file? There is saame collapsible section elsewhere
 export default function CollapsibleSection({
   title,
   children,

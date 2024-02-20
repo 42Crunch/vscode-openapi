@@ -205,7 +205,7 @@ export default function Operation({ operationId }: { operationId: string }) {
 
       {tryResult.length > 0 && (
         <CollapsibleSection title="Result">
-          <Execution result={tryResult} />
+          <Execution result={tryResult} collapsible />
         </CollapsibleSection>
       )}
     </Container>
