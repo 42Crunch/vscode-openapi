@@ -14,12 +14,14 @@ export default function ParameterGroup({
   group,
   placeholder,
   variables,
+  allowUnknown,
 }: {
   group: Record<string, Parameter>;
   oas: BundledSwaggerOrOasSpec;
   name: string;
   placeholder: string;
   variables: string[];
+  allowUnknown?: boolean;
 }) {
   const { fields, append, remove } = useFieldArray({
     name: name,
@@ -48,12 +50,12 @@ export default function ParameterGroup({
             />
           );
         })}
-
         <NewParameterSelect
           placeholder={placeholder}
           name={name}
           group={group}
           onSelection={addField}
+          allowUnknown={allowUnknown}
         />
       </Body>
     </Container>
@@ -115,9 +117,15 @@ const Header = styled.div`
 
 const Body = styled.div`
   display: contents;
-  & > div > div,
-  & > div > input {
+  & > div > div {
     padding: 4px 8px;
     border-bottom: 1px solid var(${ThemeColorVariables.border});
   }
+  & > div > div:last-child {
+    padding: 2px 5px;
+  }
+  // for now keep with of a new entry selector to 1 column
+  // & > div:last-child {
+  //   grid-column: span 3;
+  // }
 `;
