@@ -126,7 +126,6 @@ function makeOasTabs(
           variables={availableVariables}
         />
       ),
-      disabled: hasNoParameters(parameters.header),
     },
     {
       id: "cookie",

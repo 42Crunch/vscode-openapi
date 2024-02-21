@@ -38,22 +38,15 @@ export default function ParameterGroup({
       </Header>
       <Body>
         {fields.map((field: any, index) => {
-          if (group[field.key]) {
-            const parameter = group[field.key];
-            const schema = isArray(parameter)
-              ? getArraySchema(oas, parameter)
-              : getSchema(parameter);
-            return (
-              <ParameterRow
-                name={`${name}.${index}.value`}
-                key={field.id}
-                parameter={parameter}
-                schema={schema}
-                onDelete={() => remove(index)}
-                variables={variables}
-              />
-            );
-          }
+          return (
+            <ParameterRow
+              name={`${name}.${index}`}
+              key={field.id}
+              schema={getParameterSchema(oas, group, field.key)}
+              onDelete={() => remove(index)}
+              variables={variables}
+            />
+          );
         })}
 
         <NewParameterSelect
@@ -65,6 +58,17 @@ export default function ParameterGroup({
       </Body>
     </Container>
   );
+}
+
+function getParameterSchema(
+  oas: BundledSwaggerOrOasSpec,
+  group: Record<string, Parameter>,
+  name: string
+): Schema | undefined {
+  if (group[name]) {
+    const parameter = group[name];
+    return isArray(parameter) ? getArraySchema(oas, parameter) : getSchema(parameter);
+  }
 }
 
 function isArray(parameter: Parameter) {
