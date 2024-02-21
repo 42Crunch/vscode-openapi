@@ -27,6 +27,14 @@ export async function makeHttpRequest(
       ? await makeHttpRequestForOas(oas, server, operationId, request, security)
       : await makeHttpRequestForSwagger(oas, server, operationId, request, security);
 
+    // request might contain headers which are not defined in the spec
+    // add these extra headers to the request
+    for (const { key, value } of request.parameters.header) {
+      if (result.headers[key.toLowerCase()] === undefined) {
+        result.headers[key] = String(value);
+      }
+    }
+
     return [
       {
         method: request.method,
