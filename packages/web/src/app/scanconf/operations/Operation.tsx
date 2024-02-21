@@ -1,6 +1,12 @@
 import styled from "styled-components";
 
-import * as playbook from "@xliic/common/playbook";
+import {
+  getCurrentEnvironment,
+  StageLocation,
+  StageContainer,
+  StageReference,
+  RequestRef,
+} from "@xliic/common/playbook";
 
 import { makeEnvEnv } from "../../../core/playbook/execute";
 import { serialize } from "../../../core/playbook/scanconf-serializer";
@@ -28,15 +34,15 @@ export default function Operation({ operationId }: { operationId: string }) {
   const { mockResult, tryResult } = useAppSelector((state) => state.operations);
   const env = useAppSelector((state) => state.env.data);
 
-  const removeStage = (location: playbook.StageLocation) => dispatch(actions.removeStage(location));
+  const removeStage = (location: StageLocation) => dispatch(actions.removeStage(location));
 
-  const saveStage = (location: playbook.StageLocation, stage: playbook.StageReference) =>
+  const saveStage = (location: StageLocation, stage: StageReference) =>
     dispatch(actions.saveOperationReference({ location, reference: stage }));
 
-  const moveStage = (location: playbook.StageLocation, to: number) =>
+  const moveStage = (location: StageLocation, to: number) =>
     dispatch(actions.moveStage({ location, to }));
 
-  const addStage = (container: playbook.StageContainer, ref: playbook.RequestRef) => {
+  const addStage = (container: StageContainer, ref: RequestRef) => {
     dispatch(
       actions.addStage({
         container,
@@ -50,15 +56,18 @@ export default function Operation({ operationId }: { operationId: string }) {
   const operationIds = Object.keys(playbook.operations);
   const requestIds = Object.keys(playbook.requests || {});
 
-  const { simple } = makeEnvEnv(
-    playbook.environments[playbook.runtimeConfiguration?.environment || "default"],
-    env
-  );
+  const {
+    simple,
+    environment: {
+      env: { host },
+    },
+  } = makeEnvEnv(getCurrentEnvironment(playbook), env);
 
   return (
     <Container>
       <TryAndServerSelector
         servers={servers}
+        host={host as string | undefined}
         onTry={(server: string) => {
           dispatch(startTryExecution(server));
         }}
@@ -143,7 +152,7 @@ export default function Operation({ operationId }: { operationId: string }) {
         <Content>
           <Scenario
             oas={oas}
-            stages={playbook.operations[operationId].before as playbook.StageReference[]}
+            stages={playbook.operations[operationId].before as StageReference[]}
             container={{ container: "operationBefore", operationId }}
             executionResult={findResult(mockResult, "operationBefore")}
             saveStage={saveStage}
@@ -175,7 +184,7 @@ export default function Operation({ operationId }: { operationId: string }) {
         <Content>
           <Scenario
             oas={oas}
-            stages={playbook.operations[operationId].after as playbook.StageReference[]}
+            stages={playbook.operations[operationId].after as StageReference[]}
             container={{ container: "operationAfter", operationId }}
             executionResult={findResult(mockResult, "operationAfter")}
             saveStage={saveStage}

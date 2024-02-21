@@ -427,10 +427,11 @@ export function makeEnvEnv(
       result[name] = env.default[variable.name];
       simple[variable.name] = env.default[variable.name];
     } else if (!variable.required && variable.default !== undefined) {
+      result[name] = variable.default;
+      simple[variable.name] = String(variable.default);
+    } else if (variable.required) {
       // required variables must always come from the environment, no default
       // values is used for these
-      result[name] = variable.default;
-    } else if (variable.required) {
       missing.push(variable.name);
     }
   }

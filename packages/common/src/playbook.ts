@@ -277,3 +277,8 @@ export type StageContainer =
   | Omit<StageLocationOperationAfter, "stageIndex">
   | Omit<StageLocationOperationScenarios, "stageIndex">
   | Omit<StageLocationCredential, "stageIndex">;
+
+export function getCurrentEnvironment(playbook: PlaybookBundle): PlaybookEnvironment {
+  const environment = playbook.runtimeConfiguration?.environment || "default";
+  return playbook.environments[environment];
+}
