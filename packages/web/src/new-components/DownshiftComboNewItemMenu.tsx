@@ -48,7 +48,7 @@ export default function DownshiftComboNewItemMenu<T>({
       <Input
         {...getInputProps({
           onKeyDown: (event) => {
-            if (event.key === "Enter") {
+            if (event.key === "Enter" || event.key === "Tab") {
               onSelectedItemChange(filter);
               setFilter("");
               reset();
