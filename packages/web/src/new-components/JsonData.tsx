@@ -7,7 +7,7 @@ export default function JsonData({
   trailingComma = false,
 }: {
   value: any;
-  trailingComma: boolean;
+  trailingComma?: boolean;
 }) {
   if (typeof value === "object") {
     if (Array.isArray(value)) {
