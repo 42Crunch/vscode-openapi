@@ -25,7 +25,7 @@ function ObjectRenderer({ object }: { object: Record<string, any> }) {
       <div style={{ marginLeft: "20px" }}>
         {Object.entries(object).map(([key, value], index, array) => (
           <div key={key}>
-            <code>{`${key}: `}</code>
+            <code>{`"${key}": `}</code>
             <JsonData value={value} />
             {index < array.length - 1 && <code>,</code>}
           </div>
