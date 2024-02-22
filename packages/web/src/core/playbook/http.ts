@@ -68,8 +68,6 @@ async function makeHttpRequestForOas(
     operation
   );
 
-  debugger;
-
   const result = SwaggerClient.buildRequest({
     spec: await buildOasSpecWithServers(oas, server, request),
     operationId: swaggerClientOperationId,
@@ -333,8 +331,5 @@ function makeSwaggerClientOperationId(
   path: string,
   operation: OasOperation | SwaggerOperation
 ): string {
-  if (operation.operationId !== undefined) {
-    return operation.operationId;
-  }
   return SwaggerClient.helpers.opId(operation, path, method);
 }
