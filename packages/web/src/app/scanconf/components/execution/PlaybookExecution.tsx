@@ -12,12 +12,12 @@ export default function PlaybookExecution({
   playbook: PlaybookResult;
   collapsible?: boolean;
 }) {
-  const [isOpen, setOpen] = useState(playbook.name === "Scenario");
+  const [isOpen, setOpen] = useState(false);
 
   useEffect(() => {
-    if (playbook.status === "failure") {
-      setOpen(true);
-    }
+    setOpen(
+      playbook.status === "failure" || playbook.status === "pending" || playbook.name === "Scenario"
+    );
   }, [playbook.status]);
 
   const execution = playbook.results.map((operation, index) => (
