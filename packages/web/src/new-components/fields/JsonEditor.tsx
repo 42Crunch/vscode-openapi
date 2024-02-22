@@ -1,4 +1,3 @@
-import { HashtagNode } from "@lexical/hashtag";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -52,7 +51,7 @@ export default function JsonEditor({ name, variables }: { name: string; variable
       paragraph: "editor-paragraph",
     },
     onError,
-    nodes: [VariableNode, HashtagNode],
+    nodes: [VariableNode],
   };
 
   const [hasFocus, setFocus] = useState(false);
@@ -167,7 +166,6 @@ const EditorFocusPlugin = ({ onFocus }: { onFocus: (focus: boolean) => void }) =
 };
 
 const Container = styled.div`
-  //padding: 4px;
   color: var(${ThemeColorVariables.foreground});
   background-color: var(${ThemeColorVariables.background});
   border: 1px solid var(${ThemeColorVariables.border});
