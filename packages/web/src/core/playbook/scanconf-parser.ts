@@ -262,6 +262,8 @@ function parseRequestBody(
       { mediaType: "application/x-www-form-urlencoded", value: parseUrlencoded(body.urlencoded) },
       undefined,
     ];
+  } else if (body.mode === "raw") {
+    return [{ mediaType: "raw", value: body.raw }, undefined];
   }
 
   return [undefined, undefined];

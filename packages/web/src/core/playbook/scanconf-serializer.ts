@@ -428,6 +428,11 @@ function serializeCRequest(
         mode: "urlencoded",
         urlencoded: request.body.value as any,
       };
+    } else if (request.body.mediaType === "raw") {
+      details.requestBody = {
+        mode: "raw",
+        raw: request.body.value as string,
+      };
     }
   }
 
@@ -465,6 +470,11 @@ function serializeExternalCRequest(
       details.requestBody = {
         mode: "urlencoded",
         urlencoded: serializeUrlencoded(request.body.value as object),
+      };
+    } else if (request.body.mediaType === "raw") {
+      details.requestBody = {
+        mode: "raw",
+        raw: request.body.value as string,
       };
     }
   }

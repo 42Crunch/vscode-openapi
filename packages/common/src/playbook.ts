@@ -20,6 +20,10 @@ export type OperationBody =
   | {
       mediaType: "application/x-www-form-urlencoded";
       value: Record<string, unknown>;
+    }
+  | {
+      mediaType: "raw";
+      value: unknown;
     };
 
 export type CRequest = {
