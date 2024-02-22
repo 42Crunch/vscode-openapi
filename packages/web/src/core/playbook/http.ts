@@ -68,12 +68,14 @@ async function makeHttpRequestForOas(
     operation
   );
 
+  const swaggerContentType = getSwaggerClientContentType(request);
+
   const result = SwaggerClient.buildRequest({
     spec: await buildOasSpecWithServers(oas, server, request),
     operationId: swaggerClientOperationId,
     parameters: makeOpenApiSwaggerClientParameters(request.parameters, security),
     securities: makeOasSecurities(oas?.components?.securitySchemes || {}, security),
-    requestContentType: request.body?.mediaType,
+    requestContentType: swaggerContentType,
     requestBody: request.body?.value,
   });
 
@@ -105,6 +107,7 @@ async function makeHttpRequestForSwagger(
     parameters: makeSwaggerSwaggerClientParameters(oas, request, security),
     securities: makeSwaggerSecurities(oas?.securityDefinitions || {}, security),
   });
+
   // FIXME return replacements
   return result;
 }
@@ -332,4 +335,17 @@ function makeSwaggerClientOperationId(
   operation: OasOperation | SwaggerOperation
 ): string {
   return SwaggerClient.helpers.opId(operation, path, method);
+}
+
+function getSwaggerClientContentType(request: playbook.CRequest): string | undefined {
+  if (request.body?.mediaType === "raw") {
+    for (const { key, value } of request.parameters.header) {
+      if (key.toLowerCase() === "content-type") {
+        return String(value);
+      }
+    }
+    // if content-type header is not found, fallback to text/plain
+    return "text/plain";
+  }
+  return request.body?.mediaType;
 }
