@@ -1,9 +1,9 @@
 //@ts-ignore
 import SwaggerClient from "swagger-client";
-import { BundledOpenApiSpec, OasSecurityScheme } from "@xliic/common/oas30";
+import { BundledOpenApiSpec, OasSecurityScheme, OasOperation } from "@xliic/common/oas30";
 import { BundledSwaggerOrOasSpec, getOperation, isOpenapi } from "@xliic/common/openapi";
-import { BundledSwaggerSpec, SwaggerSecurityScheme } from "@xliic/common/swagger";
-import { HttpRequest } from "@xliic/common/http";
+import { BundledSwaggerSpec, SwaggerSecurityScheme, SwaggerOperation } from "@xliic/common/swagger";
+import { HttpMethod, HttpRequest } from "@xliic/common/http";
 import { Result } from "@xliic/common/result";
 
 import * as playbook from "@xliic/common/playbook";
@@ -58,14 +58,21 @@ async function makeHttpRequestForOas(
 ): Promise<HttpRequest> {
   const operation = getOperation(oas, request.path, request.method);
 
-  const swaggerClientOperationId =
-    operation?.operationId !== undefined
-      ? operation?.operationId
-      : `${request.method}-${request.path}`;
+  if (operation === undefined) {
+    throw new Error(`operation not found for ${request.method} ${request.path}`);
+  }
+
+  const swaggerClientOperationId = makeSwaggerClientOperationId(
+    request.method,
+    request.path,
+    operation
+  );
+
+  debugger;
 
   const result = SwaggerClient.buildRequest({
     spec: await buildOasSpecWithServers(oas, server, request),
-    operationId: swaggerClientEscapeString(swaggerClientOperationId),
+    operationId: swaggerClientOperationId,
     parameters: makeOpenApiSwaggerClientParameters(request.parameters, security),
     securities: makeOasSecurities(oas?.components?.securitySchemes || {}, security),
     requestContentType: request.body?.mediaType,
@@ -84,14 +91,19 @@ async function makeHttpRequestForSwagger(
 ): Promise<HttpRequest> {
   const operation = getOperation(oas, request.path, request.method);
 
-  const swaggerClientOperationId =
-    operation?.operationId !== undefined
-      ? operation?.operationId
-      : `${request.method}-${request.path}`;
+  if (operation === undefined) {
+    throw new Error(`operation not found for ${request.method} ${request.path}`);
+  }
+
+  const swaggerClientOperationId = makeSwaggerClientOperationId(
+    request.method,
+    request.path,
+    operation
+  );
 
   const result = SwaggerClient.buildRequest({
     spec: await buildSwaggerSpecWithServers(oas, server, request),
-    operationId: swaggerClientEscapeString(swaggerClientOperationId),
+    operationId: swaggerClientOperationId,
     parameters: makeSwaggerSwaggerClientParameters(oas, request, security),
     securities: makeSwaggerSecurities(oas?.securityDefinitions || {}, security),
   });
@@ -316,5 +328,13 @@ function makeUrlencodedBody(body: Record<string, unknown>): string {
   return params.toString();
 }
 
-// escapng the string same as swaggerclient does
-const swaggerClientEscapeString = (str: string) => str.replace(/[^\w]/gi, "_");
+function makeSwaggerClientOperationId(
+  method: HttpMethod,
+  path: string,
+  operation: OasOperation | SwaggerOperation
+): string {
+  if (operation.operationId !== undefined) {
+    return operation.operationId;
+  }
+  return SwaggerClient.helpers.opId(operation, path, method);
+}
