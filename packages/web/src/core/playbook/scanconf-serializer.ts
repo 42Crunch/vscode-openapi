@@ -82,7 +82,8 @@ function serializeAuthenticationDetails(
     }
     result.push(detail);
   }
-  return [result, undefined];
+  // if result contains one empty object, return empty array with no object
+  return [result.length === 1 && Object.keys(result[0]).length === 0 ? [] : result, undefined];
 }
 
 function serializeAuthenticationDetail(

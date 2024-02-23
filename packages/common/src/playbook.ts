@@ -92,7 +92,7 @@ export type PlaybookBundle = {
   customizations?: unknown;
   environments: Record<string, PlaybookEnvironment>;
   operations: Record<string, Operation>;
-  authenticationDetails: Credentials[];
+  authenticationDetails: [Credentials, ...Credentials[]];
   before: Stage[];
   after: Stage[];
   authorizationTests: AuthorizationTests;

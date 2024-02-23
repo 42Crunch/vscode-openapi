@@ -36,6 +36,7 @@ import {
   removeAuthorizationTest,
   addAuthorizationTest,
   updateOperationAuthorizationTests,
+  removeCredential,
 } from "./slice";
 import { AppDispatch, RootState } from "./store";
 import { setScanServer } from "../../features/prefs/slice";
@@ -64,6 +65,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
           saveSettings,
           saveCredential,
           addCredential,
+          removeCredential,
           addStage,
           moveStage,
           removeStage,
