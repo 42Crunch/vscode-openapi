@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.24.1 (February 23, 2024)
+
+- Fix issue where authorization tests dialog would not show in Scan UI
+
 ## Version 4.24.0 (February 19, 2024)
 
 - Updated to the lastest SwaggerUI version for OpenAPI preview
