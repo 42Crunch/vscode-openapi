@@ -1,0 +1,11 @@
+{
+  "name": "@xliic/openapi",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc"
+  },
+  "type": "module",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

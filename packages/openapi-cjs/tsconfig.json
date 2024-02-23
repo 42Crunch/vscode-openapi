@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.base",
+  "compilerOptions": {
+    "module": "commonjs",
+    "outDir": "dist/",
+    "rootDir": "../openapi/src/",
+    "declaration": true,
+    "composite": true
+  },
+  "include": ["../openapi/src/"]
+}
