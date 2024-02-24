@@ -1,20 +1,17 @@
 import styled from "styled-components";
-import {
-  BundledSwaggerSpec,
-  ResolvedSwaggerOperationSecurity,
-  SwaggerSecurityScheme,
-} from "@xliic/common/swagger";
-
 import { useFormContext, useController, useFieldArray } from "react-hook-form";
-import SwaggerSecurityRequirements from "./SwaggerSecurityRequirements";
+
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { Swagger } from "@xliic/openapi";
+
+import SwaggerSecurityRequirements from "./SwaggerSecurityRequirements";
 
 export default function SwaggerSecurity({
   oas,
   security,
 }: {
-  oas: BundledSwaggerSpec;
-  security: ResolvedSwaggerOperationSecurity;
+  oas: Swagger.BundledSwaggerSpec;
+  security: Swagger.ResolvedSwaggerOperationSecurity;
 }) {
   if (security === undefined) {
     return null;
@@ -51,7 +48,7 @@ export default function SwaggerSecurity({
 }
 
 function securityRequirementOption(
-  requirement: Record<string, SwaggerSecurityScheme>,
+  requirement: Record<string, Swagger.SwaggerSecurityScheme>,
   index: number
 ) {
   const keys = Object.keys(requirement).join(", ");

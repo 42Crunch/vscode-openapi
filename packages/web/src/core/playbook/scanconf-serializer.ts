@@ -1,4 +1,4 @@
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
+import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import * as playbook from "@xliic/common/playbook";
 import { NullableResult, Result } from "@xliic/common/result";
 import { joinJsonPointer } from "@xliic/preserving-json-yaml-parser";

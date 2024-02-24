@@ -1,17 +1,5 @@
 import { Result } from "./result";
-
-export const HttpMethods = [
-  "get",
-  "put",
-  "post",
-  "delete",
-  "options",
-  "head",
-  "patch",
-  "trace",
-] as const;
-
-export type HttpMethod = (typeof HttpMethods)[number];
+import { HttpMethod } from "@xliic/openapi";
 
 export type HttpRequest = {
   url: string;

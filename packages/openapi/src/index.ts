@@ -10,8 +10,14 @@ import {
   getServerUrls as getSwaggerServerUrls,
   getOperations as getSwaggerOperations,
 } from "./swagger";
-import { HttpMethod } from "./http";
+import { HttpMethod, HttpMethods } from "./http";
 import { deref } from "./ref";
+
+export * as OpenApi30 from "./oas30";
+export * as Swagger from "./swagger";
+export { deref } from "./ref";
+export type { HttpMethod } from "./http";
+export { HttpMethods } from "./http";
 
 export type BundledSwaggerOrOasSpec = BundledOpenApiSpec | BundledSwaggerSpec;
 

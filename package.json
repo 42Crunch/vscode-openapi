@@ -850,7 +850,8 @@
     ]
   },
   "workspaces": [
-    "packages/common/dist/cjs"
+    "packages/common/dist/cjs",
+    "packages/openapi-cjs"
   ],
   "dependencies": {
     "@xliic/json-schema-ref-parser": "^9.3.0",

@@ -1,10 +1,9 @@
 import * as vscode from "vscode";
-import { Cache } from "../../cache";
-import { getOperations as getOpenApiOperations } from "@xliic/common/oas30";
-import { getOperations as getSwaggerOperations } from "@xliic/common/swagger";
-import { BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/common/openapi";
 
+import { OpenApi30, Swagger, BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/openapi";
 import { getLocation } from "@xliic/preserving-json-yaml-parser";
+
+import { Cache } from "../../cache";
 import { getOpenApiVersion } from "../../parsers";
 import { OpenApiVersion } from "../../types";
 
@@ -21,7 +20,7 @@ export class ScanCodelensProvider implements vscode.CodeLensProvider {
     const version = getOpenApiVersion(parsed);
     if (parsed && version !== OpenApiVersion.Unknown) {
       const oas = parsed as unknown as BundledSwaggerOrOasSpec;
-      const operations = isOpenapi(oas) ? getOpenApiOperations(oas) : getSwaggerOperations(oas);
+      const operations = isOpenapi(oas) ? OpenApi30.getOperations(oas) : Swagger.getOperations(oas);
       for (const [path, method, operation] of operations) {
         const lens = scanLens(document, oas, path, method);
         if (lens) {

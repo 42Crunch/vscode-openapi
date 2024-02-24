@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 
-import { HttpMethod } from "@xliic/common/http";
+import { HttpMethod } from "@xliic/openapi";
+import { Container, Location, getLocation } from "@xliic/preserving-json-yaml-parser";
 
 import { AbstractOutlineNode, HTTP_METHODS, OutlineNode } from "./base";
-import { Container, Location, getLocation } from "@xliic/preserving-json-yaml-parser";
 import { SimpleNode, getParameterLabel } from "./simple";
 
 type OperationId = {

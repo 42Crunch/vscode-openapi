@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { Environment, SimpleEnvironment } from "@xliic/common/env";
-import { getOperation, makeOperationId } from "@xliic/common/openapi";
+import { getOperation, makeOperationId } from "@xliic/openapi";
 import { RequestRef } from "@xliic/common/playbook";
 import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
 import { showScanconfOperation } from "../actions";

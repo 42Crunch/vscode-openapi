@@ -1,15 +1,19 @@
 //@ts-ignore
 import SwaggerClient from "swagger-client";
-import { BundledOpenApiSpec, OasSecurityScheme, OasOperation } from "@xliic/common/oas30";
-import { BundledSwaggerOrOasSpec, getOperation, isOpenapi } from "@xliic/common/openapi";
-import { BundledSwaggerSpec, SwaggerSecurityScheme, SwaggerOperation } from "@xliic/common/swagger";
-import { HttpMethod, HttpRequest } from "@xliic/common/http";
-import { Result } from "@xliic/common/result";
 
+import {
+  OpenApi30,
+  Swagger,
+  BundledSwaggerOrOasSpec,
+  HttpMethod,
+  getOperation,
+  isOpenapi,
+} from "@xliic/openapi";
+import { HttpRequest } from "@xliic/common/http";
+import { Result } from "@xliic/common/result";
 import * as playbook from "@xliic/common/playbook";
 
 import { checkCredential } from "./util";
-
 import { getParameters } from "./util-swagger";
 import { AuthResult } from "./playbook";
 
@@ -50,7 +54,7 @@ export async function makeHttpRequest(
 }
 
 async function makeHttpRequestForOas(
-  oas: BundledOpenApiSpec,
+  oas: OpenApi30.BundledOpenApiSpec,
   server: string,
   operationId: string | undefined,
   request: playbook.CRequest,
@@ -83,7 +87,7 @@ async function makeHttpRequestForOas(
 }
 
 async function makeHttpRequestForSwagger(
-  oas: BundledSwaggerSpec,
+  oas: Swagger.BundledSwaggerSpec,
   server: string,
   operationId: string | undefined,
   request: playbook.CRequest,
@@ -146,7 +150,7 @@ export async function makeExternalHttpRequest(
 }
 
 async function buildOasSpecWithServers(
-  oas: BundledOpenApiSpec,
+  oas: OpenApi30.BundledOpenApiSpec,
   server: string,
   request: playbook.CRequest
 ): Promise<unknown> {
@@ -161,7 +165,7 @@ async function buildOasSpecWithServers(
 }
 
 async function buildSwaggerSpecWithServers(
-  swagger: BundledSwaggerSpec,
+  swagger: Swagger.BundledSwaggerSpec,
   server: string,
   request: playbook.CRequest
 ): Promise<unknown> {
@@ -206,7 +210,7 @@ function makeOpenApiSwaggerClientParameters(
 }
 
 function makeSwaggerSwaggerClientParameters(
-  oas: BundledSwaggerSpec,
+  oas: Swagger.BundledSwaggerSpec,
   request: playbook.CRequest,
   security: AuthResult
 ): Record<string, unknown> {
@@ -259,7 +263,10 @@ function collectParameters(
   return result;
 }
 
-function makeOasSecurities(schemes: Record<string, OasSecurityScheme>, security: AuthResult): any {
+function makeOasSecurities(
+  schemes: Record<string, OpenApi30.OasSecurityScheme>,
+  security: AuthResult
+): any {
   const matches = matchSecuritySchemesToAuthResult(schemes, security);
   const result: any = {};
   for (const name of Object.keys(matches)) {
@@ -276,7 +283,7 @@ function makeOasSecurities(schemes: Record<string, OasSecurityScheme>, security:
 }
 
 function makeSwaggerSecurities(
-  schemes: Record<string, SwaggerSecurityScheme>,
+  schemes: Record<string, Swagger.SwaggerSecurityScheme>,
   security: AuthResult
 ): any {
   const result: any = {};
@@ -295,7 +302,7 @@ function makeSwaggerSecurities(
 }
 
 function matchSecuritySchemesToAuthResult(
-  schemes: Record<string, OasSecurityScheme | SwaggerSecurityScheme>,
+  schemes: Record<string, OpenApi30.OasSecurityScheme | Swagger.SwaggerSecurityScheme>,
   security: AuthResult
 ): Record<string, string | undefined> {
   const mutable = { ...security };
@@ -332,7 +339,7 @@ function makeUrlencodedBody(body: Record<string, unknown>): string {
 function makeSwaggerClientOperationId(
   method: HttpMethod,
   path: string,
-  operation: OasOperation | SwaggerOperation
+  operation: OpenApi30.OasOperation | Swagger.SwaggerOperation
 ): string {
   return SwaggerClient.helpers.opId(operation, path, method);
 }

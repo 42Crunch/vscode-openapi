@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { HttpMethod } from "@xliic/common/http";
+import { HttpMethod } from "@xliic/openapi";
 import { Container, getLocation } from "@xliic/preserving-json-yaml-parser";
 
 import { encodeJsonPointerSegment } from "../../pointer";

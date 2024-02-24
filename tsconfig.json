@@ -8,10 +8,8 @@
     "outDir": "out",
     "rootDir": "src",
     "lib": ["es6"],
-    "sourceMap": true,
-    "jsx": "react"
+    "sourceMap": true
   },
   "include": ["src"],
-  "exclude": ["node_modules", ".vscode-test"],
-  "references": [{ "path": "packages/common/tsconfig.cjs.json" }]
+  "exclude": ["node_modules", ".vscode-test"]
 }

@@ -11,7 +11,7 @@ import {
   ShowHttpResponseMessage,
 } from "@xliic/common/http";
 import { Webapp } from "@xliic/common/message";
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
+import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import * as playbook from "@xliic/common/playbook";
 import { Result } from "@xliic/common/result";
 

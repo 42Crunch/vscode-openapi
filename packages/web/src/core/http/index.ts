@@ -1,11 +1,8 @@
 //@ts-ignore
 import SwaggerClient from "swagger-client";
-import { BundledOpenApiSpec, OasSecurityScheme, OasServer } from "@xliic/common/oas30";
-import { BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/common/openapi";
-import { BundledSwaggerSpec, SwaggerSecurityScheme } from "@xliic/common/swagger";
-import { HttpConfig, HttpMethod, HttpRequest } from "@xliic/common/http";
+import { OpenApi30, Swagger, BundledSwaggerOrOasSpec, HttpMethod, isOpenapi } from "@xliic/openapi";
+import { HttpConfig, HttpRequest } from "@xliic/common/http";
 import { Config } from "@xliic/common/config";
-
 import {
   TryitOperationValues,
   TryitParameterValues,
@@ -76,7 +73,7 @@ export async function makeHttpRequest(
 }
 
 async function buildOasSpec(
-  oas: BundledOpenApiSpec,
+  oas: OpenApi30.BundledOpenApiSpec,
   path: string,
   method: HttpMethod,
   values: TryitOperationValues,
@@ -94,7 +91,7 @@ async function buildOasSpec(
 }
 
 async function buildSwaggerSpec(
-  swagger: BundledSwaggerSpec,
+  swagger: Swagger.BundledSwaggerSpec,
   path: string,
   method: HttpMethod,
   values: TryitOperationValues,
@@ -122,7 +119,7 @@ function convertBody(body: unknown): unknown {
   return JSON.stringify(body);
 }
 
-function pickServer(servers: OasServer[], server: string): OasServer[] {
+function pickServer(servers: OpenApi30.OasServer[], server: string): OpenApi30.OasServer[] {
   return servers.filter((s) => s.url === server);
 }
 
@@ -141,7 +138,7 @@ function makeOpenApiSwaggerClientParameters(
 }
 
 function makeSwaggerSwaggerClientParameters(
-  oas: BundledSwaggerSpec,
+  oas: Swagger.BundledSwaggerSpec,
   path: string,
   method: HttpMethod,
   values: TryitOperationValues,
@@ -168,7 +165,7 @@ function makeSwaggerSwaggerClientParameters(
 }
 
 function makeOasSecurities(
-  schemes: Record<string, OasSecurityScheme>,
+  schemes: Record<string, OpenApi30.OasSecurityScheme>,
   values: TryitSecurityAllValues,
   index: number,
   env: EnvData
@@ -192,7 +189,7 @@ function makeOasSecurities(
 }
 
 function makeSwaggerSecurities(
-  schemes: Record<string, SwaggerSecurityScheme>,
+  schemes: Record<string, Swagger.SwaggerSecurityScheme>,
   values: TryitSecurityAllValues,
   index: number,
   env: EnvData

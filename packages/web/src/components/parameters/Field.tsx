@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { useFormContext, useController } from "react-hook-form";
 import styled from "styled-components";
-import { ResolvedOasParameter } from "@xliic/common/oas30";
-import { ResolvedSwaggerParameter } from "@xliic/common/swagger";
+
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { OpenApi30, Swagger } from "@xliic/openapi";
+
 import { TrashCan, TriangleExclamation } from "../../icons";
 
-export type Parameter = ResolvedOasParameter | ResolvedSwaggerParameter;
+export type Parameter = OpenApi30.ResolvedOasParameter | Swagger.ResolvedSwaggerParameter;
 export type Schema = { type?: string };
 const DefaultSchema = { type: "string" };
 

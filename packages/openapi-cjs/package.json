@@ -1,11 +1,12 @@
 {
   "name": "@xliic/openapi",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
     "build": "tsc"
   },
-  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "devDependencies": {
     "typescript": "^5.0.0"
   }

@@ -1,8 +1,9 @@
-import { OasSecurityScheme } from "@xliic/common/oas30";
-import * as playbook from "@xliic/common/playbook";
-import { SwaggerSecurityScheme } from "@xliic/common/swagger";
-import { ThemeColorVariables } from "@xliic/common/theme";
 import styled from "styled-components";
+
+import * as playbook from "@xliic/common/playbook";
+import { ThemeColorVariables } from "@xliic/common/theme";
+import { OpenApi30, Swagger } from "@xliic/openapi";
+
 import { goTo } from "../../../../features/router/slice";
 import { ArrowUpRightFromSquare } from "../../../../icons";
 import DownshiftSelect from "../../../../new-components/DownshiftSelect";
@@ -17,7 +18,7 @@ export default function CredentialPicker({
   onChange,
 }: {
   schemeName: string;
-  scheme: OasSecurityScheme | SwaggerSecurityScheme;
+  scheme: OpenApi30.OasSecurityScheme | Swagger.SwaggerSecurityScheme;
   credentials: playbook.Credentials;
   value: string;
   onChange: (value: string | undefined) => void;

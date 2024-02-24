@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import { GeneralError } from "@xliic/common/error";
-import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
+import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/openapi";
 import * as playbook from "@xliic/common/playbook";
 import { LoadScanconfMessage } from "@xliic/common/playbook";
 import { Result } from "@xliic/common/result";

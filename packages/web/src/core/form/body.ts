@@ -1,17 +1,11 @@
 import jsf from "json-schema-faker";
 
-import {
-  BundledOpenApiSpec,
-  OasRequestBody,
-  OasMediaType,
-  OasOperation,
-} from "@xliic/common/oas30";
+import { OpenApi30, deref } from "@xliic/openapi";
 import { TryitOperationBody } from "@xliic/common/tryit";
-import { deref } from "@xliic/common/ref";
 
 export function createDefaultBody(
-  oas: BundledOpenApiSpec,
-  operation?: OasOperation,
+  oas: OpenApi30.BundledOpenApiSpec,
+  operation?: OpenApi30.OasOperation,
   preferredMediaType?: string,
   preferredBodyValue?: unknown
 ): TryitOperationBody | undefined {
@@ -25,9 +19,9 @@ export function createDefaultBody(
 }
 
 export function createBody(
-  oas: BundledOpenApiSpec,
+  oas: OpenApi30.BundledOpenApiSpec,
   mediaType: string,
-  mto?: OasMediaType,
+  mto?: OpenApi30.OasMediaType,
   preferredBodyValue?: unknown
 ): TryitOperationBody {
   // use the preferred body value if it's provided
@@ -98,9 +92,9 @@ export function parseFromFormText(mediaType: string, value: string): unknown | E
 }
 
 function findPreferredBody(
-  requestBody?: OasRequestBody,
+  requestBody?: OpenApi30.OasRequestBody,
   preferredMediaType?: string
-): [string, OasMediaType] | undefined {
+): [string, OpenApi30.OasMediaType] | undefined {
   if (!requestBody || !requestBody.content) {
     return undefined;
   }

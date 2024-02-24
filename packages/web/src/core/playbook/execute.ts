@@ -1,6 +1,6 @@
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
 import { HttpClient } from "@xliic/common/http";
-import { BundledSwaggerOrOasSpec, getOperationById } from "@xliic/common/openapi";
+import { BundledSwaggerOrOasSpec, getOperationById } from "@xliic/openapi";
 import * as playbook from "@xliic/common/playbook";
 
 import { makeExternalHttpRequest, makeHttpRequest } from "./http";

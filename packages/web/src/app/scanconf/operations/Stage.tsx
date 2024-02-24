@@ -2,7 +2,7 @@ import { useDrag } from "react-dnd";
 import styled from "styled-components";
 import * as Tooltip from "@radix-ui/react-tooltip";
 
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
+import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import * as playbook from "@xliic/common/playbook";
 import { ThemeColorVariables } from "@xliic/common/theme";
 

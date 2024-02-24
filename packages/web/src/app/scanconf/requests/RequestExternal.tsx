@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { Environment as UnknownEnvironment } from "@xliic/common/env";
-import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
+import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/openapi";
 import * as playbook from "@xliic/common/playbook";
 import { RequestRef } from "@xliic/common/playbook";
 import { ThemeColorVariables } from "@xliic/common/theme";

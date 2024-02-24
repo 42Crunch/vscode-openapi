@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { HttpMethod } from "@xliic/common/http";
+import { HttpMethod } from "@xliic/openapi";
 
 import { AbstractOutlineNode, HTTP_METHODS, OutlineNode } from "./base";
 import { SimpleNode, getParameterLabel } from "./simple";

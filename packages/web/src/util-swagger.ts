@@ -1,37 +1,22 @@
 import jsf from "json-schema-faker";
 
-import {
-  BundledSwaggerSpec,
-  SwaggerPathItem,
-  SwaggerParameter,
-  getPathItemParameters,
-  getOperation,
-  getOperationParameters,
-  OperationParametersMap,
-  getParametersMap,
-  SwaggerParameterLocation,
-  SwaggerOperation,
-  getServerUrls,
-  SwaggerSecurityScheme,
-  ResolvedSwaggerOperationSecurity,
-} from "@xliic/common/swagger";
+import { Swagger, HttpMethod } from "@xliic/openapi";
 import {
   TryitOperationValues,
   TryitParameterValues,
   TryitSecurityValue,
   TryitSecurityAllValues,
 } from "@xliic/common/tryit";
-import { HttpMethod } from "@xliic/common/http";
 import { createDefaultBody } from "./core/form/body-swagger";
 
 export function createDefaultValues(
-  oas: BundledSwaggerSpec,
+  oas: Swagger.BundledSwaggerSpec,
   path: string,
   method: HttpMethod,
   preferredMediaType: string | undefined,
   preferredBodyValue: unknown
 ): TryitOperationValues {
-  const operation = getOperation(oas, path, method);
+  const operation = Swagger.getOperation(oas, path, method);
   // parameters
   const parameters = getParameters(oas, path, method);
   const parameterValues = generateParameterValues(oas, parameters);
@@ -39,7 +24,7 @@ export function createDefaultValues(
   const security = getSecurity(oas, path, method);
   const securityValues = generateSecurityValues(security);
 
-  const serverUrls = getServerUrls(oas);
+  const serverUrls = Swagger.getServerUrls(oas);
 
   const body = createDefaultBody(
     oas,
@@ -59,20 +44,20 @@ export function createDefaultValues(
 }
 
 export function getParameters(
-  oas: BundledSwaggerSpec,
+  oas: Swagger.BundledSwaggerSpec,
   path: string,
   method: HttpMethod
-): OperationParametersMap {
-  const pathParameters = getPathItemParameters(oas, oas.paths[path]);
-  const operation = getOperation(oas, path, method);
-  const operationParameters = getOperationParameters(oas, operation);
-  const result = getParametersMap(oas, pathParameters, operationParameters);
+): Swagger.OperationParametersMap {
+  const pathParameters = Swagger.getPathItemParameters(oas, oas.paths[path]);
+  const operation = Swagger.getOperation(oas, path, method);
+  const operationParameters = Swagger.getOperationParameters(oas, operation);
+  const result = Swagger.getParametersMap(oas, pathParameters, operationParameters);
   return result;
 }
 
 export function generateParameterValues(
-  oas: BundledSwaggerSpec,
-  parameters: OperationParametersMap
+  oas: Swagger.BundledSwaggerSpec,
+  parameters: Swagger.OperationParametersMap
 ): TryitParameterValues {
   const values: TryitParameterValues = {
     query: {},
@@ -81,7 +66,7 @@ export function generateParameterValues(
     cookie: {},
   };
 
-  const locations = Object.keys(parameters) as SwaggerParameterLocation[];
+  const locations = Object.keys(parameters) as Swagger.SwaggerParameterLocation[];
   for (const location of locations) {
     if (location === "body" || location === "formData") {
       // don't generate body or formData
@@ -114,25 +99,25 @@ export function generateParameterValues(
 }
 
 export function hasSecurityRequirements(
-  oas: BundledSwaggerSpec,
+  oas: Swagger.BundledSwaggerSpec,
   path: string,
   method: HttpMethod
 ): boolean {
-  const operation = getOperation(oas, path, method);
+  const operation = Swagger.getOperation(oas, path, method);
   const requirements = operation?.security ?? oas.security ?? [];
   return requirements.length > 0;
 }
 
 export function getSecurity(
-  oas: BundledSwaggerSpec,
+  oas: Swagger.BundledSwaggerSpec,
   path: string,
   method: HttpMethod
-): ResolvedSwaggerOperationSecurity {
-  const operation = getOperation(oas, path, method);
+): Swagger.ResolvedSwaggerOperationSecurity {
+  const operation = Swagger.getOperation(oas, path, method);
   const requirements = operation?.security ?? oas.security ?? [];
-  const result: ResolvedSwaggerOperationSecurity = [];
+  const result: Swagger.ResolvedSwaggerOperationSecurity = [];
   for (const requirement of requirements) {
-    const resolved: Record<string, SwaggerSecurityScheme> = {};
+    const resolved: Record<string, Swagger.SwaggerSecurityScheme> = {};
     for (const schemeName of Object.keys(requirement)) {
       // check if the requsted security scheme is defined in the OAS
       if (oas?.securityDefinitions?.[schemeName]) {
@@ -145,7 +130,7 @@ export function getSecurity(
 }
 
 export function generateSecurityValues(
-  security: ResolvedSwaggerOperationSecurity
+  security: Swagger.ResolvedSwaggerOperationSecurity
 ): TryitSecurityAllValues {
   const result: TryitSecurityAllValues = [];
   for (const requirement of security) {
@@ -160,7 +145,7 @@ export function generateSecurityValues(
   return result;
 }
 
-export function generateSecurityValue(security: SwaggerSecurityScheme): TryitSecurityValue {
+export function generateSecurityValue(security: Swagger.SwaggerSecurityScheme): TryitSecurityValue {
   if (security?.type === "basic") {
     return { username: "", password: "" };
   }

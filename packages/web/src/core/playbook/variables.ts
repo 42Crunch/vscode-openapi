@@ -1,13 +1,17 @@
 import jsf from "json-schema-faker";
 
 import { LookupFailure, LookupResult, ReplacementResult } from "@xliic/common/env";
-import { BundledOpenApiSpec, OasOperation } from "@xliic/common/oas30";
+import {
+  OpenApi30,
+  Swagger,
+  BundledSwaggerOrOasSpec,
+  HttpMethod,
+  getOperation,
+  isOpenapi,
+} from "@xliic/openapi";
 import * as playbook from "@xliic/common/playbook";
-import { SwaggerOperation } from "@xliic/common/swagger";
 import { Path, findByPath, simpleClone } from "@xliic/preserving-json-yaml-parser";
-import { BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/common/openapi";
 import { deref } from "@xliic/common/ref";
-import { HttpMethod } from "@xliic/common/http";
 
 import { EnvStackLookupResult, PlaybookEnvStack, lookup } from "./playbook-env";
 import {
@@ -41,7 +45,7 @@ export function replaceEnvironmentVariables(
 export function replaceRequestVariables(
   oas: BundledSwaggerOrOasSpec,
   request: playbook.CRequest | playbook.ExternalCRequest,
-  operation: OasOperation | SwaggerOperation | undefined,
+  operation: OpenApi30.OasOperation | Swagger.SwaggerOperation | undefined,
   envStack: PlaybookEnvStack
 ): ReplacementResult<playbook.CRequest | playbook.ExternalCRequest> {
   let fake: { body: unknown; parameters: unknown };
@@ -173,7 +177,7 @@ function lookupOrDynamic(
 
 function createFake(
   oas: BundledSwaggerOrOasSpec,
-  operation: OasOperation | SwaggerOperation | undefined,
+  operation: OpenApi30.OasOperation | Swagger.SwaggerOperation | undefined,
   path: string,
   method: HttpMethod
 ): { body: unknown; parameters: unknown } {
@@ -184,7 +188,7 @@ function createFake(
   }
 
   if (isOpenapi(oas)) {
-    const requestBody = deref(oas, (operation as OasOperation).requestBody);
+    const requestBody = deref(oas, (operation as OpenApi30.OasOperation).requestBody);
     const schema = deref(oas, requestBody?.content["application/json"]?.schema);
     if (schema) {
       result.body = generateBody({ ...schema, components: (oas as any).components });

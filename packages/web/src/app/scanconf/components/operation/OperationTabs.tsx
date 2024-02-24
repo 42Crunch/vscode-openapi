@@ -1,15 +1,14 @@
 import { useFormContext } from "react-hook-form";
 
-import { HttpMethod } from "@xliic/common/http";
 import {
-  BundledOpenApiSpec,
-  OasRequestBody,
-  getOperation as getOasOperation,
-} from "@xliic/common/oas30";
-import { BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/common/openapi";
+  OpenApi30,
+  Swagger,
+  BundledSwaggerOrOasSpec,
+  isOpenapi,
+  HttpMethod,
+  deref,
+} from "@xliic/openapi";
 import * as playbook from "@xliic/common/playbook";
-import { deref } from "@xliic/common/ref";
-import { BundledSwaggerSpec } from "@xliic/common/swagger";
 
 import { TabContainer } from "../../../../new-components/Tabs";
 import ParameterGroup from "../parameters/ParameterGroup";
@@ -56,7 +55,7 @@ export default function OperationTabs({
 }
 
 function makeOasTabs(
-  oas: BundledOpenApiSpec,
+  oas: OpenApi30.BundledOpenApiSpec,
   credentials: playbook.Credentials,
   path: string,
   method: HttpMethod,
@@ -64,8 +63,8 @@ function makeOasTabs(
   isBodyPresent: boolean
 ) {
   const parameters = getOasParameters(oas, path, method);
-  const operation = getOasOperation(oas, path, method);
-  const requestBody = deref<OasRequestBody>(oas, operation?.requestBody);
+  const operation = OpenApi30.getOperation(oas, path, method);
+  const requestBody = deref<OpenApi30.OasRequestBody>(oas, operation?.requestBody);
 
   return [
     {
@@ -156,7 +155,7 @@ function makeOasTabs(
 }
 
 function makeSwaggerTabs(
-  oas: BundledSwaggerSpec,
+  oas: Swagger.BundledSwaggerSpec,
   credentials: playbook.Credentials,
   path: string,
   method: HttpMethod,

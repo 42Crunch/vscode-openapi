@@ -1,7 +1,8 @@
-import { HttpClient, HttpError, HttpMethod, HttpRequest, HttpResponse } from "@xliic/common/http";
+import { HttpMethod } from "@xliic/openapi";
+import { HttpClient, HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
 import { RequestRef, Credential } from "@xliic/common/playbook";
-
 import { LookupResult, LookupFailure } from "@xliic/common/env";
+
 import { PlaybookEnvStack } from "./playbook-env";
 import { MockHttpResponseType } from "./mock-http";
 

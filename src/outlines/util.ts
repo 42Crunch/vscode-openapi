@@ -3,7 +3,7 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import { HttpMethod } from "@xliic/common/http";
+import { HttpMethod } from "@xliic/openapi";
 
 import { OperationIdNode } from "./nodes/operation-ids";
 import { OperationNode, PathNode } from "./nodes/paths";

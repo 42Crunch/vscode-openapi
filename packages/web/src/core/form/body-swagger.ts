@@ -1,26 +1,12 @@
 import jsf from "json-schema-faker";
 
-import {
-  BundledSwaggerSpec,
-  SwaggerPathItem,
-  SwaggerParameter,
-  getPathItemParameters,
-  getOperation,
-  getOperationParameters,
-  OperationParametersMap,
-  getParametersMap,
-  SwaggerParameterLocation,
-  SwaggerOperation,
-  getConsumes,
-} from "@xliic/common/swagger";
-
+import { Swagger, deref } from "@xliic/openapi";
 import { TryitOperationBody } from "@xliic/common/tryit";
-import { deref } from "@xliic/common/ref";
 
 export function createDefaultBody(
-  oas: BundledSwaggerSpec,
-  operation: SwaggerOperation,
-  parameters: OperationParametersMap,
+  oas: Swagger.BundledSwaggerSpec,
+  operation: Swagger.SwaggerOperation,
+  parameters: Swagger.OperationParametersMap,
   preferredMediaType?: string,
   preferredBodyValue?: unknown
 ): TryitOperationBody | undefined {
@@ -36,9 +22,9 @@ export function createDefaultBody(
 }
 
 export function createBody(
-  oas: BundledSwaggerSpec,
-  operation: SwaggerOperation,
-  parameters: OperationParametersMap,
+  oas: Swagger.BundledSwaggerSpec,
+  operation: Swagger.SwaggerOperation,
+  parameters: Swagger.OperationParametersMap,
   mediaType: string
 ): TryitOperationBody {
   if (FORM_MEDIA_TYPES.includes(mediaType)) {
@@ -75,11 +61,11 @@ export function createBody(
 }
 
 function getMediaType(
-  oas: BundledSwaggerSpec,
-  operation: SwaggerOperation,
+  oas: Swagger.BundledSwaggerSpec,
+  operation: Swagger.SwaggerOperation,
   preferredMediaType?: string
 ): string | undefined {
-  const consumes = getConsumes(oas, operation);
+  const consumes = Swagger.getConsumes(oas, operation);
   if (preferredMediaType !== undefined && consumes.includes(preferredMediaType)) {
     return preferredMediaType;
   } else if (consumes.length > 0) {

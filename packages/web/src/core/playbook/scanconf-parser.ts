@@ -1,11 +1,10 @@
 import { NullableResult, Result } from "@xliic/common/result";
 import { parseJsonPointer } from "@xliic/common/jsonpointer";
-
 import * as playbook from "@xliic/common/playbook";
-import * as scan from "./scanconfig";
-
-import { BundledSwaggerOrOasSpec, getOperationById } from "@xliic/common/openapi";
+import { BundledSwaggerOrOasSpec, getOperationById } from "@xliic/openapi";
 import { joinJsonPointer } from "@xliic/preserving-json-yaml-parser";
+
+import * as scan from "./scanconfig";
 
 export function parse(
   oas: BundledSwaggerOrOasSpec,

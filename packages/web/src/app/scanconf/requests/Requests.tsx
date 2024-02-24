@@ -1,4 +1,4 @@
-import { HttpMethod } from "@xliic/common/http";
+import { HttpMethod } from "@xliic/openapi";
 import { RequestRef } from "@xliic/common/playbook";
 
 import { ItemId, SearchSidebarControlled } from "../../../components/layout/SearchSidebar";

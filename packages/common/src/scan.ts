@@ -1,6 +1,4 @@
-import { SimpleEnvironment } from "./env";
-import { HttpMethod } from "./http";
-import { BundledSwaggerOrOasSpec } from "./openapi";
+import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
 import { ScanReportJSONSchema } from "./scan-report";
 import { TryitSecurityValues } from "./tryit";
 

@@ -1,4 +1,5 @@
-import type { SwaggerSecurityScheme } from "@xliic/common/swagger";
+import { Swagger } from "@xliic/openapi";
+
 import { escapeFieldName } from "../../util";
 import { SecurityHttpBasic } from "./SecurityHttpBasic";
 import { SecurityGeneric } from "./SecurityGeneric";
@@ -9,7 +10,7 @@ export default function SecurityRequirements({
   schema,
 }: {
   name: string;
-  schema: Record<string, SwaggerSecurityScheme>;
+  schema: Record<string, Swagger.SwaggerSecurityScheme>;
 }) {
   if (!schema) {
     return null;

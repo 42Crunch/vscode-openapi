@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import type { BundledOpenApiSpec, OasRequestBody } from "@xliic/common/oas30";
+import { OpenApi30 } from "@xliic/openapi";
 
 import JsonEditor from "../../../../new-components/fields/JsonEditor";
 import { useController } from "react-hook-form";
@@ -11,8 +11,8 @@ export default function RequestBody({
   requestBody,
   variables,
 }: {
-  oas: BundledOpenApiSpec;
-  requestBody?: OasRequestBody;
+  oas: OpenApi30.BundledOpenApiSpec;
+  requestBody?: OpenApi30.OasRequestBody;
   variables: string[];
 }) {
   const {

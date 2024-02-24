@@ -1,20 +1,13 @@
 import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
-import { BundledSwaggerOrOasSpec, getOperation } from "@xliic/common/openapi";
+import { BundledSwaggerOrOasSpec, getOperation, HttpMethod, HttpMethods } from "@xliic/openapi";
 import { TryitOperationValues } from "@xliic/common/tryit";
 import {
   ScanConfig,
   OasWithOperationAndConfig,
   SingleOperationScanReport,
 } from "@xliic/common/scan";
-import {
-  HttpMethod,
-  HttpRequest,
-  HttpResponse,
-  HttpError,
-  HttpMethods,
-  HttpConfig,
-} from "@xliic/common/http";
+import { HttpRequest, HttpResponse, HttpError, HttpConfig } from "@xliic/common/http";
 import { GeneralError } from "@xliic/common/error";
 import { Preferences } from "@xliic/common/prefs";
 import { ScanReportJSONSchema, TestLogReport } from "@xliic/common/scan-report";

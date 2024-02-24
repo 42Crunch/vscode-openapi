@@ -1,8 +1,7 @@
 import { useFieldArray } from "react-hook-form";
 import styled from "styled-components";
 
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
-import { deref } from "@xliic/common/ref";
+import { BundledSwaggerOrOasSpec, deref } from "@xliic/openapi";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import ParameterRow, { Parameter, Schema } from "./ParameterRow";
