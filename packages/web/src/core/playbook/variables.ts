@@ -1,17 +1,10 @@
 import jsf from "json-schema-faker";
 
 import { LookupFailure, LookupResult, ReplacementResult } from "@xliic/common/env";
-import {
-  OpenApi30,
-  Swagger,
-  BundledSwaggerOrOasSpec,
-  HttpMethod,
-  getOperation,
-  isOpenapi,
-} from "@xliic/openapi";
+import { OpenApi30, Swagger, BundledSwaggerOrOasSpec, HttpMethod, isOpenapi } from "@xliic/openapi";
 import * as playbook from "@xliic/common/playbook";
-import { Path, findByPath, simpleClone } from "@xliic/preserving-json-yaml-parser";
-import { deref } from "@xliic/common/ref";
+import { Path, simpleClone } from "@xliic/preserving-json-yaml-parser";
+import { deref } from "@xliic/openapi";
 
 import { EnvStackLookupResult, PlaybookEnvStack, lookup } from "./playbook-env";
 import {

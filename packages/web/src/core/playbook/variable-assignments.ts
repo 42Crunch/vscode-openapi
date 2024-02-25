@@ -3,7 +3,7 @@ import { Cookie } from "tough-cookie";
 
 import { Environment } from "@xliic/common/env";
 import { HttpRequest, HttpResponse } from "@xliic/common/http";
-import { find } from "@xliic/common/jsonpointer";
+import { find } from "@xliic/preserving-json-yaml-parser";
 import * as playbook from "@xliic/common/playbook";
 import { NullableResult, Result } from "@xliic/result";
 

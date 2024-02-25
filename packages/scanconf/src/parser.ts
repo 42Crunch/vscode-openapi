@@ -1,7 +1,6 @@
 import { BundledSwaggerOrOasSpec, getOperationById } from "@xliic/openapi";
 import { NullableResult, Result } from "@xliic/result";
-import { joinJsonPointer } from "@xliic/preserving-json-yaml-parser";
-import { parseJsonPointer } from "@xliic/common/jsonpointer";
+import { joinJsonPointer, parseJsonPointer } from "@xliic/preserving-json-yaml-parser";
 
 import * as scan from "./scanconfig";
 import * as playbook from "./playbook";
@@ -385,9 +384,9 @@ function parseRequestRef(
 
   const path = parseJsonPointer(ref);
   if (path.length === 2 && path[0] === "requests") {
-    return [{ type: "request", id: path[1] }, undefined];
+    return [{ type: "request", id: String(path[1]) }, undefined];
   } else if (path.length === 3 && path[0] === "operations" && path[2] === "request") {
-    return [{ type: "operation", id: path[1] }, undefined];
+    return [{ type: "operation", id: String(path[1]) }, undefined];
   }
 
   return makeErrorResult(`unexpected stage $ref, must point to operations or requests: ${ref}`);

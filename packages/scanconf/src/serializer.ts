@@ -1,5 +1,5 @@
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
-import { NullableResult, Result } from "@xliic/common/result";
+import { NullableResult, Result } from "@xliic/result";
 import { joinJsonPointer } from "@xliic/preserving-json-yaml-parser";
 
 import * as scan from "./scanconfig";

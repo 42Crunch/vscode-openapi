@@ -1,4 +1,4 @@
-import { find } from "./jsonpointer";
+import { Parsed, find } from "@xliic/preserving-json-yaml-parser";
 
 export interface Ref {
   $ref: string;
@@ -12,7 +12,7 @@ export function deref<T>(document: unknown, maybeRef: RefOr<T> | undefined): T |
   }
 
   if (typeof maybeRef === "object" && "$ref" in maybeRef) {
-    const refTarget = find(document, maybeRef.$ref);
+    const refTarget = find(document as Parsed, maybeRef.$ref);
     return refTarget as T;
   }
 

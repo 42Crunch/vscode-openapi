@@ -1,4 +1,4 @@
-import { Result } from "./result";
+import { Result } from "@xliic/result";
 import { HttpMethod } from "@xliic/openapi";
 
 export type HttpRequest = {
