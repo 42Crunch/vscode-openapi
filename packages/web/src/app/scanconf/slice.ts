@@ -4,9 +4,9 @@ import { GeneralError } from "@xliic/common/error";
 import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/openapi";
 import * as playbook from "@xliic/common/playbook";
 import { LoadScanconfMessage } from "@xliic/common/playbook";
-import { Result } from "@xliic/common/result";
+import { Result } from "@xliic/result";
+import { parse } from "@xliic/scanconf";
 
-import { parse } from "../../core/playbook/scanconf-parser";
 import { showScanconfOperation } from "./actions";
 
 export type State = {

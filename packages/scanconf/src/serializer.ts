@@ -1,9 +1,9 @@
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
-import * as playbook from "@xliic/common/playbook";
 import { NullableResult, Result } from "@xliic/common/result";
 import { joinJsonPointer } from "@xliic/preserving-json-yaml-parser";
 
 import * as scan from "./scanconfig";
+import * as playbook from "./playbook";
 
 export function serialize(
   oas: BundledSwaggerOrOasSpec,

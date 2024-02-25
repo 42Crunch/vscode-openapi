@@ -13,7 +13,7 @@ import {
 import { Webapp } from "@xliic/common/message";
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import * as playbook from "@xliic/common/playbook";
-import { Result } from "@xliic/common/result";
+import { Result } from "@xliic/result";
 
 import { createAuthCache } from "../../core/playbook/auth-cache";
 import {

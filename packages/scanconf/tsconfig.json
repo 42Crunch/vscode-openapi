@@ -1,12 +1,12 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "composite": true,
+    "resolveJsonModule": true,
     "sourceMap": true,
     "declarationMap": true,
     "declaration": true,
     "outDir": "dist/",
-    "rootDir": "./src/"
+    "rootDir": "src/"
   },
-  "include": ["./src/"]
+  "include": ["src/**/*"]
 }

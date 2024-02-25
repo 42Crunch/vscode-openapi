@@ -10,7 +10,7 @@ import {
   isOpenapi,
 } from "@xliic/openapi";
 import { HttpRequest } from "@xliic/common/http";
-import { Result } from "@xliic/common/result";
+import { Result } from "@xliic/result";
 import * as playbook from "@xliic/common/playbook";
 
 import { checkCredential } from "./util";

@@ -1,6 +1,6 @@
-import * as scan from "../scanconfig";
+import { Scanconf } from "@xliic/scanconf";
 
-const register: scan.Operation = {
+const register: Scanconf.Operation = {
   operationId: "register",
   scenarios: [],
   request: {
@@ -68,7 +68,7 @@ const register: scan.Operation = {
   },
 };
 
-const userinfo: scan.Operation = {
+const userinfo: Scanconf.Operation = {
   operationId: "userinfo",
   scenarios: [
     {
@@ -109,7 +109,7 @@ const userinfo: scan.Operation = {
   },
 };
 
-const file: scan.ConfigurationFileBundle = {
+const file: Scanconf.ConfigurationFileBundle = {
   version: "2.0.0",
   operations: {
     register,

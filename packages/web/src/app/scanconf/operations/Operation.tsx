@@ -7,10 +7,9 @@ import {
   StageReference,
   RequestRef,
 } from "@xliic/common/playbook";
+import { serialize, Scanconf } from "@xliic/scanconf";
 
 import { makeEnvEnv } from "../../../core/playbook/execute";
-import { serialize } from "../../../core/playbook/scanconf-serializer";
-import * as scan from "../../../core/playbook/scanconfig";
 import { runScan } from "../actions";
 import CollapsibleSection from "../components/CollapsibleSection";
 import TryAndServerSelector from "../components/TryAndServerSelector";
@@ -237,7 +236,7 @@ const Title = styled.div`
   font-weight: 700;
 `;
 
-function extractScanconf(mutable: scan.ConfigurationFileBundle, operationId: string): string {
+function extractScanconf(mutable: Scanconf.ConfigurationFileBundle, operationId: string): string {
   if (mutable.operations !== undefined) {
     for (const key of Object.keys(mutable?.operations)) {
       if (key !== operationId) {

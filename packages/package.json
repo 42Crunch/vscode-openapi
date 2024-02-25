@@ -4,7 +4,9 @@
   "workspaces": [
     "web",
     "common/dist/esm",
-    "openapi"
+    "openapi",
+    "result",
+    "scanconf"
   ],
   "scripts": {
     "postinstall": "cd preview-redoc && npm install && cd ../preview-swaggerui && npm install",

@@ -1,5 +1,5 @@
 import { HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
-import { Result } from "@xliic/common/result";
+import { Result } from "@xliic/result";
 
 export async function httpClient(request: HttpRequest): Promise<Result<HttpResponse, HttpError>> {
   try {

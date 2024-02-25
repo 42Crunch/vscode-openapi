@@ -5,7 +5,7 @@ import { Environment } from "@xliic/common/env";
 import { HttpRequest, HttpResponse } from "@xliic/common/http";
 import { find } from "@xliic/common/jsonpointer";
 import * as playbook from "@xliic/common/playbook";
-import { NullableResult, Result } from "@xliic/common/result";
+import { NullableResult, Result } from "@xliic/result";
 
 import { PlaybookEnv, PlaybookEnvStack, PlaybookVariableAssignments } from "./playbook-env";
 import { MockHttpResponse, MockHttpResponseType } from "./mock-http";

@@ -1,0 +1,13 @@
+{
+  "name": "@xliic/result",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

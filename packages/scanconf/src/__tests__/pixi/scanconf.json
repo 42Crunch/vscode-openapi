@@ -1,0 +1,888 @@
+{
+  "version": "2.0.0",
+  "runtimeConfiguration": {
+    "environment": "default",
+    "logLevel": "debug",
+    "logDestination": "stdout+platform",
+    "logMaxFileSize": 2147483648,
+    "requestHeaderNameRequestId": "x-scan-request-id",
+    "requestHeaderNameScenarioId": "x-scan-scenario-id",
+    "requestFlowrate": 100,
+    "requestTimeout": 30,
+    "requestTlsInsecureSkipVerify": true,
+    "responseFollowRedirection": false,
+    "responseMaxBodySizeScan": 10485760,
+    "happyPathOnly": false,
+    "maxScanDuration": 3600,
+    "memoryLimit": 2147483648,
+    "memoryTimeSpan": 10,
+    "reportMaxHttpResponseSizeHappyPath": 8092,
+    "reportMaxBodySizeHappyPath": 8092,
+    "reportMaxHttpResponseSizeTest": 8092,
+    "reportMaxBodySizeTest": 8092,
+    "reportIssuesOnly": false,
+    "reportMaxIssues": 1000,
+    "reportMaxSize": 20971520,
+    "reportGenerateCurlCommand": true
+  },
+  "before": [
+    {
+      "environment": {
+        "dynamic_user": "userscan-user{{$random}}@acme.com",
+        "dynamic_pass": "hellopixi",
+        "admin_role": true
+      },
+      "$ref": "#/operations/register/request",
+      "responses": {
+        "200": {
+          "expectations": {
+            "httpStatus": 200
+          },
+          "variableAssignments": {
+            "access-token-user1": {
+              "from": "response",
+              "in": "body",
+              "contentType": "json",
+              "path": {
+                "type": "jsonPath",
+                "value": "$.token"
+              }
+            },
+            "userid-user1": {
+              "from": "response",
+              "in": "body",
+              "contentType": "json",
+              "path": {
+                "type": "jsonPath",
+                "value": "$._id"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "environment": {
+        "dynamic_user": "userscan-user2{{$random}}@acme.com",
+        "dynamic_pass": "hellopixi",
+        "admin_role": true
+      },
+      "$ref": "#/operations/register/request",
+      "responses": {
+        "200": {
+          "expectations": {
+            "httpStatus": 200
+          },
+          "variableAssignments": {
+            "access-token-user2": {
+              "from": "response",
+              "in": "body",
+              "contentType": "json",
+              "path": {
+                "type": "jsonPath",
+                "value": "$.token"
+              }
+            },
+            "userid-user2": {
+              "from": "response",
+              "in": "body",
+              "contentType": "json",
+              "path": {
+                "type": "jsonPath",
+                "value": "$._id"
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "environment": {
+        "dynamic_user": "userscan-admin@acme.com",
+        "dynamic_pass": "hellopixi",
+        "admin_role": true
+      },
+      "$ref": "#/operations/authenticate/request",
+      "responses": {
+        "200": {
+          "expectations": {
+            "httpStatus": 200
+          },
+          "variableAssignments": {
+            "access-token-admin": {
+              "from": "response",
+              "in": "body",
+              "contentType": "json",
+              "path": {
+                "type": "jsonPath",
+                "value": "$.token"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "customizations": {
+    "happyPaths": {
+      "retry": 1,
+      "responsePolicy": {
+        "httpStatusExpected": true,
+        "mustBeConformant": true
+      },
+      "httpStatusExpected": ["2XX", "400", "404"]
+    },
+    "tests": {
+      "responsePolicy": {
+        "httpStatusExpected": true,
+        "mustBeConformant": true
+      }
+    }
+  },
+  "authorizationTests": {
+    "DeletePicture": {
+      "key": "authentication-swapping-bola",
+      "source": ["access-token/User1"],
+      "target": ["access-token/User2"]
+    },
+    "AdminOnlyOps": {
+      "key": "authentication-swapping-bfla",
+      "source": ["access-token/Admin"],
+      "target": ["access-token/User2"]
+    }
+  },
+  "authenticationDetails": [
+    {
+      "access-token-env": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-access-token",
+        "default": "access-token",
+        "credentials": {
+          "access-token": {
+            "description": "access-token from cmd line- not used - sample only",
+            "credential": "{{inbound_token}}"
+          }
+        }
+      },
+      "access-token": {
+        "credentials": {
+          "User1": {
+            "credential": "{{access-token-user1}}",
+            "description": "User1 Token"
+          },
+          "User2": {
+            "credential": "{{access-token-user2}}",
+            "description": "User2 Token"
+          },
+          "Admin": {
+            "credential": "{{access-token-admin}}",
+            "description": "Admin User Token",
+            "requests": [
+              {
+                "environment": {
+                  "inbound_pass": "hellopixi",
+                  "inbound_user": "userscan-admin@acme.com"
+                },
+                "$ref": "#/operations/authenticate/request",
+                "responses": {
+                  "200": {
+                    "expectations": {
+                      "httpStatus": 200
+                    },
+                    "variableAssignments": {
+                      "access-token-admin": {
+                        "from": "response",
+                        "in": "body",
+                        "contentType": "json",
+                        "path": {
+                          "type": "jsonPath",
+                          "value": "$.token"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-access-token",
+        "ttl": "600s",
+        "default": "User1"
+      }
+    }
+  ],
+  "operations": {
+    "adminallusers": {
+      "operationId": "adminallusers",
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "fuzzing": true,
+          "requests": [
+            {
+              "$ref": "#/operations/adminallusers/request",
+              "fuzzing": true
+            }
+          ]
+        }
+      ],
+      "request": {
+        "operationId": "adminallusers",
+        "auth": ["access-token"],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "adminallusers",
+            "url": "{{host}}/admin/all_users",
+            "method": "GET"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      }
+    },
+    "authenticate": {
+      "operationId": "authenticate",
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "fuzzing": true,
+          "requests": [
+            {
+              "$ref": "#/operations/authenticate/request",
+              "fuzzing": true
+            }
+          ]
+        }
+      ],
+      "request": {
+        "operationId": "authenticate",
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "authenticate",
+            "url": "{{host}}/user/login",
+            "method": "POST",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "pass": "{{inbound_pass}}",
+                "user": "{{inbound_user}}"
+              }
+            }
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "422": {
+            "expectations": {
+              "httpStatus": 422
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      }
+    },
+    "deletePicture": {
+      "operationId": "deletePicture",
+      "authorizationTests": ["DeletePicture"],
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "fuzzing": true,
+          "requests": [
+            {
+              "environment": {
+                "contents": "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyMy4wLjEsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCA5MC43IDkwLjciIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDkwLjcgOTAuNzsiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4NCgkuc3Qwe2ZpbGw6IzdGNDg4RTt9DQoJLnN0MXtmaWxsOiNGRkZGRkY7fQ0KPC9zdHlsZT4NCjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iODQuNiw2OC4xIDg0LjYsMjIuOCA0NS40LDAuMiA2LjIsMjIuOCA2LjIsNjguMSA0NS40LDkwLjcgIi8+DQo8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNjAuOCw2NmMtMi40LDAtNC40LTAuNy02LjEtMi4xYy0xLjctMS40LTIuNS0zLjQtMi41LTZjMC0yLjcsMC45LTQuNywyLjYtNi4xYzEuNy0xLjQsMy44LTIsNi4yLTINCgljMi42LDAsNC45LDAuNyw2LjgsMi4xdi01Yy0xLjctMS0zLjctMS42LTUuOS0xLjh2LTAuMWwtMTcsMGMwLTAuMywwLTAuNiwwLjEtMWMwLjEtMC4zLDAuMi0wLjYsMC4zLTAuOWMwLjEtMC4zLDAuMy0wLjUsMC41LTAuOA0KCWMwLjItMC4zLDAuNS0wLjYsMC42LTAuOGMwLjItMC4yLDAuNS0wLjUsMC45LTAuOGMwLjQtMC4zLDAuNy0wLjUsMC45LTAuN2MwLjItMC4xLDAuNi0wLjQsMS4xLTAuN2MwLjUtMC4zLDAuOS0wLjUsMS4xLTAuNw0KCWMwLjItMC4xLDAuNi0wLjQsMS4yLTAuN2MwLjYtMC4zLDEtMC42LDEuMi0wLjdjMi43LTEuNiw0LjktMy4yLDYuNC00LjljMS42LTEuNywyLjQtMy43LDIuNC02LjFjMC0yLjktMS01LTMuMS02LjYNCgljLTItMS41LTQuNy0yLjMtOC4xLTIuM2MtMy45LDAtNy40LDEuMS0xMC41LDMuMnY1LjFjMy4zLTIuNCw2LjYtMy41LDEwLjEtMy41YzIsMCwzLjUsMC40LDQuNiwxLjFjMS4xLDAuNywxLjcsMS44LDEuNywzLjENCgljMCwxLjUtMC42LDIuOC0xLjksNGMtMC44LDAuNy0yLjQsMS44LTUuMSwzLjNjLTIuNiwxLjYtNC40LDIuNy01LjMsMy41Yy0xLjcsMS4zLTIuOSwyLjgtMy44LDQuNFYyOS45aC01LjRMMTgsNTAuNnY0LjVoMTcuMnY2LjUNCgloNS4xdi02LjVoMC4xdi00LjZoLTAuMXYtMC45aDguOWMtMS44LDIuMS0yLjcsNS0yLjcsOC41YzAsNC4xLDEuMyw3LjMsNCw5LjVjMi42LDIuMiw1LjgsMy4zLDkuMywzLjNjMy4xLDAsNS44LTAuNiw4LjItMS43di01LjENCglDNjUuOCw2NS40LDYzLjQsNjYsNjAuOCw2NnogTTM1LjIsNTAuNUgyMy45bDExLjMtMTMuOFY1MC41eiIvPg0KPC9zdmc+DQo=",
+                "title": "Upload from before block"
+              },
+              "$ref": "#/operations/uploadPicture/request",
+              "responses": {
+                "200": {
+                  "expectations": {
+                    "httpStatus": 200
+                  },
+                  "variableAssignments": {
+                    "before_picture_id": {
+                      "from": "response",
+                      "in": "body",
+                      "contentType": "json",
+                      "path": {
+                        "type": "jsonPath",
+                        "value": "$._id"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "environment": {
+                "picture_id": "{{before_picture_id}}"
+              },
+              "$ref": "#/operations/deletePicture/request",
+              "fuzzing": true
+            }
+          ]
+        }
+      ],
+      "request": {
+        "operationId": "deletePicture",
+        "auth": ["access-token"],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "deletePicture",
+            "url": "{{host}}/picture/{id}",
+            "method": "DELETE",
+            "paths": [
+              {
+                "key": "id",
+                "value": "{{picture_id}}"
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      }
+    },
+    "deleteUser": {
+      "operationId": "deleteUser",
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "fuzzing": true,
+          "requests": [
+            {
+              "$ref": "#/operations/deleteUser/request",
+              "fuzzing": true
+            }
+          ]
+        }
+      ],
+      "request": {
+        "operationId": "deleteUser",
+        "auth": ["access-token"],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "deleteUser",
+            "url": "{{host}}/admin/user/{userid}",
+            "method": "DELETE",
+            "paths": [
+              {
+                "key": "userid",
+                "value": "DD68C630-3CCB-4FD0-9C5B-A0A34C952681"
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      }
+    },
+    "edituserinfo": {
+      "operationId": "edituserinfo",
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "fuzzing": true,
+          "requests": [
+            {
+              "$ref": "#/operations/edituserinfo/request",
+              "fuzzing": true
+            }
+          ]
+        }
+      ],
+      "customTests": [
+        {
+          "requests": [
+            {
+              "$ref": "#/requests/makeUserAdmin",
+              "expectedResponse": "403"
+            }
+          ]
+        }
+      ],
+      "request": {
+        "operationId": "edituserinfo",
+        "auth": ["access-token"],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "edituserinfo",
+            "url": "{{host}}/user/edit_info",
+            "method": "PUT",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "email": "foo@bar.com",
+                "name": "JNIf\n4toL"
+              }
+            }
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      }
+    },
+    "listUserPictures": {
+      "operationId": "listUserPictures",
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "fuzzing": true,
+          "requests": [
+            {
+              "$ref": "#/operations/listUserPictures/request",
+              "fuzzing": true
+            }
+          ]
+        }
+      ],
+      "request": {
+        "operationId": "listUserPictures",
+        "auth": ["access-token"],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "listUserPictures",
+            "url": "{{host}}/user/pictures",
+            "method": "GET"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      }
+    },
+    "register": {
+      "operationId": "register",
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "fuzzing": true,
+          "requests": [
+            {
+              "environment": {
+                "dynamic_user": "user-register@acme.com",
+                "dynamic_pass": "helloPixi",
+                "admin_role": false
+              },
+              "$ref": "#/operations/register/request",
+              "fuzzing": true
+            }
+          ]
+        }
+      ],
+      "request": {
+        "operationId": "register",
+        "environment": { "foo": "bar" },
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "register",
+            "url": "{{host}}/user/register",
+            "method": "POST",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "account_balance": 500,
+                "is_admin": "{{admin_role}}",
+                "name": "{{$random}}",
+                "pass": "{{dynamic_pass}}",
+                "user": "{{dynamic_user}}"
+              }
+            }
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            },
+            "variableAssignments": {
+              "content_type": {
+                "from": "response",
+                "in": "header",
+                "name": "content-type"
+              },
+              "user_token": {
+                "from": "response",
+                "in": "body",
+                "contentType": "json",
+                "path": {
+                  "type": "jsonPointer",
+                  "value": "/token"
+                }
+              },
+              "user_id": {
+                "from": "response",
+                "in": "body",
+                "contentType": "json",
+                "path": {
+                  "type": "jsonPointer",
+                  "value": "/_id"
+                }
+              }
+            }
+          },
+          "202": {
+            "expectations": {
+              "httpStatus": 202
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      }
+    },
+    "uploadPicture": {
+      "operationId": "uploadPicture",
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "fuzzing": true,
+          "requests": [
+            {
+              "environment": {
+                "contents": "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAyMy4wLjEsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCA5MC43IDkwLjciIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDkwLjcgOTAuNzsiIHhtbDpzcGFjZT0icHJlc2VydmUiPg0KPHN0eWxlIHR5cGU9InRleHQvY3NzIj4NCgkuc3Qwe2ZpbGw6IzdGNDg4RTt9DQoJLnN0MXtmaWxsOiNGRkZGRkY7fQ0KPC9zdHlsZT4NCjxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iODQuNiw2OC4xIDg0LjYsMjIuOCA0NS40LDAuMiA2LjIsMjIuOCA2LjIsNjguMSA0NS40LDkwLjcgIi8+DQo8cGF0aCBjbGFzcz0ic3QxIiBkPSJNNjAuOCw2NmMtMi40LDAtNC40LTAuNy02LjEtMi4xYy0xLjctMS40LTIuNS0zLjQtMi41LTZjMC0yLjcsMC45LTQuNywyLjYtNi4xYzEuNy0xLjQsMy44LTIsNi4yLTINCgljMi42LDAsNC45LDAuNyw2LjgsMi4xdi01Yy0xLjctMS0zLjctMS42LTUuOS0xLjh2LTAuMWwtMTcsMGMwLTAuMywwLTAuNiwwLjEtMWMwLjEtMC4zLDAuMi0wLjYsMC4zLTAuOWMwLjEtMC4zLDAuMy0wLjUsMC41LTAuOA0KCWMwLjItMC4zLDAuNS0wLjYsMC42LTAuOGMwLjItMC4yLDAuNS0wLjUsMC45LTAuOGMwLjQtMC4zLDAuNy0wLjUsMC45LTAuN2MwLjItMC4xLDAuNi0wLjQsMS4xLTAuN2MwLjUtMC4zLDAuOS0wLjUsMS4xLTAuNw0KCWMwLjItMC4xLDAuNi0wLjQsMS4yLTAuN2MwLjYtMC4zLDEtMC42LDEuMi0wLjdjMi43LTEuNiw0LjktMy4yLDYuNC00LjljMS42LTEuNywyLjQtMy43LDIuNC02LjFjMC0yLjktMS01LTMuMS02LjYNCgljLTItMS41LTQuNy0yLjMtOC4xLTIuM2MtMy45LDAtNy40LDEuMS0xMC41LDMuMnY1LjFjMy4zLTIuNCw2LjYtMy41LDEwLjEtMy41YzIsMCwzLjUsMC40LDQuNiwxLjFjMS4xLDAuNywxLjcsMS44LDEuNywzLjENCgljMCwxLjUtMC42LDIuOC0xLjksNGMtMC44LDAuNy0yLjQsMS44LTUuMSwzLjNjLTIuNiwxLjYtNC40LDIuNy01LjMsMy41Yy0xLjcsMS4zLTIuOSwyLjgtMy44LDQuNFYyOS45aC01LjRMMTgsNTAuNnY0LjVoMTcuMnY2LjUNCgloNS4xdi02LjVoMC4xdi00LjZoLTAuMXYtMC45aDguOWMtMS44LDIuMS0yLjcsNS0yLjcsOC41YzAsNC4xLDEuMyw3LjMsNCw5LjVjMi42LDIuMiw1LjgsMy4zLDkuMywzLjNjMy4xLDAsNS44LTAuNiw4LjItMS43di01LjENCglDNjUuOCw2NS40LDYzLjQsNjYsNjAuOCw2NnogTTM1LjIsNTAuNUgyMy45bDExLjMtMTMuOFY1MC41eiIvPg0KPC9zdmc+DQo=",
+                "title": "upload from create pic"
+              },
+              "$ref": "#/operations/uploadPicture/request",
+              "fuzzing": true
+            }
+          ]
+        }
+      ],
+      "request": {
+        "operationId": "uploadPicture",
+        "auth": ["access-token"],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "uploadPicture",
+            "url": "{{host}}/picture/upload",
+            "method": "POST",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "contents": "{{contents}}",
+                "title": "{{title}}"
+              }
+            }
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      }
+    },
+    "userSearch": {
+      "operationId": "userSearch",
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "fuzzing": true,
+          "requests": [
+            {
+              "$ref": "#/operations/userSearch/request",
+              "fuzzing": true
+            }
+          ]
+        }
+      ],
+      "request": {
+        "operationId": "userSearch",
+        "auth": ["access-token"],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "userSearch",
+            "url": "{{host}}/admin/users/search",
+            "method": "GET",
+            "queries": [
+              {
+                "key": "search",
+                "value": "n@.\fFcuIn5kK\fOe@BxSpLO4ZwMHN=Mv\nB42MD\fj=ZXJv3h\u000bTh1Ka"
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      }
+    },
+    "userinfo": {
+      "operationId": "userinfo",
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "fuzzing": true,
+          "requests": [
+            {
+              "$ref": "#/operations/userinfo/request",
+              "fuzzing": true
+            }
+          ]
+        }
+      ],
+      "request": {
+        "operationId": "userinfo",
+        "auth": ["access-token"],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "userinfo",
+            "url": "{{host}}/user/info",
+            "method": "GET"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "default": {
+            "expectations": {
+              "httpStatus": "default"
+            }
+          }
+        }
+      }
+    }
+  },
+  "requests": {
+    "makeUserAdmin": {
+      "operationId": "edituserinfo",
+      "auth": ["access-token/User2"],
+      "request": {
+        "type": "42c",
+        "details": {
+          "operationId": "edituserinfo",
+          "url": "{{host}}/user/edit_info",
+          "method": "PUT",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "requestBody": {
+            "mode": "json",
+            "json": {
+              "email": "email@was.updated",
+              "name": "Updated Custom User",
+              "is_admin": true
+            }
+          }
+        }
+      },
+      "defaultResponse": "403",
+      "responses": {
+        "200": {
+          "expectations": {
+            "httpStatus": 200
+          }
+        },
+        "403": {
+          "expectations": {
+            "httpStatus": 403
+          }
+        },
+        "default": {
+          "expectations": {
+            "httpStatus": "default"
+          }
+        }
+      }
+    }
+  },
+  "environments": {
+    "default": {
+      "variables": {
+        "access-token": {
+          "from": "environment",
+          "name": "SCAN42C_SECURITY_ACCESS_TOKEN",
+          "required": true
+        },
+        "host": {
+          "from": "environment",
+          "name": "SCAN42C_HOST",
+          "required": false,
+          "default": "https://photo-demo.westeurope.cloudapp.azure.com/api"
+        },
+        "inbound_user": {
+          "from": "environment",
+          "name": "SCAN42C_user",
+          "required": true
+        },
+        "inbound_pass": {
+          "from": "environment",
+          "name": "SCAN42C_pass",
+          "required": true
+        }
+      }
+    }
+  }
+}
