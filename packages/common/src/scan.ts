@@ -64,6 +64,7 @@ export type StartScanMessage = {
 export type ScandManagerConnection = {
   url: string;
   auth: "none" | "header";
+  timeout: number;
   header: {
     name: string;
     value: string;

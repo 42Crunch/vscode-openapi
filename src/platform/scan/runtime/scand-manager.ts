@@ -53,7 +53,7 @@ export async function runScanWithScandManager(
     };
   }
 
-  const error = await waitForScandJob(job.name, config.scandManager, logger, 30000);
+  const error = await waitForScandJob(job.name, config.scandManager, logger);
 
   if (error) {
     return error;
@@ -68,9 +68,9 @@ export async function runScanWithScandManager(
 async function waitForScandJob(
   name: string,
   manager: ScandManagerConnection,
-  logger: Logger,
-  maxDelay: number
+  logger: Logger
 ): Promise<GeneralError | undefined> {
+  const maxDelay = manager.timeout * 1000;
   let currentDelay = 0;
   while (currentDelay < maxDelay) {
     const status = await managerApi.readJobStatus(name, manager, logger);
