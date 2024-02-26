@@ -10,7 +10,7 @@ export default function SecurityRequirements({
   schema,
 }: {
   name: string;
-  schema: Record<string, Swagger.SwaggerSecurityScheme>;
+  schema: Record<string, Swagger.SecurityScheme>;
 }) {
   if (!schema) {
     return null;

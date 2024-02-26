@@ -1,7 +1,7 @@
 import { Swagger, HttpMethod } from "@xliic/openapi";
 
 export function getParameters(
-  oas: Swagger.BundledSwaggerSpec,
+  oas: Swagger.BundledSpec,
   path: string,
   method: HttpMethod
 ): Swagger.OperationParametersMap {
@@ -13,7 +13,7 @@ export function getParameters(
 }
 
 export function hasSecurityRequirements(
-  oas: Swagger.BundledSwaggerSpec,
+  oas: Swagger.BundledSpec,
   path: string,
   method: HttpMethod
 ): boolean {
@@ -23,15 +23,15 @@ export function hasSecurityRequirements(
 }
 
 export function getSecurity(
-  oas: Swagger.BundledSwaggerSpec,
+  oas: Swagger.BundledSpec,
   path: string,
   method: HttpMethod
-): Swagger.ResolvedSwaggerOperationSecurity {
+): Swagger.ResolvedOperationSecurity {
   const operation = Swagger.getOperation(oas, path, method);
   const requirements = operation?.security ?? oas.security ?? [];
-  const result: Swagger.ResolvedSwaggerOperationSecurity = [];
+  const result: Swagger.ResolvedOperationSecurity = [];
   for (const requirement of requirements) {
-    const resolved: Record<string, Swagger.SwaggerSecurityScheme> = {};
+    const resolved: Record<string, Swagger.SecurityScheme> = {};
     for (const schemeName of Object.keys(requirement)) {
       // check if the requsted security scheme is defined in the OAS
       if (oas?.securityDefinitions?.[schemeName]) {

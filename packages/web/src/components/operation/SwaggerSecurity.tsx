@@ -10,8 +10,8 @@ export default function SwaggerSecurity({
   oas,
   security,
 }: {
-  oas: Swagger.BundledSwaggerSpec;
-  security: Swagger.ResolvedSwaggerOperationSecurity;
+  oas: Swagger.BundledSpec;
+  security: Swagger.ResolvedOperationSecurity;
 }) {
   if (security === undefined) {
     return null;
@@ -48,7 +48,7 @@ export default function SwaggerSecurity({
 }
 
 function securityRequirementOption(
-  requirement: Record<string, Swagger.SwaggerSecurityScheme>,
+  requirement: Record<string, Swagger.SecurityScheme>,
   index: number
 ) {
   const keys = Object.keys(requirement).join(", ");

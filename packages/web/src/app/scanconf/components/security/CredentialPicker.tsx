@@ -18,7 +18,7 @@ export default function CredentialPicker({
   onChange,
 }: {
   schemeName: string;
-  scheme: OpenApi30.OasSecurityScheme | Swagger.SwaggerSecurityScheme;
+  scheme: OpenApi30.SecurityScheme | Swagger.SecurityScheme;
   credentials: playbook.Credentials;
   value: string;
   onChange: (value: string | undefined) => void;

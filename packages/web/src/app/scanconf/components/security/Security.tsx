@@ -15,8 +15,8 @@ export default function Security({
   security,
   credentials,
 }: {
-  oas: OpenApi30.BundledOpenApiSpec | Swagger.BundledSwaggerSpec;
-  security: OpenApi30.ResolvedOasOperationSecurity | Swagger.ResolvedSwaggerOperationSecurity;
+  oas: OpenApi30.BundledSpec | Swagger.BundledSpec;
+  security: OpenApi30.ResolvedOperationSecurity | Swagger.ResolvedOperationSecurity;
   credentials: playbook.Credentials;
 }) {
   const { field: authField } = useController({
@@ -100,7 +100,7 @@ const Fields = styled.div`
 `;
 
 function mapRequirementsToCredentials(
-  security: OpenApi30.ResolvedOasOperationSecurity | Swagger.ResolvedSwaggerOperationSecurity,
+  security: OpenApi30.ResolvedOperationSecurity | Swagger.ResolvedOperationSecurity,
   credentials: playbook.Credentials,
   auth: string[]
 ) {
@@ -149,7 +149,7 @@ function getCredentialByName(
 }
 
 function matchRequirementToAuth(
-  requirement: Record<string, OpenApi30.OasSecurityScheme | Swagger.SwaggerSecurityScheme>,
+  requirement: Record<string, OpenApi30.SecurityScheme | Swagger.SecurityScheme>,
   auth: Record<string, playbook.Credential>
 ) {
   const mutable = { ...auth };

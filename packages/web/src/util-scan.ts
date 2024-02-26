@@ -7,7 +7,7 @@ export function generateDefaultValues(
   configuration: ScanConfig
 ): Record<string, any> {
   const values: Record<string, any> = { parameters: {} };
-  const locations = Object.keys(parameters) as OpenApi30.OasParameterLocation[];
+  const locations = Object.keys(parameters) as OpenApi30.ParameterLocation[];
   for (const location of locations) {
     for (const name of Object.keys(parameters[location])) {
       const value = configuration.parameters[location]?.[name];

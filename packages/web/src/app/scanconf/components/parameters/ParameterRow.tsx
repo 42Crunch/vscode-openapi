@@ -8,7 +8,7 @@ import { ENV_VAR_REGEX } from "../../../../core/playbook/variables";
 import { TrashCan, TriangleExclamation } from "../../../../icons";
 import LineEditor from "../../../../new-components/fields/LineEditor";
 
-export type Parameter = OpenApi30.ResolvedOasParameter | Swagger.ResolvedSwaggerParameter;
+export type Parameter = OpenApi30.ResolvedParameter | Swagger.ResolvedParameter;
 export type Schema = { type?: string };
 const DefaultSchema = { type: "string" };
 

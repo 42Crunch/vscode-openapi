@@ -54,7 +54,7 @@ export async function makeHttpRequest(
 }
 
 async function makeHttpRequestForOas(
-  oas: OpenApi30.BundledOpenApiSpec,
+  oas: OpenApi30.BundledSpec,
   server: string,
   operationId: string | undefined,
   request: playbook.CRequest,
@@ -87,7 +87,7 @@ async function makeHttpRequestForOas(
 }
 
 async function makeHttpRequestForSwagger(
-  oas: Swagger.BundledSwaggerSpec,
+  oas: Swagger.BundledSpec,
   server: string,
   operationId: string | undefined,
   request: playbook.CRequest,
@@ -150,7 +150,7 @@ export async function makeExternalHttpRequest(
 }
 
 async function buildOasSpecWithServers(
-  oas: OpenApi30.BundledOpenApiSpec,
+  oas: OpenApi30.BundledSpec,
   server: string,
   request: playbook.CRequest
 ): Promise<unknown> {
@@ -165,7 +165,7 @@ async function buildOasSpecWithServers(
 }
 
 async function buildSwaggerSpecWithServers(
-  swagger: Swagger.BundledSwaggerSpec,
+  swagger: Swagger.BundledSpec,
   server: string,
   request: playbook.CRequest
 ): Promise<unknown> {
@@ -210,7 +210,7 @@ function makeOpenApiSwaggerClientParameters(
 }
 
 function makeSwaggerSwaggerClientParameters(
-  oas: Swagger.BundledSwaggerSpec,
+  oas: Swagger.BundledSpec,
   request: playbook.CRequest,
   security: AuthResult
 ): Record<string, unknown> {
@@ -264,7 +264,7 @@ function collectParameters(
 }
 
 function makeOasSecurities(
-  schemes: Record<string, OpenApi30.OasSecurityScheme>,
+  schemes: Record<string, OpenApi30.SecurityScheme>,
   security: AuthResult
 ): any {
   const matches = matchSecuritySchemesToAuthResult(schemes, security);
@@ -283,7 +283,7 @@ function makeOasSecurities(
 }
 
 function makeSwaggerSecurities(
-  schemes: Record<string, Swagger.SwaggerSecurityScheme>,
+  schemes: Record<string, Swagger.SecurityScheme>,
   security: AuthResult
 ): any {
   const result: any = {};
@@ -302,7 +302,7 @@ function makeSwaggerSecurities(
 }
 
 function matchSecuritySchemesToAuthResult(
-  schemes: Record<string, OpenApi30.OasSecurityScheme | Swagger.SwaggerSecurityScheme>,
+  schemes: Record<string, OpenApi30.SecurityScheme | Swagger.SecurityScheme>,
   security: AuthResult
 ): Record<string, string | undefined> {
   const mutable = { ...security };
@@ -339,7 +339,7 @@ function makeUrlencodedBody(body: Record<string, unknown>): string {
 function makeSwaggerClientOperationId(
   method: HttpMethod,
   path: string,
-  operation: OpenApi30.OasOperation | Swagger.SwaggerOperation
+  operation: OpenApi30.Operation | Swagger.Operation
 ): string {
   return SwaggerClient.helpers.opId(operation, path, method);
 }

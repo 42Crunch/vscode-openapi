@@ -11,8 +11,8 @@ export default function RequestBody({
   requestBody,
   variables,
 }: {
-  oas: OpenApi30.BundledOpenApiSpec;
-  requestBody?: OpenApi30.OasRequestBody;
+  oas: OpenApi30.BundledSpec;
+  requestBody?: OpenApi30.RequestBody;
   variables: string[];
 }) {
   const {

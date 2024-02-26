@@ -4,8 +4,8 @@ import { OpenApi30, deref } from "@xliic/openapi";
 import { TryitOperationBody } from "@xliic/common/tryit";
 
 export function createDefaultBody(
-  oas: OpenApi30.BundledOpenApiSpec,
-  operation?: OpenApi30.OasOperation,
+  oas: OpenApi30.BundledSpec,
+  operation?: OpenApi30.Operation,
   preferredMediaType?: string,
   preferredBodyValue?: unknown
 ): TryitOperationBody | undefined {
@@ -19,9 +19,9 @@ export function createDefaultBody(
 }
 
 export function createBody(
-  oas: OpenApi30.BundledOpenApiSpec,
+  oas: OpenApi30.BundledSpec,
   mediaType: string,
-  mto?: OpenApi30.OasMediaType,
+  mto?: OpenApi30.MediaType,
   preferredBodyValue?: unknown
 ): TryitOperationBody {
   // use the preferred body value if it's provided
@@ -92,9 +92,9 @@ export function parseFromFormText(mediaType: string, value: string): unknown | E
 }
 
 function findPreferredBody(
-  requestBody?: OpenApi30.OasRequestBody,
+  requestBody?: OpenApi30.RequestBody,
   preferredMediaType?: string
-): [string, OpenApi30.OasMediaType] | undefined {
+): [string, OpenApi30.MediaType] | undefined {
   if (!requestBody || !requestBody.content) {
     return undefined;
   }

@@ -13,6 +13,6 @@ import { OpenApi30 } from "@xliic/openapi";
 //   return "";
 // }
 
-export function formatValue(value: any, parameter: OpenApi30.ResolvedOasParameter): string {
+export function formatValue(value: any, parameter: OpenApi30.ResolvedParameter): string {
   return "";
 }

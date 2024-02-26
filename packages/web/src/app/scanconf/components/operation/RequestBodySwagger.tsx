@@ -24,8 +24,8 @@ export default function RequestBodySwagger({
   group,
   variables,
 }: {
-  oas: Swagger.BundledSwaggerSpec;
-  group: Record<string, Swagger.ResolvedSwaggerParameter>;
+  oas: Swagger.BundledSpec;
+  group: Record<string, Swagger.ResolvedParameter>;
   variables: string[];
 }) {
   const { control } = useFormContext();

@@ -12,8 +12,8 @@ export default function RequestBody({
   oas,
   requestBody,
 }: {
-  oas: OpenApi30.BundledOpenApiSpec;
-  requestBody?: OpenApi30.OasRequestBody;
+  oas: OpenApi30.BundledSpec;
+  requestBody?: OpenApi30.RequestBody;
 }) {
   const { control } = useFormContext();
 

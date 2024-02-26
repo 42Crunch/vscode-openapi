@@ -7,7 +7,7 @@ import { OpenApi30, Swagger } from "@xliic/openapi";
 
 import { TrashCan, TriangleExclamation } from "../../icons";
 
-export type Parameter = OpenApi30.ResolvedOasParameter | Swagger.ResolvedSwaggerParameter;
+export type Parameter = OpenApi30.ResolvedParameter | Swagger.ResolvedParameter;
 export type Schema = { type?: string };
 const DefaultSchema = { type: "string" };
 

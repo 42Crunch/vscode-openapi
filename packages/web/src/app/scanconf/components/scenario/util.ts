@@ -11,7 +11,7 @@ import {
 } from "@xliic/common/tryit";
 
 export function getParameters(
-  oas: OpenApi30.BundledOpenApiSpec,
+  oas: OpenApi30.BundledSpec,
   path: string,
   method: HttpMethod
 ): OpenApi30.OperationParametersMap {
@@ -23,7 +23,7 @@ export function getParameters(
 }
 
 export function hasSecurityRequirements(
-  oas: OpenApi30.BundledOpenApiSpec,
+  oas: OpenApi30.BundledSpec,
   path: string,
   method: HttpMethod
 ): boolean {
@@ -33,15 +33,15 @@ export function hasSecurityRequirements(
 }
 
 export function getSecurity(
-  oas: OpenApi30.BundledOpenApiSpec,
+  oas: OpenApi30.BundledSpec,
   path: string,
   method: HttpMethod
-): OpenApi30.ResolvedOasOperationSecurity {
+): OpenApi30.ResolvedOperationSecurity {
   const operation = OpenApi30.getOperation(oas, path, method);
   const requirements = operation?.security ?? oas.security ?? [];
-  const result: OpenApi30.ResolvedOasOperationSecurity = [];
+  const result: OpenApi30.ResolvedOperationSecurity = [];
   for (const requirement of requirements) {
-    const resolved: Record<string, OpenApi30.OasSecurityScheme> = {};
+    const resolved: Record<string, OpenApi30.SecurityScheme> = {};
     for (const schemeName of Object.keys(requirement)) {
       // check if the requsted security scheme is defined in the OAS
       if (oas?.components?.securitySchemes?.[schemeName]) {
@@ -54,7 +54,7 @@ export function getSecurity(
 }
 
 export function generateParameterValues(
-  oas: OpenApi30.BundledOpenApiSpec,
+  oas: OpenApi30.BundledSpec,
   parameters: OpenApi30.OperationParametersMap
 ): TryitParameterValues {
   const values: TryitParameterValues = {
@@ -64,7 +64,7 @@ export function generateParameterValues(
     cookie: {},
   };
 
-  const locations = Object.keys(parameters) as OpenApi30.OasParameterLocation[];
+  const locations = Object.keys(parameters) as OpenApi30.ParameterLocation[];
   for (const location of locations) {
     for (const name of Object.keys(parameters[location])) {
       const parameter = parameters[location][name];
@@ -98,7 +98,7 @@ export function generateParameterValues(
 }
 
 export function generateSecurityValues(
-  security: OpenApi30.ResolvedOasOperationSecurity
+  security: OpenApi30.ResolvedOperationSecurity
 ): TryitSecurityAllValues {
   const result: TryitSecurityAllValues = [];
   for (const requirement of security) {
@@ -113,7 +113,7 @@ export function generateSecurityValues(
   return result;
 }
 
-export function generateSecurityValue(security: OpenApi30.OasSecurityScheme): TryitSecurityValue {
+export function generateSecurityValue(security: OpenApi30.SecurityScheme): TryitSecurityValue {
   if (security?.type === "http" && security.scheme && /^basic$/i.test(security.scheme)) {
     return { username: "", password: "" };
   }

@@ -4,8 +4,8 @@ import { Swagger, deref } from "@xliic/openapi";
 import { TryitOperationBody } from "@xliic/common/tryit";
 
 export function createDefaultBody(
-  oas: Swagger.BundledSwaggerSpec,
-  operation: Swagger.SwaggerOperation,
+  oas: Swagger.BundledSpec,
+  operation: Swagger.Operation,
   parameters: Swagger.OperationParametersMap,
   preferredMediaType?: string,
   preferredBodyValue?: unknown
@@ -22,8 +22,8 @@ export function createDefaultBody(
 }
 
 export function createBody(
-  oas: Swagger.BundledSwaggerSpec,
-  operation: Swagger.SwaggerOperation,
+  oas: Swagger.BundledSpec,
+  operation: Swagger.Operation,
   parameters: Swagger.OperationParametersMap,
   mediaType: string
 ): TryitOperationBody {
@@ -61,8 +61,8 @@ export function createBody(
 }
 
 function getMediaType(
-  oas: Swagger.BundledSwaggerSpec,
-  operation: Swagger.SwaggerOperation,
+  oas: Swagger.BundledSpec,
+  operation: Swagger.Operation,
   preferredMediaType?: string
 ): string | undefined {
   const consumes = Swagger.getConsumes(oas, operation);

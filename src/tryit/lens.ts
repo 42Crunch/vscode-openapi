@@ -27,13 +27,7 @@ export class TryItCodelensProvider implements vscode.CodeLensProvider {
         // TODO examples in swagger
         if (isOpenapi(oas)) {
           result.push(
-            ...operationExamplesLens(
-              document,
-              oas,
-              path,
-              method,
-              operation as OpenApi30.OasOperation
-            )
+            ...operationExamplesLens(document, oas, path, method, operation as OpenApi30.Operation)
           );
         }
       }
@@ -69,10 +63,10 @@ function operationLens(
 
 function operationExamplesLens(
   document: vscode.TextDocument,
-  oas: OpenApi30.BundledOpenApiSpec,
+  oas: OpenApi30.BundledSpec,
   path: string,
   method: string,
-  operation: OpenApi30.OasOperation
+  operation: OpenApi30.Operation
 ): vscode.CodeLens[] {
   const result = [];
   const content = deref(oas, operation.requestBody)?.content;

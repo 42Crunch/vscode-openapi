@@ -11,8 +11,8 @@ export default function Security({
   oas,
   security,
 }: {
-  oas: OpenApi30.BundledOpenApiSpec;
-  security: OpenApi30.ResolvedOasOperationSecurity;
+  oas: OpenApi30.BundledSpec;
+  security: OpenApi30.ResolvedOperationSecurity;
 }) {
   if (security === undefined) {
     return null;
@@ -49,7 +49,7 @@ export default function Security({
 }
 
 function securityRequirementOption(
-  requirement: Record<string, OpenApi30.OasSecurityScheme>,
+  requirement: Record<string, OpenApi30.SecurityScheme>,
   index: number
 ) {
   const keys = Object.keys(requirement).join(", ");

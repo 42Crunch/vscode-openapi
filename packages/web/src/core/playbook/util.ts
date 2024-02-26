@@ -3,7 +3,7 @@ import { OpenApi30, Swagger } from "@xliic/openapi";
 
 export function checkCredential(
   credential: playbook.Credential,
-  scheme: OpenApi30.OasSecurityScheme | Swagger.SwaggerSecurityScheme
+  scheme: OpenApi30.SecurityScheme | Swagger.SecurityScheme
 ): boolean {
   if (scheme.type === credential.type && scheme.in === credential.in) {
     return true;

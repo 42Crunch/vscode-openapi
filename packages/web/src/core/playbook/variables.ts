@@ -38,7 +38,7 @@ export function replaceEnvironmentVariables(
 export function replaceRequestVariables(
   oas: BundledSwaggerOrOasSpec,
   request: playbook.CRequest | playbook.ExternalCRequest,
-  operation: OpenApi30.OasOperation | Swagger.SwaggerOperation | undefined,
+  operation: OpenApi30.Operation | Swagger.Operation | undefined,
   envStack: PlaybookEnvStack
 ): ReplacementResult<playbook.CRequest | playbook.ExternalCRequest> {
   let fake: { body: unknown; parameters: unknown };
@@ -170,7 +170,7 @@ function lookupOrDynamic(
 
 function createFake(
   oas: BundledSwaggerOrOasSpec,
-  operation: OpenApi30.OasOperation | Swagger.SwaggerOperation | undefined,
+  operation: OpenApi30.Operation | Swagger.Operation | undefined,
   path: string,
   method: HttpMethod
 ): { body: unknown; parameters: unknown } {
@@ -181,7 +181,7 @@ function createFake(
   }
 
   if (isOpenapi(oas)) {
-    const requestBody = deref(oas, (operation as OpenApi30.OasOperation).requestBody);
+    const requestBody = deref(oas, (operation as OpenApi30.Operation).requestBody);
     const schema = deref(oas, requestBody?.content["application/json"]?.schema);
     if (schema) {
       result.body = generateBody({ ...schema, components: (oas as any).components });

@@ -1,7 +1,7 @@
 import { Swagger, HttpMethod } from "@xliic/openapi";
 
 export function getParameters(
-  oas: Swagger.BundledSwaggerSpec,
+  oas: Swagger.BundledSpec,
   path: string,
   method: HttpMethod
 ): Swagger.OperationParametersMap {

@@ -50,10 +50,10 @@ export default function OperationTabs({
   return <TabContainer tabs={tabs} />;
 }
 
-function makeOasTabs(oas: OpenApi30.BundledOpenApiSpec, path: string, method: HttpMethod) {
+function makeOasTabs(oas: OpenApi30.BundledSpec, path: string, method: HttpMethod) {
   const parameters = getOasParameters(oas, path, method);
   const operation = OpenApi30.getOperation(oas, path, method);
-  const requestBody = deref<OpenApi30.OasRequestBody>(oas, operation?.requestBody);
+  const requestBody = deref<OpenApi30.RequestBody>(oas, operation?.requestBody);
 
   return [
     {
@@ -95,7 +95,7 @@ function makeOasTabs(oas: OpenApi30.BundledOpenApiSpec, path: string, method: Ht
   ];
 }
 
-function makeSwaggerTabs(oas: Swagger.BundledSwaggerSpec, path: string, method: HttpMethod) {
+function makeSwaggerTabs(oas: Swagger.BundledSpec, path: string, method: HttpMethod) {
   const parameters = getSwaggerParameters(oas, path, method);
 
   return [

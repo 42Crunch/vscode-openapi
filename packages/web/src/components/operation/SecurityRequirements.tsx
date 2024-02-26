@@ -10,7 +10,7 @@ export default function SecurityRequirements({
   schema,
 }: {
   name: string;
-  schema: Record<string, OpenApi30.OasSecurityScheme>;
+  schema: Record<string, OpenApi30.SecurityScheme>;
 }) {
   if (!schema) {
     return null;

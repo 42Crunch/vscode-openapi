@@ -1,99 +1,99 @@
 import { HttpMethod, HttpMethods } from "./http";
 import { deref, RefOr } from "./ref";
 
-export interface OpenApiSpec {
+export type Spec = {
   openapi: "3.0.0" | "3.0.1" | "3.0.2" | "3.0.3";
-  info: OasInfo;
-  tags?: OasTag[];
-  servers?: OasServer[];
-  externalDocs?: OasExternalDocumentation;
-  paths: Record<string, OasPathItem>;
-  webhooks?: Record<string, OasPathItem>;
-  components?: OasComponents;
-  security?: OasSecurityRequirement[];
-}
+  info: Info;
+  tags?: Tag[];
+  servers?: Server[];
+  externalDocs?: ExternalDocumentation;
+  paths: Record<string, PathItem>;
+  webhooks?: Record<string, PathItem>;
+  components?: Components;
+  security?: SecurityRequirement[];
+};
 
-export interface OasComponents {
-  schemas?: { [name: string]: RefOr<OasSchema> };
-  responses?: { [name: string]: RefOr<OasResponse> };
-  parameters?: { [name: string]: RefOr<OasParameter> };
-  examples?: { [name: string]: RefOr<OasExample> };
-  requestBodies?: { [name: string]: RefOr<OasRequestBody> };
-  headers?: { [name: string]: RefOr<OasHeader> };
-  securitySchemes?: { [name: string]: RefOr<OasSecurityScheme> };
-  links?: { [name: string]: RefOr<OasLink> };
-  callbacks?: { [name: string]: RefOr<OasCallback> };
-}
+export type Components = {
+  schemas?: { [name: string]: RefOr<Schema> };
+  responses?: { [name: string]: RefOr<Response> };
+  parameters?: { [name: string]: RefOr<Parameter> };
+  examples?: { [name: string]: RefOr<Example> };
+  requestBodies?: { [name: string]: RefOr<RequestBody> };
+  headers?: { [name: string]: RefOr<Header> };
+  securitySchemes?: { [name: string]: RefOr<SecurityScheme> };
+  links?: { [name: string]: RefOr<Link> };
+  callbacks?: { [name: string]: RefOr<Callback> };
+};
 
-export interface OasPathItem {
+export type PathItem = {
   summary?: string;
   description?: string;
-  get?: OasOperation;
-  put?: OasOperation;
-  post?: OasOperation;
-  delete?: OasOperation;
-  options?: OasOperation;
-  head?: OasOperation;
-  patch?: OasOperation;
-  trace?: OasOperation;
+  get?: Operation;
+  put?: Operation;
+  post?: Operation;
+  delete?: Operation;
+  options?: Operation;
+  head?: Operation;
+  patch?: Operation;
+  trace?: Operation;
 
-  servers?: OasServer[];
-  parameters?: Array<RefOr<OasParameter>>;
+  servers?: Server[];
+  parameters?: Array<RefOr<Parameter>>;
   $ref?: string;
-}
+};
 
-export interface OasOperation {
+export type Operation = {
   tags?: string[];
   summary?: string;
   description?: string;
-  externalDocs?: OasExternalDocumentation;
+  externalDocs?: ExternalDocumentation;
   operationId?: string;
-  parameters?: Array<RefOr<OasParameter>>;
-  requestBody?: RefOr<OasRequestBody>;
-  responses: OasResponses;
-  callbacks?: { [name: string]: RefOr<OasCallback> };
+  parameters?: Array<RefOr<Parameter>>;
+  requestBody?: RefOr<RequestBody>;
+  responses: Responses;
+  callbacks?: { [name: string]: RefOr<Callback> };
   deprecated?: boolean;
-  security?: OasSecurityRequirement[];
-  servers?: OasServer[];
-}
+  security?: SecurityRequirement[];
+  servers?: Server[];
+};
 
-export interface OasParameter {
+export type Parameter = {
   name: string;
-  in: OasParameterLocation;
+  in: ParameterLocation;
   description?: string;
   required?: boolean;
   deprecated?: boolean;
   allowEmptyValue?: boolean;
-  style?: OasParameterStyle;
+  style?: ParameterStyle;
   explode?: boolean;
   allowReserved?: boolean;
-  schema?: RefOr<OasSchema>;
+  schema?: RefOr<Schema>;
   example?: any;
-  examples?: { [media: string]: RefOr<OasExample> };
-  content?: { [media: string]: OasMediaType };
-  encoding?: Record<string, OasEncoding>;
+  examples?: { [media: string]: RefOr<Example> };
+  content?: { [media: string]: MediaType };
+  encoding?: Record<string, Encoding>;
   const?: any;
-}
+};
 
-export interface OasSchema {
+export type Schema = {
   type?: string;
-  properties?: { [name: string]: OasSchema };
-  additionalProperties?: boolean | OasSchema;
+  properties?: { [name: string]: Schema };
+  additionalProperties?: boolean | Schema;
   description?: string;
   default?: any;
-  items?: RefOr<OasSchema>;
+  items?: RefOr<Schema>;
   required?: string[];
   readOnly?: boolean;
   writeOnly?: boolean;
   deprecated?: boolean;
   format?: string;
-  externalDocs?: OasExternalDocumentation;
-  discriminator?: OasDiscriminator;
+  externalDocs?: ExternalDocumentation;
+  discriminator?: Discriminator;
   nullable?: boolean;
-  oneOf?: OasSchema[];
-  anyOf?: OasSchema[];
-  allOf?: OasSchema[];
-  not?: OasSchema;
+  oneOf?: Schema[];
+  anyOf?: Schema[];
+  allOf?: Schema[];
+  not?: Schema;
   title?: string;
   multipleOf?: number;
   maximum?: number;
@@ -113,59 +113,59 @@ export interface OasSchema {
   const?: string;
   contentEncoding?: string;
   contentMediaType?: string;
-}
+};
 
-export interface OasServer {
+export type Server = {
   url: string;
   description?: string;
-  variables?: { [name: string]: OasServerVariable };
-}
+  variables?: { [name: string]: ServerVariable };
+};
 
-export interface OasServerVariable {
+export type ServerVariable = {
   enum?: string[];
   default: string;
   description?: string;
-}
+};
 
-export interface OasExternalDocumentation {
+export type ExternalDocumentation = {
   description?: string;
   url: string;
-}
+};
 
-export interface OasRequestBody {
+export type RequestBody = {
   description?: string;
   required?: boolean;
-  content: { [mime: string]: OasMediaType };
-}
+  content: { [mime: string]: MediaType };
+};
 
-export interface OasResponses {
-  [code: string]: RefOr<OasResponse>;
-}
+export type Responses = {
+  [code: string]: RefOr<Response>;
+};
 
-export interface OasResponse {
+export type Response = {
   description: string;
-  headers?: { [name: string]: RefOr<OasHeader> };
-  content?: { [mime: string]: OasMediaType };
-  links?: { [name: string]: RefOr<OasLink> };
-}
+  headers?: { [name: string]: RefOr<Header> };
+  content?: { [mime: string]: MediaType };
+  links?: { [name: string]: RefOr<Link> };
+};
 
-export interface OasMediaType {
-  schema?: RefOr<OasSchema>;
+export type MediaType = {
+  schema?: RefOr<Schema>;
   example?: any;
-  examples?: { [name: string]: RefOr<OasExample> };
-  encoding?: { [field: string]: OasEncoding };
-}
+  examples?: { [name: string]: RefOr<Example> };
+  encoding?: { [field: string]: Encoding };
+};
 
-export interface OasLink {
+export type Link = {
   operationRef?: string;
   operationId?: string;
   parameters?: { [name: string]: any };
   requestBody?: any;
   description?: string;
-  server?: OasServer;
-}
+  server?: Server;
+};
 
-export interface OasSecurityScheme {
+export type SecurityScheme = {
   type: "apiKey" | "http" | "oauth2" | "openIdConnect";
   description?: string;
   name: string;
@@ -195,68 +195,68 @@ export interface OasSecurityScheme {
     };
   };
   openIdConnectUrl?: string;
-}
+};
 
-export interface OasSecurityRequirement {
+export type SecurityRequirement = {
   [name: string]: string[];
-}
+};
 
-export interface OasExample {
+export type Example = {
   summary?: string;
   description?: string;
   value?: any;
   externalValue?: string;
-}
+};
 
-export interface OasDiscriminator {
+export type Discriminator = {
   propertyName: string;
   mapping?: { [name: string]: string };
-}
+};
 
-export interface OasEncoding {
+export type Encoding = {
   contentType: string;
-  headers?: { [name: string]: RefOr<OasHeader> };
-  style: OasParameterStyle;
+  headers?: { [name: string]: RefOr<Header> };
+  style: ParameterStyle;
   explode: boolean;
   allowReserved: boolean;
-}
+};
 
-export interface OasTag {
+export type Tag = {
   name: string;
   description?: string;
-  externalDocs?: OasExternalDocumentation;
-}
+  externalDocs?: ExternalDocumentation;
+};
 
-export interface OasCallback {
-  [name: string]: OasPathItem;
-}
+export type Callback = {
+  [name: string]: PathItem;
+};
 
-export interface OasInfo {
+export type Info = {
   title: string;
   description?: string;
   termsOfService?: string;
-  contact?: OasContact;
-  license?: OasLicense;
+  contact?: Contact;
+  license?: License;
   version: string;
-}
+};
 
-export interface OasContact {
+export type Contact = {
   name?: string;
   url?: string;
   email?: string;
-}
+};
 
-export interface OasLicense {
+export type License = {
   name: string;
   url?: string;
   identifier?: string;
-}
+};
 
-export type OasHeader = Omit<OasParameter, "in" | "name">;
+export type Header = Omit<Parameter, "in" | "name">;
 
-export type OasParameterLocation = "query" | "header" | "path" | "cookie";
+export type ParameterLocation = "query" | "header" | "path" | "cookie";
 
-export type OasParameterStyle =
+export type ParameterStyle =
   | "matrix"
   | "label"
   | "form"
@@ -267,65 +267,59 @@ export type OasParameterStyle =
 
 // utility functions and types
 
-export interface BundledOpenApiSpec extends OpenApiSpec {
-  paths: Record<string, ResolvedOasPathItem>;
-  webhooks?: Record<string, ResolvedOasPathItem>;
-  components?: ResolvedOasComponents;
-}
+export type BundledSpec = Spec & {
+  paths: Record<string, ResolvedPathItem>;
+  webhooks?: Record<string, ResolvedPathItem>;
+  components?: ResolvedComponents;
+};
 
-export interface ResolvedOasComponents {
-  schemas?: Record<string, OasSchema>;
-  responses?: Record<string, OasResponse>;
-  parameters?: Record<string, OasParameter>;
-  examples?: Record<string, OasExample>;
-  requestBodies?: Record<string, OasRequestBody>;
-  headers?: Record<string, OasHeader>;
-  securitySchemes?: Record<string, OasSecurityScheme>;
-  links?: Record<string, OasLink>;
-  callbacks?: Record<string, OasCallback>;
-}
+export type ResolvedComponents = {
+  schemas?: Record<string, Schema>;
+  responses?: Record<string, Response>;
+  parameters?: Record<string, Parameter>;
+  examples?: Record<string, Example>;
+  requestBodies?: Record<string, RequestBody>;
+  headers?: Record<string, Header>;
+  securitySchemes?: Record<string, SecurityScheme>;
+  links?: Record<string, Link>;
+  callbacks?: Record<string, Callback>;
+};
 
-export type ResolvedOasPathItem = Omit<OasPathItem, "$ref">;
+export type ResolvedPathItem = Omit<PathItem, "$ref">;
 
-export interface ResolvedOasParameter extends OasParameter {
-  schema?: OasSchema;
-}
+export type ResolvedParameter = Parameter & {
+  schema?: Schema;
+};
 
-export type OperationParametersMap = Record<
-  OasParameterLocation,
-  Record<string, ResolvedOasParameter>
->;
+export type OperationParametersMap = Record<ParameterLocation, Record<string, ResolvedParameter>>;
 
-export type ResolvedOasOperationSecurity = Record<string, OasSecurityScheme>[];
+export type ResolvedOperationSecurity = Record<string, SecurityScheme>[];
 
 export function getOperation(
-  oas: BundledOpenApiSpec,
+  oas: BundledSpec,
   path: string,
   method: HttpMethod
-): OasOperation | undefined {
+): Operation | undefined {
   return deref(oas, oas.paths[path])?.[method];
 }
 
-export function getPathItemParameters(
-  oas: BundledOpenApiSpec,
-  pathItem: OasPathItem
-): OasParameter[] {
+export function getPathItemParameters(oas: BundledSpec, pathItem: PathItem): Parameter[] {
   const params = pathItem.parameters ?? [];
   return params.map((param) => deref(oas, param)!);
 }
 
 export function getOperationParameters(
-  oas: BundledOpenApiSpec,
-  operation: OasOperation | undefined
-): OasParameter[] {
+  oas: BundledSpec,
+  operation: Operation | undefined
+): Parameter[] {
   const params = operation?.parameters ?? [];
   return params.map((param) => deref(oas, param)!);
 }
 
 export function getParametersMap(
-  oas: BundledOpenApiSpec,
-  pathParameters: OasParameter[],
-  operationParameters: OasParameter[]
+  oas: BundledSpec,
+  pathParameters: Parameter[],
+  operationParameters: Parameter[]
 ): OperationParametersMap {
   const result: OperationParametersMap = { query: {}, header: {}, path: {}, cookie: {} };
 
@@ -344,8 +338,8 @@ export function getParametersMap(
   return result;
 }
 
-export function getOperations(oas: BundledOpenApiSpec): [string, HttpMethod, OasOperation][] {
-  const operations: [string, HttpMethod, OasOperation][] = [];
+export function getOperations(oas: BundledSpec): [string, HttpMethod, Operation][] {
+  const operations: [string, HttpMethod, Operation][] = [];
   for (const path of Object.keys(oas.paths)) {
     for (const method of Object.keys(oas.paths[path])) {
       if (HttpMethods.includes(method as HttpMethod)) {
@@ -357,15 +351,15 @@ export function getOperations(oas: BundledOpenApiSpec): [string, HttpMethod, Oas
   return operations;
 }
 
-export const OasPrimitiveTypes = ["string", "number", "integer", "boolean"] as const;
-export type OasPrimitiveType = (typeof OasPrimitiveTypes)[number];
+export const PrimitiveTypes = ["string", "number", "integer", "boolean"] as const;
+export type PrimitiveType = (typeof PrimitiveTypes)[number];
 
-export type OasVaueType =
-  | { type: "primitive"; value: OasPrimitiveType }
-  | { type: "array"; items: OasPrimitiveType | "unknown" }
+export type VaueType =
+  | { type: "primitive"; value: PrimitiveType }
+  | { type: "array"; items: PrimitiveType | "unknown" }
   | { type: "object" };
 
-export function getServerUrls(oas: OpenApiSpec): string[] {
+export function getServerUrls(oas: Spec): string[] {
   const servers = (oas.servers ?? [])
     .filter((server) => server.url !== undefined && server.url !== "")
     .map((server) => server.url);

@@ -9,7 +9,7 @@ export default function SecurityRequirementsSelect({
   value,
   setValue,
 }: {
-  security: OpenApi30.ResolvedOasOperationSecurity | Swagger.ResolvedSwaggerOperationSecurity;
+  security: OpenApi30.ResolvedOperationSecurity | Swagger.ResolvedOperationSecurity;
   value: number;
   setValue: (value: number) => void;
 }) {

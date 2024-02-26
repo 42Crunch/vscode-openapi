@@ -55,7 +55,7 @@ export default function OperationTabs({
 }
 
 function makeOasTabs(
-  oas: OpenApi30.BundledOpenApiSpec,
+  oas: OpenApi30.BundledSpec,
   credentials: playbook.Credentials,
   path: string,
   method: HttpMethod,
@@ -64,7 +64,7 @@ function makeOasTabs(
 ) {
   const parameters = getOasParameters(oas, path, method);
   const operation = OpenApi30.getOperation(oas, path, method);
-  const requestBody = deref<OpenApi30.OasRequestBody>(oas, operation?.requestBody);
+  const requestBody = deref<OpenApi30.RequestBody>(oas, operation?.requestBody);
 
   return [
     {
@@ -155,7 +155,7 @@ function makeOasTabs(
 }
 
 function makeSwaggerTabs(
-  oas: Swagger.BundledSwaggerSpec,
+  oas: Swagger.BundledSpec,
   credentials: playbook.Credentials,
   path: string,
   method: HttpMethod,

@@ -11,7 +11,7 @@ export default function SecurityRequirement({
   values,
   setValues,
 }: {
-  requirement: Record<string, OpenApi30.OasSecurityScheme | Swagger.SwaggerSecurityScheme>;
+  requirement: Record<string, OpenApi30.SecurityScheme | Swagger.SecurityScheme>;
   credentials: playbook.Credentials;
   values: Record<string, string>;
   setValues: (values: Record<string, string>) => void;

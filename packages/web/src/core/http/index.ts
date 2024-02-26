@@ -73,7 +73,7 @@ export async function makeHttpRequest(
 }
 
 async function buildOasSpec(
-  oas: OpenApi30.BundledOpenApiSpec,
+  oas: OpenApi30.BundledSpec,
   path: string,
   method: HttpMethod,
   values: TryitOperationValues,
@@ -91,7 +91,7 @@ async function buildOasSpec(
 }
 
 async function buildSwaggerSpec(
-  swagger: Swagger.BundledSwaggerSpec,
+  swagger: Swagger.BundledSpec,
   path: string,
   method: HttpMethod,
   values: TryitOperationValues,
@@ -119,7 +119,7 @@ function convertBody(body: unknown): unknown {
   return JSON.stringify(body);
 }
 
-function pickServer(servers: OpenApi30.OasServer[], server: string): OpenApi30.OasServer[] {
+function pickServer(servers: OpenApi30.Server[], server: string): OpenApi30.Server[] {
   return servers.filter((s) => s.url === server);
 }
 
@@ -138,7 +138,7 @@ function makeOpenApiSwaggerClientParameters(
 }
 
 function makeSwaggerSwaggerClientParameters(
-  oas: Swagger.BundledSwaggerSpec,
+  oas: Swagger.BundledSpec,
   path: string,
   method: HttpMethod,
   values: TryitOperationValues,
@@ -165,7 +165,7 @@ function makeSwaggerSwaggerClientParameters(
 }
 
 function makeOasSecurities(
-  schemes: Record<string, OpenApi30.OasSecurityScheme>,
+  schemes: Record<string, OpenApi30.SecurityScheme>,
   values: TryitSecurityAllValues,
   index: number,
   env: EnvData
@@ -189,7 +189,7 @@ function makeOasSecurities(
 }
 
 function makeSwaggerSecurities(
-  schemes: Record<string, Swagger.SwaggerSecurityScheme>,
+  schemes: Record<string, Swagger.SecurityScheme>,
   values: TryitSecurityAllValues,
   index: number,
   env: EnvData
