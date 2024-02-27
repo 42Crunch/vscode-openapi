@@ -24,19 +24,43 @@ export async function offerUpgrade(): Promise<unknown> {
 export const UPGRADE_WARN_LIMIT = 10;
 
 export async function warnScans(left: number) {
-  return vscode.window.showInformationMessage(
-    `You have ${left} per-opertion Conformance Scans left. Consider upgrading your 42Crunch subscription.`
-  );
+  return vscode.window
+    .showInformationMessage(
+      `You have ${left} per-opertion Conformance Scans left. Consider upgrading your 42Crunch subscription.`,
+      { modal: false },
+      { title: "Upgrade", id: "upgrade" }
+    )
+    .then((choice) => {
+      if (choice?.id === "upgrade") {
+        vscode.env.openExternal(vscode.Uri.parse("https://42crunch.com/ide-upgrade/"));
+      }
+    });
 }
 
 export async function warnOperationAudits(left: number) {
-  return vscode.window.showInformationMessage(
-    `You have ${left} per-opertion Security Audits left. Consider upgrading your 42Crunch subscription.`
-  );
+  return vscode.window
+    .showInformationMessage(
+      `You have ${left} per-opertion Security Audits left. Consider upgrading your 42Crunch subscription.`,
+      { modal: false },
+      { title: "Upgrade", id: "upgrade" }
+    )
+    .then((choice) => {
+      if (choice?.id === "upgrade") {
+        vscode.env.openExternal(vscode.Uri.parse("https://42crunch.com/ide-upgrade/"));
+      }
+    });
 }
 
 export async function warnAudits(left: number) {
-  return vscode.window.showInformationMessage(
-    `You have ${left}  Security Audits left. Consider upgrading your 42Crunch subscription.`
-  );
+  return vscode.window
+    .showInformationMessage(
+      `You have ${left}  Security Audits left. Consider upgrading your 42Crunch subscription.`,
+      { modal: false },
+      { title: "Upgrade", id: "upgrade" }
+    )
+    .then((choice) => {
+      if (choice?.id === "upgrade") {
+        vscode.env.openExternal(vscode.Uri.parse("https://42crunch.com/ide-upgrade/"));
+      }
+    });
 }
