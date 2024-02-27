@@ -1,7 +1,7 @@
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 
-export function wrapCredential(credential: playbook.Credential) {
+export function wrapCredential(credential: Playbook.Credential) {
   const result = simpleClone(credential);
   const methods = Object.keys(credential.methods).map((key) => {
     return { key, value: credential.methods[key] };
@@ -14,8 +14,8 @@ export function wrapCredential(credential: playbook.Credential) {
   };
 }
 
-export function unwrapCredential(data: any): playbook.Credential {
-  const methods: playbook.Credential["methods"] = {};
+export function unwrapCredential(data: any): Playbook.Credential {
+  const methods: Playbook.Credential["methods"] = {};
   for (const { key, value } of data.methods) {
     methods[key] = value;
   }

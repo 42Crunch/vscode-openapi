@@ -1,10 +1,10 @@
-import { RequestRef } from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 
 import { useAppSelector } from "../store";
 import RequestExternal from "./RequestExternal";
 import RequestInternal from "./RequestInternal";
 
-export default function Request({ requestRef }: { requestRef: RequestRef }) {
+export default function Request({ requestRef }: { requestRef: Playbook.RequestRef }) {
   const { playbook } = useAppSelector((state) => state.scanconf);
 
   const request =

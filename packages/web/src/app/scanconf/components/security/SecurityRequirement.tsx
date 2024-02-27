@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 import { OpenApi30, Swagger } from "@xliic/openapi";
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 
 import CredentialPicker from "./CredentialPicker";
 
@@ -12,7 +12,7 @@ export default function SecurityRequirement({
   setValues,
 }: {
   requirement: Record<string, OpenApi30.SecurityScheme | Swagger.SecurityScheme>;
-  credentials: playbook.Credentials;
+  credentials: Playbook.Credentials;
   values: Record<string, string>;
   setValues: (values: Record<string, string>) => void;
 }) {

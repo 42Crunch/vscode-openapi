@@ -1,4 +1,4 @@
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import { SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
 import { addCredential, removeCredential, selectCredential } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
@@ -15,7 +15,7 @@ export default function Auth() {
     selectedCredential,
   } = useAppSelector((state) => state.scanconf);
 
-  const onAddCredential = (id: string, credential: playbook.Credential) => {
+  const onAddCredential = (id: string, credential: Playbook.Credential) => {
     // no way to select credentialGroup for now
     dispatch(addCredential({ credentialGroup: 0, id, credential }));
     dispatch(selectCredential({ group: 0, credential: id }));

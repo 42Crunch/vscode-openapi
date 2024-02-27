@@ -1,5 +1,5 @@
 import { HttpMethod } from "@xliic/openapi";
-import { RequestRef } from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 
 import { ItemId, SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
 import { Menu, MenuItem } from "../../../new-components/Menu";
@@ -141,7 +141,7 @@ export default function Operations() {
         if (selected !== undefined)
           return (
             <Request
-              requestRef={{ type: selected.sectionId, id: selected.itemId } as RequestRef}
+              requestRef={{ type: selected.sectionId, id: selected.itemId } as Playbook.RequestRef}
               key={`${selected.sectionId}-${selected.itemId}`}
             />
           );

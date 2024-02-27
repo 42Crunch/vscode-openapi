@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useController } from "react-hook-form";
 import { useState } from "react";
 
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { OpenApi30, Swagger } from "@xliic/openapi";
 
@@ -17,7 +17,7 @@ export default function Security({
 }: {
   oas: OpenApi30.BundledSpec | Swagger.BundledSpec;
   security: OpenApi30.ResolvedOperationSecurity | Swagger.ResolvedOperationSecurity;
-  credentials: playbook.Credentials;
+  credentials: Playbook.Credentials;
 }) {
   const { field: authField } = useController({
     name: "auth",
@@ -101,7 +101,7 @@ const Fields = styled.div`
 
 function mapRequirementsToCredentials(
   security: OpenApi30.ResolvedOperationSecurity | Swagger.ResolvedOperationSecurity,
-  credentials: playbook.Credentials,
+  credentials: Playbook.Credentials,
   auth: string[]
 ) {
   const authWithCredentials = mapAuthToCredentials(credentials, auth);
@@ -118,10 +118,10 @@ function mapRequirementsToCredentials(
 }
 
 function mapAuthToCredentials(
-  credentials: playbook.Credentials,
+  credentials: Playbook.Credentials,
   auth: string[]
-): Record<string, playbook.Credential> {
-  const result: Record<string, playbook.Credential> = {};
+): Record<string, Playbook.Credential> {
+  const result: Record<string, Playbook.Credential> = {};
   for (const credentialName of auth) {
     const credential = getCredentialByName(credentials, credentialName);
     if (credential !== undefined) {
@@ -132,9 +132,9 @@ function mapAuthToCredentials(
 }
 
 function getCredentialByName(
-  credentials: playbook.Credentials,
+  credentials: Playbook.Credentials,
   name: string
-): playbook.Credential | undefined {
+): Playbook.Credential | undefined {
   for (const [credentialName, credential] of Object.entries(credentials)) {
     if (credentialName === name) {
       return credential;
@@ -150,7 +150,7 @@ function getCredentialByName(
 
 function matchRequirementToAuth(
   requirement: Record<string, OpenApi30.SecurityScheme | Swagger.SecurityScheme>,
-  auth: Record<string, playbook.Credential>
+  auth: Record<string, Playbook.Credential>
 ) {
   const mutable = { ...auth };
   const result: Record<string, string> = {};

@@ -11,7 +11,7 @@ import {
 } from "@xliic/openapi";
 import { HttpRequest } from "@xliic/common/http";
 import { Result } from "@xliic/result";
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 
 import { checkCredential } from "./util";
 import { getParameters } from "./util-swagger";
@@ -21,7 +21,7 @@ export async function makeHttpRequest(
   oas: BundledSwaggerOrOasSpec,
   server: string,
   operationId: string | undefined,
-  request: playbook.CRequest,
+  request: Playbook.CRequest,
   security: AuthResult
 ): Promise<Result<HttpRequest, string>> {
   // FIXME, this can throw an exception, make sure it's handled
@@ -57,7 +57,7 @@ async function makeHttpRequestForOas(
   oas: OpenApi30.BundledSpec,
   server: string,
   operationId: string | undefined,
-  request: playbook.CRequest,
+  request: Playbook.CRequest,
   security: AuthResult
 ): Promise<HttpRequest> {
   const operation = getOperation(oas, request.path, request.method);
@@ -90,7 +90,7 @@ async function makeHttpRequestForSwagger(
   oas: Swagger.BundledSpec,
   server: string,
   operationId: string | undefined,
-  request: playbook.CRequest,
+  request: Playbook.CRequest,
   security: AuthResult
 ): Promise<HttpRequest> {
   const operation = getOperation(oas, request.path, request.method);
@@ -117,7 +117,7 @@ async function makeHttpRequestForSwagger(
 }
 
 export async function makeExternalHttpRequest(
-  request: playbook.ExternalCRequest
+  request: Playbook.ExternalCRequest
 ): Promise<Result<HttpRequest, string>> {
   const searchParams = new URLSearchParams(
     playbookParameterValueToObject(request.parameters.query)
@@ -152,7 +152,7 @@ export async function makeExternalHttpRequest(
 async function buildOasSpecWithServers(
   oas: OpenApi30.BundledSpec,
   server: string,
-  request: playbook.CRequest
+  request: Playbook.CRequest
 ): Promise<unknown> {
   const servers = [{ url: server }];
 
@@ -167,7 +167,7 @@ async function buildOasSpecWithServers(
 async function buildSwaggerSpecWithServers(
   swagger: Swagger.BundledSpec,
   server: string,
-  request: playbook.CRequest
+  request: Playbook.CRequest
 ): Promise<unknown> {
   const urlObj = new URL(server);
   const schemes = urlObj.protocol === "https:" ? ["https"] : ["http"];
@@ -192,10 +192,10 @@ function convertBody(body: unknown): unknown {
 }
 
 function makeOpenApiSwaggerClientParameters(
-  parameters: playbook.ParameterValues,
+  parameters: Playbook.ParameterValues,
   security: AuthResult
 ): Record<string, unknown> {
-  const locations: playbook.ParameterLocation[] = ["path", "query", "header", "cookie"];
+  const locations: Playbook.ParameterLocation[] = ["path", "query", "header", "cookie"];
   const result = collectParameters(parameters, locations);
   // this is a workaround for having duplicate required header, etc names
   // to supply schema validation to the security scheme
@@ -211,10 +211,10 @@ function makeOpenApiSwaggerClientParameters(
 
 function makeSwaggerSwaggerClientParameters(
   oas: Swagger.BundledSpec,
-  request: playbook.CRequest,
+  request: Playbook.CRequest,
   security: AuthResult
 ): Record<string, unknown> {
-  const locations: playbook.ParameterLocation[] = ["path", "query", "header"];
+  const locations: Playbook.ParameterLocation[] = ["path", "query", "header"];
   const result = collectParameters(request.parameters, locations);
 
   // this is a workaround for having duplicate required header, etc names
@@ -241,8 +241,8 @@ function makeSwaggerSwaggerClientParameters(
 }
 
 function collectParameters(
-  parameters: playbook.ParameterValues,
-  locations: playbook.ParameterLocation[]
+  parameters: Playbook.ParameterValues,
+  locations: Playbook.ParameterLocation[]
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   for (const location of locations) {
@@ -319,7 +319,7 @@ function matchSecuritySchemesToAuthResult(
   return result;
 }
 
-function playbookParameterValueToObject(parameterValue: playbook.ParameterList) {
+function playbookParameterValueToObject(parameterValue: Playbook.ParameterList) {
   // FIXME overwrites duplicate entries
   const result: Record<string, string> = {};
   for (const { key, value } of parameterValue) {
@@ -344,7 +344,7 @@ function makeSwaggerClientOperationId(
   return SwaggerClient.helpers.opId(operation, path, method);
 }
 
-function getSwaggerClientContentType(request: playbook.CRequest): string | undefined {
+function getSwaggerClientContentType(request: Playbook.CRequest): string | undefined {
   if (request.body?.mediaType === "raw") {
     for (const { key, value } of request.parameters.header) {
       if (key.toLowerCase() === "content-type") {

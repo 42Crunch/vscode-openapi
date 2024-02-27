@@ -1,11 +1,16 @@
-import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
+import { HttpMethod } from "@xliic/openapi";
 
-export interface OasWithPlaybook {
-  oas: BundledSwaggerOrOasSpec;
-  path: string;
-  method: HttpMethod;
-  scanconf: string;
-}
+export type Bundle = {
+  runtimeConfiguration?: RuntimeConfiguration;
+  customizations?: unknown;
+  environments: Record<string, Environment>;
+  operations: Record<string, Operation>;
+  authenticationDetails: [Credentials, ...Credentials[]];
+  before: Stage[];
+  after: Stage[];
+  authorizationTests: AuthorizationTests;
+  requests: Record<string, StageContent | ExternalStageContent>;
+};
 
 export type ParameterLocation = "query" | "header" | "path" | "cookie";
 export type ParameterList = { key: string; value: unknown }[];
@@ -67,37 +72,6 @@ export type VariableAssignmentsParameter = {
   name: string;
 };
 
-// vs code to webapp requests
-export type TryScenarioMessage = { command: "tryScenario"; payload: OasWithPlaybook };
-export type LoadScanconfMessage = {
-  command: "loadScanconf";
-  payload: {
-    oas: BundledSwaggerOrOasSpec;
-    scanconf: string;
-    uri: string;
-  };
-};
-export type UpdateScanconfMessage = { command: "updateScanconf"; payload: string };
-export type ShowAuthWindow = { command: "showAuthWindow"; payload: undefined };
-
-// webapp to vs code responses
-export type SaveScanconfMessage = {
-  command: "saveScanconf";
-  payload: string;
-};
-
-export type PlaybookBundle = {
-  runtimeConfiguration?: RuntimeConfiguration;
-  customizations?: unknown;
-  environments: Record<string, PlaybookEnvironment>;
-  operations: Record<string, Operation>;
-  authenticationDetails: [Credentials, ...Credentials[]];
-  before: Stage[];
-  after: Stage[];
-  authorizationTests: AuthorizationTests;
-  requests: Record<string, StageContent | ExternalStageContent>;
-};
-
 export type RuntimeConfiguration = {
   environment?: string;
   logLevel?: "debug" | "info" | "error" | "critical";
@@ -126,11 +100,11 @@ export type RuntimeConfiguration = {
   reportGenerateCurlCommand?: boolean;
 };
 
-export type PlaybookEnvironment = {
-  variables: Record<string, PlaybookEnvironmentVariable>;
+export type Environment = {
+  variables: Record<string, EnvironmentVariable>;
 };
 
-export type PlaybookEnvironmentVariable = {
+export type EnvironmentVariable = {
   from: "environment";
   name: string;
   required: boolean;
@@ -157,14 +131,14 @@ export type Scenarios = {
   scenarios: Scenario[];
 };
 
-export type Environment = Record<string, unknown>;
-
 export type RequestRef = { type: "operation"; id: string } | { type: "request"; id: string };
+
+export type OperationEnvironment = Record<string, unknown>;
 
 export type StageReference = {
   fuzzing?: boolean;
   auth?: string[];
-  environment?: Environment;
+  environment?: OperationEnvironment;
   responses?: Responses;
   expectedResponse?: string;
   injectionKey?: string;
@@ -175,7 +149,7 @@ export type StageContent = {
   ref: undefined;
   fuzzing?: boolean;
   auth?: string[];
-  environment?: Environment;
+  environment?: OperationEnvironment;
   responses?: Responses;
   defaultResponse: string;
   injectionKey?: string;
@@ -185,7 +159,7 @@ export type StageContent = {
 
 export type ExternalStageContent = {
   operationId: undefined;
-  environment?: Environment;
+  environment?: OperationEnvironment;
   responses?: Responses;
   defaultResponse: string;
   request: ExternalCRequest;
@@ -281,7 +255,7 @@ export type StageContainer =
   | Omit<StageLocationOperationScenarios, "stageIndex">
   | Omit<StageLocationCredential, "stageIndex">;
 
-export function getCurrentEnvironment(playbook: PlaybookBundle): PlaybookEnvironment {
+export function getCurrentEnvironment(playbook: Bundle): Environment {
   const environment = playbook.runtimeConfiguration?.environment || "default";
   return playbook.environments[environment];
 }

@@ -1,12 +1,6 @@
 import styled from "styled-components";
 
-import {
-  getCurrentEnvironment,
-  StageLocation,
-  StageContainer,
-  StageReference,
-  RequestRef,
-} from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import { serialize, Scanconf } from "@xliic/scanconf";
 
 import { makeEnvEnv } from "../../../core/playbook/execute";
@@ -33,15 +27,15 @@ export default function Operation({ operationId }: { operationId: string }) {
   const { mockResult, tryResult } = useAppSelector((state) => state.operations);
   const env = useAppSelector((state) => state.env.data);
 
-  const removeStage = (location: StageLocation) => dispatch(actions.removeStage(location));
+  const removeStage = (location: Playbook.StageLocation) => dispatch(actions.removeStage(location));
 
-  const saveStage = (location: StageLocation, stage: StageReference) =>
+  const saveStage = (location: Playbook.StageLocation, stage: Playbook.StageReference) =>
     dispatch(actions.saveOperationReference({ location, reference: stage }));
 
-  const moveStage = (location: StageLocation, to: number) =>
+  const moveStage = (location: Playbook.StageLocation, to: number) =>
     dispatch(actions.moveStage({ location, to }));
 
-  const addStage = (container: StageContainer, ref: RequestRef) => {
+  const addStage = (container: Playbook.StageContainer, ref: Playbook.RequestRef) => {
     dispatch(
       actions.addStage({
         container,
@@ -61,7 +55,7 @@ export default function Operation({ operationId }: { operationId: string }) {
     environment: {
       env: { host },
     },
-  } = makeEnvEnv(getCurrentEnvironment(playbook), env);
+  } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
 
   return (
     <Container>
@@ -145,7 +139,7 @@ export default function Operation({ operationId }: { operationId: string }) {
         <Content>
           <Scenario
             oas={oas}
-            stages={operation.before as StageReference[]}
+            stages={operation.before as Playbook.StageReference[]}
             container={{ container: "operationBefore", operationId }}
             executionResult={findResult(mockResult, "operationBefore")}
             saveStage={saveStage}
@@ -170,7 +164,7 @@ export default function Operation({ operationId }: { operationId: string }) {
         <Content>
           <Scenario
             oas={oas}
-            stages={operation.after as StageReference[]}
+            stages={operation.after as Playbook.StageReference[]}
             container={{ container: "operationAfter", operationId }}
             executionResult={findResult(mockResult, "operationAfter")}
             saveStage={saveStage}

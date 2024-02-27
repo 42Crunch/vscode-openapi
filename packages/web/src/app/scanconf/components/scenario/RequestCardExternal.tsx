@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import Form from "../../../../new-components/Form";
@@ -20,9 +20,9 @@ export default function RequestCardExternal({
   defaultCollapsed,
   variables,
 }: {
-  requestRef: playbook.RequestRef;
-  stage: playbook.ExternalStageContent;
-  saveRequest: (request: playbook.ExternalStageContent) => void;
+  requestRef: Playbook.RequestRef;
+  stage: Playbook.ExternalStageContent;
+  saveRequest: (request: Playbook.ExternalStageContent) => void;
   defaultCollapsed?: boolean;
   variables: string[];
 }) {
@@ -61,7 +61,7 @@ export function Request({
   stage,
   variables,
 }: {
-  stage: playbook.ExternalStageContent;
+  stage: Playbook.ExternalStageContent;
   variables: string[];
 }) {
   return (
@@ -95,7 +95,7 @@ export function Request({
   );
 }
 
-function getResponseCodeOptions(stage: playbook.ExternalStageContent) {
+function getResponseCodeOptions(stage: Playbook.ExternalStageContent) {
   return Object.keys(stage.responses || {}).map((key) => ({ label: key, value: key }));
 }
 

@@ -1,7 +1,7 @@
 import * as z from "zod";
 import styled from "styled-components";
 
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 
 import Button from "../../../components/Button";
 
@@ -15,9 +15,9 @@ export default function NewAuthorizationTestDialog({
   existing,
   credentials,
 }: {
-  onAddTest: (id: string, credential: playbook.AuthenticationSwappingTest) => void;
+  onAddTest: (id: string, credential: Playbook.AuthenticationSwappingTest) => void;
   existing: string[];
-  credentials: playbook.Credentials;
+  credentials: Playbook.Credentials;
 }) {
   const defaultValues = {
     id: "",

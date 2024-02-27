@@ -1,4 +1,4 @@
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import { SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
 import { addAuthorizationTest, removeAuthorizationTest, selectAuthorizationTest } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
@@ -14,7 +14,7 @@ export default function AuthorizationTests() {
     selectedAuthorizationTest,
   } = useAppSelector((state) => state.scanconf);
 
-  const onAddAuthorizationTest = (id: string, test: playbook.AuthenticationSwappingTest) => {
+  const onAddAuthorizationTest = (id: string, test: Playbook.AuthenticationSwappingTest) => {
     dispatch(addAuthorizationTest({ id, test }));
     dispatch(selectAuthorizationTest({ id }));
   };

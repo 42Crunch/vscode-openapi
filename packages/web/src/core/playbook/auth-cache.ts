@@ -1,4 +1,4 @@
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import { parseDuration } from "../duration";
 
 type AuthCacheEntry = {
@@ -14,7 +14,7 @@ export function createAuthCache(): AuthCache {
 
 export function setAuthEntry(
   cache: AuthCache,
-  credential: playbook.Credential,
+  credential: Playbook.Credential,
   valueName: string,
   value: string
 ) {
@@ -28,7 +28,7 @@ export function setAuthEntry(
 
 export function getAuthEntry(
   cache: AuthCache,
-  credential: playbook.Credential,
+  credential: Playbook.Credential,
   valueName: string
 ): string | undefined {
   const name = `${credential.name}/${valueName}`;

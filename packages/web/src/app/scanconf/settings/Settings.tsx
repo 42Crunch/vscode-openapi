@@ -1,4 +1,4 @@
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 
 import SearchSidebar from "../../../components/layout/SearchSidebar";
 import Form from "../../../new-components/Form";
@@ -57,13 +57,13 @@ export default function Config() {
   );
 }
 
-function wrapSettings(settings: playbook.RuntimeConfiguration) {
+function wrapSettings(settings: Playbook.RuntimeConfiguration) {
   return {
     ...settings,
     logLevel: settings.logLevel !== undefined ? settings.logLevel : "",
   };
 }
 
-function unwrapSettings(data: any): playbook.RuntimeConfiguration {
+function unwrapSettings(data: any): Playbook.RuntimeConfiguration {
   return { ...data, logLevel: data.logLevel !== "" ? data.logLevel : undefined };
 }

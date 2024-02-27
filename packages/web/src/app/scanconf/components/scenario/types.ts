@@ -1,8 +1,9 @@
 import { LookupFailure, LookupResult } from "@xliic/common/env";
 import { HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
+import { Playbook } from "@xliic/scanconf";
+
 import { PlaybookEnvStack } from "../../../../core/playbook/playbook-env";
 import { MockHttpResponseType } from "../../../../core/playbook/mock-http";
-import { RequestRef } from "@xliic/common/playbook";
 
 export type VariableReplacement = {
   stack: PlaybookEnvStack;
@@ -20,7 +21,7 @@ export type AuthenticationResult = {
 };
 
 export type OperationResult = {
-  ref?: RequestRef;
+  ref?: Playbook.RequestRef;
   operationId?: string;
   httpRequest?: HttpRequest;
   httpRequestPrepareError?: string;

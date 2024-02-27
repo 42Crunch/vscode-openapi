@@ -8,7 +8,7 @@ import * as playbook from "./playbook";
 export function parse(
   oas: BundledSwaggerOrOasSpec,
   file: scan.ConfigurationFileBundle
-): Result<playbook.PlaybookBundle, ParsingErrors> {
+): Result<playbook.Bundle, ParsingErrors> {
   const [result, errors] = parseInternal(oas, file);
   if (errors == undefined) {
     return [result, undefined];
@@ -26,8 +26,8 @@ export function parse(
 export function parseInternal(
   oas: BundledSwaggerOrOasSpec,
   file: scan.ConfigurationFileBundle
-): Result<playbook.PlaybookBundle, InternalParsingErrors> {
-  return result<playbook.PlaybookBundle>({
+): Result<playbook.Bundle, InternalParsingErrors> {
+  return result<playbook.Bundle>({
     before: parseArray(oas, file, file.before || [], parseRequestStage),
     after: parseArray(oas, file, file.after || [], parseRequestStage),
     operations: parseMap(oas, file, file.operations || {}, parseOperation),
@@ -64,8 +64,8 @@ function parseEnvironmentFile(
   oas: BundledSwaggerOrOasSpec,
   file: scan.ConfigurationFileBundle,
   entry: scan.EnvironmentFile
-): Result<playbook.PlaybookEnvironment, InternalParsingErrors> {
-  return result<playbook.PlaybookEnvironment>({
+): Result<playbook.Environment, InternalParsingErrors> {
+  return result<playbook.Environment>({
     variables: parseMap(oas, file, entry.variables || {}, parseEnvironmentVariable),
   });
 }
@@ -74,12 +74,12 @@ function parseEnvironmentVariable(
   oas: BundledSwaggerOrOasSpec,
   file: scan.ConfigurationFileBundle,
   entry: any
-): Result<playbook.PlaybookEnvironmentVariable, InternalParsingErrors> {
+): Result<playbook.EnvironmentVariable, InternalParsingErrors> {
   if (entry.from !== "environment") {
     return makeErrorResult("unknown env from");
   }
 
-  return result<playbook.PlaybookEnvironmentVariable>({
+  return result<playbook.EnvironmentVariable>({
     name: value(entry.name),
     from: value(entry.from),
     required: value(entry.required),
@@ -360,7 +360,7 @@ function parseCtxVariables(
   oas: BundledSwaggerOrOasSpec,
   file: scan.ConfigurationFileBundle,
   entry: scan.CtxVariables
-): Result<playbook.Environment, InternalParsingErrors> {
+): Result<playbook.OperationEnvironment, InternalParsingErrors> {
   return [entry, undefined];
 }
 

@@ -8,7 +8,7 @@ import {
   HttpMethod,
   deref,
 } from "@xliic/openapi";
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 
 import { TabContainer } from "../../../../new-components/Tabs";
 import ParameterGroup from "../parameters/ParameterGroup";
@@ -37,7 +37,7 @@ export default function OperationTabs({
   availableVariables,
 }: {
   oas: BundledSwaggerOrOasSpec;
-  credentials: playbook.Credentials;
+  credentials: Playbook.Credentials;
   settings?: JSX.Element;
   path: string;
   method: HttpMethod;
@@ -56,7 +56,7 @@ export default function OperationTabs({
 
 function makeOasTabs(
   oas: OpenApi30.BundledSpec,
-  credentials: playbook.Credentials,
+  credentials: Playbook.Credentials,
   path: string,
   method: HttpMethod,
   availableVariables: string[],
@@ -156,7 +156,7 @@ function makeOasTabs(
 
 function makeSwaggerTabs(
   oas: Swagger.BundledSpec,
-  credentials: playbook.Credentials,
+  credentials: Playbook.Credentials,
   path: string,
   method: HttpMethod,
   availableVariables: string[],

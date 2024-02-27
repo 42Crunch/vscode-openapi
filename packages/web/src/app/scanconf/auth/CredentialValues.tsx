@@ -1,5 +1,5 @@
 import * as Tabs from "@radix-ui/react-tabs";
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import styled from "styled-components";
 import Input from "../../../components/Input";
@@ -26,15 +26,15 @@ export default function CredentialValues({
   const operationIds = Object.keys(playbook.operations);
   const requestIds = Object.keys(playbook.requests || {});
 
-  const removeStage = (location: playbook.StageLocation) => dispatch(actions.removeStage(location));
+  const removeStage = (location: Playbook.StageLocation) => dispatch(actions.removeStage(location));
 
-  const saveStage = (location: playbook.StageLocation, stage: playbook.StageReference) =>
+  const saveStage = (location: Playbook.StageLocation, stage: Playbook.StageReference) =>
     dispatch(actions.saveOperationReference({ location, reference: stage }));
 
-  const moveStage = (location: playbook.StageLocation, to: number) =>
+  const moveStage = (location: Playbook.StageLocation, to: number) =>
     dispatch(actions.moveStage({ location, to }));
 
-  const addStage = (container: playbook.StageContainer, ref: playbook.RequestRef) => {
+  const addStage = (container: Playbook.StageContainer, ref: Playbook.RequestRef) => {
     dispatch(
       actions.addStage({
         container,
@@ -68,7 +68,7 @@ export default function CredentialValues({
           <Requests>
             <Scenario
               oas={oas}
-              stages={method.value.requests as playbook.StageReference[]}
+              stages={method.value.requests as Playbook.StageReference[]}
               container={{
                 container: "credential",
                 group: group,
@@ -106,7 +106,7 @@ export default function CredentialValues({
       menu={
         <NewValueDialog
           existing={getValues("methods").map((value: any) => value.key as string)}
-          onAddCredentialValue={(name: string, value: playbook.CredentialMethod) => {
+          onAddCredentialValue={(name: string, value: Playbook.CredentialMethod) => {
             append({ key: name, value: value });
             dispatch(actions.selectSubcredential(name));
           }}

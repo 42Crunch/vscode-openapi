@@ -2,7 +2,7 @@ import { FieldValues } from "react-hook-form";
 import styled from "styled-components";
 import * as z from "zod";
 
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import Input from "../../../components/Input";
@@ -15,7 +15,7 @@ export default function NewValueDialog({
   existing,
 }: {
   existing: string[];
-  onAddCredentialValue: (name: string, value: playbook.CredentialMethod) => void;
+  onAddCredentialValue: (name: string, value: Playbook.CredentialMethod) => void;
 }) {
   const defaultValues = { name: "", value: "" };
 

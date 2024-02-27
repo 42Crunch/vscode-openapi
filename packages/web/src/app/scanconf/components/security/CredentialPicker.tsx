@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { OpenApi30, Swagger } from "@xliic/openapi";
 
@@ -19,7 +19,7 @@ export default function CredentialPicker({
 }: {
   schemeName: string;
   scheme: OpenApi30.SecurityScheme | Swagger.SecurityScheme;
-  credentials: playbook.Credentials;
+  credentials: Playbook.Credentials;
   value: string;
   onChange: (value: string | undefined) => void;
 }) {
@@ -68,7 +68,7 @@ const Manage = styled.li`
   }
 `;
 
-function flattenCredentials(credentials: playbook.Credentials) {
+function flattenCredentials(credentials: Playbook.Credentials) {
   return Object.entries(credentials)
     .map(([credentialName, credential]) => {
       return Object.entries(credential.methods || {}).map(([methodName, method]) => {

@@ -3,7 +3,7 @@ import { FieldValues } from "react-hook-form";
 
 import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 import { OpenApi30, HttpMethod, deref } from "@xliic/openapi";
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import {
   TryitParameterValues,
   TryitSecurityAllValues,
@@ -120,7 +120,7 @@ export function generateSecurityValue(security: OpenApi30.SecurityScheme): Tryit
   return "";
 }
 
-export function wrapPlaybookStage(stage: playbook.StageReference): Record<string, any> {
+export function wrapPlaybookStage(stage: Playbook.StageReference): Record<string, any> {
   stage = simpleClone(stage);
   return {
     ...stage,
@@ -131,17 +131,17 @@ export function wrapPlaybookStage(stage: playbook.StageReference): Record<string
   };
 }
 
-export function unwrapPlaybookStage(stage: FieldValues): playbook.StageReference {
+export function unwrapPlaybookStage(stage: FieldValues): Playbook.StageReference {
   return {
     ...stage,
     fuzzing: stage.fuzzing === true ? true : undefined,
     expectedResponse: stage.expectedResponse !== "" ? stage.expectedResponse : undefined,
     environment: unwrapEnvironment(stage.environment),
     responses: unwrapResponses(stage.responses),
-  } as playbook.StageReference;
+  } as Playbook.StageReference;
 }
 
-export function wrapPlaybookRequest(stage: playbook.StageContent): Record<string, any> {
+export function wrapPlaybookRequest(stage: Playbook.StageContent): Record<string, any> {
   stage = simpleClone(stage);
 
   return {
@@ -161,7 +161,7 @@ export function wrapPlaybookRequest(stage: playbook.StageContent): Record<string
 }
 
 export function wrapExternalPlaybookRequest(
-  stage: playbook.ExternalStageContent
+  stage: Playbook.ExternalStageContent
 ): Record<string, any> {
   stage = simpleClone(stage);
 
@@ -176,7 +176,7 @@ export function wrapExternalPlaybookRequest(
   };
 }
 
-function wrapEnvironment(environment: playbook.Environment | undefined) {
+function wrapEnvironment(environment: Playbook.OperationEnvironment | undefined) {
   const wrapped = Object.entries(environment || {}).map(([key, value]) => ({
     key,
     value,
@@ -185,7 +185,7 @@ function wrapEnvironment(environment: playbook.Environment | undefined) {
   return wrapped;
 }
 
-function wrapResponses(responses: playbook.Responses | undefined) {
+function wrapResponses(responses: Playbook.Responses | undefined) {
   return Object.entries(responses || {}).map(([key, value]) => {
     return {
       key,
@@ -197,8 +197,8 @@ function wrapResponses(responses: playbook.Responses | undefined) {
   });
 }
 
-function unwrapResponses(data: any): playbook.Responses {
-  const result: playbook.Responses = {};
+function unwrapResponses(data: any): Playbook.Responses {
+  const result: Playbook.Responses = {};
   for (const { key, value } of data) {
     result[key] = {
       ...value,
@@ -208,7 +208,7 @@ function unwrapResponses(data: any): playbook.Responses {
   return result;
 }
 
-function wrapVariableAssignments(assignments: playbook.VariableAssignments | undefined) {
+function wrapVariableAssignments(assignments: Playbook.VariableAssignments | undefined) {
   return Object.entries(assignments || {}).map(([key, value]) => {
     return {
       key,
@@ -217,15 +217,15 @@ function wrapVariableAssignments(assignments: playbook.VariableAssignments | und
   });
 }
 
-function unwrapVariableAssignments(data: any): playbook.VariableAssignments {
-  const result: playbook.VariableAssignments = {};
+function unwrapVariableAssignments(data: any): Playbook.VariableAssignments {
+  const result: Playbook.VariableAssignments = {};
   for (const { key, value } of data) {
     result[key] = value;
   }
   return result;
 }
 
-export function unwrapPlaybookRequest(request: FieldValues): playbook.StageContent {
+export function unwrapPlaybookRequest(request: FieldValues): Playbook.StageContent {
   request = simpleClone(request);
   return {
     ref: undefined,
@@ -246,7 +246,7 @@ export function unwrapPlaybookRequest(request: FieldValues): playbook.StageConte
   };
 }
 
-export function unwrapExternalPlaybookRequest(request: FieldValues): playbook.ExternalStageContent {
+export function unwrapExternalPlaybookRequest(request: FieldValues): Playbook.ExternalStageContent {
   request = simpleClone(request);
   return {
     request: {
@@ -262,8 +262,8 @@ export function unwrapExternalPlaybookRequest(request: FieldValues): playbook.Ex
   };
 }
 
-function unwrapEnvironment(data: any): playbook.Environment {
-  const environment: playbook.Environment = {};
+function unwrapEnvironment(data: any): Playbook.OperationEnvironment {
+  const environment: Playbook.OperationEnvironment = {};
   for (const item of data) {
     environment[item.key] = convertToType(item.value, item.type);
   }

@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useState } from "react";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { Credentials, AuthorizationTests } from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 
 import { Plus } from "../../../../icons";
 import AuthorizationTestCombo from "./AuthorizationTestCombo";
@@ -14,9 +14,9 @@ export default function AddAuthorizationTest({
   credentials,
   onSelect,
 }: {
-  authorizationTests: AuthorizationTests;
+  authorizationTests: Playbook.AuthorizationTests;
   auth: string[] | undefined;
-  credentials: Credentials;
+  credentials: Playbook.Credentials;
   existing: string[];
   onSelect: (test: string) => void;
 }) {
@@ -66,7 +66,7 @@ const Container = styled.div`
 `;
 
 function isMatchingAuth(
-  credentials: Credentials,
+  credentials: Playbook.Credentials,
   auths: string[] | undefined,
   credential: string
 ): boolean {

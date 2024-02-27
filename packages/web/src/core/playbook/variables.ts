@@ -2,7 +2,8 @@ import jsf from "json-schema-faker";
 
 import { LookupFailure, LookupResult, ReplacementResult } from "@xliic/common/env";
 import { OpenApi30, Swagger, BundledSwaggerOrOasSpec, HttpMethod, isOpenapi } from "@xliic/openapi";
-import * as playbook from "@xliic/common/playbook";
+import { Environment } from "@xliic/common/env";
+import { Playbook } from "@xliic/scanconf";
 import { Path, simpleClone } from "@xliic/preserving-json-yaml-parser";
 import { deref } from "@xliic/openapi";
 
@@ -29,22 +30,22 @@ export const ENV_VAR_REGEX = () => /{{([\w\-$]+)}}/g;
 export const ENTIRE_ENV_VAR_REGEX = () => /^{{([\w\-$]+)}}$/;
 
 export function replaceEnvironmentVariables(
-  environment: playbook.Environment,
+  environment: Environment,
   envStack: PlaybookEnvStack
-): ReplacementResult<playbook.Environment> {
+): ReplacementResult<Environment> {
   return replaceObject(environment, envStack, () => ({ body: undefined, parameters: undefined }));
 }
 
 export function replaceRequestVariables(
   oas: BundledSwaggerOrOasSpec,
-  request: playbook.CRequest | playbook.ExternalCRequest,
+  request: Playbook.CRequest | Playbook.ExternalCRequest,
   operation: OpenApi30.Operation | Swagger.Operation | undefined,
   envStack: PlaybookEnvStack
-): ReplacementResult<playbook.CRequest | playbook.ExternalCRequest> {
+): ReplacementResult<Playbook.CRequest | Playbook.ExternalCRequest> {
   let fake: { body: unknown; parameters: unknown };
   const fakeMaker: FakeMaker = (location: Path) => {
     if (fake === undefined) {
-      fake = createFake(oas, operation, (request as playbook.CRequest).path, request.method);
+      fake = createFake(oas, operation, (request as Playbook.CRequest).path, request.method);
     }
     return fake;
   };

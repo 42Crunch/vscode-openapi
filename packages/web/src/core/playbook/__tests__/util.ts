@@ -1,4 +1,4 @@
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import { Scanconf, parse } from "@xliic/scanconf";
 
 import { assert, expect } from "vitest";
@@ -23,7 +23,7 @@ export function parseScenario(oas: any, scenario: Scanconf.ConfigurationFileBund
 
 export async function runScenario(
   oas: any,
-  file: playbook.PlaybookBundle,
+  file: Playbook.Bundle,
   name: string,
   vars?: PlaybookEnv
 ): Promise<PlaybookExecutorStep[]> {

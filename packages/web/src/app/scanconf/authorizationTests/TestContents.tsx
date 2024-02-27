@@ -1,8 +1,8 @@
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 
 import DownshiftSelect from "../../../new-components/fat-fields/DownshiftSelect";
 
-export default function TestContents({ credentials }: { credentials: playbook.Credentials }) {
+export default function TestContents({ credentials }: { credentials: Playbook.Credentials }) {
   const options = flattenCredentials(credentials).map(({ name }) => ({ label: name, value: name }));
 
   return (
@@ -23,7 +23,7 @@ export default function TestContents({ credentials }: { credentials: playbook.Cr
   );
 }
 
-function flattenCredentials(credentials: playbook.Credentials) {
+function flattenCredentials(credentials: Playbook.Credentials) {
   return Object.entries(credentials)
     .map(([credentialName, credential]) => {
       return Object.entries(credential.methods || {}).map(([methodName, method]) => {

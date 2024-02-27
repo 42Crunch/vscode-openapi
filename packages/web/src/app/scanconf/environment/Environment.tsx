@@ -1,4 +1,4 @@
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import { makeEnvEnv } from "../../../core/playbook/execute";
 import Form from "../../../new-components/Form";
 import { useAppDispatch, useAppSelector } from "../store";
@@ -39,14 +39,14 @@ export default function Environment({ name }: { name: string }) {
   );
 }
 
-function wrapEnvironment(env: playbook.PlaybookEnvironment) {
+function wrapEnvironment(env: Playbook.Environment) {
   return {
     variables: Object.entries(env.variables).map(([key, value]) => ({ key, value })),
   };
 }
 
-function unwrapEnvironment(data: any): playbook.PlaybookEnvironment {
-  const env: playbook.PlaybookEnvironment = {
+function unwrapEnvironment(data: any): Playbook.Environment {
+  const env: Playbook.Environment = {
     variables: {},
   };
 

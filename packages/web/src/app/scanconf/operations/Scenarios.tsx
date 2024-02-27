@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 
 import { Menu, MenuItem } from "../../../new-components/Menu";
 import { TabContainer } from "../../../new-components/Tabs";
@@ -21,14 +21,14 @@ export default function Scenarios({ operationId }: { operationId: string }) {
 
   const setScenarioId = (scenarioId: number) => dispatch(localActions.setScenarioId(scenarioId));
 
-  const saveStage = (location: playbook.StageLocation, stage: playbook.StageReference) =>
+  const saveStage = (location: Playbook.StageLocation, stage: Playbook.StageReference) =>
     dispatch(actions.saveOperationReference({ location, reference: stage }));
-  const removeStage = (location: playbook.StageLocation) => dispatch(actions.removeStage(location));
+  const removeStage = (location: Playbook.StageLocation) => dispatch(actions.removeStage(location));
 
-  const moveStage = (location: playbook.StageLocation, to: number) =>
+  const moveStage = (location: Playbook.StageLocation, to: number) =>
     dispatch(actions.moveStage({ location, to }));
 
-  const addStage = (container: playbook.StageContainer, ref: playbook.RequestRef) => {
+  const addStage = (container: Playbook.StageContainer, ref: Playbook.RequestRef) => {
     dispatch(
       actions.addStage({
         container,
@@ -53,7 +53,7 @@ export default function Scenarios({ operationId }: { operationId: string }) {
       <Container>
         <Scenario
           oas={oas}
-          stages={scenario.requests as playbook.StageReference[]}
+          stages={scenario.requests as Playbook.StageReference[]}
           container={{ container: "operationScenarios", operationId, scenarioIndex }}
           executionResult={findResult(mockResult, "operationScenarios")}
           saveStage={saveStage}

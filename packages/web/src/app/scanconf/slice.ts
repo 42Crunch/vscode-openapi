@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import { GeneralError } from "@xliic/common/error";
 import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/openapi";
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import { LoadScanconfMessage } from "@xliic/common/playbook";
 import { Result } from "@xliic/result";
 import { parse } from "@xliic/scanconf";
@@ -11,7 +11,7 @@ import { showScanconfOperation } from "./actions";
 
 export type State = {
   oas: BundledSwaggerOrOasSpec;
-  playbook: playbook.PlaybookBundle;
+  playbook: Playbook.Bundle;
   gerror?: GeneralError;
   dirty: boolean;
   servers: string[];
@@ -86,7 +86,7 @@ export const slice = createSlice({
 
     saveScanconf: (state) => {},
 
-    saveSettings: (state, { payload: settings }: PayloadAction<playbook.RuntimeConfiguration>) => {
+    saveSettings: (state, { payload: settings }: PayloadAction<Playbook.RuntimeConfiguration>) => {
       state.playbook.runtimeConfiguration = { ...state.playbook.runtimeConfiguration, ...settings };
     },
 
@@ -95,18 +95,18 @@ export const slice = createSlice({
       {
         payload: { ref, stage },
       }: PayloadAction<{
-        ref: playbook.RequestRef;
-        stage: playbook.StageContent | playbook.ExternalStageContent;
+        ref: Playbook.RequestRef;
+        stage: Playbook.StageContent | Playbook.ExternalStageContent;
       }>
     ) => {
       if (ref.type === "operation") {
-        state.playbook.operations[ref.id].request = stage as playbook.StageContent;
+        state.playbook.operations[ref.id].request = stage as Playbook.StageContent;
       } else if (state.playbook.requests) {
         state.playbook.requests[ref.id] = stage;
       }
     },
 
-    removeRequest: (state, { payload: ref }: PayloadAction<playbook.RequestRef>) => {
+    removeRequest: (state, { payload: ref }: PayloadAction<Playbook.RequestRef>) => {
       // only 'request' requests can be deleted
       if (ref.type === "request") {
         if (state.playbook.requests?.[ref.id] !== undefined) {
@@ -119,7 +119,7 @@ export const slice = createSlice({
       state,
       {
         payload: { group, id, credential },
-      }: PayloadAction<{ group: number; id: string; credential: playbook.Credential }>
+      }: PayloadAction<{ group: number; id: string; credential: Playbook.Credential }>
     ) => {
       const firstAvailable = Object.keys(credential.methods || {})[0];
       if (
@@ -140,7 +140,7 @@ export const slice = createSlice({
       state,
       {
         payload: { name, environment },
-      }: PayloadAction<{ name: string; environment: playbook.PlaybookEnvironment }>
+      }: PayloadAction<{ name: string; environment: Playbook.Environment }>
     ) => {
       state.playbook.environments[name] = environment;
     },
@@ -149,7 +149,7 @@ export const slice = createSlice({
       state,
       {
         payload: { credentialGroup, id, credential },
-      }: PayloadAction<{ credentialGroup: number; id: string; credential: playbook.Credential }>
+      }: PayloadAction<{ credentialGroup: number; id: string; credential: Playbook.Credential }>
     ) => {
       // check if no credential groups exists
       if (state.playbook.authenticationDetails[credentialGroup] === undefined) {
@@ -203,7 +203,7 @@ export const slice = createSlice({
       state,
       {
         payload: { id, test },
-      }: PayloadAction<{ id: string; test: playbook.AuthenticationSwappingTest }>
+      }: PayloadAction<{ id: string; test: Playbook.AuthenticationSwappingTest }>
     ) => {
       state.playbook.authorizationTests[id] = test;
     },
@@ -212,7 +212,7 @@ export const slice = createSlice({
       state,
       {
         payload: { id, test },
-      }: PayloadAction<{ id: string; test: playbook.AuthenticationSwappingTest }>
+      }: PayloadAction<{ id: string; test: Playbook.AuthenticationSwappingTest }>
     ) => {
       state.playbook.authorizationTests[id] = test;
     },
@@ -231,8 +231,8 @@ export const slice = createSlice({
       {
         payload: { location, reference },
       }: PayloadAction<{
-        location: playbook.StageLocation;
-        reference: playbook.StageReference;
+        location: Playbook.StageLocation;
+        reference: Playbook.StageReference;
       }>
     ) => {
       getStageContainer(state.playbook, location)[location.stageIndex] = reference;
@@ -241,7 +241,7 @@ export const slice = createSlice({
       state,
       {
         payload: { container, stage },
-      }: PayloadAction<{ container: playbook.StageContainer; stage: playbook.StageReference }>
+      }: PayloadAction<{ container: Playbook.StageContainer; stage: Playbook.StageReference }>
     ) => {
       getStageContainer(state.playbook, container).push(stage);
     },
@@ -251,14 +251,14 @@ export const slice = createSlice({
       {
         payload: { location, to },
       }: PayloadAction<{
-        location: playbook.StageLocation;
+        location: Playbook.StageLocation;
         to: number;
       }>
     ) => {
       arrayMoveMutable(getStageContainer(state.playbook, location), location.stageIndex, to);
     },
 
-    removeStage: (state, { payload }: PayloadAction<playbook.StageLocation>) => {
+    removeStage: (state, { payload }: PayloadAction<Playbook.StageLocation>) => {
       const container = getStageContainer(state.playbook, payload);
       container.splice(payload.stageIndex, 1);
     },
@@ -305,9 +305,9 @@ export const slice = createSlice({
 });
 
 function getStageContainer(
-  playbook: playbook.PlaybookBundle,
-  container: playbook.StageContainer
-): playbook.Stage[] {
+  playbook: Playbook.Bundle,
+  container: Playbook.StageContainer
+): Playbook.Stage[] {
   if (container.container === "operationScenarios") {
     return playbook.operations[container.operationId].scenarios[container.scenarioIndex].requests;
   } else if (container.container === "operationBefore") {

@@ -3,7 +3,7 @@ import { useDrop } from "react-dnd";
 import styled from "styled-components";
 
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { PlaybookResult } from "../components/scenario/types";
@@ -22,19 +22,19 @@ export default function Scenario({
   requests,
 }: {
   oas: BundledSwaggerOrOasSpec;
-  stages: playbook.StageReference[];
-  container: playbook.StageContainer;
+  stages: Playbook.StageReference[];
+  container: Playbook.StageContainer;
   executionResult?: PlaybookResult;
-  saveStage: (location: playbook.StageLocation, stage: playbook.StageReference) => void;
-  removeStage: (location: playbook.StageLocation) => void;
-  moveStage: (location: playbook.StageLocation, to: number) => void;
+  saveStage: (location: Playbook.StageLocation, stage: Playbook.StageReference) => void;
+  removeStage: (location: Playbook.StageLocation) => void;
+  moveStage: (location: Playbook.StageLocation, to: number) => void;
   fuzzing?: boolean;
-  operations: playbook.PlaybookBundle["operations"];
-  requests: playbook.PlaybookBundle["requests"];
+  operations: Playbook.Bundle["operations"];
+  requests: Playbook.Bundle["requests"];
 }) {
-  const save = (location: playbook.StageLocation) => (stage: playbook.StageReference) =>
+  const save = (location: Playbook.StageLocation) => (stage: Playbook.StageReference) =>
     saveStage(location, stage);
-  const remove = (location: playbook.StageLocation) => () => removeStage(location);
+  const remove = (location: Playbook.StageLocation) => () => removeStage(location);
 
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "stage",
@@ -56,7 +56,7 @@ export default function Scenario({
             {isOver && <StageDropTarget moveStage={moveStage} destinationIndex={stageIndex} />}
             <Stage
               oas={oas}
-              stage={stage as playbook.StageReference}
+              stage={stage as Playbook.StageReference}
               result={executionResult?.results?.[stageIndex]}
               saveStage={save(location)}
               removeStage={remove(location)}
@@ -77,7 +77,7 @@ function StageDropTarget({
   moveStage,
 }: {
   destinationIndex: number;
-  moveStage: (from: playbook.StageLocation, to: number) => void;
+  moveStage: (from: Playbook.StageLocation, to: number) => void;
 }) {
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "stage",
