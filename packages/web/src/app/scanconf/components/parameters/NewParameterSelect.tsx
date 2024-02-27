@@ -2,17 +2,20 @@ import styled from "styled-components";
 import { Parameter } from "./ParameterRow";
 import { useWatch } from "react-hook-form";
 import DownshiftSelect from "../../../../new-components/DownshiftSelect";
+import DownshiftComboNewItemMenu from "../../../../new-components/DownshiftComboNewItemMenu";
 
 export default function NewParameterSelect({
   name,
   group,
   onSelection,
   placeholder,
+  allowUnknown,
 }: {
   name: string;
   placeholder: string;
   group: Record<string, Parameter>;
   onSelection: (name: string, parameter: Parameter) => void;
+  allowUnknown?: boolean;
 }) {
   const values = useWatch({ name });
   const parameterNames = Object.keys(group);
@@ -30,24 +33,36 @@ export default function NewParameterSelect({
     (name) => arrayParameterNames.includes(name) || !existingValuesNames.includes(name)
   );
 
-  const options = parameterNames.map((name) => ({
-    label: name,
-    value: name,
-    disabled: !canBeAddedNames.includes(name),
-  }));
-
   return (
     <Container>
       <div>
-        <DownshiftSelect
-          placeholder={placeholder}
-          options={options}
-          onSelectedItemChange={(selection) => {
-            if (selection) {
-              onSelection(selection.value, group[selection.value]);
-            }
-          }}
-        />
+        {allowUnknown && (
+          <DownshiftComboNewItemMenu
+            placeholder={placeholder}
+            options={parameterNames.filter((name) => canBeAddedNames.includes(name))}
+            onSelectedItemChange={(item) => {
+              if (item) {
+                onSelection(item, group[item]);
+              }
+            }}
+          />
+        )}
+
+        {!allowUnknown && (
+          <DownshiftSelect
+            placeholder={placeholder}
+            options={parameterNames.map((name) => ({
+              label: name,
+              value: name,
+              disabled: !canBeAddedNames.includes(name),
+            }))}
+            onSelectedItemChange={(selection) => {
+              if (selection) {
+                onSelection(selection.value, group[selection.value]);
+              }
+            }}
+          />
+        )}
       </div>
     </Container>
   );

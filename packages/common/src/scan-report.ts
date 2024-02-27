@@ -6,13 +6,17 @@
  */
 
 /**
+ * An array of HTTP response status codes that the scan expects for the request.
+ */
+export type ResponseHttpStatusExpected = string[];
+/**
  * A global summary of the scan report.
  */
 export type GlobalSummary = GlobalSummary1 & {
   /**
-   * The UUID of the OpenAPI file in the system.
+   * The ID of the API in the 42Crunch platform.
    */
-  openapiId: string;
+  apiID?: string;
   /**
    * Scan report name. Can be set with SCAN42C_NAME
    */
@@ -43,194 +47,219 @@ export type GlobalSummary = GlobalSummary1 & {
    * The state in which the scan finished.
    */
   state:
-    | "done"
+    | "success"
     | "oasInvalid"
     | "configurationInvalid"
     | "apiUnreachable"
-    | "oasComplex"
+    | "oasTooComplex"
     | "issuesLimitReached"
     | "apiTimeoutLimitReached"
     | "maxMemoryReached"
     | "reportSizeExceeded"
-    | "maxScanTimeReached";
+    | "maxScanTimeReached"
+    | "runtimePreconditionFailed";
   /**
    * An exit code (index) that shows how the scan process finished the task.
    */
   exitCode: number;
-};
-export type GlobalSummary1 = PathSummary;
-/**
- * A path summary of the scan report.
- */
-export type PathSummary = PathSummary1 & {
   /**
-   * A summary of the happy path requests that the scan ran.
+   * A summary of the scenario requests that the scan ran.
    */
-  happyPathsTested: {
-    /**
-     * Total number of happy path requests that would have been possible to generate based on the OpenAPI definition of the API.
-     */
-    total: number;
-    /**
-     * How many happy path requests could be generated after applying the defined scan configuration on top of the OpenAPI definition of the API.
-     */
-    estimated: number;
-    /**
-     * How many happy path requests the scan executed.
-     */
-    executed: number;
-    /**
-     * How many of the executed happy path requests failed. This could have been, for example, because of configuration errors, connectivity problems, or othe errors. Failed happy path requests prevent creating the actual test requests during the scan because Conformance Scan cannot establish the baseline for API behavior.
-     */
-    failed: number;
+  scenarios: {
+    estimated: EstimatedTest;
+    skipped: SkippedOperation;
+    executed: ExecutedTest;
   };
   /**
    * This property gives a quick overview if all happy path requests were successful ('false'), or if some failed ('true') either because the API returned a wrong HTTP response status code or some other error occurred. This may be useful information for gauging the reliability of the results in the rest of the report: depending on your API, a failed happy path request on one operation could affect other operations, especially if there are a lot of dependencies.
    */
-  errorsOccurred?: boolean;
+  scenarioErrorsOccured?: boolean;
   /**
    * A summary of operations defined in the OpenAPI definition of the scanned API.
    */
-  operationsTested: {
+  operations: {
     /**
-     * Total number of operations defined in the OpenAPI file.
+     * Number of operations where the happy path is a success and all tests have raised no errors based on customization.
      */
-    total: number;
+    success: number;
     /**
-     * How many of operations could be tested after applying the defined scan configuration on top of the OpenAPI definition of the API.
+     * Number of operations where the happy path is a success and at least one test has raised an error based on customizations
      */
-    estimated: number;
+    failure: number;
     /**
-     * How many operations the configuration skipped.
+     * Number of operations where the happy path is a failure
      */
-    skipped: number;
-    /**
-     * How many operations the scan executed.
-     */
-    executed: number;
-    /**
-     * How many of the executed happy path requests failed. This could have been, for example, because of configuration errors, connectivity problems, or othe errors. Failed happy path requests prevent creating the actual test requests during the scan because Conformance Scan cannot establish the baseline for API behavior.
-     */
-    failed: number;
+    happyPathFailure: number;
+    estimated: EstimatedTest;
+    skipped: SkippedOperation;
+    executed: {
+      /**
+       * How many operations the scan executed.
+       */
+      total: number;
+      /**
+       * How many of the executed operations requests succeded.
+       */
+      success: number;
+      /**
+       * How many of the executed operations requests failed. This could have been, for example, because of configuration errors, connectivity problems, or othe errors. Failed happy path requests prevent creating the actual test requests during the scan because Conformance Scan cannot establish the baseline for API behavior.
+       */
+      failed: number;
+    };
   };
+  methodNotAllowedTestRequests?: TestRequestsSummary;
+  [k: string]: unknown;
 };
-export type PathSummary1 = OperationSummary;
-/**
- * A summary of the actual test requests (as opposed to happy path requests) executed. Conformance test requests are request that scan automatically tests for (as opposed to custom test requests).
- */
-export type ConformanceTestRequestsSummary = CustomTestRequestsSummary & {
+export type GlobalSummary1 = OperationSummary;
+export type RequestLogReport = {
   /**
-   * Total number of test requests that would have been possible to generate based on the OpenAPI definition of the API.
+   * The unique ID of the request, present in the associated header 'x-scan-request-id' (default) or specified by the user.
    */
-  total: number;
-};
+  id?: string;
+  /**
+   * The unique ID of the scenario, present in the associated header 'x-scan-scenario-id' (default) or specified by the user.
+   */
+  scenarioId?: string;
+  /**
+   * The timestamp when the scan sent the request to the API.
+   */
+  date: string;
+  /**
+   * The content type of the request body. The string is empty if no content type is specified. Can be indexed.
+   */
+  contentType: string | number;
+  /**
+   * The length of the body in the request.
+   */
+  bodyLength: number;
+  /**
+   * The full URL of the request including query parameters
+   */
+  url: string;
+  /**
+   * Array of credentials used in the request. The names in the array is included in the cURL request.
+   *
+   * @minItems 1
+   */
+  auth?: [string, ...string[]];
+  /**
+   * Base64 of the response received from the API. The body can be skipped if it is too large.
+   */
+  rawPayload?: string;
+  /**
+   * The cURL of the sent request. The body can be omitted if it exceeds the size limit. In this case, the property 'curlBodySkipped' is set to 'true'.
+   */
+  curl: string;
+  /**
+   * If this property is 'true', the body was omitted from the cURL request because it exceeds the size limit.
+   */
+  curlBodySkipped?: boolean;
+} & RequestLogReport1;
+export type RequestLogReport1 = {
+  /**
+   * The unique ID of the request, present in the associated header 'x-scan-request-id' (default) or specified by the user.
+   */
+  id?: string;
+  /**
+   * The unique ID of the scenario, present in the associated header 'x-scan-scenario-id' (default) or specified by the user.
+   */
+  scenarioId?: string;
+  /**
+   * The timestamp when the scan sent the request to the API.
+   */
+  date: string;
+  /**
+   * The content type of the request body. The string is empty if no content type is specified. Can be indexed.
+   */
+  contentType: string | number;
+  /**
+   * The length of the body in the request.
+   */
+  bodyLength: number;
+  /**
+   * The full URL of the request including query parameters
+   */
+  url: string;
+  /**
+   * Array of credentials used in the request. The names in the array is included in the cURL request.
+   *
+   * @minItems 1
+   */
+  auth?: [string, ...string[]];
+  /**
+   * Base64 of the response received from the API. The body can be skipped if it is too large.
+   */
+  rawPayload?: string;
+  /**
+   * The cURL of the sent request. The body can be omitted if it exceeds the size limit. In this case, the property 'curlBodySkipped' is set to 'true'.
+   */
+  curl: string;
+  /**
+   * If this property is 'true', the body was omitted from the cURL request because it exceeds the size limit.
+   */
+  curlBodySkipped?: boolean;
+} | null;
+export type ResponseLogReport = {
+  /**
+   * The time elapsed (in milliseconds) between sending the request and receiving the response.
+   */
+  latency: number;
+  /**
+   * The HTTP response status code received from the API (between [100—999]).
+   */
+  httpStatusCode: number;
+  /**
+   * The content type of the request body in the received response. Can be indexed.
+   */
+  contentType: string | number;
+  /**
+   * The length of the body in the received response.
+   */
+  bodyLength: number;
+  /**
+   * Base64 of the response received from the API. The body can be skipped if it is too large.
+   */
+  rawPayload: string;
+} & ResponseLogReport1;
+export type ResponseLogReport1 = {
+  /**
+   * The time elapsed (in milliseconds) between sending the request and receiving the response.
+   */
+  latency: number;
+  /**
+   * The HTTP response status code received from the API (between [100—999]).
+   */
+  httpStatusCode: number;
+  /**
+   * The content type of the request body in the received response. Can be indexed.
+   */
+  contentType: string | number;
+  /**
+   * The length of the body in the received response.
+   */
+  bodyLength: number;
+  /**
+   * Base64 of the response received from the API. The body can be skipped if it is too large.
+   */
+  rawPayload: string;
+} | null;
+/**
+ * An array of results from the test requests. The property 'errorsOnly' in the root report object controls what results are included in the report: if 'errorsOnly' is set to 'true', the report includes only the requests that discovered issues in API implementation; if set to 'false', the report includes results from all sent requests.
+ *
+ * @minItems 0
+ */
+export type TestResults = TestLogReport[];
 
 /**
  * V3.0.0 scan report structure
  */
 export interface ScanReportJSONSchema {
-  runtimeConfiguration?: {
-    /**
-     * The level of detail in logs set for the scan.
-     */
-    logLevel?: "debug" | "info" | "error" | "critical";
-    /**
-     * The destination of all logs produced during the scan. The possible values are'stdout','files', and 'platform'. You can select multiple outputs by adding the character '+' between the values.
-     */
-    logDestination?: string;
-    /**
-     * The maximum size (in bytes) of the log file when the 'logDestination' value includes 'files'.
-     */
-    maxLogFileSize?: number;
-    /**
-     * The name of the header that contains the request ID of the sent request.
-     */
-    headerNameRequestId?: string;
-    /**
-     * The name of the header that contains the scenario ID of the sent request.
-     */
-    headerNameScenarioId?: string;
-    /**
-     * The time interval (in milliseconds) between the requests that the scan sends to the API during a scan.
-     */
-    flowrate?: number;
-    /**
-     * The maximum time (in seconds) that the scan waits for a response from the API. It is not recommended to set this value to '0', because that means the scan would wait forever for the API to respond, causing the scan to hang if the API is unresponsive.
-     */
-    timeout?: number;
-    /**
-     * This setting defines if the scan accepts any certificate presented by the server and any host name in that certificate
-     */
-    tlsInsecureSkipVerify?: boolean;
-    /**
-     * This setting defines if the scan follows the 'HTTP 302 Redirection' response. Maximum of 10 successive redirections are allowed before the scan stops.
-     */
-    followRedirection?: boolean;
-    /**
-     * The number of retry attempts that the scan performs for a happy path request. A successfully performed happy path request is required to establish a baseline before the scan can run any actual test requests on the operation.
-     */
-    happyPathRetry?: number;
-    /**
-     * This setting controls which requests are included in the scan. By default, the scan first sends happy path requests to establish the baseline for how the normal API behavior, then the actual test requests to detect any problems in how the API implementation conforms to the API definition. If you set this setting to 'true', the scan only runs the happy path requests during the scan before stopping, instead of a full scan.
-     */
-    happyPathOnly?: boolean;
-    /**
-     * This setting defines how strictly conformance is enforced on happy path requests. The setting defaults to 'false', meaning that the API must return an expected HTTP status response code, but the response body does not need to conform to the API definition for the happy path request to pass. If set to 'true', strict conformance to API definition is also required for happy path requests: if a returned response body does not conform to the API definition, the happy path request fails. This setting does not affect how the scan analyzes actual test requests: with them, strict conformance is always enforced.
-     */
-    happyPathConformanceStrict?: boolean;
-    /**
-     * The maximum duration (in seconds) allowed for executing the scan. The scan times out if the the execution takes longer.
-     */
-    maxScanTime?: number;
-    /**
-     * A soft limit (in bytes) for the maximum amount of memory that the scan process is allowed to consume.
-     */
-    memoryLimit?: number;
-    /**
-     * The time interval (in seconds) how often the scan process checks the current memory consumption.
-     */
-    memoryTimeSpan?: number;
-    /**
-     * Is the scan report indexed or not. Indexing the report (set to 'true') can reduce the report size, but it may make it less human-readable.
-     */
-    indexed?: boolean;
-    /**
-     * Is the scan report prettified or not. Prettifying the scan report increases its human-readability, but it also increases the report size.
-     */
-    prettify?: boolean;
-    /**
-     * The maximum body size (in bytes) that the scan consumes from an API response, to avoid massive memory consumption.
-     */
-    maxBodySizeScan?: number;
-    /**
-     * The maximum size (in bytes) of the HTTP responses received for a happy path request that is included in the scan report.
-     */
-    maxHttpResponseSizeHappyPathReport?: number;
-    /**
-     * The maximum body size (in bytes) that the scan includes in the scan report for a happy path request.
-     */
-    maxBodySizeHappyPathReport?: number;
-    /**
-     * The maximum size (in bytes) of the HTTP responses received for an actual test request that is included in the scan report.
-     */
-    maxHttpResponseSizeTestReport?: number;
-    /**
-     * The maximum body size (in bytes) that the scan includes in the scan report for an actual test request.
-     */
-    maxBodySizeTestReport?: number;
-    /**
-     * This setting determines what results are included in the scan report. If set to 'true', only test requests that uncovered problems in your API implementation are included in the scan report, to avoid overly large report size. If set to 'false', both requests that uncovered problems and the ones that did not (so where all was good) are included in the scan report, significantly increasing the report size.
-     */
-    issuesOnly?: boolean;
-    /**
-     * The maximum number of problems that the scan can uncover before it must stop. This setting helps to control the report size: you can iterate on scanning your API, and as you fix the problems found in previous scans, the scan keeps including subsequently discovered problems.
-     */
-    maxIssues?: number;
-    /**
-     * The maximum scan report size (in bytes). The scan stops when the size limit is reached.
-     */
-    maxReportSize?: number;
-  };
+  /**
+   * An error table preventing the scan from running.
+   */
+  errors?: string[];
+  runtimeConfiguration?: RuntimeConfiguration;
+  customizations?: Customizations;
   /**
    * Indicates if the report is indexed or not
    */
@@ -262,81 +291,334 @@ export interface ScanReportJSONSchema {
     /**
      * An array of reusable response descriptions.
      */
-    responseDescription: string[];
+    responseDescriptions: string[];
+    [k: string]: unknown;
   };
   /**
    * The version of Conformance Scan that generated the report.
    */
-  scanVersion: "2.0.0" | "2.0.0-beta";
+  scanVersion: string;
   /**
    * The version of the scan report.
    */
-  scanReportVersion?: "3.0.0";
+  scanReportVersion?: string;
   /**
-   * The GitHub commit ID of the scan version that generated the report.
+   * Data related to the execution context of the scan
+   */
+  context?: {
+    /**
+     * type of execution scan performed
+     */
+    execution: "full" | "diff";
+    /**
+     * git reference used to determines the difference in the open api file. Defined when the execution is 'diff'
+     */
+    diffReference?: string;
+    /**
+     * git commit
+     */
+    commit: string;
+    /**
+     * git reference
+     */
+    reference: string;
+    /**
+     * git repository
+     */
+    repository: string;
+    /**
+     * relative path to the scan configuration file/directory in the git repository
+     */
+    scanConfigurationFilePath: string;
+    /**
+     * relative path to the openAPI specification file in the git repository
+     */
+    openAPISpecificationFilePath: string;
+  };
+  /**
+   * The GitHub commit ID (42Crunch format) of the scan version that generated the report.
    */
   commit: string;
   /**
    * The type of environment where the scan has been executed
    */
-  scanType?: "OnPrem" | "Platform";
+  scanType?: "onPrem" | "platform";
   summary: GlobalSummary;
   /**
-   * A map of paths defined in the OpenAPI definition of the API.
+   * A map of operations tested against the method not allowed.
    */
-  paths?: {
+  methodNotAllowed?: {
     /**
-     * A map of operations (OpenAPI definition file + `Method not allowed`).
-     *
      * This interface was referenced by `undefined`'s JSON-Schema definition
-     * via the `patternProperty` "/".
+     * via the `patternProperty` ".*".
      */
     [k: string]: {
-      summary?: PathSummary1;
-      get?: RuntimeOperationReport;
-      put?: RuntimeOperationReport;
-      post?: RuntimeOperationReport;
-      delete?: RuntimeOperationReport;
-      options?: RuntimeOperationReport;
-      head?: RuntimeOperationReport;
-      patch?: RuntimeOperationReport;
-      trace?: RuntimeOperationReport;
+      get?: OperationNotAllowedTested;
+      put?: OperationNotAllowedTested;
+      post?: OperationNotAllowedTested;
+      delete?: OperationNotAllowedTested;
+      options?: OperationNotAllowedTested;
+      head?: OperationNotAllowedTested;
+      patch?: OperationNotAllowedTested;
+      trace?: OperationNotAllowedTested;
+      [k: string]: unknown;
     };
   };
+  /**
+   * A map of operations (OpenAPI definition file + `Method not allowed`
+   */
+  operations?: {
+    [k: string]: RuntimeOperationReport;
+  };
+}
+export interface RuntimeConfiguration {
+  /**
+   * Default environment to be loaded if none is specified at scan runtime
+   */
+  environment?: string;
+  /**
+   * The level of detail in logs set for the scan.
+   */
+  logLevel?: "debug" | "info" | "error" | "critical";
+  /**
+   * The destination of all logs produced during the scan. The possible values are'stdout','files', and 'platform'. You can select multiple outputs by adding the character '+' between the values.
+   */
+  logDestination?: string;
+  /**
+   * The maximum size (in bytes) of the log file when the 'logDestination' value includes 'files'.
+   */
+  logMaxFileSize?: number;
+  /**
+   * The name of the header that contains the request ID of the sent request.
+   */
+  requestHeaderNameRequestId?: string;
+  /**
+   * The name of the header that contains the scenario ID of the sent request.
+   */
+  requestHeaderNameScenarioId?: string;
+  /**
+   * The time interval (in milliseconds) between the requests that the scan sends to the API during a scan.
+   */
+  requestFlowrate?: number;
+  /**
+   * The maximum time (in seconds) that the scan waits for a response from the API. It is not recommended to set this value to '0', because that means the scan would wait forever for the API to respond, causing the scan to hang if the API is unresponsive.
+   */
+  requestTimeout?: number;
+  /**
+   * This setting defines if the scan accepts any certificate presented by the server and any host name in that certificate
+   */
+  requestTlsInsecureSkipVerify?: boolean;
+  /**
+   * This setting defines if the scan follows the 'HTTP 302 Redirection' response. Maximum of 10 successive redirections are allowed before the scan stops.
+   */
+  responseFollowRedirection?: boolean;
+  /**
+   * This setting controls which requests are included in the scan. By default, the scan first sends happy path requests to establish the baseline for how the normal API behavior, then the actual test requests to detect any problems in how the API implementation conforms to the API definition. If you set this setting to 'true', the scan only runs the happy path requests during the scan before stopping, instead of a full scan.
+   */
+  happyPathOnly?: boolean;
+  /**
+   * The maximum duration (in seconds) allowed for executing the scan. The scan times out if the the execution takes longer.
+   */
+  maxScanDuration?: number;
+  /**
+   * A soft limit (in bytes) for the maximum amount of memory that the scan process is allowed to consume.
+   */
+  memoryLimit?: number;
+  /**
+   * The time interval (in seconds) how often the scan process checks the current memory consumption.
+   */
+  memoryTimeSpan?: number;
+  /**
+   * The maximum body size (in bytes) that the scan consumes from an API response, to avoid massive memory consumption.
+   */
+  responseMaxBodySizeScan?: number;
+  /**
+   * Is the scan report indexed or not. Indexing the report (set to 'true') can reduce the report size, but it may make it less human-readable.
+   */
+  reportIndexed?: boolean;
+  /**
+   * Is the scan report prettified or not. Prettifying the scan report increases its human-readability, but it also increases the report size.
+   */
+  reportPrettify?: boolean;
+  /**
+   * The maximum size (in bytes) of the HTTP responses received for a happy path request that is included in the scan report.
+   */
+  reportMaxHttpResponseSizeHappyPath?: number;
+  /**
+   * The maximum body size (in bytes) that the scan includes in the scan report for a happy path request.
+   */
+  reportMaxBodySizeHappyPath?: number;
+  /**
+   * The maximum size (in bytes) of the HTTP responses received for an actual test request that is included in the scan report.
+   */
+  reportMaxHttpResponseSizeTest?: number;
+  /**
+   * The maximum body size (in bytes) that the scan includes in the scan report for an actual test request.
+   */
+  reportMaxBodySizeTest?: number;
+  /**
+   * This setting determines what results are included in the scan report. If set to 'true', only test requests that uncovered problems in your API implementation are included in the scan report, to avoid overly large report size. If set to 'false', both requests that uncovered problems and the ones that did not (so where all was good) are included in the scan report, significantly increasing the report size.
+   */
+  reportIssuesOnly?: boolean;
+  /**
+   * The maximum number of problems that the scan can uncover before it must stop. This setting helps to control the report size: you can iterate on scanning your API, and as you fix the problems found in previous scans, the scan keeps including subsequently discovered problems.
+   */
+  reportMaxIssues?: number;
+  /**
+   * The maximum scan report size (in bytes). The scan stops when the size limit is reached.
+   */
+  reportMaxSize?: number;
+  /**
+   * Generate the corresponding curl command for each tested request. Note: This will increase the report size twofold.
+   */
+  reportGenerateCurlCommand?: boolean;
+}
+/**
+ * Customize scan behavior for happys paths and tests
+ */
+export interface Customizations {
+  happyPaths?: {
+    /**
+     * The number of retry attempts that the scan performs for a happy path request. A successfully performed happy path request is required to establish a baseline before the scan can run any actual test requests on the operation.
+     */
+    retry: number;
+    responsePolicy: ResponsePolicy;
+    httpStatusExpected: ResponseHttpStatusExpected;
+  };
+  tests?: {
+    /**
+     * An array of test IDs to be skipped in the scan, defined at the playbook level.
+     */
+    skippedKeys?: string[];
+    responsePolicy: ResponsePolicy;
+    responseAnalysisBehavior?: {
+      [k: string]: ResponseAnalysisBehavior;
+    };
+  };
+}
+export interface ResponsePolicy {
+  httpStatusExpected?: boolean;
+  mustBeConformant?: boolean;
+}
+/**
+ * Defines what the scan expects regarding the response status code, header and body assessment.
+ *
+ * This interface was referenced by `undefined`'s JSON-Schema definition
+ * via the `patternProperty` ".*".
+ */
+export interface ResponseAnalysisBehavior {
+  httpStatusExpected?: ResponseHttpStatusExpected;
 }
 /**
  * An operation summary of the scan report.
  */
 export interface OperationSummary {
-  conformanceTestRequests: ConformanceTestRequestsSummary;
-  customTestRequests: CustomTestRequestsSummary;
-  authorizationTestRequests: CustomTestRequestsSummary;
+  conformanceTestRequests: TestRequestsSummary;
+  customTestRequests: TestRequestsSummary;
+  authorizationTestRequests: TestRequestsSummary;
   /**
    * The highest severity level in the issues found in the scan.
    */
   criticality: number;
-  issues: ScanSummaryIssues;
-}
-/**
- * A summary of custom requests executed in the scan. Custom requests are user-defined test requests that scan executes in addition to the regular conformance test requests.
- */
-export interface CustomTestRequestsSummary {
   /**
-   * Total number of test requests that would have been possible to generate based on the OpenAPI definition of the API.
+   * Counters that cover all issues during the scan
+   */
+  issues: {
+    /**
+     * A counter for the total number of issues found during the scan.
+     */
+    total?: number;
+    /**
+     * A counter for the total number of OWASP issues found during the scan.
+     */
+    owasp?: number;
+    /**
+     * A counter for critical issues found in the scan.
+     */
+    critical?: number;
+    /**
+     * A counter for high severity issues found in the scan.
+     */
+    high?: number;
+    /**
+     * A counter for medium severity issues found in the scan.
+     */
+    medium?: number;
+    /**
+     * A counter for low severity issues found in the scan.
+     */
+    low?: number;
+    /**
+     * A counter for info (non-severe) issues found in the scan.
+     */
+    info?: number;
+    /**
+     * Group issue counters by category (Conformance/Custom/Authorization/MethodNotAllowed[Only in the root summary]).
+     */
+    issueTypeCounters?: {
+      conformanceTests?: IssueCounters;
+      customTests?: IssueCounters;
+      authorizationTests?: IssueCounters;
+      methodNotAllowedTests?: IssueCounters;
+      [k: string]: unknown;
+    };
+    /**
+     * A map of OWASP API Security Top 10 issue IDs and counters for how many times each found issue was raised in the scan.
+     */
+    owaspCounters?: {
+      /**
+       * How many times a found OWASP API Security Top 10 issue was raised in the scan.
+       *
+       * This interface was referenced by `undefined`'s JSON-Schema definition
+       * via the `patternProperty` ".*".
+       */
+      [k: string]: number;
+    };
+  };
+  [k: string]: unknown;
+}
+export interface TestRequestsSummary {
+  estimated: EstimatedTest;
+  skipped: SkippedTest;
+  executed: ExecutedTest;
+  [k: string]: unknown;
+}
+export interface EstimatedTest {
+  /**
+   * Total number of test requests that would have been possible to generate based on the OpenAPI definition of the API. Null for custom and authorization test
+   */
+  fromSpecification: number | null;
+  /**
+   * Total number of test requests that would have been possible to generate based on the configuration and the OpenAPI definition of the API.
+   */
+  fromConfiguration: number;
+}
+export interface SkippedTest {
+  /**
+   * Total number of test skipped by customization.
+   */
+  fromCustomization: number;
+  /**
+   * Total number of test skipped by configuration.
+   */
+  fromConfiguration: number;
+  /**
+   * Total number of test skipped by happy path. Required except for method not allowed test
+   */
+  fromHappyPaths?: number;
+}
+export interface ExecutedTest {
+  /**
+   * Total number of test executed.
    */
   total?: number;
-  /**
-   * How many test requests could be generated after applying the defined scan configuration on top of the OpenAPI definition of the API.
-   */
-  estimated: number;
-
-  executed: number;
-
-  responses: {
-    expected?: ResponsesOutcome;
-    unexpected?: ResponsesOutcome1;
-    incorrect?: ResponsesOutcome2;
-  };
+  responses?: ResponsesSummary;
+  errors?: ErrorsSummary;
+}
+export interface ResponsesSummary {
+  correct?: ResponsesOutcome;
+  mismatch?: ResponsesOutcome1;
+  defective?: ResponsesOutcome2;
 }
 /**
  * How many requests the scan executed. Any failed happy path requests in the scan reduce this number because scan cannot generate the test request without the baseline from successful happy path request.
@@ -378,140 +660,143 @@ export interface ResponsesOutcome2 {
   notConformant: number;
 }
 /**
- * Counters that cover all issues during the scan
+ * A summary of errors happened
  */
-export interface ScanSummaryIssues {
+export interface ErrorsSummary {
   /**
-   * A counter for the total number of issues found during the scan.
+   * Total number of errors.
    */
-  total?: number;
-  /**
-   * A counter for the total number of owasp issues found during the scan.
-   */
-  totalOwasp?: number;
-  /**
-   * A counter for critical issues found in the scan.
-   */
-  critical?: number;
-  /**
-   * A counter for high severity issues found in the scan.
-   */
-  high?: number;
-  /**
-   * A counter for medium severity issues found in the scan.
-   */
-  medium?: number;
-  /**
-   * A counter for low severity issues found in the scan.
-   */
-  low?: number;
-  /**
-   * A counter for info (non-severe) issues found in the scan.
-   */
-  info?: number;
-  /**
-   * A map of test key (test ID) and the associated counter of the raised issue.
-   */
-  issueTypeCounter?: {
-    /**
-     * How many times the test failed.
-     *
-     * This interface was referenced by `undefined`'s JSON-Schema definition
-     * via the `patternProperty` ".*".
-     */
-    [k: string]: number;
-  };
-  /**
-   * A map of OWASP API Security Top 10 issue IDs and counters for how many times each found issue was raised in the scan.
-   */
-  owaspCounter?: {
-    /**
-     * How many times a found OWASP API Security Top 10 issue was raised in the scan.
-     *
-     * This interface was referenced by `undefined`'s JSON-Schema definition
-     * via the `patternProperty` ".*".
-     */
-    [k: string]: number;
-  };
+  total: number;
+  functional: FunctionalErrorsSummary;
+  technical: TechnicalErrorsSummary;
 }
 /**
- * A report of the scanned operation.
+ * A summary of functional errors happened.
  */
-export interface RuntimeOperationReport {
-  summary?: OperationSummary;
+export interface FunctionalErrorsSummary {
   /**
-   * If set to 'true', the operation was successfully scanned. If set to 'false', there was a problem during the initialization of the operation and it was not scanned.
+   * How many functional errors happened. It can be related to the API's behavior or a wrong flow in the scan configuration.
    */
-  checked: boolean;
-  /**
-   * If the property 'checked' is 'false', this property provides more details on why the operation was not scanned.
-   */
-  reason?: "operation-skipped" | "operation-configuration-invalid";
-  /**
-   * The index of the operation on the execution order list
-   */
-  executionOrderIndex?: number;
-  /**
-   * The 'operationId' defined for the operation in the OpenAPI definition of the API.
-   */
-  operationId?: string;
-  /**
-   * An array of the results from happy path requests.
-   *
-   * @minItems 0
-   */
-  happyPaths?: HappyPathReport[];
-  /**
-   * An array of scan issues. The property 'errorsOnly' in the root report object controls which issues are included in the report: 'true' to include only errors, 'false' to include all sent requests.
-   *
-   * @minItems 0
-   */
-  conformanceRequestIssues?: TestLogReport[];
-  /**
-   * An array of scan issues. The property 'errorsOnly' in the root report object controls which issues are included in the report: 'true' to include only errors, 'false' to include all sent requests.
-   *
-   * @minItems 0
-   */
-  customRequestIssues?: TestLogReport[];
-  /**
-   * An array of scan issues. The property 'errorsOnly' in the root report object controls which issues are included in the report: 'true' to include only errors, 'false' to include all sent requests.
-   *
-   * @minItems 0
-   */
-  authorizationRequestIssues?: TestLogReport[];
+  scanFlow: number;
 }
-export interface HappyPathReport {
-  happyPath?: HappyPathInfoReport;
+/**
+ * A summary of technical errors happened. It can be timeout, tls or connectivity.
+ */
+export interface TechnicalErrorsSummary {
+  /**
+   * How many of the responses received from the API got a timeout
+   */
+  timeout?: number;
+  /**
+   * How many of the responses received connectivity issue with the API
+   */
+  connection?: number;
+  /**
+   * All errors not catched regarding connection or timeout but still related to the communication with the api
+   */
+  other?: number;
+}
+/**
+ * A map of test key (test ID) and the associated counter of the raised issue
+ */
+export interface IssueCounters {
+  /**
+   * How many times the test failed.
+   *
+   * This interface was referenced by `IssueCounters`'s JSON-Schema definition
+   * via the `patternProperty` ".*".
+   */
+  [k: string]: number;
+}
+export interface SkippedOperation {
+  /**
+   * Total number of test requests that would have been possible to generate based on the configuration and the OpenAPI definition of the API.
+   */
+  fromConfiguration: number;
+}
+export interface OperationNotAllowedTested {
+  conformanceRequestsResults?: TestResults;
+}
+/**
+ * The details of a test request that the scan generated and sent to the API.
+ */
+export interface TestLogReport {
+  test?: TestLogInfoReport;
   outcome?: OutcomeReport;
   request?: RequestLogReport;
   response?: ResponseLogReport;
 }
 /**
- * A summary of the executed happy path.
+ * A summary of the executed test
  */
-export interface HappyPathInfoReport {
+export interface TestLogInfoReport {
   /**
-   * A key to identify the happy path outcome.
+   * The key (test ID) to identify the executed test.
    */
-  key?: "happy.path.success" | "happy.path.failure";
+  key?: string;
+  /**
+   * The description of the test. Can be indexed.
+   */
+  description?: string | number;
+  /**
+   * Describes the action done by the scan to turn a successfull request into a test
+   */
+  action?: "omit" | "add" | "fuzz";
+  /**
+   * When the action is 'add' or 'fuzz', the value taken by the scan to turn a successfull request into a test
+   */
+  value?:
+    | unknown[]
+    | {
+        [k: string]: unknown;
+      }
+    | string
+    | number
+    | number
+    | boolean
+    | null;
+  /**
+   * This property is present if the report is indexed, and it lists the parameters to build the property 'testDescription'. For example, for a description 'Hello World', the 'testDescription' will be an index pointing to 'Hello ‘%s’', and the variable ‘%s’ is populated from the item 'World' in the 'testDescriptionParams'.
+   */
+  descriptionParams?: string[];
   /**
    * An array of HTTP response status codes that the scan expected for the happy path request.
    */
   httpStatusExpected?: string[];
   /**
-   * The index of the stage in the scan scenario that is designated as the one where the happy path request must succeed. For example, a scenario might require creating some objects before the happy path request can be tested. The property 'successIndex' allows to separate failing the operation that the happy path request is testing from failing the prerequisite requests, for example, due to a configuration error.
+   * Where the expectations for the returned HTTP status response codes comes from (default expectations, scan rules, other custom definitions like the scenario).
    */
-  successIndex?: number;
+  expectationSource?: "default" | "customizationRule" | "configuration";
+  /**
+   * Mapping between the test key (test ID) and vulnerabilities from the OWASP API Security Top 10
+   */
+  owaspMapping?: string | null;
+  /**
+   * The JSON pointer of the scanned object in the OpenAPI definition file. Can be indexed.
+   */
+  jsonPointer?: string | number;
+  /**
+   * This property provides the path to the instance of the object where the scan found the issue, which together with the JSON pointer helps homing in on the problem, especially with reused components. For example, the scan could found a problem in an object that is comprised of several references to the same reusable schema, but only one of these demonstrates the issue. In this case, the path that stack trace provides shows which of the references has the problem, making it easier to find the correct one to fix.
+   */
+  stackTrace?: string;
 }
 export interface OutcomeReport {
   /**
-   * The index in the scenario where the request has failed. The value '-1' means no errors occurred.
+   * The index in the scenario where the request has failed. Not defined when no errors occurred.
    */
-  failureIndex: number;
+  failureIndex?: string;
+  /**
+   * A unique fingerprint (ID) of the test result that can be used to, for example, track in subsequent scans if the problem has been fixed or not. Only the outcome of the request that was the subject of the scan test gets a fingerprint, the outcomes from any supporting requests sent in the scan scenario or happy path requests do not get a fingerprint.
+   */
+  fingerprint?: string;
   /**
    * The end status of the executed scenario.
    */
-  status: "expected" | "unexpected" | "incorrect";
+  status: "correct" | "mismatch" | "defective" | "error";
+  /**
+   * Error ID
+   */
+  errorType?: "connection" | "timeout" | "other" | "scanFlow";
   /**
    * A description of the encountered error.
    */
@@ -543,112 +828,77 @@ export interface OutcomeReport {
    * The severity of the encountered error. The value '0' means the error is not severe at all.
    */
   criticality: number;
+  /**
+   * Returns the final result of the scenario/test based on customizations
+   */
+  isIssue?: boolean;
 }
-export interface RequestLogReport {
+/**
+ * A report of the scanned operation.
+ *
+ * This interface was referenced by `undefined`'s JSON-Schema definition
+ * via the `patternProperty` ".*".
+ */
+export interface RuntimeOperationReport {
+  summary?: OperationSummary;
   /**
-   * The unique ID of the request, present in the associated header 'x-scan-request-id' (default) or specified by the user.
+   * The relative path to an individual endpoint.
    */
-  id?: string;
+  path: string;
   /**
-   * The unique ID of the scenario, present in the associated header 'x-scan-scenario-id' (default) or specified by the user.
+   * The HTTP verb to an individual endpoint.
    */
-  scenarioId?: string;
+  method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH" | "HEAD" | "TRACE" | "OPTIONS";
   /**
-   * The timestamp when the scan sent the request to the API.
+   * If set to 'true', the operation was successfully fuzzed. If set to 'false', there was a problem during the initialization of the operation and it was not fuzzed.
    */
-  date: string;
+  fuzzed: boolean;
   /**
-   * The content type of the request body. The string is empty if no content type is specified. Can be indexed.
+   * If the property 'fuzzed' is 'false', this property provides more details on why the operation was not fuzzed.
    */
-  contentType: string | number;
+  reason?: "operation-skipped" | "operation-configuration-invalid" | "operation-happy-path-failed";
   /**
-   * The length of the body in the request.
+   * The index of the operation on the execution order list
    */
-  bodyLength: number;
+  executionOrderIndex?: number;
   /**
-   * The full URL of the request including query parameters
+   * The 'operationId' defined for the operation in the OpenAPI definition of the API.
    */
-  url: string;
+  operationId?: string;
   /**
-   * Array of credentials used in the request. The names in the array is included in the cURL request.
+   * An array of the results from scenarios requests.
    *
-   * @minItems 1
+   * @minItems 0
    */
-  auth?: [string, ...string[]];
-  /**
-   * The cURL of the sent request. The body can be omitted if it exceeds the size limit. In this case, the property 'curlBodySkipped' is set to 'true'.
-   */
-  curl: string;
-  /**
-   * If this property is 'true', the body was omitted from the cURL request because it exceeds the size limit.
-   */
-  curlBodySkipped?: boolean;
+  scenarios?: HappyPathReport[];
+  conformanceRequestsResults?: TestResults;
+  customRequestsResults?: TestResults;
+  authorizationRequestsResults?: TestResults;
 }
-export interface ResponseLogReport {
-  /**
-   * The time elapsed (in milliseconds) between sending the request and receiving the response.
-   */
-  time: number;
-  /**
-   * The HTTP response status code received from the API (between [100—999]).
-   */
-  httpStatusCode: number;
-  /**
-   * The content type of the request body in the received response. Can be indexed.
-   */
-  contentType: string | number;
-  /**
-   * The length of the body in the received response.
-   */
-  bodyLength: number;
-  /**
-   * Base64 of the response received from the API. The body can be skipped if it is too large.
-   */
-  http: string;
-}
-/**
- * The details of a test request that the scan generated and sent to the API.
- */
-export interface TestLogReport {
-  test?: TestLogInfoReport;
+export interface HappyPathReport {
+  happyPath?: HappyPathInfoReport;
   outcome?: OutcomeReport;
-  request?: RequestLogReport;
-  response?: ResponseLogReport;
+  request?: RequestLogReport1;
+  response?: ResponseLogReport1;
 }
 /**
- * A summary of the executed test
+ * A summary of the executed happy path.
  */
-export interface TestLogInfoReport {
+export interface HappyPathInfoReport {
   /**
-   * The key (test ID) to identify the executed test.
+   * Uses the requests defined in the scenario as a baseline to run conformance and authorization tests. It can only have one property 'fuzzing' set to true per scenarios.json file
    */
-  key?: string;
+  fuzzing?: boolean;
   /**
-   * The description of the test. Can be indexed.
+   * A key to identify the happy path outcome.
    */
-  description?: string | number;
+  key?: "happy.path" | "unhappy.path";
   /**
-   * This property is present if the report is indexed, and it lists the parameters to build the property 'testDescription'. For example, for a description 'Hello World', the 'testDescription' will be an index pointing to 'Hello ‘%s’', and the variable ‘%s’ is populated from the item 'World' in the 'testDescriptionParams'.
+   * An array of HTTP response status codes that the scan expected for the happy path request. Can be null if an error has prevented execution of the happy path
    */
-  descriptionParams?: string[];
+  httpStatusExpected?: string[] | null;
   /**
-   * An array of HTTP response status codes that the scan expected for the happy path request.
+   * The index of the stage in the scan scenario that is designated as the one where the happy path request must succeed. For example, a scenario might require creating some objects before the happy path request can be tested. The property 'successIndex' allows to separate failing the operation that the happy path request is testing from failing the prerequisite requests, for example, due to a configuration error.
    */
-  httpStatusExpected?: string[];
-  /**
-   * Where the expectations for the returned HTTP status response codes comes from (default expectations, scan rules, other custom definitions like the scenario).
-   */
-  expectationSource?: "default" | "customizationRule" | "custom";
-  /**
-   * Mapping between the test key (test ID) and vulnerabilities from the OWASP API Security Top 10
-   */
-  owaspMapping?: string;
-  /**
-   * The JSON pointer of the scanned object in the OpenAPI definition file. Can be indexed.
-   */
-  jsonPointer?: string | number;
-  /**
-   * This property provides the path to the instance of the object where the scan found the issue, which together with the JSON pointer helps homing in on the problem, especially with reused components. For example, the scan could found a problem in an object that is comprised of several references to the same reusable schema, but only one of these demonstrates the issue. In this case, the path that stack trace provides shows which of the references has the problem, making it easier to find the correct one to fix.
-   */
-  stackTrace?: string;
+  successIndex?: number;
 }

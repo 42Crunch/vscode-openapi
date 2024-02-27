@@ -1,5 +1,4 @@
 import { Action, TypedStartListening, isAnyOf } from "@reduxjs/toolkit";
-import { v4 as uuidv4 } from "uuid";
 
 import { EnvData } from "@xliic/common/env";
 import {
@@ -448,7 +447,7 @@ function httpClient(host: HttpCapableWebappHost, take: (pattern: any) => any): H
 
 function makeSend(host: HttpCapableWebappHost) {
   const send = (request: HttpRequest) => {
-    const id = uuidv4();
+    const id = crypto.randomUUID();
     host.postMessage({
       command: "sendHttpRequest",
       payload: {

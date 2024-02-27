@@ -87,7 +87,7 @@ export const slice = createSlice({
     saveScanconf: (state) => {},
 
     saveSettings: (state, { payload: settings }: PayloadAction<playbook.RuntimeConfiguration>) => {
-      state.playbook.runtimeConfiguration = settings;
+      state.playbook.runtimeConfiguration = { ...state.playbook.runtimeConfiguration, ...settings };
     },
 
     saveRequest: (

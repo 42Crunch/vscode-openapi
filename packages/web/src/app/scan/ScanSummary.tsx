@@ -4,24 +4,25 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { ArrowUpRightFromSquare } from "../../icons";
 import { useAppDispatch } from "./store";
 import { changeFilter, changeTab } from "./slice";
-import { GlobalSummary, OperationSummary, TestLogReport } from "./scan-report-new";
+import { GlobalSummary, OperationSummary, TestLogReport } from "@xliic/common/scan-report";
 
 export function ScanSummary({
   global,
   operation,
   issues,
+  scanVersion,
 }: {
   global: GlobalSummary;
   operation: OperationSummary;
   issues: TestLogReport[];
+  scanVersion: string;
 }) {
   const dispatch = useAppDispatch();
 
-  const critical = global.issues.critical ?? 0;
-  const high = global.issues.high ?? 0;
-
   const executed =
     (global.conformanceTestRequests.executed.total ?? 0) +
+    (global.authorizationTestRequests.executed.total ?? 0) +
+    (global.customTestRequests.executed.total ?? 0) +
     (global.methodNotAllowedTestRequests?.executed.total ?? 0);
 
   const issuesNumber = issues?.length | 0;
@@ -43,6 +44,7 @@ export function ScanSummary({
             .diff(DateTime.fromISO(global.startDate))
             .toFormat("mm:ss.SSS")}
         </div>
+        <div>Scan version: {scanVersion}</div>
       </Stats>
       <Tiles>
         <div

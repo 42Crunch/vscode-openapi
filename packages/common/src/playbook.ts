@@ -12,10 +12,19 @@ export type ParameterLocation = "query" | "header" | "path" | "cookie";
 export type ParameterList = { key: string; value: unknown }[];
 export type ParameterValues = Record<ParameterLocation, ParameterList>;
 
-export interface OperationBody {
-  mediaType: string;
-  value: unknown;
-}
+export type OperationBody =
+  | {
+      mediaType: "application/json";
+      value: unknown;
+    }
+  | {
+      mediaType: "application/x-www-form-urlencoded";
+      value: Record<string, unknown>;
+    }
+  | {
+      mediaType: "raw";
+      value: unknown;
+    };
 
 export type CRequest = {
   operationId: string;
@@ -83,7 +92,7 @@ export type PlaybookBundle = {
   customizations?: unknown;
   environments: Record<string, PlaybookEnvironment>;
   operations: Record<string, Operation>;
-  authenticationDetails: Credentials[];
+  authenticationDetails: [Credentials, ...Credentials[]];
   before: Stage[];
   after: Stage[];
   authorizationTests: AuthorizationTests;
@@ -272,3 +281,8 @@ export type StageContainer =
   | Omit<StageLocationOperationAfter, "stageIndex">
   | Omit<StageLocationOperationScenarios, "stageIndex">
   | Omit<StageLocationCredential, "stageIndex">;
+
+export function getCurrentEnvironment(playbook: PlaybookBundle): PlaybookEnvironment {
+  const environment = playbook.runtimeConfiguration?.environment || "default";
+  return playbook.environments[environment];
+}

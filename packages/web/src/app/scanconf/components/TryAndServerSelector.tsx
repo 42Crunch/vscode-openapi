@@ -11,18 +11,30 @@ export default function TryAndServerSelector({
   onTry,
   onScan,
   servers,
+  host,
 }: {
   onTry: (server: string) => unknown;
   onScan?: (server: string) => unknown;
   servers: string[];
+  host?: string;
 }) {
   const dispatch = useFeatureDispatch();
   const setServer = (server: string) => dispatch(setScanServer(server));
   const scanServer = useFeatureSelector((state) => state.prefs.scanServer);
-  const [selectedServer, setSelectedServer] = useState(scanServer !== "" ? scanServer : servers[0]);
 
-  const allServers =
-    servers.includes(scanServer) || scanServer === "" ? servers : [...servers, scanServer];
+  const allServers = [...servers];
+
+  if (host && !allServers.includes(host)) {
+    allServers.unshift(host);
+  }
+
+  const [selectedServer, setSelectedServer] = useState(
+    scanServer !== "" ? scanServer : allServers[0]
+  );
+
+  if (!allServers.includes(scanServer) && scanServer !== "") {
+    allServers.push(scanServer);
+  }
 
   // TODO validate free-form server, make sure it's a valid URL
 
@@ -38,9 +50,7 @@ export default function TryAndServerSelector({
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
-            if (!servers.includes(selectedServer)) {
-              setServer(selectedServer);
-            }
+            setServer(selectedServer);
             onTry(selectedServer);
           }}
         >
@@ -52,9 +62,7 @@ export default function TryAndServerSelector({
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              if (!servers.includes(selectedServer)) {
-                setServer(selectedServer);
-              }
+              setServer(selectedServer);
               onScan(selectedServer);
             }}
           >

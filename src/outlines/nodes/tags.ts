@@ -4,6 +4,7 @@ import { HttpMethod } from "@xliic/common/http";
 
 import { AbstractOutlineNode, HTTP_METHODS, OutlineNode } from "./base";
 import { Container, Location, getLocation } from "@xliic/preserving-json-yaml-parser";
+import { SimpleNode, getParameterLabel } from "./simple";
 
 type OperationId = {
   type: "operationId";
@@ -151,7 +152,7 @@ export class TagChildNode extends AbstractOutlineNode {
       parent,
       id,
       uniqueNameToString(tagOp.name),
-      vscode.TreeItemCollapsibleState.None,
+      vscode.TreeItemCollapsibleState.Collapsed,
       tagOp.operation,
       parent.context
     );
@@ -161,6 +162,18 @@ export class TagChildNode extends AbstractOutlineNode {
       this.item.tooltip = getTooltip(tagOp.name);
     }
     this.contextValue = "tag-child";
+  }
+
+  getChildren(): OutlineNode[] {
+    return this.getChildrenByKey((key, pointer, node) => {
+      if (["responses", "parameters", "requestBody"].includes(key)) {
+        if (key == "parameters") {
+          return new SimpleNode(this, pointer, key, node, 1, getParameterLabel);
+        } else {
+          return new SimpleNode(this, pointer, key, node, 1);
+        }
+      }
+    });
   }
 }
 

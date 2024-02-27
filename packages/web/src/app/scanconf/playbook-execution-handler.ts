@@ -185,6 +185,7 @@ const PlaybookStepHandlers: PlaybookEventHandlers = {
     const operation = currentOperation(stateCurrent, stateResult);
     operation.httpRequestPrepareError = event.error;
     operation.status = "failure";
+    currentPlaybook(stateCurrent, stateResult).status = "failure";
   },
 
   "http-response-received": function (
@@ -205,6 +206,7 @@ const PlaybookStepHandlers: PlaybookEventHandlers = {
     const operation = currentOperation(stateCurrent, stateResult);
     operation.httpError = event.error;
     operation.status = "failure";
+    currentPlaybook(stateCurrent, stateResult).status = "failure";
   },
 
   "variables-assigned": function (
@@ -223,6 +225,7 @@ const PlaybookStepHandlers: PlaybookEventHandlers = {
     const operation = currentOperation(stateCurrent, stateResult);
     operation.responseProcessingError = event.error;
     operation.status = "failure";
+    currentPlaybook(stateCurrent, stateResult).status = "failure";
   },
 };
 

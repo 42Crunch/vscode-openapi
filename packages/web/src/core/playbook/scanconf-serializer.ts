@@ -82,7 +82,8 @@ function serializeAuthenticationDetails(
     }
     result.push(detail);
   }
-  return [result, undefined];
+  // if result contains one empty object, return empty array with no object
+  return [result.length === 1 && Object.keys(result[0]).length === 0 ? [] : result, undefined];
 }
 
 function serializeAuthenticationDetail(
@@ -428,6 +429,11 @@ function serializeCRequest(
         mode: "urlencoded",
         urlencoded: request.body.value as any,
       };
+    } else if (request.body.mediaType === "raw") {
+      details.requestBody = {
+        mode: "raw",
+        raw: request.body.value as string,
+      };
     }
   }
 
@@ -455,12 +461,23 @@ function serializeExternalCRequest(
     cookies: serializeRequestParameters(oas, file, request.parameters.cookie) as any,
   };
 
-  // FIXME better body handling
   if (request.body !== undefined) {
-    details.requestBody = {
-      mode: "json",
-      json: request.body.value as any,
-    };
+    if (request.body.mediaType === "application/json") {
+      details.requestBody = {
+        mode: "json",
+        json: request.body.value as any,
+      };
+    } else if (request.body.mediaType === "application/x-www-form-urlencoded") {
+      details.requestBody = {
+        mode: "urlencoded",
+        urlencoded: serializeUrlencoded(request.body.value as object),
+      };
+    } else if (request.body.mediaType === "raw") {
+      details.requestBody = {
+        mode: "raw",
+        raw: request.body.value as string,
+      };
+    }
   }
 
   return [
@@ -510,4 +527,8 @@ function serializeVariableAssignments(
     return undefined;
   }
   return assignments as scan.VariableAssignments;
+}
+
+function serializeUrlencoded(value: object): Record<string, scan.UrlencodedObject> {
+  return Object.fromEntries(Object.entries(value).map(([key, value]) => [key, { value }]));
 }

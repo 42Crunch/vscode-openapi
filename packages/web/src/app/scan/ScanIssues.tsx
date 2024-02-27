@@ -5,7 +5,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 
 import ScanIssue from "./ScanIssue";
 import FilterPanel from "./FilterPanel";
-import { RuntimeOperationReport, TestLogReport } from "./scan-report-new";
+import { RuntimeOperationReport, TestLogReport } from "@xliic/common/scan-report";
 
 export default function ScanIssues({
   operation,

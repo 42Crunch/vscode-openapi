@@ -31,7 +31,6 @@ You can home in on elements in the OpenAPI explorer view, or jump directly to th
 
 ![Create new OpenAPI file from a template](./images/New%20OpenAPI%20file.gif?raw=true)
 
-
 ![](https://img.shields.io/badge/Learning%20More!-red) Watch this [video](https://42crunch.com/tutorial-openapi-swagger-extension-vs-code/#Navigating-OpenAPI-Explorer) on editor basics. 
 
 ### Navigating an API definition
@@ -145,11 +144,11 @@ You can run the audit service in freemium or platform mode:
 
 ### Getting a Freemium Token
 
-To run Security Audit from VS Code, you need a token. The first time you try to audit or scan an API, you are asked to provide your email address or an API token from the platform. 
-
-<link to video on on-boarding>
+To run Security Audit from VS Code, you need a token. The first time you try to audit or scan an API, you are asked to provide your email address or an API token from the platform.
 
 Once you supply the address, the extension requests the token to be sent to your mailbox. Paste the token you received in the prompt in VS Code, and you are all set.
+
+Watch this short [video](https://42crunch.com/free-user-faq/#Free-API-Security-Testing-FAQs-02) which takes you through those steps. 
 
 ### Running an audit
 

@@ -276,6 +276,8 @@ export class PlatformStore {
   }
 
   async clearTempApi(tmp: { apiId: string; collectionId: string }): Promise<void> {
+    // delete the api
+    await deleteApi(tmp.apiId, this.getConnection(), this.logger);
     // check if any of the old apis have to be deleted
     const current = new Date().getTime();
     const response = await listApis(tmp.collectionId, this.getConnection(), this.logger);

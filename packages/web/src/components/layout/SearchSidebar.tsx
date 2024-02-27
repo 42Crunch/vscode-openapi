@@ -46,6 +46,7 @@ export function SearchSidebarControlled({
   selected,
   onSelected,
   title,
+  hideEmptySections,
 }: {
   title?: string;
   sections: Section[];
@@ -56,6 +57,7 @@ export function SearchSidebarControlled({
   renderButtons?: () => ReactNode;
   selected?: ItemId;
   onSelected?: (selected: ItemId) => void;
+  hideEmptySections?: boolean;
 }) {
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState(true);
@@ -102,25 +104,30 @@ export function SearchSidebarControlled({
             <MagnifyingGlass />
           </Search>
           <Sections>
-            {sections.map((section: Section) => (
-              <React.Fragment key={section.title}>
-                {!noSectionTitles && (
-                  <Subheader>
-                    <span>{section.title}</span>
-                    {section.menu && <Menu>{section.menu}</Menu>}
-                  </Subheader>
-                )}
-                <List
-                  selected={selected?.sectionId == section.id ? selected.itemId : undefined}
-                  setSelected={(selected) =>
-                    onSelected && onSelected({ sectionId: section.id, itemId: selected })
-                  }
-                  items={section.items}
-                  errors={errors}
-                  filter={search.trim()}
-                />
-              </React.Fragment>
-            ))}
+            {sections.map((section: Section) => {
+              if (section.items.length === 0 && hideEmptySections && section.menu === undefined) {
+                return null;
+              }
+              return (
+                <React.Fragment key={section.title}>
+                  {!noSectionTitles && (
+                    <Subheader>
+                      <span>{section.title}</span>
+                      {section.menu && <Menu>{section.menu}</Menu>}
+                    </Subheader>
+                  )}
+                  <List
+                    selected={selected?.sectionId == section.id ? selected.itemId : undefined}
+                    setSelected={(selected) =>
+                      onSelected && onSelected({ sectionId: section.id, itemId: selected })
+                    }
+                    items={section.items}
+                    errors={errors}
+                    filter={search.trim()}
+                  />
+                </React.Fragment>
+              );
+            })}
           </Sections>
           {renderButtons && <Buttons>{renderButtons()}</Buttons>}
         </Sidebar>

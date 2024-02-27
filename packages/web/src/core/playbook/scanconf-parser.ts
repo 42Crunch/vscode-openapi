@@ -1,5 +1,5 @@
 import { NullableResult, Result } from "@xliic/common/result";
-import { find, parseJsonPointer } from "@xliic/common/jsonpointer";
+import { parseJsonPointer } from "@xliic/common/jsonpointer";
 
 import * as playbook from "@xliic/common/playbook";
 import * as scan from "./scanconfig";
@@ -36,7 +36,9 @@ export function parseInternal(
     authenticationDetails: parseArray(
       oas,
       file,
-      file.authenticationDetails || [],
+      file.authenticationDetails === undefined || file.authenticationDetails.length === 0
+        ? [{}]
+        : file.authenticationDetails,
       parseCredentials
     ),
     runtimeConfiguration: parseruntimeConfiguration(oas, file, file.runtimeConfiguration || {}),
@@ -258,10 +260,21 @@ function parseRequestBody(
   if (body.mode === "json") {
     return [{ mediaType: "application/json", value: body.json }, undefined];
   } else if (body.mode === "urlencoded") {
-    return [{ mediaType: "application/x-www-form-urlencoded", value: body.urlencoded }, undefined];
+    return [
+      { mediaType: "application/x-www-form-urlencoded", value: parseUrlencoded(body.urlencoded) },
+      undefined,
+    ];
+  } else if (body.mode === "raw") {
+    return [{ mediaType: "raw", value: body.raw }, undefined];
   }
 
   return [undefined, undefined];
+}
+
+function parseUrlencoded(
+  urlencoded: Record<string, scan.UrlencodedObject>
+): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(urlencoded).map(([key, value]) => [key, value.value]));
 }
 
 function parseParameters(

@@ -14,12 +14,14 @@ export default function ParameterGroup({
   group,
   placeholder,
   variables,
+  allowUnknown,
 }: {
   group: Record<string, Parameter>;
   oas: BundledSwaggerOrOasSpec;
   name: string;
   placeholder: string;
   variables: string[];
+  allowUnknown?: boolean;
 }) {
   const { fields, append, remove } = useFieldArray({
     name: name,
@@ -38,33 +40,37 @@ export default function ParameterGroup({
       </Header>
       <Body>
         {fields.map((field: any, index) => {
-          if (group[field.key]) {
-            const parameter = group[field.key];
-            const schema = isArray(parameter)
-              ? getArraySchema(oas, parameter)
-              : getSchema(parameter);
-            return (
-              <ParameterRow
-                name={`${name}.${index}.value`}
-                key={field.id}
-                parameter={parameter}
-                schema={schema}
-                onDelete={() => remove(index)}
-                variables={variables}
-              />
-            );
-          }
+          return (
+            <ParameterRow
+              name={`${name}.${index}`}
+              key={field.id}
+              schema={getParameterSchema(oas, group, field.key)}
+              onDelete={() => remove(index)}
+              variables={variables}
+            />
+          );
         })}
-
         <NewParameterSelect
           placeholder={placeholder}
           name={name}
           group={group}
           onSelection={addField}
+          allowUnknown={allowUnknown}
         />
       </Body>
     </Container>
   );
+}
+
+function getParameterSchema(
+  oas: BundledSwaggerOrOasSpec,
+  group: Record<string, Parameter>,
+  name: string
+): Schema | undefined {
+  if (group[name]) {
+    const parameter = group[name];
+    return isArray(parameter) ? getArraySchema(oas, parameter) : getSchema(parameter);
+  }
 }
 
 function isArray(parameter: Parameter) {
@@ -111,9 +117,15 @@ const Header = styled.div`
 
 const Body = styled.div`
   display: contents;
-  & > div > div,
-  & > div > input {
+  & > div > div {
     padding: 4px 8px;
     border-bottom: 1px solid var(${ThemeColorVariables.border});
   }
+  & > div > div:last-child {
+    padding: 2px 5px;
+  }
+  // for now keep with of a new entry selector to 1 column
+  // & > div:last-child {
+  //   grid-column: span 3;
+  // }
 `;

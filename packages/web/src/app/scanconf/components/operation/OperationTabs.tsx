@@ -124,9 +124,9 @@ function makeOasTabs(
           name={"parameters.header"}
           placeholder="Add new header"
           variables={availableVariables}
+          allowUnknown
         />
       ),
-      disabled: hasNoParameters(parameters.header),
     },
     {
       id: "cookie",

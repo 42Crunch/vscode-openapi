@@ -15,26 +15,26 @@ const DefaultSchema = { type: "string" };
 
 export default function ParameterRow({
   name,
-  parameter,
   schema,
   onDelete,
   variables,
 }: {
   name: string;
-  parameter: Parameter;
   variables: string[];
   schema: Schema | undefined;
   onDelete: () => void;
 }) {
   const {
     fieldState: { error },
-  } = useController({ name });
+  } = useController({ name: `${name}.value` });
+
+  const { field: nameField } = useController({ name: `${name}.key` });
 
   return (
     <Container>
-      <Name>{parameter.name}</Name>
+      <Name>{nameField.value}</Name>
       <LineEditor
-        name={name}
+        name={`${name}.value`}
         variables={variables}
         encode={(value) => encode(schema || DefaultSchema, value)}
         decode={(value) => decode(schema, value)}

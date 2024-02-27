@@ -3,7 +3,7 @@ import { useCombobox } from "downshift";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { useEffect, useState } from "react";
 
-export default function DownshiftCombo<T>({
+export default function DownshiftComboNewItemMenu<T>({
   options,
   placeholder,
   selected,
@@ -26,11 +26,14 @@ export default function DownshiftCombo<T>({
     );
   }, [filter, options]);
 
-  const { isOpen, getMenuProps, getInputProps, getItemProps } = useCombobox({
+  const { isOpen, getMenuProps, getInputProps, getItemProps, reset } = useCombobox({
     initialInputValue: selected,
     items: filteredOptions,
+    onSelectedItemChange: ({ selectedItem }) => {
+      reset();
+      onSelectedItemChange(selectedItem);
+    },
     onInputValueChange: ({ inputValue }) => {
-      onSelectedItemChange(inputValue);
       if (inputValue !== undefined) {
         setFilter(inputValue);
       } else {
@@ -42,8 +45,19 @@ export default function DownshiftCombo<T>({
 
   return (
     <Container>
-      <Input {...getInputProps()} placeholder={placeholder} />
-      <Dropdown visible={isOpen && filteredOptions.length > 0}>
+      <Input
+        {...getInputProps({
+          onKeyDown: (event) => {
+            if (event.key === "Enter" || event.key === "Tab") {
+              onSelectedItemChange(filter);
+              setFilter("");
+              reset();
+            }
+          },
+        })}
+        placeholder={placeholder}
+      />
+      <Dropdown visible={isOpen && (filteredOptions.length > 0 || filter.length > 0)}>
         <DropdownList {...getMenuProps()}>
           {filteredOptions.map((item, index) => {
             return (
@@ -58,6 +72,19 @@ export default function DownshiftCombo<T>({
               </li>
             );
           })}
+          {filter.length > 0 && filteredOptions.length === 0 && (
+            <li
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                onSelectedItemChange(filter);
+                setFilter("");
+                reset();
+              }}
+            >
+              {filter}
+            </li>
+          )}
         </DropdownList>
       </Dropdown>
     </Container>
@@ -77,7 +104,6 @@ const Input = styled.input`
   background: transparent;
   border: none;
   color: var(${ThemeColorVariables.foreground});
-  padding: 4px;
   &::placeholder {
     color: var(${ThemeColorVariables.inputPlaceholderForeground});
   }

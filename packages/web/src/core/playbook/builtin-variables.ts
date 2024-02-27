@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 import { Path, findByPath } from "@xliic/preserving-json-yaml-parser";
 
 export const DynamicVariableNames = [
@@ -20,7 +19,7 @@ export const DynamicVariables: Record<
 > = {
   $randomString: () => generateRandomString(20),
   $randomuint: () => getRandomUint32(),
-  $uuid: () => uuidv4(),
+  $uuid: () => crypto.randomUUID(),
   $timestamp: () => generateTimestamp(),
   $timestamp3339: () => generateIsoTimestamp(),
   $randomFromSchema: randomFromSchema,

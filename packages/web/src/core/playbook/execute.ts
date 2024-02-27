@@ -427,10 +427,14 @@ export function makeEnvEnv(
       result[name] = env.default[variable.name];
       simple[variable.name] = env.default[variable.name];
     } else if (!variable.required && variable.default !== undefined) {
+      result[name] = variable.default;
+      // simple environment is for passing a substituted variables to binary or docker
+      // in case if env parameter has a default value, there is no need to pass it
+      // since it's available in the scan config file
+      // additionally, it can be not just a string as in simple environment, but a complex object
+    } else if (variable.required) {
       // required variables must always come from the environment, no default
       // values is used for these
-      result[name] = variable.default;
-    } else if (variable.required) {
       missing.push(variable.name);
     }
   }
