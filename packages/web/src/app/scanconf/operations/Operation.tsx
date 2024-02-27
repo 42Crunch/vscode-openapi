@@ -54,6 +54,7 @@ export default function Operation({ operationId }: { operationId: string }) {
 
   const operationIds = Object.keys(playbook.operations);
   const requestIds = Object.keys(playbook.requests || {});
+  const operation = playbook.operations[operationId];
 
   const {
     simple,
@@ -87,8 +88,8 @@ export default function Operation({ operationId }: { operationId: string }) {
 
           dispatch(
             runScan({
-              path: playbook.operations[operationId].request.request.path,
-              method: playbook.operations[operationId].request.request.method,
+              path: operation.request.request.path,
+              method: operation.request.request.method,
               operationId,
               env: {
                 SCAN42C_HOST: updatedServer,
@@ -107,15 +108,13 @@ export default function Operation({ operationId }: { operationId: string }) {
       <CollapsibleSection
         defaultOpen={false}
         title="Authorization Tests"
-        count={playbook.operations[operationId].authorizationTests.length}
+        count={operation.authorizationTests.length}
       >
         <Content>
           <AuthorizationTests
-            authorizationTests={playbook.operations[operationId].authorizationTests}
+            authorizationTests={operation.authorizationTests}
             removeTest={(test) => {
-              const updated = playbook.operations[operationId].authorizationTests.filter(
-                (existing) => existing !== test
-              );
+              const updated = operation.authorizationTests.filter((existing) => existing !== test);
               dispatch(
                 actions.updateOperationAuthorizationTests({
                   operationId,
@@ -126,16 +125,15 @@ export default function Operation({ operationId }: { operationId: string }) {
           />
 
           <AddAuthorizationTest
-            authorizationTests={Object.keys(playbook.authorizationTests)}
-            existing={playbook.operations[operationId].authorizationTests}
+            authorizationTests={playbook.authorizationTests}
+            existing={operation.authorizationTests}
+            auth={operation.request.auth}
+            credentials={playbook.authenticationDetails[0]}
             onSelect={(selected) => {
               dispatch(
                 actions.updateOperationAuthorizationTests({
                   operationId,
-                  authorizationTests: [
-                    ...playbook.operations[operationId].authorizationTests,
-                    selected,
-                  ],
+                  authorizationTests: [...operation.authorizationTests, selected],
                 })
               );
             }}
@@ -143,15 +141,11 @@ export default function Operation({ operationId }: { operationId: string }) {
         </Content>
       </CollapsibleSection>
 
-      <CollapsibleSection
-        defaultOpen={false}
-        title="Before"
-        count={playbook.operations[operationId]?.before?.length}
-      >
+      <CollapsibleSection defaultOpen={false} title="Before" count={operation.before?.length}>
         <Content>
           <Scenario
             oas={oas}
-            stages={playbook.operations[operationId].before as StageReference[]}
+            stages={operation.before as StageReference[]}
             container={{ container: "operationBefore", operationId }}
             executionResult={findResult(mockResult, "operationBefore")}
             saveStage={saveStage}
@@ -169,21 +163,14 @@ export default function Operation({ operationId }: { operationId: string }) {
           />
         </Content>
       </CollapsibleSection>
-      <CollapsibleSection
-        title="Scenarios"
-        count={playbook.operations[operationId]?.scenarios?.length}
-      >
+      <CollapsibleSection title="Scenarios" count={operation.scenarios?.length}>
         <Scenarios operationId={operationId} />
       </CollapsibleSection>
-      <CollapsibleSection
-        defaultOpen={false}
-        title="After"
-        count={playbook.operations[operationId]?.after?.length}
-      >
+      <CollapsibleSection defaultOpen={false} title="After" count={operation.after?.length}>
         <Content>
           <Scenario
             oas={oas}
-            stages={playbook.operations[operationId].after as StageReference[]}
+            stages={operation.after as StageReference[]}
             container={{ container: "operationAfter", operationId }}
             executionResult={findResult(mockResult, "operationAfter")}
             saveStage={saveStage}

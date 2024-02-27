@@ -1,23 +1,32 @@
 import styled from "styled-components";
+import { useState } from "react";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { Credentials, AuthorizationTests } from "@xliic/common/playbook";
 
-import { useState } from "react";
 import { Plus } from "../../../../icons";
 import AuthorizationTestCombo from "./AuthorizationTestCombo";
 
 export default function AddAuthorizationTest({
   authorizationTests,
+  auth,
   existing,
+  credentials,
   onSelect,
 }: {
-  authorizationTests: string[];
+  authorizationTests: AuthorizationTests;
+  auth: string[] | undefined;
+  credentials: Credentials;
   existing: string[];
   onSelect: (test: string) => void;
 }) {
   const [showCombo, setShowCombo] = useState(false);
 
-  const availableTests = authorizationTests.filter((test) => !existing.includes(test));
+  const applicableTestNames = Object.entries(authorizationTests)
+    .filter(([name, test]) => isMatchingAuth(credentials, auth, test.source[0]))
+    .map(([name]) => name);
+
+  const availableTests = applicableTestNames.filter((test) => !existing.includes(test));
 
   return showCombo ? (
     <AuthorizationTestCombo
@@ -55,3 +64,19 @@ const Container = styled.div`
     fill: var(${ThemeColorVariables.linkForeground});
   }
 `;
+
+function isMatchingAuth(
+  credentials: Credentials,
+  auths: string[] | undefined,
+  credential: string
+): boolean {
+  // auth entries can be either in short form "credential" or longer form "credential/credentialValue"
+  // we need to check for both
+  return (
+    auths !== undefined &&
+    auths.some((auth) => {
+      const defaultCredentialName = credentials[auth]?.default;
+      return credential === auth || credential === `${auth}/${defaultCredentialName}`;
+    })
+  );
+}
