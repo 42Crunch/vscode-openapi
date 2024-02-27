@@ -733,6 +733,9 @@
             "url": {
               "type": "string"
             },
+            "timeout": {
+              "type": "integer"
+            },
             "auth": {
               "type": "string",
               "enum": [
@@ -743,11 +746,13 @@
           },
           "required": [
             "url",
-            "auth"
+            "auth",
+            "timeout"
           ],
           "default": {
             "url": "",
-            "auth": "none"
+            "auth": "none",
+            "timeout": 300
           }
         },
         "openapi.platformServices": {
