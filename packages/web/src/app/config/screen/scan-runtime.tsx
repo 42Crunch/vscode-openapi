@@ -83,7 +83,10 @@ export function PlatformServices() {
 
             <Input label="Docker image for 'scand-agent'" name="scanImage" />
 
-            <Input label="Maximum scan job execution time (seconds)" name="scandManager.timeout" />
+            <Input
+              label="Maximum amount of time to check on scan completion (seconds)"
+              name="scandManager.timeout"
+            />
 
             <Test>
               <ValidProgressButton
