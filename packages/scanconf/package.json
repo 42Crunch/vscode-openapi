@@ -15,6 +15,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "files": [
+    "LICENSE.txt",
     "src",
     "dist"
   ],
