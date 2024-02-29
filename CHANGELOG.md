@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.25.0 (February 29, 2024)
+
+- Make scand-manager timeout configurable
+
 ## Version 4.24.1 (February 23, 2024)
 
 - Fix issue where authorization tests dialog would not show in Scan UI
