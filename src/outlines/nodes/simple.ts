@@ -13,6 +13,7 @@ const icons: any = {
   parameters: "sliders.svg",
   requestBodies: "request.svg",
   requestBody: "request.svg",
+  security: "key.svg",
 };
 
 const contextValues: any = {

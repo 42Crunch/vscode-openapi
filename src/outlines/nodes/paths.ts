@@ -52,9 +52,11 @@ export class OperationNode extends AbstractOutlineNode {
 
   getChildren(): OutlineNode[] {
     return this.getChildrenByKey((key, pointer, node) => {
-      if (["responses", "parameters", "requestBody"].includes(key)) {
-        if (key == "parameters") {
+      if (["responses", "parameters", "requestBody", "security"].includes(key)) {
+        if (key === "parameters") {
           return new SimpleNode(this, pointer, key, node, 1, getParameterLabel);
+        } else if (key === "security") {
+          return new SimpleNode(this, pointer, key, node, 0);
         } else {
           return new SimpleNode(this, pointer, key, node, 1);
         }
