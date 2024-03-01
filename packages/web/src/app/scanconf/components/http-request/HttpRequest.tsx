@@ -23,7 +23,13 @@ export default function HttpRequest({
       <CollapsibleCard defaultCollapsed={defaultCollapsed}>
         <BottomDescription style={{ gap: "8px" }}>
           <ArrowRightFromBracket
-            style={{ width: 14, height: 14, fill: `var(${ThemeColorVariables.foreground})` }}
+            style={{
+              width: 14,
+              minWidth: 14,
+              height: 14,
+              minHeight: 14,
+              fill: `var(${ThemeColorVariables.foreground})`,
+            }}
           />
           <Method>{request.method}</Method>
           <Path>{request.url}</Path>
@@ -70,12 +76,16 @@ const Method = styled.div`
   justify-content: center;
   align-items: center;
   width: 48px;
+  min-width: 48px;
   height: 16px;
+  min-height: 16px;
   text-transform: uppercase;
   font-size: 11px;
 `;
 
-const Path = styled.div``;
+const Path = styled.div`
+  line-break: anywhere;
+`;
 
 const Padding = styled.div`
   padding: 8px;
