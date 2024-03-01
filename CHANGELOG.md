@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.25.1 (March 1, 2024)
+
+- Downgrade swagger-ui dependency in preview to fix #264
+- Display 'security' property in the operation nodes in OpenAPI Explorer
+
 ## Version 4.25.0 (February 29, 2024)
 
 - Make scand-manager timeout configurable
