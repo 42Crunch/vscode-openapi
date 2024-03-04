@@ -857,6 +857,7 @@
   "workspaces": [
     "packages/common/dist/cjs",
     "packages/openapi-cjs",
+    "packages/scanconf-cjs",
     "packages/result-cjs"
   ],
   "dependencies": {

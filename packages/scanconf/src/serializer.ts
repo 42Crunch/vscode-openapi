@@ -532,5 +532,8 @@ function serializeVariableAssignments(
 }
 
 function serializeUrlencoded(value: object): Record<string, scan.UrlencodedObject> {
-  return Object.fromEntries(Object.entries(value).map(([key, value]) => [key, { value }]));
+  return Object.entries(value).reduce((acc, [key, value]) => {
+    acc[key] = { value };
+    return acc;
+  }, {} as Record<string, scan.UrlencodedObject>);
 }

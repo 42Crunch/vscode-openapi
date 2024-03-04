@@ -1,5 +1,5 @@
 import { assert } from "vitest";
-import { parse } from "../index";
+import { parse } from "../src/index";
 
 export function parseScenario(oas: any, scenario: any) {
   const [file, error] = parse(oas, scenario);

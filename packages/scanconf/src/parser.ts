@@ -272,7 +272,10 @@ function parseRequestBody(
 function parseUrlencoded(
   urlencoded: Record<string, scan.UrlencodedObject>
 ): Record<string, unknown> {
-  return Object.fromEntries(Object.entries(urlencoded).map(([key, value]) => [key, value.value]));
+  return Object.entries(urlencoded).reduce((acc, [key, value]) => {
+    acc[key] = value.value;
+    return acc;
+  }, {} as Record<string, unknown>);
 }
 
 function parseParameters(

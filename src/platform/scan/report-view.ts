@@ -4,7 +4,7 @@
 */
 
 import { GeneralError } from "@xliic/common/error";
-import { HttpMethod } from "@xliic/openapi";
+import { HttpMethod, BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { LogLevel } from "@xliic/common/logging";
 import { Preferences } from "@xliic/common/prefs";
 import { Webapp } from "@xliic/common/webapp/scan";
@@ -21,7 +21,6 @@ import { loadConfig } from "../../util/config";
 import { WebView } from "../../web-view";
 import { PlatformStore } from "../stores/platform-store";
 import { executeHttpRequest } from "./http-handler";
-import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 
 export class ScanReportWebView extends WebView<Webapp> {
   private document?: vscode.TextDocument;

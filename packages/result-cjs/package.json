@@ -1,12 +1,21 @@
 {
   "name": "@xliic/result",
-  "version": "0.0.0",
-  "private": true,
+  "author": "42Crunch",
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/42Crunch/vscode-openapi.git"
+  },
+  "version": "2.0.0",
   "scripts": {
     "build": "tsc"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "LICENSE.txt",
+    "dist"
+  ],
   "devDependencies": {
     "typescript": "^5.0.0"
   }
