@@ -23,7 +23,7 @@ import {
 import { PlatformStore } from "../stores/platform-store";
 import { Logger, PlatformContext } from "../types";
 import { offerUpgrade } from "../upgrade";
-import { getScanconfUri } from "./config";
+import { getOrCreateScanconfUri } from "./config";
 import { createScanConfigWithPlatform } from "./runtime/platform";
 import { ScanWebView } from "./view";
 import { formatException } from "../util";
@@ -139,7 +139,7 @@ async function editorRunSingleOperationScan(
   }
 
   const title = bundle?.value?.info?.title || "OpenAPI";
-  const scanconfUri = getScanconfUri(editor.document.uri, title);
+  const scanconfUri = getOrCreateScanconfUri(editor.document.uri, title);
 
   if (
     (scanconfUri === undefined || !(await exists(scanconfUri))) &&
