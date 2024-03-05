@@ -851,6 +851,12 @@
       {
         "fileMatch": "*.json",
         "url": "./schema/generated/openapi.json"
+      },
+      {
+        "fileMatch": [
+          ".42c/**/scanconf.json"
+        ],
+        "url": "./schema/scanconf-full-bundle.json"
       }
     ]
   },
