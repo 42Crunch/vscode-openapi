@@ -862,7 +862,16 @@
         ],
         "url": "./schema/scanconf-full-bundle.json"
       }
-    ]
+    ],
+    "icons": {
+      "xliic-icon": {
+        "description": "42Crunch Icon",
+        "default": {
+          "fontPath": "./resources/xliic.woff",
+          "fontCharacter": "0"
+        }
+      }
+    }
   },
   "workspaces": [
     "packages/common/dist/cjs",
