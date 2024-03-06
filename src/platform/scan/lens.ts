@@ -6,7 +6,6 @@ import { getLocation } from "@xliic/preserving-json-yaml-parser";
 import { Cache } from "../../cache";
 import { getOpenApiVersion } from "../../parsers";
 import { OpenApiVersion } from "../../types";
-import { exists, getScanconfUri } from "./config";
 
 export class ScanCodelensProvider implements vscode.CodeLensProvider {
   onDidChangeCodeLenses?: vscode.Event<void>;
@@ -88,7 +87,7 @@ function topScanLens(
 
   return new vscode.CodeLens(range, {
     title: `Scan`,
-    tooltip: "Open the Scan UI",
+    tooltip: "Scan this OpenAPI file",
     command: "openapi.platform.editorRunSingleOperationScan",
     arguments: [document.uri, firstPath, firstMethod],
   });
