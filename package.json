@@ -652,6 +652,10 @@
       {
         "command": "openapi.platform.loadAuditReportFromFile",
         "title": "42Crunch: Load Security Audit report from file"
+      },
+      {
+        "command": "openapi.platform.editorOpenScanconfig",
+        "title": "42Crunch: Open Scan Configuration file for the current OpenAPI file"
       }
     ],
     "keybindings": [

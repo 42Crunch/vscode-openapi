@@ -26,7 +26,6 @@ export class ScanCodelensProvider implements vscode.CodeLensProvider {
         result.push(scanLens(document, oas, path, method));
       }
       result.push(topScanLens(document, oas));
-      result.push(topEditScanconf(document, oas));
     }
 
     return result.filter((lens): lens is vscode.CodeLens => lens !== undefined);
@@ -47,8 +46,8 @@ function scanLens(
   const position = document.positionAt(location!.key!.start);
   const line = document.lineAt(position.line + 1);
   const range = new vscode.Range(
-    new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
-    new vscode.Position(position.line, line.range.end.character)
+    new vscode.Position(position.line + 1, line.firstNonWhitespaceCharacterIndex),
+    new vscode.Position(position.line + 1, line.range.end.character)
   );
 
   return new vscode.CodeLens(range, {
@@ -92,29 +91,5 @@ function topScanLens(
     tooltip: "Open the Scan UI",
     command: "openapi.platform.editorRunSingleOperationScan",
     arguments: [document.uri, firstPath, firstMethod],
-  });
-}
-
-function topEditScanconf(
-  document: vscode.TextDocument,
-  oas: BundledSwaggerOrOasSpec
-): vscode.CodeLens | undefined {
-  const scanconfUri = getScanconfUri(document.uri);
-  if (scanconfUri === undefined || !exists(scanconfUri.fsPath)) {
-    return undefined;
-  }
-
-  const position = document.positionAt(0);
-  const line = document.lineAt(position.line + 1);
-  const range = new vscode.Range(
-    new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
-    new vscode.Position(position.line, line.range.end.character)
-  );
-
-  return new vscode.CodeLens(range, {
-    title: `Open Scan Config`,
-    tooltip: "Open the scan configuration file for this API",
-    command: "vscode.open",
-    arguments: [scanconfUri],
   });
 }
