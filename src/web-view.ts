@@ -45,6 +45,7 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
       [vscode.ColorThemeKind.Light]: "light",
       [vscode.ColorThemeKind.Dark]: "dark",
       [vscode.ColorThemeKind.HighContrast]: "highContrast",
+      [vscode.ColorThemeKind.HighContrastLight]: "highContrastLight",
     };
     this.sendRequest({ command: "changeTheme", payload: { kind: kindMap[theme.kind] } });
   }

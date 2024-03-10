@@ -4,10 +4,10 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "module": "commonjs",
-    "target": "es6",
+    "target": "es2020",
     "outDir": "out",
     "rootDir": "src",
-    "lib": ["es6"],
+    "lib": ["ES2020"],
     "sourceMap": true
   },
   "include": ["src"],

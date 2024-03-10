@@ -24,7 +24,7 @@
     "api"
   ],
   "engines": {
-    "vscode": "^1.61.0"
+    "vscode": "^1.70.0"
   },
   "extensionDependencies": [
     "redhat.vscode-yaml"
@@ -868,7 +868,7 @@
         "description": "42Crunch Icon",
         "default": {
           "fontPath": "./resources/xliic.woff",
-          "fontCharacter": "0"
+          "fontCharacter": "3"
         }
       }
     }
@@ -897,7 +897,7 @@
     "@types/node": "^14.14.31",
     "@types/picomatch": "^2.3.0",
     "@types/semver": "^6.2.0",
-    "@types/vscode": "1.61.0",
+    "@types/vscode": "1.70.0",
     "@vscode/test-electron": "^2.3.4",
     "glob": "^7.1.4",
     "marked": "^4.0.10",

@@ -99,7 +99,7 @@ export const ThemeColorVariables: ThemeColorValues = {
 export type VsCodeColorMap = ThemeColorValues;
 
 export type ChangeThemePayload = {
-  kind: "light" | "dark" | "highContrast";
+  kind: "light" | "dark" | "highContrast" | "highContrastLight";
   theme?: ThemeColorValues;
 };
 
