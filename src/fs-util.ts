@@ -24,3 +24,21 @@ export function dirnameUri(uri: vscode.Uri): vscode.Uri {
 
   return uri.with({ path: path.posix.dirname(uri.path) });
 }
+
+export async function exists(uri: vscode.Uri): Promise<boolean> {
+  try {
+    await vscode.workspace.fs.stat(uri);
+    return true;
+  } catch (err) {
+    return false;
+  }
+}
+
+export async function existsDir(uri: vscode.Uri): Promise<boolean> {
+  try {
+    const stats = await vscode.workspace.fs.stat(uri);
+    return stats.type === vscode.FileType.Directory;
+  } catch (err) {
+    return false;
+  }
+}

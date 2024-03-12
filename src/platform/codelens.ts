@@ -1,8 +1,12 @@
 import * as vscode from "vscode";
 import { PlatformStore } from "./stores/platform-store";
 import { getApiId } from "./util";
+import { Cache } from "../cache";
+import { getOpenApiVersion } from "../parsers";
+import { OpenApiVersion } from "../types";
+import { getApiConfig } from "./config";
 
-export class CodelensProvider implements vscode.CodeLensProvider {
+export class PlatformApiCodelensProvider implements vscode.CodeLensProvider {
   onDidChangeCodeLenses?: vscode.Event<void>;
   constructor(private store: PlatformStore) {}
 
@@ -36,5 +40,39 @@ export class CodelensProvider implements vscode.CodeLensProvider {
     });
 
     return [collectionLens, apiLens, uuidLens];
+  }
+}
+
+export class PlatformTagCodelensProvider implements vscode.CodeLensProvider<TagsLens> {
+  onDidChangeCodeLenses?: vscode.Event<void>;
+
+  constructor(private cache: Cache, private store: PlatformStore) {}
+
+  provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): TagsLens[] {
+    const parsed = this.cache.getParsedDocument(document);
+    const version = getOpenApiVersion(parsed);
+    if (parsed && version !== OpenApiVersion.Unknown) {
+      return [new TagsLens(document.uri)];
+    }
+    return [];
+  }
+
+  async resolveCodeLens(codeLens: TagsLens, token: vscode.CancellationToken): Promise<TagsLens> {
+    const config = await getApiConfig(codeLens.uri);
+    const tags = config?.tags;
+    codeLens.command = {
+      title: `Tags` + (tags ? `: ${tags.join(", ")}` : ""),
+      tooltip: "My Tags are...",
+      command: "zomg",
+      arguments: [],
+    };
+
+    return codeLens;
+  }
+}
+
+class TagsLens extends vscode.CodeLens {
+  constructor(public uri: vscode.Uri) {
+    super(new vscode.Range(0, 1, 0, 1024));
   }
 }

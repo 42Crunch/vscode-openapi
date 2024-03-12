@@ -23,10 +23,10 @@ import {
 import { PlatformStore } from "../stores/platform-store";
 import { Logger, PlatformContext } from "../types";
 import { offerUpgrade } from "../upgrade";
-import { getOrCreateScanconfUri, getScanconfUri } from "./config";
 import { createScanConfigWithPlatform } from "./runtime/platform";
 import { ScanWebView } from "./view";
 import { formatException } from "../util";
+import { getScanconfUri, makeScanconfUri } from "../config";
 
 export default (
   cache: Cache,
@@ -34,7 +34,7 @@ export default (
   store: PlatformStore,
   configuration: Configuration,
   secrets: vscode.SecretStorage,
-  getScanView: (uri: vscode.Uri) => ScanWebView
+  getScanView: (uri: vscode.Uri) => Promise<ScanWebView>
 ) => {
   vscode.commands.registerTextEditorCommand(
     "openapi.platform.editorRunSingleOperationScan",
@@ -123,7 +123,7 @@ async function editorRunSingleOperationScan(
   store: PlatformStore,
   configuration: Configuration,
   secrets: vscode.SecretStorage,
-  getScanView: (uri: vscode.Uri) => ScanWebView,
+  getScanView: (uri: vscode.Uri) => Promise<ScanWebView>,
   path: string,
   method: HttpMethod
 ): Promise<void> {
@@ -146,7 +146,9 @@ async function editorRunSingleOperationScan(
   }
 
   const title = bundle?.value?.info?.title || "OpenAPI";
-  const scanconfUri = getOrCreateScanconfUri(editor.document.uri, title);
+  const scanconfUri =
+    (await getScanconfUri(editor.document.uri)) ||
+    (await makeScanconfUri(editor.document.uri, title));
 
   if (
     (scanconfUri === undefined || !(await exists(scanconfUri))) &&
@@ -162,7 +164,7 @@ async function editorRunSingleOperationScan(
     return;
   }
 
-  const view = getScanView(editor.document.uri);
+  const view = await getScanView(editor.document.uri);
   await view.show();
   await view.sendColorTheme(vscode.window.activeColorTheme);
   return view.sendScanOperation(bundle, editor.document, scanconfUri, path, method);
@@ -231,7 +233,7 @@ async function createDefaultScanConfig(
 }
 
 async function editorOpenScanconfig(editor: vscode.TextEditor): Promise<void> {
-  const scanconfUri = getScanconfUri(editor.document.uri);
+  const scanconfUri = await getScanconfUri(editor.document.uri);
   if (scanconfUri === undefined || !exists(scanconfUri)) {
     await vscode.window.showErrorMessage(
       "No scan configuration found for the current document. Please create one first by running a scan.",

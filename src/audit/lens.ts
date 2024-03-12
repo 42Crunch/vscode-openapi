@@ -58,14 +58,7 @@ function auditLens(
 }
 
 function topAuditLens(document: vscode.TextDocument): vscode.CodeLens | undefined {
-  const position = document.positionAt(0);
-  const line = document.lineAt(position.line + 1);
-  const range = new vscode.Range(
-    new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
-    new vscode.Position(position.line, line.range.end.character)
-  );
-
-  return new vscode.CodeLens(range, {
+  return new vscode.CodeLens(new vscode.Range(0, 0, 0, 1024), {
     title: "Audit",
     tooltip: "Audit this OpenAPI file",
     command: "openapi.securityAudit",

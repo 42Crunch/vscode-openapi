@@ -434,7 +434,7 @@ export class PlatformStore {
     return this.formats;
   }
 
-  async getTags(): Promise<any> {
+  async getTags() {
     const tags = await getTags(this.getConnection(), this.logger);
     return tags;
   }

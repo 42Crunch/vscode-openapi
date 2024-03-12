@@ -16,7 +16,7 @@ import { FavoritesStore } from "./stores/favorites-store";
 import { ImportedUrlStore } from "./stores/imported-url-store";
 import { PlatformFS } from "./fs-provider";
 import { isPlatformUri } from "./util";
-import { CodelensProvider } from "./codelens";
+import { PlatformApiCodelensProvider, PlatformTagCodelensProvider } from "./codelens";
 import { refreshAuditReport } from "./audit";
 import { AuditWebView } from "../audit/view";
 import { DataDictionaryWebView } from "./data-dictionary/view";
@@ -153,6 +153,13 @@ export async function activate(
       { scheme: platformUriScheme, language: "json" },
       { scheme: platformUriScheme, language: "jsonc" },
     ],
-    new CodelensProvider(store)
+    new PlatformApiCodelensProvider(store)
+  );
+
+  Object.values(selectors).map((selector) =>
+    vscode.languages.registerCodeLensProvider(
+      selector,
+      new PlatformTagCodelensProvider(cache, store)
+    )
   );
 }

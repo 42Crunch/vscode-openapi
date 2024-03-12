@@ -107,6 +107,12 @@ export type ApiAuditReport = {
 
 export type Tag = {
   categoryName: string;
+  categoryDescription: string;
+  categoryId: string;
+  isExclusive: boolean;
+  isFreeForm: boolean;
+  isProtected: boolean;
   tagName: string;
+  tagDescription: string;
   tagId: string;
 };

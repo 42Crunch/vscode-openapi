@@ -12,7 +12,7 @@ import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
 import { AuditWebView } from "../../audit/view";
 import { AuditContext } from "../../types";
-import { getOpenapiAlias } from "./config";
+import { getApiConfig } from "../config";
 
 const selectors = {
   json: { scheme: "file", language: "json" },
@@ -36,13 +36,13 @@ export function activate(
   const scanViews: Record<string, ScanWebView> = {};
   const reportViews: Record<string, ScanReportWebView> = {};
 
-  const getScanView = (uri: vscode.Uri): ScanWebView => {
+  const getScanView = async (uri: vscode.Uri): Promise<ScanWebView> => {
     const viewId = uri.toString();
-    const alias = getOpenapiAlias(uri) || "unknown";
+    const apiConfig = await getApiConfig(uri);
 
     if (scanViews[viewId] === undefined) {
       scanViews[viewId] = new ScanWebView(
-        alias,
+        apiConfig?.alias || "unknown",
         context.extensionPath,
         cache,
         configuration,
@@ -51,7 +51,7 @@ export function activate(
         envStore,
         prefs,
         auditView,
-        () => getReportView(uri),
+        async () => await getReportView(uri),
         auditContext
       );
     }
@@ -59,13 +59,13 @@ export function activate(
     return scanViews[viewId];
   };
 
-  const getReportView = (uri: vscode.Uri): ScanReportWebView => {
+  const getReportView = async (uri: vscode.Uri): Promise<ScanReportWebView> => {
     const viewId = uri.toString();
-    const alias = getOpenapiAlias(uri) || "unknown";
+    const apiConfig = await getApiConfig(uri);
 
     if (reportViews[viewId] === undefined) {
       reportViews[viewId] = new ScanReportWebView(
-        `Scan report ${alias}`,
+        apiConfig?.alias ? `Scan report ${apiConfig.alias}` : "Scan report",
         context.extensionPath,
         cache,
         configuration,
