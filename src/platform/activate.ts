@@ -137,6 +137,7 @@ export async function activate(
     context,
     platformContext,
     auditContext,
+    configuration,
     store,
     favoriteCollections,
     importedUrls,

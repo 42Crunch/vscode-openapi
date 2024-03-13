@@ -52,19 +52,22 @@ export class PlatformTagCodelensProvider implements vscode.CodeLensProvider<Tags
     const parsed = this.cache.getParsedDocument(document);
     const version = getOpenApiVersion(parsed);
     if (parsed && version !== OpenApiVersion.Unknown) {
-      return [new TagsLens(document.uri)];
+      return [new TagsLens(document)];
     }
     return [];
   }
 
   async resolveCodeLens(codeLens: TagsLens, token: vscode.CancellationToken): Promise<TagsLens> {
-    const config = await getApiConfig(codeLens.uri);
+    const config = await getApiConfig(codeLens.document.uri);
     const tags = config?.tags;
+    const formatted = tags ? `: ${tags.join(", ")}` : "";
+    const MAX_FORMATTED_TAGS_LENGTH = 40;
     codeLens.command = {
-      title: `Tags` + (tags ? `: ${tags.join(", ")}` : ""),
-      tooltip: "My Tags are...",
-      command: "zomg",
-      arguments: [],
+      title:
+        `Tags` + (formatted.length > MAX_FORMATTED_TAGS_LENGTH ? `: (${tags?.length})` : formatted),
+      tooltip: "42Crunch platform tags",
+      command: "openapi.platform.updateTags",
+      arguments: [codeLens.document],
     };
 
     return codeLens;
@@ -72,7 +75,7 @@ export class PlatformTagCodelensProvider implements vscode.CodeLensProvider<Tags
 }
 
 class TagsLens extends vscode.CodeLens {
-  constructor(public uri: vscode.Uri) {
+  constructor(public document: vscode.TextDocument) {
     super(new vscode.Range(0, 1, 0, 1024));
   }
 }

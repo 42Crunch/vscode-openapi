@@ -38,20 +38,20 @@ export async function makeApiConfig(openapiUri: vscode.Uri, title: string): Prom
   return config.apis[path];
 }
 
+export async function saveApiConfig(openapiUri: vscode.Uri, apiConfig: ApiConfig) {
+  const rootUri = await getRootUri(openapiUri);
+  const config = (await getConfig(openapiUri)) || createDefaultConfig();
+  const apiRelativePath = getApiRelativePath(rootUri, openapiUri);
+  config.apis[apiRelativePath] = apiConfig;
+  await writeConfig(rootUri, config);
+}
+
 export async function getConfig(openapiUri: vscode.Uri): Promise<ConfigFile | undefined> {
   const rootUri = await getRootUri(openapiUri);
   if (!(await exists(getConfigUri(rootUri)))) {
     return undefined;
   }
   return await readConfig(rootUri);
-}
-
-export async function saveApiConfig(openapiUri: vscode.Uri, apiConfig: ApiConfig) {
-  const rootUri = await getRootUri(openapiUri);
-  const config = (await getConfig(openapiUri)) || createDefaultConfig();
-  const apiRelativePath = getApiRelativePath(rootUri, openapiUri);
-  config.apis[apiRelativePath] = apiConfig;
-  await writeConfig(openapiUri, config);
 }
 
 function createDefaultConfig(): ConfigFile {
@@ -88,66 +88,6 @@ export async function makeScanconfUri(openapiUri: vscode.Uri, title: string): Pr
   }
   return vscode.Uri.joinPath(scanDirectoryAliasUri, "scanconf.json");
 }
-
-/*
-async function getOrCreateScanconfUri(openapiUri: vscode.Uri, title: string): Promise<vscode.Uri> {
-  const rootUri = await getRootUri(openapiUri);
-
-  const configDirUri = vscode.Uri.joinPath(rootUri, ".42c");
-  const configUri = await getConfigUri(openapiUri);
-  const relativeOasPath = relative(rootUri, openapiUri);
-  const config = await readConfigOrDefault(configUri);
-
-  if (config.apis[relativeOasPath] === undefined) {
-    const aliases = Object.values(config.apis).map((api) => api.alias);
-    const uniqueAlias = getUniqueAlias(aliases, convertTitleToAlias(title));
-    config.apis[relativeOasPath] = { alias: uniqueAlias, tags: [] };
-
-    // make "config" dir
-    if (!exists(configDirUri)) {
-      await vscode.workspace.fs.createDirectory(configDirUri);
-    }
-
-    // write config
-    writeConfig(configUri, config);
-  }
-
-  const alias = config.apis[relativeOasPath].alias;
-
-  // safeguard by making "scan" dir, "scan/<alias>" dirs in case these
-  // have been removed
-  const scanDirectoryUri = vscode.Uri.joinPath(rootUri, ".42c", "scan");
-  if (!exists(scanDirectoryUri)) {
-    await vscode.workspace.fs.createDirectory(scanDirectoryUri);
-  }
-
-  const scanDirectoryAliasUri = vscode.Uri.joinPath(rootUri, ".42c", "scan", alias);
-  if (!exists(scanDirectoryAliasUri)) {
-    await vscode.workspace.fs.createDirectory(scanDirectoryAliasUri);
-  }
-
-  return vscode.Uri.joinPath(rootUri, ".42c", "scan", alias, `scanconf.json`);
-}
-
-async function getScanconfUriZ(openapiUri: vscode.Uri): Promise<vscode.Uri | undefined> {
-  const rootUri = await getRootUri(openapiUri);
-  const configUri = await getConfigUri(openapiUri);
-  const relativeOasPath = relative(rootUri, openapiUri);
-  const config = await readConfigOrDefault(configUri);
-
-  if (config.apis[relativeOasPath] === undefined) {
-    return undefined;
-  }
-
-  const alias = config.apis[relativeOasPath].alias;
-
-  if (alias === undefined) {
-    return undefined;
-  }
-
-  return vscode.Uri.joinPath(rootUri, ".42c", "scan", alias, `scanconf.json`);
-}
-*/
 
 function getConfigUri(rootUri: vscode.Uri) {
   return vscode.Uri.joinPath(getConfigDirUri(rootUri), "conf.yaml");

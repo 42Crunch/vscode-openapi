@@ -117,55 +117,8 @@ export default (
   },
 
   refreshCollections: async () => {
-    const tags = await store.getTags();
-    const grouped = groupBy(tags, "categoryName");
-
-    const items: any[] = [];
-
-    // sort keys of the grouped object and iterate over each one with for of loop
-    for (const key of Object.keys(grouped).sort()) {
-      const groupTags = grouped[key];
-      groupTags.sort((a, b) => a.tagName.localeCompare(b.tagName));
-      const label = groupTags[0].isExclusive ? "" : `multiple tags allowed`;
-      items.push({ label, kind: vscode.QuickPickItemKind.Separator });
-      for (const tag of groupTags) {
-        items.push({
-          label: `${tag.categoryName}:${tag.tagName}`,
-          categoryName: tag.categoryName,
-          isExclusive: tag.isExclusive,
-          detail: tag.tagDescription,
-        });
-      }
-    }
-
-    const quickPick = vscode.window.createQuickPick<TagItem>();
-    quickPick.items = items;
-    //quickPick.selectedItems = [];
-    quickPick.busy = true;
-    quickPick.ignoreFocusOut = true;
-
-    let oldSelection: string[] = [];
-
-    quickPick.onDidChangeSelection((selection) => {
-      const newlySelected = selection.filter((item) => !oldSelection.includes(item.label));
-
-      if (newlySelected.length === 0) {
-        return;
-      }
-
-      const updatedSelection = filterOldExclusives(selection, newlySelected);
-
-      // update oldSelection
-      oldSelection = updatedSelection.map((item) => item.label);
-      quickPick.selectedItems = updatedSelection;
-    });
-
-    quickPick.canSelectMany = true;
-
-    quickPick.show();
-
-    //await store.refresh();
-    //provider.refresh();
+    await store.refresh();
+    provider.refresh();
   },
 
   editApi: async (apiId: string) => {
@@ -180,37 +133,3 @@ export default (
     await vscode.window.showTextDocument(document);
   },
 });
-
-function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
-  return array.reduce((result, currentItem) => {
-    const groupKey = currentItem[key];
-
-    if (!(result as any)[groupKey]) {
-      (result as any)[groupKey] = [];
-    }
-
-    (result as any)[groupKey].push(currentItem);
-    return result;
-  }, {});
-}
-
-type TagItem = vscode.QuickPickItem & { categoryName: string; isExclusive: boolean };
-
-// given a current selection and a list of a newly selected items, return the updated selection
-// removing any old exclusives, forcing that only one exclusive item per category is selected
-function filterOldExclusives(selection: readonly TagItem[], newlySelected: TagItem[]): TagItem[] {
-  return selection.filter((item) => {
-    if (!item.isExclusive) {
-      return true;
-    }
-
-    // if exclusive, return if present in newlySelected
-    if (newlySelected.some((selected) => selected.label === item.label)) {
-      return true;
-    }
-
-    // if exclusive item is not present in newlySelected
-    // allow it if category is different to any item in newlySelected
-    return newlySelected.every((selected) => selected.categoryName !== item.categoryName);
-  });
-}

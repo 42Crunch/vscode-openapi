@@ -11,6 +11,7 @@ import util from "./commands/util";
 import createApi from "./commands/create-api";
 import filter from "./commands/filter";
 import report from "./commands/report";
+import tags from "./commands/tags";
 import dataDictionary from "./data-dictionary/commands";
 
 import { AuditContext } from "../types";
@@ -18,11 +19,14 @@ import { CollectionsProvider } from "./explorer/provider";
 import { ExplorerNode } from "./explorer/nodes/base";
 import { AuditWebView } from "../audit/view";
 import { DataDictionaryWebView } from "./data-dictionary/view";
+import { Config } from "@xliic/common/config";
+import { Configuration } from "../configuration";
 
 export function registerCommands(
   context: vscode.ExtensionContext,
   platformContext: PlatformContext,
   auditContext: AuditContext,
+  configuration: Configuration,
   store: PlatformStore,
   favorites: FavoritesStore,
   importedUrls: ImportedUrlStore,
@@ -39,6 +43,7 @@ export function registerCommands(
   Object.assign(commands, createApi(store, importedUrls, provider, tree, cache));
   Object.assign(commands, filter(store, provider));
   Object.assign(commands, report(store, context, auditContext, cache, reportWebView));
+  Object.assign(commands, tags(cache, store, configuration));
   Object.assign(
     commands,
     dataDictionary(cache, platformContext, store, dataDictionaryView, dataDictionaryDiagnostics)
