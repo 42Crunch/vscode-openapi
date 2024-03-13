@@ -26,7 +26,7 @@ import { offerUpgrade } from "../upgrade";
 import { createScanConfigWithPlatform } from "./runtime/platform";
 import { ScanWebView } from "./view";
 import { formatException } from "../util";
-import { getScanconfUri, makeScanconfUri } from "../config";
+import { getApiConfig, getScanconfUri, makeScanconfUri } from "../config";
 
 export default (
   cache: Cache,
@@ -150,6 +150,8 @@ async function editorRunSingleOperationScan(
     (await getScanconfUri(editor.document.uri)) ||
     (await makeScanconfUri(editor.document.uri, title));
 
+  const apiConfig = await getApiConfig(editor.document.uri);
+
   if (
     (scanconfUri === undefined || !(await exists(scanconfUri))) &&
     !(await createDefaultScanConfig(
@@ -158,7 +160,8 @@ async function editorRunSingleOperationScan(
       secrets,
       hasCli,
       scanconfUri,
-      stringify(bundle.value)
+      stringify(bundle.value),
+      apiConfig?.tags || []
     ))
   ) {
     return;
@@ -176,7 +179,8 @@ async function createDefaultScanConfig(
   secrets: vscode.SecretStorage,
   hasCli: boolean,
   scanconfUri: vscode.Uri,
-  oas: string
+  oas: string,
+  tags: string[]
 ): Promise<boolean> {
   return vscode.window.withProgress(
     {
@@ -216,7 +220,7 @@ async function createDefaultScanConfig(
               "Security Audit Token required by 42Crunch CLI is not found, using platform connection instead."
             );
           }
-          await createScanConfigWithPlatform(store, scanconfUri, oas);
+          await createScanConfigWithPlatform(store, scanconfUri, oas, tags);
         }
         vscode.window.showInformationMessage(
           `Saved Conformance Scan configuration to: ${scanconfUri.toString()}`

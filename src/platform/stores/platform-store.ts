@@ -235,7 +235,7 @@ export class PlatformStore {
     const mandatoryTags = getMandatoryTags(this.configuration);
     if (mandatoryTags.length > 0) {
       const platformTags = await getTags(this.getConnection(), this.logger);
-      tagIds.push(...getMandatoryTagsIds(mandatoryTags, platformTags));
+      tagIds.push(...getTagsIds(mandatoryTags, platformTags));
     }
 
     const api = await createApi(
@@ -249,14 +249,18 @@ export class PlatformStore {
     return api;
   }
 
-  async createTempApi(json: string): Promise<{ apiId: string; collectionId: string }> {
+  async createTempApi(
+    json: string,
+    tags: string[]
+  ): Promise<{ apiId: string; collectionId: string }> {
     const collectionId = await this.findOrCreateTempCollection();
 
-    const tagIds: string[] = [];
     const mandatoryTags = getMandatoryTags(this.configuration);
-    if (mandatoryTags.length > 0) {
+    const effectiveTags = [...mandatoryTags, ...tags];
+    const tagIds: string[] = [];
+    if (effectiveTags.length > 0) {
       const platformTags = await getTags(this.getConnection(), this.logger);
-      tagIds.push(...getMandatoryTagsIds(mandatoryTags, platformTags));
+      tagIds.push(...getTagsIds(effectiveTags, platformTags));
     }
 
     // if the api naming convention is configured, use its example as the api name
@@ -562,17 +566,17 @@ function getMandatoryTags(configuration: Configuration): string[] {
   return tags;
 }
 
-function getMandatoryTagsIds(tags: string[], platformTags: Tag[]): string[] {
+function getTagsIds(tags: string[], platformTags: Tag[]): string[] {
   const tagIds: string[] = [];
   for (const tag of tags) {
     const found = platformTags.filter(
       (platformTag) => tag === `${platformTag.categoryName}:${platformTag.tagName}`
-    );
-    if (found.length > 0) {
-      tagIds.push(found[0].tagId);
+    )[0];
+    if (found !== undefined && !tagIds.includes(found.tagId)) {
+      tagIds.push(found.tagId);
     } else {
       throw new Error(
-        `The mandatory tag "${tag}" is not found. Please change the mandatory tags in your settings.`
+        `The tag "${tag}" is not found on the platform. Please update your mandatory tag settings or file tags.`
       );
     }
   }

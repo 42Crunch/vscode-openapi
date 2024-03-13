@@ -11,6 +11,7 @@ import { PlatformStore } from "../../platform/stores/platform-store";
 import { MappingNode } from "../../types";
 import { parseAuditReport } from "../audit";
 import { formatException } from "../../platform/util";
+import { getApiConfig } from "../../platform/config";
 
 export async function runPlatformAudit(
   document: vscode.TextDocument,
@@ -20,7 +21,8 @@ export async function runPlatformAudit(
   store: PlatformStore
 ): Promise<Audit | undefined> {
   try {
-    const tmpApi = await store.createTempApi(oas);
+    const apiConfig = await getApiConfig(document.uri);
+    const tmpApi = await store.createTempApi(oas, apiConfig?.tags || []);
     const report = await store.getAuditReport(tmpApi.apiId);
     const compliance = await store.readAuditCompliance(report.tid);
     const todoReport = await store.readAuditReportSqgTodo(report.tid);

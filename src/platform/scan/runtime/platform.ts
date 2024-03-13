@@ -5,9 +5,10 @@ import { TextEncoder } from "node:util";
 export async function createScanConfigWithPlatform(
   store: PlatformStore,
   scanconfUri: vscode.Uri,
-  oas: string
+  oas: string,
+  tags: string[]
 ): Promise<void> {
-  const tmpApi = await store.createTempApi(oas);
+  const tmpApi = await store.createTempApi(oas, tags);
 
   const report = await store.getAuditReport(tmpApi.apiId);
 

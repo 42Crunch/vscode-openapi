@@ -31,6 +31,7 @@ import { runScanWithScandManager } from "./runtime/scand-manager";
 import { UPGRADE_WARN_LIMIT, offerUpgrade, warnScans } from "../upgrade";
 import { getAnondCredentials } from "../../credentials";
 import { formatException } from "../util";
+import { getApiConfig } from "../config";
 
 export type BundleDocumentVersions = Record<string, number>;
 
@@ -107,6 +108,7 @@ export class ScanWebView extends WebView<Webapp> {
     runScan: async ({ path, method, operationId, env, scanconf }): Promise<void> => {
       try {
         const config = await loadConfig(this.configuration, this.secrets);
+        const apiConfig = await getApiConfig(this.target!.document.uri);
 
         const reportView = await this.getReportView();
 
@@ -121,6 +123,7 @@ export class ScanWebView extends WebView<Webapp> {
           this.envStore,
           env,
           this.target!.bundle,
+          apiConfig?.tags || [],
           path,
           method,
           operationId,
@@ -221,6 +224,7 @@ async function runScan(
   envStore: EnvStore,
   scanEnv: SimpleEnvironment,
   bundle: Bundle,
+  tags: string[],
   path: string,
   method: HttpMethod,
   operationId: string,
@@ -299,7 +303,7 @@ async function runScan(
         );
       }
 
-      const { token, tmpApi } = await createScanconfToken(store, stringOas, scanconf, logger);
+      const { token, tmpApi } = await createScanconfToken(store, stringOas, tags, scanconf, logger);
 
       // fall back to docker if no anond token, and cli is configured
       const failure =
@@ -395,10 +399,11 @@ async function loadReport(
 async function createScanconfToken(
   store: PlatformStore,
   oas: string,
+  tags: string[],
   scanconf: string,
   logger: Logger
 ) {
-  const tmpApi = await store.createTempApi(oas);
+  const tmpApi = await store.createTempApi(oas, tags);
   logger.info(`Created temp API "${tmpApi.apiId}", waiting for Security Audit`);
 
   const audit = await store.getAuditReport(tmpApi.apiId);
