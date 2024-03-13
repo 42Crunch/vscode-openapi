@@ -33,7 +33,7 @@
     "vscode.git"
   ],
   "activationEvents": [
-    "*",
+    "onStartupFinished",
     "onFileSystem:openapi-42crunch"
   ],
   "capabilities": {
