@@ -160,7 +160,7 @@ export async function activate(
   Object.values(selectors).map((selector) =>
     vscode.languages.registerCodeLensProvider(
       selector,
-      new PlatformTagCodelensProvider(cache, store)
+      new PlatformTagCodelensProvider(configuration, cache)
     )
   );
 }

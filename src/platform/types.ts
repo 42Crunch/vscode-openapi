@@ -115,4 +115,15 @@ export type Tag = {
   tagName: string;
   tagDescription: string;
   tagId: string;
+  onlyAdminCanTag?: boolean;
+};
+
+export type Category = {
+  id: string;
+  name: string;
+  description?: string;
+  isExclusive: boolean;
+  isFreeForm: boolean;
+  isProtected: boolean;
+  onlyAdminCanTag: boolean;
 };

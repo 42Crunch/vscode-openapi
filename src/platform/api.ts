@@ -7,7 +7,7 @@ import got, { Method, OptionsOfJSONResponseBody, HTTPError } from "got";
 import { AuditCompliance } from "@xliic/common/audit";
 import { NamingConvention } from "@xliic/common/platform";
 
-import { ApiAuditReport, SearchCollectionsResponse } from "./types";
+import { ApiAuditReport, Category, SearchCollectionsResponse } from "./types";
 import {
   Api,
   ListCollectionsResponse,
@@ -300,6 +300,14 @@ export async function getDataDictionaryFormats(
 export async function getTags(options: PlatformConnection, logger: Logger): Promise<Tag[]> {
   const { body } = await got(`api/v2/tags`, gotOptions("GET", options, logger));
   return <Tag[]>(body as any).list;
+}
+
+export async function getCategories(
+  options: PlatformConnection,
+  logger: Logger
+): Promise<Category[]> {
+  const { body } = await got(`api/v2/categories`, gotOptions("GET", options, logger));
+  return <Category[]>(body as any).list;
 }
 
 export async function createDefaultScanConfig(

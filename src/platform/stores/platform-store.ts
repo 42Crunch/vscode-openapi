@@ -35,6 +35,7 @@ import {
   readAuditCompliance,
   readAuditReportSqgTodo,
   getTags,
+  getCategories,
 } from "../api";
 import {
   Api,
@@ -48,6 +49,7 @@ import {
   Tag,
 } from "../types";
 import { GitManager } from "./git-store";
+import { getMandatoryTags } from "../mandatory-tags";
 
 export interface CollectionsView {
   collections: CollectionData[];
@@ -439,7 +441,13 @@ export class PlatformStore {
   }
 
   async getTags() {
+    const categories = await getCategories(this.getConnection(), this.logger);
     const tags = await getTags(this.getConnection(), this.logger);
+    for (const tag of tags) {
+      tag.onlyAdminCanTag = categories.some(
+        (category) => category.id === tag.categoryId && category.onlyAdminCanTag
+      );
+    }
     return tags;
   }
 
@@ -543,27 +551,6 @@ export class PlatformStore {
       return collection.desc.id;
     }
   }
-}
-
-function getMandatoryTags(configuration: Configuration): string[] {
-  const tags: string[] = [];
-
-  const platformMandatoryTags = configuration.get<string>("platformMandatoryTags");
-  if (platformMandatoryTags !== "") {
-    if (platformMandatoryTags.match(TagRegex) !== null) {
-      for (const tag of platformMandatoryTags.split(/[\s,]+/)) {
-        if (tag !== "") {
-          tags.push(tag);
-        }
-      }
-    } else {
-      throw new Error(
-        `The mandatory tags "${platformMandatoryTags}" do not match the expected pattern. Please change the mandatory tags in your settings.`
-      );
-    }
-  }
-
-  return tags;
 }
 
 function getTagsIds(tags: string[], platformTags: Tag[]): string[] {

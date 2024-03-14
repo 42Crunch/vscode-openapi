@@ -3,16 +3,17 @@ import * as vscode from "vscode";
 import { PlatformStore } from "../stores/platform-store";
 import { getApiConfig, makeApiConfig, saveApiConfig } from "../config";
 import { Configuration } from "../../configuration";
-import { TagRegex } from "@xliic/common/platform";
 import { Cache } from "../../cache";
 import { Tag } from "../types";
+import { getMandatoryTags } from "../mandatory-tags";
 
 export default (cache: Cache, store: PlatformStore, confiuration: Configuration) => ({
   updateTags: async (document: vscode.TextDocument) => {
-    const quickPick = vscode.window.createQuickPick<TagItem>();
+    const quickPick = vscode.window.createQuickPick<TagItemOrSeparator>();
     quickPick.canSelectMany = true;
     quickPick.busy = true;
     quickPick.enabled = false;
+    quickPick.matchOnDescription = true;
     quickPick.title = "42Crunch platform tags";
     quickPick.placeholder = "Loading tags...";
     quickPick.show();
@@ -24,21 +25,29 @@ export default (cache: Cache, store: PlatformStore, confiuration: Configuration)
 
     quickPick.items = items;
     quickPick.selectedItems = items.filter(
-      (item) => currentTags.includes(item.label) || item?.isMandatory
+      (item) =>
+        item.kind === vscode.QuickPickItemKind.Default &&
+        !item.onlyAdminCanTag &&
+        (item?.isMandatory || currentTags.includes(item.label))
     );
     quickPick.placeholder = "";
     quickPick.busy = false;
     quickPick.enabled = true;
 
-    let previous: string[] = quickPick.selectedItems.map((item) => item.label);
+    let previous: string[] = quickPick.selectedItems
+      .filter((item) => item.kind === vscode.QuickPickItemKind.Default)
+      .map((item) => item.label);
+
     quickPick.onDidChangeSelection((selection) => {
       const changed =
         previous.length !== selection.length ||
         !previous.every((item) => selection.some((selected) => selected.label === item));
 
       if (changed) {
-        quickPick.selectedItems = updateSelection(items, selection, previous);
-        previous = quickPick.selectedItems.map((item) => item.label);
+        quickPick.selectedItems = updateSelection(items, selection as TagItem[], previous);
+        previous = quickPick.selectedItems
+          .filter((item) => item.kind === vscode.QuickPickItemKind.Default)
+          .map((item) => item.label);
       }
     });
 
@@ -50,33 +59,36 @@ export default (cache: Cache, store: PlatformStore, confiuration: Configuration)
         config = await makeApiConfig(document.uri, title);
       }
       config.tags = quickPick.selectedItems
-        .filter((item) => !item.isMandatory)
-        .map((item) => item.label);
+        .filter((item) => item.kind === vscode.QuickPickItemKind.Default && !item.isMandatory)
+        .map((item) => item.kind === vscode.QuickPickItemKind.Default && item.label)
+        .filter((item) => item !== false) as string[];
       await saveApiConfig(document.uri, config);
       quickPick.hide();
     });
   },
 });
 
-function getQuickpickItems(tags: Tag[], mandatoryTags: string[]) {
+function getQuickpickItems(tags: Tag[], mandatoryTags: string[]): TagItemOrSeparator[] {
   const grouped = groupBy(tags, "categoryName");
-  const items: any[] = [];
+  const items: TagItemOrSeparator[] = [];
   // sort keys of the grouped object and iterate over each one with for of loop
   for (const key of Object.keys(grouped).sort()) {
     const groupTags = grouped[key];
     groupTags.sort((a, b) => a.tagName.localeCompare(b.tagName));
-    const label = groupTags[0].isExclusive ? "" : `multiple tags allowed`;
+    const label = groupTags[0].isExclusive ? "single tag only" : `multiple tags allowed`;
     items.push({ label, kind: vscode.QuickPickItemKind.Separator });
     for (const tag of groupTags) {
       const label = `${tag.categoryName}:${tag.tagName}`;
       const isMandatory = mandatoryTags.includes(label);
       items.push({
+        kind: vscode.QuickPickItemKind.Default,
         label,
         categoryName: tag.categoryName,
         isExclusive: tag.isExclusive,
         detail: tag.tagDescription,
+        onlyAdminCanTag: !!tag.onlyAdminCanTag,
         isMandatory,
-        description: isMandatory ? "(mandatory)" : undefined,
+        description: tag.onlyAdminCanTag ? "(admin only)" : isMandatory ? "(mandatory)" : undefined,
       });
     }
   }
@@ -85,15 +97,20 @@ function getQuickpickItems(tags: Tag[], mandatoryTags: string[]) {
 
 // returns a new selection taking tag exclusivity and mandatory tags into consideration
 function updateSelection(
-  items: any[],
+  items: TagItemOrSeparator[],
   selection: readonly TagItem[],
   previous: string[]
 ): TagItem[] {
   // newly selected items
   const fresh = selection.filter((item) => !previous.includes(item.label));
   return items.filter((item) => {
-    // separators
+    // separators not selectable
     if (item.kind === vscode.QuickPickItemKind.Separator) {
+      return false;
+    }
+
+    // admin only tags are not selectable either
+    if (item.onlyAdminCanTag) {
       return false;
     }
 
@@ -121,7 +138,7 @@ function updateSelection(
     if (fresh.every((selected) => selected.categoryName !== item.categoryName)) {
       return isSelected(item, selection);
     }
-  });
+  }) as TagItem[];
 }
 
 function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
@@ -138,26 +155,20 @@ function groupBy<T>(array: T[], key: keyof T): Record<string, T[]> {
 }
 
 type TagItem = vscode.QuickPickItem & {
+  kind: vscode.QuickPickItemKind.Default;
   categoryName: string;
   isExclusive: boolean;
-  isMandatory?: boolean;
+  isMandatory: boolean;
+  onlyAdminCanTag: boolean;
 };
+
+type TagItemOrSeparator =
+  | TagItem
+  | {
+      kind: vscode.QuickPickItemKind.Separator;
+      label: string;
+    };
 
 function isSelected(item: TagItem, selection: readonly TagItem[]): boolean {
   return selection.some((selected) => selected.label === item.label);
-}
-
-function getMandatoryTags(configuration: Configuration): string[] {
-  const tags: string[] = [];
-  const platformMandatoryTags = configuration.get<string>("platformMandatoryTags");
-  if (platformMandatoryTags !== "") {
-    if (platformMandatoryTags.match(TagRegex) !== null) {
-      for (const tag of platformMandatoryTags.split(/[\s,]+/)) {
-        if (tag !== "") {
-          tags.push(tag);
-        }
-      }
-    }
-  }
-  return tags;
 }

@@ -5,6 +5,8 @@ import { Cache } from "../cache";
 import { getOpenApiVersion } from "../parsers";
 import { OpenApiVersion } from "../types";
 import { getApiConfig } from "./config";
+import { Configuration } from "../configuration";
+import { getMandatoryTags } from "./mandatory-tags";
 
 export class PlatformApiCodelensProvider implements vscode.CodeLensProvider {
   onDidChangeCodeLenses?: vscode.Event<void>;
@@ -46,7 +48,7 @@ export class PlatformApiCodelensProvider implements vscode.CodeLensProvider {
 export class PlatformTagCodelensProvider implements vscode.CodeLensProvider<TagsLens> {
   onDidChangeCodeLenses?: vscode.Event<void>;
 
-  constructor(private cache: Cache, private store: PlatformStore) {}
+  constructor(private configuration: Configuration, private cache: Cache) {}
 
   provideCodeLenses(document: vscode.TextDocument, token: vscode.CancellationToken): TagsLens[] {
     const parsed = this.cache.getParsedDocument(document);
@@ -58,10 +60,12 @@ export class PlatformTagCodelensProvider implements vscode.CodeLensProvider<Tags
   }
 
   async resolveCodeLens(codeLens: TagsLens, token: vscode.CancellationToken): Promise<TagsLens> {
+    const mandatoryTags = getMandatoryTags(this.configuration);
     const config = await getApiConfig(codeLens.document.uri);
-    const tags = config?.tags;
+    const tags = [...mandatoryTags, ...(config?.tags || [])];
     const formatted = tags ? `: ${tags.join(", ")}` : "";
     const MAX_FORMATTED_TAGS_LENGTH = 40;
+    // add mandatory
     codeLens.command = {
       title:
         `Tags` + (formatted.length > MAX_FORMATTED_TAGS_LENGTH ? `: (${tags?.length})` : formatted),
