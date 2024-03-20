@@ -419,7 +419,6 @@ function serializeCRequest(
     cookies: serializeRequestParameters(oas, file, request.parameters.cookie) as any,
   };
 
-  // FIXME better body handling
   if (request.body !== undefined) {
     if (request.body.mediaType === "application/json") {
       details.requestBody = {
@@ -429,7 +428,7 @@ function serializeCRequest(
     } else if (request.body.mediaType === "application/x-www-form-urlencoded") {
       details.requestBody = {
         mode: "urlencoded",
-        urlencoded: request.body.value as any,
+        urlencoded: serializeUrlencoded(request.body.value as object),
       };
     } else if (request.body.mediaType === "raw") {
       details.requestBody = {
