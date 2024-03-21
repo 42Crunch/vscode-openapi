@@ -29,6 +29,13 @@ export interface OutlineNode {
 }
 
 export const HTTP_METHODS = ["get", "put", "post", "delete", "options", "head", "patch", "trace"];
+const SKIP_DEEP_SEARCH_CONTEXT_VALUES = new Set([
+  "tag",
+  "tag-child",
+  "path",
+  "operation",
+  "operation-id",
+]);
 
 export abstract class AbstractOutlineNode implements OutlineNode {
   readonly item: vscode.TreeItem;
@@ -77,7 +84,10 @@ export abstract class AbstractOutlineNode implements OutlineNode {
       // Pass filtering if node's passFilter API returns true
       if (child.passFilter(searchValue)) {
         res.push(child);
-        if (child.contextValue == "path" || child.contextValue == "operation") {
+        if (
+          (child.contextValue && SKIP_DEEP_SEARCH_CONTEXT_VALUES.has(child.contextValue)) ||
+          (child.parent && child.parent.contextValue === "tag-child")
+        ) {
           child.skipDeepSearch = true;
         }
         // or node has a descendant that meets search criteria

@@ -74,7 +74,6 @@ export class OperationIdNode extends AbstractOutlineNode {
     this.path = path;
     this.method = method;
     this.contextValue = "operation-id";
-    this.searchable = false;
   }
 
   getChildren(): OutlineNode[] {
