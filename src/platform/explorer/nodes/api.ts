@@ -4,7 +4,6 @@ import { Api } from "../../types";
 import { AbstractExplorerNode, ExplorerNode } from "./base";
 import { CollectionNode } from "./collection";
 import { FavoriteCollectionNode } from "./favorite";
-import { fileExists, getGitApiRootPathAndMapName } from "../../stores/git-store";
 
 export class ApiNode extends AbstractExplorerNode {
   constructor(
@@ -29,20 +28,6 @@ export class ApiNode extends AbstractExplorerNode {
     const readonly = apiId !== apiTechName;
     if (readonly) {
       this.store.readonlyApis.add(apiId);
-      const gitInfo = this.store.gitManager.getInfo();
-      if (Object.keys(gitInfo).length > 0) {
-        const ctName = this.getCollectionTechnicalName();
-        if (ctName) {
-          const rootPathAndMapName = getGitApiRootPathAndMapName(ctName, gitInfo, apiId);
-          if (rootPathAndMapName) {
-            const [rootPath, apiMapName] = rootPathAndMapName;
-            const apiName = apiMapName ? apiMapName : apiTechName;
-            if (await fileExists(rootPath, apiName)) {
-              res.push(new TechNameNode(this, rootPath, apiName));
-            }
-          }
-        }
-      }
     }
     res.push(new OasNode(this, this.store, this.api, readonly));
     res.push(new AuditNode(this, this.store, this.api));
@@ -99,20 +84,6 @@ export class OasNode extends AbstractExplorerNode {
       command: "openapi.platform.editApi",
       title: "",
       arguments: [api.desc.id],
-    };
-  }
-}
-
-export class TechNameNode extends AbstractExplorerNode {
-  readonly icon: { dark: string; light: string } | string;
-
-  constructor(parent: ExplorerNode, private rootPath: string, private technicalName: string) {
-    super(parent, `${parent.id}-tech}`, technicalName, vscode.TreeItemCollapsibleState.None);
-    this.icon = "file-symlink-file";
-    this.item.command = {
-      command: "openapi.platform.openFile",
-      title: "",
-      arguments: [rootPath, technicalName],
     };
   }
 }

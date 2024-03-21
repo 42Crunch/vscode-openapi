@@ -24,9 +24,7 @@ import { DataDictionaryCompletionProvider } from "./data-dictionary/completion";
 import { DataDictionaryCodeActions } from "./data-dictionary/code-actions";
 import { activate as activateLinter } from "./data-dictionary/linter";
 import { activate as activateScan } from "./scan/activate";
-
 import { EnvStore } from "../envstore";
-import { GitChangeEvent } from "./stores/git-store";
 
 export async function activate(
   context: vscode.ExtensionContext,
@@ -72,10 +70,6 @@ export async function activate(
       credentials ? "present" : "missing"
     )
   );
-
-  store.gitManager.onDidChange((event: GitChangeEvent) => {
-    provider.refresh();
-  });
 
   // TODO unsubscribe?
 
