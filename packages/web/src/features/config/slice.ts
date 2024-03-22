@@ -49,6 +49,7 @@ const initialState: ConfigState = {
     platformUrl: "https://platform.42crunch.com",
     platformAuthType: "anond-token",
     platformApiToken: "",
+    anondToken: "",
     platformServices: {
       source: "auto",
       manual: undefined,

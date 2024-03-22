@@ -9,6 +9,9 @@ import {
 } from "../../../features/config/slice";
 import ConnectionTestBanner from "../ConnectionTestBanner";
 import { Container, Test, Title } from "../layout";
+import { RadioGroup } from "../../../components/RadioGroup";
+import { useWatch } from "react-hook-form";
+import Textarea from "../../../components/Textarea";
 
 function PlatformConnection() {
   const dispatch = useFeatureDispatch();
@@ -18,31 +21,55 @@ function PlatformConnection() {
     waitingForPlatformConnectionTest: waitingForTest,
   } = useFeatureSelector((state) => state.config);
 
+  const platformAuthType = useWatch({ name: "platformAuthType" });
+
   return (
     <>
       <Title>Connection to 42Crunch Platform</Title>
+
       <Container>
-        <Input label="Platform URL" name="platformUrl" />
-        <Input label="IDE token" name="platformApiToken" password />
-        <Test>
-          <ValidProgressButton
-            label="Test connection"
-            waiting={waitingForTest}
-            onClick={(e) => {
-              dispatch(testPlatformConnection());
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-          />
-          <ConnectionTestBanner result={testResult} />
-        </Test>
+        <RadioGroup
+          name="platformAuthType"
+          options={[
+            { value: "anond-token", label: "Freemium token" },
+            { value: "ide-key", label: "Platform IDE key" },
+          ]}
+        />
+
+        {platformAuthType === "anond-token" && (
+          <div>
+            <Textarea label="Freemium token" name="anondToken" />
+          </div>
+        )}
+
+        {platformAuthType === "ide-key" && (
+          <>
+            <Input label="Platform URL" name="platformUrl" />
+            <Input label="IDE token" name="platformApiToken" password />
+
+            <Test>
+              <ValidProgressButton
+                label="Test connection"
+                waiting={waitingForTest}
+                onClick={(e) => {
+                  dispatch(testPlatformConnection());
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              />
+              <ConnectionTestBanner result={testResult} />
+            </Test>
+          </>
+        )}
       </Container>
     </>
   );
 }
 
 const schema = z.object({
+  platformAuthType: z.enum(["anond-token", "ide-key"]),
   platformUrl: z.string().url().startsWith("https://"),
+  anondToken: z.string(),
   platformApiToken: z
     .string()
     .regex(

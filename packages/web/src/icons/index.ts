@@ -14,6 +14,7 @@ export { default as CircleExclamation } from "./CircleExclamation";
 export { default as CircleInfo } from "./CircleInfo";
 export { default as CircleQuestion } from "./CircleQuestion";
 export { default as CircleSolid } from "./CircleSolid";
+export { default as Circle } from "./Circle";
 export { default as Clone } from "./Clone";
 export { default as EllipsisVertical } from "./EllipsisVertical";
 export { default as ExclamationCircle } from "./ExclamationCircle";

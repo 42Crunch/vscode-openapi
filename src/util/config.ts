@@ -37,6 +37,7 @@ export async function loadConfig(
     platformUrl,
     platformAuthType: platformAuthType == "" ? derivedAutType : platformAuthType,
     platformApiToken: apiToken,
+    anondToken,
     insecureSslHostnames,
     platformServices: {
       source: platformServices === "" ? "auto" : "manual",
@@ -65,6 +66,18 @@ export async function saveConfig(
   secrets: vscode.SecretStorage
 ) {
   await configuration.update("platformUrl", config.platformUrl, vscode.ConfigurationTarget.Global);
+
+  await configuration.update(
+    "platformAuthType",
+    config.platformAuthType,
+    vscode.ConfigurationTarget.Global
+  );
+
+  await configuration.update(
+    "securityAuditToken",
+    config.anondToken,
+    vscode.ConfigurationTarget.Global
+  );
 
   if (config.platformServices.source === "auto") {
     await configuration.update("platformServices", "", vscode.ConfigurationTarget.Global);
