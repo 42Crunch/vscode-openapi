@@ -806,15 +806,6 @@
           "default": 1000,
           "description": "Preview update delay (in milliseconds after the last document change)"
         },
-        "openapi.approvedHostnames": {
-          "scope": "application",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "default": [],
-          "description": "List of hostnames approved for resolving external http:// and https:// references"
-        },
         "openapi.tryit.insecureSslHostnames": {
           "scope": "application",
           "type": "array",

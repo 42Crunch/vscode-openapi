@@ -385,5 +385,4 @@ const screen: ConfigScreen = {
     schema,
     form: OpenApiExternalRefs,
   };
-
 export default screen;
