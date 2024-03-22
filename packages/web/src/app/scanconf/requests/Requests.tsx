@@ -1,5 +1,5 @@
-import { HttpMethod } from "@xliic/common/http";
-import { RequestRef } from "@xliic/common/playbook";
+import { HttpMethod } from "@xliic/openapi";
+import { Playbook } from "@xliic/scanconf";
 
 import { ItemId, SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
 import { Menu, MenuItem } from "../../../new-components/Menu";
@@ -82,7 +82,12 @@ export default function Operations() {
       items: externalRequestItems,
       menu: (
         <AddExternalRequestDialog
-          onAddExternalRequest={(id: string, method: HttpMethod, url: string) => {
+          onAddExternalRequest={(
+            id: string,
+            method: HttpMethod,
+            url: string,
+            mode: "json" | "urlencoded"
+          ) => {
             dispatch(
               saveRequest({
                 ref: { id, type: "request" },
@@ -100,7 +105,10 @@ export default function Operations() {
                     },
                     body: hasBody(method)
                       ? {
-                          mediaType: "application/json",
+                          mediaType:
+                            mode === "urlencoded"
+                              ? "application/x-www-form-urlencoded"
+                              : "application/json",
                           value: {},
                         }
                       : undefined,
@@ -128,11 +136,12 @@ export default function Operations() {
       selected={selected}
       sections={sections}
       onSelected={onSetOperationId}
+      hideEmptySections={true}
       render={(selected) => {
         if (selected !== undefined)
           return (
             <Request
-              requestRef={{ type: selected.sectionId, id: selected.itemId } as RequestRef}
+              requestRef={{ type: selected.sectionId, id: selected.itemId } as Playbook.RequestRef}
               key={`${selected.sectionId}-${selected.itemId}`}
             />
           );

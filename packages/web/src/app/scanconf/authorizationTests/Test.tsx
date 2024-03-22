@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 
 import { ItemId } from "../../../components/layout/SearchSidebar";
 import Form from "../../../new-components/Form";
@@ -14,7 +14,7 @@ export default function Test({
   credentials,
 }: {
   selected: ItemId;
-  credentials: playbook.Credentials;
+  credentials: Playbook.Credentials;
 }) {
   const dispatch = useAppDispatch();
 
@@ -22,7 +22,7 @@ export default function Test({
     playbook: { authorizationTests },
   } = useAppSelector((state) => state.scanconf);
 
-  const onUpdateTest = (id: string, test: playbook.AuthenticationSwappingTest) =>
+  const onUpdateTest = (id: string, test: Playbook.AuthenticationSwappingTest) =>
     dispatch(saveAuthorizationTest({ id, test }));
 
   const authorizationTest = authorizationTests[selected.itemId];
@@ -34,7 +34,7 @@ export default function Test({
       <Form
         data={authorizationTest}
         wrapFormData={(x) => x}
-        unwrapFormData={(x) => x as playbook.AuthenticationSwappingTest}
+        unwrapFormData={(x) => x as Playbook.AuthenticationSwappingTest}
         saveData={(test) => onUpdateTest(selected.itemId, test)}
       >
         <TestContents credentials={credentials} />

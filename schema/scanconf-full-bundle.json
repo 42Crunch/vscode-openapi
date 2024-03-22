@@ -1,0 +1,1528 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Configuration file bundle",
+    "type": "object",
+    "allOf": [
+        {
+            "title": "Global file",
+            "type": "object",
+            "required": [
+                "version"
+            ],
+            "properties": {
+                "version": {
+                    "type": "string",
+                    "description": "file's version",
+                    "enum": [
+                        "2.0.0"
+                    ]
+                },
+                "runtimeConfiguration": {
+                    "$ref": "#/definitions/runtimeConfiguration"
+                },
+                "customizations": {
+                    "$ref": "#/definitions/customizations"
+                },
+                "authorizationTests": {
+                    "patternProperties": {
+                        ".*": {
+                            "oneOf": [
+                                {
+                                    "$ref": "#/definitions/authenticationSwappingTest"
+                                }
+                            ]
+                        }
+                    },
+                    "type": "object"
+                },
+                "authenticationDetails": {
+                    "items": {
+                        "$ref": "#/definitions/credentialsStore"
+                    },
+                    "type": "array"
+                },
+                "apiVersion": {
+                    "description": "An array of requests to be sent to get the API version. The variable 'version' must be set in the context at the end of the execution",
+                    "$ref": "#/definitions/requestsStage"
+                },
+                "before": {
+                    "description": "Array of requests to be sent once before the scan is executed.",
+                    "$ref": "#/definitions/requestsStage"
+                },
+                "after": {
+                    "description": "Array of requests to be sent once after the scan has been executed.",
+                    "$ref": "#/definitions/requestsStage"
+                },
+                "hooks": {
+                    "type": "object",
+                    "description": "Hold all plugins reference used in request and response during the runtime execution",
+                    "additionalProperties": false,
+                    "properties": {
+                        "requests": {
+                            "$ref": "#/definitions/hooksPluginReference"
+                        },
+                        "responses": {
+                            "$ref": "#/definitions/hooksPluginReference"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "type": "object",
+            "properties": {
+                "operations": {
+                    "type": "object",
+                    "patternProperties": {
+                        ".*": {
+                            "$ref": "#/definitions/operation"
+                        }
+                    }
+                },
+                "requests": {
+                    "type": "object",
+                    "description": "Contains all request templates that are not linked to an operation in the specification file but are needed to be re-used through configuration.",
+                    "patternProperties": {
+                        ".*": {
+                            "$ref": "#/definitions/requestStageContent"
+                        }
+                    }
+                },
+                "environments": {
+                    "type": "object",
+                    "patternProperties": {
+                        ".*": {
+                            "title": "Environment File",
+                            "type": "object",
+                            "additionalProperties": false,
+                            "required": [
+                                "variables"
+                            ],
+                            "properties": {
+                                "variables": {
+                                    "description": "A map for storing user-defined variables that are needed in the scenario.",
+                                    "type": "object",
+                                    "patternProperties": {
+                                        ".*": {
+                                            "oneOf": [
+                                                {
+                                                    "type": [
+                                                        "array",
+                                                        "object",
+                                                        "string",
+                                                        "integer",
+                                                        "number",
+                                                        "boolean",
+                                                        "null"
+                                                    ],
+                                                    "not": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "from": {
+                                                                "type": "string",
+                                                                "enum": [
+                                                                    "hardcoded",
+                                                                    "environment"
+                                                                ]
+                                                            }
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "$ref": "#/definitions/hardcodedVariable"
+                                                },
+                                                {
+                                                    "$ref": "#/definitions/envVariable"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "definitions": {
+        "scenarios": {
+            "title": "Scenario File",
+            "type": "object",
+            "required": [
+                "scenarios"
+            ],
+            "properties": {
+                "authorizationTests": {
+                    "type": "array",
+                    "description": "Reference to a definition of an authorization test in the common.json. The fuzzedRequest in the happy path must have the authentication that match the source in the test.",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "customTests": {
+                    "type": "array",
+                    "description": "Array of user-defined custom requests to be sent at operation level.",
+                    "items": {
+                        "$ref": "#/definitions/customTest"
+                    }
+                },
+                "before": {
+                    "$ref": "#/definitions/before"
+                },
+                "after": {
+                    "$ref": "#/definitions/after"
+                },
+                "scenarios": {
+                    "type": "array",
+                    "description": "",
+                    "items": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/definitions/happyPathScenario"
+                            },
+                            {
+                                "$ref": "#/definitions/unhappyPathScenario"
+                            }
+                        ]
+                    }
+                },
+                "operationId": {
+                    "type": "string",
+                    "description": "ID of the operation in the specification file"
+                }
+            }
+        },
+        "operation": {
+            "allOf": [
+                {
+                    "$ref": "#/definitions/scenarios"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "request": {
+                            "$ref": "#/definitions/request"
+                        }
+                    }
+                }
+            ]
+        },
+        "hardcodedVariable": {
+            "type": "object",
+            "required": [
+                "from",
+                "value"
+            ],
+            "properties": {
+                "from": {
+                    "type": "string",
+                    "enum": [
+                        "hardcoded"
+                    ]
+                },
+                "value": {
+                    "$ref": "#/definitions/userInputValue"
+                }
+            },
+            "defaultSnippets": [
+                {
+                    "label": "Hardcoded value",
+                    "description": "An hardcoded value",
+                    "body": {
+                        "from": "hardcoded",
+                        "value": "$1"
+                    }
+                }
+            ]
+        },
+        "envVariable": {
+            "type": "object",
+            "required": [
+                "from",
+                "required"
+            ],
+            "properties": {
+                "from": {
+                    "type": "string",
+                    "enum": [
+                        "environment"
+                    ]
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Environment name to fetch in the config file or in the os."
+                },
+                "required": {
+                    "type": "boolean",
+                    "description": "Determines whether the environment variable is mandatory"
+                },
+                "default": {
+                    "description": "Determines the default value when the environment variable is not defined in the config file or in the os. The default property is not needed when 'required' is true",
+                    "$ref": "#/definitions/userInputValue"
+                }
+            },
+            "defaultSnippets": [
+                {
+                    "label": "Environment value required",
+                    "description": "An environment value",
+                    "body": {
+                        "from": "environment",
+                        "name": "$1",
+                        "required": true
+                    }
+                },
+                {
+                    "label": "Environment value non-required",
+                    "description": "An environment value",
+                    "body": {
+                        "from": "environment",
+                        "name": "$1",
+                        "required": false,
+                        "default": "$2"
+                    }
+                }
+            ]
+        },
+        "credentialsStore": {
+            "oneOf": [
+                {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "$ref"
+                    ],
+                    "properties": {
+                        "$ref": {
+                            "type": "string",
+                            "description": "Reference to a scan credential stored in a scan vault.",
+                            "pattern": "^(o:)[\\w\\- \\.]{1,255}$"
+                        }
+                    }
+                },
+                {
+                    "type": "object",
+                    "description": "A map of security schemes",
+                    "patternProperties": {
+                        ".*": {
+                            "$ref": "#/definitions/credential"
+                        }
+                    }
+                }
+            ]
+        },
+        "credential": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+                "type",
+                "default",
+                "credentials"
+            ],
+            "properties": {
+                "type": {
+                    "description": "Security scheme type",
+                    "type": "string",
+                    "enum": [
+                        "basic",
+                        "bearer",
+                        "apiKey",
+                        "oauth2",
+                        "openIdConnect"
+                    ]
+                },
+                "description": {
+                    "type": "string"
+                },
+                "default": {
+                    "type": "string",
+                    "description": "The default credential stored in your scan vault that the scan uses for authenication if no other credential is defined for a test. The value must be a key in your credentials map."
+                },
+                "credentials": {
+                    "type": "object",
+                    "patternProperties": {
+                        ".*": {
+                            "$ref": "#/definitions/credentialContent"
+                        }
+                    }
+                },
+                "tti": {
+                    "type": "string",
+                    "description": "The idle time before re-running requests defined for each credentials value. 'ParseDuration' parses this to a duration string, such as '300s', '300ms', '1h',  valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'."
+                },
+                "ttl": {
+                    "type": "string",
+                    "description": "The hard time before re-running requests defined for each credentials values. 'ParseDuration' parses this to a duration string, such as '300s', '300ms', '1h',  valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'."
+                },
+                "in": {
+                    "description": "The location of the API key. Valid values are 'query', 'header' or 'cookie'",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "The name of the header, query or cookie parameter to be used.",
+                    "type": "string"
+                }
+            }
+        },
+        "authenticationSwappingTest": {
+            "type": "object",
+            "required": [
+                "key",
+                "source",
+                "target"
+            ],
+            "properties": {
+                "key": {
+                    "type": "string",
+                    "enum": [
+                        "authentication-swapping-bola",
+                        "authentication-swapping-bfla"
+                    ]
+                },
+                "source": {
+                    "$ref": "#/definitions/authArray"
+                },
+                "target": {
+                    "$ref": "#/definitions/authArray"
+                }
+            }
+        },
+        "authArray": {
+            "type": [
+                "array",
+                "null"
+            ],
+            "description": "An array of authentication requests to be fullfilled.",
+            "items": {
+                "$ref": "#/definitions/authenticationItem"
+            }
+        },
+        "authenticationItem": {
+            "oneOf": [
+                {
+                    "type": "string",
+                    "description": "The reference to the credential to be used for authentication."
+                },
+                {
+                    "$ref": "#/definitions/credential"
+                }
+            ]
+        },
+        "hooksPluginReference": {
+            "type": "array",
+            "description": "Array of plugins command to execute",
+            "items": {
+                "description": "Command to execute the plugin. If a path is defined to execute a binary, this one must be a relative path beginning by './'",
+                "type": "string",
+                "examples": [
+                    "python3 plugin.py",
+                    "./plugin",
+                    "aws_signature"
+                ]
+            }
+        },
+        "runtimeConfiguration": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+                "environment": {
+                    "type": "string",
+                    "description": "Default environment to be loaded if none is specified at scan runtime"
+                },
+                "logLevel": {
+                    "type": "string",
+                    "description": "The level of detail in logs set for the scan.",
+                    "enum": [
+                        "debug",
+                        "info",
+                        "error",
+                        "critical"
+                    ],
+                    "default": "error"
+                },
+                "logDestination": {
+                    "type": "string",
+                    "description": "The destination of all logs produced during the scan. The possible values are'stdout','files', and 'platform'. You can select multiple outputs by adding the character '+' between the values.",
+                    "default": "stdout+platform"
+                },
+                "logMaxFileSize": {
+                    "type": "integer",
+                    "description": "The maximum size (in bytes) of the log file when the 'logDestination' value includes 'files'.",
+                    "default": 2147483648
+                },
+                "requestHeaderNameRequestId": {
+                    "type": "string",
+                    "description": "The name of the header that contains the request ID of the sent request.",
+                    "default": "x-scan-request-id"
+                },
+                "requestHeaderNameScenarioId": {
+                    "type": "string",
+                    "description": "The name of the header that contains the scenario ID of the sent request.",
+                    "default": "x-scan-scenario-id"
+                },
+                "requestFlowrate": {
+                    "type": "integer",
+                    "description": "The time interval (in milliseconds) between the requests that the scan sends to the API during a scan.",
+                    "default": 10
+                },
+                "requestTimeout": {
+                    "type": "integer",
+                    "description": "The maximum time (in seconds) that the scan waits for a response from the API. It is not recommended to set this value to '0', because that means the scan would wait forever for the API to respond, causing the scan to hang if the API is unresponsive.",
+                    "default": 30
+                },
+                "requestTlsInsecureSkipVerify": {
+                    "type": "boolean",
+                    "description": "This setting defines if the scan accepts any certificate presented by the server and any host name in that certificate",
+                    "default": false
+                },
+                "responseFollowRedirection": {
+                    "type": "boolean",
+                    "description": "This setting defines if the scan follows the 'HTTP 302 Redirection' response. Maximum of 10 successive redirections are allowed before the scan stops.",
+                    "default": true
+                },
+                "happyPathOnly": {
+                    "type": "boolean",
+                    "description": "This setting controls which requests are included in the scan. By default, the scan first sends happy path requests to establish the baseline for how the normal API behavior, then the actual test requests to detect any problems in how the API implementation conforms to the API definition. If you set this setting to 'true', the scan only runs the happy path requests during the scan before stopping, instead of a full scan.",
+                    "default": false
+                },
+                "maxScanDuration": {
+                    "type": "integer",
+                    "description": "The maximum duration (in seconds) allowed for executing the scan. The scan times out if the the execution takes longer.",
+                    "default": 3600
+                },
+                "memoryLimit": {
+                    "type": "integer",
+                    "description": "A soft limit (in bytes) for the maximum amount of memory that the scan process is allowed to consume.",
+                    "default": 2147483648
+                },
+                "memoryTimeSpan": {
+                    "type": "integer",
+                    "description": "The time interval (in seconds) how often the scan process checks the current memory consumption.",
+                    "default": 10
+                },
+                "responseMaxBodySizeScan": {
+                    "type": "integer",
+                    "description": "The maximum body size (in bytes) that the scan consumes from an API response, to avoid massive memory consumption.",
+                    "default": 8092
+                },
+                "reportIndexed": {
+                    "type": "boolean",
+                    "description": "Is the scan report indexed or not. Indexing the report (set to 'true') can reduce the report size, but it may make it less human-readable.",
+                    "default": false
+                },
+                "reportPrettify": {
+                    "type": "boolean",
+                    "description": "Is the scan report prettified or not. Prettifying the scan report increases its human-readability, but it also increases the report size.",
+                    "default": false
+                },
+                "reportMaxHttpResponseSizeHappyPath": {
+                    "type": "integer",
+                    "description": "The maximum size (in bytes) of the HTTP responses received for a happy path request that is included in the scan report.",
+                    "default": 8092
+                },
+                "reportMaxBodySizeHappyPath": {
+                    "type": "integer",
+                    "description": "The maximum body size (in bytes) that the scan includes in the scan report for a happy path request.",
+                    "default": 8092
+                },
+                "reportMaxHttpResponseSizeTest": {
+                    "type": "integer",
+                    "description": "The maximum size (in bytes) of the HTTP responses received for an actual test request that is included in the scan report.",
+                    "default": 8092
+                },
+                "reportMaxBodySizeTest": {
+                    "type": "integer",
+                    "description": "The maximum body size (in bytes) that the scan includes in the scan report for an actual test request.",
+                    "default": 8092
+                },
+                "reportIssuesOnly": {
+                    "type": "boolean",
+                    "description": "This setting determines what results are included in the scan report. If set to 'true', only test requests that uncovered problems in your API implementation are included in the scan report, to avoid overly large report size. If set to 'false', both requests that uncovered problems and the ones that did not (so where all was good) are included in the scan report, significantly increasing the report size.",
+                    "default": true
+                },
+                "reportMaxIssues": {
+                    "type": "integer",
+                    "description": "The maximum number of problems that the scan can uncover before it must stop. This setting helps to control the report size: you can iterate on scanning your API, and as you fix the problems found in previous scans, the scan keeps including subsequently discovered problems.",
+                    "default": 10000
+                },
+                "reportMaxSize": {
+                    "type": "integer",
+                    "description": "The maximum scan report size (in bytes). The scan stops when the size limit is reached.",
+                    "default": 20971520
+                },
+                "reportGenerateCurlCommand": {
+                    "type": "boolean",
+                    "description": "Generate the corresponding curl command for each tested request. Note: This will increase the report size twofold.",
+                    "default": false
+                }
+            }
+        },
+        "customizations": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Customize scan behavior for happys paths and tests",
+            "properties": {
+                "happyPaths": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "retry",
+                        "responsePolicy",
+                        "httpStatusExpected"
+                    ],
+                    "properties": {
+                        "retry": {
+                            "type": "integer",
+                            "description": "The number of retry attempts that the scan performs for a happy path request. A successfully performed happy path request is required to establish a baseline before the scan can run any actual test requests on the operation.",
+                            "minimum": 1,
+                            "maximum": 100,
+                            "default": 1
+                        },
+                        "responsePolicy": {
+                            "$ref": "#/definitions/responsePolicy"
+                        },
+                        "httpStatusExpected": {
+                            "$ref": "#/definitions/responseHttpStatusExpected"
+                        }
+                    }
+                },
+                "tests": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                        "responsePolicy"
+                    ],
+                    "properties": {
+                        "skippedKeys": {
+                            "description": "An array of test IDs to be skipped in the scan, defined at the playbook level.",
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "responsePolicy": {
+                            "$ref": "#/definitions/responsePolicy"
+                        },
+                        "responseAnalysisBehavior": {
+                            "patternProperties": {
+                                ".*": {
+                                    "$ref": "#/definitions/responseAnalysisBehavior"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "responsePolicy": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "httpStatusExpected": {
+                    "type": "boolean"
+                },
+                "mustBeConformant": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "responseAnalysisBehavior": {
+            "additionalProperties": false,
+            "type": "object",
+            "description": "Defines what the scan expects regarding the response status code, header and body assessment.",
+            "properties": {
+                "httpStatusExpected": {
+                    "$ref": "#/definitions/responseHttpStatusExpected"
+                }
+            }
+        },
+        "responseHttpStatusExpected": {
+            "type": "array",
+            "description": "An array of HTTP response status codes that the scan expects for the request.",
+            "items": {
+                "description": "String of the expected HTTP response status codes (in the format 400/4XX/40X)",
+                "type": "string"
+            }
+        },
+        "request": {
+            "description": "Contains all the data needed to send an HTTP request.",
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/42cRequest"
+                },
+                {
+                    "$ref": "#/definitions/httpRequest"
+                }
+            ]
+        },
+        "42cRequest": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "Contains all the data needed to send an HTTP request with the 42c format.",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "description": "Format for describing the request",
+                    "enum": [
+                        "42c"
+                    ]
+                },
+                "details": {
+                    "required": [
+                        "url",
+                        "method"
+                    ],
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "method": {
+                            "type": "string",
+                            "enum": [
+                                "GET",
+                                "POST",
+                                "PUT",
+                                "DELETE",
+                                "PATCH",
+                                "HEAD",
+                                "TRACE",
+                                "OPTIONS"
+                            ]
+                        },
+                        "url": {
+                            "type": "string",
+                            "description": "The string representation of the request URL, including the protocol, host, path, hash and path variable(s). Query parameter(s) must be included in the 'query' object. Fragment URL is not supported yet."
+                        },
+                        "paths": {
+                            "description": "An array of path parameters",
+                            "$ref": "#/definitions/parametersArray"
+                        },
+                        "queries": {
+                            "description": "An array of query parameteres, which is basically the query string part of the URL, parsed into separate variables",
+                            "$ref": "#/definitions/parametersArray"
+                        },
+                        "headers": {
+                            "description": "An array of header parameters",
+                            "$ref": "#/definitions/parametersArray"
+                        },
+                        "cookies": {
+                            "description": "An array of cookie parameters",
+                            "$ref": "#/definitions/parametersArray"
+                        },
+                        "requestBody": {
+                            "oneOf": [
+                                {
+                                    "type": "null"
+                                },
+                                {
+                                    "type": "object",
+                                    "description": "HTTP request body",
+                                    "oneOf": [
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "mode",
+                                                "raw"
+                                            ],
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "mode": {
+                                                    "type": "string",
+                                                    "description": "Type of the request body",
+                                                    "enum": [
+                                                        "raw"
+                                                    ]
+                                                },
+                                                "raw": {
+                                                    "type": "string"
+                                                },
+                                                "options": {
+                                                    "type": "object",
+                                                    "required": [
+                                                        "raw"
+                                                    ],
+                                                    "properties": {
+                                                        "raw": {
+                                                            "type": "object",
+                                                            "required": [
+                                                                "json"
+                                                            ],
+                                                            "properties": {
+                                                                "language": {
+                                                                    "type": "string",
+                                                                    "enum": [
+                                                                        "json"
+                                                                    ]
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "mode",
+                                                "json"
+                                            ],
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "mode": {
+                                                    "type": "string",
+                                                    "description": "Type of the request body",
+                                                    "enum": [
+                                                        "json"
+                                                    ]
+                                                },
+                                                "json": {
+                                                    "description": "A JSON value to be included in the request body.",
+                                                    "$ref": "#/definitions/userInputValue"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "type": "object",
+                                            "required": [
+                                                "mode",
+                                                "urlencoded"
+                                            ],
+                                            "additionalProperties": false,
+                                            "properties": {
+                                                "mode": {
+                                                    "type": "string",
+                                                    "description": "Type of the request body",
+                                                    "enum": [
+                                                        "urlencoded"
+                                                    ]
+                                                },
+                                                "urlencoded": {
+                                                    "description": "Map of urlencoded value to send value to send in the body",
+                                                    "patternProperties": {
+                                                        ".*": {
+                                                            "$ref": "#/definitions/urlencodedObject"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "required": [
+                "type",
+                "details"
+            ]
+        },
+        "parametersArray": {
+            "type": "array",
+            "description": "An array of parameters",
+            "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "description": "Parameter's name"
+                    },
+                    "value": {
+                        "$ref": "#/definitions/userInputValue"
+                    }
+                },
+                "required": [
+                    "key",
+                    "value"
+                ],
+                "defaultSnippets": [
+                    {
+                        "label": "Input value",
+                        "description": "A free-form input value",
+                        "body": {
+                            "key": "$1",
+                            "value": "$2"
+                        }
+                    }
+                ]
+            },
+            "defaultSnippets": [
+                {
+                    "label": "1 Parameter",
+                    "description": "A unique parameter",
+                    "body": [
+                        {
+                            "key": "$1",
+                            "value": "$2"
+                        }
+                    ]
+                },
+                {
+                    "label": "2 Parameters",
+                    "description": "2 parameters",
+                    "body": [
+                        {
+                            "key": "$1",
+                            "value": "$2"
+                        },
+                        {
+                            "key": "$3",
+                            "value": "$4"
+                        }
+                    ]
+                },
+                {
+                    "label": "3 Parameters",
+                    "description": "3 parameters",
+                    "body": [
+                        {
+                            "key": "$1",
+                            "value": "$2"
+                        },
+                        {
+                            "key": "$3",
+                            "value": "$4"
+                        },
+                        {
+                            "key": "$5",
+                            "value": "$6"
+                        }
+                    ]
+                }
+            ]
+        },
+        "urlencodedObject": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "value"
+            ],
+            "properties": {
+                "value": {
+                    "$ref": "#/definitions/userInputValue"
+                }
+            }
+        },
+        "requestsStage": {
+            "type": "array",
+            "description": "An array of requests to execute",
+            "items": {
+                "$ref": "#/definitions/requestStage"
+            }
+        },
+        "requestStage": {
+            "oneOf": [
+                {
+                    "$ref": "#/definitions/requestStageReference"
+                },
+                {
+                    "$ref": "#/definitions/requestStageContent"
+                }
+            ]
+        },
+        "requestStageReference": {
+            "additionalProperties": false,
+            "type": "object",
+            "description": "A scenario stage to be executed by the scan",
+            "required": [
+                "$ref"
+            ],
+            "properties": {
+                "$ref": {
+                    "description": "A reference to a request. Other properties except '$ref/request' can be ovewritten.",
+                    "type": "string"
+                },
+                "environment": {
+                    "$ref": "#/definitions/ctxVariables"
+                },
+                "auth": {
+                    "$ref": "#/definitions/authArray"
+                },
+                "responses": {
+                    "$ref": "#/definitions/responses"
+                },
+                "injectionKey": {
+                    "$ref": "#/definitions/injectionKey"
+                },
+                "fuzzing": {
+                    "$ref": "#/definitions/fuzzing"
+                },
+                "expectedResponse": {
+                    "$ref": "#/definitions/expectedResponse"
+                },
+                "hookArgs": {
+                    "$ref": "#/definitions/hookArgs"
+                }
+            }
+        },
+        "requestStageContentWithInjection": {
+            "allOf": [
+                {
+                    "type": "object",
+                    "properties": {
+                        "injectionKey": {
+                            "type": "string"
+                        }
+                    }
+                },
+                {
+                    "$ref": "#/definitions/requestStageContent"
+                }
+            ]
+        },
+        "requestStageContent": {
+            "type": "object",
+            "description": "A request stage to be executed by the scan",
+            "required": [
+                "request",
+                "defaultResponse",
+                "responses"
+            ],
+            "properties": {
+                "environment": {
+                    "$ref": "#/definitions/ctxVariables"
+                },
+                "auth": {
+                    "$ref": "#/definitions/authArray"
+                },
+                "request": {
+                    "$ref": "#/definitions/request"
+                },
+                "defaultResponse": {
+                    "description": "Default response in case no 'expectedResponse' is specified when referencing the request. This is a key that refers to an object inside the 'responses' property",
+                    "type": "string"
+                },
+                "responses": {
+                    "$ref": "#/definitions/responses"
+                },
+                "injectionKey": {
+                    "$ref": "#/definitions/injectionKey"
+                },
+                "fuzzing": {
+                    "$ref": "#/definitions/fuzzing"
+                },
+                "hookArgs": {
+                    "$ref": "#/definitions/hookArgs"
+                }
+            }
+        },
+        "curlRequest": {
+            "type": "object",
+            "description": "cURL format that describes the HTTP request that the scan sends.",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "description": "Format for describing the request",
+                    "enum": [
+                        "har"
+                    ]
+                },
+                "curl": {
+                    "properties": {
+                        "curl": {
+                            "description": "cURL request",
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "type": "object",
+                    "required": [
+                        "curl"
+                    ]
+                }
+            }
+        },
+        "harRequest": {
+            "type": "object",
+            "description": "The HAR format that describes the HTTP requests that the scan sends.",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "description": "Format for describing the request",
+                    "enum": [
+                        "har"
+                    ]
+                },
+                "har": {
+                    "properties": {
+                        "har": {
+                            "type": "string",
+                            "contentEncoding": "base64"
+                        },
+                        "ignoreHarCookies": {
+                            "description": "Ignore HAR cookies defined in the request",
+                            "type": "boolean"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "type": "object",
+                    "required": [
+                        "har",
+                        "ignoreHarCookies"
+                    ]
+                }
+            }
+        },
+        "httpRequest": {
+            "type": "object",
+            "description": "The http format that describes the HTTP requests that the scan sends.",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "description": "Format for describing the request",
+                    "enum": [
+                        "http"
+                    ]
+                },
+                "http": {
+                    "properties": {
+                        "protocol": {
+                            "type": "string"
+                        },
+                        "http": {
+                            "type": "string"
+                        }
+                    },
+                    "additionalProperties": false,
+                    "type": "object",
+                    "required": [
+                        "protocol",
+                        "http"
+                    ]
+                }
+            }
+        },
+        "userInputValue": {
+            "type": [
+                "array",
+                "object",
+                "string",
+                "integer",
+                "number",
+                "boolean",
+                "null"
+            ],
+            "defaultSnippets": [
+                {
+                    "label": "Input value",
+                    "description": "A free-form input value",
+                    "body": "$1"
+                }
+            ]
+        },
+        "credentialContent": {
+            "properties": {
+                "type": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "requests": {
+                    "$ref": "#/definitions/requestsStage"
+                },
+                "credential": {
+                    "type": "string"
+                }
+            },
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+                "credential"
+            ]
+        },
+        "responses": {
+            "type": "object",
+            "description": "Response map returned by the API. Keys in the map are free-form",
+            "patternProperties": {
+                ".*": {
+                    "$ref": "#/definitions/response"
+                }
+            }
+        },
+        "response": {
+            "type": "object",
+            "description": "Describe the response returned by the API.",
+            "required": [
+                "expectations"
+            ],
+            "properties": {
+                "expectations": {
+                    "type": "object",
+                    "description": "Assess the API's response with expectations.",
+                    "required": [
+                        "httpStatus"
+                    ],
+                    "properties": {
+                        "httpStatus": {
+                            "oneOf": [
+                                {
+                                    "type": "integer",
+                                    "description": "HTTP status expected in integer format",
+                                    "minimum": 100,
+                                    "maximum": 999
+                                },
+                                {
+                                    "type": "string",
+                                    "description": "Default fallback when no http status match the one from the API Response. Only one default can be defined in the responses and one wildcard by the hundred. Explicit code like 200 are recommended to improve scan results, its takes precedence over the range definition for that code or default response.",
+                                    "enum": [
+                                        "default",
+                                        "1XX",
+                                        "2XX",
+                                        "3XX",
+                                        "4XX",
+                                        "5XX"
+                                    ],
+                                    "defaultSnippets": [
+                                        {
+                                            "label": "200",
+                                            "description": "Status code 200",
+                                            "body": 200
+                                        },
+                                        {
+                                            "label": "204",
+                                            "description": "Status code 204",
+                                            "body": 204
+                                        },
+                                        {
+                                            "label": "400",
+                                            "description": "Error code 400",
+                                            "body": 400
+                                        },
+                                        {
+                                            "label": "404",
+                                            "description": "Error code 404",
+                                            "body": 404
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                "variableAssignments": {
+                    "$ref": "#/definitions/variableAssignments"
+                }
+            }
+        },
+        "variableAssignments": {
+            "type": "object",
+            "description": "Allows defining variables by extracting response/request content at header or body level.",
+            "patternProperties": {
+                ".*": {
+                    "oneOf": [
+                        {
+                            "type": [
+                                "array",
+                                "object",
+                                "string",
+                                "integer",
+                                "number",
+                                "boolean",
+                                "null"
+                            ],
+                            "not": {
+                                "type": "object",
+                                "properties": {
+                                    "from": {
+                                        "type": "string",
+                                        "enum": [
+                                            "hardcoded",
+                                            "context",
+                                            "request",
+                                            "response"
+                                        ]
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "$ref": "#/definitions/variableAssignmentsHardcoded"
+                        },
+                        {
+                            "$ref": "#/definitions/variableAssignmentsContext"
+                        },
+                        {
+                            "$ref": "#/definitions/variableAssignmentsParameter"
+                        },
+                        {
+                            "$ref": "#/definitions/variableAssignmentsBody"
+                        }
+                    ]
+                }
+            }
+        },
+        "variableAssignmentsHardcoded": {
+            "type": "object",
+            "required": [
+                "from"
+            ],
+            "properties": {
+                "from": {
+                    "type": "string",
+                    "description": "TODO",
+                    "enum": [
+                        "hardcoded"
+                    ]
+                },
+                "name": {
+                    "type": "string",
+                    "description": "The variable name in the context"
+                }
+            },
+            "defaultSnippets": [
+                {
+                    "label": "Hardcoded value",
+                    "description": "Get the value literally",
+                    "body": {
+                        "from": "$1",
+                        "in": "$2",
+                        "name": "3"
+                    }
+                }
+            ]
+        },
+        "variableAssignmentsContext": {
+            "type": "object",
+            "required": [
+                "from"
+            ],
+            "properties": {
+                "from": {
+                    "type": "string",
+                    "description": "TODO",
+                    "enum": [
+                        "context"
+                    ]
+                },
+                "name": {
+                    "type": "string",
+                    "description": "The variable name in the context"
+                }
+            },
+            "defaultSnippets": [
+                {
+                    "label": "From context",
+                    "description": "Fetch the data in the context",
+                    "body": {
+                        "from": "$1",
+                        "name": "$2"
+                    }
+                }
+            ]
+        },
+        "variableAssignmentsParameter": {
+            "type": "object",
+            "properties": {
+                "from": {
+                    "type": "string",
+                    "description": "Allows to specify whether a variable should be loaded in the request or response",
+                    "enum": [
+                        "request",
+                        "response"
+                    ]
+                },
+                "in": {
+                    "type": "string",
+                    "description": "Determines the location of a variable within an API request or response",
+                    "enum": [
+                        "header",
+                        "query",
+                        "path",
+                        "cookie"
+                    ]
+                },
+                "name": {
+                    "type": "string",
+                    "description": "Specify the name of the header/query or path parameter to fetch the data"
+                }
+            },
+            "defaultSnippets": [
+                {
+                    "label": "From parameter",
+                    "description": "Fetch the data from the parameter",
+                    "body": {
+                        "from": "$1",
+                        "in": "$2",
+                        "name": "3"
+                    }
+                }
+            ]
+        },
+        "variableAssignmentsBody": {
+            "type": "object",
+            "properties": {
+                "from": {
+                    "type": "string",
+                    "description": "Allows to specify whether a variable should be loaded in the request or response",
+                    "enum": [
+                        "request",
+                        "response"
+                    ]
+                },
+                "in": {
+                    "type": "string",
+                    "description": "Determines the location of a variable within an API request or response",
+                    "enum": [
+                        "body"
+                    ]
+                },
+                "contentType": {
+                    "type": "string",
+                    "description": "Specify the 'Content-Type' of the data being sent or received in an API request or response",
+                    "enum": [
+                        "json"
+                    ]
+                },
+                "path": {
+                    "type": "object",
+                    "description": "Provides instructions on how to extract and load a variable from the body of an HTTP request or response.",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "description": "Type of syntax for identifying a specific value to fetch in the body",
+                            "enum": [
+                                "jsonPointer",
+                                "jsonPath"
+                            ]
+                        },
+                        "value": {
+                            "description": "Value of the pointer to identify the specific value to fetch in the body",
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "defaultSnippets": [
+                {
+                    "label": "From body",
+                    "description": "Fetch the data from the body",
+                    "body": {
+                        "from": "$1",
+                        "in": "$2",
+                        "name": "3"
+                    }
+                }
+            ]
+        },
+        "ctxVariables": {
+            "description": "A map for storing user-defined variables that are needed in the scenario.",
+            "type": "object",
+            "patternProperties": {
+                ".*": {
+                    "$ref": "#/definitions/userInputValue"
+                }
+            }
+        },
+        "injectionKey": {
+            "type": "string",
+            "description": "Describe the type of injection done for a specific request. Can be used only in the scenarios.json file under the customTests properties"
+        },
+        "expectedResponse": {
+            "type": "string",
+            "description": "Reference to a response defined in the 'responses' map and ignore the one specified in the defaultResponse"
+        },
+        "fuzzing": {
+            "type": "boolean",
+            "description": "Uses the request defined in the scenario as a baseline to run conformance and authorization tests. It can only have one property 'fuzzing' set to true per scenarios.json file. Can be used only in the scenarios.json"
+        },
+        "hookArgs": {
+            "description": "A map of user's arguments to send to the request/response hooks in order to have specific logic in their code.",
+            "type": "object",
+            "patternProperties": {
+                ".*": {
+                    "type": "string"
+                }
+            }
+        },
+        "before": {
+            "type": "array",
+            "description": "Array of requests to be sent once before running scenarios",
+            "items": {
+                "$ref": "#/definitions/requestStage"
+            }
+        },
+        "after": {
+            "type": "array",
+            "description": "Array of requests to be sent once after running scenarios",
+            "items": {
+                "$ref": "#/definitions/requestStage"
+            }
+        },
+        "happyPathScenario": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "",
+            "required": [
+                "key"
+            ],
+            "properties": {
+                "key": {
+                    "type": "string",
+                    "description": "Describe all requests defined in the scenario represents a happy or unhappy path scenario.",
+                    "enum": [
+                        "happy.path"
+                    ]
+                },
+                "displayName": {
+                    "$ref": "#/definitions/displayName"
+                },
+                "requests": {
+                    "$ref": "#/definitions/requestsStage"
+                },
+                "fuzzing": {
+                    "type": "boolean",
+                    "description": "The scenario will be used as a baseline to run the tests"
+                }
+            }
+        },
+        "unhappyPathScenario": {
+            "type": "object",
+            "additionalProperties": false,
+            "description": "",
+            "required": [
+                "key"
+            ],
+            "properties": {
+                "key": {
+                    "type": "string",
+                    "description": "Describe all requests defined in the scenario represents a happy or unhappy path scenario.",
+                    "enum": [
+                        "unhappy.path"
+                    ]
+                },
+                "displayName": {
+                    "$ref": "#/definitions/displayName"
+                },
+                "requests": {
+                    "$ref": "#/definitions/requestsStage"
+                }
+            }
+        },
+        "displayName": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 256,
+            "pattern": "^[a-zA-Z0-9\\-_]{0,256}$",
+            "example": "My-custom_Title-001",
+            "description": "A user-friendly name for the Happy path or unhappy path tests, intended to improve readability in configuration and reports."
+        },
+        "customTest": {
+            "additionalProperties": false,
+            "type": "object",
+            "required": [
+                "requests"
+            ],
+            "properties": {
+                "requests": {
+                    "$ref": "#/definitions/requestsStage"
+                },
+                "key": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

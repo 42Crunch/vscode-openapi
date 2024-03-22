@@ -4,8 +4,7 @@
 */
 
 import { parseJsonPointer, Path, simpleClone } from "@xliic/preserving-json-yaml-parser";
-import { HttpMethod } from "@xliic/common/http";
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
+import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
 
 export function walk(current: any, parent: any, path: string[], visitor: any) {
   for (const key of Object.keys(current)) {

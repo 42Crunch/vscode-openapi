@@ -8,7 +8,7 @@ function Environment() {
     <>
       <Title>Default environment</Title>
       <Container>
-        <Input name="environment" label="Default environment" />
+        <Input name="environment" label="Default environment" disabled />
       </Container>
     </>
   );

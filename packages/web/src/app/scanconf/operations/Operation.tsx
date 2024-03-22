@@ -1,10 +1,9 @@
 import styled from "styled-components";
 
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
+import { serialize, Scanconf } from "@xliic/scanconf";
 
 import { makeEnvEnv } from "../../../core/playbook/execute";
-import { serialize } from "../../../core/playbook/scanconf-serializer";
-import * as scan from "../../../core/playbook/scanconfig";
 import { runScan } from "../actions";
 import CollapsibleSection from "../components/CollapsibleSection";
 import TryAndServerSelector from "../components/TryAndServerSelector";
@@ -28,15 +27,15 @@ export default function Operation({ operationId }: { operationId: string }) {
   const { mockResult, tryResult } = useAppSelector((state) => state.operations);
   const env = useAppSelector((state) => state.env.data);
 
-  const removeStage = (location: playbook.StageLocation) => dispatch(actions.removeStage(location));
+  const removeStage = (location: Playbook.StageLocation) => dispatch(actions.removeStage(location));
 
-  const saveStage = (location: playbook.StageLocation, stage: playbook.StageReference) =>
+  const saveStage = (location: Playbook.StageLocation, stage: Playbook.StageReference) =>
     dispatch(actions.saveOperationReference({ location, reference: stage }));
 
-  const moveStage = (location: playbook.StageLocation, to: number) =>
+  const moveStage = (location: Playbook.StageLocation, to: number) =>
     dispatch(actions.moveStage({ location, to }));
 
-  const addStage = (container: playbook.StageContainer, ref: playbook.RequestRef) => {
+  const addStage = (container: Playbook.StageContainer, ref: Playbook.RequestRef) => {
     dispatch(
       actions.addStage({
         container,
@@ -49,16 +48,20 @@ export default function Operation({ operationId }: { operationId: string }) {
 
   const operationIds = Object.keys(playbook.operations);
   const requestIds = Object.keys(playbook.requests || {});
+  const operation = playbook.operations[operationId];
 
-  const { simple } = makeEnvEnv(
-    playbook.environments[playbook.runtimeConfiguration?.environment || "default"],
-    env
-  );
+  const {
+    simple,
+    environment: {
+      env: { host },
+    },
+  } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
 
   return (
     <Container>
       <TryAndServerSelector
         servers={servers}
+        host={host as string | undefined}
         onTry={(server: string) => {
           dispatch(startTryExecution(server));
         }}
@@ -79,8 +82,8 @@ export default function Operation({ operationId }: { operationId: string }) {
 
           dispatch(
             runScan({
-              path: playbook.operations[operationId].request.request.path,
-              method: playbook.operations[operationId].request.request.method,
+              path: operation.request.request.path,
+              method: operation.request.request.method,
               operationId,
               env: {
                 SCAN42C_HOST: updatedServer,
@@ -99,15 +102,13 @@ export default function Operation({ operationId }: { operationId: string }) {
       <CollapsibleSection
         defaultOpen={false}
         title="Authorization Tests"
-        count={playbook.operations[operationId].authorizationTests.length}
+        count={operation.authorizationTests.length}
       >
         <Content>
           <AuthorizationTests
-            authorizationTests={playbook.operations[operationId].authorizationTests}
+            authorizationTests={operation.authorizationTests}
             removeTest={(test) => {
-              const updated = playbook.operations[operationId].authorizationTests.filter(
-                (existing) => existing !== test
-              );
+              const updated = operation.authorizationTests.filter((existing) => existing !== test);
               dispatch(
                 actions.updateOperationAuthorizationTests({
                   operationId,
@@ -118,16 +119,15 @@ export default function Operation({ operationId }: { operationId: string }) {
           />
 
           <AddAuthorizationTest
-            authorizationTests={Object.keys(playbook.authorizationTests)}
-            existing={playbook.operations[operationId].authorizationTests}
+            authorizationTests={playbook.authorizationTests}
+            existing={operation.authorizationTests}
+            auth={operation.request.auth}
+            credentials={playbook.authenticationDetails[0]}
             onSelect={(selected) => {
               dispatch(
                 actions.updateOperationAuthorizationTests({
                   operationId,
-                  authorizationTests: [
-                    ...playbook.operations[operationId].authorizationTests,
-                    selected,
-                  ],
+                  authorizationTests: [...operation.authorizationTests, selected],
                 })
               );
             }}
@@ -135,15 +135,11 @@ export default function Operation({ operationId }: { operationId: string }) {
         </Content>
       </CollapsibleSection>
 
-      <CollapsibleSection
-        defaultOpen={false}
-        title="Before"
-        count={playbook.operations[operationId]?.before?.length}
-      >
+      <CollapsibleSection defaultOpen={false} title="Before" count={operation.before?.length}>
         <Content>
           <Scenario
             oas={oas}
-            stages={playbook.operations[operationId].before as playbook.StageReference[]}
+            stages={operation.before as Playbook.StageReference[]}
             container={{ container: "operationBefore", operationId }}
             executionResult={findResult(mockResult, "operationBefore")}
             saveStage={saveStage}
@@ -161,21 +157,14 @@ export default function Operation({ operationId }: { operationId: string }) {
           />
         </Content>
       </CollapsibleSection>
-      <CollapsibleSection
-        title="Scenarios"
-        count={playbook.operations[operationId]?.scenarios?.length}
-      >
+      <CollapsibleSection title="Scenarios" count={operation.scenarios?.length}>
         <Scenarios operationId={operationId} />
       </CollapsibleSection>
-      <CollapsibleSection
-        defaultOpen={false}
-        title="After"
-        count={playbook.operations[operationId]?.after?.length}
-      >
+      <CollapsibleSection defaultOpen={false} title="After" count={operation.after?.length}>
         <Content>
           <Scenario
             oas={oas}
-            stages={playbook.operations[operationId].after as playbook.StageReference[]}
+            stages={operation.after as Playbook.StageReference[]}
             container={{ container: "operationAfter", operationId }}
             executionResult={findResult(mockResult, "operationAfter")}
             saveStage={saveStage}
@@ -196,7 +185,7 @@ export default function Operation({ operationId }: { operationId: string }) {
 
       {tryResult.length > 0 && (
         <CollapsibleSection title="Result">
-          <Execution result={tryResult} />
+          <Execution result={tryResult} collapsible />
         </CollapsibleSection>
       )}
     </Container>
@@ -228,7 +217,7 @@ const Title = styled.div`
   font-weight: 700;
 `;
 
-function extractScanconf(mutable: scan.ConfigurationFileBundle, operationId: string): string {
+function extractScanconf(mutable: Scanconf.ConfigurationFileBundle, operationId: string): string {
   if (mutable.operations !== undefined) {
     for (const key of Object.keys(mutable?.operations)) {
       if (key !== operationId) {

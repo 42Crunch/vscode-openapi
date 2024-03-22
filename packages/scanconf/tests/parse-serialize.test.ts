@@ -1,7 +1,6 @@
 import { expect, test, assert } from "vitest";
 
-import { parse } from "../scanconf-parser";
-import { serialize } from "../scanconf-serializer";
+import { serialize } from "../src/index";
 
 import oas from "./pixi/pixi.json";
 import scanconf from "./pixi/scanconf.json";

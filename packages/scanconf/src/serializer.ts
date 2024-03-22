@@ -1,13 +1,13 @@
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
-import * as playbook from "@xliic/common/playbook";
-import { NullableResult, Result } from "@xliic/common/result";
+import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
+import { NullableResult, Result } from "@xliic/result";
 import { joinJsonPointer } from "@xliic/preserving-json-yaml-parser";
 
 import * as scan from "./scanconfig";
+import * as playbook from "./playbook";
 
 export function serialize(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.PlaybookBundle
+  file: playbook.Bundle
 ): Result<scan.ConfigurationFileBundle, string> {
   const runtimeConfiguration = file.runtimeConfiguration as scan.RuntimeConfiguration;
   const customizations = file.customizations as scan.Customizations;
@@ -71,7 +71,7 @@ function undefinedIfEmpty<T extends Array<unknown> | Record<string, unknown>>(
 
 function serializeAuthenticationDetails(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.PlaybookBundle,
+  file: playbook.Bundle,
   credentials: playbook.Credentials[]
 ): Result<Record<string, scan.Credential>[], string> {
   const result = [];
@@ -82,12 +82,13 @@ function serializeAuthenticationDetails(
     }
     result.push(detail);
   }
-  return [result, undefined];
+  // if result contains one empty object, return empty array with no object
+  return [result.length === 1 && Object.keys(result[0]).length === 0 ? [] : result, undefined];
 }
 
 function serializeAuthenticationDetail(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.PlaybookBundle,
+  file: playbook.Bundle,
   credential: playbook.Credentials
 ): Result<Record<string, scan.Credential>, string> {
   const result: Record<string, scan.Credential> = {};
@@ -116,7 +117,7 @@ function serializeAuthenticationDetail(
 
 function serializeCredentials(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.PlaybookBundle,
+  file: playbook.Bundle,
   methods: Record<string, playbook.CredentialMethod>
 ): Result<Record<string, scan.CredentialContent>, string> {
   const result: Record<string, scan.CredentialContent> = {};
@@ -136,7 +137,7 @@ function serializeCredentials(
 
 function serializeOperations(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.PlaybookBundle
+  file: playbook.Bundle
 ): Result<Record<string, scan.Operation>, string> {
   const result: Record<string, scan.Operation> = {};
   for (const [key, val] of Object.entries(file.operations)) {
@@ -151,7 +152,7 @@ function serializeOperations(
 
 function serializeOperation(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.PlaybookBundle,
+  file: playbook.Bundle,
   operation: playbook.Operation
 ): Result<scan.Operation, string> {
   const [request, requestError] = serializeStageContent(
@@ -195,7 +196,7 @@ function serializeOperation(
 
 function serializeStageReference(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.PlaybookBundle,
+  file: playbook.Bundle,
   stage: playbook.StageReference
 ): Result<scan.RequestStageReference, string> {
   const [responses, responsesError] = serializeResponses(oas, file, stage.responses);
@@ -222,7 +223,7 @@ function serializeStageReference(
 
 function serializeStageContent(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.PlaybookBundle,
+  file: playbook.Bundle,
   stage: playbook.StageContent,
   operationId: string
 ): Result<scan.RequestStageContent, string> {
@@ -252,7 +253,7 @@ function serializeStageContent(
 
 function serializeExternalStageContent(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.PlaybookBundle,
+  file: playbook.Bundle,
   stage: playbook.ExternalStageContent
 ): Result<scan.RequestStageContent, string> {
   const [request, requestError] = serializeExternalCRequest(oas, file, stage.request);
@@ -285,7 +286,7 @@ function serializeAuth(auth: string[] | undefined) {
 
 function serializeScenarios(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.PlaybookBundle,
+  file: playbook.Bundle,
   operation: playbook.Operation
 ): Result<scan.ScenarioFile, string> {
   const scenarios: scan.HappyPathScenario[] = [];
@@ -302,7 +303,7 @@ function serializeScenarios(
 
 function serializeScenario(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.PlaybookBundle,
+  file: playbook.Bundle,
   scenario: playbook.Scenario
 ): Result<scan.HappyPathScenario, string> {
   const [requests, requestsError] = serializeRequestsStage(oas, file, scenario.requests);
@@ -322,7 +323,7 @@ function serializeScenario(
 
 function serializeRequestsStage(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.PlaybookBundle,
+  file: playbook.Bundle,
   requests: playbook.Stage[]
 ): Result<scan.RequestsStage, string> {
   const result: scan.RequestsStage = [];
@@ -353,7 +354,7 @@ function serializeRequestsStage(
 
 function serializeRequests(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.PlaybookBundle,
+  file: playbook.Bundle,
   requests?: Record<string, playbook.StageContent | playbook.ExternalStageContent>
 ): Result<Record<string, scan.RequestFile>, string> {
   const result: Record<string, scan.RequestFile> = {};
@@ -392,7 +393,9 @@ function serializeRef(ref: playbook.StageReference["ref"]): Result<string, strin
   return [undefined, `Unable to serialize unknown $ref type: ${ref}`];
 }
 
-function serializeEnvironment(environment?: playbook.Environment): scan.CtxVariables | undefined {
+function serializeEnvironment(
+  environment?: Record<string, unknown>
+): scan.CtxVariables | undefined {
   if (environment === undefined || Object.keys(environment).length === 0) {
     return undefined;
   }
@@ -402,7 +405,7 @@ function serializeEnvironment(environment?: playbook.Environment): scan.CtxVaria
 
 function serializeCRequest(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.PlaybookBundle,
+  file: playbook.Bundle,
   request: playbook.CRequest,
   operationId: string
 ): Result<scan.CRequest, string> {
@@ -416,7 +419,6 @@ function serializeCRequest(
     cookies: serializeRequestParameters(oas, file, request.parameters.cookie) as any,
   };
 
-  // FIXME better body handling
   if (request.body !== undefined) {
     if (request.body.mediaType === "application/json") {
       details.requestBody = {
@@ -426,7 +428,12 @@ function serializeCRequest(
     } else if (request.body.mediaType === "application/x-www-form-urlencoded") {
       details.requestBody = {
         mode: "urlencoded",
-        urlencoded: request.body.value as any,
+        urlencoded: serializeUrlencoded(request.body.value as object),
+      };
+    } else if (request.body.mediaType === "raw") {
+      details.requestBody = {
+        mode: "raw",
+        raw: request.body.value as string,
       };
     }
   }
@@ -442,7 +449,7 @@ function serializeCRequest(
 
 function serializeExternalCRequest(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.PlaybookBundle,
+  file: playbook.Bundle,
   request: playbook.ExternalCRequest
 ): Result<scan.CRequest, string> {
   const details: scan.CRequest["details"] = {
@@ -455,12 +462,23 @@ function serializeExternalCRequest(
     cookies: serializeRequestParameters(oas, file, request.parameters.cookie) as any,
   };
 
-  // FIXME better body handling
   if (request.body !== undefined) {
-    details.requestBody = {
-      mode: "json",
-      json: request.body.value as any,
-    };
+    if (request.body.mediaType === "application/json") {
+      details.requestBody = {
+        mode: "json",
+        json: request.body.value as any,
+      };
+    } else if (request.body.mediaType === "application/x-www-form-urlencoded") {
+      details.requestBody = {
+        mode: "urlencoded",
+        urlencoded: serializeUrlencoded(request.body.value as object),
+      };
+    } else if (request.body.mediaType === "raw") {
+      details.requestBody = {
+        mode: "raw",
+        raw: request.body.value as string,
+      };
+    }
   }
 
   return [
@@ -474,7 +492,7 @@ function serializeExternalCRequest(
 
 function serializeResponses(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.PlaybookBundle,
+  file: playbook.Bundle,
   responses: playbook.Responses | undefined
 ): NullableResult<scan.Responses | undefined, string> {
   const result: scan.Responses = {};
@@ -493,7 +511,7 @@ function serializeResponses(
 
 function serializeRequestParameters(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.PlaybookBundle,
+  file: playbook.Bundle,
   parameters: playbook.ParameterList
 ) {
   if (parameters.length === 0) {
@@ -510,4 +528,11 @@ function serializeVariableAssignments(
     return undefined;
   }
   return assignments as scan.VariableAssignments;
+}
+
+function serializeUrlencoded(value: object): Record<string, scan.UrlencodedObject> {
+  return Object.entries(value).reduce((acc, [key, value]) => {
+    acc[key] = { value };
+    return acc;
+  }, {} as Record<string, scan.UrlencodedObject>);
 }

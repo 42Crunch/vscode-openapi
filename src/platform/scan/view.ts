@@ -8,9 +8,8 @@ import * as vscode from "vscode";
 
 import { Config } from "@xliic/common/config";
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
-import { HttpMethod } from "@xliic/common/http";
+import { HttpMethod, BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { LogLevel } from "@xliic/common/logging";
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
 import { Preferences } from "@xliic/common/prefs";
 import { Webapp } from "@xliic/common/webapp/scanconf";
 import { stringify } from "@xliic/preserving-json-yaml-parser";

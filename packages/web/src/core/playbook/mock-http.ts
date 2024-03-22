@@ -1,5 +1,5 @@
 import { HttpError, HttpRequest } from "@xliic/common/http";
-import { NullableResult, Result } from "@xliic/common/result";
+import { NullableResult } from "@xliic/result";
 
 export const MockHttpResponse = null;
 

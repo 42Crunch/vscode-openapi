@@ -1,7 +1,6 @@
 import styled from "styled-components";
 
-import { HttpMethod } from "@xliic/common/http";
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
+import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
 
 import OperationTabs from "./OperationTabs";
 

@@ -1,14 +1,15 @@
-import { ResolvedOasOperationSecurity } from "@xliic/common/oas30";
-import { ResolvedSwaggerOperationSecurity } from "@xliic/common/swagger";
-import DownshiftSelect from "../../../../new-components/DownshiftSelect";
 import styled from "styled-components";
+
+import { OpenApi30, Swagger } from "@xliic/openapi";
+
+import DownshiftSelect from "../../../../new-components/DownshiftSelect";
 
 export default function SecurityRequirementsSelect({
   security,
   value,
   setValue,
 }: {
-  security: ResolvedOasOperationSecurity | ResolvedSwaggerOperationSecurity;
+  security: OpenApi30.ResolvedOperationSecurity | Swagger.ResolvedOperationSecurity;
   value: number;
   setValue: (value: number) => void;
 }) {

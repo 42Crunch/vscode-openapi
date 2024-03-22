@@ -1,6 +1,5 @@
+import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
 import { SimpleEnvironment } from "./env";
-import { HttpMethod } from "./http";
-import { BundledSwaggerOrOasSpec } from "./openapi";
 
 export type OasWithScanconf = {
   oas: BundledSwaggerOrOasSpec;

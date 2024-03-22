@@ -1,40 +1,39 @@
 import { useController } from "react-hook-form";
 import styled from "styled-components";
 
-import { ResolvedOasParameter } from "@xliic/common/oas30";
-import { ResolvedSwaggerParameter } from "@xliic/common/swagger";
+import { OpenApi30, Swagger } from "@xliic/openapi";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { ENV_VAR_REGEX } from "../../../../core/playbook/variables";
 import { TrashCan, TriangleExclamation } from "../../../../icons";
 import LineEditor from "../../../../new-components/fields/LineEditor";
 
-export type Parameter = ResolvedOasParameter | ResolvedSwaggerParameter;
+export type Parameter = OpenApi30.ResolvedParameter | Swagger.ResolvedParameter;
 export type Schema = { type?: string };
 const DefaultSchema = { type: "string" };
 
 export default function ParameterRow({
   name,
-  parameter,
   schema,
   onDelete,
   variables,
 }: {
   name: string;
-  parameter: Parameter;
   variables: string[];
   schema: Schema | undefined;
   onDelete: () => void;
 }) {
   const {
     fieldState: { error },
-  } = useController({ name });
+  } = useController({ name: `${name}.value` });
+
+  const { field: nameField } = useController({ name: `${name}.key` });
 
   return (
     <Container>
-      <Name>{parameter.name}</Name>
+      <Name>{nameField.value}</Name>
       <LineEditor
-        name={name}
+        name={`${name}.value`}
         variables={variables}
         encode={(value) => encode(schema || DefaultSchema, value)}
         decode={(value) => decode(schema, value)}

@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { Buffer } from "buffer";
 
 import { HttpError, HttpResponse } from "@xliic/common/http";
 
@@ -10,10 +9,10 @@ import CurlRequest from "./CurlRequest";
 import Response from "../../components/response/Response";
 import { showJsonPointer } from "./slice";
 
-import { parseResponse, safeParseResponse } from "../../http-parser";
+import { safeParseResponse } from "../../http-parser";
 import { useState } from "react";
-import { useAppDispatch, useAppSelector } from "./store";
-import { RuntimeOperationReport, TestLogReport } from "./scan-report-new";
+import { useAppDispatch } from "./store";
+import { RuntimeOperationReport, TestLogReport } from "@xliic/common/scan-report";
 
 export default function ScanIssue({
   operation,
@@ -33,7 +32,7 @@ export default function ScanIssue({
   const dispatch = useAppDispatch();
 
   const [collapsed, setCollapsed] = useState(true);
-  const { response, test, outcome } = issue;
+  const { request, response, test, outcome } = issue;
 
   const responseCodeExpected = outcome?.status === "correct";
   const conformsToContract = outcome?.conformant;
@@ -59,17 +58,25 @@ export default function ScanIssue({
         : "Yes";
   }
 
+  const outcomeError = outcome?.error;
+
   return (
     <Container>
       <Title collapsed={collapsed} onClick={() => setCollapsed(!collapsed)}>
         <div>{collapsed ? <AngleDown /> : <AngleUp />}</div>
         <div>
-          <TopDescription>{issue.test?.description}</TopDescription>
+          <TopDescription>{test?.description}</TopDescription>
           <BottomDescription>
-            {failed ? (
+            {outcomeError && (
+              <BottomItem>
+                <ExclamationCircle /> Error: {outcomeError}
+              </BottomItem>
+            )}
+
+            {!outcomeError && failed && (
               <BottomItem>
                 <ExclamationCircle /> Failed
-                {issue.outcome!.criticality > 0 && (
+                {outcome!.criticality > 0 && (
                   <>
                     /
                     <span style={{ fontWeight: criticalityWeights[outcome!.criticality!] }}>
@@ -79,13 +86,15 @@ export default function ScanIssue({
                   </>
                 )}
               </BottomItem>
-            ) : (
+            )}
+
+            {!outcomeError && !failed && (
               <BottomItem>
                 <Check /> Passed
               </BottomItem>
             )}
 
-            {failed && (
+            {!outcomeError && failed && (
               <>
                 <BottomItem>
                   {responseCodeExpected ? (
@@ -117,85 +126,94 @@ export default function ScanIssue({
 
       {!collapsed && (
         <Content>
-          <Item>
-            <div>HTTP code received</div>
-            <div>
-              {issue.response?.httpStatusCode} (Expected:{" "}
-              {issue.test?.httpStatusExpected?.join(", ")})
-            </div>
-          </Item>
-
-          <Item>
-            <div>Response code found in API Contract</div>
-            <div>{responseCodeFound}</div>
-          </Item>
-
-          <Item>
-            <div>Content-Type found in API Contract</div>
-            <div>{contentTypeFound}</div>
-          </Item>
-
-          <Item>
-            <div>Response matches API Contract</div>
-            <div>{responsePayloadMatchesContract}</div>
-          </Item>
-
-          {outcome?.apiResponseAnalysis?.[0]?.responseDescription && (
-            <Item>
-              <div>Response analysis</div>
-              <div> {outcome?.apiResponseAnalysis?.[0]?.responseDescription}</div>
-            </Item>
-          )}
-
-          <Item>
-            <div>JSON Pointer</div>
-            <div>
-              {issue.test?.jsonPointer ? (
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    dispatch(
-                      showJsonPointer(issue.test?.jsonPointer + "") // FIXME support indexed reports
-                    );
-                  }}
-                >
-                  {issue.test?.jsonPointer}
-                </a>
-              ) : (
-                "N/A"
-              )}
-            </div>
-          </Item>
-
-          {issue.request?.curl && (
-            <Item>
-              <div>Request</div>
-              <div>
-                <CurlRequest waiting={waiting} curl={issue.request.curl} id={id} />
-              </div>
-            </Item>
-          )}
-          {error === undefined &&
-            (httpResponse !== undefined || issue.response?.rawPayload !== undefined) && (
-              <Item>
-                <div>Response</div>
-                <div>
-                  <Response
-                    accented
-                    response={
-                      httpResponse ? httpResponse : safeParseResponse(issue.response?.rawPayload)
-                    }
-                  />
-                </div>
-              </Item>
-            )}
-          {error && (
+          {outcomeError && (
             <Item>
               <div>Error</div>
-              <div>{error?.message}</div>
+              <div>{outcomeError}</div>
             </Item>
+          )}
+          {!outcomeError && (
+            <>
+              <Item>
+                <div>HTTP code received</div>
+                <div>
+                  {response?.httpStatusCode} (Expected: {test?.httpStatusExpected?.join(", ")})
+                </div>
+              </Item>
+
+              <Item>
+                <div>Response code found in API Contract</div>
+                <div>{responseCodeFound}</div>
+              </Item>
+
+              <Item>
+                <div>Content-Type found in API Contract</div>
+                <div>{contentTypeFound}</div>
+              </Item>
+
+              <Item>
+                <div>Response matches API Contract</div>
+                <div>{responsePayloadMatchesContract}</div>
+              </Item>
+
+              {outcome?.apiResponseAnalysis?.[0]?.responseDescription && (
+                <Item>
+                  <div>Response analysis</div>
+                  <div> {outcome?.apiResponseAnalysis?.[0]?.responseDescription}</div>
+                </Item>
+              )}
+
+              <Item>
+                <div>JSON Pointer</div>
+                <div>
+                  {test?.jsonPointer ? (
+                    <a
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dispatch(
+                          showJsonPointer(test?.jsonPointer + "") // FIXME support indexed reports
+                        );
+                      }}
+                    >
+                      {test?.jsonPointer}
+                    </a>
+                  ) : (
+                    "N/A"
+                  )}
+                </div>
+              </Item>
+
+              {request?.curl && (
+                <Item>
+                  <div>Request</div>
+                  <div>
+                    <CurlRequest waiting={waiting} curl={request.curl} id={id} />
+                  </div>
+                </Item>
+              )}
+              {error === undefined &&
+                (httpResponse !== undefined || response?.rawPayload !== undefined) && (
+                  <Item>
+                    <div>Response</div>
+                    <div>
+                      <Response
+                        accented
+                        response={
+                          httpResponse ? httpResponse : safeParseResponse(response?.rawPayload)
+                        }
+                      />
+                    </div>
+                  </Item>
+                )}
+              {error && (
+                <Item>
+                  <div>Error</div>
+                  <div>{error?.message}</div>
+                </Item>
+              )}
+            </>
           )}
         </Content>
       )}
@@ -269,10 +287,11 @@ const Item = styled.div`
 
 const criticalityNames: Record<number, string> = {
   0: "None",
-  1: "Low",
-  2: "Medium",
-  3: "High",
-  4: "Critical",
+  1: "Info",
+  2: "Low",
+  3: "Medium",
+  4: "High",
+  5: "Critical",
 };
 
 const criticalityWeights: Record<number, number> = {
@@ -281,4 +300,5 @@ const criticalityWeights: Record<number, number> = {
   2: 500,
   3: 700,
   4: 700,
+  5: 700,
 };

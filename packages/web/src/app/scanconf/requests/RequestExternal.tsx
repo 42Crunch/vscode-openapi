@@ -2,9 +2,8 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { Environment as UnknownEnvironment } from "@xliic/common/env";
-import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
-import * as playbook from "@xliic/common/playbook";
-import { RequestRef } from "@xliic/common/playbook";
+import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/openapi";
+import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { DynamicVariableNames } from "../../../core/playbook/builtin-variables";
@@ -23,8 +22,8 @@ export default function RequestExternal({
   request,
   requestRef,
 }: {
-  request: playbook.ExternalStageContent;
-  requestRef: RequestRef;
+  request: Playbook.ExternalStageContent;
+  requestRef: Playbook.RequestRef;
 }) {
   const dispatch = useAppDispatch();
 
@@ -39,7 +38,7 @@ export default function RequestExternal({
   const onRun = (server: string, inputs: UnknownEnvironment) =>
     dispatch(executeRequest({ server, inputs }));
 
-  const onSaveRequest = (stage: playbook.ExternalStageContent) =>
+  const onSaveRequest = (stage: Playbook.ExternalStageContent) =>
     dispatch(saveRequest({ ref: requestRef, stage }));
 
   const variables = [

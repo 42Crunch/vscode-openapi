@@ -4,8 +4,10 @@ import {
   TypedStartListening,
   UnsubscribeListener,
 } from "@reduxjs/toolkit";
+
+import { serialize } from "@xliic/scanconf";
 import { Webapp } from "@xliic/common/webapp/scanconf";
-import { serialize } from "../../core/playbook/scanconf-serializer";
+
 import { showEnvWindow } from "../../features/env/slice";
 import { startNavigationListening } from "../../features/router/listener";
 import { Routes } from "../../features/router/RouterContext";
@@ -36,6 +38,7 @@ import {
   removeAuthorizationTest,
   addAuthorizationTest,
   updateOperationAuthorizationTests,
+  removeCredential,
 } from "./slice";
 import { AppDispatch, RootState } from "./store";
 import { setScanServer } from "../../features/prefs/slice";
@@ -64,6 +67,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
           saveSettings,
           saveCredential,
           addCredential,
+          removeCredential,
           addStage,
           moveStage,
           removeStage,

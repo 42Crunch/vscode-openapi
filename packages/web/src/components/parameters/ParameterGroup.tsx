@@ -1,12 +1,13 @@
 import styled from "styled-components";
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
-import { deref } from "@xliic/common/ref";
+import { useFormContext, UseFieldArrayAppend, FieldValues } from "react-hook-form";
+import { useRef } from "react";
+
+import { BundledSwaggerOrOasSpec, deref } from "@xliic/openapi";
+
 import { escapeFieldName } from "../../util";
 import ArrayField from "./ArrayField";
 import Field, { Parameter, Schema } from "./Field";
 import { NewParameterTrigger } from "./NewParameterTrigger";
-import { useRef } from "react";
-import { useFormContext, UseFieldArrayAppend, FieldValues } from "react-hook-form";
 
 export default function ParameterGroup({
   oas,

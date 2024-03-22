@@ -1,15 +1,19 @@
 //@ts-ignore
 import SwaggerClient from "swagger-client";
-import { BundledOpenApiSpec, OasSecurityScheme } from "@xliic/common/oas30";
-import { BundledSwaggerOrOasSpec, getOperation, isOpenapi } from "@xliic/common/openapi";
-import { BundledSwaggerSpec, SwaggerSecurityScheme } from "@xliic/common/swagger";
-import { HttpRequest } from "@xliic/common/http";
-import { Result } from "@xliic/common/result";
 
-import * as playbook from "@xliic/common/playbook";
+import {
+  OpenApi30,
+  Swagger,
+  BundledSwaggerOrOasSpec,
+  HttpMethod,
+  getOperation,
+  isOpenapi,
+} from "@xliic/openapi";
+import { HttpRequest } from "@xliic/common/http";
+import { Result } from "@xliic/result";
+import { Playbook } from "@xliic/scanconf";
 
 import { checkCredential } from "./util";
-
 import { getParameters } from "./util-swagger";
 import { AuthResult } from "./playbook";
 
@@ -17,7 +21,7 @@ export async function makeHttpRequest(
   oas: BundledSwaggerOrOasSpec,
   server: string,
   operationId: string | undefined,
-  request: playbook.CRequest,
+  request: Playbook.CRequest,
   security: AuthResult
 ): Promise<Result<HttpRequest, string>> {
   // FIXME, this can throw an exception, make sure it's handled
@@ -26,6 +30,14 @@ export async function makeHttpRequest(
     const result = isOpenapi(oas)
       ? await makeHttpRequestForOas(oas, server, operationId, request, security)
       : await makeHttpRequestForSwagger(oas, server, operationId, request, security);
+
+    // request might contain headers which are not defined in the spec
+    // add these extra headers to the request
+    for (const { key, value } of request.parameters.header) {
+      if (result.headers[key.toLowerCase()] === undefined) {
+        result.headers[key] = String(value);
+      }
+    }
 
     return [
       {
@@ -42,86 +54,105 @@ export async function makeHttpRequest(
 }
 
 async function makeHttpRequestForOas(
-  oas: BundledOpenApiSpec,
+  oas: OpenApi30.BundledSpec,
   server: string,
   operationId: string | undefined,
-  request: playbook.CRequest,
+  request: Playbook.CRequest,
   security: AuthResult
 ): Promise<HttpRequest> {
   const operation = getOperation(oas, request.path, request.method);
 
-  const swaggerClientOperationId =
-    operation?.operationId !== undefined
-      ? operation?.operationId
-      : `${request.method}-${request.path}`;
+  if (operation === undefined) {
+    throw new Error(`operation not found for ${request.method} ${request.path}`);
+  }
 
-  const requestBody =
-    request.body?.mediaType === "application/x-www-form-urlencoded"
-      ? makeUrlencodedBody(request.body?.value)
-      : request.body?.value;
+  const swaggerClientOperationId = makeSwaggerClientOperationId(
+    request.method,
+    request.path,
+    operation
+  );
+
+  const swaggerContentType = getSwaggerClientContentType(request);
 
   const result = SwaggerClient.buildRequest({
     spec: await buildOasSpecWithServers(oas, server, request),
-    operationId: swaggerClientEscapeString(swaggerClientOperationId),
+    operationId: swaggerClientOperationId,
     parameters: makeOpenApiSwaggerClientParameters(request.parameters, security),
     securities: makeOasSecurities(oas?.components?.securitySchemes || {}, security),
-    requestContentType: request.body?.mediaType,
-    requestBody: requestBody,
+    requestContentType: swaggerContentType,
+    requestBody: request.body?.value,
   });
 
   return result;
 }
 
 async function makeHttpRequestForSwagger(
-  oas: BundledSwaggerSpec,
+  oas: Swagger.BundledSpec,
   server: string,
   operationId: string | undefined,
-  request: playbook.CRequest,
+  request: Playbook.CRequest,
   security: AuthResult
 ): Promise<HttpRequest> {
   const operation = getOperation(oas, request.path, request.method);
 
-  const swaggerClientOperationId =
-    operation?.operationId !== undefined
-      ? operation?.operationId
-      : `${request.method}-${request.path}`;
+  if (operation === undefined) {
+    throw new Error(`operation not found for ${request.method} ${request.path}`);
+  }
+
+  const swaggerClientOperationId = makeSwaggerClientOperationId(
+    request.method,
+    request.path,
+    operation
+  );
 
   const result = SwaggerClient.buildRequest({
     spec: await buildSwaggerSpecWithServers(oas, server, request),
-    operationId: swaggerClientEscapeString(swaggerClientOperationId),
+    operationId: swaggerClientOperationId,
     parameters: makeSwaggerSwaggerClientParameters(oas, request, security),
     securities: makeSwaggerSecurities(oas?.securityDefinitions || {}, security),
   });
+
   // FIXME return replacements
   return result;
 }
 
 export async function makeExternalHttpRequest(
-  request: playbook.ExternalCRequest
+  request: Playbook.ExternalCRequest
 ): Promise<Result<HttpRequest, string>> {
   const searchParams = new URLSearchParams(
     playbookParameterValueToObject(request.parameters.query)
   ).toString();
+
   try {
+    const headers = playbookParameterValueToObject(request.parameters.header);
+
+    if (request.body?.mediaType !== undefined) {
+      headers["Content-Type"] = request.body?.mediaType;
+    }
+
+    const body =
+      request.body?.mediaType === "application/x-www-form-urlencoded"
+        ? makeUrlencodedBody(request.body.value)
+        : request.body?.value;
+
     return [
       {
         method: request.method,
         url: searchParams === "" ? request.url : `${request.url}?${searchParams}`,
-        headers: playbookParameterValueToObject(request.parameters.header),
-        body: request.body !== undefined ? convertBody(request.body.value) : undefined,
+        headers,
+        body: convertBody(body),
       },
       undefined,
     ];
   } catch (ex) {
-    console.log("chatch ed", ex);
     return [undefined, `failed to build http request: ${ex}`];
   }
 }
 
 async function buildOasSpecWithServers(
-  oas: BundledOpenApiSpec,
+  oas: OpenApi30.BundledSpec,
   server: string,
-  request: playbook.CRequest
+  request: Playbook.CRequest
 ): Promise<unknown> {
   const servers = [{ url: server }];
 
@@ -134,9 +165,9 @@ async function buildOasSpecWithServers(
 }
 
 async function buildSwaggerSpecWithServers(
-  swagger: BundledSwaggerSpec,
+  swagger: Swagger.BundledSpec,
   server: string,
-  request: playbook.CRequest
+  request: Playbook.CRequest
 ): Promise<unknown> {
   const urlObj = new URL(server);
   const schemes = urlObj.protocol === "https:" ? ["https"] : ["http"];
@@ -149,7 +180,9 @@ async function buildSwaggerSpecWithServers(
 }
 
 function convertBody(body: unknown): unknown {
-  if (typeof body === "string") {
+  if (body === undefined) {
+    return undefined;
+  } else if (typeof body === "string") {
     return body;
   } else if (body instanceof FormData) {
     // FIXME replace env vars as well
@@ -159,10 +192,10 @@ function convertBody(body: unknown): unknown {
 }
 
 function makeOpenApiSwaggerClientParameters(
-  parameters: playbook.ParameterValues,
+  parameters: Playbook.ParameterValues,
   security: AuthResult
 ): Record<string, unknown> {
-  const locations: playbook.ParameterLocation[] = ["path", "query", "header", "cookie"];
+  const locations: Playbook.ParameterLocation[] = ["path", "query", "header", "cookie"];
   const result = collectParameters(parameters, locations);
   // this is a workaround for having duplicate required header, etc names
   // to supply schema validation to the security scheme
@@ -177,11 +210,11 @@ function makeOpenApiSwaggerClientParameters(
 }
 
 function makeSwaggerSwaggerClientParameters(
-  oas: BundledSwaggerSpec,
-  request: playbook.CRequest,
+  oas: Swagger.BundledSpec,
+  request: Playbook.CRequest,
   security: AuthResult
 ): Record<string, unknown> {
-  const locations: playbook.ParameterLocation[] = ["path", "query", "header"];
+  const locations: Playbook.ParameterLocation[] = ["path", "query", "header"];
   const result = collectParameters(request.parameters, locations);
 
   // this is a workaround for having duplicate required header, etc names
@@ -199,13 +232,7 @@ function makeSwaggerSwaggerClientParameters(
   const bodyParams = Object.keys(parameters.body);
   if (bodyParams.length > 0) {
     const name = bodyParams[0];
-
-    const requestBody =
-      request.body?.mediaType === "application/x-www-form-urlencoded"
-        ? makeUrlencodedBody(request.body?.value)
-        : request.body?.value;
-
-    result[`body.${name}`] = requestBody;
+    result[`body.${name}`] = request.body?.value;
   }
 
   // FIXME support formData
@@ -214,8 +241,8 @@ function makeSwaggerSwaggerClientParameters(
 }
 
 function collectParameters(
-  parameters: playbook.ParameterValues,
-  locations: playbook.ParameterLocation[]
+  parameters: Playbook.ParameterValues,
+  locations: Playbook.ParameterLocation[]
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   for (const location of locations) {
@@ -236,7 +263,10 @@ function collectParameters(
   return result;
 }
 
-function makeOasSecurities(schemes: Record<string, OasSecurityScheme>, security: AuthResult): any {
+function makeOasSecurities(
+  schemes: Record<string, OpenApi30.SecurityScheme>,
+  security: AuthResult
+): any {
   const matches = matchSecuritySchemesToAuthResult(schemes, security);
   const result: any = {};
   for (const name of Object.keys(matches)) {
@@ -253,7 +283,7 @@ function makeOasSecurities(schemes: Record<string, OasSecurityScheme>, security:
 }
 
 function makeSwaggerSecurities(
-  schemes: Record<string, SwaggerSecurityScheme>,
+  schemes: Record<string, Swagger.SecurityScheme>,
   security: AuthResult
 ): any {
   const result: any = {};
@@ -272,7 +302,7 @@ function makeSwaggerSecurities(
 }
 
 function matchSecuritySchemesToAuthResult(
-  schemes: Record<string, OasSecurityScheme | SwaggerSecurityScheme>,
+  schemes: Record<string, OpenApi30.SecurityScheme | Swagger.SecurityScheme>,
   security: AuthResult
 ): Record<string, string | undefined> {
   const mutable = { ...security };
@@ -289,7 +319,7 @@ function matchSecuritySchemesToAuthResult(
   return result;
 }
 
-function playbookParameterValueToObject(parameterValue: playbook.ParameterList) {
+function playbookParameterValueToObject(parameterValue: Playbook.ParameterList) {
   // FIXME overwrites duplicate entries
   const result: Record<string, string> = {};
   for (const { key, value } of parameterValue) {
@@ -297,16 +327,32 @@ function playbookParameterValueToObject(parameterValue: playbook.ParameterList) 
   }
   return result;
 }
-function makeUrlencodedBody(body: unknown): unknown {
-  const result: any = {};
-  for (const [key, value] of Object.entries(body as any)) {
-    const valueValue = (value as any)["value"];
-    if (valueValue !== undefined) {
-      result[key] = valueValue;
-    }
+
+function makeUrlencodedBody(body: Record<string, unknown>): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(body)) {
+    params.append(key, `${value}`);
   }
-  return result;
+  return params.toString();
 }
 
-// escapng the string same as swaggerclient does
-const swaggerClientEscapeString = (str: string) => str.replace(/[^\w]/gi, "_");
+function makeSwaggerClientOperationId(
+  method: HttpMethod,
+  path: string,
+  operation: OpenApi30.Operation | Swagger.Operation
+): string {
+  return SwaggerClient.helpers.opId(operation, path, method);
+}
+
+function getSwaggerClientContentType(request: Playbook.CRequest): string | undefined {
+  if (request.body?.mediaType === "raw") {
+    for (const { key, value } of request.parameters.header) {
+      if (key.toLowerCase() === "content-type") {
+        return String(value);
+      }
+    }
+    // if content-type header is not found, fallback to text/plain
+    return "text/plain";
+  }
+  return request.body?.mediaType;
+}

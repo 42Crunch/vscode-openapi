@@ -1,14 +1,14 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { Environment, SimpleEnvironment } from "@xliic/common/env";
-import { getOperation, makeOperationId } from "@xliic/common/openapi";
-import { RequestRef } from "@xliic/common/playbook";
+import { getOperation, makeOperationId } from "@xliic/openapi";
+import { Playbook } from "@xliic/scanconf";
 import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
 import { showScanconfOperation } from "../actions";
 import { ExecutionResult } from "../components/scenario/types";
 import { Current, handleMockStep, handleTryItStep } from "../playbook-execution-handler";
 
 export type State = {
-  ref?: RequestRef;
+  ref?: Playbook.RequestRef;
   tryCurrent: Current;
   tryResult: ExecutionResult;
   mockCurrent: Current;
@@ -28,7 +28,7 @@ export const slice = createSlice({
   name: "requests",
   initialState,
   reducers: {
-    setRequestId: (state, { payload }: PayloadAction<RequestRef>) => {
+    setRequestId: (state, { payload }: PayloadAction<Playbook.RequestRef>) => {
       state.ref = payload;
       state.tryResult = [];
     },

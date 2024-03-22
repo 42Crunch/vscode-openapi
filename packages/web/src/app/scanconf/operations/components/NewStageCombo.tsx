@@ -2,7 +2,7 @@ import { useCombobox } from "downshift";
 import { useState } from "react";
 import styled from "styled-components";
 
-import { RequestRef } from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 export default function NewStageCombo({
@@ -12,16 +12,16 @@ export default function NewStageCombo({
 }: {
   operationIds: string[];
   requestIds: string[];
-  onSelect: (ref?: RequestRef) => void;
+  onSelect: (ref?: Playbook.RequestRef) => void;
 }) {
   const value: string = "";
   const placeholder = "";
 
-  const items: RequestRef[] = [];
+  const items: Playbook.RequestRef[] = [];
 
   items.push(
     ...operationIds.map(
-      (id): RequestRef => ({
+      (id): Playbook.RequestRef => ({
         type: "operation",
         id,
       })
@@ -30,7 +30,7 @@ export default function NewStageCombo({
 
   items.push(
     ...requestIds.map(
-      (id): RequestRef => ({
+      (id): Playbook.RequestRef => ({
         type: "request",
         id,
       })

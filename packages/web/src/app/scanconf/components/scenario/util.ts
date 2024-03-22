@@ -1,60 +1,47 @@
-import { deref } from "@xliic/common/ref";
-import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 import jsf from "json-schema-faker";
+import { FieldValues } from "react-hook-form";
 
-import { HttpMethod } from "@xliic/common/http";
-import {
-  BundledOpenApiSpec,
-  OasParameterLocation,
-  OasSecurityScheme,
-  OperationParametersMap,
-  ResolvedOasOperationSecurity,
-  getOperation,
-  getOperationParameters,
-  getParametersMap,
-  getPathItemParameters,
-} from "@xliic/common/oas30";
-import * as playbook from "@xliic/common/playbook";
+import { simpleClone } from "@xliic/preserving-json-yaml-parser";
+import { OpenApi30, HttpMethod, deref } from "@xliic/openapi";
+import { Playbook } from "@xliic/scanconf";
 import {
   TryitParameterValues,
   TryitSecurityAllValues,
   TryitSecurityValue,
 } from "@xliic/common/tryit";
 
-import { FieldValues } from "react-hook-form";
-
 export function getParameters(
-  oas: BundledOpenApiSpec,
+  oas: OpenApi30.BundledSpec,
   path: string,
   method: HttpMethod
-): OperationParametersMap {
-  const pathParameters = getPathItemParameters(oas, oas.paths[path]);
-  const operation = getOperation(oas, path, method);
-  const operationParameters = getOperationParameters(oas, operation);
-  const result = getParametersMap(oas, pathParameters, operationParameters);
+): OpenApi30.OperationParametersMap {
+  const pathParameters = OpenApi30.getPathItemParameters(oas, oas.paths[path]);
+  const operation = OpenApi30.getOperation(oas, path, method);
+  const operationParameters = OpenApi30.getOperationParameters(oas, operation);
+  const result = OpenApi30.getParametersMap(oas, pathParameters, operationParameters);
   return result;
 }
 
 export function hasSecurityRequirements(
-  oas: BundledOpenApiSpec,
+  oas: OpenApi30.BundledSpec,
   path: string,
   method: HttpMethod
 ): boolean {
-  const operation = getOperation(oas, path, method);
+  const operation = OpenApi30.getOperation(oas, path, method);
   const requirements = operation?.security ?? oas.security ?? [];
   return requirements.length > 0;
 }
 
 export function getSecurity(
-  oas: BundledOpenApiSpec,
+  oas: OpenApi30.BundledSpec,
   path: string,
   method: HttpMethod
-): ResolvedOasOperationSecurity {
-  const operation = getOperation(oas, path, method);
+): OpenApi30.ResolvedOperationSecurity {
+  const operation = OpenApi30.getOperation(oas, path, method);
   const requirements = operation?.security ?? oas.security ?? [];
-  const result: ResolvedOasOperationSecurity = [];
+  const result: OpenApi30.ResolvedOperationSecurity = [];
   for (const requirement of requirements) {
-    const resolved: Record<string, OasSecurityScheme> = {};
+    const resolved: Record<string, OpenApi30.SecurityScheme> = {};
     for (const schemeName of Object.keys(requirement)) {
       // check if the requsted security scheme is defined in the OAS
       if (oas?.components?.securitySchemes?.[schemeName]) {
@@ -67,8 +54,8 @@ export function getSecurity(
 }
 
 export function generateParameterValues(
-  oas: BundledOpenApiSpec,
-  parameters: OperationParametersMap
+  oas: OpenApi30.BundledSpec,
+  parameters: OpenApi30.OperationParametersMap
 ): TryitParameterValues {
   const values: TryitParameterValues = {
     query: {},
@@ -77,7 +64,7 @@ export function generateParameterValues(
     cookie: {},
   };
 
-  const locations = Object.keys(parameters) as OasParameterLocation[];
+  const locations = Object.keys(parameters) as OpenApi30.ParameterLocation[];
   for (const location of locations) {
     for (const name of Object.keys(parameters[location])) {
       const parameter = parameters[location][name];
@@ -111,7 +98,7 @@ export function generateParameterValues(
 }
 
 export function generateSecurityValues(
-  security: ResolvedOasOperationSecurity
+  security: OpenApi30.ResolvedOperationSecurity
 ): TryitSecurityAllValues {
   const result: TryitSecurityAllValues = [];
   for (const requirement of security) {
@@ -126,14 +113,14 @@ export function generateSecurityValues(
   return result;
 }
 
-export function generateSecurityValue(security: OasSecurityScheme): TryitSecurityValue {
+export function generateSecurityValue(security: OpenApi30.SecurityScheme): TryitSecurityValue {
   if (security?.type === "http" && security.scheme && /^basic$/i.test(security.scheme)) {
     return { username: "", password: "" };
   }
   return "";
 }
 
-export function wrapPlaybookStage(stage: playbook.StageReference): Record<string, any> {
+export function wrapPlaybookStage(stage: Playbook.StageReference): Record<string, any> {
   stage = simpleClone(stage);
   return {
     ...stage,
@@ -144,17 +131,17 @@ export function wrapPlaybookStage(stage: playbook.StageReference): Record<string
   };
 }
 
-export function unwrapPlaybookStage(stage: FieldValues): playbook.StageReference {
+export function unwrapPlaybookStage(stage: FieldValues): Playbook.StageReference {
   return {
     ...stage,
     fuzzing: stage.fuzzing === true ? true : undefined,
     expectedResponse: stage.expectedResponse !== "" ? stage.expectedResponse : undefined,
     environment: unwrapEnvironment(stage.environment),
     responses: unwrapResponses(stage.responses),
-  } as playbook.StageReference;
+  } as Playbook.StageReference;
 }
 
-export function wrapPlaybookRequest(stage: playbook.StageContent): Record<string, any> {
+export function wrapPlaybookRequest(stage: Playbook.StageContent): Record<string, any> {
   stage = simpleClone(stage);
 
   return {
@@ -174,7 +161,7 @@ export function wrapPlaybookRequest(stage: playbook.StageContent): Record<string
 }
 
 export function wrapExternalPlaybookRequest(
-  stage: playbook.ExternalStageContent
+  stage: Playbook.ExternalStageContent
 ): Record<string, any> {
   stage = simpleClone(stage);
 
@@ -189,7 +176,7 @@ export function wrapExternalPlaybookRequest(
   };
 }
 
-function wrapEnvironment(environment: playbook.Environment | undefined) {
+function wrapEnvironment(environment: Playbook.OperationEnvironment | undefined) {
   const wrapped = Object.entries(environment || {}).map(([key, value]) => ({
     key,
     value,
@@ -198,7 +185,7 @@ function wrapEnvironment(environment: playbook.Environment | undefined) {
   return wrapped;
 }
 
-function wrapResponses(responses: playbook.Responses | undefined) {
+function wrapResponses(responses: Playbook.Responses | undefined) {
   return Object.entries(responses || {}).map(([key, value]) => {
     return {
       key,
@@ -210,8 +197,8 @@ function wrapResponses(responses: playbook.Responses | undefined) {
   });
 }
 
-function unwrapResponses(data: any): playbook.Responses {
-  const result: playbook.Responses = {};
+function unwrapResponses(data: any): Playbook.Responses {
+  const result: Playbook.Responses = {};
   for (const { key, value } of data) {
     result[key] = {
       ...value,
@@ -221,7 +208,7 @@ function unwrapResponses(data: any): playbook.Responses {
   return result;
 }
 
-function wrapVariableAssignments(assignments: playbook.VariableAssignments | undefined) {
+function wrapVariableAssignments(assignments: Playbook.VariableAssignments | undefined) {
   return Object.entries(assignments || {}).map(([key, value]) => {
     return {
       key,
@@ -230,15 +217,15 @@ function wrapVariableAssignments(assignments: playbook.VariableAssignments | und
   });
 }
 
-function unwrapVariableAssignments(data: any): playbook.VariableAssignments {
-  const result: playbook.VariableAssignments = {};
+function unwrapVariableAssignments(data: any): Playbook.VariableAssignments {
+  const result: Playbook.VariableAssignments = {};
   for (const { key, value } of data) {
     result[key] = value;
   }
   return result;
 }
 
-export function unwrapPlaybookRequest(request: FieldValues): playbook.StageContent {
+export function unwrapPlaybookRequest(request: FieldValues): Playbook.StageContent {
   request = simpleClone(request);
   return {
     ref: undefined,
@@ -259,7 +246,7 @@ export function unwrapPlaybookRequest(request: FieldValues): playbook.StageConte
   };
 }
 
-export function unwrapExternalPlaybookRequest(request: FieldValues): playbook.ExternalStageContent {
+export function unwrapExternalPlaybookRequest(request: FieldValues): Playbook.ExternalStageContent {
   request = simpleClone(request);
   return {
     request: {
@@ -275,8 +262,8 @@ export function unwrapExternalPlaybookRequest(request: FieldValues): playbook.Ex
   };
 }
 
-function unwrapEnvironment(data: any): playbook.Environment {
-  const environment: playbook.Environment = {};
+function unwrapEnvironment(data: any): Playbook.OperationEnvironment {
+  const environment: Playbook.OperationEnvironment = {};
   for (const item of data) {
     environment[item.key] = convertToType(item.value, item.type);
   }

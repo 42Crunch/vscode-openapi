@@ -1,14 +1,13 @@
-import { OasParameterLocation, OperationParametersMap } from "@xliic/common/oas30";
+import { OpenApi30, HttpMethod } from "@xliic/openapi";
 import { ScanConfig } from "@xliic/common/scan";
-import { HttpMethod } from "@xliic/common/http";
 
 export function generateDefaultValues(
   method: HttpMethod,
-  parameters: OperationParametersMap,
+  parameters: OpenApi30.OperationParametersMap,
   configuration: ScanConfig
 ): Record<string, any> {
   const values: Record<string, any> = { parameters: {} };
-  const locations = Object.keys(parameters) as OasParameterLocation[];
+  const locations = Object.keys(parameters) as OpenApi30.ParameterLocation[];
   for (const location of locations) {
     for (const name of Object.keys(parameters[location])) {
       const value = configuration.parameters[location]?.[name];

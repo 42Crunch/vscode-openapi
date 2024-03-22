@@ -1,6 +1,6 @@
-import * as scan from "../scanconfig";
+import { Scanconf } from "@xliic/scanconf";
 
-const userinfo: scan.Operation = {
+const userinfo: Scanconf.Operation = {
   operationId: "userinfo",
   scenarios: [
     {
@@ -41,7 +41,7 @@ const userinfo: scan.Operation = {
   },
 };
 
-const requests: Record<string, scan.RequestFile> = {
+const requests: Record<string, Scanconf.RequestFile> = {
   external: {
     request: {
       type: "42c",
@@ -89,7 +89,7 @@ const requests: Record<string, scan.RequestFile> = {
   },
 };
 
-const file: scan.ConfigurationFileBundle = {
+const file: Scanconf.ConfigurationFileBundle = {
   version: "2.0.0",
   operations: {
     userinfo,

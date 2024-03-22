@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 
 import { SearchSidebarControlled, Section } from "../../../components/layout/SearchSidebar";
 import CollapsibleSection from "../components/CollapsibleSection";
@@ -19,15 +19,15 @@ export default function Global() {
   const { selected } = useAppSelector((state) => state.global);
   const { tryResult, mockResult } = useAppSelector((state) => state.global);
 
-  const removeStage = (location: playbook.StageLocation) => dispatch(actions.removeStage(location));
+  const removeStage = (location: Playbook.StageLocation) => dispatch(actions.removeStage(location));
 
-  const saveStage = (location: playbook.StageLocation, stage: playbook.StageReference) =>
+  const saveStage = (location: Playbook.StageLocation, stage: Playbook.StageReference) =>
     dispatch(actions.saveOperationReference({ location, reference: stage }));
 
-  const moveStage = (location: playbook.StageLocation, to: number) =>
+  const moveStage = (location: Playbook.StageLocation, to: number) =>
     dispatch(actions.moveStage({ location, to }));
 
-  const addStage = (container: playbook.StageContainer, ref: playbook.RequestRef) => {
+  const addStage = (container: Playbook.StageContainer, ref: Playbook.RequestRef) => {
     dispatch(
       actions.addStage({
         container,
@@ -71,7 +71,7 @@ export default function Global() {
               />
               <Scenario
                 oas={oas}
-                stages={playbook.before as playbook.StageReference[]}
+                stages={playbook.before as Playbook.StageReference[]}
                 container={{ container: "globalBefore" }}
                 executionResult={mockResult?.[0]}
                 saveStage={saveStage}
@@ -102,7 +102,7 @@ export default function Global() {
               />
               <Scenario
                 oas={oas}
-                stages={playbook.after as playbook.StageReference[]}
+                stages={playbook.after as Playbook.StageReference[]}
                 container={{ container: "globalAfter" }}
                 executionResult={undefined}
                 saveStage={saveStage}

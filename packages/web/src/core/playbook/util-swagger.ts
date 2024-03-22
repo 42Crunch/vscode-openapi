@@ -1,21 +1,13 @@
-import {
-  BundledSwaggerSpec,
-  getPathItemParameters,
-  getOperation,
-  getOperationParameters,
-  OperationParametersMap,
-  getParametersMap,
-} from "@xliic/common/swagger";
-import { HttpMethod } from "@xliic/common/http";
+import { Swagger, HttpMethod } from "@xliic/openapi";
 
 export function getParameters(
-  oas: BundledSwaggerSpec,
+  oas: Swagger.BundledSpec,
   path: string,
   method: HttpMethod
-): OperationParametersMap {
-  const pathParameters = getPathItemParameters(oas, oas.paths[path]);
-  const operation = getOperation(oas, path, method);
-  const operationParameters = getOperationParameters(oas, operation);
-  const result = getParametersMap(oas, pathParameters, operationParameters);
+): Swagger.OperationParametersMap {
+  const pathParameters = Swagger.getPathItemParameters(oas, oas.paths[path]);
+  const operation = Swagger.getOperation(oas, path, method);
+  const operationParameters = Swagger.getOperationParameters(oas, operation);
+  const result = Swagger.getParametersMap(oas, pathParameters, operationParameters);
   return result;
 }

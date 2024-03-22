@@ -1,10 +1,9 @@
 import * as vscode from "vscode";
-import { Cache } from "../cache";
-import { getOperations as getOpenApiOperations } from "@xliic/common/oas30";
-import { getOperations as getSwaggerOperations } from "@xliic/common/swagger";
-import { BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/common/openapi";
 
+import { OpenApi30, Swagger, BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/openapi";
 import { getLocation } from "@xliic/preserving-json-yaml-parser";
+
+import { Cache } from "../cache";
 import { getOpenApiVersion } from "../parsers";
 import { OpenApiVersion } from "../types";
 
@@ -16,21 +15,19 @@ export class AuditCodelensProvider implements vscode.CodeLensProvider {
     document: vscode.TextDocument,
     token: vscode.CancellationToken
   ): Promise<vscode.CodeLens[]> {
-    const result: vscode.CodeLens[] = [];
+    const result: (vscode.CodeLens | undefined)[] = [];
     const parsed = this.cache.getParsedDocument(document);
     const version = getOpenApiVersion(parsed);
     if (parsed && version !== OpenApiVersion.Unknown) {
       const oas = parsed as unknown as BundledSwaggerOrOasSpec;
-      const operations = isOpenapi(oas) ? getOpenApiOperations(oas) : getSwaggerOperations(oas);
+      const operations = isOpenapi(oas) ? OpenApi30.getOperations(oas) : Swagger.getOperations(oas);
       for (const [path, method, operation] of operations) {
-        const lens = auditLens(document, oas, path, method);
-        if (lens) {
-          result.push(lens);
-        }
+        result.push(auditLens(document, oas, path, method));
       }
+      result.push(topAuditLens(document));
     }
 
-    return result;
+    return result.filter((lens): lens is vscode.CodeLens => lens !== undefined);
   }
 }
 
@@ -57,5 +54,20 @@ function auditLens(
     tooltip: "Audit this operation",
     command: "openapi.editorSingleOperationAudit",
     arguments: [path, method],
+  });
+}
+
+function topAuditLens(document: vscode.TextDocument): vscode.CodeLens | undefined {
+  const position = document.positionAt(0);
+  const line = document.lineAt(position.line + 1);
+  const range = new vscode.Range(
+    new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
+    new vscode.Position(position.line, line.range.end.character)
+  );
+
+  return new vscode.CodeLens(range, {
+    title: "Audit",
+    tooltip: "Audit this OpenAPI file",
+    command: "openapi.securityAudit",
   });
 }

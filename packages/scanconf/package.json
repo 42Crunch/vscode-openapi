@@ -1,0 +1,31 @@
+{
+  "name": "@xliic/scanconf",
+  "author": "42Crunch",
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/42Crunch/vscode-openapi.git"
+  },
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "LICENSE.txt",
+    "src",
+    "dist"
+  ],
+  "dependencies": {
+    "@xliic/preserving-json-yaml-parser": "^1.11.0",
+    "@xliic/openapi": "^1.0.0",
+    "@xliic/result": "^1.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^1.3.1"
+  }
+}

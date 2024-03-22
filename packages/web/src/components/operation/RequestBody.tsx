@@ -2,19 +2,18 @@ import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { useFormContext, useController } from "react-hook-form";
 
-import type { BundledOpenApiSpec, OasRequestBody } from "@xliic/common/oas30";
+import { OpenApi30 } from "@xliic/openapi";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { TriangleExclamation } from "../../icons";
-
 import { createBody, serializeToFormText, parseFromFormText } from "../../core/form/body";
 
 export default function RequestBody({
   oas,
   requestBody,
 }: {
-  oas: BundledOpenApiSpec;
-  requestBody?: OasRequestBody;
+  oas: OpenApi30.BundledSpec;
+  requestBody?: OpenApi30.RequestBody;
 }) {
   const { control } = useFormContext();
 

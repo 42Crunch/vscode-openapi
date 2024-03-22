@@ -1,7 +1,7 @@
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
 import { HttpClient } from "@xliic/common/http";
-import { BundledSwaggerOrOasSpec, getOperationById } from "@xliic/common/openapi";
-import * as playbook from "@xliic/common/playbook";
+import { BundledSwaggerOrOasSpec, getOperationById } from "@xliic/openapi";
+import { Playbook } from "@xliic/scanconf";
 
 import { makeExternalHttpRequest, makeHttpRequest } from "./http";
 import { MockHttpClient, MockHttpResponse } from "./mock-http";
@@ -16,13 +16,13 @@ import {
 } from "./variables";
 import { createAuthCache, getAuthEntry, setAuthEntry, AuthCache } from "./auth-cache";
 
-export type PlaybookList = { name: string; requests: playbook.Stage[] }[];
+export type PlaybookList = { name: string; requests: Playbook.Stage[] }[];
 
 export async function* executeAllPlaybooks(
   client: HttpClient | MockHttpClient,
   oas: BundledSwaggerOrOasSpec,
   server: string,
-  file: playbook.PlaybookBundle,
+  file: Playbook.Bundle,
   playbooks: PlaybookList,
   envenv: EnvData,
   extraEnv: PlaybookEnvStack = []
@@ -60,8 +60,8 @@ async function* executePlaybook(
   client: HttpClient | MockHttpClient,
   oas: BundledSwaggerOrOasSpec,
   server: string,
-  file: playbook.PlaybookBundle,
-  requests: playbook.Stage[],
+  file: Playbook.Bundle,
+  requests: Playbook.Stage[],
   env: PlaybookEnvStack,
   depth: number
 ): AsyncGenerator<PlaybookExecutorStep, PlaybookEnvStack | undefined> {
@@ -283,7 +283,7 @@ export async function* executeAuth(
   client: HttpClient | MockHttpClient,
   oas: BundledSwaggerOrOasSpec,
   server: string,
-  file: playbook.PlaybookBundle,
+  file: Playbook.Bundle,
   auth: string[] | undefined,
   env: PlaybookEnvStack,
   depth: number
@@ -365,9 +365,9 @@ async function* executeGetCredentialValue(
   client: HttpClient | MockHttpClient,
   oas: BundledSwaggerOrOasSpec,
   server: string,
-  file: playbook.PlaybookBundle,
+  file: Playbook.Bundle,
   authName: string,
-  method: playbook.CredentialMethod,
+  method: Playbook.CredentialMethod,
   env: PlaybookEnvStack,
   depth: number
 ): AsyncGenerator<PlaybookExecutorStep, string | undefined> {
@@ -413,10 +413,10 @@ async function* executeGetCredentialValue(
 }
 
 export function makeEnvEnv(
-  environment: playbook.PlaybookEnvironment,
+  environment: Playbook.Environment,
   env: EnvData
 ): { environment: PlaybookEnv; simple: SimpleEnvironment; missing: string[] } {
-  const result: playbook.Environment = {};
+  const result: Playbook.OperationEnvironment = {};
   const simple: SimpleEnvironment = {};
   const missing: string[] = [];
   for (const [name, variable] of Object.entries(environment.variables)) {
@@ -427,10 +427,14 @@ export function makeEnvEnv(
       result[name] = env.default[variable.name];
       simple[variable.name] = env.default[variable.name];
     } else if (!variable.required && variable.default !== undefined) {
+      result[name] = variable.default;
+      // simple environment is for passing a substituted variables to binary or docker
+      // in case if env parameter has a default value, there is no need to pass it
+      // since it's available in the scan config file
+      // additionally, it can be not just a string as in simple environment, but a complex object
+    } else if (variable.required) {
       // required variables must always come from the environment, no default
       // values is used for these
-      result[name] = variable.default;
-    } else if (variable.required) {
       missing.push(variable.name);
     }
   }
@@ -442,10 +446,7 @@ export function makeEnvEnv(
   };
 }
 
-export function getExternalEnvironment(
-  file: playbook.PlaybookBundle,
-  envenv: EnvData
-): PlaybookEnv {
+export function getExternalEnvironment(file: Playbook.Bundle, envenv: EnvData): PlaybookEnv {
   const environmentName = file.runtimeConfiguration?.environment || "default";
   const { environment } = makeEnvEnv(
     file?.environments?.[environmentName] || { variables: {} },
@@ -454,6 +455,6 @@ export function getExternalEnvironment(
   return environment;
 }
 
-function getRequestByRef(file: playbook.PlaybookBundle, ref: playbook.RequestRef) {
+function getRequestByRef(file: Playbook.Bundle, ref: Playbook.RequestRef) {
   return ref.type === "operation" ? file.operations[ref.id]?.request : file.requests?.[ref.id];
 }

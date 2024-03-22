@@ -1,17 +1,17 @@
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
+import { Scanconf, parse } from "@xliic/scanconf";
+
 import { assert, expect } from "vitest";
 import { executeAllPlaybooks } from "../execute";
 import { PlaybookExecutorStep } from "../playbook";
 import { PlaybookEnv } from "../playbook-env";
-import { parse } from "../scanconf-parser";
-import * as scan from "../scanconfig";
 import { httpClient } from "./httpclient";
 
 export function makeStepAssert(steps: PlaybookExecutorStep[]) {
   return (obj: any) => expect(steps.shift()).toMatchObject(obj);
 }
 
-export function parseScenario(oas: any, scenario: scan.ConfigurationFileBundle) {
+export function parseScenario(oas: any, scenario: Scanconf.ConfigurationFileBundle) {
   const [file, error] = parse(oas, scenario);
 
   if (error !== undefined) {
@@ -23,7 +23,7 @@ export function parseScenario(oas: any, scenario: scan.ConfigurationFileBundle) 
 
 export async function runScenario(
   oas: any,
-  file: playbook.PlaybookBundle,
+  file: Playbook.Bundle,
   name: string,
   vars?: PlaybookEnv
 ): Promise<PlaybookExecutorStep[]> {

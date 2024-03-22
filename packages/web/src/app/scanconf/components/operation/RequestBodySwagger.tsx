@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useFormContext, useController } from "react-hook-form";
-import { ThemeColorVariables } from "@xliic/common/theme";
 
-import { BundledSwaggerSpec, ResolvedSwaggerParameter } from "@xliic/common/swagger";
+import { ThemeColorVariables } from "@xliic/common/theme";
+import { Swagger } from "@xliic/openapi";
+
 import { TriangleExclamation } from "../../../../icons";
 
 function serialize(value: any): string {
@@ -23,8 +24,8 @@ export default function RequestBodySwagger({
   group,
   variables,
 }: {
-  oas: BundledSwaggerSpec;
-  group: Record<string, ResolvedSwaggerParameter>;
+  oas: Swagger.BundledSpec;
+  group: Record<string, Swagger.ResolvedParameter>;
   variables: string[];
 }) {
   const { control } = useFormContext();

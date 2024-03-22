@@ -1,6 +1,6 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
-import { getOperation, makeOperationId } from "@xliic/common/openapi";
+import { getOperation, makeOperationId } from "@xliic/openapi";
 
 import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
 import { showScanconfOperation } from "../actions";

@@ -1,10 +1,9 @@
-import { OasSecurityScheme } from "@xliic/common/oas30";
-import * as playbook from "@xliic/common/playbook";
-import { SwaggerSecurityScheme } from "@xliic/common/swagger";
+import { Playbook } from "@xliic/scanconf";
+import { OpenApi30, Swagger } from "@xliic/openapi";
 
 export function checkCredential(
-  credential: playbook.Credential,
-  scheme: OasSecurityScheme | SwaggerSecurityScheme
+  credential: Playbook.Credential,
+  scheme: OpenApi30.SecurityScheme | Swagger.SecurityScheme
 ): boolean {
   if (scheme.type === credential.type && scheme.in === credential.in) {
     return true;

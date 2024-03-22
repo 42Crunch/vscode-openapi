@@ -1,7 +1,6 @@
 import styled from "styled-components";
 import { useCombobox } from "downshift";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { AngleDown } from "../icons";
 import { useEffect, useState } from "react";
 
 export default function DownshiftCombo<T>({

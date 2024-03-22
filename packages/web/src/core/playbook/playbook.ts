@@ -1,11 +1,15 @@
-import { HttpClient, HttpError, HttpMethod, HttpRequest, HttpResponse } from "@xliic/common/http";
-import { RequestRef, Credential } from "@xliic/common/playbook";
-
+import { HttpMethod } from "@xliic/openapi";
+import { HttpClient, HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
+import { Playbook } from "@xliic/scanconf";
 import { LookupResult, LookupFailure } from "@xliic/common/env";
+
 import { PlaybookEnvStack } from "./playbook-env";
 import { MockHttpResponseType } from "./mock-http";
 
-export type AuthResult = Record<string, { credential: Credential; value: string | undefined }>;
+export type AuthResult = Record<
+  string,
+  { credential: Playbook.Credential; value: string | undefined }
+>;
 
 export type Step = {
   path: string;
@@ -23,7 +27,7 @@ export type PlaybookStarted = {
 
 export type RequestStarted = {
   event: "request-started";
-  ref?: RequestRef;
+  ref?: Playbook.RequestRef;
 };
 
 export type AuthStarted = {

@@ -1,5 +1,4 @@
-import { HttpMethod } from "./http";
-import { BundledSwaggerOrOasSpec } from "./openapi";
+import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
 
 export interface OasWithOperation {
   oas: BundledSwaggerOrOasSpec;

@@ -83,6 +83,11 @@ export function PlatformServices() {
 
             <Input label="Docker image for 'scand-agent'" name="scanImage" />
 
+            <Input
+              label="Maximum amount of time to check on scan completion (seconds)"
+              name="scandManager.timeout"
+            />
+
             <Test>
               <ValidProgressButton
                 label="Test connection"
@@ -175,7 +180,19 @@ export function PlatformServices() {
   );
 }
 
-const schema = z.object({}).catchall(z.unknown());
+const schema = z
+  .object({
+    scandManager: z
+      .object({
+        timeout: z.coerce
+          .number()
+          .int()
+          .min(1)
+          .max(60 * 60 * 24), // 1 day
+      })
+      .catchall(z.unknown()),
+  })
+  .catchall(z.unknown());
 
 const screen: ConfigScreen = {
   id: "scan-runtime",

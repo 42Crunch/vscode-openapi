@@ -2,8 +2,7 @@ import { useForm, FormProvider } from "react-hook-form";
 
 import { TryitSecurityAllValues, TryitSecurityValue } from "@xliic/common/tryit";
 import { SecretsForSecurity } from "@xliic/common/prefs";
-import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/common/openapi";
-import { HttpMethod } from "@xliic/common/http";
+import { BundledSwaggerOrOasSpec, HttpMethod, getServerUrls } from "@xliic/openapi";
 
 import { useAppDispatch, useAppSelector } from "./store";
 import { sendHttpRequest, showGeneralError } from "./slice";

@@ -47,7 +47,6 @@ import {
   UserData,
   Tag,
 } from "../types";
-import { GitManager } from "./git-store";
 
 export interface CollectionsView {
   collections: CollectionData[];
@@ -134,7 +133,6 @@ export class PlatformStore {
   private formats?: DataDictionaryFormat[];
   private _onConnectionDidChange = new EventEmitter<PlatformConnectionEvent>();
   private connected = false;
-  readonly gitManager: GitManager = new GitManager();
 
   constructor(private configuration: Configuration, private logger: Logger) {}
 
@@ -276,6 +274,8 @@ export class PlatformStore {
   }
 
   async clearTempApi(tmp: { apiId: string; collectionId: string }): Promise<void> {
+    // delete the api
+    await deleteApi(tmp.apiId, this.getConnection(), this.logger);
     // check if any of the old apis have to be deleted
     const current = new Date().getTime();
     const response = await listApis(tmp.collectionId, this.getConnection(), this.logger);
@@ -439,7 +439,6 @@ export class PlatformStore {
 
   async refresh(): Promise<void> {
     this.formats = undefined;
-    this.gitManager.refresh();
     if (this.hasCredentials()) {
       const { success } = await testConnection(this.getConnection(), this.logger);
       this.connected = success;

@@ -1,7 +1,8 @@
-import { OasSecurityScheme } from "@xliic/common/oas30";
-import * as playbook from "@xliic/common/playbook";
-import { SwaggerSecurityScheme } from "@xliic/common/swagger";
 import styled from "styled-components";
+
+import { OpenApi30, Swagger } from "@xliic/openapi";
+import { Playbook } from "@xliic/scanconf";
+
 import CredentialPicker from "./CredentialPicker";
 
 export default function SecurityRequirement({
@@ -10,8 +11,8 @@ export default function SecurityRequirement({
   values,
   setValues,
 }: {
-  requirement: Record<string, OasSecurityScheme | SwaggerSecurityScheme>;
-  credentials: playbook.Credentials;
+  requirement: Record<string, OpenApi30.SecurityScheme | Swagger.SecurityScheme>;
+  credentials: Playbook.Credentials;
   values: Record<string, string>;
   setValues: (values: Record<string, string>) => void;
 }) {

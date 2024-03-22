@@ -1,5 +1,5 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import { HttpMethod, HttpMethods } from "@xliic/common/http";
+import { HttpMethod, HttpMethods } from "@xliic/openapi";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
@@ -13,13 +13,19 @@ import Select from "../components/Select";
 export default function AddExternalRequestDialog({
   onAddExternalRequest,
 }: {
-  onAddExternalRequest: (id: string, method: HttpMethod, url: string) => void;
+  onAddExternalRequest: (
+    id: string,
+    method: HttpMethod,
+    url: string,
+    mode: "json" | "urlencoded"
+  ) => void;
 }) {
   const methods = useForm({
     defaultValues: {
       id: "",
       method: "post",
       url: "http://localhost:8080/",
+      mode: "json",
     },
     mode: "onChange",
   });
@@ -29,7 +35,7 @@ export default function AddExternalRequestDialog({
   const [open, setOpen] = useState(false);
 
   const onSubmit = (data: any) => {
-    onAddExternalRequest(data.id, data.method, data.url);
+    onAddExternalRequest(data.id, data.method, data.url, data.mode);
   };
 
   return (
@@ -61,8 +67,16 @@ export default function AddExternalRequestDialog({
               <Dialog.Title>New External Request</Dialog.Title>
               <Dialog.Description>Add new external request</Dialog.Description>
               <Input label="Request ID" name="id" />
-              <Select label="Method" name="method" options={httpMethods} />
               <Input label="URL" name="url" />
+              <Select label="Method" name="method" options={httpMethods} />
+              <Select
+                label="Content type"
+                name="mode"
+                options={[
+                  { value: "json", label: "application/json" },
+                  { value: "urlencoded", label: "application/x-www-form-urlencoded" },
+                ]}
+              />
               <div style={{ display: "flex", marginTop: 25, justifyContent: "flex-end", gap: 4 }}>
                 <Button type="submit">Add</Button>
                 <Dialog.Close asChild>

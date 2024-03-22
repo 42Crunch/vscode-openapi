@@ -1,10 +1,11 @@
 import * as vscode from "vscode";
 
-import { HttpMethod } from "@xliic/common/http";
+import { HttpMethod } from "@xliic/openapi";
 import { Container, getLocation } from "@xliic/preserving-json-yaml-parser";
 
 import { encodeJsonPointerSegment } from "../../pointer";
 import { AbstractOutlineNode, HTTP_METHODS, OutlineNode } from "./base";
+import { SimpleNode, getParameterLabel } from "./simple";
 
 export class OperationIdsNode extends AbstractOutlineNode {
   constructor(parent: OutlineNode, node: any) {
@@ -69,11 +70,24 @@ export class OperationIdNode extends AbstractOutlineNode {
     path: string,
     method: HttpMethod
   ) {
-    super(parent, pointer, key, vscode.TreeItemCollapsibleState.None, node, parent.context);
+    super(parent, pointer, key, vscode.TreeItemCollapsibleState.Collapsed, node, parent.context);
     this.path = path;
     this.method = method;
     this.contextValue = "operation-id";
-    this.searchable = false;
+  }
+
+  getChildren(): OutlineNode[] {
+    return this.getChildrenByKey((key, pointer, node) => {
+      if (["responses", "parameters", "requestBody", "security"].includes(key)) {
+        if (key == "parameters") {
+          return new SimpleNode(this, pointer, key, node, 1, getParameterLabel);
+        } else if (key === "security") {
+          return new SimpleNode(this, pointer, key, node, 0);
+        } else {
+          return new SimpleNode(this, pointer, key, node, 1);
+        }
+      }
+    });
   }
 }
 

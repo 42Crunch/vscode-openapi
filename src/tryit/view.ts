@@ -6,7 +6,7 @@
 import * as vscode from "vscode";
 
 import { Preferences } from "@xliic/common/prefs";
-import { HttpMethod } from "@xliic/common/http";
+import { HttpMethod } from "@xliic/openapi";
 import { Webapp } from "@xliic/common/webapp/tryit";
 import { Config } from "@xliic/common/config";
 

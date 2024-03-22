@@ -1,5 +1,40 @@
 # Changelog
 
+## Version 4.25.1 (March 1, 2024)
+
+- Downgrade swagger-ui dependency in preview to fix #264
+- Display 'security' property in the operation nodes in OpenAPI Explorer
+
+## Version 4.25.0 (February 29, 2024)
+
+- Make scand-manager timeout configurable
+
+## Version 4.24.1 (February 23, 2024)
+
+- Fix issue where authorization tests dialog would not show in Scan UI
+
+## Version 4.24.0 (February 19, 2024)
+
+- Updated to the lastest SwaggerUI version for OpenAPI preview
+- Support form/urlencoded bodies in external requests in Scan UI
+- Support raw bodies in Scan UI
+
+## Version 4.23.0 (February 15, 2024)
+
+- Display 'requestBody' in the operation node OpenAPI Explorer
+- Display operation child nodes in OperationID / Tag nodes in OpenAPI Explorer
+- Fix labels of issue severity in the Scan report
+- Stop hiding debug logs in the Logging view in the Scan report
+
+## Version 4.22.1 (February 13, 2024)
+
+- Fix issue where the temp apis on the platform were not properly cleaned up
+
+## Version 4.22.0 (February 13, 2024)
+
+- Check for updates of the 42Crunch AST binary and prompt user to upgrade
+- Add support for BOLA/BFLA tests in Scan UI
+
 ## Version 4.21.1 (January 22, 2024)
 
 - Fix for creating temp APIs when API Naming Convention is configured
