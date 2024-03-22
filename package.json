@@ -681,8 +681,8 @@
             "ide-key"
           ],
           "enumDescriptions": [
-            "Freemium Token",
-            "Platform IDE Key"
+            "Freemium token",
+            "Platform IDE key"
           ]
         },
         "openapi.platformConformanceScanRuntime": {
