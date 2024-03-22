@@ -15,6 +15,7 @@ import platformServices from "./screen/platform-services";
 import temporaryCollectionMaker from "./screen/temporary-collection";
 import mandatoryTagsMaker from "./screen/mandatory-tags";
 import scanRuntime from "./screen/scan-runtime";
+import openapiExternalRefs from "./screen/openapi-external-refs";
 import { unwrapFormValues, wrapFormValues } from "./util";
 
 export default function Config() {
@@ -35,6 +36,11 @@ export default function Config() {
       title: "API Conformance Scan",
       items: [scanRuntime],
     },
+    {
+      id: "openapi",
+      title: "OpenAPI",
+      items: [ openapiExternalRefs ]
+    }
   ];
 
   const screenById = {
@@ -43,6 +49,7 @@ export default function Config() {
     [scanRuntime.id]: scanRuntime,
     [temporaryCollection.id]: temporaryCollection,
     [mandatoryTags.id]: mandatoryTags,
+    [openapiExternalRefs.id]: openapiExternalRefs,
   };
 
   useEffect(() => {

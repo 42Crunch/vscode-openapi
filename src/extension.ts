@@ -35,6 +35,7 @@ import { Logger } from "./platform/types";
 import { getPlatformCredentials, hasCredentials } from "./credentials";
 import { EnvStore } from "./envstore";
 import { debounce } from "./util/debounce";
+import { getHostConfigurationSecretKeyBase } from "./util/config";
 
 export async function activate(context: vscode.ExtensionContext) {
   const versionProperty = "openapiVersion";
@@ -53,7 +54,7 @@ export async function activate(context: vscode.ExtensionContext) {
     yaml: { language: "yaml" },
   };
 
-  const externalRefProvider = new ExternalRefDocumentProvider();
+  const externalRefProvider = new ExternalRefDocumentProvider(context.secrets);
   vscode.workspace.registerTextDocumentContentProvider(INTERNAL_SCHEMES.http, externalRefProvider);
   vscode.workspace.registerTextDocumentContentProvider(INTERNAL_SCHEMES.https, externalRefProvider);
 
@@ -165,6 +166,11 @@ export async function activate(context: vscode.ExtensionContext) {
     { delay: 3000 }
   );
 
+  const reloadHostnames = debounce(
+    config.reloadConfig,
+    { delay: 3000 }
+  )
+
   configuration.onDidChange(async (e: vscode.ConfigurationChangeEvent) => {
     if (
       configuration.changed(e, "platformUrl") ||
@@ -175,11 +181,17 @@ export async function activate(context: vscode.ExtensionContext) {
     ) {
       reloadCredentials();
     }
+    if (configuration.changed(e, "approvedHostnames")) {
+      reloadHostnames();
+    }
   });
 
   context.secrets.onDidChange(async (e) => {
     if (e.key === "platformApiToken") {
       reloadCredentials();
+    }
+    if (e.key.startsWith(getHostConfigurationSecretKeyBase())) {
+      reloadHostnames();
     }
   });
 }

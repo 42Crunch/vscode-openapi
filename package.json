@@ -4,7 +4,7 @@
   "displayName": "OpenAPI (Swagger) Editor",
   "description": "OpenAPI extension for Visual Studio Code",
   "license": "AGPL-3.0-only",
-  "version": "4.25.1",
+  "version": "4.26.0",
   "publisher": "42Crunch",
   "repository": {
     "type": "git",
@@ -805,15 +805,6 @@
           "type": "integer",
           "default": 1000,
           "description": "Preview update delay (in milliseconds after the last document change)"
-        },
-        "openapi.approvedHostnames": {
-          "scope": "application",
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "default": [],
-          "description": "List of hostnames approved for resolving external http:// and https:// references"
         },
         "openapi.tryit.insecureSslHostnames": {
           "scope": "application",
