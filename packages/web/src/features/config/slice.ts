@@ -47,6 +47,7 @@ const initialState: ConfigState = {
   data: {
     insecureSslHostnames: [],
     platformUrl: "https://platform.42crunch.com",
+    platformAuthType: "anond-token",
     platformApiToken: "",
     platformServices: {
       source: "auto",

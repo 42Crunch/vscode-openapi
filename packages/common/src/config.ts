@@ -4,6 +4,8 @@ import { ScandManagerConnection } from "./scan";
 export type Config = {
   insecureSslHostnames: string[];
   platformUrl: string;
+  platformAuthType: "anond-token" | "ide-key";
+  anondToken: string;
   platformApiToken: string;
   platformServices: {
     source: "auto" | "manual";

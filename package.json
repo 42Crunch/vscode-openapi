@@ -673,6 +673,18 @@
           "default": "https://platform.42crunch.com",
           "description": "42Crunch platform URL"
         },
+        "openapi.platformAuthType": {
+          "scope": "machine",
+          "type": "string",
+          "enum": [
+            "anond-token",
+            "ide-key"
+          ],
+          "enumDescriptions": [
+            "Freemium Token",
+            "Platform IDE Key"
+          ]
+        },
         "openapi.platformConformanceScanRuntime": {
           "scope": "machine",
           "type": "string",
@@ -778,7 +790,6 @@
         "openapi.securityAuditToken": {
           "scope": "machine",
           "type": "string",
-          "default": null,
           "description": "Authentication token for Security Audit"
         },
         "openapi.sortOutlines": {

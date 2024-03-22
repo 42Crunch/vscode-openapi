@@ -8,7 +8,9 @@ export async function loadConfig(
   configuration: Configuration,
   secrets: vscode.SecretStorage
 ): Promise<Config> {
+  const platformAuthType = configuration.get<Config["platformAuthType"] | "">("platformAuthType");
   const platformUrl = configuration.get<string>("platformUrl");
+  const anondToken = configuration.get<string>("securityAuditToken");
   const apiToken = (await secrets.get("platformApiToken")) ?? "";
   const insecureSslHostnames = configuration.get<string[]>("tryit.insecureSslHostnames");
   const platformServices = configuration.get<string>("platformServices");
@@ -28,8 +30,12 @@ export async function loadConfig(
 
   const platformMandatoryTags = configuration.get<"string">("platformMandatoryTags");
 
+  // derived auth type is ide-key only if anondToken is not set and anond-token is set, otherwise it is anond-token
+  const derivedAutType = !anondToken && !!apiToken ? "ide-key" : "anond-token";
+
   return {
     platformUrl,
+    platformAuthType: platformAuthType == "" ? derivedAutType : platformAuthType,
     platformApiToken: apiToken,
     insecureSslHostnames,
     platformServices: {
