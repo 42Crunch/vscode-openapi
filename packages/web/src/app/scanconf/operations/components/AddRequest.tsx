@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import { RequestRef } from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { useState } from "react";
@@ -14,7 +14,7 @@ export default function AddRequest({
 }: {
   operationIds: string[];
   requestIds: string[];
-  onSelect: (ref: RequestRef) => void;
+  onSelect: (ref: Playbook.RequestRef) => void;
 }) {
   const [showCombo, setShowCombo] = useState(false);
 

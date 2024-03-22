@@ -1,102 +1,102 @@
 import { HttpMethod, HttpMethods } from "./http";
 import { deref, RefOr } from "./ref";
 
-export interface SwaggerSpec {
+export type Spec = {
   swagger: "2.0";
-  info: SwaggerInfo;
+  info: Info;
   host?: string;
   basePath?: string;
-  schemes?: SwaggerScheme[];
+  schemes?: UrlScheme[];
   consumes?: string[];
   produces?: string[];
-  paths: Record<string, SwaggerPathItem>;
-  definitions?: Record<string, RefOr<SwaggerSchema>>;
-  parameters?: Record<string, RefOr<SwaggerParameter>>;
-  responses?: Record<string, RefOr<SwaggerResponse>>;
-  securityDefinitions?: Record<string, SwaggerSecurityScheme>;
-  security?: SwaggerSecurityRequirement[];
-  tags?: SwaggerTag[];
-  externalDocs?: SwaggerExternalDocumentation;
-}
+  paths: Record<string, PathItem>;
+  definitions?: Record<string, RefOr<Schema>>;
+  parameters?: Record<string, RefOr<Parameter>>;
+  responses?: Record<string, RefOr<Response>>;
+  securityDefinitions?: Record<string, SecurityScheme>;
+  security?: SecurityRequirement[];
+  tags?: Tag[];
+  externalDocs?: ExternalDocumentation;
+};
 
-type SwaggerScheme = "http" | "https" | "ws" | "wss";
+type UrlScheme = "http" | "https" | "ws" | "wss";
 
-export interface SwaggerInfo {
+export type Info = {
   title: string;
   description?: string;
   termsOfService?: string;
-  contact?: SwaggerContact;
-  license?: SwaggerLicense;
+  contact?: Contact;
+  license?: License;
   version: string;
-}
+};
 
-export interface SwaggerContact {
+export type Contact = {
   name?: string;
   url?: string;
   email?: string;
-}
+};
 
-export interface SwaggerLicense {
+export type License = {
   name: string;
   url?: string;
-}
+};
 
-export interface SwaggerExternalDocumentation {
+export type ExternalDocumentation = {
   description?: string;
   url: string;
-}
+};
 
-export interface SwaggerTag {
+export type Tag = {
   name: string;
   description?: string;
-  externalDocs?: SwaggerExternalDocumentation;
-}
+  externalDocs?: ExternalDocumentation;
+};
 
-export interface SwaggerSecurityRequirement {
+export type SecurityRequirement = {
   [name: string]: string[];
-}
+};
 
-export type SwaggerParameterLocation = "query" | "header" | "path" | "formData" | "body";
+export type ParameterLocation = "query" | "header" | "path" | "formData" | "body";
 
-export interface SwaggerPathItem {
-  get?: SwaggerOperation;
-  put?: SwaggerOperation;
-  post?: SwaggerOperation;
-  delete?: SwaggerOperation;
-  options?: SwaggerOperation;
-  head?: SwaggerOperation;
-  patch?: SwaggerOperation;
-  parameters?: Array<RefOr<SwaggerParameter>>;
+export type PathItem = {
+  get?: Operation;
+  put?: Operation;
+  post?: Operation;
+  delete?: Operation;
+  options?: Operation;
+  head?: Operation;
+  patch?: Operation;
+  parameters?: Array<RefOr<Parameter>>;
   $ref?: string;
-}
+};
 
-export interface SwaggerOperation {
+export type Operation = {
   tags?: string[];
   summary?: string;
   description?: string;
-  externalDocs?: SwaggerExternalDocumentation;
+  externalDocs?: ExternalDocumentation;
   operationId?: string;
   consumes?: string[];
   produces?: string[];
-  parameters?: Array<RefOr<SwaggerParameter>>;
-  responses: SwaggerResponses;
-  schemes?: SwaggerScheme[];
+  parameters?: Array<RefOr<Parameter>>;
+  responses: Responses;
+  schemes?: UrlScheme[];
   deprecated?: boolean;
-  security?: SwaggerSecurityRequirement[];
-}
+  security?: SecurityRequirement[];
+};
 
-export interface SwaggerParameter {
+export type Parameter = {
   name: string;
-  in: SwaggerParameterLocation;
+  in: ParameterLocation;
   description?: string;
   required?: boolean;
   // If in is "body"
-  schema?: RefOr<SwaggerSchema>;
+  schema?: RefOr<Schema>;
   // If in is any value other than "body":
   type?: "string" | "number" | "integer" | "boolean" | "array" | "file";
   format?: string;
   allowEmptyValue?: boolean;
-  items?: RefOr<SwaggerSchema>;
+  items?: RefOr<Schema>;
   collectionFormat: "csv" | "ssv" | "tsv" | "pipes" | "multi";
   default?: unknown;
   maximum?: number;
@@ -111,21 +111,21 @@ export interface SwaggerParameter {
   uniqueItems?: boolean;
   enum?: unknown[];
   multipleOf?: number;
-}
+};
 
-export interface SwaggerSchema {
+export type Schema = {
   type?: string;
-  properties?: { [name: string]: SwaggerSchema };
-  additionalProperties?: boolean | SwaggerSchema;
+  properties?: { [name: string]: Schema };
+  additionalProperties?: boolean | Schema;
   description?: string;
   default?: unknown;
-  items?: RefOr<SwaggerSchema>;
+  items?: RefOr<Schema>;
   required?: string[];
   readOnly?: boolean;
   format?: string;
-  externalDocs?: SwaggerExternalDocumentation;
+  externalDocs?: ExternalDocumentation;
   discriminator?: string;
-  allOf?: SwaggerSchema[];
+  allOf?: Schema[];
   title?: string;
   multipleOf?: number;
   maximum?: number;
@@ -142,20 +142,20 @@ export interface SwaggerSchema {
   minProperties?: number;
   enum?: unknown[];
   example?: unknown;
-}
+};
 
-export interface SwaggerResponses {
-  [code: string]: RefOr<SwaggerResponse>;
-}
+export type Responses = {
+  [code: string]: RefOr<Response>;
+};
 
-export interface SwaggerResponse {
+export type Response = {
   description: string;
-  schema?: RefOr<SwaggerSchema>;
-  headers?: { [name: string]: RefOr<SwaggerHeader> };
+  schema?: RefOr<Schema>;
+  headers?: { [name: string]: RefOr<Header> };
   examples?: { [name: string]: unknown };
-}
+};
 
-export interface SwaggerHeader {
+export type Header = {
   description?: string;
   type: "string" | "number" | "integer" | "boolean" | "array" | "file";
   format?: string;
@@ -174,9 +174,9 @@ export interface SwaggerHeader {
   uniqueItems?: boolean;
   enum?: unknown[];
   multipleOf?: number;
-}
+};
 
-export interface SwaggerSecurityScheme {
+export type SecurityScheme = {
   type: "apiKey" | "basic" | "oauth";
   description?: string;
   name: string;
@@ -185,33 +185,30 @@ export interface SwaggerSecurityScheme {
   authorizationUrl?: string;
   tokenUrl?: string;
   scopes?: Record<string, string>;
-}
+};
 
-export interface BundledSwaggerSpec extends SwaggerSpec {
-  paths: Record<string, ResolvedSwaggerPathItem>;
-  definitions?: Record<string, SwaggerSchema>;
-  parameters?: Record<string, SwaggerParameter>;
-  responses?: Record<string, SwaggerResponse>;
-}
+export type BundledSpec = Spec & {
+  paths: Record<string, ResolvedPathItem>;
+  definitions?: Record<string, Schema>;
+  parameters?: Record<string, Parameter>;
+  responses?: Record<string, Response>;
+};
 
-export type ResolvedSwaggerPathItem = Omit<SwaggerPathItem, "$ref">;
+export type ResolvedPathItem = Omit<PathItem, "$ref">;
 
-export interface ResolvedSwaggerParameter extends SwaggerParameter {
-  schema?: SwaggerSchema;
-}
+export type ResolvedParameter = Parameter & {
+  schema?: Schema;
+};
 
-export type OperationParametersMap = Record<
-  SwaggerParameterLocation,
-  Record<string, ResolvedSwaggerParameter>
->;
+export type OperationParametersMap = Record<ParameterLocation, Record<string, ResolvedParameter>>;
 
-export type ResolvedSwaggerOperationSecurity = Record<string, SwaggerSecurityScheme>[];
+export type ResolvedOperationSecurity = Record<string, SecurityScheme>[];
 
 export function getOperation(
-  oas: BundledSwaggerSpec,
+  oas: BundledSpec,
   path: string,
   method: HttpMethod
-): SwaggerOperation | undefined {
+): Operation | undefined {
   if (method === "trace") {
     // not 'trace' method in Swagger spec
     return undefined;
@@ -219,8 +216,8 @@ export function getOperation(
   return deref(oas, oas.paths[path])?.[method];
 }
 
-export function getOperations(oas: BundledSwaggerSpec): [string, HttpMethod, SwaggerOperation][] {
-  const operations: [string, HttpMethod, SwaggerOperation][] = [];
+export function getOperations(oas: BundledSpec): [string, HttpMethod, Operation][] {
+  const operations: [string, HttpMethod, Operation][] = [];
   for (const path of Object.keys(oas.paths)) {
     for (const method of Object.keys(oas.paths[path])) {
       if (HttpMethods.includes(method as HttpMethod)) {
@@ -232,26 +229,23 @@ export function getOperations(oas: BundledSwaggerSpec): [string, HttpMethod, Swa
   return operations;
 }
 
-export function getPathItemParameters(
-  oas: BundledSwaggerSpec,
-  pathItem: SwaggerPathItem
-): SwaggerParameter[] {
+export function getPathItemParameters(oas: BundledSpec, pathItem: PathItem): Parameter[] {
   const params = pathItem.parameters ?? [];
   return params.map((param) => deref(oas, param)!);
 }
 
 export function getOperationParameters(
-  oas: BundledSwaggerSpec,
-  operation: SwaggerOperation | undefined
-): SwaggerParameter[] {
+  oas: BundledSpec,
+  operation: Operation | undefined
+): Parameter[] {
   const params = operation?.parameters ?? [];
   return params.map((param) => deref(oas, param)!);
 }
 
 export function getParametersMap(
-  oas: BundledSwaggerSpec,
-  pathParameters: SwaggerParameter[],
-  operationParameters: SwaggerParameter[]
+  oas: BundledSpec,
+  pathParameters: Parameter[],
+  operationParameters: Parameter[]
 ): OperationParametersMap {
   const result: OperationParametersMap = {
     query: {},
@@ -276,7 +270,7 @@ export function getParametersMap(
   return result;
 }
 
-export function getServerUrls(oas: SwaggerSpec): string[] {
+export function getServerUrls(oas: Spec): string[] {
   const schemes = oas.schemes ?? ["http"];
   const basePath = oas.basePath ?? "";
   const host = oas.host ?? "localhost";
@@ -284,7 +278,7 @@ export function getServerUrls(oas: SwaggerSpec): string[] {
   return schemes.map((scheme) => `${scheme}://${host}${basePath}`);
 }
 
-export function getConsumes(oas: SwaggerSpec, operation: SwaggerOperation): string[] {
+export function getConsumes(oas: Spec, operation: Operation): string[] {
   if (operation?.consumes && operation.consumes.length > 0) {
     return operation.consumes;
   }

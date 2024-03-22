@@ -4,7 +4,7 @@
   "displayName": "OpenAPI (Swagger) Editor",
   "description": "OpenAPI extension for Visual Studio Code",
   "license": "AGPL-3.0-only",
-  "version": "4.25.0",
+  "version": "4.25.1",
   "publisher": "42Crunch",
   "repository": {
     "type": "git",
@@ -24,13 +24,10 @@
     "api"
   ],
   "engines": {
-    "vscode": "^1.61.0"
+    "vscode": "^1.70.0"
   },
   "extensionDependencies": [
     "redhat.vscode-yaml"
-  ],
-  "extensionPack": [
-    "vscode.git"
   ],
   "activationEvents": [
     "*",
@@ -652,6 +649,10 @@
       {
         "command": "openapi.platform.loadAuditReportFromFile",
         "title": "42Crunch: Load Security Audit report from file"
+      },
+      {
+        "command": "openapi.platform.editorOpenScanconfig",
+        "title": "42Crunch: Open Scan Configuration file for the current OpenAPI file"
       }
     ],
     "keybindings": [
@@ -733,6 +734,9 @@
             "url": {
               "type": "string"
             },
+            "timeout": {
+              "type": "integer"
+            },
             "auth": {
               "type": "string",
               "enum": [
@@ -743,11 +747,13 @@
           },
           "required": [
             "url",
-            "auth"
+            "auth",
+            "timeout"
           ],
           "default": {
             "url": "",
-            "auth": "none"
+            "auth": "none",
+            "timeout": 300
           }
         },
         "openapi.platformServices": {
@@ -837,11 +843,29 @@
       {
         "fileMatch": "*.json",
         "url": "./schema/generated/openapi.json"
+      },
+      {
+        "fileMatch": [
+          ".42c/**/scanconf.json"
+        ],
+        "url": "./schema/scanconf-full-bundle.json"
       }
-    ]
+    ],
+    "icons": {
+      "xliic-icon": {
+        "description": "42Crunch Icon",
+        "default": {
+          "fontPath": "./resources/xliic.woff",
+          "fontCharacter": "3"
+        }
+      }
+    }
   },
   "workspaces": [
-    "packages/common/dist/cjs"
+    "packages/common/dist/cjs",
+    "packages/openapi-cjs",
+    "packages/scanconf-cjs",
+    "packages/result-cjs"
   ],
   "dependencies": {
     "@xliic/json-schema-ref-parser": "^9.3.0",
@@ -851,7 +875,6 @@
     "js-yaml": "^4.1.0",
     "jsonc-parser": "^3.0.0",
     "semver": "^7.5.0",
-    "picomatch": "^2.3.1",
     "yaml-language-server-parser": "^0.1.2"
   },
   "devDependencies": {
@@ -859,9 +882,8 @@
     "@types/js-yaml": "^4.0.3",
     "@types/mocha": "^9.1.0",
     "@types/node": "^14.14.31",
-    "@types/picomatch": "^2.3.0",
     "@types/semver": "^6.2.0",
-    "@types/vscode": "1.61.0",
+    "@types/vscode": "1.70.0",
     "@vscode/test-electron": "^2.3.4",
     "glob": "^7.1.4",
     "marked": "^4.0.10",

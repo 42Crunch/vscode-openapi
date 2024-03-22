@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
-import * as playbook from "@xliic/common/playbook";
+import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
+import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { unwrapPlaybookRequest, wrapPlaybookRequest } from "./util";
@@ -20,10 +20,10 @@ export default function RequestCard({
   availableVariables,
 }: {
   oas: BundledSwaggerOrOasSpec;
-  requestRef: playbook.RequestRef;
-  credentials: playbook.Credentials;
-  stage: playbook.StageContent;
-  saveRequest: (request: playbook.StageContent) => void;
+  requestRef: Playbook.RequestRef;
+  credentials: Playbook.Credentials;
+  stage: Playbook.StageContent;
+  saveRequest: (request: Playbook.StageContent) => void;
   defaultCollapsed?: boolean;
   availableVariables: string[];
 }) {
@@ -62,7 +62,7 @@ export default function RequestCard({
   );
 }
 
-function getResponseCodeOptions(stage: playbook.StageContent) {
+function getResponseCodeOptions(stage: Playbook.StageContent) {
   return Object.keys(stage.responses || {}).map((key) => ({ label: key, value: key }));
 }
 

@@ -1,15 +1,14 @@
 import { useController } from "react-hook-form";
 import styled from "styled-components";
 
-import { ResolvedOasParameter } from "@xliic/common/oas30";
-import { ResolvedSwaggerParameter } from "@xliic/common/swagger";
+import { OpenApi30, Swagger } from "@xliic/openapi";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { ENV_VAR_REGEX } from "../../../../core/playbook/variables";
 import { TrashCan, TriangleExclamation } from "../../../../icons";
 import LineEditor from "../../../../new-components/fields/LineEditor";
 
-export type Parameter = ResolvedOasParameter | ResolvedSwaggerParameter;
+export type Parameter = OpenApi30.ResolvedParameter | Swagger.ResolvedParameter;
 export type Schema = { type?: string };
 const DefaultSchema = { type: "string" };
 

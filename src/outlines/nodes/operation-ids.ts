@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { HttpMethod } from "@xliic/common/http";
+import { HttpMethod } from "@xliic/openapi";
 import { Container, getLocation } from "@xliic/preserving-json-yaml-parser";
 
 import { encodeJsonPointerSegment } from "../../pointer";
@@ -74,14 +74,15 @@ export class OperationIdNode extends AbstractOutlineNode {
     this.path = path;
     this.method = method;
     this.contextValue = "operation-id";
-    this.searchable = false;
   }
 
   getChildren(): OutlineNode[] {
     return this.getChildrenByKey((key, pointer, node) => {
-      if (["responses", "parameters", "requestBody"].includes(key)) {
+      if (["responses", "parameters", "requestBody", "security"].includes(key)) {
         if (key == "parameters") {
           return new SimpleNode(this, pointer, key, node, 1, getParameterLabel);
+        } else if (key === "security") {
+          return new SimpleNode(this, pointer, key, node, 0);
         } else {
           return new SimpleNode(this, pointer, key, node, 1);
         }

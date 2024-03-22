@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "declaration": true,
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "target": "es6",
+    "outDir": "dist/",
+    "rootDir": "../openapi/src/",
+    "lib": ["es6"],
+    "sourceMap": true
+  },
+  "include": ["../openapi/src/"]
+}

@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { Environment as UnknownEnvironment } from "@xliic/common/env";
-import * as playbook from "@xliic/common/playbook";
-import { RequestRef } from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { DynamicVariableNames } from "../../../core/playbook/builtin-variables";
@@ -22,8 +21,8 @@ export default function RequestInternal({
   request,
   requestRef,
 }: {
-  request: playbook.StageContent;
-  requestRef: RequestRef;
+  request: Playbook.StageContent;
+  requestRef: Playbook.RequestRef;
 }) {
   const dispatch = useAppDispatch();
 
@@ -38,7 +37,7 @@ export default function RequestInternal({
   const onRun = (server: string, inputs: UnknownEnvironment) =>
     dispatch(executeRequest({ server, inputs }));
 
-  const onSaveRequest = (stage: playbook.StageContent) =>
+  const onSaveRequest = (stage: Playbook.StageContent) =>
     dispatch(saveRequest({ ref: requestRef, stage }));
 
   const credentials = playbook.authenticationDetails[0];

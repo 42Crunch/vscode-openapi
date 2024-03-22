@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 
 import { ItemId } from "../../../components/layout/SearchSidebar";
 import Form from "../../../new-components/Form";
@@ -24,7 +24,7 @@ export default function Credential({ selected }: { selected: ItemId }) {
 
   const { tryResult } = useAppSelector((state) => state.auth);
 
-  const onUpdateCredential = (group: string, id: string, credential: playbook.Credential) =>
+  const onUpdateCredential = (group: string, id: string, credential: Playbook.Credential) =>
     dispatch(saveCredential({ group: parseInt(group), id, credential }));
 
   const group = parseInt(selected.sectionId);

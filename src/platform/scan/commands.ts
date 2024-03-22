@@ -5,7 +5,7 @@
 
 import * as vscode from "vscode";
 
-import { HttpMethod } from "@xliic/common/http";
+import { HttpMethod } from "@xliic/openapi";
 import { stringify } from "@xliic/preserving-json-yaml-parser";
 
 import { Cache } from "../../cache";
@@ -23,7 +23,7 @@ import {
 import { PlatformStore } from "../stores/platform-store";
 import { Logger, PlatformContext } from "../types";
 import { offerUpgrade } from "../upgrade";
-import { getScanconfUri } from "./config";
+import { getOrCreateScanconfUri, getScanconfUri } from "./config";
 import { createScanConfigWithPlatform } from "./runtime/platform";
 import { ScanWebView } from "./view";
 import { formatException } from "../util";
@@ -108,6 +108,13 @@ export default (
       }
     }
   );
+
+  vscode.commands.registerTextEditorCommand(
+    "openapi.platform.editorOpenScanconfig",
+    async (editor: vscode.TextEditor, edit: vscode.TextEditorEdit): Promise<void> => {
+      await editorOpenScanconfig(editor);
+    }
+  );
 };
 
 async function editorRunSingleOperationScan(
@@ -139,7 +146,7 @@ async function editorRunSingleOperationScan(
   }
 
   const title = bundle?.value?.info?.title || "OpenAPI";
-  const scanconfUri = getScanconfUri(editor.document.uri, title);
+  const scanconfUri = getOrCreateScanconfUri(editor.document.uri, title);
 
   if (
     (scanconfUri === undefined || !(await exists(scanconfUri))) &&
@@ -221,6 +228,19 @@ async function createDefaultScanConfig(
       }
     }
   );
+}
+
+async function editorOpenScanconfig(editor: vscode.TextEditor): Promise<void> {
+  const scanconfUri = getScanconfUri(editor.document.uri);
+  if (scanconfUri === undefined || !exists(scanconfUri)) {
+    await vscode.window.showErrorMessage(
+      "No scan configuration found for the current document. Please create one first by running a scan.",
+      { modal: true }
+    );
+    return undefined;
+  }
+
+  await vscode.window.showTextDocument(scanconfUri);
 }
 
 async function exists(uri: vscode.Uri): Promise<boolean> {

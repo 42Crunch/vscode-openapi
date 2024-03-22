@@ -1,8 +1,9 @@
-import { OasSecurityScheme } from "@xliic/common/oas30";
-import * as playbook from "@xliic/common/playbook";
-import { SwaggerSecurityScheme } from "@xliic/common/swagger";
-import { ThemeColorVariables } from "@xliic/common/theme";
 import styled from "styled-components";
+
+import { Playbook } from "@xliic/scanconf";
+import { ThemeColorVariables } from "@xliic/common/theme";
+import { OpenApi30, Swagger } from "@xliic/openapi";
+
 import { goTo } from "../../../../features/router/slice";
 import { ArrowUpRightFromSquare } from "../../../../icons";
 import DownshiftSelect from "../../../../new-components/DownshiftSelect";
@@ -17,8 +18,8 @@ export default function CredentialPicker({
   onChange,
 }: {
   schemeName: string;
-  scheme: OasSecurityScheme | SwaggerSecurityScheme;
-  credentials: playbook.Credentials;
+  scheme: OpenApi30.SecurityScheme | Swagger.SecurityScheme;
+  credentials: Playbook.Credentials;
   value: string;
   onChange: (value: string | undefined) => void;
 }) {
@@ -67,7 +68,7 @@ const Manage = styled.li`
   }
 `;
 
-function flattenCredentials(credentials: playbook.Credentials) {
+function flattenCredentials(credentials: Playbook.Credentials) {
   return Object.entries(credentials)
     .map(([credentialName, credential]) => {
       return Object.entries(credential.methods || {}).map(([methodName, method]) => {

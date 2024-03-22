@@ -2,8 +2,8 @@ import { useDrag } from "react-dnd";
 import styled from "styled-components";
 import * as Tooltip from "@radix-ui/react-tooltip";
 
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
-import * as playbook from "@xliic/common/playbook";
+import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
+import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { DynamicVariableNames } from "../../../core/playbook/builtin-variables";
@@ -31,15 +31,15 @@ export default function Stage({
   operations,
   requests,
 }: {
-  stage: playbook.StageReference;
-  location: playbook.StageLocation;
+  stage: Playbook.StageReference;
+  location: Playbook.StageLocation;
   oas: BundledSwaggerOrOasSpec;
   result?: OperationResult;
-  saveStage: (stage: playbook.StageReference) => void;
+  saveStage: (stage: Playbook.StageReference) => void;
   removeStage: () => void;
   fuzzing?: boolean;
-  operations: playbook.PlaybookBundle["operations"];
-  requests: playbook.PlaybookBundle["requests"];
+  operations: Playbook.Bundle["operations"];
+  requests: Playbook.Bundle["requests"];
 }) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "stage",
@@ -168,7 +168,7 @@ function getVariableNamesFromEnvStack(env: PlaybookEnvStack): string[] {
 }
 
 function getResponseCodes(
-  target: playbook.Operation | playbook.StageContent | playbook.ExternalStageContent | undefined
+  target: Playbook.Operation | Playbook.StageContent | Playbook.ExternalStageContent | undefined
 ): string[] {
   if (target !== undefined) {
     const responses = "scenarios" in target ? target.request.responses : target.responses;
@@ -179,7 +179,7 @@ function getResponseCodes(
 }
 
 function getDefaultResponseCode(
-  target: playbook.Operation | playbook.StageContent | playbook.ExternalStageContent | undefined
+  target: Playbook.Operation | Playbook.StageContent | Playbook.ExternalStageContent | undefined
 ): string | undefined {
   if (target !== undefined) {
     const stageContent = "scenarios" in target ? target.request : target;

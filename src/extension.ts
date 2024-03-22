@@ -32,7 +32,7 @@ import * as environment from "./environment/activate";
 import * as config from "./webapps/config/activate";
 import { PlatformStore } from "./platform/stores/platform-store";
 import { Logger } from "./platform/types";
-import { getPlatformCredentials } from "./credentials";
+import { getPlatformCredentials, hasCredentials } from "./credentials";
 import { EnvStore } from "./envstore";
 import { debounce } from "./util/debounce";
 import { getApprovedHostnames, processApprovedHosts } from "./util/config";
@@ -149,6 +149,15 @@ export async function activate(context: vscode.ExtensionContext) {
     prefs,
     logger
   );
+
+  if ((await hasCredentials(configuration, context.secrets)) !== undefined) {
+    // TODO check if credentials has been removed and hide the status bar item, or show if added
+    const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+    statusBarItem.text = "$(xliic-icon)";
+    statusBarItem.command = "openapi.showSettings";
+    statusBarItem.tooltip = "42Crunch Settings";
+    statusBarItem.show();
+  }
 
   if (previousVersion!.major < currentVersion.major) {
     createWhatsNewPanel(context);

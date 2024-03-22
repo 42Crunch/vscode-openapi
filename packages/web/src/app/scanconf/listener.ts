@@ -4,8 +4,10 @@ import {
   TypedStartListening,
   UnsubscribeListener,
 } from "@reduxjs/toolkit";
+
+import { serialize } from "@xliic/scanconf";
 import { Webapp } from "@xliic/common/webapp/scanconf";
-import { serialize } from "../../core/playbook/scanconf-serializer";
+
 import { showEnvWindow } from "../../features/env/slice";
 import { startNavigationListening } from "../../features/router/listener";
 import { Routes } from "../../features/router/RouterContext";

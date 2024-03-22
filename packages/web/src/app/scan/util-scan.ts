@@ -1,12 +1,11 @@
 import { ScanConfig } from "@xliic/common/scan";
-
 import {
   TryitOperationValues,
   TryitParameterValues,
   TryitSecurityAllValues,
 } from "@xliic/common/tryit";
-import { HttpMethod } from "@xliic/common/http";
-import { find } from "@xliic/common/jsonpointer";
+import { HttpMethod } from "@xliic/openapi";
+import { find } from "@xliic/preserving-json-yaml-parser";
 
 export function generateParameterValuesForScan(config: ScanConfig): TryitParameterValues {
   const values: TryitParameterValues = {

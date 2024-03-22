@@ -4,14 +4,12 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "module": "commonjs",
-    "target": "es6",
+    "target": "es2020",
     "outDir": "out",
     "rootDir": "src",
-    "lib": ["es6"],
-    "sourceMap": true,
-    "jsx": "react"
+    "lib": ["ES2020"],
+    "sourceMap": true
   },
   "include": ["src"],
-  "exclude": ["node_modules", ".vscode-test"],
-  "references": [{ "path": "packages/common/tsconfig.cjs.json" }]
+  "exclude": ["node_modules", ".vscode-test"]
 }

@@ -17,6 +17,5 @@
     "jsx": "react-jsx",
     "types": ["vite-plugin-svgr/client"]
   },
-  "include": ["./src"],
-  "references": [{ "path": "../common/tsconfig.esm.json" }]
+  "include": ["./src"]
 }

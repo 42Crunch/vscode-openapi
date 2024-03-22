@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useFormContext } from "react-hook-form";
 import * as z from "zod";
 
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 
 import Form from "../../../new-components/Form";
 import { unwrapCredential, wrapCredential } from "./form";
@@ -14,8 +14,8 @@ export default function CredentialDetails({
   credential,
   saveCredential,
 }: {
-  credential: playbook.Credential;
-  saveCredential: (credential: playbook.Credential) => void;
+  credential: Playbook.Credential;
+  saveCredential: (credential: Playbook.Credential) => void;
 }) {
   const schema = z.object({
     type: z.string(),

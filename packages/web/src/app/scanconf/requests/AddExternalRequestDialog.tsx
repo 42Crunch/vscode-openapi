@@ -1,5 +1,5 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import { HttpMethod, HttpMethods } from "@xliic/common/http";
+import { HttpMethod, HttpMethods } from "@xliic/openapi";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";

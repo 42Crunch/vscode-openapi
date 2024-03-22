@@ -7,7 +7,7 @@ import * as vscode from "vscode";
 import { Preferences } from "@xliic/common/prefs";
 import { Bundle } from "../types";
 import { Cache } from "../cache";
-import { HttpMethod } from "@xliic/common/http";
+import { HttpMethod } from "@xliic/openapi";
 import { BundleDocumentVersions, TryItWebView } from "./view";
 import { TryItCodelensProvider } from "./lens";
 import { Configuration } from "../configuration";

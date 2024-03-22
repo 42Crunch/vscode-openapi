@@ -57,6 +57,7 @@ const initialState: ConfigState = {
     scandManager: {
       url: "",
       auth: "none",
+      timeout: 300,
       header: {
         name: "",
         value: "",

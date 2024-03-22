@@ -1,16 +1,14 @@
-import { NullableResult, Result } from "@xliic/common/result";
-import { parseJsonPointer } from "@xliic/common/jsonpointer";
+import { BundledSwaggerOrOasSpec, getOperationById } from "@xliic/openapi";
+import { NullableResult, Result } from "@xliic/result";
+import { joinJsonPointer, parseJsonPointer } from "@xliic/preserving-json-yaml-parser";
 
-import * as playbook from "@xliic/common/playbook";
 import * as scan from "./scanconfig";
-
-import { BundledSwaggerOrOasSpec, getOperationById } from "@xliic/common/openapi";
-import { joinJsonPointer } from "@xliic/preserving-json-yaml-parser";
+import * as playbook from "./playbook";
 
 export function parse(
   oas: BundledSwaggerOrOasSpec,
   file: scan.ConfigurationFileBundle
-): Result<playbook.PlaybookBundle, ParsingErrors> {
+): Result<playbook.Bundle, ParsingErrors> {
   const [result, errors] = parseInternal(oas, file);
   if (errors == undefined) {
     return [result, undefined];
@@ -28,8 +26,8 @@ export function parse(
 export function parseInternal(
   oas: BundledSwaggerOrOasSpec,
   file: scan.ConfigurationFileBundle
-): Result<playbook.PlaybookBundle, InternalParsingErrors> {
-  return result<playbook.PlaybookBundle>({
+): Result<playbook.Bundle, InternalParsingErrors> {
+  return result<playbook.Bundle>({
     before: parseArray(oas, file, file.before || [], parseRequestStage),
     after: parseArray(oas, file, file.after || [], parseRequestStage),
     operations: parseMap(oas, file, file.operations || {}, parseOperation),
@@ -66,8 +64,8 @@ function parseEnvironmentFile(
   oas: BundledSwaggerOrOasSpec,
   file: scan.ConfigurationFileBundle,
   entry: scan.EnvironmentFile
-): Result<playbook.PlaybookEnvironment, InternalParsingErrors> {
-  return result<playbook.PlaybookEnvironment>({
+): Result<playbook.Environment, InternalParsingErrors> {
+  return result<playbook.Environment>({
     variables: parseMap(oas, file, entry.variables || {}, parseEnvironmentVariable),
   });
 }
@@ -76,12 +74,12 @@ function parseEnvironmentVariable(
   oas: BundledSwaggerOrOasSpec,
   file: scan.ConfigurationFileBundle,
   entry: any
-): Result<playbook.PlaybookEnvironmentVariable, InternalParsingErrors> {
+): Result<playbook.EnvironmentVariable, InternalParsingErrors> {
   if (entry.from !== "environment") {
     return makeErrorResult("unknown env from");
   }
 
-  return result<playbook.PlaybookEnvironmentVariable>({
+  return result<playbook.EnvironmentVariable>({
     name: value(entry.name),
     from: value(entry.from),
     required: value(entry.required),
@@ -274,7 +272,10 @@ function parseRequestBody(
 function parseUrlencoded(
   urlencoded: Record<string, scan.UrlencodedObject>
 ): Record<string, unknown> {
-  return Object.fromEntries(Object.entries(urlencoded).map(([key, value]) => [key, value.value]));
+  return Object.entries(urlencoded).reduce((acc, [key, value]) => {
+    acc[key] = value.value;
+    return acc;
+  }, {} as Record<string, unknown>);
 }
 
 function parseParameters(
@@ -362,7 +363,7 @@ function parseCtxVariables(
   oas: BundledSwaggerOrOasSpec,
   file: scan.ConfigurationFileBundle,
   entry: scan.CtxVariables
-): Result<playbook.Environment, InternalParsingErrors> {
+): Result<playbook.OperationEnvironment, InternalParsingErrors> {
   return [entry, undefined];
 }
 
@@ -386,9 +387,9 @@ function parseRequestRef(
 
   const path = parseJsonPointer(ref);
   if (path.length === 2 && path[0] === "requests") {
-    return [{ type: "request", id: path[1] }, undefined];
+    return [{ type: "request", id: String(path[1]) }, undefined];
   } else if (path.length === 3 && path[0] === "operations" && path[2] === "request") {
-    return [{ type: "operation", id: path[1] }, undefined];
+    return [{ type: "operation", id: String(path[1]) }, undefined];
   }
 
   return makeErrorResult(`unexpected stage $ref, must point to operations or requests: ${ref}`);

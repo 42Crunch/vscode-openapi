@@ -1,4 +1,4 @@
-import { OasMediaType, ResolvedOasParameter } from "@xliic/common/oas30";
+import { OpenApi30 } from "@xliic/openapi";
 
 // export function formatQuery(
 //   query: Record<string, Value>,
@@ -13,6 +13,6 @@ import { OasMediaType, ResolvedOasParameter } from "@xliic/common/oas30";
 //   return "";
 // }
 
-export function formatValue(value: any, parameter: ResolvedOasParameter): string {
+export function formatValue(value: any, parameter: OpenApi30.ResolvedParameter): string {
   return "";
 }

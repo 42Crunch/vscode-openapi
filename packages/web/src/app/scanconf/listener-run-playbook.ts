@@ -11,9 +11,9 @@ import {
   ShowHttpResponseMessage,
 } from "@xliic/common/http";
 import { Webapp } from "@xliic/common/message";
-import { BundledSwaggerOrOasSpec } from "@xliic/common/openapi";
-import * as playbook from "@xliic/common/playbook";
-import { Result } from "@xliic/common/result";
+import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
+import { Playbook } from "@xliic/scanconf";
+import { Result } from "@xliic/result";
 
 import { createAuthCache } from "../../core/playbook/auth-cache";
 import {
@@ -405,7 +405,7 @@ export function onExecuteGlobal(startAppListening: AppStartListening, host: Http
 
 async function execute(
   state: {
-    scanconf: { oas: BundledSwaggerOrOasSpec; playbook: playbook.PlaybookBundle };
+    scanconf: { oas: BundledSwaggerOrOasSpec; playbook: Playbook.Bundle };
     env: { data: EnvData };
   },
   httpClient: HttpClient | MockHttpClient,

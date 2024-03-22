@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { useFormContext, useController } from "react-hook-form";
-import { HttpMethod } from "@xliic/common/http";
+import { HttpMethod } from "@xliic/openapi";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { ProgressButton } from "../ProgressButton";
 

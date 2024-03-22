@@ -1,0 +1,13 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "declarationMap": true,
+    "declaration": true,
+    "outDir": "dist/",
+    "rootDir": "src/"
+  },
+  "include": ["src/**/*"]
+}

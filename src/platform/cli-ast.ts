@@ -27,7 +27,7 @@ import * as vscode from "vscode";
 
 import { CliDownloadProgress, CliTestResult, Config } from "@xliic/common/config";
 import { SimpleEnvironment } from "@xliic/common/env";
-import { Result } from "@xliic/common/result";
+import { Result } from "@xliic/result";
 
 import { Configuration, configuration } from "../configuration";
 import { getAnondCredentials, getPlatformCredentials, hasCredentials } from "../credentials";

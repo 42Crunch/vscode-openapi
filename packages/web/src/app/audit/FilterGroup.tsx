@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { Domain } from "@xliic/common/audit";
 
 import { useAppDispatch, useAppSelector } from "./store";
 
@@ -16,7 +15,7 @@ const allOptions = {
   oasconformance: [
     { label: "All", value: "all" },
     { label: "Structure", value: "validation" },
-    { label: "Structure", value: "semantics" },
+    { label: "Semantic", value: "semantics" },
     { label: "Best practices", value: "bestpractices" },
   ],
   datavalidation: [

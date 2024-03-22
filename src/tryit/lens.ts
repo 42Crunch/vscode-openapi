@@ -1,13 +1,6 @@
 import * as vscode from "vscode";
 import { Cache } from "../cache";
-import {
-  BundledOpenApiSpec,
-  getOperations as getOpenApiOperations,
-  OasOperation,
-} from "@xliic/common/oas30";
-import { getOperations as getSwaggerOperations } from "@xliic/common/swagger";
-import { BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/common/openapi";
-import { deref } from "@xliic/common/ref";
+import { OpenApi30, Swagger, BundledSwaggerOrOasSpec, isOpenapi, deref } from "@xliic/openapi";
 import { getLocation } from "@xliic/preserving-json-yaml-parser";
 import { getOpenApiVersion } from "../parsers";
 import { OpenApiVersion } from "../types";
@@ -25,7 +18,7 @@ export class TryItCodelensProvider implements vscode.CodeLensProvider {
     const version = getOpenApiVersion(parsed);
     if (parsed && version !== OpenApiVersion.Unknown) {
       const oas = parsed as unknown as BundledSwaggerOrOasSpec;
-      const operations = isOpenapi(oas) ? getOpenApiOperations(oas) : getSwaggerOperations(oas);
+      const operations = isOpenapi(oas) ? OpenApi30.getOperations(oas) : Swagger.getOperations(oas);
       for (const [path, method, operation] of operations) {
         const tryOperationLens = operationLens(document, oas, path, method);
         if (tryOperationLens) {
@@ -34,7 +27,7 @@ export class TryItCodelensProvider implements vscode.CodeLensProvider {
         // TODO examples in swagger
         if (isOpenapi(oas)) {
           result.push(
-            ...operationExamplesLens(document, oas, path, method, operation as OasOperation)
+            ...operationExamplesLens(document, oas, path, method, operation as OpenApi30.Operation)
           );
         }
       }
@@ -70,10 +63,10 @@ function operationLens(
 
 function operationExamplesLens(
   document: vscode.TextDocument,
-  oas: BundledOpenApiSpec,
+  oas: OpenApi30.BundledSpec,
   path: string,
   method: string,
-  operation: OasOperation
+  operation: OpenApi30.Operation
 ): vscode.CodeLens[] {
   const result = [];
   const content = deref(oas, operation.requestBody)?.content;

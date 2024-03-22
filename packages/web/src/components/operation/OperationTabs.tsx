@@ -1,12 +1,12 @@
-import { HttpMethod } from "@xliic/common/http";
 import {
-  BundledOpenApiSpec,
-  OasRequestBody,
-  getOperation as getOasOperation,
-} from "@xliic/common/oas30";
-import { BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/common/openapi";
-import { deref } from "@xliic/common/ref";
-import { BundledSwaggerSpec } from "@xliic/common/swagger";
+  OpenApi30,
+  Swagger,
+  BundledSwaggerOrOasSpec,
+  HttpMethod,
+  isOpenapi,
+  deref,
+} from "@xliic/openapi";
+
 import { Tab, TabContainer } from "../../new-components/Tabs";
 import {
   getParameters as getOasParameters,
@@ -50,10 +50,10 @@ export default function OperationTabs({
   return <TabContainer tabs={tabs} />;
 }
 
-function makeOasTabs(oas: BundledOpenApiSpec, path: string, method: HttpMethod) {
+function makeOasTabs(oas: OpenApi30.BundledSpec, path: string, method: HttpMethod) {
   const parameters = getOasParameters(oas, path, method);
-  const operation = getOasOperation(oas, path, method);
-  const requestBody = deref<OasRequestBody>(oas, operation?.requestBody);
+  const operation = OpenApi30.getOperation(oas, path, method);
+  const requestBody = deref<OpenApi30.RequestBody>(oas, operation?.requestBody);
 
   return [
     {
@@ -95,7 +95,7 @@ function makeOasTabs(oas: BundledOpenApiSpec, path: string, method: HttpMethod) 
   ];
 }
 
-function makeSwaggerTabs(oas: BundledSwaggerSpec, path: string, method: HttpMethod) {
+function makeSwaggerTabs(oas: Swagger.BundledSpec, path: string, method: HttpMethod) {
   const parameters = getSwaggerParameters(oas, path, method);
 
   return [

@@ -47,7 +47,6 @@ import {
   UserData,
   Tag,
 } from "../types";
-import { GitManager } from "./git-store";
 
 export interface CollectionsView {
   collections: CollectionData[];
@@ -134,7 +133,6 @@ export class PlatformStore {
   private formats?: DataDictionaryFormat[];
   private _onConnectionDidChange = new EventEmitter<PlatformConnectionEvent>();
   private connected = false;
-  readonly gitManager: GitManager = new GitManager();
 
   constructor(private configuration: Configuration, private logger: Logger) {}
 
@@ -441,7 +439,6 @@ export class PlatformStore {
 
   async refresh(): Promise<void> {
     this.formats = undefined;
-    this.gitManager.refresh();
     if (this.hasCredentials()) {
       const { success } = await testConnection(this.getConnection(), this.logger);
       this.connected = success;

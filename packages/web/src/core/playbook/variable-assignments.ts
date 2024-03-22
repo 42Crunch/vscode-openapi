@@ -3,19 +3,19 @@ import { Cookie } from "tough-cookie";
 
 import { Environment } from "@xliic/common/env";
 import { HttpRequest, HttpResponse } from "@xliic/common/http";
-import { find } from "@xliic/common/jsonpointer";
-import * as playbook from "@xliic/common/playbook";
-import { NullableResult, Result } from "@xliic/common/result";
+import { find } from "@xliic/preserving-json-yaml-parser";
+import { Playbook } from "@xliic/scanconf";
+import { NullableResult, Result } from "@xliic/result";
 
 import { PlaybookEnv, PlaybookEnvStack, PlaybookVariableAssignments } from "./playbook-env";
 import { MockHttpResponse, MockHttpResponseType } from "./mock-http";
 
 export function assignVariables(
   id: string,
-  responses: playbook.Responses | undefined,
+  responses: Playbook.Responses | undefined,
   httpRequest: HttpRequest,
   httpResponse: HttpResponse | MockHttpResponseType,
-  parameters: playbook.ParameterValues
+  parameters: Playbook.ParameterValues
 ): Result<PlaybookEnvStack, string> {
   const result: PlaybookEnvStack = [];
 
@@ -48,10 +48,10 @@ export function assignVariables(
 }
 
 function extractMatchingResponses(
-  responses: playbook.Responses,
+  responses: Playbook.Responses,
   httpResponse: HttpResponse | MockHttpResponseType
-): [string, playbook.Response][] {
-  const result: [string, playbook.Response][] = [];
+): [string, Playbook.Response][] {
+  const result: [string, Playbook.Response][] = [];
   const codes = Object.keys(responses).sort(httpStatusSort);
   for (const code of codes) {
     if (checkResponseCodeMatch(code, httpResponse)) {
@@ -75,10 +75,10 @@ function checkResponseCodeMatch(
 
 function assignValues(
   id: string,
-  response: playbook.Response,
+  response: Playbook.Response,
   httpRequest: HttpRequest,
   httpResponse: HttpResponse | MockHttpResponseType,
-  parameters: playbook.ParameterValues
+  parameters: Playbook.ParameterValues
 ): Result<PlaybookEnv, string> {
   const env: Environment = {};
   const result: PlaybookVariableAssignments = [];
@@ -103,10 +103,10 @@ function assignValues(
 }
 
 function extractValue(
-  assignment: playbook.VariableAssignment,
+  assignment: Playbook.VariableAssignment,
   httpRequest: HttpRequest,
   httpResponse: HttpResponse | MockHttpResponseType,
-  parameters: playbook.ParameterValues
+  parameters: Playbook.ParameterValues
 ): NullableResult<unknown, string> {
   // in case of mock response simply pretend that we've successfully extracted
   // a value for any given assignment
@@ -237,7 +237,7 @@ function extractFromRequestCookies(
 }
 
 function extractFromRequestParameters(
-  container: playbook.ParameterList,
+  container: Playbook.ParameterList,
   name: string
 ): NullableResult<unknown, string> {
   for (const { key, value } of container) {

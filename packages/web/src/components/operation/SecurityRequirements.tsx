@@ -1,4 +1,5 @@
-import type { OasSecurityScheme } from "@xliic/common/oas30";
+import { OpenApi30 } from "@xliic/openapi";
+
 import { escapeFieldName } from "../../util";
 import { SecurityHttpBasic } from "./SecurityHttpBasic";
 import { SecurityGeneric } from "./SecurityGeneric";
@@ -9,7 +10,7 @@ export default function SecurityRequirements({
   schema,
 }: {
   name: string;
-  schema: Record<string, OasSecurityScheme>;
+  schema: Record<string, OpenApi30.SecurityScheme>;
 }) {
   if (!schema) {
     return null;

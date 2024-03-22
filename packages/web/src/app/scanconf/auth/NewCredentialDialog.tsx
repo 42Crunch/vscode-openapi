@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-import * as playbook from "@xliic/common/playbook";
+import { Playbook } from "@xliic/scanconf";
 
 import Button from "../../../components/Button";
 
@@ -12,7 +12,7 @@ export default function NewCredentialDialog({
   onAddCredential,
   existing,
 }: {
-  onAddCredential: (id: string, credential: playbook.Credential) => void;
+  onAddCredential: (id: string, credential: Playbook.Credential) => void;
   existing: string[];
 }) {
   const defaultValues = {

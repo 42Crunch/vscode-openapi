@@ -3,11 +3,18 @@
   "private": true,
   "workspaces": [
     "web",
-    "common/dist/esm"
+    "common/dist/esm",
+    "openapi",
+    "result",
+    "scanconf"
   ],
   "scripts": {
     "postinstall": "cd preview-redoc && npm install && cd ../preview-swaggerui && npm install",
-    "build": "npm run build-web && npm run build-swaggerui && npm run build-redoc",
+    "build": "npm run build-result && npm run build-openapi &&  npm run build-scanconf && npm run build-common && npm run build-web && npm run build-swaggerui && npm run build-redoc",
+    "build-openapi": "cd openapi && npm run build && cd .. && cd openapi-cjs && npm run build",
+    "build-result": "cd result && npm run build && cd .. && cd result-cjs && npm run build",
+    "build-scanconf": "cd scanconf && npm run build && cd .. && cd scanconf-cjs && npm run build",
+    "build-common": "cd common && npm run build",
     "build-web": "cd web && npm run build && mkdirp ../../webview/generated/web && ncp dist ../../webview/generated/web",
     "build-swaggerui": "cd preview-swaggerui && npm run build && mkdirp ../../webview/generated/preview/swaggerui && ncp dist ../../webview/generated/preview/swaggerui",
     "build-redoc": "cd preview-redoc && npm run build && mkdirp ../../webview/generated/preview/redoc && ncp dist ../../webview/generated/preview/redoc"
