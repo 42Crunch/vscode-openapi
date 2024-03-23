@@ -30,8 +30,8 @@ export async function loadConfig(
 
   const platformMandatoryTags = configuration.get<"string">("platformMandatoryTags");
 
-  // derived auth type is ide-key only if anondToken is not set and anond-token is set, otherwise it is anond-token
-  const derivedAutType = !anondToken && !!apiToken ? "ide-key" : "anond-token";
+  // derived auth type is api-token only if anondToken is not set and apiToken is set, otherwise it is anond-token
+  const derivedAutType = !anondToken && !!apiToken ? "api-token" : "anond-token";
 
   return {
     platformUrl,

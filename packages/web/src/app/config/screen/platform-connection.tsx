@@ -32,7 +32,7 @@ function PlatformConnection() {
           name="platformAuthType"
           options={[
             { value: "anond-token", label: "Freemium token" },
-            { value: "ide-key", label: "Platform IDE key" },
+            { value: "api-token", label: "Platform IDE key" },
           ]}
         />
 
@@ -42,7 +42,7 @@ function PlatformConnection() {
           </div>
         )}
 
-        {platformAuthType === "ide-key" && (
+        {platformAuthType === "api-token" && (
           <>
             <Input label="Platform URL" name="platformUrl" />
             <Input label="IDE token" name="platformApiToken" password />
@@ -67,7 +67,7 @@ function PlatformConnection() {
 }
 
 const schema = z.object({
-  platformAuthType: z.enum(["anond-token", "ide-key"]),
+  platformAuthType: z.enum(["anond-token", "api-token"]),
   platformUrl: z.string().url().startsWith("https://"),
   anondToken: z.string(),
   platformApiToken: z

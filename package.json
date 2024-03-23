@@ -161,7 +161,7 @@
         },
         {
           "command": "openapi.outlineSingleOperationScan",
-          "when": "view == openapiOutline && openapiScanEnabled && openapiDocumentScheme == file && (viewItem == operation || viewItem == tag-child || viewItem == operation-id)"
+          "when": "view == openapiOutline && openapiDocumentScheme == file && (viewItem == operation || viewItem == tag-child || viewItem == operation-id)"
         },
         {
           "command": "openapi.outlineTryOperation",
@@ -678,7 +678,7 @@
           "type": "string",
           "enum": [
             "anond-token",
-            "ide-key"
+            "api-token"
           ],
           "enumDescriptions": [
             "Freemium token",

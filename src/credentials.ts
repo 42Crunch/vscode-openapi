@@ -4,18 +4,25 @@ import { Configuration } from "./configuration";
 import { PlatformConnection } from "./platform/types";
 import { deriveServices } from "./util/config";
 import { delay } from "./time-util";
+import { Config } from "@xliic/common/config";
 
 export async function hasCredentials(
   configuration: Configuration,
   secrets: vscode.SecretStorage
-): Promise<"platform" | "anond" | undefined> {
+): Promise<"api-token" | "anond-token" | undefined> {
+  // if platformAuthType is set, use it else check credentials
+  const platformAuthType = configuration.get<Config["platformAuthType"] | "">("platformAuthType");
+  if (platformAuthType !== "") {
+    return platformAuthType;
+  }
+
   if (getAnondCredentials(configuration)) {
-    return "anond";
+    return "anond-token";
   }
 
   const platform = await getPlatformCredentials(configuration, secrets);
   if (platform !== undefined) {
-    return "platform";
+    return "api-token";
   }
 
   return undefined;
@@ -73,12 +80,12 @@ export async function getPlatformCredentials(
 export async function configureCredentials(
   configuration: Configuration,
   secrets: vscode.SecretStorage
-): Promise<"platform" | "anond" | undefined> {
+): Promise<"api-token" | "anond-token" | undefined> {
   const userType = await chooseNewOrExisting();
   if (userType === "existing") {
-    return (await configurePlatformUser(configuration, secrets)) ? "platform" : undefined;
+    return (await configurePlatformUser(configuration, secrets)) ? "api-token" : undefined;
   } else if (userType === "new") {
-    return (await configureAnondUser(configuration)) ? "anond" : undefined;
+    return (await configureAnondUser(configuration)) ? "anond-token" : undefined;
   }
   return undefined;
 }
@@ -149,6 +156,7 @@ async function configureAnondUser(configuration: Configuration): Promise<boolean
   }
 
   await configuration.update("securityAuditToken", token, vscode.ConfigurationTarget.Global);
+  await configuration.update("platformAuthType", "anond-token", vscode.ConfigurationTarget.Global);
 
   return true;
 }
@@ -206,7 +214,9 @@ export async function configurePlatformUser(
     vscode.Uri.parse(platformUrl).toString(),
     vscode.ConfigurationTarget.Global
   );
+
   await secrets.store("platformApiToken", token);
+  await configuration.update("platformAuthType", "api-token", vscode.ConfigurationTarget.Global);
 
   return true;
 }

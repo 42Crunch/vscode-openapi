@@ -83,9 +83,9 @@ export function activate(
 
   const scanCodelensProvider = new ScanCodelensProvider(cache);
 
-  function activateLens(connected: boolean, configuration: Configuration) {
+  function activateLens(enabled: boolean) {
     disposables.forEach((disposable) => disposable.dispose());
-    if (isCodeLensEnabled(connected, configuration)) {
+    if (enabled) {
       disposables = Object.values(selectors).map((selector) =>
         vscode.languages.registerCodeLensProvider(selector, scanCodelensProvider)
       );
@@ -94,38 +94,15 @@ export function activate(
     }
   }
 
-  store.onConnectionDidChange(({ connected }) => {
-    activateLens(connected, configuration);
-    vscode.commands.executeCommand(
-      "setContext",
-      "openapiScanEnabled",
-      isScanEnabled(store.isConnected(), configuration)
-    );
-  });
-
   configuration.onDidChange(async (e: vscode.ConfigurationChangeEvent) => {
-    if (
-      configuration.changed(e, "codeLens") ||
-      configuration.changed(e, "platformConformanceScanRuntime")
-    ) {
-      activateLens(store.isConnected(), configuration);
-      vscode.commands.executeCommand(
-        "setContext",
-        "openapiScanEnabled",
-        isScanEnabled(store.isConnected(), configuration)
-      );
+    if (configuration.changed(e, "codeLens")) {
+      activateLens(configuration.get("codeLens"));
     }
   });
+
+  activateLens(configuration.get("codeLens"));
 
   commands(cache, platformContext, store, configuration, secrets, getScanView);
 
   return new vscode.Disposable(() => disposables.forEach((disposable) => disposable.dispose()));
-}
-
-function isScanEnabled(isConnected: boolean, configuration: Configuration): boolean {
-  return isConnected || configuration.get("platformConformanceScanRuntime") === "cli";
-}
-
-function isCodeLensEnabled(isConnected: boolean, configuration: Configuration): boolean {
-  return isScanEnabled(isConnected, configuration) && configuration.get("codeLens");
 }

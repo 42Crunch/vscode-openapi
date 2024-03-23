@@ -136,14 +136,10 @@ export async function activate(context: vscode.ExtensionContext) {
     logger
   );
 
-  if ((await hasCredentials(configuration, context.secrets)) !== undefined) {
-    // TODO check if credentials has been removed and hide the status bar item, or show if added
-    const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
-    statusBarItem.text = "$(xliic-icon)";
-    statusBarItem.command = "openapi.showSettings";
-    statusBarItem.tooltip = "42Crunch Settings";
-    statusBarItem.show();
-  }
+  const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  statusBarItem.text = "$(xliic-icon)";
+  statusBarItem.command = "openapi.showSettings";
+  statusBarItem.tooltip = "42Crunch Settings";
 
   if (previousVersion!.major < currentVersion.major) {
     createWhatsNewPanel(context);
@@ -156,17 +152,27 @@ export async function activate(context: vscode.ExtensionContext) {
     cache.onActiveEditorChanged(vscode.window.activeTextEditor);
   }
 
-  platformStore.setCredentials(await getPlatformCredentials(configuration, context.secrets));
-
   const reloadCredentials = debounce(
     async () => {
-      platformStore.setCredentials(await getPlatformCredentials(configuration, context.secrets));
+      const credentials = await hasCredentials(configuration, context.secrets);
+      if (credentials === undefined) {
+        statusBarItem.hide();
+      } else {
+        statusBarItem.show();
+      }
+      if (credentials === "api-token") {
+        platformStore.setCredentials(await getPlatformCredentials(configuration, context.secrets));
+      } else {
+        platformStore.setCredentials(undefined);
+      }
     },
     { delay: 3000 }
   );
 
   configuration.onDidChange(async (e: vscode.ConfigurationChangeEvent) => {
     if (
+      configuration.changed(e, "platformAuthType") ||
+      configuration.changed(e, "securityAuditToken") ||
       configuration.changed(e, "platformUrl") ||
       configuration.changed(e, "platformServices") ||
       configuration.changed(e, "scandManagerUrl") ||
@@ -182,6 +188,8 @@ export async function activate(context: vscode.ExtensionContext) {
       reloadCredentials();
     }
   });
+
+  await reloadCredentials();
 }
 
 export function deactivate() {}

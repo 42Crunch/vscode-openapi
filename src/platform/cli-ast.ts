@@ -221,7 +221,7 @@ export async function runScanWithCliBinary(
   logger.info(`Running scan using: ${cli}`);
 
   const token =
-    (await hasCredentials(configuration, secrets)) === "anond"
+    (await hasCredentials(configuration, secrets)) === "anond-token"
       ? getAnondCredentials(configuration)
       : (await getPlatformCredentials(configuration, secrets))?.apiToken;
 
@@ -340,7 +340,7 @@ export async function runAuditWithCliBinary(
   logger.info(`Running Security Audit using: ${cli}`);
 
   const token =
-    (await hasCredentials(configuration, secrets)) === "anond"
+    (await hasCredentials(configuration, secrets)) === "anond-token"
       ? getAnondCredentials(configuration)
       : (await getPlatformCredentials(configuration, secrets))?.apiToken;
 
