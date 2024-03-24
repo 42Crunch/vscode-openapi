@@ -1,7 +1,9 @@
+import styled from "styled-components";
+import { ErrorBoundary } from "react-error-boundary";
+
 import ThemeStyles from "../features/theme/ThemeStyles";
 import Router from "../features/router/Router";
 import Navigation from "../features/router/Navigation";
-import styled from "styled-components";
 
 export function makeWebappMessageHandler(store: any, handlers: any) {
   return function webappMessageHandler(event: MessageEvent<any>) {
@@ -27,18 +29,27 @@ export function startListeners(listeners: Record<string, () => unknown>) {
   }
 }
 
+function Fallback({ error }: { error: Error }) {
+  return (
+    <div>
+      <p>Unexpected error:</p>
+      <pre>{error.message}</pre>
+    </div>
+  );
+}
+
 export function RouterApp() {
   return (
-    <>
+    <ErrorBoundary FallbackComponent={Fallback}>
       <ThemeStyles />
       <Router />
-    </>
+    </ErrorBoundary>
   );
 }
 
 export function NavigationRouterApp() {
   return (
-    <>
+    <ErrorBoundary FallbackComponent={Fallback}>
       <ThemeStyles />
       <NavigationContainer>
         <Navigation />
@@ -46,7 +57,7 @@ export function NavigationRouterApp() {
       <ContentContainer>
         <Router />
       </ContentContainer>
-    </>
+    </ErrorBoundary>
   );
 }
 
