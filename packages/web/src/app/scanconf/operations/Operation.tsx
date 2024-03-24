@@ -17,6 +17,7 @@ import AddRequest from "./components/AddRequest";
 import { startTryExecution } from "./slice";
 import AddAuthorizationTest from "./components/AddAuthorizationTest";
 import AuthorizationTests from "./AuthorizationTests";
+import { ErrorBanner } from "../../../components/Banner";
 
 export default function Operation({ operationId }: { operationId: string }) {
   const dispatch = useAppDispatch();
@@ -56,6 +57,20 @@ export default function Operation({ operationId }: { operationId: string }) {
       env: { host },
     },
   } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
+
+  if (operation === undefined) {
+    return (
+      <ErrorBanner
+        message={`Unable to find operation with operationId "${operationId}" in scan configuration`}
+      >
+        <p>
+          Verify if the OpenAPI file contains operations that were added after the scan
+          configuration was created. If needed, consider deleting and recreating the scan
+          configuration.
+        </p>
+      </ErrorBanner>
+    );
+  }
 
   return (
     <Container>
