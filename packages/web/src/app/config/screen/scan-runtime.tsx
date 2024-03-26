@@ -34,22 +34,31 @@ export function PlatformServices() {
     data: { cli },
   } = useFeatureSelector((state) => state.config);
 
-  const scanRuntime = useWatch({ name: "scanRuntime" });
+  const platformAuthType = useWatch({ name: "platformAuthType" });
   const scanAuth = useWatch({ name: "scandManager.auth" });
+  const configuredScanRuntime = useWatch({ name: "scanRuntime" });
+  const scanRuntime = platformAuthType === "api-token" ? configuredScanRuntime : "cli";
 
   return (
     <>
       <Title>Runtime for API Conformance Scan</Title>
       <Container>
-        <Select
-          label="Runtime"
-          name="scanRuntime"
-          options={[
-            { value: "docker", label: "Docker" },
-            { value: "scand-manager", label: "Scand manager" },
-            { value: "cli", label: "42Crunch CLI" },
-          ]}
-        />
+        {/* Only paid customers can select scan runtime */}
+        {platformAuthType === "api-token" && (
+          <Select
+            label="Runtime"
+            name="scanRuntime"
+            options={[
+              { value: "docker", label: "Docker" },
+              { value: "scand-manager", label: "Scand manager" },
+              { value: "cli", label: "42Crunch CLI" },
+            ]}
+          />
+        )}
+
+        {platformAuthType === "anond-token" && (
+          <Banner message="Scan runtime is set to use 42Crunch CLI" />
+        )}
 
         {scanRuntime === "docker" && (
           <>
@@ -150,16 +159,6 @@ export function PlatformServices() {
 
         {scanRuntime === "cli" && (
           <div>
-            <p>
-              In addition to to executing the Conformance Scan, we will use the CLI to perform
-              Security Audit.
-            </p>
-
-            <p>
-              A Security Audit Token is required for the CLI, IDE Tokens are not currently
-              supported.
-            </p>
-
             <p>
               42Crunch CLI is subject to usage limits, find more details at{" "}
               <a
