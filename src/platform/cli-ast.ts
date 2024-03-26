@@ -349,10 +349,8 @@ export async function runAuditWithCliBinary(
 
   logger.info(`Running Security Audit using: ${cli}`);
 
-  const token =
-    (await hasCredentials(configuration, secrets)) === "anond-token"
-      ? getAnondCredentials(configuration)
-      : (await getPlatformCredentials(configuration, secrets))?.apiToken;
+  // CLI audits currently used only by free users
+  const token = getAnondCredentials(configuration);
 
   try {
     const output = await asyncExecFile(

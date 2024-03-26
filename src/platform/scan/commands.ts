@@ -10,7 +10,7 @@ import { stringify } from "@xliic/preserving-json-yaml-parser";
 
 import { Cache } from "../../cache";
 import { Configuration } from "../../configuration";
-import { ensureHasCredentials, getAnondCredentials } from "../../credentials";
+import { ensureHasCredentials } from "../../credentials";
 import { OperationIdNode } from "../../outlines/nodes/operation-ids";
 import { OperationNode } from "../../outlines/nodes/paths";
 import { TagChildNode } from "../../outlines/nodes/tags";
@@ -27,6 +27,7 @@ import { getOrCreateScanconfUri, getScanconfUri } from "./config";
 import { createScanConfigWithPlatform } from "./runtime/platform";
 import { ScanWebView } from "./view";
 import { formatException } from "../util";
+import { loadConfig } from "../../util/config";
 
 export default (
   cache: Cache,
@@ -131,8 +132,17 @@ async function editorRunSingleOperationScan(
     return;
   }
 
-  const hasCli = configuration.get("platformConformanceScanRuntime") === "cli";
-  if (hasCli && !(await ensureCliDownloaded(configuration, secrets))) {
+  // run single operation scan creates the scan config and displays the scan view
+  // actual execution of the scan triggered from the scan view
+
+  const config = await loadConfig(configuration, secrets);
+
+  // free users must have CLI available, platform users always use platform for scan config generation
+  // so there is no need to check for CLI availability for platform users
+  if (
+    config.platformAuthType === "anond-token" &&
+    !(await ensureCliDownloaded(configuration, secrets))
+  ) {
     // cli is not available and user chose to cancel download
     return;
   }
@@ -154,7 +164,7 @@ async function editorRunSingleOperationScan(
       store,
       configuration,
       secrets,
-      hasCli,
+      config.platformAuthType,
       scanconfUri,
       stringify(bundle.value)
     ))
@@ -172,7 +182,7 @@ async function createDefaultScanConfig(
   store: PlatformStore,
   configuration: Configuration,
   secrets: vscode.SecretStorage,
-  hasCli: boolean,
+  platformAuthType: "api-token" | "anond-token",
   scanconfUri: vscode.Uri,
   oas: string
 ): Promise<boolean> {
@@ -184,8 +194,9 @@ async function createDefaultScanConfig(
     },
     async (progress, cancellationToken): Promise<boolean> => {
       try {
-        if (hasCli && getAnondCredentials(configuration)) {
-          //const oas = stringify(bundle.value);
+        if (platformAuthType === "anond-token") {
+          // free users must use CLI for scan, there is no need to fallback to anond for initial audit
+          // if there is no CLI available, they will not be able to run scan or create a scan config in any case
           const [report, reportError] = await runAuditWithCliBinary(
             secrets,
             emptyLogger,
@@ -209,11 +220,7 @@ async function createDefaultScanConfig(
           }
           await createScanConfigWithCliBinary(scanconfUri, oas);
         } else {
-          if (hasCli) {
-            vscode.window.showInformationMessage(
-              "Security Audit Token required by 42Crunch CLI is not found, using platform connection instead."
-            );
-          }
+          // paid users create scan configs using the platform, this includes running an initial audit
           await createScanConfigWithPlatform(store, scanconfUri, oas);
         }
         vscode.window.showInformationMessage(
