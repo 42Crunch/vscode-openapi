@@ -11,7 +11,7 @@ import { stringify } from "@xliic/preserving-json-yaml-parser";
 
 import { Cache } from "../cache";
 import { Configuration, configuration } from "../configuration";
-import { ensureHasCredentials, getAnondCredentials, getPlatformCredentials } from "../credentials";
+import { ensureHasCredentials } from "../credentials";
 import { OperationIdNode } from "../outlines/nodes/operation-ids";
 import { OperationNode } from "../outlines/nodes/paths";
 import { TagChildNode } from "../outlines/nodes/tags";
@@ -26,6 +26,8 @@ import { runCliAudit } from "./runtime/cli";
 import { runPlatformAudit } from "./runtime/platform";
 import { setAudit } from "./service";
 import { AuditWebView } from "./view";
+import { Config } from "@xliic/common/config";
+import { loadConfig } from "../util/config";
 
 export function registerSecurityAudit(
   context: vscode.ExtensionContext,
@@ -197,17 +199,24 @@ async function securityAudit(
         const oas = isFullAudit
           ? stringify(value)
           : stringify(extractSingleOperation(method, path as string, value));
-        const runtime = await chooseAuditRuntime(configuration, secrets);
-        if (runtime === "platform") {
+        // paid users always run audit using the platform, free users use CLI or fallback to anond
+        if ((await chooseAuditRuntime(configuration, secrets)) === "platform") {
           return runPlatformAudit(editor.document, oas, mapping, cache, store);
-        } else if (runtime === "cli") {
-          if (!(await ensureCliDownloaded(configuration, secrets))) {
-            // cli is not available and user chose to cancel download
-            return;
-          }
-          return runCliAudit(editor.document, oas, mapping, cache, secrets, progress, !isFullAudit);
         } else {
-          return runAnondAudit(editor.document, oas, mapping, cache, configuration, progress);
+          // use CLI or fallback to anond
+          if (await ensureCliDownloaded(configuration, secrets)) {
+            return runCliAudit(
+              editor.document,
+              oas,
+              mapping,
+              cache,
+              secrets,
+              progress,
+              !isFullAudit
+            );
+          } else {
+            return runAnondAudit(editor.document, oas, mapping, cache, configuration, progress);
+          }
         }
       }
     );
@@ -249,24 +258,7 @@ async function offerDataDictionaryUpdateAndContinue(documentUri: vscode.Uri): Pr
 async function chooseAuditRuntime(
   configuration: Configuration,
   secrets: vscode.SecretStorage
-): Promise<"anond" | "platform" | "cli"> {
-  const platformCredentials = await getPlatformCredentials(configuration, secrets);
-  const anondCredentials = getAnondCredentials(configuration);
-  const hasCli = configuration.get("platformConformanceScanRuntime") === "cli";
-
-  if (hasCli && anondCredentials === "") {
-    vscode.window.showInformationMessage(
-      "Security Audit Token required by 42Crunch CLI is not found, using platform connection instead."
-    );
-  }
-
-  if (anondCredentials && hasCli) {
-    return "cli";
-  }
-
-  if (platformCredentials !== undefined) {
-    return "platform";
-  }
-
-  return "anond";
+): Promise<"platform" | "cli"> {
+  const config = await loadConfig(configuration, secrets);
+  return config.platformAuthType === "api-token" ? "platform" : "cli";
 }
