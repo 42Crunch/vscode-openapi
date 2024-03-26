@@ -47,9 +47,17 @@ export async function runCliAudit(
     }
   }
 
-  if (isSingleOperationAudit && result.cli.remainingPerOperationAudit < UPGRADE_WARN_LIMIT) {
+  if (
+    isSingleOperationAudit &&
+    result.cli.remainingPerOperationAudit !== undefined &&
+    result.cli.remainingPerOperationAudit < UPGRADE_WARN_LIMIT
+  ) {
     warnOperationAudits(result.cli.remainingPerOperationAudit);
-  } else if (!isSingleOperationAudit && result.cli.remainingFullAudit < UPGRADE_WARN_LIMIT) {
+  } else if (
+    !isSingleOperationAudit &&
+    result.cli.remainingFullAudit !== undefined &&
+    result.cli.remainingFullAudit < UPGRADE_WARN_LIMIT
+  ) {
     warnAudits(result.cli.remainingFullAudit);
   }
 

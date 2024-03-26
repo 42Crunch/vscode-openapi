@@ -230,33 +230,39 @@ export async function runScanWithCliBinary(
 
   logger.info(`Running scan using: ${cli}`);
 
-  const token =
-    config.platformAuthType === "anond-token"
-      ? getAnondCredentials(configuration)
-      : (await getPlatformCredentials(configuration, secrets))?.apiToken;
+  const args = [
+    "scan",
+    "run",
+    "openapi.json",
+    "--conf-file",
+    "scanconf.json",
+    "--output",
+    "report.json",
+    "--output-format",
+    "json",
+    "--verbose",
+    "error",
+    "--enrich=false",
+    "--is-operation",
+  ];
+
+  if (config.platformAuthType === "anond-token") {
+    const anondToken = getAnondCredentials(configuration);
+    args.push("--token", String(anondToken));
+  } else {
+    const platformConnection = await getPlatformCredentials(configuration, secrets);
+    if (platformConnection !== undefined) {
+      scanEnv["API_KEY"] = platformConnection.apiToken!;
+      scanEnv["PLATFORM_HOST"] = platformConnection.platformUrl;
+    }
+  }
 
   try {
-    const output = await asyncExecFile(
-      cli,
-      [
-        "scan",
-        "run",
-        "openapi.json",
-        "--conf-file",
-        "scanconf.json",
-        "--output",
-        "report.json",
-        "--output-format",
-        "json",
-        "--verbose",
-        "error",
-        "--enrich=false",
-        "--is-operation",
-        "--token",
-        String(token),
-      ],
-      { cwd: dir as string, windowsHide: true, env: scanEnv }
-    );
+    const output = await asyncExecFile(cli, args, {
+      cwd: dir as string,
+      windowsHide: true,
+      env: scanEnv,
+    });
 
     const report = await readFile(reportFilename, { encoding: "utf8" });
     const parsed = JSON.parse(report);
@@ -491,10 +497,10 @@ function formatException({
 export type CliResponse = {
   statusCode: number;
   statusMessage: string;
-  remainingFullAudit: number;
-  remainingPerOperationAudit: number;
-  remainingFullScan: number;
-  remainingPerOperationScan: number;
+  remainingFullAudit?: number;
+  remainingPerOperationAudit?: number;
+  remainingFullScan?: number;
+  remainingPerOperationScan?: number;
   scanLogs?: CliLogEntry[];
 };
 

@@ -284,7 +284,10 @@ async function runScan(
         }
       }
 
-      if (result.cli.remainingPerOperationScan < UPGRADE_WARN_LIMIT) {
+      if (
+        result.cli.remainingPerOperationScan !== undefined &&
+        result.cli.remainingPerOperationScan < UPGRADE_WARN_LIMIT
+      ) {
         warnScans(result.cli.remainingPerOperationScan);
       }
 
