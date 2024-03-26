@@ -31,11 +31,11 @@ export async function loadConfig(
   const platformMandatoryTags = configuration.get<"string">("platformMandatoryTags");
 
   // derived auth type is api-token only if anondToken is not set and apiToken is set, otherwise it is anond-token
-  const derivedAutType = !anondToken && !!apiToken ? "api-token" : "anond-token";
+  const derivedAuthType = !anondToken && !!apiToken ? "api-token" : "anond-token";
 
   return {
     platformUrl,
-    platformAuthType: platformAuthType == "" ? derivedAutType : platformAuthType,
+    platformAuthType: platformAuthType == "" ? derivedAuthType : platformAuthType,
     platformApiToken: apiToken,
     anondToken,
     insecureSslHostnames,
