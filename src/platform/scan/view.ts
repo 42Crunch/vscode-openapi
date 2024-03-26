@@ -236,7 +236,10 @@ async function runScan(
   const stringOas = stringify(bundle.value);
 
   try {
-    if (config.scanRuntime === "cli" && getAnondCredentials(configuration)) {
+    if (
+      config.platformAuthType === "anond-token" ||
+      (config.platformAuthType === "api-token" && config.scanRuntime === "cli")
+    ) {
       const [validateReport, validateError] = await runValidateScanConfigWithCliBinary(
         secrets,
         envStore,
@@ -293,12 +296,6 @@ async function runScan(
 
       await reportView.showScanReport(path, method, result.scan, oas);
     } else {
-      if (config.scanRuntime === "cli") {
-        vscode.window.showInformationMessage(
-          "Security Audit Token required by 42Crunch CLI is not found, using docker instead."
-        );
-      }
-
       const { token, tmpApi } = await createScanconfToken(store, stringOas, scanconf, logger);
 
       // fall back to docker if no anond token, and cli is configured

@@ -231,7 +231,7 @@ export async function runScanWithCliBinary(
   logger.info(`Running scan using: ${cli}`);
 
   const token =
-    (await hasCredentials(configuration, secrets)) === "anond-token"
+    config.platformAuthType === "anond-token"
       ? getAnondCredentials(configuration)
       : (await getPlatformCredentials(configuration, secrets))?.apiToken;
 
