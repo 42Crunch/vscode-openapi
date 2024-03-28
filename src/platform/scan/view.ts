@@ -29,7 +29,6 @@ import { runScanWithCliBinary, runValidateScanConfigWithCliBinary } from "../cli
 import { runScanWithDocker } from "./runtime/docker";
 import { runScanWithScandManager } from "./runtime/scand-manager";
 import { UPGRADE_WARN_LIMIT, offerUpgrade, warnScans } from "../upgrade";
-import { getAnondCredentials } from "../../credentials";
 import { formatException } from "../util";
 
 export type BundleDocumentVersions = Record<string, number>;
@@ -115,7 +114,6 @@ export class ScanWebView extends WebView<Webapp> {
         await reportView.sendStartScan(this.target!.document);
 
         return await runScan(
-          this.configuration,
           this.secrets,
           this.store,
           this.envStore,
@@ -123,12 +121,46 @@ export class ScanWebView extends WebView<Webapp> {
           this.target!.bundle,
           path,
           method,
-          operationId,
           scanconf,
-          this.target!.scanconfUri,
           config,
           makeLogger(reportView),
-          reportView
+          reportView,
+          false
+        );
+      } catch (ex: any) {
+        const message =
+          ex?.response?.statusCode === 409 &&
+          ex?.response?.body?.code === 109 &&
+          ex?.response?.body?.message === "limit reached"
+            ? "You have reached your maximum number of APIs. Please contact support@42crunch.com to upgrade your account."
+            : formatException("Failed to run scan:", ex);
+        vscode.window.showErrorMessage(message);
+      }
+    },
+
+    runFullScan: async ({ env, scanconf }): Promise<void> => {
+      try {
+        const config = await loadConfig(this.configuration, this.secrets);
+
+        const reportView = this.getReportView();
+
+        await reportView.show();
+        await reportView.sendColorTheme(vscode.window.activeColorTheme);
+        await reportView.sendStartScan(this.target!.document);
+
+        return await runScan(
+          this.secrets,
+          this.store,
+          this.envStore,
+          env,
+          this.target!.bundle,
+          undefined,
+          undefined,
+          scanconf,
+          config,
+          makeLogger(reportView),
+          reportView,
+          true
         );
       } catch (ex: any) {
         const message =
@@ -215,20 +247,18 @@ function makeLogger(view: { sendLogMessage: (message: string, level: LogLevel) =
 }
 
 async function runScan(
-  configuration: Configuration,
   secrets: vscode.SecretStorage,
   store: PlatformStore,
   envStore: EnvStore,
   scanEnv: SimpleEnvironment,
   bundle: Bundle,
-  path: string,
-  method: HttpMethod,
-  operationId: string,
+  path: string | undefined,
+  method: HttpMethod | undefined,
   scanconf: string,
-  scanconfUri: vscode.Uri,
   config: Config,
   logger: Logger,
-  reportView: ScanReportWebView
+  reportView: ScanReportWebView,
+  isFullScan: boolean
 ): Promise<void> {
   logger.info(`Starting API Conformance Scan`);
 
@@ -267,12 +297,12 @@ async function runScan(
 
       const [result, error] = await runScanWithCliBinary(
         secrets,
-        envStore,
         scanEnv,
         config,
         logger,
         stringOas,
-        scanconf
+        scanconf,
+        isFullScan
       );
 
       if (error !== undefined) {
@@ -297,7 +327,11 @@ async function runScan(
         }
       }
 
-      await reportView.showScanReport(path, method, result.scan, oas);
+      if (isFullScan) {
+        await reportView.showFullScanReport(result.scan, oas);
+      } else {
+        await reportView.showScanReport(path!, method!, result.scan, oas);
+      }
     } else {
       const { token, tmpApi } = await createScanconfToken(store, stringOas, scanconf, logger);
 
@@ -320,7 +354,12 @@ async function runScan(
 
       const parsedReport = await loadReport(store, tmpApi, logger);
       logger.info(`Finished API Conformance Scan`);
-      await reportView.showScanReport(path, method, parsedReport, oas);
+
+      if (isFullScan) {
+        await reportView.showFullScanReport(parsedReport, oas);
+      } else {
+        await reportView.showScanReport(path!, method!, parsedReport, oas);
+      }
     }
   } catch (e: any) {
     await reportView.showGeneralError({ message: "Failed to execute scan: " + e.message });

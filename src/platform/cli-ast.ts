@@ -206,12 +206,12 @@ export async function* downloadCli(
 
 export async function runScanWithCliBinary(
   secrets: vscode.SecretStorage,
-  envStore: EnvStore,
   scanEnv: SimpleEnvironment,
   config: Config,
   logger: Logger,
   oas: string,
-  scanconf: string
+  scanconf: string,
+  isSingleOperationScan: boolean
 ): Promise<Result<{ scan: unknown; cli: CliResponse }, CliError>> {
   logger.info(`Running Conformance Scan using 42Crunch CLI`);
 
@@ -243,8 +243,11 @@ export async function runScanWithCliBinary(
     "--verbose",
     "error",
     "--enrich=false",
-    "--is-operation",
   ];
+
+  if (isSingleOperationScan) {
+    args.push("--is-operation");
+  }
 
   if (config.platformAuthType === "anond-token") {
     const anondToken = getAnondCredentials(configuration);

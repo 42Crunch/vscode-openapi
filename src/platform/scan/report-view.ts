@@ -183,6 +183,17 @@ export class ScanReportWebView extends WebView<Webapp> {
       },
     });
   }
+  async showFullScanReport(report: unknown, oas: BundledSwaggerOrOasSpec) {
+    await this.sendRequest({
+      command: "showFullScanReport",
+      // FIXME path and method are ignored by the UI, fix message to make 'em optionals
+      payload: {
+        report: report as any,
+        security: undefined,
+        oas,
+      },
+    });
+  }
 }
 
 function findOrCreateTerminal() {
