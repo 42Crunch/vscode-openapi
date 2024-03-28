@@ -61,6 +61,7 @@ export interface Audit {
   issues: IssuesByDocument;
   minimalReport: boolean;
   valid: boolean;
+  openapiState: string;
   compliance?: AuditCompliance;
   todo?: IssuesByDocument;
 }

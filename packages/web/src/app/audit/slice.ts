@@ -103,6 +103,7 @@ const initialState: ReportState = {
     issues: {},
     minimalReport: false,
     valid: true,
+    openapiState: "",
     summary: {
       documentUri: "",
       subdocumentUris: [],
