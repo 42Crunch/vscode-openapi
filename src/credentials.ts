@@ -10,18 +10,18 @@ export async function hasCredentials(
   configuration: Configuration,
   secrets: vscode.SecretStorage
 ): Promise<"api-token" | "anond-token" | undefined> {
-  // if platformAuthType is set, use it else check credentials
   const platformAuthType = configuration.get<Config["platformAuthType"] | "">("platformAuthType");
-  if (platformAuthType !== "") {
-    return platformAuthType;
-  }
+  const anondToken = getAnondCredentials(configuration);
+  const apiToken = await secrets.get("platformApiToken");
 
-  if (getAnondCredentials(configuration)) {
+  // if platformAuthType is set, use it else try to derive from the available tokens
+  if (platformAuthType === "anond-token" && anondToken) {
     return "anond-token";
-  }
-
-  const platform = await getPlatformCredentials(configuration, secrets);
-  if (platform !== undefined) {
+  } else if (platformAuthType === "api-token" && apiToken) {
+    return "api-token";
+  } else if (anondToken) {
+    return "anond-token";
+  } else if (apiToken) {
     return "api-token";
   }
 
