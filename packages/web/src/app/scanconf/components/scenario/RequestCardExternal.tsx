@@ -7,7 +7,10 @@ import Form from "../../../../new-components/Form";
 import { TabContainer } from "../../../../new-components/Tabs";
 import JsonEditor from "../../../../new-components/fields/JsonEditor";
 import LineEditor from "../../../../new-components/fields/LineEditor";
-import CollapsibleCard, { BottomDescription, TopDescription } from "../CollapsibleCard";
+import CollapsibleCard, {
+  BottomDescription,
+  TopDescription,
+} from "../../../../new-components/CollapsibleCard";
 import ResponseProcessing from "../operation/ResponseProcessing";
 import ExternalParameters from "./ExternalParameters";
 import { unwrapExternalPlaybookRequest, wrapExternalPlaybookRequest } from "./util";

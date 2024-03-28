@@ -1,8 +1,13 @@
 import { createAction } from "@reduxjs/toolkit";
 import { HttpConfig, HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
-import { OasWithScanconfPathMethod, ScanRunConfig } from "@xliic/common/scanconf";
+import {
+  OasWithScanconfPathMethod,
+  ScanRunConfig,
+  FullScanRunConfig,
+} from "@xliic/common/scanconf";
 
 export const runScan = createAction<ScanRunConfig>("scanconf/runScan");
+export const runFullScan = createAction<FullScanRunConfig>("scanconf/runFullScan");
 
 export const showScanconfOperation = createAction<OasWithScanconfPathMethod>(
   "scanconf/showScanconfOperation"

@@ -4,7 +4,10 @@ import styled, { keyframes } from "styled-components";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { CircleCheck, ExclamationCircle, Key, Spinner } from "../../../../icons";
-import CollapsibleCard, { BottomDescription, BottomItem } from "../CollapsibleCard";
+import CollapsibleCard, {
+  BottomDescription,
+  BottomItem,
+} from "../../../../new-components/CollapsibleCard";
 import { AuthenticationResult, ProgressState } from "../scenario/types";
 import { AuthenticationVariables } from "./AutnenticationVariables";
 import PlaybookExecution from "./PlaybookExecution";

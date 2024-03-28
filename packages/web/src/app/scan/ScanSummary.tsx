@@ -1,31 +1,35 @@
 import styled from "styled-components";
 import { DateTime } from "luxon";
+
 import { ThemeColorVariables } from "@xliic/common/theme";
+
 import { ArrowUpRightFromSquare } from "../../icons";
 import { useAppDispatch } from "./store";
 import { changeFilter, changeTab } from "./slice";
-import { GlobalSummary, OperationSummary, TestLogReport } from "@xliic/common/scan-report";
+import { GlobalSummary, TestLogReport } from "@xliic/common/scan-report";
 
 export function ScanSummary({
   global,
-  operation,
   issues,
   scanVersion,
 }: {
   global: GlobalSummary;
-  operation: OperationSummary;
   issues: TestLogReport[];
   scanVersion: string;
 }) {
   const dispatch = useAppDispatch();
 
-  const executed =
-    (global.conformanceTestRequests.executed.total ?? 0) +
-    (global.authorizationTestRequests.executed.total ?? 0) +
-    (global.customTestRequests.executed.total ?? 0) +
-    (global.methodNotAllowedTestRequests?.executed.total ?? 0);
+  // const executed =
+  //   (global.conformanceTestRequests.executed.total ?? 0) +
+  //   (global.authorizationTestRequests.executed.total ?? 0) +
+  //   (global.customTestRequests.executed.total ?? 0) +
+  //   (global.methodNotAllowedTestRequests?.executed.total ?? 0);
 
-  const issuesNumber = issues?.length | 0;
+  // const issuesNumber = issues?.length | 0;
+
+  const lowAndAbove = issues.filter(
+    (issue) => issue?.outcome?.criticality && issue.outcome?.criticality >= 1
+  ).length;
 
   const criticalAndHigh = issues.filter(
     (issue) => issue?.outcome?.criticality && issue.outcome?.criticality >= 4
@@ -56,7 +60,7 @@ export function ScanSummary({
           }}
         >
           <div>
-            {executed} <ArrowUpRightFromSquare />
+            {issues.length} <ArrowUpRightFromSquare />
           </div>
           <div>Executed</div>
         </div>
@@ -65,11 +69,11 @@ export function ScanSummary({
             e.preventDefault();
             e.stopPropagation();
             dispatch(changeTab("tests"));
-            dispatch(changeFilter({}));
+            dispatch(changeFilter({ severity: "low" }));
           }}
         >
           <div>
-            {issuesNumber ?? 0} <ArrowUpRightFromSquare />
+            {lowAndAbove} <ArrowUpRightFromSquare />
           </div>
           <div>Issues Found</div>
         </div>
@@ -92,14 +96,14 @@ export function ScanSummary({
 }
 
 const Container = styled.div`
-  margin: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 `;
 
 const Tiles = styled.div`
   display: flex;
   gap: 8px;
-  margin-top: 8px;
-  margin-bottom: 8px;
   & > div {
     cursor: pointer;
     flex: 1;

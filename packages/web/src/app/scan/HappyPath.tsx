@@ -1,52 +1,24 @@
 import styled from "styled-components";
 
-import { HttpError, HttpResponse } from "@xliic/common/http";
-
 import { ThemeColorVariables } from "@xliic/common/theme";
 import Response from "../../components/response/Response";
 import { safeParseResponse } from "../../http-parser";
 import CurlRequest from "./CurlRequest";
-import { HappyPathReport, RuntimeOperationReport } from "@xliic/common/scan-report";
+import { RuntimeOperationReport } from "@xliic/common/scan-report";
 
-export function HappyPath({
-  operation,
-  issue,
-  responses,
-  errors,
-  waitings,
-}: {
-  operation: RuntimeOperationReport;
-  issue: HappyPathReport;
-  responses: Record<string, HttpResponse>;
-  errors: Record<string, HttpError>;
-  waitings: Record<string, boolean>;
-}) {
-  const { request, response, outcome, happyPath } = issue;
-  const failed = !operation.fuzzed;
+export function HappyPath({ operation }: { operation: RuntimeOperationReport }) {
+  const { request, response, outcome, happyPath } = operation.scenarios?.[0]!;
 
   let responsePayloadMatchesContract = "N/A";
 
-  const responseCodeFound = issue?.outcome?.status === "correct" ? "Yes" : "No";
+  const responseCodeFound = outcome?.status === "correct" ? "Yes" : "No";
 
   if (responseCodeFound === "Yes") {
     responsePayloadMatchesContract = outcome?.conformant ? "Yes" : "No";
   }
 
-  const httpResponse = responses["happy-path"];
-  const error = errors["happy-path"];
-  const waiting = waitings["happy-path"];
-
   return (
     <Container>
-      <Item>
-        <div style={{ opacity: 1 }}>
-          <b>Happy Path Testing results</b>
-        </div>
-      </Item>
-      <Item>
-        <div>Test Status</div>
-        <div>{failed ? "Failed" : "Passed"}</div>
-      </Item>
       <Item>
         <div>HTTP code received</div>
         <div>
@@ -68,27 +40,24 @@ export function HappyPath({
         <Item>
           <div>Request</div>
           <div>
-            <CurlRequest curl={request?.curl} id={"happy-path"} waiting={waiting} />
+            <CurlRequest curl={request?.curl} id={"happy-path"} waiting={false} />
           </div>
         </Item>
       )}
 
-      {(response?.rawPayload || httpResponse) && (
+      {response?.rawPayload && (
         <Item>
           <div>Response</div>
           <div>
-            <Response
-              accented
-              response={httpResponse ? httpResponse : safeParseResponse(response!.rawPayload)}
-            />
+            <Response accented response={safeParseResponse(response!.rawPayload)} />
           </div>
         </Item>
       )}
 
-      {(outcome?.error || error) && (
+      {outcome?.error && (
         <Item>
           <div>Error</div>
-          <div>{error ? error.message : outcome?.error}</div>
+          <div>{outcome?.error}</div>
         </Item>
       )}
     </Container>

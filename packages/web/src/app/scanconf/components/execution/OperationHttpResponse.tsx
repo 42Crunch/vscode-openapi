@@ -6,7 +6,10 @@ import { HttpResponse } from "../../../../../../common/src/http";
 import { PlaybookEnvStack } from "../../../../core/playbook/playbook-env";
 import { ArrowRightFromBracket } from "../../../../icons";
 import { TabContainer } from "../../../../new-components/Tabs";
-import CollapsibleCard, { BottomDescription, BottomItem } from "../CollapsibleCard";
+import CollapsibleCard, {
+  BottomDescription,
+  BottomItem,
+} from "../../../../new-components/CollapsibleCard";
 import Body from "../response/Body";
 import Headers from "../response/Headers";
 import VariableAssignments from "../scenario/VariableAssignments";

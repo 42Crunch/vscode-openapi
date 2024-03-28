@@ -1,17 +1,17 @@
 import styled from "styled-components";
+
 import { useAppDispatch, useAppSelector } from "./store";
 import LogMessages from "../../features/logging/LogMessages";
-import { HappyPath } from "./HappyPath";
 import { OasState, changeTab } from "./slice";
-import { GlobalSummary, ScanReportJSONSchema, TestLogReport } from "@xliic/common/scan-report";
-
 import { ScanSummary } from "./ScanSummary";
 import ScanIssues from "./ScanIssues";
 import { TabContainer } from "../../new-components/Tabs";
+import { HappyPathCard } from "./HappyPathCard";
 
 export default function ScanReport() {
   const dispatch = useAppDispatch();
-  const { scanReport, operationId, responses, errors, waitings, tab, issues, grouped } =
+
+  const { scanReport, operations, responses, errors, waitings, tab, issues, grouped } =
     useAppSelector((state) => state.scan);
 
   if (scanReport === undefined) {
@@ -22,8 +22,7 @@ export default function ScanReport() {
     );
   }
 
-  const happyPath = (scanReport as ScanReportJSONSchema).operations?.[operationId!].scenarios?.[0];
-  const operation = (scanReport as ScanReportJSONSchema).operations?.[operationId!];
+  const entries = Object.entries(operations);
 
   return (
     <TabContainer
@@ -34,23 +33,22 @@ export default function ScanReport() {
           id: "summary",
           title: "Summary",
           content: (
-            <>
+            <Summary>
               <ScanSummary
                 issues={issues as any}
                 global={scanReport.summary}
                 scanVersion={scanReport.scanVersion}
-                operation={operation?.summary!}
               />
-              {happyPath && (
-                <HappyPath
-                  operation={operation!}
-                  issue={happyPath}
-                  responses={responses}
-                  errors={errors}
-                  waitings={waitings}
+              <div style={{ fontWeight: 600, margin: "8px" }}>Happy Path Testing results</div>
+              {entries.map(([operationId, operation]) => (
+                <HappyPathCard
+                  defaultCollapsed={entries.length > 1}
+                  operationId={operationId}
+                  operation={operation}
+                  key={operationId}
                 />
-              )}
-            </>
+              ))}
+            </Summary>
           ),
         },
         {
@@ -58,9 +56,8 @@ export default function ScanReport() {
           title: "Tests",
           content: (
             <ScanIssues
-              operation={operation!}
-              issues={issues as TestLogReport[]}
-              grouped={grouped as Record<string, TestLogReport[]>}
+              issues={issues}
+              grouped={grouped}
               responses={responses}
               errors={errors}
               waitings={waitings}
@@ -74,6 +71,13 @@ export default function ScanReport() {
 }
 
 const Container = styled.div``;
+
+const Summary = styled.div`
+  margin: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
 
 const Message = styled.div`
   margin: 1em;

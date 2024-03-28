@@ -2,7 +2,7 @@ import { ReactNode, useState } from "react";
 import styled from "styled-components";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { AngleDown, AngleUp } from "../../../icons";
+import { AngleDown, AngleUp } from "../icons";
 
 export default function CollapsibleCard({
   children,

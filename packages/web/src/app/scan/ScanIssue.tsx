@@ -1,28 +1,24 @@
 import styled from "styled-components";
+import { useState } from "react";
 
 import { HttpError, HttpResponse } from "@xliic/common/http";
-
+import { TestLogReport } from "@xliic/common/scan-report";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { ExclamationCircle, Check, AngleDown, AngleUp } from "../../icons";
 
+import { ExclamationCircle, Check, AngleDown, AngleUp } from "../../icons";
 import CurlRequest from "./CurlRequest";
 import Response from "../../components/response/Response";
 import { showJsonPointer } from "./slice";
-
 import { safeParseResponse } from "../../http-parser";
-import { useState } from "react";
 import { useAppDispatch } from "./store";
-import { RuntimeOperationReport, TestLogReport } from "@xliic/common/scan-report";
 
 export default function ScanIssue({
-  operation,
   issue,
   httpResponse,
   error,
   id,
   waiting,
 }: {
-  operation: RuntimeOperationReport;
   issue: TestLogReport;
   httpResponse: HttpResponse | undefined;
   error: HttpError | undefined;

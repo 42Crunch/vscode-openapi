@@ -17,7 +17,7 @@ import ResponseProcessing from "../components/operation/ResponseProcessing";
 import Environment from "../components/scenario/Environment";
 import { OperationResult } from "../components/scenario/types";
 import { unwrapPlaybookStage, wrapPlaybookStage } from "../components/scenario/util";
-import CollapsibleCard from "../components/CollapsibleCard";
+import CollapsibleCard from "../../../new-components/CollapsibleCard";
 import DownshiftSelect from "../../../new-components/fields/DownshiftSelect";
 
 export default function Stage({

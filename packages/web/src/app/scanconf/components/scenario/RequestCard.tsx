@@ -5,7 +5,10 @@ import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { unwrapPlaybookRequest, wrapPlaybookRequest } from "./util";
-import CollapsibleCard, { BottomDescription, TopDescription } from "../CollapsibleCard";
+import CollapsibleCard, {
+  BottomDescription,
+  TopDescription,
+} from "../../../../new-components/CollapsibleCard";
 import Form from "../../../../new-components/Form";
 import OperationTabs from "../operation/OperationTabs";
 import DownshiftSelect from "../../../../new-components/fields/DownshiftSelect";

@@ -12,7 +12,7 @@ import { showEnvWindow } from "../../features/env/slice";
 import { startNavigationListening } from "../../features/router/listener";
 import { Routes } from "../../features/router/RouterContext";
 import { startListeners } from "../webapp";
-import { runScan, sendHttpRequest } from "./actions";
+import { runFullScan, runScan, sendHttpRequest } from "./actions";
 import {
   onExecuteAuthentication,
   onExecuteGlobal,
@@ -55,6 +55,17 @@ export function createListener(host: Webapp["host"], routes: Routes) {
         effect: async (action, listenerApi) => {
           host.postMessage({
             command: "runScan",
+            payload: action.payload,
+          });
+        },
+      }),
+
+    runFullScan: () =>
+      startAppListening({
+        actionCreator: runFullScan,
+        effect: async (action, listenerApi) => {
+          host.postMessage({
+            command: "runFullScan",
             payload: action.payload,
           });
         },

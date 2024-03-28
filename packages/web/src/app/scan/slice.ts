@@ -6,24 +6,35 @@ import {
   ScanConfig,
   OasWithOperationAndConfig,
   SingleOperationScanReport,
+  FullScanReport,
 } from "@xliic/common/scan";
 import { HttpRequest, HttpResponse, HttpError, HttpConfig } from "@xliic/common/http";
 import { GeneralError } from "@xliic/common/error";
 import { Preferences } from "@xliic/common/prefs";
-import { ScanReportJSONSchema, TestLogReport } from "@xliic/common/scan-report";
+import {
+  RuntimeOperationReport,
+  ScanReportJSONSchema,
+  TestLogReport,
+} from "@xliic/common/scan-report";
 import { SeverityLevel, SeverityLevels } from "@xliic/common/audit";
 
 export type Filter = {
   severity?: SeverityLevel;
   title?: string;
+  path?: string;
+  method?: HttpMethod;
+  operationId?: string;
+};
+
+export type TestLogReportWithLocation = TestLogReport & {
+  path: string;
+  method?: HttpMethod;
+  operationId?: string;
 };
 
 export interface OasState {
   oas: BundledSwaggerOrOasSpec;
   rawOas: string;
-  path?: string;
-  method?: HttpMethod;
-  operationId?: string;
   example?: {
     mediaType: string;
     name: string;
@@ -41,9 +52,12 @@ export interface OasState {
   waiting: boolean;
   filter: Filter;
   tab: "summary" | "tests" | "logs";
-  grouped: Record<string, TestLogReport[]>;
+  issues: TestLogReportWithLocation[];
+  grouped: Record<string, TestLogReportWithLocation[]>;
+  operations: Record<string, RuntimeOperationReport>;
   titles: string[];
-  issues: TestLogReport[];
+  paths: string[];
+  operationIds: string[];
 }
 
 const initialState: OasState = {
@@ -68,7 +82,10 @@ const initialState: OasState = {
   tab: "summary",
   grouped: {},
   issues: [],
+  operations: {},
   titles: [],
+  paths: [],
+  operationIds: [],
 };
 
 export const slice = createSlice({
@@ -104,33 +121,55 @@ export const slice = createSlice({
     },
 
     showScanReport: (state, action: PayloadAction<SingleOperationScanReport>) => {
-      const { oas, path, method } = action.payload;
-      const operation = getOperation(oas, path, method);
+      const { oas, path, method, report } = action.payload;
 
+      const oasOperation = getOperation(oas, path, method);
       const operationId =
-        operation?.operationId === undefined ? `${path}:${method}` : operation.operationId;
+        oasOperation?.operationId === undefined ? `${path}:${method}` : oasOperation.operationId;
+      const operation = report.operations?.[operationId];
 
-      state.operationId = operationId;
-      state.oas = oas;
-      state.path = path;
-      state.method = method;
+      if (operation) {
+        state.operations[operationId] = operation;
+      }
 
-      const issues = flattenIssues(action.payload.report, state.path!, state.operationId!);
+      const issues = flattenIssues(report);
       const filtered = filterIssues(issues, state.filter);
-      const { titles } = groupIssuesNew(issues);
-      const { grouped } = groupIssuesNew(filtered);
+      const { titles, paths, operationIds } = groupIssues(issues);
+      const { grouped } = groupIssues(filtered);
+
       state.issues = issues;
       state.titles = titles;
+      state.paths = paths;
+      state.operationIds = operationIds;
       state.grouped = grouped;
+      state.oas = oas;
+      state.scanReport = report;
+      state.waiting = false;
+    },
 
-      state.scanReport = action.payload.report;
+    showFullScanReport: (state, action: PayloadAction<FullScanReport>) => {
+      const { oas, report } = action.payload;
+
+      const issues = flattenIssues(report);
+      const filtered = filterIssues(issues, state.filter);
+      const { titles, paths, operationIds } = groupIssues(issues);
+      const { grouped } = groupIssues(filtered);
+
+      state.oas = oas;
+      state.operations = { ...(report.operations || {}) };
+      state.issues = issues;
+      state.titles = titles;
+      state.paths = paths;
+      state.operationIds = operationIds;
+      state.grouped = grouped;
+      state.scanReport = report;
       state.waiting = false;
     },
 
     changeFilter: (state, action: PayloadAction<Filter>) => {
       state.filter = action.payload;
-      const filtered = filterIssues(state.issues as TestLogReport[], state.filter);
-      const { grouped } = groupIssuesNew(filtered);
+      const filtered = filterIssues(state.issues, state.filter);
+      const { grouped } = groupIssues(filtered);
       state.grouped = grouped;
     },
 
@@ -181,6 +220,7 @@ export const {
   scanOperation,
   runScan,
   showScanReport,
+  showFullScanReport,
   showGeneralError,
   showHttpError,
   sendHttpRequest,
@@ -200,52 +240,79 @@ export const useFeatureSelector: TypedUseSelectorHook<
   StateFromReducersMapObject<Record<typeof slice.name, typeof slice.reducer>>
 > = useSelector;
 
-function flattenIssues(scanReport: ScanReportJSONSchema, path: string, operationId: string) {
-  const issues: TestLogReport[] = [];
+function flattenIssues(scanReport: ScanReportJSONSchema) {
+  const issues: TestLogReportWithLocation[] = [];
 
-  for (const kind of [
-    "conformanceRequestsResults",
-    "authorizationRequestsResults",
-    "customRequestsResults",
-  ] as const) {
-    const results = scanReport?.operations?.[operationId]?.[kind];
-    if (results !== undefined) {
-      issues.push(...results);
+  for (const [operationId, operationReport] of Object.entries(scanReport?.operations || {})) {
+    for (const kind of [
+      "conformanceRequestsResults",
+      "authorizationRequestsResults",
+      "customRequestsResults",
+    ] as const) {
+      const results = operationReport[kind];
+      const path = operationReport.path;
+      const method = operationReport.method.toLocaleLowerCase() as HttpMethod;
+      for (const result of results || []) {
+        issues.push({ ...result, path, method, operationId });
+      }
     }
   }
 
-  for (const method of HttpMethods) {
-    const results = scanReport?.methodNotAllowed?.[path]?.[method]?.conformanceRequestsResults;
-    if (results !== undefined) {
-      issues.push(...results);
+  for (const path of Object.keys(scanReport?.methodNotAllowed || {})) {
+    for (const method of HttpMethods) {
+      const results = scanReport?.methodNotAllowed?.[path]?.[method]?.conformanceRequestsResults;
+      for (const result of results || []) {
+        issues.push({ ...result, path });
+      }
     }
   }
 
   return issues;
 }
 
-function filterIssues(issues: TestLogReport[], filter: Filter) {
-  const byTitle = (issue: TestLogReport) =>
+function filterIssues(issues: TestLogReportWithLocation[], filter: Filter) {
+  const byTitle = (issue: TestLogReportWithLocation) =>
     filter?.title === undefined || issue.test?.key === filter.title;
 
   const criticality =
     filter.severity !== undefined ? SeverityLevels.indexOf(filter.severity) + 1 : 0;
-  const byCriticality = (issue: TestLogReport) =>
+
+  const byCriticality = (issue: TestLogReportWithLocation) =>
     filter.severity === undefined ||
     issue.outcome?.criticality === undefined ||
     issue.outcome?.criticality >= criticality;
 
+  const byPath = (issue: TestLogReportWithLocation) =>
+    filter?.path === undefined || issue.path === filter.path;
+
+  const byMethod = (issue: TestLogReportWithLocation) =>
+    filter?.method === undefined || issue.method === filter.method;
+
+  const byOperationId = (issue: TestLogReportWithLocation) =>
+    filter?.operationId === undefined || issue.operationId === filter.operationId;
+
   return issues.filter((issue) => {
-    return byTitle(issue) && byCriticality(issue);
+    return (
+      byTitle(issue) &&
+      byCriticality(issue) &&
+      byPath(issue) &&
+      byMethod(issue) &&
+      byOperationId(issue)
+    );
   });
 }
 
-function groupIssuesNew(issues: TestLogReport[]): {
+function groupIssues(issues: TestLogReportWithLocation[]): {
   grouped: OasState["grouped"];
   titles: OasState["titles"];
+  paths: OasState["paths"];
+  operationIds: OasState["operationIds"];
 } {
-  const grouped: Record<string, TestLogReport[]> = {};
+  const grouped: Record<string, TestLogReportWithLocation[]> = {};
   const titles: Record<string, string> = {};
+
+  const paths: Set<string> = new Set();
+  const operationIds: Set<string> = new Set();
 
   for (const issue of issues) {
     const key = issue.test?.key;
@@ -255,6 +322,10 @@ function groupIssuesNew(issues: TestLogReport[]): {
         titles[key] = issue.test?.description as string;
       }
       grouped[key].push(issue);
+    }
+    paths.add(issue.path);
+    if (issue.operationId) {
+      operationIds.add(issue.operationId);
     }
   }
 
@@ -286,7 +357,12 @@ function groupIssuesNew(issues: TestLogReport[]): {
     });
   }
 
-  return { grouped, titles: Object.keys(titles) };
+  return {
+    grouped,
+    titles: Object.keys(titles),
+    paths: Array.from(paths),
+    operationIds: Array.from(operationIds),
+  };
 }
 
 export default slice.reducer;

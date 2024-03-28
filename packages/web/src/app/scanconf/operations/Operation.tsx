@@ -18,6 +18,7 @@ import { startTryExecution } from "./slice";
 import AddAuthorizationTest from "./components/AddAuthorizationTest";
 import AuthorizationTests from "./AuthorizationTests";
 import { ErrorBanner } from "../../../components/Banner";
+import { extractScanconf, optionallyReplaceLocalhost } from "./util";
 
 export default function Operation({ operationId }: { operationId: string }) {
   const dispatch = useAppDispatch();
@@ -231,32 +232,3 @@ const Title = styled.div`
   font-size: 16px;
   font-weight: 700;
 `;
-
-function extractScanconf(mutable: Scanconf.ConfigurationFileBundle, operationId: string): string {
-  if (mutable.operations !== undefined) {
-    for (const key of Object.keys(mutable?.operations)) {
-      if (key !== operationId) {
-        mutable.operations[key].scenarios = [];
-      }
-    }
-  }
-  return JSON.stringify(mutable, null, 2);
-}
-
-function optionallyReplaceLocalhost(
-  server: string,
-  runtime: "docker" | "scand-manager" | "cli",
-  replaceLocalhost: boolean,
-  platform: string
-) {
-  if (
-    runtime == "docker" &&
-    replaceLocalhost &&
-    (platform === "darwin" || platform === "win32") &&
-    (server.toLowerCase().startsWith("https://localhost") ||
-      server.toLowerCase().startsWith("http://localhost"))
-  ) {
-    return server.replace(/localhost/i, "host.docker.internal");
-  }
-  return server;
-}

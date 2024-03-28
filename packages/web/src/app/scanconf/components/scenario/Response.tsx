@@ -5,7 +5,10 @@ import { useState } from "react";
 import styled from "styled-components";
 import { MockHttpResponse } from "../../../../core/playbook/mock-http";
 import { CircleCheckLight, CircleExclamationSolid } from "../../../../icons";
-import CollapsibleCard, { BottomDescription, BottomItem } from "../CollapsibleCard";
+import CollapsibleCard, {
+  BottomDescription,
+  BottomItem,
+} from "../../../../new-components/CollapsibleCard";
 import { TabButton, TabList } from "../../../../new-components/Tabs";
 import Body from "../response/Body";
 import Headers from "../response/Headers";

@@ -3,7 +3,10 @@ import styled from "styled-components";
 import { MockHttpResponse } from "../../../../core/playbook/mock-http";
 import { PlaybookEnvStack } from "../../../../core/playbook/playbook-env";
 import { TabContainer } from "../../../../new-components/Tabs";
-import CollapsibleCard, { BottomDescription, BottomItem } from "../CollapsibleCard";
+import CollapsibleCard, {
+  BottomDescription,
+  BottomItem,
+} from "../../../../new-components/CollapsibleCard";
 import HttpRequest from "../http-request/HttpRequest";
 import Body from "../response/Body";
 import Headers from "../response/Headers";

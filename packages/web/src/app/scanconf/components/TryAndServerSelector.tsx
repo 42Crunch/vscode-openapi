@@ -44,13 +44,17 @@ export default function TryAndServerSelector({
         <DownshiftCombo
           options={allServers}
           selected={selectedServer}
-          onSelectedItemChange={(item) => item && setSelectedServer(item)}
+          onSelectedItemChange={(item) => {
+            if (item) {
+              setSelectedServer(item);
+              setServer(item);
+            }
+          }}
         />
         <Action
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
-            setServer(selectedServer);
             onTry(selectedServer);
           }}
         >
@@ -62,7 +66,6 @@ export default function TryAndServerSelector({
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              setServer(selectedServer);
               onScan(selectedServer);
             }}
           >

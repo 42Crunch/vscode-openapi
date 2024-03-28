@@ -7,6 +7,9 @@ import { useState } from "react";
 import { useAppSelector } from "./store";
 import FilterCriticality from "./FilterCriticality";
 import FilterTitle from "./FilterTitle";
+import FilterPath from "./FilterPath";
+import FilterOperationId from "./FilterOperationId";
+import FilterMethod from "./FilterMethod";
 
 export default function FilterPanel() {
   const { filter, grouped } = useAppSelector((state) => state.scan);
@@ -27,6 +30,9 @@ export default function FilterPanel() {
         <Bottom>
           <FilterCriticality />
           <FilterTitle />
+          <FilterPath />
+          <FilterMethod />
+          <FilterOperationId />
           <FilterResetAll />
         </Bottom>
       )}

@@ -1,6 +1,9 @@
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { BracketsCurly, ExclamationCircle } from "../../../../icons";
-import CollapsibleCard, { BottomDescription, BottomItem } from "../CollapsibleCard";
+import CollapsibleCard, {
+  BottomDescription,
+  BottomItem,
+} from "../../../../new-components/CollapsibleCard";
 import { VariableReplacement } from "../scenario/types";
 import styled from "styled-components";
 
