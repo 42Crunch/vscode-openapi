@@ -107,7 +107,8 @@ export async function testCli(): Promise<CliTestResult> {
 
 export async function ensureCliDownloaded(
   configuration: Configuration,
-  secrets: vscode.SecretStorage
+  secrets: vscode.SecretStorage,
+  forceDownload = false
 ): Promise<boolean> {
   const config = await loadConfig(configuration, secrets);
   const info = getCliInfo();
@@ -116,7 +117,7 @@ export async function ensureCliDownloaded(
     // check if we already offered to download
 
     const currentTime = Date.now();
-    if (currentTime - lastCliDownloadCheckTime < cliDownloadCheckInterval) {
+    if (!forceDownload && currentTime - lastCliDownloadCheckTime < cliDownloadCheckInterval) {
       lastCliDownloadCheckTime = currentTime;
       return false;
     }

@@ -141,9 +141,10 @@ async function editorRunSingleOperationScan(
   // so there is no need to check for CLI availability for platform users
   if (
     config.platformAuthType === "anond-token" &&
-    !(await ensureCliDownloaded(configuration, secrets))
+    !(await ensureCliDownloaded(configuration, secrets, true))
   ) {
     // cli is not available and user chose to cancel download
+    await vscode.window.showErrorMessage("42Crunch CLI is required to run scans.");
     return;
   }
 
