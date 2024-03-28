@@ -35,12 +35,23 @@ export interface SingleOperationScanReport {
   oas: BundledSwaggerOrOasSpec;
 }
 
+export type FullScanReport = {
+  report: ScanReportJSONSchema;
+  security: TryitSecurityValues | undefined;
+  oas: BundledSwaggerOrOasSpec;
+};
+
 // requests to scan web app
 export type ScanOperationMessage = { command: "scanOperation"; payload: OasWithOperationAndConfig };
 
 export type ShowScanReportMessage = {
   command: "showScanReport";
   payload: SingleOperationScanReport;
+};
+
+export type ShowFullScanReportMessage = {
+  command: "showFullScanReport";
+  payload: FullScanReport;
 };
 
 // responses sent from web app to the vs code extension

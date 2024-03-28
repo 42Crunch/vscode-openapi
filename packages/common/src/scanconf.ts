@@ -19,6 +19,11 @@ export type ScanRunConfig = {
   scanconf: string;
 };
 
+export type FullScanRunConfig = {
+  env: SimpleEnvironment;
+  scanconf: string;
+};
+
 // vs code to webapp requests
 export type ShowScanconfOperationMessage = {
   command: "showScanconfOperation";
@@ -29,3 +34,4 @@ export type UpdateScanconfMessage = { command: "updateScanconf"; payload: string
 // webapp to vs code responses
 export type SaveScanconfMessage = { command: "saveScanconf"; payload: string };
 export type RunScanMessage = { command: "runScan"; payload: ScanRunConfig };
+export type RunFullScanMessage = { command: "runFullScan"; payload: FullScanRunConfig };

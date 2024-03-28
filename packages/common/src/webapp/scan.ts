@@ -5,6 +5,7 @@ import {
   ShowJsonPointerMessage,
   ShowAuditReportMessage,
   StartScanMessage,
+  ShowFullScanReportMessage,
 } from "../scan";
 import { LoadPreferencesMessage, SavePreferencesMessage } from "../prefs";
 import { LoadEnvMessage, ShowEnvWindow } from "../env";
@@ -30,6 +31,7 @@ export type Webapp = App<
   | ChangeThemeMessage
   | ShowHttpErrorMessage
   | ShowScanReportMessage
+  | ShowFullScanReportMessage
   | ShowHttpResponseMessage
   | ShowLogMessage,
   // produces
