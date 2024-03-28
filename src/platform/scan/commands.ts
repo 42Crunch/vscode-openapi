@@ -146,7 +146,7 @@ async function editorRunSingleOperationScan(
     !(await ensureCliDownloaded(configuration, secrets, true))
   ) {
     // cli is not available and user chose to cancel download
-    await vscode.window.showErrorMessage("42Crunch CLI is required to run scans.");
+    await vscode.window.showErrorMessage("42Crunch CLI is required to run Scan.");
     return;
   }
 
