@@ -67,6 +67,7 @@ export async function parseAuditReport(
 
   const result = {
     valid: report.valid,
+    openapiState: report.openapiState,
     minimalReport: report.minimalReport,
     summary: {
       ...grades,

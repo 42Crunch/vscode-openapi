@@ -235,7 +235,7 @@ async function createDefaultScanConfig(
           // paid users create scan configs using the platform, this includes running an initial audit
           const report = await runPlatformAudit(document, oas, bundle.mapping, cache, store);
 
-          if (report?.valid === false) {
+          if (report?.openapiState !== "valid") {
             throw new Error(
               "Your API has structural or semantic issues in its OpenAPI format. Run Security Audit on this file and fix these issues first."
             );
