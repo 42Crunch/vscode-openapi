@@ -16,7 +16,7 @@ After installing the plugin, open any JSON or YAML file that contains an OpenAPI
 
 We also encourage you to watch [this video](https://42crunch.com/tutorial-openapi-swagger-extension-vs-code/#Introducing-OpenAPI-Editor) that gives you a full tour of the editor and its different features.
 
-## Editor features 
+## Editor features
 
 This extension makes it easier and faster to navigate your OpenAPI definitions, especially when they get longer.
 
@@ -31,11 +31,11 @@ You can home in on elements in the OpenAPI explorer view, or jump directly to th
 
 ![Create new OpenAPI file from a template](./images/New%20OpenAPI%20file.gif?raw=true)
 
-![](https://img.shields.io/badge/Learning%20More!-red) Watch this [video](https://42crunch.com/tutorial-openapi-swagger-extension-vs-code/#Navigating-OpenAPI-Explorer) on editor basics. 
+![](https://img.shields.io/badge/Learning%20More!-red) Watch this [video](https://42crunch.com/tutorial-openapi-swagger-extension-vs-code/#Navigating-OpenAPI-Explorer) on editor basics.
 
 ### Navigating an API definition
 
-1. Open an OpenAPI file. 
+1. Open an OpenAPI file.
 2. Click the OpenAPI button to switch to the OpenAPI explorer view.
 3. Expand the sections and elements in the file as needed, and click the ones you want to jump to in the editor.
 
@@ -92,8 +92,8 @@ To change the default OpenAPI Preview rendering engine:
 
 With "Try it", you can invoke operations defined in your OpenAPI directly from VS Code:
 
-* Click on "Try it" in the code lens which is displayed right below the HTTP verb (e.g. "get", "post") of your operation and in the examples section.
-* The payload data will be generated based on the request JSON Schema, or the first example available. You can edit this information before sending the request.
+- Click on "Try it" in the code lens which is displayed right below the HTTP verb (e.g. "get", "post") of your operation and in the examples section.
+- The payload data will be generated based on the request JSON Schema, or the first example available. You can edit this information before sending the request.
 
 ![TryIt view](./images/tryit.png)
 
@@ -107,8 +107,8 @@ Try it comes with a number of limitations:
 
 "Try it" can be used to generate JSON Schema based on the body of the response.
 
-+ Select "Tools" tab in the TryIt response 
-+ Click "Generate schema" button.
+- Select "Tools" tab in the TryIt response
+- Click "Generate schema" button.
 
 ![TryIt response tools](images/tryit-schema.png)
 
@@ -118,11 +118,11 @@ You can use this OpenAPI extension to check the quality and security of your API
 
 ![](https://img.shields.io/badge/Learning%20More!-green) Watch this [video](https://42crunch.com/free-user-faq/#Free-API-Security-Testing-FAQs-00) to learn more about 42Crunch Audit.
 
-You can run the audit service in freemium or platform mode: 
+You can run the audit service in freemium or platform mode:
 
 - **Using our freemium centralized service**: this service is a fully featured version of the audit, but with usage limits. In this mode, OAS files are sent to the service, audited and a report is returned. This is a stateless service: **we do not keep the OpenAPI file, nor the report.**
-- New! **Using the 42Crunch CLI**:  in this mode, audits are performed locally (on the user's machine). This is only available to <u>freemium</u> users for now. Support for local audit/scans using a platform API token will be available soon. In this mode, **OpenAPI files and reports are kept locally**.
-- **Using 42Crunch SaaS platform**: this requires an account on a 42Crunch platform, which is available to customers and to prospects evaluating our product. In this case, you need to supply your platform URL and an IDE token (which can be created from the platform home page). You can specify those settings by invoking `42Crunch: Update platform credentials`  from the command palette.
+- New! **Using the 42Crunch CLI**: in this mode, audits are performed locally (on the user's machine). This is only available to <u>freemium</u> users for now. Support for local audit/scans using a platform API token will be available soon. In this mode, **OpenAPI files and reports are kept locally**.
+- **Using 42Crunch SaaS platform**: this requires an account on a 42Crunch platform, which is available to customers and to prospects evaluating our product. In this case, you need to supply your platform URL and an IDE token (which can be created from the platform home page). You can specify those settings by invoking `42Crunch: Update platform credentials` from the command palette.
 
 ![IDE-PlatformIntegration](./images/IDE-PlatformIntegration.png)
 
@@ -132,7 +132,7 @@ To run Security Audit from VS Code, you need a token. The first time you try to 
 
 Once you supply the address, the extension requests the token to be sent to your mailbox. Paste the token you received in the prompt in VS Code, and you are all set.
 
-Watch this short [video](https://42crunch.com/free-user-faq/#Free-API-Security-Testing-FAQs-02) which takes you through those steps. 
+Watch this short [video](https://42crunch.com/free-user-faq/#Free-API-Security-Testing-FAQs-02) which takes you through those steps.
 
 ### Running an audit
 
@@ -148,10 +148,10 @@ After the audit finishes, you get the audit report directly in the VS Code view,
 
 Look here for issues that require the most attention.
 
-* **Most Common issues**: this list contains issues that are occuring the most, and how many times they are repeated. 
-* **Opportunities**: this list contains issues that, if fixed, will most contribute to raise the audit score.
+- **Most Common issues**: this list contains issues that are occuring the most, and how many times they are repeated.
+- **Opportunities**: this list contains issues that, if fixed, will most contribute to raise the audit score.
 
-Those two lists will often overlap and in certain cases be identical, but this is totally normal. 
+Those two lists will often overlap and in certain cases be identical, but this is totally normal.
 
 ![AuditIssuesList](./images/AuditIssuesList.png)
 
@@ -159,18 +159,17 @@ Those two lists will often overlap and in certain cases be identical, but this i
 
 The full issue list contains all issues found. The list can be filtered in two ways:
 
-* **Using the security gate (SQG) toggle**: an SQG enforces enterprise compliance and hightlights issues that are offending the requirements established, such as a minimal score, issues severity or specific issues (e.g. an API key is used when only OAuth is allowed across the enterprise). When the toggle is on, only the issues affecting the SQG status are shown.
-
+- **Using the security gate (SQG) toggle**: an SQG enforces enterprise compliance and hightlights issues that are offending the requirements established, such as a minimal score, issues severity or specific issues (e.g. an API key is used when only OAuth is allowed across the enterprise). When the toggle is on, only the issues affecting the SQG status are shown.
 
 ![](https://img.shields.io/badge/Note%20-blue) SQG results are not visible yet to all Freemium users.
 
 ![AuditIssuesList-Full](./images/AuditIssuesList-Full.png)
 
-* **Using the filtering options**: you can also use filtering options to drill-down into the list such as severity, category or even a specific issue type.
+- **Using the filtering options**: you can also use filtering options to drill-down into the list such as severity, category or even a specific issue type.
 
 #### Issues details
 
-For each issue, you have access to full information about the issue, why it is relevant and recommendations on how to address the issue. 
+For each issue, you have access to full information about the issue, why it is relevant and recommendations on how to address the issue.
 
 ![](https://img.shields.io/badge/Learning%20More!-green) Watch this [video](https://42crunch.com/free-user-faq/#Free-API-Security-Testing-FAQs-2) to learn more about audit and how to navigate issues.
 
@@ -195,36 +194,33 @@ Many of the issues reported by 42Crunch Audit have fixes associated with them. T
 
 APIs which thoroughly enforce compliance to an established contract are far more resilient to all types of attacks.
 
-![](https://img.shields.io/badge/Important-red)  You must only use 42Crunch Scan against APIs that you own, not those of third parties.
+![](https://img.shields.io/badge/Important-red) You must only use 42Crunch Scan against APIs that you own, not those of third parties.
 
-### Launching 42Crunch Scan 
+### Launching 42Crunch Scan
 
-Scans are run at the operation level only. We recommend you use the 42Crunch CLI to run scans. The alternative is to run a docker image locally. 42Crunch customers can also leverage our [scand manager](https://github.com/42Crunch/scand-manager), by deploying an API-driven scan engine on Kubernetes.
+Scans are run at the operation level only. We recommend you use the 42Crunch API Security Testing Binary to run scans. The alternative is to run a docker image locally. 42Crunch customers can also leverage our [scand manager](https://github.com/42Crunch/scand-manager), by deploying an API-driven scan engine on Kubernetes.
 
-In order to run a scan, you will need : 
+In order to run a scan, you will need :
 
-- **A credential** : most likely, your API is using some form of authentication, like an API Key or token. You need a valid credential to provide to the scan engine. 
+- **A credential** : most likely, your API is using some form of authentication, like an API Key or token. You need a valid credential to provide to the scan engine.
 
-- **The URL** when the API is deployed.  
+- **The URL** when the API is deployed.
 
-  ![](https://img.shields.io/badge/Warning-orange)  We strongly recommend that you do <u>not</u> target a production system. While the tool does not try to inject malicious payloads, it is possible that the API implementation is not resilient enough to handle the tests and may crash or behave unexpectedly.
+  ![](https://img.shields.io/badge/Warning-orange) We strongly recommend that you do <u>not</u> target a production system. While the tool does not try to inject malicious payloads, it is possible that the API implementation is not resilient enough to handle the tests and may crash or behave unexpectedly.
 
-When you first launch a scan, you are presented with the scan configuration viewer. The scan configuration is generated automatically from the OpenAPI file you chose to scan. 
+When you first launch a scan, you are presented with the scan configuration viewer. The scan configuration is generated automatically from the OpenAPI file you chose to scan.
 
-- For each operation in the OpenAPI file, a request is created. You can test individual requests using the **Try** button top-right. 
+- For each operation in the OpenAPI file, a request is created. You can test individual requests using the **Try** button top-right.
 
   ![](./images/ScantryIt.png)
 
 - Requests can be arranged into testing scenarios: a scenario combines one or multiple requests, for example you need to create a resource before you can view it. The editor allows you to extract data as variables from a request execution to inject it into the next step.
-	
-	Similarly to requests, you can test an individual scenario to ensure it is built correctly before starting a scan: the scan engine will execute the scenario and if successful, launch automatically dozens of tests using the data provided in the OpenAPI file. The scan will send bad verbs, bad data types, bad data formats as well as authentication tests. 
-	
-	![](/Volumes/MYDATA/Product/vscode-openapi/images/ScanScenarios.png)
-	
 
+  Similarly to requests, you can test an individual scenario to ensure it is built correctly before starting a scan: the scan engine will execute the scenario and if successful, launch automatically dozens of tests using the data provided in the OpenAPI file. The scan will send bad verbs, bad data types, bad data formats as well as authentication tests.
 
+  ![](/Volumes/MYDATA/Product/vscode-openapi/images/ScanScenarios.png)
 
-Once the scan has run, you are presented with a results page. The summary shows if the scan got a testing baseline by running the HappyPath test. Additional testing results are visible from the tests list. For each issue, you can easily reproduce the problem using a curl request. 
+Once the scan has run, you are presented with a results page. The summary shows if the scan got a testing baseline by running the HappyPath test. Additional testing results are visible from the tests list. For each issue, you can easily reproduce the problem using a curl request.
 
 ![](./images/ScanReport.gif)
 

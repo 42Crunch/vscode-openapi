@@ -697,7 +697,7 @@
           "enumDescriptions": [
             "Use Docker to run 42Crunch API Conformance Scan",
             "Use Scand-Manager to run 42Crunch API Conformance Scan",
-            "Use 42Crunch CLI to run Conformance Scan and Security Audit"
+            "Use 42Crunch API Security Testing Binary to run Conformance Scan and Security Audit"
           ]
         },
         "openapi.docker": {
@@ -785,7 +785,7 @@
           "type": "string",
           "format": "uri",
           "default": "https://repo.42crunch.com/downloads",
-          "description": "Repository URL for 42Crunch CLI binaries"
+          "description": "Repository URL for 42Crunch API Security Testing Binary"
         },
         "openapi.securityAuditToken": {
           "scope": "machine",

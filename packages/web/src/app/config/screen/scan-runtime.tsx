@@ -51,13 +51,13 @@ export function PlatformServices() {
             options={[
               { value: "docker", label: "Docker" },
               { value: "scand-manager", label: "Scand manager" },
-              { value: "cli", label: "42Crunch CLI" },
+              { value: "cli", label: "42Crunch API Security Testing Binary" },
             ]}
           />
         )}
 
         {platformAuthType === "anond-token" && (
-          <Banner message="Scan runtime is set to use 42Crunch CLI" />
+          <Banner message="Scan runtime is set to use 42Crunch API Security Testing Binary" />
         )}
 
         {scanRuntime === "docker" && (
@@ -116,7 +116,7 @@ export function PlatformServices() {
 
         {scanRuntime === "cli" && cli.found && (
           <>
-            <Banner message={`Using 42Crunch CLI in ${cli.location}`} />
+            <Banner message={`Using 42Crunch API Security Testing Binary in ${cli.location}`} />
             <Test>
               <ValidProgressButton
                 label="Check version"
@@ -148,7 +148,7 @@ export function PlatformServices() {
               {waitingForCliDownload && <ProgressBar progress={cliDownloadPercent} />}
             </Test>
             <Banner
-              message={`Download 42Crunch CLI, the binary was not found in ${cli.location}`}
+              message={`Download 42Crunch API Security Testing Binary, the binary was not found in ${cli.location}`}
             />
           </>
         )}
@@ -160,7 +160,7 @@ export function PlatformServices() {
         {scanRuntime === "cli" && (
           <div>
             <p>
-              42Crunch CLI is subject to usage limits, find more details at{" "}
+              42Crunch API Security Testing Binary is subject to usage limits, find more details at{" "}
               <a
                 href="https://42crunch.com/free-user-faq/"
                 onClick={(e) => {

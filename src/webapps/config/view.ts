@@ -144,7 +144,9 @@ async function* downloadCliHandler(
     const manifest = await getCliUpdate(repository, "0.0.0");
 
     if (manifest === undefined) {
-      throw new Error("Failed to download 42Crunch CLI, manifest not found");
+      throw new Error(
+        "Failed to download 42Crunch API Security Testing Binary, manifest not found"
+      );
     }
 
     const location = yield* transformValues(

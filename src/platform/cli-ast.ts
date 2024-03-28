@@ -125,7 +125,7 @@ export async function ensureCliDownloaded(
     // offer to download
     await delay(100); // workaround for #133073
     const answer = await vscode.window.showInformationMessage(
-      "42Crunch CLI is not found, download?",
+      "42Crunch API Security Testing Binary is not found, download?",
       { modal: true },
       { title: "Download", id: "download" }
     );
@@ -133,7 +133,9 @@ export async function ensureCliDownloaded(
     if (answer?.id === "download") {
       const manifest = await getCliUpdate(config.repository, "0.0.0");
       if (manifest === undefined) {
-        vscode.window.showErrorMessage("Failed to download 42Crunch CLI, manifest not found");
+        vscode.window.showErrorMessage(
+          "Failed to download 42Crunch API Security Testing Binary, manifest not found"
+        );
         return false;
       }
       return downloadCliWithProgress(manifest);
@@ -158,7 +160,7 @@ async function checkForCliUpdate(repository: string): Promise<boolean> {
     if (manifest !== undefined) {
       await delay(100); // workaround for #133073
       const answer = await vscode.window.showInformationMessage(
-        `New version ${manifest.version} of 42Crunch CLI is available, download?`,
+        `New version ${manifest.version} of 42Crunch API Security Testing Binary is available, download?`,
         { modal: true },
         { title: "Download", id: "download" }
       );
@@ -176,7 +178,7 @@ function downloadCliWithProgress(manifest: CliAstManifestEntry) {
   return vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: "Downloading 42Crunch CLI",
+      title: "Downloading 42Crunch API Security Testing Binary",
       cancellable: false,
     },
     async (progress, cancellationToken): Promise<boolean> => {
@@ -214,7 +216,7 @@ export async function runScanWithCliBinary(
   scanconf: string,
   isSingleOperationScan: boolean
 ): Promise<Result<{ scan: unknown; cli: CliResponse }, CliError>> {
-  logger.info(`Running Conformance Scan using 42Crunch CLI`);
+  logger.info(`Running Conformance Scan using 42Crunch API Security Testing Binary`);
 
   const tmpDir = tmpdir();
   const dir = mkdtempSync(join(`${tmpDir}`, "scan-"));
@@ -299,7 +301,7 @@ export async function runValidateScanConfigWithCliBinary(
   oas: string,
   scanconf: string
 ): Promise<Result<CliValidateResponse, CliError>> {
-  logger.info(`Running Validate Scan Config using 42Crunch CLI`);
+  logger.info(`Running Validate Scan Config using 42Crunch API Security Testing Binary`);
 
   const tmpDir = tmpdir();
   const dir = mkdtempSync(join(`${tmpDir}`, "scan-"));
@@ -347,7 +349,7 @@ export async function runAuditWithCliBinary(
   oas: string,
   isSingleOperationAudit: boolean
 ): Promise<Result<{ audit: unknown; cli: CliResponse }, CliError>> {
-  logger.info(`Running Security Audit using 42Crunch CLI`);
+  logger.info(`Running Security Audit using 42Crunch API Security Testing Binary`);
 
   const dir = createTempDirectory("audit-");
 
