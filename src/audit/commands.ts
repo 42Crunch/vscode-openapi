@@ -26,7 +26,6 @@ import { runCliAudit } from "./runtime/cli";
 import { runPlatformAudit } from "./runtime/platform";
 import { setAudit } from "./service";
 import { AuditWebView } from "./view";
-import { Config } from "@xliic/common/config";
 import { loadConfig } from "../util/config";
 
 export function registerSecurityAudit(

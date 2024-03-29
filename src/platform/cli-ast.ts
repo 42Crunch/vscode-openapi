@@ -118,9 +118,9 @@ export async function ensureCliDownloaded(
 
     const currentTime = Date.now();
     if (!forceDownload && currentTime - lastCliDownloadCheckTime < cliDownloadCheckInterval) {
-      lastCliDownloadCheckTime = currentTime;
       return false;
     }
+    lastCliDownloadCheckTime = currentTime;
 
     // offer to download
     await delay(100); // workaround for #133073

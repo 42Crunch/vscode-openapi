@@ -139,10 +139,10 @@ async function editorRunSingleOperationScan(
 
   const config = await loadConfig(configuration, secrets);
 
-  // free users must have CLI available, platform users always use platform for scan config generation
-  // so there is no need to check for CLI availability for platform users
+  // free users and platform users who chose to use CLI for scan must have CLI available
   if (
-    config.platformAuthType === "anond-token" &&
+    (config.platformAuthType === "anond-token" ||
+      (config.platformAuthType === "api-token" && config.scanRuntime === "cli")) &&
     !(await ensureCliDownloaded(configuration, secrets, true))
   ) {
     // cli is not available and user chose to cancel download
