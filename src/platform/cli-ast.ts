@@ -214,7 +214,7 @@ export async function runScanWithCliBinary(
   logger: Logger,
   oas: string,
   scanconf: string,
-  isSingleOperationScan: boolean
+  isFullScan: boolean
 ): Promise<Result<{ scan: unknown; cli: CliResponse }, CliError>> {
   logger.info(`Running Conformance Scan using 42Crunch API Security Testing Binary`);
 
@@ -248,7 +248,7 @@ export async function runScanWithCliBinary(
     "--enrich=false",
   ];
 
-  if (isSingleOperationScan) {
+  if (!isFullScan) {
     args.push("--is-operation");
   }
 
