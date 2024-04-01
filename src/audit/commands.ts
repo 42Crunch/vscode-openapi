@@ -211,7 +211,7 @@ async function securityAudit(
               cache,
               secrets,
               progress,
-              !isFullAudit
+              isFullAudit
             );
           } else {
             return runAnondAudit(editor.document, oas, mapping, cache, configuration, progress);

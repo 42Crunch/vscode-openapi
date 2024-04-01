@@ -212,7 +212,7 @@ async function createDefaultScanConfig(
             secrets,
             emptyLogger,
             oas,
-            false
+            true
           );
 
           if (reportError !== undefined) {

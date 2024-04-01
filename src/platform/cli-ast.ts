@@ -347,7 +347,7 @@ export async function runAuditWithCliBinary(
   secrets: vscode.SecretStorage,
   logger: Logger,
   oas: string,
-  isSingleOperationAudit: boolean
+  isFullAudit: boolean
 ): Promise<Result<{ audit: unknown; cli: CliResponse }, CliError>> {
   logger.info(`Running Security Audit using 42Crunch API Security Testing Binary`);
 
@@ -378,7 +378,7 @@ export async function runAuditWithCliBinary(
         "--verbose",
         "error",
         "--enrich=false",
-        isSingleOperationAudit ? "--is-operation" : "",
+        isFullAudit ? "" : "--is-operation",
         "--token",
         String(token),
       ].filter((option) => option !== ""),

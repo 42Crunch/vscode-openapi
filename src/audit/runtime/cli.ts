@@ -26,7 +26,7 @@ export async function runCliAudit(
   cache: Cache,
   secrets: vscode.SecretStorage,
   progress: vscode.Progress<any>,
-  isSingleOperationAudit: boolean
+  isFullAudit: boolean
 ): Promise<Audit | undefined> {
   const logger: Logger = {
     fatal: (message: string) => null,
@@ -36,7 +36,7 @@ export async function runCliAudit(
     debug: (message: string) => null,
   };
 
-  const [result, error] = await runAuditWithCliBinary(secrets, logger, oas, isSingleOperationAudit);
+  const [result, error] = await runAuditWithCliBinary(secrets, logger, oas, isFullAudit);
 
   if (error !== undefined) {
     if (error.statusCode === 3 && error.statusMessage === "limits_reached") {
@@ -48,13 +48,13 @@ export async function runCliAudit(
   }
 
   if (
-    isSingleOperationAudit &&
+    isFullAudit &&
     result.cli.remainingPerOperationAudit !== undefined &&
     result.cli.remainingPerOperationAudit < UPGRADE_WARN_LIMIT
   ) {
     warnOperationAudits(result.cli.remainingPerOperationAudit);
   } else if (
-    !isSingleOperationAudit &&
+    !isFullAudit &&
     result.cli.remainingFullAudit !== undefined &&
     result.cli.remainingFullAudit < UPGRADE_WARN_LIMIT
   ) {
