@@ -7,7 +7,12 @@ import { find } from "@xliic/preserving-json-yaml-parser";
 import { Playbook } from "@xliic/scanconf";
 import { NullableResult, Result } from "@xliic/result";
 
-import { PlaybookEnv, PlaybookEnvStack, PlaybookVariableAssignments } from "./playbook-env";
+import {
+  PlaybookEnv,
+  PlaybookEnvStack,
+  PlaybookVariableAssignments,
+  PlaybookVariableFailedAssignment,
+} from "./playbook-env";
 import { MockHttpResponse, MockHttpResponseType } from "./mock-http";
 
 export function assignVariables(
@@ -278,4 +283,16 @@ export function getHttpStatusCategory(httpStatus: number): string {
   } else {
     return "default";
   }
+}
+
+export function failedAssigments(env: PlaybookEnvStack): PlaybookVariableFailedAssignment[] {
+  const result: PlaybookVariableFailedAssignment[] = [];
+  for (const { assignments } of env) {
+    for (const assignment of assignments) {
+      if (assignment.error !== undefined) {
+        result.push(assignment);
+      }
+    }
+  }
+  return result;
 }

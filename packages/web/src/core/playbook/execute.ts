@@ -7,7 +7,7 @@ import { makeExternalHttpRequest, makeHttpRequest } from "./http";
 import { MockHttpClient, MockHttpResponse } from "./mock-http";
 import { AuthResult, PlaybookExecutorStep } from "./playbook";
 import { PlaybookEnv, PlaybookEnvStack } from "./playbook-env";
-import { assignVariables, getHttpStatusCategory } from "./variable-assignments";
+import { assignVariables, failedAssigments, getHttpStatusCategory } from "./variable-assignments";
 import {
   getMissingVariableNames,
   replaceCredentialVariables,
@@ -252,6 +252,17 @@ async function* executePlaybook(
 
     yield { event: "variables-assigned", assignments: requestAssignments };
 
+    const requestFailedAssignments = failedAssigments(requestAssignments);
+    if (requestFailedAssignments.length > 0) {
+      yield {
+        event: "response-processing-error",
+        error: `Response processing failed, can't values for variables: ${requestFailedAssignments
+          .map((a) => `${a.name} (${a.error})`)
+          .join(", ")}`,
+      };
+      return;
+    }
+
     const [stepAssignments, stepAssignmentsError] = assignVariables(
       `playbook-${name}-step-${i}`,
       step.responses,
@@ -269,6 +280,17 @@ async function* executePlaybook(
     }
 
     yield { event: "variables-assigned", assignments: stepAssignments };
+
+    const stepFailedAssignments = failedAssigments(stepAssignments);
+    if (stepFailedAssignments.length > 0) {
+      yield {
+        event: "response-processing-error",
+        error: `Response processing failed, can't values for variables: ${stepFailedAssignments
+          .map((a) => `${a.name} (${a.error})`)
+          .join(", ")}`,
+      };
+      return;
+    }
 
     result.push(...stepAssignments);
   }
