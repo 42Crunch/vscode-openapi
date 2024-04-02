@@ -178,6 +178,10 @@ export class ScanWebView extends WebView<Webapp> {
     showEnvWindow: async () => {
       vscode.commands.executeCommand("openapi.showEnvironment");
     },
+
+    openLink: async (url: string) => {
+      vscode.env.openExternal(vscode.Uri.parse(url));
+    },
   };
 
   onDispose(): void {

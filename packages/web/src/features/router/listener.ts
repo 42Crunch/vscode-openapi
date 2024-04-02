@@ -1,6 +1,38 @@
-import { ListenerMiddlewareInstance } from "@reduxjs/toolkit";
+import {
+  ListenerMiddlewareInstance,
+  StateFromReducersMapObject,
+  TypedStartListening,
+  configureStore,
+} from "@reduxjs/toolkit";
+
+import { Webapp, NoopMessage } from "@xliic/common/message";
+import { OpenLinkMessage } from "@xliic/common/link";
+
 import { Routes } from "./RouterContext";
-import { goTo } from "./slice";
+import { goTo, openLink } from "./slice";
+
+import router from "./slice";
+
+const reducer = { router };
+const initStore = () => configureStore({ reducer });
+
+type FeatureState = StateFromReducersMapObject<typeof reducer>;
+type FeatureDispatch = ReturnType<typeof initStore>["dispatch"];
+type FeatureListening = TypedStartListening<FeatureState, FeatureDispatch>;
+
+export function onOpenLink(
+  startAppListening: FeatureListening,
+  host: Webapp<NoopMessage, OpenLinkMessage>["host"]
+) {
+  return () =>
+    startAppListening({
+      actionCreator: openLink,
+      effect: async (action, listenerApi) => {
+        debugger;
+        host.postMessage({ command: "openLink", payload: action.payload });
+      },
+    });
+}
 
 export function startNavigationListening(
   startListening: ListenerMiddlewareInstance["startListening"],

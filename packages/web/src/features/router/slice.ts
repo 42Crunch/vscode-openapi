@@ -21,6 +21,7 @@ export const slice = createSlice({
       state.history.push(state.current);
       state.current = action.payload;
     },
+    openLink: (state, action: PayloadAction<string>) => {},
     goBack: (state) => {
       if (state.history.length > 0) {
         state.current = state.history.pop()!;
@@ -29,7 +30,7 @@ export const slice = createSlice({
   },
 });
 
-export const { goTo, goBack } = slice.actions;
+export const { goTo, goBack, openLink } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<
   ReturnType<(typeof slice.actions)[keyof typeof slice.actions]>

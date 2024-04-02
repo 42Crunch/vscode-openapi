@@ -4,6 +4,7 @@ import { ShowScanconfOperationMessage, RunScanMessage, RunFullScanMessage } from
 import { ChangeThemeMessage } from "../theme";
 import { ShowEnvWindow, LoadEnvMessage } from "../env";
 import { LoadConfigMessage } from "../config";
+import { OpenLinkMessage } from "../link";
 
 import { SendHttpRequestMessage, ShowHttpResponseMessage, ShowHttpErrorMessage } from "../http";
 import { LoadPreferencesMessage, SavePreferencesMessage } from "../prefs";
@@ -25,4 +26,5 @@ export type Webapp = App<
   | ShowEnvWindow
   | RunScanMessage
   | RunFullScanMessage
+  | OpenLinkMessage
 >;

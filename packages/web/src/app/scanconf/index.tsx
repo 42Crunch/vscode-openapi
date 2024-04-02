@@ -56,6 +56,11 @@ const routes: Routes = [
     title: "Settings",
     element: <Settings />,
   },
+  {
+    id: "help",
+    title: "Help",
+    link: "https://42crunch.com/tutorial-security-conformance-scan-openapi-swagger-extension-vs-code/",
+  },
 ];
 
 function renderWebView(host: Webapp["host"], theme: ThemeState) {

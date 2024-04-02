@@ -9,7 +9,7 @@ import { serialize } from "@xliic/scanconf";
 import { Webapp } from "@xliic/common/webapp/scanconf";
 
 import { showEnvWindow } from "../../features/env/slice";
-import { startNavigationListening } from "../../features/router/listener";
+import { startNavigationListening, onOpenLink } from "../../features/router/listener";
 import { Routes } from "../../features/router/RouterContext";
 import { startListeners } from "../webapp";
 import { runFullScan, runScan, sendHttpRequest } from "./actions";
@@ -136,6 +136,8 @@ export function createListener(host: Webapp["host"], routes: Routes) {
           });
         },
       }),
+
+    openLink: onOpenLink(startAppListening, host),
   };
 
   const executeTryScenarioListener = onTryExecuteScenario(startAppListening, host);

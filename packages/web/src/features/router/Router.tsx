@@ -10,9 +10,10 @@ export default function Router() {
 function InnerRouter({ routes }: { routes: Routes }) {
   const current = useFeatureSelector((state) => state.router.current);
   const route = findRoute(routes, current);
-  if (!route) {
+  if (!route || route.link) {
     return <div />;
   }
+
   return route.element;
 }
 

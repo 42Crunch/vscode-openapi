@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { goTo } from "./slice";
+import { goTo, openLink } from "./slice";
 
 import { RouterContext, Routes } from "./RouterContext";
 import { useFeatureSelector, useFeatureDispatch } from "./slice";
@@ -19,8 +19,18 @@ function InnerNavigation({ routes }: { routes: Routes }) {
 
   return (
     <NavigationContent>
-      {routes.map(({ id, title }) => (
-        <NavigationTab key={id} active={id === current[0]} onClick={() => dispatch(goTo([id]))}>
+      {routes.map(({ id, title, link }) => (
+        <NavigationTab
+          key={id}
+          active={id === current[0]}
+          onClick={() => {
+            if (link) {
+              dispatch(openLink(link));
+            } else {
+              dispatch(goTo([id]));
+            }
+          }}
+        >
           {typeof title === "string" ? <div>{title}</div> : title}
         </NavigationTab>
       ))}
