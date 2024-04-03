@@ -42,6 +42,7 @@ function renderSuccessfullAssignment(assignment: PlaybookVariableSuccessfullAssi
     <React.Fragment>
       <div>{assignment.name}</div>
       <div>{`${assignment.value}`}</div>
+      <div></div>
     </React.Fragment>
   );
 }

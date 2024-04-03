@@ -72,9 +72,8 @@ const Container = styled.div`
 
 function assignmentCount(env?: PlaybookEnvStack): number {
   if (env !== undefined) {
-    return env.map((e) => e.assignments.length).reduce((acc, value) => (acc = value), 0);
+    return env.map((e) => e.assignments.length).reduce((acc, value) => (acc = acc + value), 0);
   }
-
   return 0;
 }
 
