@@ -256,8 +256,8 @@ async function* executePlaybook(
     if (requestFailedAssignments.length > 0) {
       yield {
         event: "response-processing-error",
-        error: `Response processing failed, can't values for variables: ${requestFailedAssignments
-          .map((a) => `${a.name} (${a.error})`)
+        error: `Response processing failed, can't assign variables: ${requestFailedAssignments
+          .map((a) => a.name)
           .join(", ")}`,
       };
       return;
@@ -285,8 +285,8 @@ async function* executePlaybook(
     if (stepFailedAssignments.length > 0) {
       yield {
         event: "response-processing-error",
-        error: `Response processing failed, can't values for variables: ${stepFailedAssignments
-          .map((a) => `${a.name} (${a.error})`)
+        error: `Response processing failed, can't assign variables: ${stepFailedAssignments
+          .map((a) => a.name)
           .join(", ")}`,
       };
       return;

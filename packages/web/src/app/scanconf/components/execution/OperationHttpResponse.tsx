@@ -45,6 +45,7 @@ export default function OperationHttpResponse({
               title: "Variables",
               content: <VariableAssignments assignment={variables || []} />,
               counter: assignmentCount(variables),
+              counterKind: hasErrors(variables) ? "error" : "normal",
               disabled: variables === undefined || assignmentCount(variables) === 0,
             },
           ]}
@@ -66,4 +67,10 @@ function assignmentCount(env?: PlaybookEnvStack): number {
   }
 
   return 0;
+}
+
+function hasErrors(assignments?: PlaybookEnvStack): boolean {
+  return !!assignments
+    ?.map((env) => env.assignments.some((a) => a.error !== undefined))
+    .some((e) => e);
 }

@@ -5,9 +5,12 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import {
   PlaybookEnvStack,
   PlaybookVariableAssignment,
+  PlaybookVariableFailedAssignment,
+  PlaybookVariableSuccessfullAssignment,
 } from "../../../../core/playbook/playbook-env";
 import { TriangleExclamation } from "../../../../icons";
 import React from "react";
+import { VariableAssignment } from "@xliic/scanconf/dist/playbook";
 
 export default function VariableAssignments({ assignment }: { assignment: PlaybookEnvStack }) {
   return (
@@ -18,20 +21,51 @@ export default function VariableAssignments({ assignment }: { assignment: Playbo
         <div></div>
       </Header>
       <Fields>
-        {assignment.flatMap((env, index) => renderAssignment(env.assignments, index))}
+        {assignment.flatMap((env, index) => renderAssignments(env.assignments, index))}
       </Fields>
     </Container>
   );
 }
 
-function renderAssignment(assignments: PlaybookVariableAssignment[], key: number) {
+function renderAssignments(assignments: PlaybookVariableAssignment[], key: number) {
   return assignments.map((assignment, index) => (
     <React.Fragment key={`${key}-${index}`}>
-      <div>{assignment.name}</div>
-      <div>{`${assignment.error !== undefined ? assignment.error : assignment.value}`}</div>
-      <Error>{assignment.error && <TriangleExclamation />}</Error>
+      {assignment.error !== undefined
+        ? renderFailedAssignment(assignment)
+        : renderSuccessfullAssignment(assignment)}
     </React.Fragment>
   ));
+}
+
+function renderSuccessfullAssignment(assignment: PlaybookVariableSuccessfullAssignment) {
+  return (
+    <React.Fragment>
+      <div>{assignment.name}</div>
+      <div>{`${assignment.value}`}</div>
+    </React.Fragment>
+  );
+}
+
+function renderFailedAssignment(assignment: PlaybookVariableFailedAssignment) {
+  return (
+    <React.Fragment>
+      <div>{assignment.name}</div>
+      <div>
+        {formatAssignmentLocation(assignment.assignment)}: {assignment.error}
+      </div>
+      <Error>
+        <TriangleExclamation />
+      </Error>
+    </React.Fragment>
+  );
+}
+
+function formatAssignmentLocation(assignment: VariableAssignment): string {
+  if (assignment.in == "body") {
+    return `From "${assignment.from}" Location "${assignment.in}" Type "${assignment.path.type}" Path "${assignment.path.value}"`;
+  } else {
+    return `From "${assignment.from}" Location "${assignment.in}" Name "${assignment.name}"`;
+  }
 }
 
 const Container = styled.div`

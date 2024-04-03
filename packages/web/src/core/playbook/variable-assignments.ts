@@ -100,7 +100,7 @@ function assignValues(
       env[varname] = value;
       result.push({ name: varname, value, error: undefined });
     } else {
-      result.push({ name: varname, error: "not found", value: undefined });
+      result.push({ name: varname, error: "not found", value: undefined, assignment });
     }
   }
 

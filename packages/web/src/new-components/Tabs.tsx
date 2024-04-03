@@ -2,6 +2,7 @@ import * as Tabs from "@radix-ui/react-tabs";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
+import { TriangleExclamation } from "../icons";
 
 export function TabContainer({
   tabs,
@@ -109,7 +110,10 @@ function renderCounter(tab: Tab) {
   }
 
   return tab.counterKind === "error" ? (
-    <ErrorCounter>{tab.counter}</ErrorCounter>
+    <ErrorCounter>
+      {tab.counter}
+      <TriangleExclamation />
+    </ErrorCounter>
   ) : (
     <Counter>{tab.counter}</Counter>
   );
@@ -225,6 +229,12 @@ const ErrorCounter = styled.span`
   align-items: center;
   font-size: 10px;
   padding: 2px 4px;
+  gap: 3px;
+  > svg {
+    fill: var(${ThemeColorVariables.errorForeground});
+    width: 10px;
+    height: 10px;
+  }
 `;
 
 const Menu = styled.div`

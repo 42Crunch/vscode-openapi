@@ -1,4 +1,5 @@
 import { Environment } from "@xliic/common/env";
+import { Playbook } from "@xliic/scanconf";
 
 export type PlaybookVariableSuccessfullAssignment = {
   name: string;
@@ -10,6 +11,7 @@ export type PlaybookVariableFailedAssignment = {
   name: string;
   error: string;
   value: undefined;
+  assignment: Playbook.VariableAssignment;
 };
 
 export type PlaybookVariableAssignment =
