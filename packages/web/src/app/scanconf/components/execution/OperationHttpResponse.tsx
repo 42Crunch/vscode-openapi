@@ -4,7 +4,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { HttpResponse } from "../../../../../../common/src/http";
 import { PlaybookEnvStack } from "../../../../core/playbook/playbook-env";
-import { ArrowRightFromBracket } from "../../../../icons";
+import { ArrowRightFromBracket, TriangleExclamation } from "../../../../icons";
 import { TabContainer } from "../../../../new-components/Tabs";
 import CollapsibleCard, {
   BottomDescription,
@@ -21,12 +21,21 @@ export default function OperationHttpResponse({
   response: HttpResponse;
   variables?: PlaybookEnvStack;
 }) {
+  const hasErrors = hasVariableAssignmentErrors(variables);
+
   return (
     <Container>
       <CollapsibleCard>
         <BottomDescription style={{ gap: "8px" }}>
           <ArrowRightFromBracket style={{ transform: "rotate(180deg)" }} />
-          <BottomItem>{`${response?.statusCode} ${response?.statusMessage}`}</BottomItem>
+          <BottomItem>
+            {`${response?.statusCode} ${response?.statusMessage}`}
+            {hasErrors && (
+              <TriangleExclamation
+                style={{ fill: `var(${ThemeColorVariables.errorForeground})` }}
+              />
+            )}
+          </BottomItem>
         </BottomDescription>
         <TabContainer
           tabs={[
@@ -45,7 +54,7 @@ export default function OperationHttpResponse({
               title: "Variables",
               content: <VariableAssignments assignment={variables || []} />,
               counter: assignmentCount(variables),
-              counterKind: hasErrors(variables) ? "error" : "normal",
+              counterKind: hasErrors ? "error" : "normal",
               disabled: variables === undefined || assignmentCount(variables) === 0,
             },
           ]}
@@ -69,7 +78,7 @@ function assignmentCount(env?: PlaybookEnvStack): number {
   return 0;
 }
 
-function hasErrors(assignments?: PlaybookEnvStack): boolean {
+function hasVariableAssignmentErrors(assignments?: PlaybookEnvStack): boolean {
   return !!assignments
     ?.map((env) => env.assignments.some((a) => a.error !== undefined))
     .some((e) => e);
