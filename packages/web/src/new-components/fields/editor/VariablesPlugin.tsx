@@ -127,7 +127,9 @@ export default function VariablesPlugin({
 
   useEffect(() => {
     if (queryString !== null) {
-      setResults(variables.filter((variable) => variable.toLowerCase().includes(queryString)));
+      setResults(
+        variables.filter((variable) => variable.toLowerCase().includes(queryString.toLowerCase()))
+      );
     } else {
       setResults(variables);
     }
