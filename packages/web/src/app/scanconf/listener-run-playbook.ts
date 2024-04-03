@@ -154,7 +154,7 @@ export function onMockExecuteRequest(
           listenerApi.dispatch,
           resetMockRequestExecution,
           addMockRequestExecutionStep,
-          [{ name: "", requests: [{ ref: ref! }] }],
+          [{ name: "requests", requests: [{ ref: ref! }] }],
           "http://localhost"
         );
       },
@@ -217,7 +217,7 @@ export function onMockExecuteAuthRequests(
           listenerApi.dispatch,
           resetMockAuthRequestsExecution,
           addMockAuthRequestsExecutionStep,
-          [{ name: "", requests: subcredential.requests }],
+          [{ name: "auth", requests: subcredential.requests }],
           "http://localhost"
         );
       },
@@ -365,7 +365,7 @@ export function onExecuteRequest(
           listenerApi.dispatch,
           resetExecuteRequest,
           addExecutionStep,
-          [{ name: "", requests: [{ ref: ref! }] }],
+          [{ name: "requests", requests: [{ ref: ref! }] }],
           server,
           [{ id: "inputs", env: inputs, assignments: [] }]
         );

@@ -1,6 +1,9 @@
 import styled from "styled-components";
+import React from "react";
+import * as Tooltip from "@radix-ui/react-tooltip";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { Playbook } from "@xliic/scanconf";
 
 import {
   PlaybookEnvStack,
@@ -9,10 +12,9 @@ import {
   PlaybookVariableSuccessfullAssignment,
 } from "../../../../core/playbook/playbook-env";
 import { TriangleExclamation } from "../../../../icons";
-import React from "react";
-import { VariableAssignment } from "@xliic/scanconf/dist/playbook";
 
 export default function VariableAssignments({ assignment }: { assignment: PlaybookEnvStack }) {
+  console.log("rendering VariableAssignments", assignment);
   return (
     <Container>
       <Header>
@@ -21,36 +23,39 @@ export default function VariableAssignments({ assignment }: { assignment: Playbo
         <div></div>
       </Header>
       <Fields>
-        {assignment.flatMap((env, index) => renderAssignments(env.assignments, index))}
+        {assignment.flatMap((env, index) => renderAssignments(env.id, env.assignments, index))}
       </Fields>
     </Container>
   );
 }
 
-function renderAssignments(assignments: PlaybookVariableAssignment[], key: number) {
+function renderAssignments(id: string, assignments: PlaybookVariableAssignment[], key: number) {
   return assignments.map((assignment, index) => (
     <React.Fragment key={`${key}-${index}`}>
       {assignment.error !== undefined
-        ? renderFailedAssignment(assignment)
-        : renderSuccessfullAssignment(assignment)}
+        ? renderFailedAssignment(id, assignment)
+        : renderSuccessfullAssignment(id, assignment)}
     </React.Fragment>
   ));
 }
 
-function renderSuccessfullAssignment(assignment: PlaybookVariableSuccessfullAssignment) {
+function renderSuccessfullAssignment(
+  id: string,
+  assignment: PlaybookVariableSuccessfullAssignment
+) {
   return (
     <React.Fragment>
-      <div>{assignment.name}</div>
+      <VariableNameWithTooltip name={assignment.name} id={id} />
       <div>{`${assignment.value}`}</div>
       <div></div>
     </React.Fragment>
   );
 }
 
-function renderFailedAssignment(assignment: PlaybookVariableFailedAssignment) {
+function renderFailedAssignment(id: string, assignment: PlaybookVariableFailedAssignment) {
   return (
     <React.Fragment>
-      <div>{assignment.name}</div>
+      <VariableNameWithTooltip name={assignment.name} id={id} />
       <div>
         {formatAssignmentLocation(assignment.assignment)}: {assignment.error}
       </div>
@@ -61,12 +66,27 @@ function renderFailedAssignment(assignment: PlaybookVariableFailedAssignment) {
   );
 }
 
-function formatAssignmentLocation(assignment: VariableAssignment): string {
+function formatAssignmentLocation(assignment: Playbook.VariableAssignment): string {
   if (assignment.in == "body") {
     return `From "${assignment.from}" Location "${assignment.in}" Type "${assignment.path.type}" Path "${assignment.path.value}"`;
   } else {
     return `From "${assignment.from}" Location "${assignment.in}" Name "${assignment.name}"`;
   }
+}
+
+function VariableNameWithTooltip({ name, id }: { name: string; id: string }) {
+  return (
+    <Tooltip.Provider>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          <div>{name}</div>
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <TooltipContent>{id}</TooltipContent>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
+  );
 }
 
 const Container = styled.div`
@@ -105,4 +125,13 @@ const Error = styled.div`
     fill: var(${ThemeColorVariables.errorForeground});
     padding-right: 4px;
   }
+`;
+
+const TooltipContent = styled(Tooltip.Content)`
+  color: var(${ThemeColorVariables.notificationsForeground});
+  background-color: var(${ThemeColorVariables.notificationsBackground});
+  border: 1px solid var(${ThemeColorVariables.notificationsBorder});
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin-right: 16px;
 `;
