@@ -179,6 +179,7 @@ const Content = styled.div<{ expanded: boolean }>`
 
 const Sections = styled.div`
   flex: 1;
+  overflow-y: auto;
   > ul {
     > li {
       > .menu {
