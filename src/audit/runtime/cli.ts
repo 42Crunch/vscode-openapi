@@ -48,13 +48,13 @@ export async function runCliAudit(
   }
 
   if (
-    isFullAudit &&
+    !isFullAudit &&
     result.cli.remainingPerOperationAudit !== undefined &&
     result.cli.remainingPerOperationAudit < UPGRADE_WARN_LIMIT
   ) {
     warnOperationAudits(result.cli.remainingPerOperationAudit);
   } else if (
-    !isFullAudit &&
+    isFullAudit &&
     result.cli.remainingFullAudit !== undefined &&
     result.cli.remainingFullAudit < UPGRADE_WARN_LIMIT
   ) {
