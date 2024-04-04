@@ -32,7 +32,7 @@ function PlatformConnection() {
           name="platformAuthType"
           options={[
             { value: "anond-token", label: "Freemium token" },
-            { value: "api-token", label: "Platform IDE key" },
+            { value: "api-token", label: "Platform IDE token" },
           ]}
         />
 
