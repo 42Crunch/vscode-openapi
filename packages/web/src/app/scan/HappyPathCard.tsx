@@ -4,7 +4,8 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { RuntimeOperationReport } from "@xliic/common/scan-report";
 
 import { HappyPath } from "./HappyPath";
-import CollapsibleCard, { BottomDescription } from "../../new-components/CollapsibleCard";
+import CollapsibleCard from "../../new-components/CollapsibleCard";
+import { Check, CircleCheck, ExclamationCircle, TriangleExclamation } from "../../icons";
 
 export function HappyPathCard({
   operation,
@@ -22,10 +23,11 @@ export function HappyPathCard({
           <span>{operationId}</span>
           <span>{operation.fuzzed ? "Passed" : "Failed"}</span>
         </Top>
-        <BottomDescription>
+        <Bottom>
           <Method>{operation.method}</Method>
           <Path>{operation.path}</Path>
-        </BottomDescription>
+          {operation.fuzzed ? <Check /> : <TriangleExclamation />}
+        </Bottom>
         <HappyPath operation={operation} />
       </CollapsibleCard>
     </Container>
@@ -47,6 +49,20 @@ const Top = styled.div`
   > span:last-child {
     flex: none;
     font-weight: 600;
+  }
+`;
+
+export const Bottom = styled.div`
+  display: flex;
+  font-size: 90%;
+  align-items: center;
+  gap: 16px;
+  > svg {
+    margin-left: auto;
+    margin-right: 2px;
+    width: 14px;
+    height: 14px;
+    fill: var(${ThemeColorVariables.foreground});
   }
 `;
 
