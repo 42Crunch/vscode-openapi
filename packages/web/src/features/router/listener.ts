@@ -28,7 +28,6 @@ export function onOpenLink(
     startAppListening({
       actionCreator: openLink,
       effect: async (action, listenerApi) => {
-        debugger;
         host.postMessage({ command: "openLink", payload: action.payload });
       },
     });

@@ -44,6 +44,7 @@ const Title = styled.div`
   cursor: pointer;
   padding: 10px 10px 10px 0px;
   align-items: stretch;
+  line-break: anywhere;
   & > div:first-child {
     padding-left: 4px;
     padding-right: 8px;

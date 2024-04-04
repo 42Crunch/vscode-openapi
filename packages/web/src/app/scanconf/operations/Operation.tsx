@@ -1,7 +1,8 @@
 import styled from "styled-components";
 
 import { Playbook } from "@xliic/scanconf";
-import { serialize, Scanconf } from "@xliic/scanconf";
+import { serialize } from "@xliic/scanconf";
+import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { makeEnvEnv } from "../../../core/playbook/execute";
 import { runScan } from "../actions";
@@ -113,6 +114,10 @@ export default function Operation({ operationId }: { operationId: string }) {
 
       <Header>
         <Title>{operationId}</Title>
+        <div>
+          <Method>{operation.request.request.method}</Method>
+          <Path>{operation.request.request.path}</Path>
+        </div>
       </Header>
 
       <CollapsibleSection
@@ -219,12 +224,14 @@ const Content = styled.div`
 `;
 
 const Header = styled.div`
-  margin-bottom: 8px;
-  margin-top: 8px;
+  margin-bottom: 16px;
+  margin-top: 16px;
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  > div:first-child {
-    flex: 1;
+  > div:last-child {
+    display: flex;
+    gap: 4px;
   }
 `;
 
@@ -232,3 +239,18 @@ const Title = styled.div`
   font-size: 16px;
   font-weight: 700;
 `;
+
+const Method = styled.div`
+  background-color: var(${ThemeColorVariables.badgeBackground});
+  color: var(${ThemeColorVariables.badgeForeground});
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 48px;
+  height: 16px;
+  text-transform: uppercase;
+  font-size: 11px;
+`;
+
+const Path = styled.div``;
