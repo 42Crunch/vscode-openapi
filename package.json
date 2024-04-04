@@ -682,7 +682,7 @@
           ],
           "enumDescriptions": [
             "Freemium token",
-            "Platform IDE key"
+            "Platform IDE token"
           ]
         },
         "openapi.platformConformanceScanRuntime": {
