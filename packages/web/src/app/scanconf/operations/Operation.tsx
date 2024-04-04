@@ -233,6 +233,7 @@ const Header = styled.div`
     display: flex;
     gap: 4px;
   }
+  line-break: anywhere;
 `;
 
 const Title = styled.div`
