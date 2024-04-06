@@ -12,7 +12,7 @@ import { showEnvWindow } from "../../features/env/slice";
 import { startNavigationListening, onOpenLink } from "../../features/router/listener";
 import { Routes } from "../../features/router/RouterContext";
 import { startListeners } from "../webapp";
-import { runFullScan, runScan, sendHttpRequest } from "./actions";
+import { runFullScan, runScan, sendHttpRequest, showScanconfOperation } from "./actions";
 import {
   onExecuteAuthentication,
   onExecuteGlobal,
@@ -42,6 +42,7 @@ import {
 } from "./slice";
 import { AppDispatch, RootState } from "./store";
 import { setScanServer } from "../../features/prefs/slice";
+import { onShowScanconf } from "./listener-show-scanconf";
 
 const listenerMiddleware = createListenerMiddleware();
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
@@ -149,6 +150,8 @@ export function createListener(host: Webapp["host"], routes: Routes) {
   const executeTryGlobalListener = onExecuteGlobal(startAppListening, host);
   const executeMockGlobalListener = onMockExecuteGlobal(startAppListening, host);
 
+  const executeShowScanconfOperationListener = onShowScanconf(startAppListening);
+
   startNavigationListening(startAppListening, routes);
   startListeners({
     ...listeners,
@@ -160,6 +163,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
     executeTryAuthenticationListener,
     executeTryGlobalListener,
     executeMockGlobalListener,
+    executeShowScanconfOperationListener,
   });
 
   return listenerMiddleware;
