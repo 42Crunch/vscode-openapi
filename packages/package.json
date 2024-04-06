@@ -6,7 +6,8 @@
     "common/dist/esm",
     "openapi",
     "result",
-    "scanconf"
+    "scanconf",
+    "scanconf-changes"
   ],
   "scripts": {
     "postinstall": "cd preview-redoc && npm install && cd ../preview-swaggerui && npm install",
@@ -14,6 +15,7 @@
     "build-openapi": "cd openapi && npm run build && cd .. && cd openapi-cjs && npm run build",
     "build-result": "cd result && npm run build && cd .. && cd result-cjs && npm run build",
     "build-scanconf": "cd scanconf && npm run build && cd .. && cd scanconf-cjs && npm run build",
+    "build-scanconf-changes": "cd scanconf-changes && npm run build && cd ..",
     "build-common": "cd common && npm run build",
     "build-web": "cd web && npm run build && mkdirp ../../webview/generated/web && ncp dist ../../webview/generated/web",
     "build-swaggerui": "cd preview-swaggerui && npm run build && mkdirp ../../webview/generated/preview/swaggerui && ncp dist ../../webview/generated/preview/swaggerui",
