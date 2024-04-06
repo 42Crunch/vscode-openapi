@@ -22,7 +22,18 @@ function InnerNavigation({ routes }: { routes: Routes }) {
     current.length > 1 ? routes.find((r) => r.id === current[0])?.children : routes;
   const route = menuRoutes?.find((r) => r.id === current[current.length - 1]);
 
-  if (!menuRoutes || route?.navigation === false) {
+  if (!menuRoutes) {
+    return null;
+  }
+
+  if (route?.navigation === false) {
+    if (route.title !== "") {
+      return (
+        <NavigationContent>
+          <div>{route.title}</div>
+        </NavigationContent>
+      );
+    }
     return null;
   }
 

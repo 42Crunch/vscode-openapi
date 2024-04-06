@@ -17,12 +17,19 @@ import Global from "./global/Global";
 import Settings from "./settings/Settings";
 import EnvironmentsNavigationTab from "./environment/EnvironmentsNavigationTab";
 import AuthorizationTests from "./authorizationTests/AuthorizationTests";
+import GeneralError from "../../features/general-error/GeneralError";
 
 const routes: Routes = [
   {
     id: "starting",
     title: "Starting",
     element: <div>Starting...</div>,
+    navigation: false,
+  },
+  {
+    id: "general-error",
+    title: "An error has occurred",
+    element: <GeneralError />,
     navigation: false,
   },
   {

@@ -1,11 +1,13 @@
 import styled from "styled-components";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { GeneralError } from "@xliic/common/error";
+import { useFeatureSelector } from "./slice";
 
-export default function Error({ error }: { error: GeneralError }) {
+export default function GeneralError() {
+  const error = useFeatureSelector((state) => state.generalError.error);
+
   return (
     <Container>
-      <ErrorText>{error.message}</ErrorText>
+      <ErrorText>{error?.message}</ErrorText>
     </Container>
   );
 }

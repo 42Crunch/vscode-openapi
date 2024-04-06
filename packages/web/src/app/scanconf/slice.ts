@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-import { GeneralError } from "@xliic/common/error";
 import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 
@@ -9,7 +8,6 @@ import { loadPlaybook } from "./actions";
 export type State = {
   oas: BundledSwaggerOrOasSpec;
   playbook: Playbook.Bundle;
-  gerror?: GeneralError;
   servers: string[];
 
   selectedCredentialGroup: number;

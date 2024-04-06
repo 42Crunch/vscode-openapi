@@ -7,6 +7,7 @@ import { compare } from "@xliic/scanconf-changes";
 import { goTo } from "../../../features/router/slice";
 import { AppDispatch, RootState } from "../store";
 import { showScanconfOperation, loadPlaybook } from "../actions";
+import { showGeneralError } from "../../../features/general-error/slice";
 
 export function onShowScanconf(startAppListening: TypedStartListening<RootState, AppDispatch>) {
   return () =>
@@ -15,7 +16,10 @@ export function onShowScanconf(startAppListening: TypedStartListening<RootState,
       effect: async ({ payload: { oas, scanconf } }, listenerApi) => {
         const [parsed, parseError] = jsonParse(scanconf);
         if (parseError !== undefined) {
-          //state.gerror = { message: `Failed to parse scan configuration: ${parseError}` };
+          listenerApi.dispatch(
+            showGeneralError({ message: `Failed to parse scan configuration: ${parseError}` })
+          );
+          listenerApi.dispatch(goTo(["general-error"]));
           return;
         }
 
@@ -26,7 +30,8 @@ export function onShowScanconf(startAppListening: TypedStartListening<RootState,
         const [playbook, error] = parse(oas, parsed);
         if (error !== undefined) {
           const message = error.map((e) => `${e.message}: ${e.pointer}`).join(" ");
-          //state.gerror = { message };
+          listenerApi.dispatch(showGeneralError({ message }));
+          listenerApi.dispatch(goTo(["general-error"]));
           return;
         }
 

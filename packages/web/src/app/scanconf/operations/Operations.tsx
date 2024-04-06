@@ -3,7 +3,6 @@ import { Playbook } from "@xliic/scanconf";
 
 import { SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
 import Button from "../../../new-components/Button";
-import GeneralError from "../components/GeneralError";
 import { useAppDispatch, useAppSelector } from "../store";
 import Operation from "./Operation";
 import { setOperationId } from "./slice";
@@ -15,7 +14,7 @@ export default function Operations() {
   const dispatch = useAppDispatch();
   const operationId = useAppSelector((state) => state.operations.operationId);
   const onSetOperationId = (operationId: string) => dispatch(setOperationId(operationId));
-  const { oas, playbook, gerror, servers } = useAppSelector((state) => state.scanconf);
+  const { oas, playbook, servers } = useAppSelector((state) => state.scanconf);
   const config = useAppSelector((state) => state.config.data);
   const env = useAppSelector((state) => state.env.data);
   const preferredScanServer = useAppSelector((state) => state.prefs.scanServer);
@@ -57,10 +56,6 @@ export default function Operations() {
       })
     );
   };
-
-  if (gerror !== undefined) {
-    return <GeneralError error={gerror} />;
-  }
 
   return (
     <SearchSidebarControlled
