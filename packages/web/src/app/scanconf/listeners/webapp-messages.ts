@@ -24,6 +24,7 @@ import {
   saveSettings,
   updateOperationAuthorizationTests,
 } from "../slice";
+import { updateScanconf } from "../scanconf-update/slice";
 import { AppDispatch, RootState } from "../store";
 
 const listeners = (
@@ -120,6 +121,17 @@ const listeners = (
       }),
 
     openLink: onOpenLink(startAppListening, host),
+
+    updateScanconf: () =>
+      startAppListening({
+        actionCreator: updateScanconf,
+        effect: async (action, listenerApi) => {
+          host.postMessage({
+            command: "updateScanconf",
+            payload: undefined,
+          });
+        },
+      }),
   };
 };
 

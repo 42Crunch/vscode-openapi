@@ -14,7 +14,12 @@ import prefs, { loadPrefs } from "../../features/prefs/slice";
 import router from "../../features/router/slice";
 import generalError from "../../features/general-error/slice";
 import theme, { changeTheme, ThemeState } from "../../features/theme/slice";
-import { showHttpError, showHttpResponse, showScanconfOperation } from "./actions";
+import {
+  showHttpError,
+  showHttpResponse,
+  showScanconfOperation,
+  loadUpdatedScanconf,
+} from "./actions";
 import auth from "./auth/slice";
 import global from "./global/slice";
 import operations from "./operations/slice";
@@ -40,6 +45,7 @@ export const messageHandlers: Webapp["webappHandlers"] = {
   showHttpError,
   showHttpResponse,
   showScanconfOperation,
+  loadUpdatedScanconf,
   loadEnv,
   loadConfig,
   loadPrefs,

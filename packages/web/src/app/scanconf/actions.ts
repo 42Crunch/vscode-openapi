@@ -7,6 +7,7 @@ import {
   OasWithScanconfPathMethod,
   ScanRunConfig,
   FullScanRunConfig,
+  OasWithScanconf,
 } from "@xliic/common/scanconf";
 
 export const runScan = createAction<ScanRunConfig>("scanconf/runScan");
@@ -15,6 +16,8 @@ export const runFullScan = createAction<FullScanRunConfig>("scanconf/runFullScan
 export const showScanconfOperation = createAction<OasWithScanconfPathMethod>(
   "scanconf/showScanconfOperation"
 );
+
+export const loadUpdatedScanconf = createAction<OasWithScanconf>("scanconf/loadUpdatedScanconf");
 
 export const loadPlaybook = createAction<{
   oas: BundledSwaggerOrOasSpec;
