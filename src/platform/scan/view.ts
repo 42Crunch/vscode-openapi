@@ -25,7 +25,12 @@ import { PlatformStore } from "../stores/platform-store";
 import { Logger } from "../types";
 import { executeHttpRequest } from "./http-handler";
 import { ScanReportWebView } from "./report-view";
-import { runScanWithCliBinary, runValidateScanConfigWithCliBinary } from "../cli-ast";
+import {
+  runScanWithCliBinary,
+  runValidateScanConfigWithCliBinary,
+  createScanConfigWithCliBinary,
+  createDefaultConfigWithCliBinary,
+} from "../cli-ast";
 import { runScanWithDocker } from "./runtime/docker";
 import { runScanWithScandManager } from "./runtime/scand-manager";
 import { UPGRADE_WARN_LIMIT, offerUpgrade, warnScans } from "../upgrade";
@@ -181,6 +186,15 @@ export class ScanWebView extends WebView<Webapp> {
 
     openLink: async (url: string) => {
       vscode.env.openExternal(vscode.Uri.parse(url));
+    },
+
+    updateScanconf: async () => {
+      const stringOas = stringify(this.target!.bundle.value);
+      const scanconf = await createDefaultConfigWithCliBinary(stringOas);
+      this.sendRequest({
+        command: "loadUpdatedScanconf",
+        payload: { oas: this.target!.bundle.value, scanconf },
+      });
     },
   };
 

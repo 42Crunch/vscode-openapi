@@ -77,6 +77,17 @@ export async function createScanConfigWithCliBinary(
   }
 }
 
+export async function createDefaultConfigWithCliBinary(oas: string): Promise<string> {
+  const tmpdir = createTempDirectory("scanconf-update-");
+  const scanconfFilename = join(tmpdir, "scanconf.json");
+  const scanconfUri = vscode.Uri.file(scanconfFilename);
+  await createScanConfigWithCliBinary(scanconfUri, oas);
+  const scanconf = await readFile(scanconfFilename, { encoding: "utf8" });
+  unlinkSync(scanconfFilename);
+  rmdirSync(tmpdir);
+  return scanconf;
+}
+
 export function getCliInfo(): Config["cli"] {
   const cli = join(getBinDirectory(), getCliFilename());
   return { location: cli, found: exists(cli) };
