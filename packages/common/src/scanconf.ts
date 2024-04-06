@@ -29,9 +29,17 @@ export type ShowScanconfOperationMessage = {
   command: "showScanconfOperation";
   payload: OasWithScanconfPathMethod;
 };
-export type UpdateScanconfMessage = { command: "updateScanconf"; payload: string };
+
+export type LoadUpdatedScanconf = {
+  command: "loadUpdatedScanconf";
+  payload: OasWithScanconf;
+};
 
 // webapp to vs code responses
 export type SaveScanconfMessage = { command: "saveScanconf"; payload: string };
 export type RunScanMessage = { command: "runScan"; payload: ScanRunConfig };
 export type RunFullScanMessage = { command: "runFullScan"; payload: FullScanRunConfig };
+export type UpdateScanconf = {
+  command: "updateScanconf";
+  payload: undefined;
+};

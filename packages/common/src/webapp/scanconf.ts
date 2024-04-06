@@ -1,6 +1,12 @@
 import { Webapp as App } from "../message";
 import { SaveScanconfMessage } from "../playbook";
-import { ShowScanconfOperationMessage, RunScanMessage, RunFullScanMessage } from "../scanconf";
+import {
+  ShowScanconfOperationMessage,
+  RunScanMessage,
+  RunFullScanMessage,
+  LoadUpdatedScanconf,
+  UpdateScanconf,
+} from "../scanconf";
 import { ChangeThemeMessage } from "../theme";
 import { ShowEnvWindow, LoadEnvMessage } from "../env";
 import { LoadConfigMessage } from "../config";
@@ -17,7 +23,8 @@ export type Webapp = App<
   | ShowHttpErrorMessage
   | LoadEnvMessage
   | LoadPreferencesMessage
-  | LoadConfigMessage,
+  | LoadConfigMessage
+  | LoadUpdatedScanconf,
   // produces
   | SaveScanconfMessage
   | SavePreferencesMessage
@@ -26,4 +33,5 @@ export type Webapp = App<
   | RunScanMessage
   | RunFullScanMessage
   | OpenLinkMessage
+  | UpdateScanconf
 >;
