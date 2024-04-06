@@ -16,11 +16,19 @@ export default function Navigation() {
 
 function InnerNavigation({ routes }: { routes: Routes }) {
   const dispatch = useFeatureDispatch();
-  const currentPath = useFeatureSelector((state) => state.router.current);
-  const currentRoute = findRoute(routes, currentPath);
+  const menuPath = useFeatureSelector((state) => {
+    if (state.router.current.length == 1) {
+      // top level
+      return state.router.current;
+    } else {
+      // second level
+      return state.router.current.slice(0, 1);
+    }
+  });
 
+  const currentRoute = findRoute(routes, menuPath);
   const menuRoutes = currentRoute?.children || routes;
-  const gotoPrefix = currentRoute?.children ? [currentPath[0]] : [];
+  const gotoPrefix = currentRoute?.children ? [menuPath[0]] : [];
 
   if (currentRoute?.navigation === false) {
     return null;
@@ -31,7 +39,7 @@ function InnerNavigation({ routes }: { routes: Routes }) {
       {menuRoutes.map(({ id, title, link }) => (
         <NavigationTab
           key={id}
-          active={id === currentPath[currentPath.length - 1]}
+          active={id === menuPath[menuPath.length - 1]}
           onClick={() => {
             if (link) {
               dispatch(openLink(link));
