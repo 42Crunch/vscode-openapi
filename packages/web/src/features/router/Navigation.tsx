@@ -4,7 +4,6 @@ import { goTo, openLink } from "./slice";
 
 import { RouterContext, Routes } from "./RouterContext";
 import { useFeatureSelector, useFeatureDispatch } from "./slice";
-import { findRoute } from "./util";
 
 export default function Navigation() {
   return (
@@ -16,21 +15,14 @@ export default function Navigation() {
 
 function InnerNavigation({ routes }: { routes: Routes }) {
   const dispatch = useFeatureDispatch();
-  const menuPath = useFeatureSelector((state) => {
-    if (state.router.current.length == 1) {
-      // top level
-      return state.router.current;
-    } else {
-      // second level
-      return state.router.current.slice(0, 1);
-    }
-  });
+  // navigation is only for the first two levels
+  const current = useFeatureSelector((state) => state.router.current.slice(0, 2));
+  const gotoPrefix = current.slice(0, 1);
+  const menuRoutes =
+    current.length > 1 ? routes.find((r) => r.id === current[0])?.children : routes;
+  const route = menuRoutes?.find((r) => r.id === current[current.length - 1]);
 
-  const currentRoute = findRoute(routes, menuPath);
-  const menuRoutes = currentRoute?.children || routes;
-  const gotoPrefix = currentRoute?.children ? [menuPath[0]] : [];
-
-  if (currentRoute?.navigation === false) {
+  if (!menuRoutes || route?.navigation === false) {
     return null;
   }
 
@@ -39,7 +31,7 @@ function InnerNavigation({ routes }: { routes: Routes }) {
       {menuRoutes.map(({ id, title, link }) => (
         <NavigationTab
           key={id}
-          active={id === menuPath[menuPath.length - 1]}
+          active={id === current[current.length - 1]}
           onClick={() => {
             if (link) {
               dispatch(openLink(link));
