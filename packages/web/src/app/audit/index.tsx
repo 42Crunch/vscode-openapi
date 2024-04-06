@@ -26,6 +26,7 @@ import NoReport from "./NoReport";
 import Loading from "./Loading";
 
 const routes: Routes = [
+  { id: "starting", title: "Starting", element: <div /> },
   { id: "blank", title: "Blank", element: <div />, when: cancelAudit },
   {
     id: "start-audit",

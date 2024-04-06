@@ -29,15 +29,13 @@ import { loadConfig } from "../../features/config/slice";
 import { showLogMessage } from "../../features/logging/slice";
 
 import ScanOperation from "./ScanOperation";
-import Starting from "./Starting";
 
 const routes: Routes = [
-  // {
-  //   id: "start-scan",
-  //   title: "Scan is starting",
-  //   element: <Starting />,
-  //   when: startScan,
-  // },
+  {
+    id: "starting",
+    title: "Starting",
+    element: <div />,
+  },
   {
     id: "scan",
     title: "Scan",

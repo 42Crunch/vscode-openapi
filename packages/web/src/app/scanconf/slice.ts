@@ -3,17 +3,13 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { GeneralError } from "@xliic/common/error";
 import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
-import { LoadScanconfMessage } from "@xliic/common/playbook";
-import { Result } from "@xliic/result";
-import { parse } from "@xliic/scanconf";
 
-import { showScanconfOperation } from "./actions";
+import { loadPlaybook } from "./actions";
 
 export type State = {
   oas: BundledSwaggerOrOasSpec;
   playbook: Playbook.Bundle;
   gerror?: GeneralError;
-  dirty: boolean;
   servers: string[];
 
   selectedCredentialGroup: number;
@@ -37,9 +33,7 @@ const initialState: State = {
     environments: {},
     authorizationTests: {},
   },
-  dirty: false,
   servers: [],
-
   selectedCredentialGroup: 0,
 };
 
@@ -47,43 +41,6 @@ export const slice = createSlice({
   name: "scanconf",
   initialState,
   reducers: {
-    loadScanconf: (
-      state,
-      { payload: { scanconf, oas } }: PayloadAction<LoadScanconfMessage["payload"]>
-    ) => {
-      const [parsed, parseError] = jsonParse(scanconf);
-      if (parseError !== undefined) {
-        state.gerror = { message: `Failed to parse scan configuration: ${parseError}` };
-        return;
-      }
-
-      const [playbook, error] = parse(oas, parsed);
-      if (error !== undefined) {
-        const message = error.map((e) => `${e.message}: ${e.pointer}`).join(" ");
-        state.gerror = { message };
-        return;
-      }
-
-      state.oas = oas;
-      state.playbook = playbook;
-    },
-
-    updateScanconf: (state, { payload: scanconf }: PayloadAction<string>) => {
-      // this will cause local edits to be lost
-      const [parsed, parseError] = jsonParse(scanconf);
-      if (parseError !== undefined) {
-        state.gerror = { message: `Failed to parse scan configuration: ${parseError}` };
-        return;
-      }
-      const [playbook, error] = parse(state.oas, parsed);
-      if (error !== undefined) {
-        const message = error.map((e) => `${e.message}: ${e.pointer}`).join(" ");
-        state.gerror = { message };
-        return;
-      }
-      state.playbook = playbook;
-    },
-
     saveScanconf: (state) => {},
 
     saveSettings: (state, { payload: settings }: PayloadAction<Playbook.RuntimeConfiguration>) => {
@@ -274,18 +231,7 @@ export const slice = createSlice({
   },
 
   extraReducers: (builder) => {
-    builder.addCase(showScanconfOperation, (state, { payload: { oas, scanconf } }) => {
-      const [parsed, parseError] = jsonParse(scanconf);
-      if (parseError !== undefined) {
-        state.gerror = { message: `Failed to parse scan configuration: ${parseError}` };
-        return;
-      }
-      const [playbook, error] = parse(oas, parsed);
-      if (error !== undefined) {
-        const message = error.map((e) => `${e.message}: ${e.pointer}`).join(" ");
-        state.gerror = { message };
-        return;
-      }
+    builder.addCase(loadPlaybook, (state, { payload: { oas, playbook } }) => {
       state.oas = oas;
       state.playbook = playbook;
       state.servers = getServerUrls(oas);
@@ -298,6 +244,7 @@ export const slice = createSlice({
           playbook?.authenticationDetails[0][state.selectedCredential]?.methods
         )?.[0];
       }
+
       // select first authorization test
       state.selectedAuthorizationTest = Object.keys(playbook?.authorizationTests || {})?.[0];
     });
@@ -327,7 +274,6 @@ function getStageContainer(
 }
 
 export const {
-  loadScanconf,
   saveSettings,
   saveEnvironment,
   saveScanconf,
@@ -344,7 +290,6 @@ export const {
   saveAuthorizationTest,
   removeAuthorizationTest,
   selectAuthorizationTest,
-  updateScanconf,
   saveRequest,
   removeRequest,
   updateOperationAuthorizationTests,
@@ -360,13 +305,5 @@ export function arrayMoveMutable(array: unknown[], fromIndex: number, toIndex: n
 
     const [item] = array.splice(fromIndex, 1);
     array.splice(endIndex, 0, item);
-  }
-}
-
-function jsonParse(value: string): Result<any, string> {
-  try {
-    return [JSON.parse(value), undefined];
-  } catch (e) {
-    return [undefined, `${e}`];
   }
 }

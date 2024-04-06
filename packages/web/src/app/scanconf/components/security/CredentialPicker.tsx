@@ -43,7 +43,7 @@ export default function CredentialPicker({
             onClick={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              dispatch(goTo(["auth"]));
+              dispatch(goTo(["scanconf", "auth"]));
             }}
           >
             Manage authentication <ArrowUpRightFromSquare />

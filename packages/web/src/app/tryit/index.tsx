@@ -19,6 +19,7 @@ import { loadConfig } from "../../features/config/slice";
 import TryOperation from "./TryOperation";
 
 const routes: Routes = [
+  { id: "starting", title: "Starting", element: <div /> },
   {
     id: "tryit",
     title: "Try It",

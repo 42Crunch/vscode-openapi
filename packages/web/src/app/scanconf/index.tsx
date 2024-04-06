@@ -7,7 +7,6 @@ import { Provider } from "react-redux";
 import { RouterContext, Routes } from "../../features/router/RouterContext";
 import { ThemeState } from "../../features/theme/slice";
 import { NavigationRouterApp, makeWebappMessageHandler } from "../webapp";
-import { showScanconfOperation } from "./actions";
 import Auth from "./auth/Auth";
 import { createListener } from "./listener";
 import Operations from "./operations/Operations";
@@ -21,45 +20,57 @@ import AuthorizationTests from "./authorizationTests/AuthorizationTests";
 
 const routes: Routes = [
   {
-    id: "requests",
-    title: "Requests",
-    element: <Requests />,
+    id: "starting",
+    title: "Starting",
+    element: <div>Starting...</div>,
+    navigation: false,
   },
   {
-    id: "operations",
-    title: "Scenarios",
-    element: <Operations />,
-    when: showScanconfOperation,
-  },
-  {
-    id: "global",
-    title: "Global blocks",
-    element: <Global />,
-  },
-  {
-    id: "auth",
-    title: "Authentication",
-    element: <Auth />,
-  },
-  {
-    id: "authorizationTests",
-    title: "Tests",
-    element: <AuthorizationTests />,
-  },
-  {
-    id: "environments",
-    title: <EnvironmentsNavigationTab />,
-    element: <Environments />,
-  },
-  {
-    id: "settings",
-    title: "Settings",
-    element: <Settings />,
-  },
-  {
-    id: "help",
-    title: "Help",
-    link: "https://42crunch.com/tutorial-security-conformance-scan-openapi-swagger-extension-vs-code/",
+    id: "scanconf",
+    title: "Scanconf",
+    element: <div>Main</div>,
+    children: [
+      {
+        id: "requests",
+        title: "Requests",
+        element: <Requests />,
+      },
+      {
+        id: "operations",
+        title: "Scenarios",
+        element: <Operations />,
+      },
+      {
+        id: "global",
+        title: "Global blocks",
+        element: <Global />,
+      },
+      {
+        id: "auth",
+        title: "Authentication",
+        element: <Auth />,
+      },
+      {
+        id: "authorizationTests",
+        title: "Tests",
+        element: <AuthorizationTests />,
+      },
+      {
+        id: "environments",
+        title: <EnvironmentsNavigationTab />,
+        element: <Environments />,
+      },
+      {
+        id: "settings",
+        title: "Settings",
+        element: <Settings />,
+      },
+      {
+        id: "help",
+        title: "Help",
+        link: "https://42crunch.com/tutorial-security-conformance-scan-openapi-swagger-extension-vs-code/",
+      },
+    ],
   },
 ];
 
