@@ -8,7 +8,7 @@ import {
 import { Webapp, NoopMessage } from "@xliic/common/message";
 import { OpenLinkMessage } from "@xliic/common/link";
 
-import { Routes } from "./RouterContext";
+import { Route } from "./RouterContext";
 import { goTo, openLink } from "./slice";
 
 import router from "./slice";
@@ -35,8 +35,8 @@ export function onOpenLink(
 
 export function startNavigationListening(
   startListening: ListenerMiddlewareInstance["startListening"],
-  routes: Routes,
-  parent: Routes = []
+  routes: Route[],
+  parent: Route[] = []
 ) {
   for (const route of routes) {
     if (route.when) {

@@ -4,6 +4,7 @@ import { goTo, openLink } from "./slice";
 
 import { RouterContext, Routes } from "./RouterContext";
 import { useFeatureSelector, useFeatureDispatch } from "./slice";
+import { findRoute } from "./util";
 
 export default function Navigation() {
   return (
@@ -15,19 +16,27 @@ export default function Navigation() {
 
 function InnerNavigation({ routes }: { routes: Routes }) {
   const dispatch = useFeatureDispatch();
-  const current = useFeatureSelector((state) => state.router.current);
+  const currentPath = useFeatureSelector((state) => state.router.current);
+  const currentRoute = findRoute(routes, currentPath);
+
+  const menuRoutes = currentRoute?.children || routes;
+  const gotoPrefix = currentRoute?.children ? [currentPath[0]] : [];
+
+  if (currentRoute?.navigation === false) {
+    return null;
+  }
 
   return (
     <NavigationContent>
-      {routes.map(({ id, title, link }) => (
+      {menuRoutes.map(({ id, title, link }) => (
         <NavigationTab
           key={id}
-          active={id === current[0]}
+          active={id === currentPath[currentPath.length - 1]}
           onClick={() => {
             if (link) {
               dispatch(openLink(link));
             } else {
-              dispatch(goTo([id]));
+              dispatch(goTo([...gotoPrefix, id]));
             }
           }}
         >
