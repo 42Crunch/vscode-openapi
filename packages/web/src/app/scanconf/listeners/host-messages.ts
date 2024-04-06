@@ -1,17 +1,14 @@
-import { Action, TypedStartListening, isAnyOf } from "@reduxjs/toolkit";
+import { TypedStartListening } from "@reduxjs/toolkit";
 
-import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
-import { Playbook, parse } from "@xliic/scanconf";
+import { parse } from "@xliic/scanconf";
 import { Result } from "@xliic/result";
-import { compare, Change } from "@xliic/scanconf-changes";
+import { compare } from "@xliic/scanconf-changes";
 
-import { goTo } from "../../features/router/slice";
-import { AppDispatch, RootState } from "./store";
-import { showScanconfOperation, loadPlaybook } from "./actions";
+import { goTo } from "../../../features/router/slice";
+import { AppDispatch, RootState } from "../store";
+import { showScanconfOperation, loadPlaybook } from "../actions";
 
-type AppStartListening = TypedStartListening<RootState, AppDispatch>;
-
-export function onShowScanconf(startAppListening: AppStartListening) {
+export function onShowScanconf(startAppListening: TypedStartListening<RootState, AppDispatch>) {
   return () =>
     startAppListening({
       actionCreator: showScanconfOperation,
