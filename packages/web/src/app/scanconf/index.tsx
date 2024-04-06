@@ -22,7 +22,7 @@ import GeneralError from "../../features/general-error/GeneralError";
 const routes: Routes = [
   {
     id: "starting",
-    title: "Starting",
+    title: "",
     element: <div>Starting...</div>,
     navigation: false,
   },

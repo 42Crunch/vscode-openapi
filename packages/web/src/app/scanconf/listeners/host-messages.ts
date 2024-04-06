@@ -24,7 +24,15 @@ export function onShowScanconf(startAppListening: TypedStartListening<RootState,
         }
 
         const changes = compare(oas, parsed);
+
+        console.log("got changes", changes);
+
         if (changes.length > 0) {
+          listenerApi.dispatch(
+            showGeneralError({ message: `Has changes: ${JSON.stringify(changes)}` })
+          );
+          listenerApi.dispatch(goTo(["general-error"]));
+          return;
         }
 
         const [playbook, error] = parse(oas, parsed);
