@@ -18,6 +18,7 @@ import Settings from "./settings/Settings";
 import EnvironmentsNavigationTab from "./environment/EnvironmentsNavigationTab";
 import AuthorizationTests from "./authorizationTests/AuthorizationTests";
 import GeneralError from "../../features/general-error/GeneralError";
+import UpdatePrompt from "./scanconf-update/UpdatePrompt";
 
 const routes: Routes = [
   {
@@ -30,6 +31,12 @@ const routes: Routes = [
     id: "general-error",
     title: "An error has occurred",
     element: <GeneralError />,
+    navigation: false,
+  },
+  {
+    id: "scanconf-update",
+    title: "Scanconf update",
+    element: <UpdatePrompt />,
     navigation: false,
   },
   {

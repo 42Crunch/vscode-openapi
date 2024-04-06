@@ -7,6 +7,7 @@ import { compare } from "@xliic/scanconf-changes";
 import { goTo } from "../../../features/router/slice";
 import { AppDispatch, RootState } from "../store";
 import { showScanconfOperation, loadPlaybook } from "../actions";
+import { showChanges } from "../scanconf-update/slice";
 import { showGeneralError } from "../../../features/general-error/slice";
 
 export function onShowScanconf(startAppListening: TypedStartListening<RootState, AppDispatch>) {
@@ -25,13 +26,9 @@ export function onShowScanconf(startAppListening: TypedStartListening<RootState,
 
         const changes = compare(oas, parsed);
 
-        console.log("got changes", changes);
-
         if (changes.length > 0) {
-          listenerApi.dispatch(
-            showGeneralError({ message: `Has changes: ${JSON.stringify(changes)}` })
-          );
-          listenerApi.dispatch(goTo(["general-error"]));
+          listenerApi.dispatch(showChanges(changes));
+          listenerApi.dispatch(goTo(["scanconf-update"]));
           return;
         }
 
