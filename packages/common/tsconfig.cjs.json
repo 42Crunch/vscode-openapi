@@ -5,6 +5,7 @@
     "outDir": "dist/cjs",
     "rootDir": "src",
     "declaration": true,
+    "declarationMap": true,
     "composite": true
   }
 }
