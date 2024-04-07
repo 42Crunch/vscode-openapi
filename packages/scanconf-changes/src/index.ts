@@ -1,51 +1,7 @@
-import { BundledSwaggerOrOasSpec, Swagger, OpenApi30, isOpenapi, HttpMethod } from "@xliic/openapi";
+import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
 import { Scanconf } from "@xliic/scanconf";
-import { Change, OperationAdded, OperationRemoved } from "./changes";
-
-export type { Change } from "./changes";
-
-export function compare(
-  oas: BundledSwaggerOrOasSpec,
-  scanconf: Scanconf.ConfigurationFileBundle
-): Change[] {
-  return [
-    ...operationsAdded(oas, scanconf.operations || {}),
-    ...operationsRemoved(oas, scanconf.operations || {}),
-  ];
-}
-
-type OperationId = {
-  path: string;
-  method: HttpMethod;
-  operationId: string;
-};
-
-function operationsAdded(
-  oas: BundledSwaggerOrOasSpec,
-  scanconfOperations: Record<string, Scanconf.Operation>
-): OperationAdded[] {
-  // operations present in OAS but missing from scanconf
-  return getOperations(oas)
-    .filter((operation) => !scanconfOperations[operation.operationId])
-    .map((operation) => ({
-      type: "operation-added",
-      ...operation,
-    }));
-}
-
-function operationsRemoved(
-  oas: BundledSwaggerOrOasSpec,
-  scanconfOperations: Record<string, Scanconf.Operation>
-): OperationRemoved[] {
-  const oasOperationIds = getOperations(oas).map((operation) => operation.operationId);
-  const scanconfOperationIds = Object.keys(scanconfOperations);
-  return scanconfOperationIds
-    .filter((operationId) => !oasOperationIds.includes(operationId))
-    .map((operationId) => ({
-      type: "operation-removed",
-      operationId,
-    }));
-}
+import { OperationId } from "./compare";
+import { getOperations } from "./compare";
 
 function getCommonOperations(
   oas: BundledSwaggerOrOasSpec,
@@ -54,17 +10,7 @@ function getCommonOperations(
   return getOperations(oas).filter((operation) => !!scanconfOperations[operation.operationId]);
 }
 
-function getOperations(oas: BundledSwaggerOrOasSpec): OperationId[] {
-  const operations = isOpenapi(oas) ? OpenApi30.getOperations(oas) : Swagger.getOperations(oas);
-
-  return operations.map(([path, method, operation]) => ({
-    path,
-    method,
-    operationId: operation.operationId || makeOperationId(path, method),
-  }));
-}
-
-function makeOperationId(path: string, method: HttpMethod) {
+export function makeOperationId(path: string, method: HttpMethod) {
   return `${path}:${method}`;
 }
 
