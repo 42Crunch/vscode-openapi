@@ -15,7 +15,7 @@ import {
   onMockExecuteScenario,
   onTryExecuteScenario,
 } from "./listener-run-playbook";
-import { onShowScanconf } from "./listeners/host-messages";
+import { onShowScanconf, onLoadUpdatedScanconf } from "./listeners/host-messages";
 import listeners from "./listeners/webapp-messages";
 import { AppDispatch, RootState } from "./store";
 
@@ -33,7 +33,6 @@ export function createListener(host: Webapp["host"], routes: Routes) {
   const executeTryGlobalListener = onExecuteGlobal(startAppListening, host);
   const executeMockGlobalListener = onMockExecuteGlobal(startAppListening, host);
 
-  const executeShowScanconfOperationListener = onShowScanconf(startAppListening);
   const executeWebappMessages = listeners(startAppListening, host);
 
   startNavigationListening(startAppListening, routes);
@@ -47,7 +46,8 @@ export function createListener(host: Webapp["host"], routes: Routes) {
     executeTryAuthenticationListener,
     executeTryGlobalListener,
     executeMockGlobalListener,
-    executeShowScanconfOperationListener,
+    executeShowScanconfOperationListener: onShowScanconf(startAppListening),
+    executeLoadUpdatedScanconfListener: onLoadUpdatedScanconf(startAppListening, host),
   });
 
   return listenerMiddleware;

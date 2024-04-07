@@ -25,10 +25,12 @@ import global from "./global/slice";
 import operations from "./operations/slice";
 import requests from "./requests/slice";
 import scanconf from "./slice";
+import scanconfUpdate from "./scanconf-update/slice";
 
 const reducer = {
   theme,
   scanconf,
+  scanconfUpdate,
   operations,
   requests,
   auth,

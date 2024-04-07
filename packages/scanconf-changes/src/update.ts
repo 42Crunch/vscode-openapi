@@ -7,14 +7,17 @@ export function update(
   oas: BundledSwaggerOrOasSpec,
   original: Scanconf.ConfigurationFileBundle,
   updated: Scanconf.ConfigurationFileBundle,
-  change: Change
+  changes: Change[]
 ): Scanconf.ConfigurationFileBundle {
-  if (change.type === "operation-added") {
-    return updateAddOperation(oas, simpleClone(original), updated, change);
-  } else if (change.type === "operation-removed") {
-    return updateRemoveOperation(oas, simpleClone(original), updated, change);
+  const result = simpleClone(original);
+  for (const change of changes) {
+    if (change.type === "operation-added") {
+      return updateAddOperation(oas, result, updated, change);
+    } else if (change.type === "operation-removed") {
+      return updateRemoveOperation(oas, result, updated, change);
+    }
   }
-  return original;
+  return result;
 }
 
 export function updateAddOperation(
