@@ -91,7 +91,7 @@ export function onLoadUpdatedScanconf(
 
         host.postMessage({
           command: "saveScanconf",
-          payload: JSON.stringify(patched),
+          payload: JSON.stringify(patched, null, 2),
         });
 
         listenerApi.dispatch(loadPlaybook({ playbook, oas }));

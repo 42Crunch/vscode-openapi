@@ -1,7 +1,8 @@
-import { BundledSwaggerOrOasSpec, Swagger, OpenApi30, isOpenapi, HttpMethod } from "@xliic/openapi";
+import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Scanconf } from "@xliic/scanconf";
-import { Change, OperationAdded, OperationRemoved } from "./compare";
 import { simpleClone } from "@xliic/preserving-json-yaml-parser";
+
+import { Change, OperationAdded, OperationRemoved } from "./compare";
 
 export function update(
   oas: BundledSwaggerOrOasSpec,
@@ -9,12 +10,12 @@ export function update(
   updated: Scanconf.ConfigurationFileBundle,
   changes: Change[]
 ): Scanconf.ConfigurationFileBundle {
-  const result = simpleClone(original);
+  let result = simpleClone(original);
   for (const change of changes) {
     if (change.type === "operation-added") {
-      return updateAddOperation(oas, result, updated, change);
+      result = updateAddOperation(oas, result, updated, change);
     } else if (change.type === "operation-removed") {
-      return updateRemoveOperation(oas, result, updated, change);
+      result = updateRemoveOperation(oas, result, updated, change);
     }
   }
   return result;
