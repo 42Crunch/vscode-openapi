@@ -35,7 +35,7 @@ const routes: Routes = [
   },
   {
     id: "scanconf-update",
-    title: "Scanconf update",
+    title: "Scan configuration has became outdated",
     element: <UpdatePrompt />,
     navigation: false,
   },

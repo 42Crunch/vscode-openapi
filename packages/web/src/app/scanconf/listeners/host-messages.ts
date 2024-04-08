@@ -28,7 +28,7 @@ export function onShowScanconf(startAppListening: TypedStartListening<RootState,
         const changes = compare(oas, parsed);
 
         if (changes.length > 0) {
-          listenerApi.dispatch(showChanges({ scanconf, changes }));
+          listenerApi.dispatch(showChanges({ scanconf, oas, changes }));
           listenerApi.dispatch(goTo(["scanconf-update"]));
           return;
         }

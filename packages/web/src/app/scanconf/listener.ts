@@ -18,6 +18,7 @@ import {
 import { onShowScanconf, onLoadUpdatedScanconf } from "./listeners/host-messages";
 import listeners from "./listeners/webapp-messages";
 import { AppDispatch, RootState } from "./store";
+import { onScanconfSkipUpdate } from "./listeners/misc";
 
 const listenerMiddleware = createListenerMiddleware();
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
@@ -48,6 +49,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
     executeMockGlobalListener,
     executeShowScanconfOperationListener: onShowScanconf(startAppListening),
     executeLoadUpdatedScanconfListener: onLoadUpdatedScanconf(startAppListening, host),
+    executeSkipScanconfUpdate: onScanconfSkipUpdate(startAppListening),
   });
 
   return listenerMiddleware;

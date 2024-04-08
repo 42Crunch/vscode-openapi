@@ -30,7 +30,7 @@ function InnerNavigation({ routes }: { routes: Routes }) {
     if (route.title !== "") {
       return (
         <NavigationContent>
-          <div>{route.title}</div>
+          <Title>{route.title}</Title>
         </NavigationContent>
       );
     }
@@ -82,4 +82,8 @@ const NavigationTab = styled.div<{ active?: boolean }>`
         ? `1px solid var(${ThemeColorVariables.contrastActiveBorder})`
         : "none"};
   }
+`;
+
+const Title = styled.div`
+  place-self: center;
 `;
