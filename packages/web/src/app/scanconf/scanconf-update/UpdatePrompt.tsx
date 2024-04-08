@@ -13,10 +13,10 @@ export default function UpdatePrompt() {
 
   return (
     <Container>
-      <div>Your OpenAPI file has several changes that differ from your scan configuration.</div>
+      <div>Your OpenAPI file has changes that deviate from your scan configuration.</div>
       <div>
         Please update your scan configuration to reflect the changes in your OpenAPI file. If you
-        decide to ignore the changes, the scan will be performed with the current configuration.
+        decide to ignore the changes, the scan will be performed with the outdated configuration.
       </div>
 
       <Changes>

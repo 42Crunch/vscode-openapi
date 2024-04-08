@@ -29,9 +29,9 @@ function InnerNavigation({ routes }: { routes: Routes }) {
   if (route?.navigation === false) {
     if (route.title !== "") {
       return (
-        <NavigationContent>
+        <TitleContent>
           <Title>{route.title}</Title>
-        </NavigationContent>
+        </TitleContent>
       );
     }
     return null;
@@ -64,8 +64,14 @@ const NavigationContent = styled.nav`
   padding: 0px 16px;
   padding-top: 6px;
   gap: 24px;
-  //font-weight: 500;
   font-size: 14px;
+  border-bottom: 1px solid var(${ThemeColorVariables.border});
+`;
+
+const TitleContent = styled.div`
+  height: 35px;
+  display: flex;
+  padding: 0px 16px;
   border-bottom: 1px solid var(${ThemeColorVariables.border});
 `;
 
@@ -86,4 +92,7 @@ const NavigationTab = styled.div<{ active?: boolean }>`
 
 const Title = styled.div`
   place-self: center;
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
 `;
