@@ -263,7 +263,7 @@ function readSummary(assessment: any): Grades {
     grades.invalid = true;
   }
 
-  grades.all = grades.datavalidation.value + grades.security.value + grades.oasconformance.value;
+  grades.all = Math.round(assessment.score ? assessment.score : 0);
 
   return grades;
 }
