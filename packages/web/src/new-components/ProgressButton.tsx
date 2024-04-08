@@ -1,7 +1,8 @@
 import styled, { keyframes } from "styled-components";
-import { ThemeColorVariables } from "@xliic/common/theme";
-import { Spinner } from "../../../icons";
 import { useEffect, useState } from "react";
+
+import { ThemeColorVariables } from "@xliic/common/theme";
+import { Spinner } from "../icons";
 
 export function ProgressButton({
   label,
@@ -61,7 +62,7 @@ const Button = styled.button`
   cursor: pointer;
   background-color: var(${ThemeColorVariables.buttonBackground});
   color: var(${ThemeColorVariables.buttonForeground});
-  border: none;
+  border: 1px solid var(${ThemeColorVariables.buttonBorder});
   ${({ waiting }: { disabled?: boolean; waiting?: boolean }) => waiting && "gap: 8px;"}
 
   > span {

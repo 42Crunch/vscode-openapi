@@ -1,5 +1,5 @@
 import { useFormContext } from "react-hook-form";
-import { NormalProgressButton } from "../ProgressButton";
+import { NormalProgressButton } from "../../new-components/ProgressButton";
 
 export default function ValidProgressButton({
   label,

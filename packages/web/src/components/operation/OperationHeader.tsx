@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useFormContext, useController } from "react-hook-form";
 import { HttpMethod } from "@xliic/openapi";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { ProgressButton } from "../ProgressButton";
+import { ProgressButton } from "../../new-components/ProgressButton";
 
 export default function OperationHeader({
   method,

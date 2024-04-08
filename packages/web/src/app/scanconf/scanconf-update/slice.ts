@@ -1,13 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/openapi";
-import { Playbook } from "@xliic/scanconf";
+import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Change } from "@xliic/scanconf-changes";
 
 export type State = {
   changes: Change[];
   scanconf: string;
   oas: BundledSwaggerOrOasSpec;
+  updating: boolean;
 };
 
 const initialState: State = {
@@ -18,6 +18,7 @@ const initialState: State = {
     info: { title: "", version: "0.0" },
     paths: { "/": { get: { responses: {} } } },
   },
+  updating: false,
 };
 
 export const slice = createSlice({
@@ -31,9 +32,13 @@ export const slice = createSlice({
       state.changes = action.payload.changes;
       state.scanconf = action.payload.scanconf;
       state.oas = action.payload.oas;
+      state.updating = false;
     },
 
-    updateScanconf: (state) => {},
+    updateScanconf: (state) => {
+      state.updating = true;
+    },
+
     skipScanconfUpdate: (state) => {},
   },
 });

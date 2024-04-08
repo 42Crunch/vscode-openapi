@@ -3,13 +3,13 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { useAppDispatch, useAppSelector } from "../store";
 import { skipScanconfUpdate, updateScanconf } from "./slice";
-import Button from "../../../new-components/Button";
 import PathMethodCard from "../../../new-components/PathMethodCard";
 import ButtonSecondary from "../../../new-components/ButtonSecondary";
+import { ProgressButton } from "../../../new-components/ProgressButton";
 
 export default function UpdatePrompt() {
   const dispatch = useAppDispatch();
-  const changes = useAppSelector((state) => state.scanconfUpdate.changes);
+  const { changes, updating } = useAppSelector((state) => state.scanconfUpdate);
 
   return (
     <Container>
@@ -38,8 +38,14 @@ export default function UpdatePrompt() {
       </Changes>
 
       <Buttons>
-        <Button onClick={() => dispatch(updateScanconf())}>Update</Button>
-        <ButtonSecondary onClick={() => dispatch(skipScanconfUpdate())}>Skip</ButtonSecondary>
+        <ProgressButton
+          label="Update"
+          waiting={updating}
+          onClick={() => dispatch(updateScanconf())}
+        />
+        <ButtonSecondary disabled={updating} onClick={() => dispatch(skipScanconfUpdate())}>
+          Skip
+        </ButtonSecondary>
       </Buttons>
     </Container>
   );
