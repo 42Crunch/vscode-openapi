@@ -20,6 +20,7 @@ import AddAuthorizationTest from "./components/AddAuthorizationTest";
 import AuthorizationTests from "./AuthorizationTests";
 import { ErrorBanner } from "../../../components/Banner";
 import { extractScanconf, optionallyReplaceLocalhost } from "./util";
+import PathMethodCard from "../../../new-components/PathMethodCard";
 
 export default function Operation({ operationId }: { operationId: string }) {
   const dispatch = useAppDispatch();
@@ -116,11 +117,11 @@ export default function Operation({ operationId }: { operationId: string }) {
       />
 
       <Header>
-        <Title>{operationId}</Title>
-        <div>
-          <Method>{operation.request.request.method}</Method>
-          <Path>{operation.request.request.path}</Path>
-        </div>
+        <PathMethodCard
+          operationId={operationId}
+          path={operation.request.request.path}
+          method={operation.request.request.method}
+        />
       </Header>
 
       {beforeExecutionResult?.status === "failure" && (
@@ -237,32 +238,4 @@ const Content = styled.div`
 const Header = styled.div`
   margin-bottom: 16px;
   margin-top: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  > div:last-child {
-    display: flex;
-    gap: 4px;
-  }
-  line-break: anywhere;
 `;
-
-const Title = styled.div`
-  font-size: 16px;
-  font-weight: 700;
-`;
-
-const Method = styled.div`
-  background-color: var(${ThemeColorVariables.badgeBackground});
-  color: var(${ThemeColorVariables.badgeForeground});
-  border-radius: 4px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 48px;
-  height: 16px;
-  text-transform: uppercase;
-  font-size: 11px;
-`;
-
-const Path = styled.div``;
