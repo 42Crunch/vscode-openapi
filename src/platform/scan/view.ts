@@ -28,8 +28,8 @@ import { ScanReportWebView } from "./report-view";
 import {
   runScanWithCliBinary,
   runValidateScanConfigWithCliBinary,
-  createScanConfigWithCliBinary,
   createDefaultConfigWithCliBinary,
+  backupConfig,
 } from "../cli-ast";
 import { runScanWithDocker } from "./runtime/docker";
 import { runScanWithScandManager } from "./runtime/scand-manager";
@@ -191,6 +191,7 @@ export class ScanWebView extends WebView<Webapp> {
     updateScanconf: async () => {
       const stringOas = stringify(this.target!.bundle.value);
       const scanconf = await createDefaultConfigWithCliBinary(stringOas);
+      await backupConfig(this.target!.scanconfUri);
       this.sendRequest({
         command: "loadUpdatedScanconf",
         payload: { oas: this.target!.bundle.value, scanconf },

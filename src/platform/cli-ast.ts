@@ -88,6 +88,12 @@ export async function createDefaultConfigWithCliBinary(oas: string): Promise<str
   return scanconf;
 }
 
+export async function backupConfig(scanconfUri: vscode.Uri): Promise<vscode.Uri> {
+  const backup = join(dirname(scanconfUri.fsPath), "scanconf-backup.json");
+  await copyFile(scanconfUri.fsPath, backup);
+  return vscode.Uri.file(backup);
+}
+
 export function getCliInfo(): Config["cli"] {
   const cli = join(getBinDirectory(), getCliFilename());
   return { location: cli, found: exists(cli) };
