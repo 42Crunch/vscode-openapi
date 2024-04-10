@@ -5,7 +5,7 @@ import InvalidReport from "./InvalidReport";
 import PriorityIssues from "./PriorityIssues";
 import SqgReport from "./SqgReport";
 import { SummaryTiles } from "./SummaryTiles";
-import { ReportState, changeTab } from "./slice";
+import { ReportState, changeFilter, changeTab } from "./slice";
 import { useAppDispatch, useAppSelector } from "./store";
 
 export default function AuditReport() {
@@ -14,7 +14,14 @@ export default function AuditReport() {
 
   return (
     <Container>
-      {audit.valid === false && <InvalidReport />}
+      {audit.valid === false && (
+        <InvalidReport
+          onShowIssues={() => {
+            dispatch(changeTab("issues"));
+            dispatch(changeFilter({ domain: "oasconformance" }));
+          }}
+        />
+      )}
       <SummaryTiles />
       <SqgReport />
       <TabContainer
