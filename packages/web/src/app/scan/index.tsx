@@ -33,7 +33,8 @@ import ScanOperation from "./ScanOperation";
 const routes: Routes = [
   {
     id: "starting",
-    title: "Starting",
+    title: "",
+    navigation: false,
     element: <div />,
   },
   {

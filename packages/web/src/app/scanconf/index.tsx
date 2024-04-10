@@ -24,8 +24,8 @@ const routes: Routes = [
   {
     id: "starting",
     title: "",
-    element: <div>Starting...</div>,
     navigation: false,
+    element: <div />,
   },
   {
     id: "general-error",
