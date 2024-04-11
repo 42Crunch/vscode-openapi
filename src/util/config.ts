@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { Config } from "@xliic/common/config";
+import { Config, ApprovedHostConfiguration } from "@xliic/common/config";
 import { Configuration } from "../configuration";
 import { getCliInfo } from "../platform/cli-ast";
 
@@ -28,6 +28,8 @@ export async function loadConfig(
 
   const platformMandatoryTags = configuration.get<"string">("platformMandatoryTags");
 
+  const approvedHosts = await getApprovedHostsConfiguration(configuration, secrets);
+
   return {
     platformUrl,
     platformApiToken: apiToken,
@@ -50,6 +52,7 @@ export async function loadConfig(
     repository,
     platformTemporaryCollectionName,
     platformMandatoryTags,
+    approvedHosts,
   };
 }
 
@@ -107,6 +110,8 @@ export async function saveConfig(
   if (config.scandManager.auth == "header") {
     await secrets.store("platformScandManagerHeader", JSON.stringify(config.scandManager.header));
   }
+
+  await processApprovedHosts(configuration, secrets, config.approvedHosts);
 }
 
 export function deriveServices(platformUrl: string): string {
@@ -115,4 +120,111 @@ export function deriveServices(platformUrl: string): string {
     return platformHost.replace(/^platform/i, "services") + ":8001";
   }
   return "services." + platformHost + ":8001";
+}
+
+export async function processApprovedHosts(
+  configuration: Configuration,
+  secrets: vscode.SecretStorage,
+  approvedHosts: ApprovedHostConfiguration[]
+) {
+  const updateApprovedHostnames = approvedHosts.map((hostConfig) => hostConfig.host.trim());
+  const lcaseUpdateApprovedHostnames = updateApprovedHostnames.map((hostname) =>
+    hostname.toLowerCase()
+  );
+
+  const currentApprovedHostnames = getApprovedHostnames(configuration);
+
+  const removedHostnames = currentApprovedHostnames.filter(
+    (currentHost) => !lcaseUpdateApprovedHostnames.includes(currentHost.trim().toLowerCase())
+  );
+
+  // remove secrets for deleted hostnames
+  await removeSecretsForApprovedHosts(secrets, removedHostnames);
+
+  // save new secrets
+  await Promise.all(
+    approvedHosts.flatMap((hostConfigUpdate) => [
+      secrets.store(
+        getHostConfigurationSecretKeyFor(hostConfigUpdate.host, "header"),
+        hostConfigUpdate.header || ""
+      ),
+      secrets.store(
+        getHostConfigurationSecretKeyFor(hostConfigUpdate.host, "prefix"),
+        hostConfigUpdate.prefix || ""
+      ),
+      secrets.store(
+        getHostConfigurationSecretKeyFor(hostConfigUpdate.host, "token"),
+        hostConfigUpdate.token || ""
+      ),
+    ])
+  );
+
+  // update hostnames configuration
+  await configuration.update(
+    "approvedHostnames",
+    updateApprovedHostnames,
+    vscode.ConfigurationTarget.Global
+  );
+}
+
+export async function removeSecretsForApprovedHosts(
+  secrets: vscode.SecretStorage,
+  removed: string[]
+) {
+  return Promise.all(
+    removed.flatMap((removedHost) => {
+      const lcHost = removedHost.trim().toLowerCase();
+      return [
+        secrets.delete(getHostConfigurationSecretKeyFor(lcHost, "header")),
+        secrets.delete(getHostConfigurationSecretKeyFor(lcHost, "prefix")),
+        secrets.delete(getHostConfigurationSecretKeyFor(lcHost, "token")),
+      ];
+    })
+  );
+}
+
+export function getApprovedHostnames(configuration: Configuration): string[] {
+  return configuration.get<string[]>("approvedHostnames", []);
+}
+
+export function getApprovedHostnamesTrimmedLowercase(configuration: Configuration): string[] {
+  return getApprovedHostnames(configuration).map((name) => name.trim().toLowerCase());
+}
+
+export async function getApprovedHostConfiguration(
+  secrets: vscode.SecretStorage,
+  host: string
+): Promise<ApprovedHostConfiguration | undefined> {
+  const sanitizedHost = host.trim().toLowerCase();
+  if (!sanitizedHost) {
+    return undefined;
+  }
+
+  const [header, prefix, token] = (
+    await Promise.all([
+      secrets.get(getHostConfigurationSecretKeyFor(sanitizedHost, "header")),
+      secrets.get(getHostConfigurationSecretKeyFor(sanitizedHost, "prefix")),
+      secrets.get(getHostConfigurationSecretKeyFor(sanitizedHost, "token")),
+    ])
+  ).map((conf) => conf || "");
+
+  return { host: host.trim(), header, prefix, token };
+}
+
+async function getApprovedHostsConfiguration(
+  configuration: Configuration,
+  secrets: vscode.SecretStorage
+): Promise<ApprovedHostConfiguration[]> {
+  const approvedHostnames = getApprovedHostnames(configuration);
+  return (
+    await Promise.all(approvedHostnames.map((host) => getApprovedHostConfiguration(secrets, host)))
+  ).filter((hostConfig) => hostConfig !== undefined) as ApprovedHostConfiguration[];
+}
+
+export function getHostConfigurationSecretKeyBase(): string {
+  return "openapi-external-refs-host";
+}
+
+export function getHostConfigurationSecretKeyFor(host: string, group: string): string {
+  return `${getHostConfigurationSecretKeyBase()}-${group}-${host}`;
 }
