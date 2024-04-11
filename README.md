@@ -112,6 +112,28 @@ Try it comes with a number of limitations:
 
 ![TryIt response tools](images/tryit-schema.png)
 
+### Configure authentication for external references in OpenAPI files
+
+If you use references to schemas served by an authenticated HTTP service (such as an Schema Registry service or a repository), you'll need to configure the list of approved hosts in the extension settings. To do this:
+1. On the **File** menu, click **Preferences > Settings**.
+2. Expand the **Extensions** section and click **OpenAPI**.
+3. Locate the **Openapi: Approved Hostnames** setting, click on **Add item**, and write the hostname you need for resolving external references.
+![Configure approved hosts and authentication](./images/Configure%20approved%20hosts.png)
+
+In case some of the approved hosts requires authentication, you can configure it in the OpenAPI > External References section of the `42Crunch: Open Settings` command view:
+
+![Configure approved hosts and authentication](./images/Configure%20approved%20hosts%20authentication.png)
+
+<br>
+
+> To open this view, go to `View > Command Palette...` in VSCode menu and type in `42Crunch`, you'll see the Open Settings command listed below:
+> ![42Crunch: Open Settings](./images/42Crunch%20Open%20Settings.png)
+> You can also use keyboard shortcuts for the Command Palette **Ctrl+Shift+P**, or **Cmd+Shift+P** for Mac users.
+
+<br>
+
+After configuring all hosts you need to refer to, all OpenAPI references to any of the approved hosts will be dynamically resolved when linting or previewing your API.
+
 ## Static API Security Testing
 
 You can use this OpenAPI extension to check the quality and security of your API definition as you work on it. This feature is powered by 42Crunch [Audit](https://docs.42crunch.com/latest/content/concepts/api_contract_security_audit.htm?utm_campaign=IDE&utm_medium=referral&utm_source=vscode). 42Crunch Audit performs a static analysis of the API definition that includes more than 300 checks on best practices and potential vulnerabilities related to authentication, authorization as well as data constraints.
