@@ -35,6 +35,11 @@ import { Logger } from "./platform/types";
 import { getPlatformCredentials } from "./credentials";
 import { EnvStore } from "./envstore";
 import { debounce } from "./util/debounce";
+import {
+  getApprovedHostnames,
+  getApprovedHostnamesTrimmedLowercase,
+  removeSecretsForApprovedHosts,
+} from "./util/config";
 
 export async function activate(context: vscode.ExtensionContext) {
   const versionProperty = "openapiVersion";
@@ -53,7 +58,7 @@ export async function activate(context: vscode.ExtensionContext) {
     yaml: { language: "yaml" },
   };
 
-  const externalRefProvider = new ExternalRefDocumentProvider();
+  const externalRefProvider = new ExternalRefDocumentProvider(context.secrets);
   vscode.workspace.registerTextDocumentContentProvider(INTERNAL_SCHEMES.http, externalRefProvider);
   vscode.workspace.registerTextDocumentContentProvider(INTERNAL_SCHEMES.https, externalRefProvider);
 
@@ -171,6 +176,28 @@ export async function activate(context: vscode.ExtensionContext) {
   context.secrets.onDidChange(async (e) => {
     if (e.key === "platformApiToken") {
       reloadCredentials();
+    }
+  });
+
+  let approvedHostnames = getApprovedHostnamesTrimmedLowercase(configuration);
+
+  const cleanupSecrets = debounce(
+    async () => {
+      const updatedApprovedHostnames = getApprovedHostnamesTrimmedLowercase(configuration);
+
+      await removeSecretsForApprovedHosts(
+        context.secrets,
+        approvedHostnames.filter((name) => !updatedApprovedHostnames.includes(name))
+      );
+
+      approvedHostnames = updatedApprovedHostnames;
+    },
+    { delay: 3000 }
+  );
+
+  configuration.onDidChange(async (e: vscode.ConfigurationChangeEvent) => {
+    if (configuration.changed(e, "approvedHostnames")) {
+      cleanupSecrets();
     }
   });
 }
