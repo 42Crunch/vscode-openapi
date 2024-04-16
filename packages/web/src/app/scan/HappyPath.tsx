@@ -7,7 +7,14 @@ import CurlRequest from "./CurlRequest";
 import { RuntimeOperationReport } from "@xliic/common/scan-report";
 
 export function HappyPath({ operation }: { operation: RuntimeOperationReport }) {
-  const { request, response, outcome, happyPath } = operation.scenarios?.[0]!;
+  const scenario = operation.scenarios?.[0];
+
+  if (scenario === undefined) {
+    const reason = operation.reason || "unknown";
+    return <Failed>Happy path failed, reason: {reason}</Failed>;
+  }
+
+  const { request, response, outcome, happyPath } = scenario;
 
   let responsePayloadMatchesContract = "N/A";
 
@@ -67,6 +74,10 @@ export function HappyPath({ operation }: { operation: RuntimeOperationReport }) 
 const Container = styled.div`
   margin: 8px;
   border: 1px solid var(${ThemeColorVariables.border});
+`;
+
+const Failed = styled.div`
+  margin: 16px;
 `;
 
 const Item = styled.div`
