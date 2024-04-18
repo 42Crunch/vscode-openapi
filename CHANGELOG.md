@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.25.2 (April 18, 2024)
+
+- Add setting to disable contribution of OpenAPI schemas for YAML files #269 
+- Allow configuring auth info for external references #256
+
 ## Version 4.25.1 (March 1, 2024)
 
 - Downgrade swagger-ui dependency in preview to fix #264
