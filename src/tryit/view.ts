@@ -92,9 +92,9 @@ export class TryItWebView extends WebView<Webapp> {
     return this.target;
   }
 
-  onDispose(): void {
+  async onDispose(): Promise<void> {
     this.target = undefined;
-    super.onDispose();
+    await super.onDispose();
   }
 
   async showTryIt(bundle: Bundle, target: TryItTarget) {

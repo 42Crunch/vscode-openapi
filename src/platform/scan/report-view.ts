@@ -21,6 +21,7 @@ import { loadConfig } from "../../util/config";
 import { WebView } from "../../web-view";
 import { PlatformStore } from "../stores/platform-store";
 import { executeHttpRequest } from "./http-handler";
+import { cleanupTempScanDirectory } from "../cli-ast";
 
 export class ScanReportWebView extends WebView<Webapp> {
   private document?: vscode.TextDocument;
@@ -28,6 +29,8 @@ export class ScanReportWebView extends WebView<Webapp> {
     report: any;
     mapping: MappingNode;
   };
+
+  private temporaryReportDirectory?: string;
 
   constructor(
     title: string,
@@ -114,9 +117,12 @@ export class ScanReportWebView extends WebView<Webapp> {
     },
   };
 
-  onDispose(): void {
+  async onDispose(): Promise<void> {
     this.document = undefined;
-    super.onDispose();
+    if (this.temporaryReportDirectory !== undefined) {
+      await cleanupTempScanDirectory(this.temporaryReportDirectory);
+    }
+    await super.onDispose();
   }
 
   async sendStartScan(document: vscode.TextDocument) {
@@ -141,6 +147,10 @@ export class ScanReportWebView extends WebView<Webapp> {
         code: "audit-error",
       },
     });
+  }
+
+  setTemporaryReportDirectory(dir: string) {
+    this.temporaryReportDirectory = dir;
   }
 
   async sendLoadConfig() {

@@ -215,7 +215,7 @@ export async function runScanWithCliBinary(
   oas: string,
   scanconf: string,
   isFullScan: boolean
-): Promise<Result<{ scan: unknown; cli: CliResponse }, CliError>> {
+): Promise<Result<{ scan: unknown; cli: CliResponse; tempScanDirectory: string }, CliError>> {
   logger.info(`Running Conformance Scan using 42Crunch API Security Testing Binary`);
 
   const tmpDir = tmpdir();
@@ -274,13 +274,7 @@ export async function runScanWithCliBinary(
     const parsed = JSON.parse(report);
     const cliResponse = parseCliJsonResponse(output.stdout);
 
-    // clean the temp directory
-    unlinkSync(oasFilename);
-    unlinkSync(scanconfFilename);
-    unlinkSync(reportFilename);
-    rmdirSync(dir);
-
-    return [{ scan: parsed, cli: cliResponse! }, undefined];
+    return [{ scan: parsed, cli: cliResponse!, tempScanDirectory: dir }, undefined];
   } catch (ex: any) {
     const error = readException(ex);
     const json = parseCliJsonResponse(error.stdout);
@@ -290,6 +284,17 @@ export async function runScanWithCliBinary(
       throw new Error(formatException(error));
     }
   }
+}
+
+export async function cleanupTempScanDirectory(dir: string) {
+  const oasFilename = join(dir as string, "openapi.json");
+  const scanconfFilename = join(dir as string, "scanconf.json");
+  const reportFilename = join(dir as string, "report.json");
+
+  unlinkSync(oasFilename);
+  unlinkSync(scanconfFilename);
+  unlinkSync(reportFilename);
+  rmdirSync(dir);
 }
 
 export async function runValidateScanConfigWithCliBinary(

@@ -87,7 +87,7 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
     }
   }
 
-  onDispose() {
+  async onDispose() {
     this.panel = undefined;
   }
 

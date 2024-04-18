@@ -184,9 +184,9 @@ export class ScanWebView extends WebView<Webapp> {
     },
   };
 
-  onDispose(): void {
+  async onDispose(): Promise<void> {
     this.document = undefined;
-    super.onDispose();
+    await super.onDispose();
   }
 
   async sendScanOperation(
@@ -317,6 +317,8 @@ async function runScan(
           throw new Error(`Unexpected error running Conformance Scan: ${JSON.stringify(error)}`);
         }
       }
+
+      reportView.setTemporaryReportDirectory(result.tempScanDirectory);
 
       if (
         result.cli.remainingPerOperationScan !== undefined &&
