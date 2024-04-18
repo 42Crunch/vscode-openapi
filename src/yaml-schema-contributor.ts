@@ -3,11 +3,16 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { Cache } from "./cache";
 import { OpenApiVersion } from "./types";
+import { Configuration } from "./configuration";
 
-export function activate(context: vscode.ExtensionContext, cache: Cache) {
+export function activate(
+  context: vscode.ExtensionContext,
+  cache: Cache,
+  configuration: Configuration
+) {
   const yamlExtension = vscode.extensions.getExtension("redhat.vscode-yaml");
   if (yamlExtension) {
-    provideYamlSchemas(context, cache, yamlExtension);
+    provideYamlSchemas(context, cache, configuration, yamlExtension);
   } else {
     // TODO log
   }
@@ -16,13 +21,25 @@ export function activate(context: vscode.ExtensionContext, cache: Cache) {
 export async function provideYamlSchemas(
   context: vscode.ExtensionContext,
   cache: Cache,
+  configuration: Configuration,
   yamlExtension: vscode.Extension<any>
 ) {
   if (!yamlExtension.isActive) {
     await yamlExtension.activate();
   }
 
+  let disabled = configuration.get("advanced.disableYamlSchemaContribution");
+  configuration.onDidChange((e: vscode.ConfigurationChangeEvent) => {
+    if (configuration.changed(e, "advanced.disableYamlSchemaContribution")) {
+      disabled = configuration.get("advanced.disableYamlSchemaContribution");
+    }
+  });
+
   function requestSchema(uri: string) {
+    if (disabled) {
+      return null;
+    }
+
     for (const document of vscode.workspace.textDocuments) {
       if (document.uri.toString() === uri) {
         const version = cache.getDocumentVersion(document);
@@ -34,14 +51,15 @@ export async function provideYamlSchemas(
         break;
       }
     }
+
     return null;
   }
 
   function requestSchemaContent(uri: string) {
-    if (uri === "openapi:v2") {
+    if (!disabled && uri === "openapi:v2") {
       const filename = path.join(context.extensionPath, "schema/generated", "openapi-2.0.json");
       return fs.readFileSync(filename, { encoding: "utf8" });
-    } else if (uri === "openapi:v3") {
+    } else if (!disabled && uri === "openapi:v3") {
       const filename = path.join(
         context.extensionPath,
         "schema/generated",

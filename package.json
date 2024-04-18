@@ -823,6 +823,12 @@
           "default": [],
           "description": "List of hostnames TryIt is allowed to connect ignoring SSL certificate errors"
         },
+        "openapi.advanced.disableYamlSchemaContribution": {
+          "scope": "application",
+          "description": "Disable OpenAPI/Swagger schema contribution for YAML files",
+          "type": "boolean",
+          "default": false
+        },
         "openapi.dataDictionaryPreAuditFix": {
           "scope": "application",
           "type": "string",

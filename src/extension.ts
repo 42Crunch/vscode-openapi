@@ -97,7 +97,7 @@ export async function activate(context: vscode.ExtensionContext) {
   vscode.window.onDidChangeActiveTextEditor((e) => cache.onActiveEditorChanged(e));
   vscode.workspace.onDidChangeTextDocument((e) => cache.onDocumentChanged(e));
 
-  yamlSchemaContributor.activate(context, cache);
+  yamlSchemaContributor.activate(context, cache, configuration);
 
   const auditContext: AuditContext = {
     auditsByMainDocument: {},
