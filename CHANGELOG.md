@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 4.26.0 (April 9, 2024)
+## Version 4.26.0 (May ??, 2024)
 
 - Allow all users to run 42Crunch Scan
 - Show 42Crunch icon in the status bar to authenticated users
@@ -8,6 +8,11 @@
 - Add Audit/Scan code lenses to the top of the OpenAPI file
 - Allow switching between different authentication types (Security Audit Token/IDE Token) if both are available
 - Allow running full Scans (in addition to per-operation Scans)
+
+## Version 4.25.2 (April 18, 2024)
+
+- Add setting to disable contribution of OpenAPI schemas for YAML files #269 
+- Allow configuring auth info for external references #256
 
 ## Version 4.25.1 (March 1, 2024)
 
