@@ -263,4 +263,4 @@ To execute the 42Crunch Freemium services, you need access to the following URL:
 
 Submit your bug reports at [GitHub project Issues](https://github.com/42Crunch/vscode-openapi/issues).
 
-And, needless to say, your reviews at [VS Code marketplace](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi&ssr=false#review-details) mean the world to us!
+And, needless to say, your reviews at [VS Code marketplace](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi&ssr=false#review-details) mean the world to us! 
