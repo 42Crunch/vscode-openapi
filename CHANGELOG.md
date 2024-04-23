@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.25.3 (April 23, 2024)
+
+- Fix resource leak issue reported in #266
+
 ## Version 4.25.2 (April 18, 2024)
 
 - Add setting to disable contribution of OpenAPI schemas for YAML files #269 
