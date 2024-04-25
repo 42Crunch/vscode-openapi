@@ -45,7 +45,10 @@ export function getSecurity(
     for (const schemeName of Object.keys(requirement)) {
       // check if the requsted security scheme is defined in the OAS
       if (oas?.components?.securitySchemes?.[schemeName]) {
-        resolved[schemeName] = oas?.components?.securitySchemes?.[schemeName]!;
+        const derefed = deref(oas, oas?.components?.securitySchemes?.[schemeName]!);
+        if (derefed !== undefined) {
+          resolved[schemeName] = derefed;
+        }
       }
     }
     result.push(resolved);

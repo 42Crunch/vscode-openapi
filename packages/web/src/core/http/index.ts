@@ -1,6 +1,14 @@
 //@ts-ignore
 import SwaggerClient from "swagger-client";
-import { OpenApi30, Swagger, BundledSwaggerOrOasSpec, HttpMethod, isOpenapi } from "@xliic/openapi";
+import {
+  OpenApi30,
+  Swagger,
+  BundledSwaggerOrOasSpec,
+  HttpMethod,
+  isOpenapi,
+  RefOr,
+  deref,
+} from "@xliic/openapi";
 import { HttpConfig, HttpRequest } from "@xliic/common/http";
 import { Config } from "@xliic/common/config";
 import {
@@ -33,12 +41,7 @@ export async function makeHttpRequest(
         spec: await buildOasSpec(oas, path, method, values, env),
         operationId,
         parameters: makeOpenApiSwaggerClientParameters(values.parameters),
-        securities: makeOasSecurities(
-          oas?.components?.securitySchemes || {},
-          values.security,
-          values.securityIndex,
-          env
-        ),
+        securities: makeOasSecurities(oas, values.security, values.securityIndex, env),
         requestContentType: values.body?.mediaType,
         requestBody: replaceEnvVariables(values.body?.value, env),
       })
@@ -165,7 +168,7 @@ function makeSwaggerSwaggerClientParameters(
 }
 
 function makeOasSecurities(
-  schemes: Record<string, OpenApi30.SecurityScheme>,
+  oas: OpenApi30.BundledSpec,
   values: TryitSecurityAllValues,
   index: number,
   env: EnvData
@@ -174,6 +177,8 @@ function makeOasSecurities(
   if (!value) {
     return undefined;
   }
+
+  const schemes = getResolvedOasSecuritySchemes(oas);
 
   const result: any = {};
   for (const name of Object.keys(value)) {
@@ -186,6 +191,19 @@ function makeOasSecurities(
     }
   }
   return { authorized: result };
+}
+
+function getResolvedOasSecuritySchemes(
+  oas: OpenApi30.BundledSpec
+): Record<string, OpenApi30.SecurityScheme> {
+  const resolved: Record<string, OpenApi30.SecurityScheme> = {};
+  for (const [name, scheme] of Object.entries(oas.components?.securitySchemes || {})) {
+    const result = deref(oas, scheme);
+    if (result !== undefined) {
+      resolved[name] = result;
+    }
+  }
+  return resolved;
 }
 
 function makeSwaggerSecurities(

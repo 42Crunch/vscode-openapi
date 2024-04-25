@@ -8,6 +8,8 @@ import {
   HttpMethod,
   getOperation,
   isOpenapi,
+  deref,
+  RefOr,
 } from "@xliic/openapi";
 import { HttpRequest } from "@xliic/common/http";
 import { Result } from "@xliic/result";
@@ -78,7 +80,7 @@ async function makeHttpRequestForOas(
     spec: await buildOasSpecWithServers(oas, server, request),
     operationId: swaggerClientOperationId,
     parameters: makeOpenApiSwaggerClientParameters(request.parameters, security),
-    securities: makeOasSecurities(oas?.components?.securitySchemes || {}, security),
+    securities: makeOasSecurities(oas, security),
     requestContentType: swaggerContentType,
     requestBody: request.body?.value,
   });
@@ -263,14 +265,12 @@ function collectParameters(
   return result;
 }
 
-function makeOasSecurities(
-  schemes: Record<string, OpenApi30.SecurityScheme>,
-  security: AuthResult
-): any {
+function makeOasSecurities(oas: OpenApi30.BundledSpec, security: AuthResult): any {
+  const schemes = getResolvedOasSecuritySchemes(oas);
   const matches = matchSecuritySchemesToAuthResult(schemes, security);
   const result: any = {};
   for (const name of Object.keys(matches)) {
-    const scheme = schemes[name];
+    const scheme = deref(oas, schemes[name]);
     const securityValue = matches[name];
     if (scheme?.type === "oauth2" || scheme?.type === "openIdConnect") {
       result[name] = { token: { access_token: securityValue } };
@@ -280,6 +280,19 @@ function makeOasSecurities(
   }
 
   return { authorized: result };
+}
+
+function getResolvedOasSecuritySchemes(
+  oas: OpenApi30.BundledSpec
+): Record<string, OpenApi30.SecurityScheme> {
+  const resolved: Record<string, OpenApi30.SecurityScheme> = {};
+  for (const [name, scheme] of Object.entries(oas.components?.securitySchemes || {})) {
+    const result = deref(oas, scheme);
+    if (result !== undefined) {
+      resolved[name] = result;
+    }
+  }
+  return resolved;
 }
 
 function makeSwaggerSecurities(
