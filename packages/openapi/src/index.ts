@@ -6,6 +6,7 @@ import { deref } from "./ref";
 export * as OpenApi30 from "./oas30";
 export * as Swagger from "./swagger";
 export { deref } from "./ref";
+export type { RefOr } from "./ref";
 export type { HttpMethod } from "./http";
 export { HttpMethods } from "./http";
 

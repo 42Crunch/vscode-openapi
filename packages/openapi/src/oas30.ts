@@ -280,7 +280,7 @@ export type ResolvedComponents = {
   examples?: Record<string, Example>;
   requestBodies?: Record<string, RequestBody>;
   headers?: Record<string, Header>;
-  securitySchemes?: Record<string, SecurityScheme>;
+  securitySchemes?: Record<string, RefOr<SecurityScheme>>;
   links?: Record<string, Link>;
   callbacks?: Record<string, Callback>;
 };
