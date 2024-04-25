@@ -13,11 +13,10 @@ import {
   createWriteStream,
   mkdirSync,
   mkdtempSync,
-  renameSync,
   rmdirSync,
   unlinkSync,
 } from "node:fs";
-import { writeFile, readFile } from "node:fs/promises";
+import { writeFile, readFile, copyFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { finished } from "node:stream";
@@ -90,7 +89,7 @@ export async function testCli(): Promise<CliTestResult> {
     try {
       const { stdout } = await asyncExecFile(cli.location, ["--version"], { windowsHide: true });
       const version = stdout.split("\n")?.[0]; // get the first line only
-      const match = version.match(/(\d+\.\d+\.\d+)$/);
+      const match = version.match(/(\d+\.\d+\.\d+.*)$/);
       if (match !== null) {
         return { success: true, version: match[1] };
       }
@@ -199,7 +198,8 @@ export async function* downloadCli(
   ensureDirectories();
   const tmpCli = yield* downloadToTempFile(manifest);
   const destinationCli = join(getBinDirectory(), getCliFilename());
-  renameSync(tmpCli, destinationCli);
+  await copyFile(tmpCli, destinationCli);
+  unlinkSync(tmpCli);
   rmdirSync(dirname(tmpCli));
   if (process.platform === "linux" || process.platform === "darwin") {
     chmodSync(destinationCli, 0o755);
