@@ -423,7 +423,7 @@ async function loadReport(
   tmpApi: { apiId: string; collectionId: string },
   logger: Logger
 ) {
-  const reportId = await waitForReport(store, tmpApi.apiId, 30000);
+  const reportId = await waitForReport(store, tmpApi.apiId, 300000);
 
   // if (reportId === undefined) {
   //   reportView.showGeneralError({ message: "Failed to load scan report from the platform" });
@@ -432,8 +432,6 @@ async function loadReport(
   const report = await store.readScanReportNew(reportId!);
 
   const parsedReport = JSON.parse(Buffer.from(report, "base64").toString("utf-8"));
-
-  await store.clearTempApi(tmpApi);
 
   return parsedReport;
 }
