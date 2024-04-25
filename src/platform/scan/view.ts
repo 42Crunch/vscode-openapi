@@ -360,6 +360,7 @@ async function runScan(
 
       const parsedReport = await loadReport(store, tmpApi, logger);
       logger.info(`Finished API Conformance Scan`);
+      await store.clearTempApi(tmpApi);
 
       if (isFullScan) {
         await reportView.showFullScanReport(parsedReport, oas);
