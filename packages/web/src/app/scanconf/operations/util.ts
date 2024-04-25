@@ -1,4 +1,4 @@
-import { serialize, Scanconf } from "@xliic/scanconf";
+import { Scanconf } from "@xliic/scanconf";
 
 export function extractScanconf(
   mutable: Scanconf.ConfigurationFileBundle,
@@ -8,6 +8,10 @@ export function extractScanconf(
     for (const key of Object.keys(mutable?.operations)) {
       if (key !== operationId) {
         mutable.operations[key].scenarios = [];
+        mutable.operations[key].before = [];
+        mutable.operations[key].after = [];
+        mutable.operations[key].customTests = [];
+        mutable.operations[key].authorizationTests = [];
       }
     }
   }
