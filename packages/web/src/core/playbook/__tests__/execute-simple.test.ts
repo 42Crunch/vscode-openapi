@@ -24,12 +24,12 @@ test("execute simple", async () => {
       {
         context: "dynamic",
         name: "$randomuint",
-        location: ["body", "value", "name"],
+        location: ["request", "body", "value", "name"],
       },
       {
         context: "dynamic",
         name: "$randomuint",
-        location: ["body", "value", "user"],
+        location: ["request", "body", "value", "user"],
       },
     ],
     missing: [],
