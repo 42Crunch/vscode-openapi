@@ -1,5 +1,5 @@
 {
-  "title": "A JSON Schema for Swagger 2.0 API.",
+  "title": "Swagger 2.0",
   "id": "openapi-schemas:openapi-2.0.json",
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
