@@ -53,6 +53,9 @@ export default function Operation({ operationId }: { operationId: string }) {
   const requestIds = Object.keys(playbook.requests || {});
   const operation = playbook.operations[operationId];
 
+  const beforeExecutionResult = findResult(mockResult, "before");
+  const afterExecutionResult = findResult(mockResult, "after");
+
   const {
     simple,
     environment: {
@@ -119,6 +122,14 @@ export default function Operation({ operationId }: { operationId: string }) {
           <Path>{operation.request.request.path}</Path>
         </div>
       </Header>
+
+      {beforeExecutionResult?.status === "failure" && (
+        <ErrorBanner message="Global Before block failed" />
+      )}
+
+      {afterExecutionResult?.status === "failure" && (
+        <ErrorBanner message="Global After block failed" />
+      )}
 
       <CollapsibleSection
         defaultOpen={false}

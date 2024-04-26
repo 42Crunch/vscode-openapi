@@ -30,10 +30,14 @@ export const ENV_VAR_REGEX = () => /{{([\w\-$]+)}}/g;
 export const ENTIRE_ENV_VAR_REGEX = () => /^{{([\w\-$]+)}}$/;
 
 export function replaceEnvironmentVariables(
+  location: string,
   environment: Environment,
   envStack: PlaybookEnvStack
 ): ReplacementResult<Environment> {
-  return replaceObject(environment, envStack, () => ({ body: undefined, parameters: undefined }));
+  return replaceObject(location, environment, envStack, () => ({
+    body: undefined,
+    parameters: undefined,
+  }));
 }
 
 export function replaceRequestVariables(
@@ -49,7 +53,7 @@ export function replaceRequestVariables(
     }
     return fake;
   };
-  return replaceObject(request, envStack, fakeMaker);
+  return replaceObject("request", request, envStack, fakeMaker);
 }
 
 export function replaceCredentialVariables(
@@ -63,6 +67,7 @@ export function replaceCredentialVariables(
 }
 
 function replaceObject<T>(
+  location: string,
   object: T,
   envStack: PlaybookEnvStack,
   fakeMaker: FakeMaker
@@ -70,9 +75,15 @@ function replaceObject<T>(
   const missing: LookupFailure[] = [];
   const found: LookupResult[] = [];
 
-  const replaced = simpleClone(object, (value, location) => {
+  const replaced = simpleClone(object, (value, sublocation) => {
     if (typeof value === "string") {
-      const replaced = replaceString(value, envStack, object, location, fakeMaker);
+      const replaced = replaceString(
+        value,
+        envStack,
+        object,
+        [location, ...sublocation],
+        fakeMaker
+      );
       missing.push(...replaced.missing);
       found.push(...replaced.found);
       return replaced.value;

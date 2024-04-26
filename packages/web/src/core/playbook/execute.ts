@@ -121,10 +121,11 @@ async function* executePlaybook(
       return;
     }
 
-    const replacedStageEnv = replaceEnvironmentVariables(step.environment || {}, [
-      ...env,
-      ...result,
-    ]);
+    const replacedStageEnv = replaceEnvironmentVariables(
+      "stage-environment",
+      step.environment || {},
+      [...env, ...result]
+    );
 
     const stageEnv: PlaybookEnv = {
       id: "stage-environment",
@@ -136,6 +137,7 @@ async function* executePlaybook(
     const requestEnvStack: PlaybookEnvStack = [...env, ...result, stageEnv];
 
     const replacedRequestEnv = replaceEnvironmentVariables(
+      "request-environment",
       request.environment || {},
       requestEnvStack
     );

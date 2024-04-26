@@ -1,8 +1,11 @@
 import styled from "styled-components";
+
 import { LookupResult, LookupFailure } from "@xliic/common/env";
+import { ThemeColorVariables } from "@xliic/common/theme";
+
 import { TriangleExclamation } from "../../../../icons";
 
-export default function VariableAssignments({
+export default function VariableUsed({
   found,
   missing,
 }: {
@@ -11,8 +14,14 @@ export default function VariableAssignments({
 }) {
   return (
     <Container>
-      {missing?.map(renderMissing)}
+      <Header>
+        <div></div>
+        <div>Name</div>
+        <div>Defined in</div>
+        <div>Used by</div>
+      </Header>
       {found?.map(renderFound)}
+      {missing?.map(renderMissing)}
     </Container>
   );
 }
@@ -21,10 +30,15 @@ function renderMissing(value: LookupFailure, index: number) {
   return (
     <Row key={index}>
       <div>
-        <TriangleExclamation />
+        <TriangleExclamation
+          style={{
+            fill: `var(${ThemeColorVariables.errorForeground})`,
+          }}
+        />
       </div>
       <div>{value.name}</div>
-      <div>missing</div>
+      <div>not found</div>
+      <div>{value.location.join("/")}</div>
     </Row>
   );
 }
@@ -34,20 +48,29 @@ function renderFound(value: LookupResult, index: number) {
     <Row key={index}>
       <div></div>
       <div>{value.name}</div>
-      <div>found</div>
+      <div>{value.context}</div>
+      <div>{value.location.join("/")}</div>
     </Row>
   );
 }
 
 const Container = styled.div`
-  margin-left: 4px;
-  margin-right: 4px;
   display: grid;
-  grid-template-columns: 1em 10em 1fr;
-  gap: 8px;
+  grid-template-columns: 2em 16em 1fr 1fr;
   padding: 8px;
-  > div {
+  > div > div {
+    padding: 4px;
     line-break: anywhere;
+  }
+`;
+
+const Header = styled.div`
+  display: contents;
+  > div {
+    background-color: var(${ThemeColorVariables.computedOne});
+    text-transform: uppercase;
+    font-size: 90%;
+    font-weight: 600;
   }
 `;
 

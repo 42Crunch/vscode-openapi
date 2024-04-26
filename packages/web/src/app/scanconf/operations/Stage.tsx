@@ -19,6 +19,7 @@ import { OperationResult } from "../components/scenario/types";
 import { unwrapPlaybookStage, wrapPlaybookStage } from "../components/scenario/util";
 import CollapsibleCard from "../../../new-components/CollapsibleCard";
 import DownshiftSelect from "../../../new-components/fields/DownshiftSelect";
+import VariableUsed from "../components/scenario/VariableUsed";
 
 export default function Stage({
   stage,
@@ -145,6 +146,16 @@ export default function Stage({
                 id: "responses",
                 title: "Response processing",
                 content: <ResponseProcessing editable responseCodes={responseCodes} />,
+              },
+              {
+                id: "variables",
+                title: "Variables used",
+                content: (
+                  <VariableUsed
+                    missing={result?.variablesReplaced?.missing}
+                    found={result?.variablesReplaced?.found}
+                  />
+                ),
               },
             ]}
           />
