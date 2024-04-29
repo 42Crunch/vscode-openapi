@@ -47,6 +47,25 @@ test("update by removing an operation", async () => {
     {
       operationId: "/foo:delete",
       type: "operation-removed",
+      references: [
+        {
+          container: "globalBefore",
+          stageIndex: 0,
+        },
+        {
+          container: "credential",
+          credentialId: "foobar",
+          group: 0,
+          stageIndex: 0,
+          subCredentialId: "foobar",
+        },
+        {
+          container: "operationScenarios",
+          operationId: "/foo:get",
+          scenarioIndex: 0,
+          stageIndex: 1,
+        },
+      ],
     },
   ]);
 
@@ -54,6 +73,25 @@ test("update by removing an operation", async () => {
     {
       type: "operation-removed",
       operationId: "/foo:delete",
+      references: [
+        {
+          container: "globalBefore",
+          stageIndex: 0,
+        },
+        {
+          container: "credential",
+          credentialId: "foobar",
+          group: 0,
+          stageIndex: 0,
+          subCredentialId: "foobar",
+        },
+        {
+          container: "operationScenarios",
+          operationId: "/foo:get",
+          scenarioIndex: 0,
+          stageIndex: 1,
+        },
+      ],
     },
   ]);
 

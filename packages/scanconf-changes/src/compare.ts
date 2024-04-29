@@ -1,6 +1,8 @@
 import { BundledSwaggerOrOasSpec, HttpMethod, OpenApi30, Swagger, isOpenapi } from "@xliic/openapi";
+
 import { Scanconf } from "@xliic/scanconf";
 import { makeOperationId } from ".";
+import { findReferences, StageLocation } from "./references";
 
 export type OperationAdded = {
   type: "operation-added";
@@ -12,6 +14,7 @@ export type OperationAdded = {
 export type OperationRemoved = {
   type: "operation-removed";
   operationId: string;
+  references: StageLocation[];
 };
 
 export type Change = OperationAdded | OperationRemoved;
@@ -26,16 +29,17 @@ export function compare(
   oas: BundledSwaggerOrOasSpec,
   scanconf: Scanconf.ConfigurationFileBundle
 ): Change[] {
-  return [
-    ...operationsAdded(oas, scanconf.operations || {}),
-    ...operationsRemoved(oas, scanconf.operations || {}),
-  ];
+  const added = operationsAdded(oas, scanconf);
+  const removed = operationsRemoved(oas, scanconf);
+  return [...added, ...removed];
 }
+
 export function operationsAdded(
   oas: BundledSwaggerOrOasSpec,
-  scanconfOperations: Record<string, Scanconf.Operation>
+  scanconf: Scanconf.ConfigurationFileBundle
 ): OperationAdded[] {
   // operations present in OAS but missing from scanconf
+  const scanconfOperations = scanconf.operations || {};
   return getOperations(oas)
     .filter((operation) => !scanconfOperations[operation.operationId])
     .map((operation) => ({
@@ -43,19 +47,26 @@ export function operationsAdded(
       ...operation,
     }));
 }
+
 export function operationsRemoved(
   oas: BundledSwaggerOrOasSpec,
-  scanconfOperations: Record<string, Scanconf.Operation>
+  scanconf: Scanconf.ConfigurationFileBundle
 ): OperationRemoved[] {
+  const scanconfOperations = scanconf.operations || {};
   const oasOperationIds = getOperations(oas).map((operation) => operation.operationId);
   const scanconfOperationIds = Object.keys(scanconfOperations);
-  return scanconfOperationIds
-    .filter((operationId) => !oasOperationIds.includes(operationId))
-    .map((operationId) => ({
-      type: "operation-removed",
-      operationId,
-    }));
+
+  const removedIds = scanconfOperationIds.filter(
+    (operationId) => !oasOperationIds.includes(operationId)
+  );
+
+  return removedIds.map((operationId) => ({
+    type: "operation-removed",
+    operationId,
+    references: findReferences(scanconf, operationId),
+  }));
 }
+
 export function getOperations(oas: BundledSwaggerOrOasSpec): OperationId[] {
   const operations = isOpenapi(oas) ? OpenApi30.getOperations(oas) : Swagger.getOperations(oas);
 
