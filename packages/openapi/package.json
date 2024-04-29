@@ -22,6 +22,6 @@
     "@xliic/preserving-json-yaml-parser": "^1.11.0"
   },
   "devDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "*"
   }
 }
