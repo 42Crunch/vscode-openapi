@@ -3,6 +3,7 @@ import { Scanconf } from "@xliic/scanconf";
 import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 
 import { Change, OperationAdded, OperationRemoved } from "./compare";
+import { removeReferences } from "./references/remove";
 
 export function update(
   oas: BundledSwaggerOrOasSpec,
@@ -39,6 +40,5 @@ export function updateRemoveOperation(
   change: OperationRemoved
 ): Scanconf.ConfigurationFileBundle {
   delete target.operations![change.operationId];
-  // FIXME walk all the scenarios and remove the ones that reference this operation
-  return target;
+  return removeReferences(target, change.references);
 }

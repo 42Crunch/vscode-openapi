@@ -2,7 +2,8 @@ import { BundledSwaggerOrOasSpec, HttpMethod, OpenApi30, Swagger, isOpenapi } fr
 
 import { Scanconf } from "@xliic/scanconf";
 import { makeOperationId } from ".";
-import { findReferences, StageLocation } from "./references";
+import { findReferences } from "./references/find";
+import { StageLocation } from "./references/types";
 
 export type OperationAdded = {
   type: "operation-added";
