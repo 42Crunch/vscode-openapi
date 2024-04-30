@@ -1,5 +1,9 @@
 {
   "name": "@xliic/common",
   "private": true,
-  "version": "0.0.0"
+  "version": "0.0.0",
+  "devDependencies": {
+    "json-schema-to-typescript": "^11.0.3",
+    "@reduxjs/toolkit": "^2.1.1"
+  }
 }
