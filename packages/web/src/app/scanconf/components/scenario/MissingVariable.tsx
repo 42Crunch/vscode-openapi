@@ -10,7 +10,7 @@ export function MissingVariable({ name, append }: { name: string; append: any })
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
-        append({ key: name, value: "" }, { shouldFocus: true });
+        append({ key: name, value: "", type: "string" }, { shouldFocus: true });
       }}
     >
       <span>{name}</span>

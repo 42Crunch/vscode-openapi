@@ -8,7 +8,7 @@ export default function AddNewRow({ append }: { append: any }) {
         placeholder="Add new entry"
         value=""
         onChange={(e) => {
-          append({ key: e.target.value, value: "" }, { shouldFocus: true });
+          append({ key: e.target.value, value: "", type: "string" }, { shouldFocus: true });
         }}
       />
       <Placeholder />
