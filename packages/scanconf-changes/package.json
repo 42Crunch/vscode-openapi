@@ -20,9 +20,9 @@
     "dist"
   ],
   "dependencies": {
-    "@xliic/scanconf": "^1.0.0",
-    "@xliic/openapi": "^1.0.0",
-    "@xliic/result": "^1.0.0"
+    "@xliic/scanconf": "*",
+    "@xliic/openapi": "*",
+    "@xliic/result": "*"
   },
   "devDependencies": {
     "typescript": "*",
