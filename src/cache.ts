@@ -51,7 +51,7 @@ class Throttle {
 }
 
 class ExpiringCache<K, T> implements vscode.Disposable {
-  private expireTimer: NodeJS.Timer;
+  private expireTimer: NodeJS.Timeout;
   private entries = new Map<K, { timestamp: number; value: T }>();
 
   constructor(private interval: number, private maxAge: number) {

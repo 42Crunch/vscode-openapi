@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.base",
   "compilerOptions": {
+    "skipLibCheck": true,
     "module": "commonjs",
     "outDir": "dist/cjs",
     "rootDir": "src",
