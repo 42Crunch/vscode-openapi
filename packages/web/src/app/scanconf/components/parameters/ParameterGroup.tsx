@@ -46,6 +46,7 @@ export default function ParameterGroup({
               schema={getParameterSchema(oas, group, field.key)}
               onDelete={() => remove(index)}
               variables={variables}
+              isDefinedInOpenAPI={!!group[field.key]}
             />
           );
         })}

@@ -1,4 +1,4 @@
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 
 import {
   OpenApi30,
@@ -65,6 +65,7 @@ function makeOasTabs(
   const parameters = getOasParameters(oas, path, method);
   const operation = OpenApi30.getOperation(oas, path, method);
   const requestBody = deref<OpenApi30.RequestBody>(oas, operation?.requestBody);
+  const scanconfParameters = useWatch({ name: "parameters" });
 
   return [
     {
@@ -97,7 +98,7 @@ function makeOasTabs(
           variables={availableVariables}
         />
       ),
-      disabled: hasNoParameters(parameters.path),
+      disabled: hasNoParameters(parameters.path, scanconfParameters.path),
     },
     {
       id: "query",
@@ -111,7 +112,7 @@ function makeOasTabs(
           variables={availableVariables}
         />
       ),
-      disabled: hasNoParameters(parameters.query),
+      disabled: hasNoParameters(parameters.query, scanconfParameters.query),
     },
     {
       id: "header",
@@ -139,7 +140,7 @@ function makeOasTabs(
           variables={availableVariables}
         />
       ),
-      disabled: hasNoParameters(parameters.cookie),
+      disabled: hasNoParameters(parameters.cookie, scanconfParameters.cookie),
     },
     {
       id: "environment",
@@ -163,6 +164,8 @@ function makeSwaggerTabs(
   isBodyPresent: boolean
 ) {
   const parameters = getSwaggerParameters(oas, path, method);
+  const scanconfParameters = useWatch({ name: "parameters" });
+
   return [
     {
       id: "body",
@@ -170,7 +173,7 @@ function makeSwaggerTabs(
       content: (
         <RequestBodySwagger oas={oas} group={parameters.body} variables={availableVariables} />
       ),
-      disabled: hasNoParameters(parameters.body) || !isBodyPresent,
+      disabled: hasNoParameters(parameters.body, scanconfParameters.body) || !isBodyPresent,
     },
     {
       id: "security",
@@ -211,7 +214,7 @@ function makeSwaggerTabs(
           variables={availableVariables}
         />
       ),
-      disabled: hasNoParameters(parameters.path),
+      disabled: hasNoParameters(parameters.path, scanconfParameters.path),
     },
     {
       id: "query",
@@ -225,7 +228,7 @@ function makeSwaggerTabs(
           variables={availableVariables}
         />
       ),
-      disabled: hasNoParameters(parameters.query),
+      disabled: hasNoParameters(parameters.query, scanconfParameters.query),
     },
     {
       id: "header",
@@ -237,9 +240,9 @@ function makeSwaggerTabs(
           name={"parameters.header"}
           placeholder="Add new header"
           variables={availableVariables}
+          allowUnknown
         />
       ),
-      disabled: hasNoParameters(parameters.header),
     },
     {
       id: "environment",
@@ -254,6 +257,12 @@ function makeSwaggerTabs(
   ];
 }
 
-function hasNoParameters(parameters?: Record<string, unknown>) {
-  return parameters === undefined || Object.keys(parameters).length === 0;
+function hasNoParameters(
+  parameters: Record<string, unknown> | undefined,
+  scanconfParameters: any[]
+) {
+  return (
+    (parameters === undefined || Object.keys(parameters).length === 0) &&
+    scanconfParameters.length === 0
+  );
 }

@@ -1,11 +1,12 @@
 import { useController } from "react-hook-form";
 import styled from "styled-components";
+import * as Tooltip from "@radix-ui/react-tooltip";
 
 import { OpenApi30, Swagger } from "@xliic/openapi";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { ENV_VAR_REGEX } from "../../../../core/playbook/variables";
-import { TrashCan, TriangleExclamation } from "../../../../icons";
+import { CircleQuestion, TrashCan, TriangleExclamation } from "../../../../icons";
 import LineEditor from "../../../../new-components/fields/LineEditor";
 
 export type Parameter = OpenApi30.ResolvedParameter | Swagger.ResolvedParameter;
@@ -17,11 +18,13 @@ export default function ParameterRow({
   schema,
   onDelete,
   variables,
+  isDefinedInOpenAPI,
 }: {
   name: string;
   variables: string[];
   schema: Schema | undefined;
   onDelete: () => void;
+  isDefinedInOpenAPI: boolean;
 }) {
   const {
     fieldState: { error },
@@ -31,7 +34,10 @@ export default function ParameterRow({
 
   return (
     <Container>
-      <Name>{nameField.value}</Name>
+      <Name>
+        {nameField.value}
+        {!isDefinedInOpenAPI && <UnknownParameter />}
+      </Name>
       <LineEditor
         name={`${name}.value`}
         variables={variables}
@@ -61,6 +67,25 @@ export default function ParameterRow({
   );
 }
 
+function UnknownParameter() {
+  return (
+    <Tooltip.Provider>
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild>
+          <Trigger>
+            <CircleQuestion />
+          </Trigger>
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <TooltipContent>
+            This parameter is not defined in the OpenAPI specification for this API
+          </TooltipContent>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+    </Tooltip.Provider>
+  );
+}
+
 const Container = styled.div`
   display: contents;
   &:hover > :last-child {
@@ -85,6 +110,9 @@ const Name = styled.div`
   flex: 1;
   border-bottom: 1px solid var(${ThemeColorVariables.border});
   margin-right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 `;
 
 const Remove = styled.button`
@@ -100,6 +128,24 @@ const Remove = styled.button`
   > svg {
     fill: var(${ThemeColorVariables.foreground});
   }
+`;
+
+const Trigger = styled.div`
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  > svg {
+    fill: var(${ThemeColorVariables.foreground});
+  }
+`;
+
+const TooltipContent = styled(Tooltip.Content)`
+  color: var(${ThemeColorVariables.notificationsForeground});
+  background-color: var(${ThemeColorVariables.notificationsBackground});
+  border: 1px solid var(${ThemeColorVariables.notificationsBorder});
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin-right: 16px;
 `;
 
 function encode(schema: Schema, value: unknown): string {
