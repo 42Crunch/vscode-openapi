@@ -30,6 +30,8 @@ test("find removed operation", async () => {
     {
       operationId: "/foo:delete",
       type: "operation-removed",
+      method: "delete",
+      path: "/foo",
       references: [
         {
           container: "globalBefore",
@@ -61,6 +63,21 @@ test("find added operation", async () => {
       type: "operation-added",
       path: "/foo",
       method: "delete",
+    },
+  ]);
+});
+
+test("find renamed operation", async () => {
+  const oasWithRename = structuredClone(originalOas);
+  oasWithRename.paths["/foo"]["get"]!.operationId = "zomg";
+  const changes = compare(oasWithRename, originalScanconf);
+  expect(changes).toEqual([
+    {
+      oldOperationId: "/foo:get",
+      newOperationId: "zomg",
+      type: "operation-renamed",
+      path: "/foo",
+      method: "get",
     },
   ]);
 });

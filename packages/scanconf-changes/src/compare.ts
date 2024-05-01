@@ -3,28 +3,8 @@ import { BundledSwaggerOrOasSpec, HttpMethod, OpenApi30, Swagger, isOpenapi } fr
 import { Scanconf } from "@xliic/scanconf";
 import { makeOperationId } from ".";
 import { findReferences } from "./references/find";
-import { StageLocation } from "./references/types";
-
-export type OperationAdded = {
-  type: "operation-added";
-  path: string;
-  method: HttpMethod;
-  operationId: string;
-};
-
-export type OperationRemoved = {
-  type: "operation-removed";
-  operationId: string;
-  references: StageLocation[];
-};
-
-export type Change = OperationAdded | OperationRemoved;
-
-export type OperationId = {
-  path: string;
-  method: HttpMethod;
-  operationId: string;
-};
+import { findRenamedOperations as operationsRenamed } from "./renames";
+import { Change, OperationAdded, OperationId, OperationRemoved } from "./types";
 
 export function compare(
   oas: BundledSwaggerOrOasSpec,
@@ -32,7 +12,17 @@ export function compare(
 ): Change[] {
   const added = operationsAdded(oas, scanconf);
   const removed = operationsRemoved(oas, scanconf);
-  return [...added, ...removed];
+  const renamed = operationsRenamed(added, removed);
+
+  const addedNoRenames = added.filter(
+    (operation) => !renamed.some((rename) => rename.newOperationId === operation.operationId)
+  );
+
+  const removedNoRenames = removed.filter(
+    (operation) => !renamed.some((rename) => rename.oldOperationId === operation.operationId)
+  );
+
+  return [...addedNoRenames, ...removedNoRenames, ...renamed];
 }
 
 export function operationsAdded(
@@ -61,14 +51,31 @@ export function operationsRemoved(
     (operationId) => !oasOperationIds.includes(operationId)
   );
 
-  return removedIds.map((operationId) => ({
-    type: "operation-removed",
-    operationId,
-    references: findReferences(scanconf, operationId),
-  }));
+  const removed: OperationRemoved[] = [];
+
+  for (const operationId of removedIds) {
+    const request = getScanconfOperation(operationId, scanconf)?.request?.request;
+    if (request?.type === "42c" && request.details.url.startsWith("{{host}}")) {
+      const method = request.details.method.toLowerCase() as HttpMethod;
+      const path = request.details.url.substring("{{host}}".length);
+      removed.push({
+        type: "operation-removed",
+        operationId,
+        method,
+        path,
+        references: findReferences(scanconf, operationId),
+      });
+    } else {
+      throw new Error(
+        `Unsupported operation: operationId: ${operationId}, request ${JSON.stringify(request)}`
+      );
+    }
+  }
+
+  return removed;
 }
 
-export function getOperations(oas: BundledSwaggerOrOasSpec): OperationId[] {
+function getOperations(oas: BundledSwaggerOrOasSpec): OperationId[] {
   const operations = isOpenapi(oas) ? OpenApi30.getOperations(oas) : Swagger.getOperations(oas);
 
   return operations.map(([path, method, operation]) => ({
@@ -76,4 +83,11 @@ export function getOperations(oas: BundledSwaggerOrOasSpec): OperationId[] {
     method,
     operationId: operation.operationId || makeOperationId(path, method),
   }));
+}
+
+function getScanconfOperation(
+  operationId: string,
+  scanconf: Scanconf.ConfigurationFileBundle
+): Scanconf.Operation | undefined {
+  return scanconf.operations?.[operationId];
 }
