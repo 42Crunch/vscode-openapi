@@ -1,40 +1,54 @@
 import styled from "styled-components";
-import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { useAppDispatch, useAppSelector } from "../store";
 import { skipScanconfUpdate, updateScanconf } from "./slice";
-import PathMethodCard from "../../../new-components/PathMethodCard";
 import ButtonSecondary from "../../../new-components/ButtonSecondary";
 import { ProgressButton } from "../../../new-components/ProgressButton";
+import OperationAdded from "./OperationAdded";
+import OperationRemoved from "./OperationRemoved";
+import OperationRenamed from "./OperationRenamed";
 
 export default function UpdatePrompt() {
   const dispatch = useAppDispatch();
   const { changes, updating } = useAppSelector((state) => state.scanconfUpdate);
 
+  const added = changes.filter((change) => change.type === "operation-added");
+  const removed = changes.filter((change) => change.type === "operation-removed");
+  const renamed = changes.filter((change) => change.type === "operation-renamed");
+
   return (
     <Container>
-      <div>Your OpenAPI file has changes that deviate from your scan configuration.</div>
+      <div>Your OpenAPI file has deviated from your scan configuration.</div>
       <div>
         Please update your scan configuration to reflect the changes in your OpenAPI file. If you
-        decide to ignore the changes, the scan will be performed with the outdated configuration.
+        decide to ignore the changes, the scan will be performed using the old configuration.
       </div>
 
       <Changes>
-        <div>Operations added to the OpenAPI file:</div>
-        {changes.map((change, index) => {
-          if (change.type === "operation-added") {
-            return (
-              <Change key={index}>
-                <PathMethodCard
-                  path={change.path}
-                  method={change.method}
-                  operationId={change.operationId}
-                />
-              </Change>
-            );
-          }
-          return null;
-        })}
+        {added.length > 0 && (
+          <>
+            <div>Added:</div>
+            {added.map((change, index) => (
+              <OperationAdded key={index} change={change} />
+            ))}
+          </>
+        )}
+        {removed.length > 0 && (
+          <>
+            <div>Removed:</div>
+            {removed.map((change, index) => (
+              <OperationRemoved key={index} change={change} />
+            ))}
+          </>
+        )}
+        {renamed.length > 0 && (
+          <>
+            <div>OperationId changed:</div>
+            {renamed.map((change, index) => (
+              <OperationRenamed key={index} change={change} />
+            ))}
+          </>
+        )}
       </Changes>
 
       <Buttons>
@@ -69,10 +83,4 @@ const Changes = styled.div`
   gap: 8px;
   margin-top: 16px;
   margin-bottom: 16px;
-`;
-
-const Change = styled.div`
-  border: 1px solid var(${ThemeColorVariables.border});
-  padding: 8px;
-  background-color: var(${ThemeColorVariables.computedOne});
 `;

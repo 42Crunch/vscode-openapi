@@ -7,18 +7,21 @@ export default function PathMethodCard({
   path,
   method,
   operationId,
+  children,
 }: {
   operationId?: string;
   path: string;
   method: HttpMethod;
+  children?: React.ReactNode;
 }) {
   return (
     <Container>
       {operationId && <Title>{operationId}</Title>}
-      <div>
+      <MethodAndPath>
         <Method>{method}</Method>
         <Path>{path}</Path>
-      </div>
+      </MethodAndPath>
+      {children}
     </Container>
   );
 }
@@ -27,16 +30,17 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
-  > div:last-child {
-    display: flex;
-    gap: 4px;
-  }
   line-break: anywhere;
 `;
 
 const Title = styled.div`
   font-size: 14px;
   font-weight: 600;
+`;
+
+const MethodAndPath = styled.div`
+  display: flex;
+  gap: 4px;
 `;
 
 const Method = styled.div`
