@@ -1,6 +1,8 @@
 import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
 import { Scanconf } from "@xliic/scanconf";
-import { OperationId, getOperations, compare, Change } from "./compare";
+import { compare, getOperations } from "./compare";
+import { OperationId, Change } from "./types";
+
 import { update } from "./update";
 
 export { compare, update };

@@ -75,6 +75,8 @@ test("update by removing an operation", async () => {
     {
       type: "operation-removed",
       operationId: "/foo:delete",
+      path: "/foo",
+      method: "delete",
       references: [
         {
           container: "globalBefore",

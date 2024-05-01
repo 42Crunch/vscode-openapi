@@ -75,7 +75,7 @@ export function operationsRemoved(
   return removed;
 }
 
-function getOperations(oas: BundledSwaggerOrOasSpec): OperationId[] {
+export function getOperations(oas: BundledSwaggerOrOasSpec): OperationId[] {
   const operations = isOpenapi(oas) ? OpenApi30.getOperations(oas) : Swagger.getOperations(oas);
 
   return operations.map(([path, method, operation]) => ({
