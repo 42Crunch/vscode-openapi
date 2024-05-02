@@ -67,12 +67,8 @@ export const slice = createSlice({
 
   extraReducers: (builder) => {
     builder.addCase(showScanconfOperation, (state, { payload: { oas, path, method } }) => {
-      const operation = getOperation(oas, path, method);
-      const operationId =
-        operation?.operationId === undefined
-          ? makeOperationId(path, method)
-          : operation.operationId;
-      state.operationId = operationId;
+      // FIXME, set operationId in the listener
+      state.operationId = undefined;
     });
   },
 });

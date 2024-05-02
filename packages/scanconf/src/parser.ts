@@ -92,6 +92,8 @@ function parseOperation(
   file: scan.ConfigurationFileBundle,
   operation: scan.Operation
 ): Result<playbook.Operation, InternalParsingErrors> {
+  const requestsInScenario = operation.scenarios?.[0]?.requests;
+  const customized = requestsInScenario && requestsInScenario.length > 1;
   return result<playbook.Operation>({
     request: parseRequestStageContent(oas, file, operation.request, operation.operationId),
     operationId: value(operation.operationId),
@@ -100,6 +102,7 @@ function parseOperation(
     authorizationTests: value(operation.authorizationTests || []),
     scenarios: parseArray(oas, file, operation.scenarios || [], parseScenario),
     customTests: value(operation.customTests),
+    customized: value(customized),
   });
 }
 

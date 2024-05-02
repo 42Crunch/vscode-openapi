@@ -192,6 +192,7 @@ export const slice = createSlice({
     ) => {
       getStageContainer(state.playbook, location)[location.stageIndex] = reference;
     },
+
     addStage: (
       state,
       {
@@ -225,6 +226,10 @@ export const slice = createSlice({
       }: PayloadAction<{ operationId: string; authorizationTests: string[] }>
     ) => {
       state.playbook.operations[operationId].authorizationTests = authorizationTests;
+    },
+
+    customizeOperation: (state, { payload: operationId }: PayloadAction<string>) => {
+      state.playbook.operations[operationId].customized = true;
     },
   },
 
@@ -291,6 +296,7 @@ export const {
   saveRequest,
   removeRequest,
   updateOperationAuthorizationTests,
+  customizeOperation,
 } = slice.actions;
 
 export default slice.reducer;

@@ -119,6 +119,7 @@ export type Operation = {
   after: Stage[];
   authorizationTests: string[];
   customTests?: unknown;
+  customized: boolean;
 };
 
 export type Scenario = {
