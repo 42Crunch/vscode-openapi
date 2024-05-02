@@ -46,7 +46,7 @@ const routes: Routes = [
     children: [
       {
         id: "requests",
-        title: "Requests",
+        title: "Operations",
         element: <Requests />,
       },
       {

@@ -42,7 +42,7 @@ export function onShowScanconf(startAppListening: TypedStartListening<RootState,
         }
 
         listenerApi.dispatch(loadPlaybook({ playbook, oas }));
-        listenerApi.dispatch(goTo(["scanconf", "operations"]));
+        listenerApi.dispatch(goTo(["scanconf", "requests"]));
       },
     });
 }
