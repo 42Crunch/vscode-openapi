@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { Environment as UnknownEnvironment } from "@xliic/common/env";
-import { Playbook } from "@xliic/scanconf";
+import { Playbook, serialize } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { DynamicVariableNames } from "../../../core/playbook/builtin-variables";
@@ -16,6 +16,9 @@ import { saveRequest } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import { executeRequest } from "./slice";
 import TryAndServerSelector from "../components/TryAndServerSelector";
+import { extractScanconf, optionallyReplaceLocalhost } from "../operations/util";
+import { makeEnvEnv } from "../../../core/playbook/execute";
+import { runScan } from "../actions";
 
 export default function RequestInternal({
   request,
@@ -27,6 +30,8 @@ export default function RequestInternal({
   const dispatch = useAppDispatch();
 
   const { oas, playbook, servers } = useAppSelector((state) => state.scanconf);
+  const config = useAppSelector((state) => state.config.data);
+  const env = useAppSelector((state) => state.env.data);
 
   const {
     tryResult,
@@ -49,6 +54,13 @@ export default function RequestInternal({
 
   const [inputs, setInputs] = useState<UnknownEnvironment>({});
 
+  const {
+    simple,
+    environment: {
+      env: { host },
+    },
+  } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
+
   useEffect(() => {
     const updated = { ...inputs };
     // remove stale variables
@@ -68,7 +80,39 @@ export default function RequestInternal({
 
   return (
     <Container>
-      <TryAndServerSelector servers={servers} onTry={(server: string) => onRun(server, inputs)} />
+      <TryAndServerSelector
+        servers={servers}
+        host={host as string | undefined}
+        onTry={(server: string) => onRun(server, inputs)}
+        onScan={(server: string) => {
+          const updatedServer = optionallyReplaceLocalhost(
+            server,
+            config.scanRuntime,
+            config.docker.replaceLocalhost,
+            config.platform
+          );
+
+          const [serialized, error] = serialize(oas, playbook);
+          if (error !== undefined) {
+            console.log("failed to serialize", error);
+            // FIXME show error when serializing
+            return;
+          }
+
+          dispatch(
+            runScan({
+              path: request.request.path,
+              method: request.request.method,
+              operationId: request.operationId,
+              env: {
+                SCAN42C_HOST: updatedServer,
+                ...simple,
+              },
+              scanconf: extractScanconf(serialized, request.operationId),
+            })
+          );
+        }}
+      />
       <CollapsibleSection title="Request">
         <RequestCard
           defaultCollapsed={false}
