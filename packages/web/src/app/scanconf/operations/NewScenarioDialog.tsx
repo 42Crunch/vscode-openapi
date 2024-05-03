@@ -44,6 +44,7 @@ export default function NewScenarioDialog({
             <Border>
               <DownshiftCombo
                 options={available}
+                placeholder="Select operation"
                 onSelectedItemChange={(item) => {
                   setSelectedOperationId(item);
                 }}
@@ -52,7 +53,11 @@ export default function NewScenarioDialog({
             <div style={{ display: "flex", marginTop: 25, justifyContent: "flex-end", gap: 4 }}>
               <Button
                 onClick={() => {
-                  if (selectedOperationId !== null && selectedOperationId !== undefined) {
+                  if (
+                    selectedOperationId !== null &&
+                    selectedOperationId !== undefined &&
+                    available.includes(selectedOperationId)
+                  ) {
                     onAddScenario(selectedOperationId);
                     setOpen(false);
                   }
