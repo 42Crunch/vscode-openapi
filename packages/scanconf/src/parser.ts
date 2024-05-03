@@ -92,8 +92,6 @@ function parseOperation(
   file: scan.ConfigurationFileBundle,
   operation: scan.Operation
 ): Result<playbook.Operation, InternalParsingErrors> {
-  const requestsInScenario = operation.scenarios?.[0]?.requests;
-  const customized = requestsInScenario && requestsInScenario.length > 1;
   return result<playbook.Operation>({
     request: parseRequestStageContent(oas, file, operation.request, operation.operationId),
     operationId: value(operation.operationId),
@@ -102,8 +100,43 @@ function parseOperation(
     authorizationTests: value(operation.authorizationTests || []),
     scenarios: parseArray(oas, file, operation.scenarios || [], parseScenario),
     customTests: value(operation.customTests),
-    customized: value(customized),
+    customized: value(isOperationCustomized(operation)),
   });
+}
+
+function isOperationCustomized(operation: scan.Operation): boolean {
+  const requestsFromFirstScenario = operation.scenarios?.[0]?.requests;
+  const firstStageFromFirstScenarion = requestsFromFirstScenario?.[0];
+
+  const hasCustomTests = operation.customTests && operation.customTests.length > 0;
+  const hasAuthorizationTests =
+    operation.authorizationTests && operation.authorizationTests.length > 0;
+  const hasBefore = operation.before && operation.before.length > 0;
+  const hasAfter = operation.after && operation.after.length > 0;
+  const hasMultipleScenarios = operation.scenarios && operation.scenarios.length > 1;
+  const hasMoreThanOneRequestInFirstScenario =
+    requestsFromFirstScenario && requestsFromFirstScenario.length > 1;
+  const isFirstStageCustomized =
+    firstStageFromFirstScenarion !== undefined && isStageCustomized(firstStageFromFirstScenarion);
+
+  return (
+    hasCustomTests ||
+    hasAuthorizationTests ||
+    hasBefore ||
+    hasAfter ||
+    hasMultipleScenarios ||
+    hasMoreThanOneRequestInFirstScenario ||
+    isFirstStageCustomized
+  );
+}
+
+function isStageCustomized(stage: scan.RequestStageContent | scan.RequestStageReference) {
+  const hasEnvironment = stage.environment && Object.keys(stage.environment).length > 0;
+  const hasAuth = stage.auth && stage.auth.length > 0;
+  const hasResponses = stage.responses && Object.keys(stage.responses).length > 0;
+  const hasExpectedResponse = "expectedResponse" in stage;
+
+  return hasEnvironment || hasAuth || hasResponses || hasExpectedResponse;
 }
 
 function parseRequestStage(
