@@ -5,7 +5,7 @@ import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
 import { $createParagraphNode, $getRoot, BLUR_COMMAND, COMMAND_PRIORITY_LOW } from "lexical";
-import { HTMLAttributes, useEffect } from "react";
+import { HTMLAttributes, useEffect, useState } from "react";
 import { useController } from "react-hook-form";
 import styled from "styled-components";
 
@@ -15,6 +15,7 @@ import RemoveLinebreaksPlugin from "./editor/RemoveLinebreaksPlugin";
 import { VariableNode } from "./editor/VariableNode";
 import VariablesPlugin from "./editor/VariablesPlugin";
 import { createLineNodes } from "./editor/utils";
+import { EditorFocusPlugin } from "./EditorFocusPlugin";
 
 export default function LineEditor({
   name,
@@ -58,6 +59,9 @@ export default function LineEditor({
     nodes: [VariableNode],
   };
 
+  // this is a workaround for https://github.com/facebook/lexical/issues/4853
+  const [hasFocus, setFocus] = useState(false);
+
   return (
     <Container {...attrs} onBlur={field.onBlur}>
       <LexicalComposer initialConfig={initialConfig}>
@@ -68,8 +72,9 @@ export default function LineEditor({
             ErrorBoundary={LexicalErrorBoundary}
           />
           <HistoryPlugin />
-          {variables !== undefined && <VariablesPlugin variables={variables} />}
+          {hasFocus && variables !== undefined && <VariablesPlugin variables={variables} />}
           <FormPlugin name={name} decode={decode} />
+          <EditorFocusPlugin onFocus={(focus) => setFocus(focus)} />
           <RemoveLinebreaksPlugin />
         </>
       </LexicalComposer>
