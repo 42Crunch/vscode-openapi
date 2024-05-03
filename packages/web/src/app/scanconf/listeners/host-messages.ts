@@ -95,7 +95,7 @@ export function onLoadUpdatedScanconf(
         });
 
         listenerApi.dispatch(loadPlaybook({ playbook, oas }));
-        listenerApi.dispatch(goTo(["scanconf", "operations"]));
+        listenerApi.dispatch(goTo(["scanconf", "requests"]));
       },
     });
 }
