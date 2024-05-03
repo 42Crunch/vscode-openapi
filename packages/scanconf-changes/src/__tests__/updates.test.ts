@@ -71,7 +71,7 @@ test("update by removing an operation", async () => {
     },
   ]);
 
-  const patchedScanconf = update(updatedOas, originalScanconf, updatedScanconf, [
+  const patchedScanconf = update(updatedOas, updatedScanconf, originalScanconf, [
     {
       type: "operation-removed",
       operationId: "/foo:delete",
