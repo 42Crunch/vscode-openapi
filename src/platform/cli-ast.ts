@@ -29,12 +29,13 @@ import { SimpleEnvironment } from "@xliic/common/env";
 import { Result } from "@xliic/result";
 
 import { Configuration, configuration } from "../configuration";
-import { getAnondCredentials, getPlatformCredentials, hasCredentials } from "../credentials";
+import { getAnondCredentials, getPlatformCredentials } from "../credentials";
 import { EnvStore } from "../envstore";
 import { Logger } from "./types";
 import { loadConfig } from "../util/config";
 import { delay } from "../time-util";
 import { CliAstManifestEntry, getCliUpdate } from "./cli-ast-update";
+import { extensionQualifiedId } from "../types";
 
 const asyncExecFile = promisify(execFile);
 
@@ -250,6 +251,8 @@ export async function runScanWithCliBinary(
 
   logger.info(`Running scan using: ${cli}`);
 
+  const userAgent = getUserAgent();
+
   const args = [
     "scan",
     "run",
@@ -262,6 +265,8 @@ export async function runScanWithCliBinary(
     "json",
     "--verbose",
     "error",
+    "--user-agent",
+    userAgent,
     "--enrich=false",
   ];
 
@@ -386,6 +391,8 @@ export async function runAuditWithCliBinary(
   // CLI audits currently used only by free users
   const token = getAnondCredentials(configuration);
 
+  const userAgent = getUserAgent();
+
   try {
     const output = await asyncExecFile(
       cli,
@@ -399,6 +406,8 @@ export async function runAuditWithCliBinary(
         "json",
         "--verbose",
         "error",
+        "--user-agent",
+        userAgent,
         "--enrich=false",
         isFullAudit ? "" : "--is-operation",
         "--token",
@@ -563,4 +572,9 @@ function parseCliJsonResponse(response: string): CliResponse | undefined {
   }
 
   return undefined;
+}
+
+function getUserAgent() {
+  const extension = vscode.extensions.getExtension(extensionQualifiedId)!;
+  return `42Crunch-VSCode/${extension.packageJSON.version}`;
 }
