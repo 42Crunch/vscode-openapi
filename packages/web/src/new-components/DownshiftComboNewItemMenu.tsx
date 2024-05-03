@@ -21,7 +21,7 @@ export default function DownshiftComboNewItemMenu<T>({
   useEffect(() => {
     setFilteredOptions(
       options.filter((item) => {
-        return filter === "" || item.toLowerCase().includes(filter);
+        return filter === "" || item.toLowerCase().includes(filter.toLowerCase());
       })
     );
   }, [filter, options]);
@@ -123,6 +123,8 @@ const DropdownList = styled.ul`
   background-color: var(${ThemeColorVariables.dropdownBackground});
   color: var(${ThemeColorVariables.dropdownForeground});
   position: absolute;
+  overflow-y: auto;
+  max-height: 200px;
   list-style: none;
   padding: 0;
   margin: 4px 0 0 0;
