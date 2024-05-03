@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "build": "tsc --project tsconfig.esm.json; tsc --project tsconfig.cjs.json"
+    "build": "tsc --project tsconfig.esm.json && tsc --project tsconfig.cjs.json"
   },
   "devDependencies": {
     "json-schema-to-typescript": "^11.0.3",
