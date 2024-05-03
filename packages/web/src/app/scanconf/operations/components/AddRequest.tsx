@@ -37,7 +37,7 @@ export default function AddRequest({
         setShowCombo(true);
       }}
     >
-      <Plus /> Pick the request
+      <Plus /> Pick the operation
     </Container>
   );
 }

@@ -141,6 +141,8 @@ const DropdownList = styled.ul`
   background-color: var(${ThemeColorVariables.dropdownBackground});
   color: var(${ThemeColorVariables.dropdownForeground});
   position: absolute;
+  max-height: 200px;
+  overflow-y: auto;
   list-style: none;
   padding: 0;
   margin: 4px 0 0 0;
