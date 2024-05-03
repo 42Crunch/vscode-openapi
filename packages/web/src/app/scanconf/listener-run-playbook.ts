@@ -98,11 +98,11 @@ export function onMockExecuteScenario(
           },
           operations: { scenarioId, operationId },
           router: {
-            current: [page],
+            current: [parent, page],
           },
         } = listenerApi.getState();
 
-        if (page !== "operations") {
+        if (parent !== "scanconf" && page !== "operations") {
           return;
         }
 
@@ -140,11 +140,11 @@ export function onMockExecuteRequest(
         const {
           requests: { ref },
           router: {
-            current: [page],
+            current: [parent, page],
           },
         } = listenerApi.getState();
 
-        if (page !== "requests") {
+        if (parent !== "scanconf" && page !== "requests") {
           return;
         }
 
