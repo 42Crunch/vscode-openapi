@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from "../store";
 import Credential from "./Credential";
 import NewCredentialDialog from "./NewCredentialDialog";
 import { Menu, MenuItem } from "../../../new-components/Menu";
+import { TrashCan } from "../../../icons";
 
 export default function Auth() {
   const dispatch = useAppDispatch();
@@ -33,6 +34,7 @@ export default function Auth() {
             onClick={(e) => e.stopPropagation()}
             onSelect={() => dispatch(removeCredential({ credentialGroup: index, id }))}
           >
+            <TrashCan />
             Delete
           </MenuItem>
         </Menu>

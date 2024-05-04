@@ -4,6 +4,7 @@ export interface Preferences {
   scanServer: string;
   tryitServer: string;
   security: SecretsForSecurity;
+  useGlobalBlocks: boolean;
 }
 
 export type LoadPreferencesMessage = { command: "loadPrefs"; payload: Preferences };

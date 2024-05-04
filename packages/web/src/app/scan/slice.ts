@@ -72,6 +72,7 @@ const initialState: OasState = {
     scanServer: "",
     tryitServer: "",
     security: {},
+    useGlobalBlocks: true,
   },
   error: undefined,
   responses: {},

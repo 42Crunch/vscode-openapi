@@ -7,6 +7,7 @@ const initialState: Preferences = {
   security: {},
   scanServer: "",
   tryitServer: "",
+  useGlobalBlocks: true,
 };
 
 export const slice = createSlice({
@@ -27,10 +28,19 @@ export const slice = createSlice({
     setSecretForSecurity: (state, action: PayloadAction<{ scheme: string; secret: string }>) => {
       state.security[action.payload.scheme] = action.payload.secret;
     },
+    setUseGlobalBlocks: (state, action: PayloadAction<boolean>) => {
+      state.useGlobalBlocks = action.payload;
+    },
   },
 });
 
-export const { loadPrefs, setScanServer, setTryitServer, setSecretForSecurity } = slice.actions;
+export const {
+  loadPrefs,
+  setScanServer,
+  setTryitServer,
+  setSecretForSecurity,
+  setUseGlobalBlocks,
+} = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<
   ReturnType<(typeof slice.actions)[keyof typeof slice.actions]>

@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from "../store";
 import { Menu, MenuItem } from "../../../new-components/Menu";
 import Test from "./Test";
 import NewAuthorizationTestDialog from "./NewAuthorizationTestDialog";
+import { TrashCan } from "../../../icons";
 
 export default function AuthorizationTests() {
   const dispatch = useAppDispatch();
@@ -28,6 +29,7 @@ export default function AuthorizationTests() {
           onClick={(e) => e.stopPropagation()}
           onSelect={() => dispatch(removeAuthorizationTest({ id }))}
         >
+          <TrashCan />
           Delete
         </MenuItem>
       </Menu>

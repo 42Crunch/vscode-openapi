@@ -81,6 +81,7 @@ export default function Operation({ operationId }: { operationId: string }) {
   return (
     <Container>
       <TryAndServerSelector
+        menu={true}
         servers={servers}
         host={host as string | undefined}
         onTry={(server: string) => {

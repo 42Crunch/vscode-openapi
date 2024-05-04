@@ -206,7 +206,7 @@ const Subheader = styled.div`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: var(${ThemeColorVariables.disabledForeground});
+  opacity: 0.8;
 `;
 
 const Menu = styled.div`

@@ -29,6 +29,7 @@ export { default as MagnifyingGlass } from "./MagnifyingGlass";
 export { default as Pen } from "./Pen";
 export { default as Play } from "./Play";
 export { default as Plus } from "./Plus";
+export { default as Sliders } from "./Sliders";
 export { default as Spinner } from "./Spinner";
 export { default as SquareCheck } from "./SquareCheck";
 export { default as SquarePlus } from "./SquarePlus";

@@ -22,6 +22,9 @@ export default function DescriptionTooltip({ description }: { description: strin
 }
 
 const TooltipIcon = styled.div`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   > svg {
     fill: var(${ThemeColorVariables.foreground});
   }

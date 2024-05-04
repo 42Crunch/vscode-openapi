@@ -1,26 +1,38 @@
+import { useState } from "react";
 import styled from "styled-components";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
+
+import * as actions from "../../../features/prefs/slice";
+import { useFeatureDispatch, useFeatureSelector } from "../../../features/prefs/slice";
 import { FileExport, Play } from "../../../icons";
 import DownshiftCombo from "../../../new-components/DownshiftCombo";
-import { setScanServer } from "../../../features/prefs/slice";
-import { useFeatureDispatch, useFeatureSelector } from "../../../features/prefs/slice";
-import { useState } from "react";
+import {
+  CheckboxMenuItem,
+  CheckboxMenuItemIndicator,
+  Menu,
+  MenuLabel,
+  MenuSeparator,
+} from "../../../new-components/Menu";
 
 export default function TryAndServerSelector({
   onTry,
   onScan,
   servers,
   host,
+  menu,
 }: {
   onTry: (server: string) => unknown;
   onScan?: (server: string) => unknown;
   servers: string[];
   host?: string;
+  menu?: boolean;
 }) {
+  const { scanServer, useGlobalBlocks } = useFeatureSelector((state) => state.prefs);
+
   const dispatch = useFeatureDispatch();
-  const setServer = (server: string) => dispatch(setScanServer(server));
-  const scanServer = useFeatureSelector((state) => state.prefs.scanServer);
+  const setServer = (server: string) => dispatch(actions.setScanServer(server));
+  const setUseGlobalBlocks = (value: boolean) => dispatch(actions.setUseGlobalBlocks(value));
 
   const allServers = [...servers];
 
@@ -51,6 +63,7 @@ export default function TryAndServerSelector({
             }
           }}
         />
+
         <Action
           onClick={(e) => {
             e.stopPropagation();
@@ -72,6 +85,21 @@ export default function TryAndServerSelector({
             <Play />
             Scan
           </Action>
+        )}
+        {menu && (
+          <Option>
+            <Menu icon="sliders">
+              <MenuLabel>Try settings</MenuLabel>
+              <MenuSeparator />
+              <CheckboxMenuItem
+                checked={useGlobalBlocks}
+                onCheckedChange={(value) => setUseGlobalBlocks(value)}
+              >
+                <CheckboxMenuItemIndicator />
+                Execute global blocks
+              </CheckboxMenuItem>
+            </Menu>
+          </Option>
         )}
       </Operation>
     </Container>
@@ -106,4 +134,9 @@ const Action = styled.div`
   > svg {
     fill: var(${ThemeColorVariables.linkForeground});
   }
+`;
+
+const Option = styled.div`
+  display: flex;
+  padding: 8px 12px;
 `;

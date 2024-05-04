@@ -6,6 +6,7 @@ import { TabContainer } from "../../../../new-components/Tabs";
 import AddResponseDialog from "./AddResponseDialog";
 import VariableAssignments from "./VariableAssignments";
 import { Menu, MenuItem } from "../../../../new-components/Menu";
+import { TrashCan } from "../../../../icons";
 
 export default function ResponseProcessing({
   responseCodes,
@@ -32,6 +33,7 @@ export default function ResponseProcessing({
     menu: editable ? (
       <Menu>
         <MenuItem onClick={(e) => e.stopPropagation()} onSelect={() => remove(index)}>
+          <TrashCan />
           Delete
         </MenuItem>
       </Menu>
