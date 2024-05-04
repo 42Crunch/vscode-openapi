@@ -10,6 +10,7 @@ import AddRequest from "../operations/components/AddRequest";
 import * as actions from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import NewValueDialog from "./NewValueDialog";
+import { Trash, TrashCan } from "../../../icons";
 
 export default function CredentialValues({
   group,
@@ -58,6 +59,7 @@ export default function CredentialValues({
       menu: (
         <Menu>
           <MenuItem onClick={(e) => e.stopPropagation()} onSelect={() => remove(index)}>
+            <TrashCan />
             Delete
           </MenuItem>
         </Menu>
