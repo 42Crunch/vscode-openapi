@@ -3,6 +3,7 @@ import { Action, TypedStartListening, isAnyOf } from "@reduxjs/toolkit";
 import { EnvData } from "@xliic/common/env";
 import {
   HttpClient,
+  HttpConfig,
   HttpError,
   HttpRequest,
   HttpResponse,
@@ -284,7 +285,7 @@ export function onTryExecuteScenario(
             playbook: { before, after, operations },
           },
           operations: { scenarioId, operationId },
-          prefs: { useGlobalBlocks },
+          prefs: { useGlobalBlocks, rejectUnauthorized },
         } = listenerApi.getState();
 
         const operation = operations[operationId!];
@@ -299,7 +300,7 @@ export function onTryExecuteScenario(
 
         await execute(
           listenerApi.getState(),
-          httpClient(host, listenerApi.take),
+          httpClient(host, { https: { rejectUnauthorized } }, listenerApi.take),
           listenerApi.dispatch,
           resetTryExecution,
           addTryExecutionStep,
@@ -321,6 +322,7 @@ export function onExecuteAuthentication(
         const {
           scanconf: { oas, playbook, selectedCredential, selectedSubcredential },
           env: { data: envenv },
+          prefs: { rejectUnauthorized },
         } = listenerApi.getState();
 
         if (selectedCredential === undefined || selectedSubcredential === undefined) {
@@ -334,7 +336,7 @@ export function onExecuteAuthentication(
         listenerApi.dispatch(addTryAuthenticationStep({ event: "request-started" }));
         for await (const step of executeAuth(
           createAuthCache(),
-          httpClient(host, listenerApi.take),
+          httpClient(host, { https: { rejectUnauthorized } }, listenerApi.take),
           oas,
           server,
           playbook,
@@ -361,7 +363,7 @@ export function onExecuteRequest(
           scanconf: {
             playbook: { before, after },
           },
-          prefs: { useGlobalBlocks },
+          prefs: { useGlobalBlocks, rejectUnauthorized },
         } = listenerApi.getState();
 
         const playbooks: PlaybookList = [
@@ -372,7 +374,7 @@ export function onExecuteRequest(
 
         await execute(
           listenerApi.getState(),
-          httpClient(host, listenerApi.take),
+          httpClient(host, { https: { rejectUnauthorized } }, listenerApi.take),
           listenerApi.dispatch,
           resetExecuteRequest,
           addExecutionStep,
@@ -394,6 +396,7 @@ export function onExecuteGlobal(startAppListening: AppStartListening, host: Http
             playbook: { before, after },
           },
           global: { selected },
+          prefs: { rejectUnauthorized },
         } = listenerApi.getState();
 
         const playbooks =
@@ -403,7 +406,7 @@ export function onExecuteGlobal(startAppListening: AppStartListening, host: Http
 
         await execute(
           listenerApi.getState(),
-          httpClient(host, listenerApi.take),
+          httpClient(host, { https: { rejectUnauthorized } }, listenerApi.take),
           listenerApi.dispatch,
           resetTryGlobal,
           addTryGlobalStep,
@@ -445,8 +448,12 @@ function mockHttpClient(): MockHttpClient {
   return async () => [MockHttpResponse, undefined];
 }
 
-function httpClient(host: HttpCapableWebappHost, take: (pattern: any) => any): HttpClient {
-  const send = makeSend(host);
+function httpClient(
+  host: HttpCapableWebappHost,
+  config: HttpConfig,
+  take: (pattern: any) => any
+): HttpClient {
+  const send = makeSend(host, config);
   const receive = makeReceive(take);
 
   return async function httpClient(request: HttpRequest): Promise<Result<HttpResponse, HttpError>> {
@@ -456,20 +463,12 @@ function httpClient(host: HttpCapableWebappHost, take: (pattern: any) => any): H
   };
 }
 
-function makeSend(host: HttpCapableWebappHost) {
+function makeSend(host: HttpCapableWebappHost, config: HttpConfig) {
   const send = (request: HttpRequest) => {
     const id = crypto.randomUUID();
     host.postMessage({
       command: "sendHttpRequest",
-      payload: {
-        request,
-        id,
-        config: {
-          https: {
-            rejectUnauthorized: false,
-          },
-        },
-      },
+      payload: { request, id, config },
     });
     return id;
   };

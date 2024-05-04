@@ -73,6 +73,7 @@ const initialState: OasState = {
     tryitServer: "",
     security: {},
     useGlobalBlocks: true,
+    rejectUnauthorized: true,
   },
   error: undefined,
   responses: {},

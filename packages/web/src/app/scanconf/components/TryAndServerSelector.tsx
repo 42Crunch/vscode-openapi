@@ -28,11 +28,14 @@ export default function TryAndServerSelector({
   host?: string;
   menu?: boolean;
 }) {
-  const { scanServer, useGlobalBlocks } = useFeatureSelector((state) => state.prefs);
+  const { scanServer, useGlobalBlocks, rejectUnauthorized } = useFeatureSelector(
+    (state) => state.prefs
+  );
 
   const dispatch = useFeatureDispatch();
   const setServer = (server: string) => dispatch(actions.setScanServer(server));
   const setUseGlobalBlocks = (value: boolean) => dispatch(actions.setUseGlobalBlocks(value));
+  const setRejectUnauthorized = (value: boolean) => dispatch(actions.setRejectUnauthorized(value));
 
   const allServers = [...servers];
 
@@ -97,6 +100,14 @@ export default function TryAndServerSelector({
               >
                 <CheckboxMenuItemIndicator />
                 Execute global blocks
+              </CheckboxMenuItem>
+
+              <CheckboxMenuItem
+                checked={rejectUnauthorized}
+                onCheckedChange={(value) => setRejectUnauthorized(value)}
+              >
+                <CheckboxMenuItemIndicator />
+                Reject untrusted SSL certificates
               </CheckboxMenuItem>
             </Menu>
           </Option>

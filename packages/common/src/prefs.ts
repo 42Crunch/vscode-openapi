@@ -5,6 +5,7 @@ export interface Preferences {
   tryitServer: string;
   security: SecretsForSecurity;
   useGlobalBlocks: boolean;
+  rejectUnauthorized: boolean;
 }
 
 export type LoadPreferencesMessage = { command: "loadPrefs"; payload: Preferences };

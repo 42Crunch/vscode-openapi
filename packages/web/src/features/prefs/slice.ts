@@ -8,6 +8,7 @@ const initialState: Preferences = {
   scanServer: "",
   tryitServer: "",
   useGlobalBlocks: true,
+  rejectUnauthorized: true,
 };
 
 export const slice = createSlice({
@@ -31,6 +32,9 @@ export const slice = createSlice({
     setUseGlobalBlocks: (state, action: PayloadAction<boolean>) => {
       state.useGlobalBlocks = action.payload;
     },
+    setRejectUnauthorized: (state, action: PayloadAction<boolean>) => {
+      state.rejectUnauthorized = action.payload;
+    },
   },
 });
 
@@ -40,6 +44,7 @@ export const {
   setTryitServer,
   setSecretForSecurity,
   setUseGlobalBlocks,
+  setRejectUnauthorized,
 } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<
