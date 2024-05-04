@@ -58,6 +58,7 @@ const DropdownMenuContent = styled(DropdownMenu.Content)`
   border-radius: 2px;
   min-width: 220px;
   padding: 5px;
+  box-shadow: 0 10px 38px var(${ThemeColorVariables.computedTwo});
 `;
 
 export const MenuItem = styled(DropdownMenu.Item)`
@@ -70,6 +71,7 @@ export const MenuItem = styled(DropdownMenu.Item)`
   border-radius: 2px;
   align-items: center;
   outline: none;
+  user-select: none;
   &[data-highlighted] {
     background-color: var(${ThemeColorVariables.listActiveSelectionBackground});
     color: var(${ThemeColorVariables.listActiveSelectionForeground});
@@ -87,6 +89,7 @@ export const CheckboxMenuItem = styled(DropdownMenu.CheckboxItem)`
   padding-left: 25px;
   align-items: center;
   outline: none;
+  user-select: none;
   border-radius: 2px;
   &[data-highlighted] {
     background-color: var(${ThemeColorVariables.listActiveSelectionBackground});
