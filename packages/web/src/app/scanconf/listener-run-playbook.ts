@@ -284,16 +284,17 @@ export function onTryExecuteScenario(
             playbook: { before, after, operations },
           },
           operations: { scenarioId, operationId },
+          prefs: { useGlobalBlocks },
         } = listenerApi.getState();
 
         const operation = operations[operationId!];
 
         const playbooks: PlaybookList = [
-          { name: "Global Before", requests: before },
+          { name: "Global Before", requests: useGlobalBlocks ? before : [] },
           { name: "Before", requests: operation.before },
           { name: "Scenario", requests: operation.scenarios[scenarioId].requests },
           { name: "After", requests: operation.after },
-          { name: "Global After", requests: after },
+          { name: "Global After", requests: useGlobalBlocks ? after : [] },
         ].filter((playbook) => playbook.requests.length > 0);
 
         await execute(
