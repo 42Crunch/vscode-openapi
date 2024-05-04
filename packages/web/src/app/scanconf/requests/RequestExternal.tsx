@@ -25,15 +25,16 @@ export default function RequestExternal({
   request: Playbook.ExternalStageContent;
   requestRef: Playbook.RequestRef;
 }) {
-  const dispatch = useAppDispatch();
-
   const { oas } = useAppSelector((state) => state.scanconf);
+  const useGlobalBlocks = useAppSelector((state) => state.prefs.useGlobalBlocks);
 
   const {
     tryResult,
     mockResult,
     mockMissingVariables: missingVariables,
   } = useAppSelector((state) => state.requests);
+
+  const dispatch = useAppDispatch();
 
   const onRun = (server: string, inputs: UnknownEnvironment) =>
     dispatch(executeRequest({ server, inputs }));
@@ -103,9 +104,10 @@ export default function RequestExternal({
           </Form>
         </Inputs>
       </CollapsibleSection>
+
       {tryResult.length > 0 && (
         <CollapsibleSection title="Result">
-          <Execution result={tryResult} />
+          <Execution result={tryResult} collapsible={useGlobalBlocks} />
         </CollapsibleSection>
       )}
     </Container>

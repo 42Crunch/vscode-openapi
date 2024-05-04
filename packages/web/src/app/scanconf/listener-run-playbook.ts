@@ -357,7 +357,17 @@ export function onExecuteRequest(
       effect: async ({ payload: { inputs, server } }, listenerApi) => {
         const {
           requests: { ref },
+          scanconf: {
+            playbook: { before, after },
+          },
+          prefs: { useGlobalBlocks },
         } = listenerApi.getState();
+
+        const playbooks: PlaybookList = [
+          { name: "Global Before", requests: useGlobalBlocks ? before : [] },
+          { name: "Request", requests: [{ ref: ref! }] },
+          { name: "Global After", requests: useGlobalBlocks ? after : [] },
+        ].filter((playbook) => playbook.requests.length > 0);
 
         await execute(
           listenerApi.getState(),
@@ -365,7 +375,7 @@ export function onExecuteRequest(
           listenerApi.dispatch,
           resetExecuteRequest,
           addExecutionStep,
-          [{ name: "requests", requests: [{ ref: ref! }] }],
+          playbooks,
           server,
           [{ id: "inputs", env: inputs, assignments: [] }]
         );
