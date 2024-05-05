@@ -63,7 +63,7 @@ const NavigationContent = styled.nav`
   display: flex;
   padding: 0px 16px;
   padding-top: 6px;
-  gap: 24px;
+  justify-content: space-between;
   font-size: 14px;
   border-bottom: 1px solid var(${ThemeColorVariables.border});
 `;
