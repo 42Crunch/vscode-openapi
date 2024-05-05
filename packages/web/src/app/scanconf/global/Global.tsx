@@ -5,7 +5,7 @@ import { Playbook } from "@xliic/scanconf";
 import { SearchSidebarControlled, Section } from "../../../components/layout/SearchSidebar";
 import CollapsibleSection from "../components/CollapsibleSection";
 import Scenario from "../operations/Scenario";
-import AddRequest from "../operations/components/AddRequest";
+import AddRequest from "../operations/AddRequest";
 import * as actions from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import { selectGlobal, startTryGlobal } from "./slice";

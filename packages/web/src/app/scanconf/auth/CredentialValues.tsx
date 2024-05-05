@@ -6,7 +6,7 @@ import Input from "../../../components/Input";
 import { Menu, MenuItem } from "../../../new-components/Menu";
 import { TabContainer } from "../../../new-components/Tabs";
 import Scenario from "../operations/Scenario";
-import AddRequest from "../operations/components/AddRequest";
+import AddRequest from "../operations/AddRequest";
 import * as actions from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import NewValueDialog from "./NewValueDialog";

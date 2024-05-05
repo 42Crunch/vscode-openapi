@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { Playbook } from "@xliic/scanconf";
 
-import { Plus } from "../../../../icons";
+import { Plus } from "../../../icons";
 import AuthorizationTestCombo from "./AuthorizationTestCombo";
 
 export default function AddAuthorizationTest({

@@ -4,7 +4,7 @@ import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { useState } from "react";
-import { Plus } from "../../../../icons";
+import { Plus } from "../../../icons";
 import NewStageCombo from "./NewStageCombo";
 
 export default function AddRequest({

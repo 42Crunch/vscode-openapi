@@ -8,7 +8,7 @@ import { findResult } from "../playbook-execution-handler";
 import * as actions from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import Scenario from "./Scenario";
-import AddRequest from "./components/AddRequest";
+import AddRequest from "./AddRequest";
 import * as localActions from "./slice";
 
 export default function Scenarios({ operationId }: { operationId: string }) {
