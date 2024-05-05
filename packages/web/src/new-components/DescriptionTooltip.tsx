@@ -2,15 +2,21 @@ import * as Tooltip from "@radix-ui/react-tooltip";
 import styled from "styled-components";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { CircleQuestion } from "../icons";
+import { CircleQuestion, CircleExclamation } from "../icons";
 
-export default function DescriptionTooltip({ description }: { description: string }) {
+export default function DescriptionTooltip({
+  description,
+  icon,
+}: {
+  description: string;
+  icon?: "question" | "exclamation";
+}) {
   return (
     <Tooltip.Provider>
       <Tooltip.Root>
         <Tooltip.Trigger asChild>
           <TooltipIcon>
-            <CircleQuestion />
+            {icon === "exclamation" ? <CircleExclamation /> : <CircleQuestion />}
           </TooltipIcon>
         </Tooltip.Trigger>
         <Tooltip.Portal>
