@@ -14,6 +14,7 @@ export default function ParameterGroup({
   placeholder,
   variables,
   allowUnknown,
+  ignoreCase,
 }: {
   group: Record<string, Parameter>;
   oas: BundledSwaggerOrOasSpec;
@@ -21,6 +22,7 @@ export default function ParameterGroup({
   placeholder: string;
   variables: string[];
   allowUnknown?: boolean;
+  ignoreCase?: boolean;
 }) {
   const { fields, append, remove } = useFieldArray({
     name: name,
@@ -46,7 +48,7 @@ export default function ParameterGroup({
               schema={getParameterSchema(oas, group, field.key)}
               onDelete={() => remove(index)}
               variables={variables}
-              isDefinedInOpenAPI={!!group[field.key]}
+              isDefinedInOpenAPI={isDefinedInOpenAPI(group, field.key, ignoreCase)}
             />
           );
         })}
@@ -60,6 +62,13 @@ export default function ParameterGroup({
       </Body>
     </Container>
   );
+}
+
+function isDefinedInOpenAPI(group: Record<string, Parameter>, name: string, ignoreCase?: boolean) {
+  if (ignoreCase) {
+    return Object.keys(group).some((key) => key.toLowerCase() === name.toLowerCase());
+  }
+  return group[name] !== undefined;
 }
 
 function getParameterSchema(

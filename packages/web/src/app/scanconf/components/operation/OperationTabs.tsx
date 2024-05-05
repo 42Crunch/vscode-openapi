@@ -125,6 +125,7 @@ function makeOasTabs(
           placeholder="Add new header"
           variables={availableVariables}
           allowUnknown
+          ignoreCase
         />
       ),
     },

@@ -1,13 +1,13 @@
 import { useController } from "react-hook-form";
 import styled from "styled-components";
-import * as Tooltip from "@radix-ui/react-tooltip";
 
 import { OpenApi30, Swagger } from "@xliic/openapi";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { ENV_VAR_REGEX } from "../../../../core/playbook/variables";
-import { CircleQuestion, TrashCan, TriangleExclamation } from "../../../../icons";
+import { TrashCan, TriangleExclamation } from "../../../../icons";
 import LineEditor from "../../../../new-components/fields/LineEditor";
+import DescriptionTooltip from "../../../../new-components/DescriptionTooltip";
 
 export type Parameter = OpenApi30.ResolvedParameter | Swagger.ResolvedParameter;
 export type Schema = { type?: string };
@@ -36,7 +36,9 @@ export default function ParameterRow({
     <Container>
       <Name>
         {nameField.value}
-        {!isDefinedInOpenAPI && <UnknownParameter />}
+        {!isDefinedInOpenAPI && (
+          <DescriptionTooltip description="Parameter is not defined in the OpenAPI specification for this API" />
+        )}
       </Name>
       <LineEditor
         name={`${name}.value`}
@@ -64,25 +66,6 @@ export default function ParameterRow({
         </>
       )}
     </Container>
-  );
-}
-
-function UnknownParameter() {
-  return (
-    <Tooltip.Provider>
-      <Tooltip.Root>
-        <Tooltip.Trigger asChild>
-          <Trigger>
-            <CircleQuestion />
-          </Trigger>
-        </Tooltip.Trigger>
-        <Tooltip.Portal>
-          <TooltipContent>
-            This parameter is not defined in the OpenAPI specification for this API
-          </TooltipContent>
-        </Tooltip.Portal>
-      </Tooltip.Root>
-    </Tooltip.Provider>
   );
 }
 
@@ -128,24 +111,6 @@ const Remove = styled.button`
   > svg {
     fill: var(${ThemeColorVariables.foreground});
   }
-`;
-
-const Trigger = styled.div`
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  > svg {
-    fill: var(${ThemeColorVariables.foreground});
-  }
-`;
-
-const TooltipContent = styled(Tooltip.Content)`
-  color: var(${ThemeColorVariables.notificationsForeground});
-  background-color: var(${ThemeColorVariables.notificationsBackground});
-  border: 1px solid var(${ThemeColorVariables.notificationsBorder});
-  border-radius: 4px;
-  padding: 4px 8px;
-  margin-right: 16px;
 `;
 
 function encode(schema: Schema, value: unknown): string {
