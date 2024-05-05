@@ -11,6 +11,8 @@ import { useAppDispatch, useAppSelector } from "../store";
 import { selectGlobal, startTryGlobal } from "./slice";
 import Execution from "../components/execution/Execution";
 import TryAndServerSelector from "../components/TryAndServerSelector";
+import { setRequestId } from "../requests/slice";
+import { goTo } from "../../../features/router/slice";
 
 export default function Global() {
   const dispatch = useAppDispatch();
@@ -36,6 +38,13 @@ export default function Global() {
         },
       })
     );
+  };
+
+  const goToRequest = (req: Playbook.RequestRef) => {
+    // FIXME, order is important
+    // need to move setRequestId functionality to the router
+    dispatch(setRequestId(req));
+    dispatch(goTo(["scanconf", "requests"]));
   };
 
   const operationIds = Object.keys(playbook.operations);
@@ -79,6 +88,7 @@ export default function Global() {
                 removeStage={removeStage}
                 operations={playbook.operations}
                 requests={playbook.requests}
+                goToRequest={goToRequest}
               />
               <AddRequest
                 operationIds={operationIds}
@@ -110,6 +120,7 @@ export default function Global() {
                 moveStage={moveStage}
                 operations={playbook.operations}
                 requests={playbook.requests}
+                goToRequest={goToRequest}
               />
               <AddRequest
                 operationIds={operationIds}

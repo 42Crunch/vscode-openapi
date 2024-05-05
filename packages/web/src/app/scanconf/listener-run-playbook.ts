@@ -103,7 +103,7 @@ export function onMockExecuteScenario(
           },
         } = listenerApi.getState();
 
-        if (parent !== "scanconf" && page !== "operations") {
+        if (parent !== "scanconf" || page !== "operations" || operationId === undefined) {
           return;
         }
 
@@ -145,7 +145,7 @@ export function onMockExecuteRequest(
           },
         } = listenerApi.getState();
 
-        if (parent !== "scanconf" && page !== "requests") {
+        if (parent !== "scanconf" || page !== "requests") {
           return;
         }
 

@@ -10,7 +10,9 @@ import AddRequest from "../operations/AddRequest";
 import * as actions from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import NewValueDialog from "./NewValueDialog";
-import { Trash, TrashCan } from "../../../icons";
+import { TrashCan } from "../../../icons";
+import { setRequestId } from "../requests/slice";
+import { goTo } from "../../../features/router/slice";
 
 export default function CredentialValues({
   group,
@@ -44,6 +46,13 @@ export default function CredentialValues({
         },
       })
     );
+  };
+
+  const goToRequest = (req: Playbook.RequestRef) => {
+    // FIXME, order is important
+    // need to move setRequestId functionality to the router
+    dispatch(setRequestId(req));
+    dispatch(goTo(["scanconf", "requests"]));
   };
 
   const { fields, append, remove } = useFieldArray({
@@ -83,6 +92,7 @@ export default function CredentialValues({
               removeStage={removeStage}
               operations={playbook.operations}
               requests={playbook.requests}
+              goToRequest={goToRequest}
             />
             <AddRequest
               operationIds={operationIds}

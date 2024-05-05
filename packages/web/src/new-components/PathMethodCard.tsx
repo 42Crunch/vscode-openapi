@@ -2,6 +2,7 @@ import styled from "styled-components";
 
 import { HttpMethod } from "@xliic/openapi";
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { Link } from "../icons";
 
 export default function PathMethodCard({
   path,
@@ -16,7 +17,12 @@ export default function PathMethodCard({
 }) {
   return (
     <Container>
-      {operationId && <Title>{operationId}</Title>}
+      {operationId && (
+        <Title>
+          {operationId}
+          <Link />
+        </Title>
+      )}
       <MethodAndPath>
         <Method>{method}</Method>
         <Path>{path}</Path>
@@ -36,6 +42,11 @@ const Container = styled.div`
 const Title = styled.div`
   font-size: 14px;
   font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  > svg {
+    fill: var(${ThemeColorVariables.linkForeground});
+  }
 `;
 
 const MethodAndPath = styled.div`

@@ -8,7 +8,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { DynamicVariableNames } from "../../../core/playbook/builtin-variables";
 import { PlaybookEnvStack } from "../../../core/playbook/playbook-env";
-import { GripVertical, TrashCan, TriangleExclamation } from "../../../icons";
+import { GripVertical, Link, TrashCan, TriangleExclamation } from "../../../icons";
 import Form from "../../../new-components/Form";
 import { Menu, MenuItem } from "../../../new-components/Menu";
 import { TabContainer } from "../../../new-components/Tabs";
@@ -31,6 +31,7 @@ export default function Stage({
   fuzzing,
   operations,
   requests,
+  goToRequest,
 }: {
   stage: Playbook.StageReference;
   location: Playbook.StageLocation;
@@ -41,6 +42,7 @@ export default function Stage({
   fuzzing?: boolean;
   operations: Playbook.Bundle["operations"];
   requests: Playbook.Bundle["requests"];
+  goToRequest: (req: Playbook.RequestRef) => void;
 }) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "stage",
@@ -88,7 +90,16 @@ export default function Stage({
       >
         <CollapsibleCard>
           <Description>
-            <span>{stage.ref.id}</span>
+            <span>
+              {stage.ref.id}
+              <Link
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  goToRequest(stage.ref);
+                }}
+              />
+            </span>
             <Icons onClick={(e) => e.stopPropagation()}>
               {missingVariables.length > 0 && (
                 <StageError
@@ -217,8 +228,14 @@ export const Description = styled.div`
   gap: 4px;
   align-items: center;
   > span {
+    > svg {
+      fill: var(${ThemeColorVariables.linkForeground});
+    }
     flex: 1;
     font-weight: 600;
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
   }
 `;
 

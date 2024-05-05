@@ -21,6 +21,8 @@ import AuthorizationTests from "./AuthorizationTests";
 import { ErrorBanner } from "../../../components/Banner";
 import { extractScanconf, optionallyReplaceLocalhost } from "./util";
 import PathMethodCard from "../../../new-components/PathMethodCard";
+import { goTo } from "../../../features/router/slice";
+import { setRequestId } from "../requests/slice";
 
 export default function Operation({ operationId }: { operationId: string }) {
   const dispatch = useAppDispatch();
@@ -48,6 +50,13 @@ export default function Operation({ operationId }: { operationId: string }) {
         },
       })
     );
+  };
+
+  const goToRequest = (req: Playbook.RequestRef) => {
+    // FIXME, order is important
+    // need to move setRequestId functionality to the router
+    dispatch(setRequestId(req));
+    dispatch(goTo(["scanconf", "requests"]));
   };
 
   const operationIds = Object.keys(playbook.operations);
@@ -117,7 +126,13 @@ export default function Operation({ operationId }: { operationId: string }) {
         }}
       />
 
-      <Header>
+      <Header
+        onClick={(e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          goToRequest({ type: "operation", id: operationId });
+        }}
+      >
         <PathMethodCard
           operationId={operationId}
           path={operation.request.request.path}
@@ -181,6 +196,7 @@ export default function Operation({ operationId }: { operationId: string }) {
             removeStage={removeStage}
             operations={playbook.operations}
             requests={playbook.requests}
+            goToRequest={goToRequest}
           />
           <AddRequest
             operationIds={operationIds}
@@ -192,7 +208,7 @@ export default function Operation({ operationId }: { operationId: string }) {
         </Content>
       </CollapsibleSection>
       <CollapsibleSection title="Scenarios" count={operation.scenarios?.length}>
-        <Scenarios operationId={operationId} />
+        <Scenarios operationId={operationId} goToRequest={goToRequest} />
       </CollapsibleSection>
       <CollapsibleSection defaultOpen={false} title="After" count={operation.after?.length}>
         <Content>
@@ -206,6 +222,7 @@ export default function Operation({ operationId }: { operationId: string }) {
             moveStage={moveStage}
             operations={playbook.operations}
             requests={playbook.requests}
+            goToRequest={goToRequest}
           />
           <AddRequest
             operationIds={operationIds}
@@ -239,4 +256,8 @@ const Content = styled.div`
 const Header = styled.div`
   margin-bottom: 16px;
   margin-top: 16px;
+  padding: 8px;
+  border: 1px solid var(${ThemeColorVariables.border});
+  border-radius: 2px;
+  cursor: pointer;
 `;

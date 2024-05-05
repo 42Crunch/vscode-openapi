@@ -20,6 +20,7 @@ export default function Scenario({
   fuzzing,
   operations,
   requests,
+  goToRequest,
 }: {
   oas: BundledSwaggerOrOasSpec;
   stages: Playbook.StageReference[];
@@ -31,6 +32,7 @@ export default function Scenario({
   fuzzing?: boolean;
   operations: Playbook.Bundle["operations"];
   requests: Playbook.Bundle["requests"];
+  goToRequest: (req: Playbook.RequestRef) => void;
 }) {
   const save = (location: Playbook.StageLocation) => (stage: Playbook.StageReference) =>
     saveStage(location, stage);
@@ -60,6 +62,7 @@ export default function Scenario({
               result={executionResult?.results?.[stageIndex]}
               saveStage={save(location)}
               removeStage={remove(location)}
+              goToRequest={goToRequest}
               location={location}
               fuzzing={fuzzing}
               operations={operations}

@@ -11,7 +11,13 @@ import Scenario from "./Scenario";
 import AddRequest from "./AddRequest";
 import * as localActions from "./slice";
 
-export default function Scenarios({ operationId }: { operationId: string }) {
+export default function Scenarios({
+  operationId,
+  goToRequest,
+}: {
+  operationId: string;
+  goToRequest: (req: Playbook.RequestRef) => void;
+}) {
   const dispatch = useAppDispatch();
   const { playbook, oas } = useAppSelector((state) => state.scanconf);
   const { scenarioId, mockResult } = useAppSelector((state) => state.operations);
@@ -61,6 +67,7 @@ export default function Scenarios({ operationId }: { operationId: string }) {
           removeStage={removeStage}
           operations={playbook.operations}
           requests={playbook.requests}
+          goToRequest={goToRequest}
           fuzzing
         />
         <AddRequest
