@@ -6,7 +6,13 @@ import { OperationId } from "./types";
 import { update } from "./update";
 
 export { compare, update };
-export type { Change, OperationAdded, OperationRemoved, OperationRenamed } from "./types";
+export type {
+  Change,
+  OperationAdded,
+  OperationRemoved,
+  OperationRenamed,
+  SecurityAdded,
+} from "./types";
 
 function getCommonOperations(
   oas: BundledSwaggerOrOasSpec,

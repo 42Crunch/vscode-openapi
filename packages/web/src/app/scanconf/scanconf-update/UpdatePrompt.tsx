@@ -7,6 +7,7 @@ import { ProgressButton } from "../../../new-components/ProgressButton";
 import OperationAdded from "./OperationAdded";
 import OperationRemoved from "./OperationRemoved";
 import OperationRenamed from "./OperationRenamed";
+import SecuritySchemeAdded from "./SecuritySchemeAdded";
 
 export default function UpdatePrompt() {
   const dispatch = useAppDispatch();
@@ -15,6 +16,7 @@ export default function UpdatePrompt() {
   const added = changes.filter((change) => change.type === "operation-added");
   const removed = changes.filter((change) => change.type === "operation-removed");
   const renamed = changes.filter((change) => change.type === "operation-renamed");
+  const securityAdded = changes.filter((change) => change.type === "security-added");
 
   return (
     <Container>
@@ -46,6 +48,14 @@ export default function UpdatePrompt() {
             <div>OperationId changed:</div>
             {renamed.map((change, index) => (
               <OperationRenamed key={index} change={change} />
+            ))}
+          </>
+        )}
+        {securityAdded.length > 0 && (
+          <>
+            <div>Security scheme added:</div>
+            {securityAdded.map((change, index) => (
+              <SecuritySchemeAdded key={index} change={change} />
             ))}
           </>
         )}
