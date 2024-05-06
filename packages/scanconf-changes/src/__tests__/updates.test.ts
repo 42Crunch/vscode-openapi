@@ -101,3 +101,39 @@ test("update by removing an operation", async () => {
 
   expect(compare(originalOas, patchedScanconf)).toHaveLength(0);
 });
+
+const updatedOas2 = (await import(
+  "./oas/security-added/updated-oas.json"
+)) as unknown as BundledSwaggerOrOasSpec;
+
+const originalScanconf2 = (await import(
+  "./oas/security-added/original-scanconf.json"
+)) as unknown as Scanconf.ConfigurationFileBundle; // FIXME scanconf seems to diverge from schema
+
+const updatedScanconf2 = (await import(
+  "./oas/security-added/updated-scanconf.json"
+)) as unknown as Scanconf.ConfigurationFileBundle; // FIXME scanconf seems to diverge from schema
+
+test("update by adding security", async () => {
+  const patchedScanconf = update(updatedOas2, originalScanconf2, updatedScanconf2, [
+    { type: "security-added", schema: "access-token" },
+    { type: "security-added", schema: "OAuth2" },
+  ]);
+  expect(compare(updatedOas2, patchedScanconf)).toHaveLength(0);
+  expect(compareAuth(patchedScanconf, "foo", ["access-token"])).toBeTruthy();
+  expect(compareAuth(patchedScanconf, "bar", ["access-token", "OAuth2"])).toBeTruthy();
+});
+
+function compareAuth(
+  scanconf: Scanconf.ConfigurationFileBundle,
+  path: string,
+  expectedAuth: string[]
+) {
+  if (scanconf && scanconf.operations) {
+    const auth = scanconf.operations[path]["request"]["auth"];
+    if (auth && auth.length === expectedAuth.length) {
+      return JSON.stringify(auth) === JSON.stringify(expectedAuth);
+    }
+  }
+  return false;
+}

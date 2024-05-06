@@ -4,7 +4,14 @@ import { Scanconf } from "@xliic/scanconf";
 import { makeOperationId } from ".";
 import { findReferences } from "./references/find";
 import { findRenamedOperations as operationsRenamed } from "./renames";
-import { Change, OperationAdded, OperationId, OperationRemoved } from "./types";
+import {
+  SecurityAdded,
+  SecurityRemoved,
+  Change,
+  OperationAdded,
+  OperationId,
+  OperationRemoved,
+} from "./types";
 
 export function compare(
   oas: BundledSwaggerOrOasSpec,
@@ -22,7 +29,8 @@ export function compare(
     (operation) => !renamed.some((rename) => rename.oldOperationId === operation.operationId)
   );
 
-  return [...addedNoRenames, ...removedNoRenames, ...renamed];
+  const authAdded = securityAdded(oas, scanconf);
+  return [...addedNoRenames, ...removedNoRenames, ...renamed, ...authAdded];
 }
 
 export function operationsAdded(
@@ -90,4 +98,47 @@ function getScanconfOperation(
   scanconf: Scanconf.ConfigurationFileBundle
 ): Scanconf.Operation | undefined {
   return scanconf.operations?.[operationId];
+}
+
+export function securityAdded(
+  oas: BundledSwaggerOrOasSpec,
+  scanconf: Scanconf.ConfigurationFileBundle
+): SecurityAdded[] {
+  const scanconfAuthDetails: any = scanconf.authenticationDetails || [{}];
+  if (scanconfAuthDetails.length === 0) {
+    return [];
+  }
+  return getSecuritySchemes(oas)
+    .filter((schema) => !scanconfAuthDetails[0][schema])
+    .map((schema) => ({
+      type: "security-added",
+      schema,
+    }));
+}
+
+export function securityRemoved(
+  oas: BundledSwaggerOrOasSpec,
+  scanconf: Scanconf.ConfigurationFileBundle
+): SecurityRemoved[] {
+  const scanconfAuthDetails: any = scanconf.authenticationDetails || [{}];
+  if (scanconfAuthDetails.length === 0) {
+    return [];
+  }
+  const oasAuthDetails = getSecuritySchemes(oas);
+  return Object.keys(scanconfAuthDetails[0])
+    .filter((schema) => !oasAuthDetails.includes(schema))
+    .map((schema) => ({
+      type: "security-removed",
+      schema,
+    }));
+}
+
+export function getSecuritySchemes(oas: BundledSwaggerOrOasSpec): string[] {
+  if (isOpenapi(oas)) {
+    const securitySchemes = oas.components?.securitySchemes;
+    return securitySchemes ? Object.keys(securitySchemes) : [];
+  } else {
+    const securityDefinitions = oas.securityDefinitions;
+    return securityDefinitions ? Object.keys(securityDefinitions) : [];
+  }
 }
