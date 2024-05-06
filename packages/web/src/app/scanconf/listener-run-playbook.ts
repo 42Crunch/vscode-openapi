@@ -194,11 +194,11 @@ export function onMockExecuteAuthRequests(
             selectedSubcredential,
           },
           router: {
-            current: [page],
+            current: [parent, page],
           },
         } = listenerApi.getState();
 
-        if (page !== "auth") {
+        if (parent !== "scanconf" || page !== "auth") {
           return;
         }
 
@@ -256,11 +256,11 @@ export function onMockExecuteGlobal(
           },
           global: { selected },
           router: {
-            current: [page],
+            current: [parent, page],
           },
         } = listenerApi.getState();
 
-        if (page !== "global") {
+        if (parent !== "scanconf" || page !== "global") {
           return;
         }
 
