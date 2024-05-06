@@ -81,3 +81,19 @@ test("find renamed operation", async () => {
     },
   ]);
 });
+
+const updatedOas2 = (await import(
+  "./oas/security-added/updated-oas.json"
+)) as unknown as BundledSwaggerOrOasSpec;
+
+const originalScanconf2 = (await import(
+  "./oas/security-added/original-scanconf.json"
+)) as unknown as Scanconf.ConfigurationFileBundle; // FIXME scanconf seems to diverge from schema
+
+test("find added security", async () => {
+  const changes = compare(updatedOas2, originalScanconf2);
+  expect(changes).toEqual([
+    { type: "security-added", schema: "access-token" },
+    { type: "security-added", schema: "OAuth2" },
+  ]);
+});

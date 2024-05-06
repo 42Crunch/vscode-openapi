@@ -24,10 +24,15 @@ export type OperationRenamed = {
   newOperationId: string;
 };
 
-export type Change = OperationAdded | OperationRemoved | OperationRenamed;
+export type Change = OperationAdded | OperationRemoved | OperationRenamed | SecurityAdded;
 
 export type OperationId = {
   path: string;
   method: HttpMethod;
   operationId: string;
+};
+
+export type SecurityAdded = {
+  type: "security-added";
+  schema: string;
 };

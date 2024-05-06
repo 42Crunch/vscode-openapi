@@ -2,7 +2,7 @@ import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Scanconf } from "@xliic/scanconf";
 import { joinJsonPointer, simpleClone } from "@xliic/preserving-json-yaml-parser";
 
-import { Change, OperationAdded, OperationRemoved, OperationRenamed } from "./types";
+import { SecurityAdded, Change, OperationAdded, OperationRemoved, OperationRenamed } from "./types";
 import { removeReferences } from "./references/remove";
 import { updateReferences } from "./references/update";
 
@@ -20,6 +20,8 @@ export function update(
       result = updateRemoveOperation(oas, result, updated, change);
     } else if (change.type === "operation-renamed") {
       result = updateRenameOperation(result, change);
+    } else if (change.type === "security-added") {
+      result = updateSecurityAdded(oas, result, updated, change);
     }
   }
   return result;
@@ -61,4 +63,33 @@ export function updateRenameOperation(
   const oldRef = "#" + joinJsonPointer(["operations", change.oldOperationId, "request"]);
   const newRef = "#" + joinJsonPointer(["operations", change.newOperationId, "request"]);
   return updateReferences(target, oldRef, newRef);
+}
+
+export function updateSecurityAdded(
+  oas: BundledSwaggerOrOasSpec,
+  target: Scanconf.ConfigurationFileBundle,
+  updated: Scanconf.ConfigurationFileBundle,
+  change: SecurityAdded
+): Scanconf.ConfigurationFileBundle {
+  if (!target.authenticationDetails) {
+    target.authenticationDetails = [];
+    target.authenticationDetails.push({});
+  }
+
+  const schema = change.schema;
+  (target.authenticationDetails as any)![0][schema] = (updated.authenticationDetails as any)![0][
+    schema
+  ];
+
+  // FIXME review how to apply updates to the env variables
+  // to preserve existing ones and add ones required by the new security scheme
+  // if (updated.environments) {
+  //   if (!target.environments) {
+  //     target.environments = { default: { variables: {} } };
+  //   }
+  //   (target.environments.default.variables as any)![schema] = (updated.environments.default
+  //     .variables as any)![schema];
+  // }
+
+  return target;
 }
