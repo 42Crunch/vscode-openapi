@@ -107,6 +107,10 @@ export function onMockExecuteScenario(
           return;
         }
 
+        listenerApi.cancelActiveListeners();
+        listenerApi.dispatch(resetMockOperationExecution());
+        await listenerApi.delay(1000);
+
         const operation = operations[operationId!];
 
         const playbooks: PlaybookList = [
@@ -148,6 +152,10 @@ export function onMockExecuteRequest(
         if (parent !== "scanconf" || page !== "requests") {
           return;
         }
+
+        listenerApi.cancelActiveListeners();
+        listenerApi.dispatch(resetMockRequestExecution());
+        await listenerApi.delay(1000);
 
         await execute(
           listenerApi.getState(),
@@ -194,7 +202,9 @@ export function onMockExecuteAuthRequests(
           return;
         }
 
+        listenerApi.cancelActiveListeners();
         listenerApi.dispatch(resetMockAuthRequestsExecution());
+        await listenerApi.delay(1000);
 
         if (selectedCredential === undefined || selectedSubcredential === undefined) {
           return;
@@ -253,6 +263,10 @@ export function onMockExecuteGlobal(
         if (page !== "global") {
           return;
         }
+
+        listenerApi.cancelActiveListeners();
+        listenerApi.dispatch(resetMockGlobal());
+        await listenerApi.delay(1000);
 
         const playbooks =
           selected === "before"
