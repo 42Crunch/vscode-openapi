@@ -11,7 +11,7 @@ import { ChangeThemeMessage } from "../theme";
 import { ShowEnvWindow, LoadEnvMessage } from "../env";
 import { LoadConfigMessage } from "../config";
 import { OpenLinkMessage } from "../link";
-
+import { ShowGeneralErrorMessage } from "../error";
 import { SendHttpRequestMessage, ShowHttpResponseMessage, ShowHttpErrorMessage } from "../http";
 import { LoadPreferencesMessage, SavePreferencesMessage } from "../prefs";
 
@@ -21,6 +21,7 @@ export type Webapp = App<
   | ShowScanconfOperationMessage
   | ShowHttpResponseMessage
   | ShowHttpErrorMessage
+  | ShowGeneralErrorMessage
   | LoadEnvMessage
   | LoadPreferencesMessage
   | LoadConfigMessage

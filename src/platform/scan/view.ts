@@ -35,6 +35,7 @@ import { runScanWithDocker } from "./runtime/docker";
 import { runScanWithScandManager } from "./runtime/scand-manager";
 import { UPGRADE_WARN_LIMIT, offerUpgrade, warnScans } from "../upgrade";
 import { formatException } from "../util";
+import { createDefaultConfigWithPlatform } from "./runtime/platform";
 
 export type BundleDocumentVersions = Record<string, number>;
 
@@ -189,13 +190,27 @@ export class ScanWebView extends WebView<Webapp> {
     },
 
     updateScanconf: async () => {
-      const stringOas = stringify(this.target!.bundle.value);
-      const scanconf = await createDefaultConfigWithCliBinary(stringOas);
-      await backupConfig(this.target!.scanconfUri);
-      this.sendRequest({
-        command: "loadUpdatedScanconf",
-        payload: { oas: this.target!.bundle.value, scanconf },
-      });
+      try {
+        const config = await loadConfig(this.configuration, this.secrets);
+        const stringOas = stringify(this.target!.bundle.value);
+
+        const scanconf =
+          config.scanRuntime === "cli"
+            ? await createDefaultConfigWithCliBinary(stringOas)
+            : await createDefaultConfigWithPlatform(this.store, stringOas);
+
+        await backupConfig(this.target!.scanconfUri);
+
+        this.sendRequest({
+          command: "loadUpdatedScanconf",
+          payload: { oas: this.target!.bundle.value, scanconf },
+        });
+      } catch (error: any) {
+        this.sendRequest({
+          command: "showGeneralError",
+          payload: { message: `Failed to generate default scanconf: ${error.message}` },
+        });
+      }
     },
   };
 
