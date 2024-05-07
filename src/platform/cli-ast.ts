@@ -118,7 +118,7 @@ export async function testCli(): Promise<CliTestResult> {
   }
   return {
     success: false,
-    message: "CLI is not found",
+    message: "42Crunch API Security Testing Binary is not found",
   };
 }
 

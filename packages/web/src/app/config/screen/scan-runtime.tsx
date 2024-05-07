@@ -137,7 +137,7 @@ export function PlatformServices() {
           <>
             <Test>
               <ValidProgressButton
-                label="Download CLI"
+                label="Download 42Crunch API Security Testing Binary"
                 waiting={waitingForCliDownload}
                 onClick={(e) => {
                   dispatch(downloadCli());
