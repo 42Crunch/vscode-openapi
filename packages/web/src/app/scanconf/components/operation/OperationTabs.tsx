@@ -263,6 +263,6 @@ function hasNoParameters(
 ) {
   return (
     (parameters === undefined || Object.keys(parameters).length === 0) &&
-    scanconfParameters.length === 0
+    (scanconfParameters === undefined || scanconfParameters.length === 0)
   );
 }
