@@ -1,5 +1,5 @@
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { useFieldArray } from "react-hook-form";
+import { useFieldArray, useWatch } from "react-hook-form";
 import styled from "styled-components";
 import { showEnvWindow } from "../../../features/env/slice";
 import { ArrowUpRightFromSquare, TrashCan, TriangleExclamation } from "../../../icons";
@@ -102,12 +102,19 @@ function EnvironmentVariable({
   missing: boolean;
   remove: () => void;
 }) {
+  const isRequired = useWatch({ name: `${name}.value.required` });
+
   return (
     <Row>
       <Input name={`${name}.key`} label="name" />
       <ErrorContainer>{missing && <TriangleExclamation />}</ErrorContainer>
       <Input name={`${name}.value.name`} label="name" />
-      <Input name={`${name}.value.default`} label="default" />
+      {!isRequired ? (
+        <Input name={`${name}.value.default`} label="default" disabled={isRequired} />
+      ) : (
+        <div />
+      )}
+
       <SwitchContainer>
         <Switch name={`${name}.value.required`} />
       </SwitchContainer>
