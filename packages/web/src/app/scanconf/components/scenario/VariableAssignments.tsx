@@ -14,7 +14,6 @@ import {
 import { TriangleExclamation } from "../../../../icons";
 
 export default function VariableAssignments({ assignment }: { assignment: PlaybookEnvStack }) {
-  console.log("rendering VariableAssignments", assignment);
   return (
     <Container>
       <Header>
@@ -56,9 +55,7 @@ function renderFailedAssignment(id: string, assignment: PlaybookVariableFailedAs
   return (
     <React.Fragment>
       <VariableNameWithTooltip name={assignment.name} id={id} />
-      <div>
-        {formatAssignmentLocation(assignment.assignment)}: {assignment.error}
-      </div>
+      <div>{formatAssignmentLocation(assignment.assignment, assignment.error)}</div>
       <Error>
         <TriangleExclamation />
       </Error>
@@ -66,11 +63,12 @@ function renderFailedAssignment(id: string, assignment: PlaybookVariableFailedAs
   );
 }
 
-function formatAssignmentLocation(assignment: Playbook.VariableAssignment): string {
+function formatAssignmentLocation(assignment: Playbook.VariableAssignment, error: string): string {
   if (assignment.in == "body") {
-    return `From "${assignment.from}" Location "${assignment.in}" Type "${assignment.path.type}" Path "${assignment.path.value}"`;
+    const type = assignment.path.type === "jsonPath" ? "JsonPath" : "JsonPointer";
+    return `${type} "${assignment.path.value}" is ${error} in the ${assignment.from} ${assignment.in}`;
   } else {
-    return `From "${assignment.from}" Location "${assignment.in}" Name "${assignment.name}"`;
+    return `Name "${assignment.name}" is ${error} in the ${assignment.from} ${assignment.in}`;
   }
 }
 
@@ -121,7 +119,7 @@ const Error = styled.div`
   align-items: center;
   justify-content: center;
   padding: 0 !important;
-  > svg {
+  & > svg {
     fill: var(${ThemeColorVariables.errorForeground});
     padding-right: 4px;
   }

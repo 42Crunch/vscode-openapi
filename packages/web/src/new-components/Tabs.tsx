@@ -230,7 +230,7 @@ const ErrorCounter = styled.span`
   font-size: 10px;
   padding: 2px 4px;
   gap: 3px;
-  > svg {
+  & > svg {
     fill: var(${ThemeColorVariables.errorForeground});
     width: 10px;
     height: 10px;

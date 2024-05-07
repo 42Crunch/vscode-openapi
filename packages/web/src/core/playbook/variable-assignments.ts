@@ -90,17 +90,12 @@ function assignValues(
   for (const [varname, assignment] of Object.entries(response.variableAssignments || {})) {
     const [value, valueError] = extractValue(assignment, httpRequest, httpResponse, parameters);
     if (valueError !== undefined) {
-      return [
-        undefined,
-        `Failed to extract value for variable '${varname}' in context '${id}': ${valueError}`,
-      ];
-    }
-
-    if (value !== undefined) {
+      result.push({ name: varname, error: valueError, value: undefined, assignment });
+    } else if (value === undefined) {
+      result.push({ name: varname, error: "not found", value: undefined, assignment });
+    } else {
       env[varname] = value;
       result.push({ name: varname, value, error: undefined });
-    } else {
-      result.push({ name: varname, error: "not found", value: undefined, assignment });
     }
   }
 
@@ -190,7 +185,7 @@ function extractFromRequestHeaders(
     }
   }
 
-  return [undefined, `Failed to find request header name: ${name}`];
+  return [undefined, "not found"];
 }
 
 function extractFromResponseHeaders(
@@ -203,7 +198,7 @@ function extractFromResponseHeaders(
     }
   }
 
-  return [undefined, `Failed to find response header name: ${name}`];
+  return [undefined, "not found"];
 }
 
 function extractFromResponseCookies(
@@ -219,7 +214,7 @@ function extractFromResponseCookies(
     }
   }
 
-  return [undefined, `Failed to find response cookie name: ${name}`];
+  return [undefined, "not found"];
 }
 
 function extractFromRequestCookies(
@@ -238,7 +233,7 @@ function extractFromRequestCookies(
     }
   }
 
-  return [undefined, `Failed to find request cookie name: ${name}`];
+  return [undefined, "not found"];
 }
 
 function extractFromRequestParameters(
@@ -250,7 +245,7 @@ function extractFromRequestParameters(
       return [value, undefined];
     }
   }
-  return [undefined, `Failed to find request query parameter name: ${name}`];
+  return [undefined, "not found"];
 }
 
 function httpStatusSort(a: string, b: string): number {
