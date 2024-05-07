@@ -159,6 +159,9 @@ function extractByJsonPointer(from: string, pointer: string): NullableResult<unk
   try {
     const parsed = JSON.parse(from);
     const value = find(parsed, pointer);
+    if (typeof value === "object") {
+      return [undefined, "must be a primitive value"];
+    }
     return [value, undefined];
   } catch (e) {
     return [undefined, `Failed to extract value using JSON Pointer "${pointer}": ${e}`];
@@ -169,6 +172,9 @@ function extractByJsonPath(from: string, path: string): NullableResult<unknown, 
   try {
     const parsed = JSON.parse(from);
     const result = JSONPath({ json: parsed, path });
+    if (typeof result?.[0] === "object") {
+      return [undefined, "must be a primitive value"];
+    }
     return [result?.[0], undefined];
   } catch (e) {
     return [undefined, `Failed to extract value using JSON Path "${path}": ${e}`];
