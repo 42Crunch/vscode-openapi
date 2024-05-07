@@ -22,7 +22,7 @@ export default function Env() {
           {
             id: "secrets",
             title: "Secrets",
-            content: <Environment name="secrets" data={data.secrets} />,
+            content: <Environment name="secrets" data={data.secrets} password />,
           },
         ]}
       />

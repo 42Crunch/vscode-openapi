@@ -4,7 +4,15 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { TrashCan, ExclamationCircle } from "../../icons";
 import { ENV_VAR_NAME_REGEX, ENV_VAR_NAME_REGEX_MESSAGE } from "../../core/playbook/variables";
 
-export default function EnvKeyValue({ name, remove }: { name: string; remove: () => void }) {
+export default function EnvKeyValue({
+  name,
+  remove,
+  password,
+}: {
+  name: string;
+  password?: boolean;
+  remove: () => void;
+}) {
   const { control } = useFormContext();
 
   const {
@@ -30,7 +38,7 @@ export default function EnvKeyValue({ name, remove }: { name: string; remove: ()
     <Container>
       <KeyValue>
         <Name type="text" {...keyField} />
-        <Value type="text" {...valueField} />
+        <Value type={password ? "password" : "text"} {...valueField} />
         <Remove
           onClick={(e) => {
             e.preventDefault();

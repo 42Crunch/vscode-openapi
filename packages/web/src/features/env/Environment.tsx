@@ -9,9 +9,11 @@ import AddNewRow from "./AddNewRow";
 export default function EnvironmentForm({
   name,
   data,
+  password,
 }: {
   name: keyof EnvData;
   data: SimpleEnvironment;
+  password?: boolean;
 }) {
   const dispatch = useFeatureDispatch();
 
@@ -45,6 +47,7 @@ export default function EnvironmentForm({
                 remove(index);
                 handleSubmit(onSubmit)();
               }}
+              password={password}
             />
           </div>
         ))}
