@@ -108,7 +108,6 @@ export function onMockExecuteScenario(
         }
 
         listenerApi.cancelActiveListeners();
-        listenerApi.dispatch(resetMockOperationExecution());
         await listenerApi.delay(1000);
 
         const operation = operations[operationId!];
@@ -154,7 +153,6 @@ export function onMockExecuteRequest(
         }
 
         listenerApi.cancelActiveListeners();
-        listenerApi.dispatch(resetMockRequestExecution());
         await listenerApi.delay(1000);
 
         await execute(
@@ -203,7 +201,6 @@ export function onMockExecuteAuthRequests(
         }
 
         listenerApi.cancelActiveListeners();
-        listenerApi.dispatch(resetMockAuthRequestsExecution());
         await listenerApi.delay(1000);
 
         if (selectedCredential === undefined || selectedSubcredential === undefined) {
@@ -265,7 +262,6 @@ export function onMockExecuteGlobal(
         }
 
         listenerApi.cancelActiveListeners();
-        listenerApi.dispatch(resetMockGlobal());
         await listenerApi.delay(1000);
 
         const playbooks =
