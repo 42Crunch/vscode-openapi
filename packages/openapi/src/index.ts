@@ -49,7 +49,8 @@ export function getOperationById(
   for (const [path, method, operation] of operations) {
     if (
       operation.operationId === operationId ||
-      (operation.operationId === undefined && makeOperationId(path, method) === operationId)
+      ((operation.operationId === undefined || operation.operationId === "") &&
+        makeOperationId(path, method) === operationId)
     ) {
       return { path, method, operation };
     }
