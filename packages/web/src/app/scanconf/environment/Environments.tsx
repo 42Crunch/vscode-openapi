@@ -27,10 +27,7 @@ export default function Environments() {
       selected={environmentId ? { sectionId: "environment", itemId: environmentId } : undefined}
       sections={sections}
       onSelected={(selected) => setEnvironmentId(selected.itemId)}
-      render={(selected) => {
-        if (selected !== undefined)
-          return <Environment key={selected.itemId} name={selected.itemId} />;
-      }}
+      render={(selected) => <Environment key={selected.itemId} name={selected.itemId} />}
     />
   );
 }

@@ -35,10 +35,17 @@ export default function Operations() {
       selected={operationId ? { sectionId: "operations", itemId: operationId } : undefined}
       sections={sections}
       onSelected={(selected) => onSetOperationId(selected.itemId)}
-      render={(selected) => {
-        if (selected !== undefined)
-          return <Operation operationId={selected.itemId} key={selected.itemId} />;
-      }}
+      render={(selected) => <Operation operationId={selected.itemId} key={selected.itemId} />}
+      renderEmpty={() => (
+        <div>
+          <h2>Scenarios</h2>
+          <p>To test operations that involve complex request flows, use Scenarios.</p>
+          <p>
+            Scenarios allow definition of specific request and response sequences, extraction of
+            values from responses, and passing of extracted values between subsequent operations.
+          </p>
+        </div>
+      )}
       renderButtons={() => (
         <NewScenarioDialog
           operations={operations}

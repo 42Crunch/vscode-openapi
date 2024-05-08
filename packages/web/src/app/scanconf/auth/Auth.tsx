@@ -52,7 +52,7 @@ export default function Auth() {
     <SearchSidebarControlled
       title="credentials"
       sections={sections}
-      render={(selected) => (selected === undefined ? null : <Credential selected={selected} />)}
+      render={(selected) => <Credential selected={selected} />}
       renderButtons={() => (
         <NewCredentialDialog
           existing={Object.keys(authenticationDetails?.[0] || [])}

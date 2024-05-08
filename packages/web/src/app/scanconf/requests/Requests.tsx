@@ -183,15 +183,12 @@ export default function Operations() {
         </Button>
       )}
       hideEmptySections={true}
-      render={(selected) => {
-        if (selected !== undefined)
-          return (
-            <Request
-              requestRef={{ type: selected.sectionId, id: selected.itemId } as Playbook.RequestRef}
-              key={`${selected.sectionId}-${selected.itemId}`}
-            />
-          );
-      }}
+      render={(selected) => (
+        <Request
+          requestRef={{ type: selected.sectionId, id: selected.itemId } as Playbook.RequestRef}
+          key={`${selected.sectionId}-${selected.itemId}`}
+        />
+      )}
     />
   );
 }

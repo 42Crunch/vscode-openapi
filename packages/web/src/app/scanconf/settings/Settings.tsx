@@ -38,20 +38,18 @@ export default function Config() {
       sections={sections}
       defaultSelection={{ sectionId: "logging", itemId: "logging" }}
       render={(selected) => {
-        if (selected !== undefined) {
-          const { id, form: ConfigScreen, schema } = screenById[selected.itemId];
-          return (
-            <Form
-              schema={schema}
-              wrapFormData={wrapSettings}
-              unwrapFormData={unwrapSettings}
-              data={runtimeConfiguration || {}}
-              saveData={(settings) => dispatch(actions.saveSettings(settings))}
-            >
-              <ConfigScreen />
-            </Form>
-          );
-        }
+        const { id, form: ConfigScreen, schema } = screenById[selected.itemId];
+        return (
+          <Form
+            schema={schema}
+            wrapFormData={wrapSettings}
+            unwrapFormData={unwrapSettings}
+            data={runtimeConfiguration || {}}
+            saveData={(settings) => dispatch(actions.saveSettings(settings))}
+          >
+            <ConfigScreen />
+          </Form>
+        );
       }}
     />
   );

@@ -48,11 +48,7 @@ export default function AuthorizationTests() {
     <SearchSidebarControlled
       title="tests"
       sections={sections}
-      render={(selected) =>
-        selected === undefined ? null : (
-          <Test selected={selected} credentials={authenticationDetails[0]} />
-        )
-      }
+      render={(selected) => <Test selected={selected} credentials={authenticationDetails[0]} />}
       renderButtons={() => (
         <NewAuthorizationTestDialog
           credentials={authenticationDetails[0]}

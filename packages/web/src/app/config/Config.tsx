@@ -39,8 +39,8 @@ export default function Config() {
     {
       id: "openapi",
       title: "OpenAPI",
-      items: [ openapiExternalRefs ]
-    }
+      items: [openapiExternalRefs],
+    },
   ];
 
   const screenById = {
@@ -79,21 +79,19 @@ export default function Config() {
       errors={errors}
       defaultSelection={{ sectionId: "platform", itemId: "platform-connection" }}
       render={(selected) => {
-        if (selected !== undefined) {
-          const { id, form: ConfigScreen, schema } = screenById[selected.itemId];
-          return (
-            <Form
-              data={data}
-              wrapFormData={wrapFormValues}
-              unwrapFormData={unwrapFormValues}
-              saveData={(data) => dispatch(saveConfig(data))}
-              schema={schema}
-            >
-              <ConfigScreen />
-              <TriggerValidation id={id} />
-            </Form>
-          );
-        }
+        const { id, form: ConfigScreen, schema } = screenById[selected.itemId];
+        return (
+          <Form
+            data={data}
+            wrapFormData={wrapFormValues}
+            unwrapFormData={unwrapFormValues}
+            saveData={(data) => dispatch(saveConfig(data))}
+            schema={schema}
+          >
+            <ConfigScreen />
+            <TriggerValidation id={id} />
+          </Form>
+        );
       }}
     />
   );

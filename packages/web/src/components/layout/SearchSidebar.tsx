@@ -24,7 +24,8 @@ export default function SearchSidebar(props: {
   noSectionTitles?: boolean;
   errors?: Record<string, string | undefined>;
   defaultSelection?: ItemId;
-  render: (selection: ItemId | undefined) => ReactNode;
+  render: (selection: ItemId) => ReactNode;
+  renderEmpty?: () => ReactNode;
   onSelected?: (selected: ItemId) => void;
 }) {
   const [selected, setSelected] = useState(
@@ -39,6 +40,7 @@ export default function SearchSidebar(props: {
 export function SearchSidebarControlled({
   render,
   renderButtons,
+  renderEmpty,
   sections,
   errors,
   defaultSelection,
@@ -53,8 +55,9 @@ export function SearchSidebarControlled({
   noSectionTitles?: boolean;
   errors?: Record<string, string | undefined>;
   defaultSelection?: ItemId;
-  render: (selection: ItemId | undefined) => ReactNode;
+  render: (selection: ItemId) => ReactNode;
   renderButtons?: () => ReactNode;
+  renderEmpty?: () => ReactNode;
   selected?: ItemId;
   onSelected?: (selected: ItemId) => void;
   hideEmptySections?: boolean;
@@ -132,7 +135,9 @@ export function SearchSidebarControlled({
           {renderButtons && <Buttons>{renderButtons()}</Buttons>}
         </Sidebar>
       )}
-      <Content expanded={expanded}>{render(selected)}</Content>
+      <Content expanded={expanded}>
+        {selected !== undefined ? render(selected) : renderEmpty?.()}
+      </Content>
     </>
   );
 }

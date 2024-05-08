@@ -28,7 +28,7 @@ function App() {
       sections={sections}
       render={(selected) => {
         return formats
-          .filter((format) => format.dictionaryId === selected?.itemId)
+          .filter((format) => format.dictionaryId === selected.itemId)
           .map((format) => (
             <FormatCard format={format} key={`${format.dictionaryId}-${format.name}`} />
           ));
