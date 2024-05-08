@@ -16,7 +16,10 @@ export default function PlaybookExecution({
 
   useEffect(() => {
     setOpen(
-      playbook.status === "failure" || playbook.status === "pending" || playbook.name === "Scenario"
+      playbook.status === "failure" ||
+        playbook.status === "pending" ||
+        playbook.name === "Scenario" ||
+        playbook.name === "Request"
     );
   }, [playbook.status]);
 
