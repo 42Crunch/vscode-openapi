@@ -35,8 +35,15 @@ export function getOperation(
   return deref(oas, oas.paths[path])?.[method];
 }
 
-export function makeOperationId(path: string, method: HttpMethod) {
-  return `${path}:${method}`;
+export function makeOperationId(
+  oasOperationId: string | undefined,
+  path: string,
+  method: HttpMethod
+) {
+  if (oasOperationId === undefined || oasOperationId === "") {
+    return `${path}:${method}`;
+  }
+  return oasOperationId;
 }
 
 export function getOperationById(
@@ -47,11 +54,7 @@ export function getOperationById(
   | undefined {
   const operations = isOpenapi(oas) ? OpenApi30.getOperations(oas) : Swagger.getOperations(oas);
   for (const [path, method, operation] of operations) {
-    if (
-      operation.operationId === operationId ||
-      ((operation.operationId === undefined || operation.operationId === "") &&
-        makeOperationId(path, method) === operationId)
-    ) {
+    if (makeOperationId(operation.operationId, path, method) === operationId) {
       return { path, method, operation };
     }
   }

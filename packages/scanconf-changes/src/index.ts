@@ -1,4 +1,4 @@
-import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
+import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Scanconf } from "@xliic/scanconf";
 import { compare, getOperations } from "./compare";
 import { OperationId } from "./types";
@@ -19,10 +19,6 @@ function getCommonOperations(
   scanconfOperations: Record<string, Scanconf.Operation>
 ): OperationId[] {
   return getOperations(oas).filter((operation) => !!scanconfOperations[operation.operationId]);
-}
-
-export function makeOperationId(path: string, method: HttpMethod) {
-  return `${path}:${method}`;
 }
 
 // paths missing from scanconf, must be paths recently added to the OAS

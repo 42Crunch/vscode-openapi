@@ -1,7 +1,13 @@
-import { BundledSwaggerOrOasSpec, HttpMethod, OpenApi30, Swagger, isOpenapi } from "@xliic/openapi";
+import {
+  BundledSwaggerOrOasSpec,
+  HttpMethod,
+  OpenApi30,
+  Swagger,
+  isOpenapi,
+  makeOperationId,
+} from "@xliic/openapi";
 
 import { Scanconf } from "@xliic/scanconf";
-import { makeOperationId } from ".";
 import { findReferences } from "./references/find";
 import { findRenamedOperations as operationsRenamed } from "./renames";
 import { SecurityAdded, Change, OperationAdded, OperationId, OperationRemoved } from "./types";
@@ -82,7 +88,7 @@ export function getOperations(oas: BundledSwaggerOrOasSpec): OperationId[] {
   return operations.map(([path, method, operation]) => ({
     path,
     method,
-    operationId: operation.operationId || makeOperationId(path, method),
+    operationId: makeOperationId(operation.operationId, path, method),
   }));
 }
 
