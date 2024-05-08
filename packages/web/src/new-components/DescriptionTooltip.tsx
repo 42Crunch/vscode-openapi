@@ -5,11 +5,11 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { CircleQuestion, CircleExclamation } from "../icons";
 
 export default function DescriptionTooltip({
-  description,
   icon,
+  children,
 }: {
-  description: string;
   icon?: "question" | "exclamation";
+  children: React.ReactNode;
 }) {
   return (
     <Tooltip.Provider>
@@ -20,7 +20,7 @@ export default function DescriptionTooltip({
           </TooltipIcon>
         </Tooltip.Trigger>
         <Tooltip.Portal>
-          <TooltipContent>{description}</TooltipContent>
+          <TooltipContent>{children}</TooltipContent>
         </Tooltip.Portal>
       </Tooltip.Root>
     </Tooltip.Provider>
@@ -44,4 +44,5 @@ const TooltipContent = styled(Tooltip.Content)`
   padding: 4px 8px;
   margin-right: 16px;
   max-width: 500px;
+  box-shadow: 0 10px 38px var(${ThemeColorVariables.computedTwo});
 `;

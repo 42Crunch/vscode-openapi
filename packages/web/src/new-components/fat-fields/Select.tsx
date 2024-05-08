@@ -48,7 +48,7 @@ export default function Select({
         onSelectedItemChange={onSelectedItemChange}
       />
       <div className="description">
-        {description && <DescriptionTooltip description={description} />}
+        {description && <DescriptionTooltip>{description}</DescriptionTooltip>}
       </div>
     </DescriptionContainer>
   );

@@ -37,10 +37,9 @@ export default function ParameterRow({
       <Name>
         {nameField.value}
         {!isDefinedInOpenAPI && (
-          <DescriptionTooltip
-            icon="exclamation"
-            description="Parameter is not defined in the OpenAPI specification for this API"
-          />
+          <DescriptionTooltip icon="exclamation">
+            Parameter is not defined in the OpenAPI specification for this API
+          </DescriptionTooltip>
         )}
       </Name>
       <LineEditor

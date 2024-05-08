@@ -38,7 +38,7 @@ export function Checkbox({
         </Indicator>
       </CheckboxRoot>
       <label htmlFor={id}>{label}</label>
-      {description !== undefined && <DescriptionTooltip description={description} />}
+      {description !== undefined && <DescriptionTooltip>{description}</DescriptionTooltip>}
     </Container>
   );
 }

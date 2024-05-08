@@ -34,7 +34,7 @@ export default function Input({
           <input {...field} disabled={disabled} type={password ? "password" : "text"} />
         </Inner>
         <div className="description">
-          {description && <DescriptionTooltip description={description} />}
+          {description && <DescriptionTooltip>{description}</DescriptionTooltip>}
         </div>
       </Container>
       {error && <Error>{error?.message}</Error>}
