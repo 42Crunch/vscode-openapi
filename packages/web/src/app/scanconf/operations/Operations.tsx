@@ -39,10 +39,11 @@ export default function Operations() {
       renderEmpty={() => (
         <div>
           <h2>Scenarios</h2>
-          <p>To test operations that involve complex request flows, use Scenarios.</p>
+          <p>Scan scenarios let you test operations that involve complex request flows</p>
           <p>
-            Scenarios allow definition of specific request and response sequences, extraction of
-            values from responses, and passing of extracted values between subsequent operations.
+            Scenarios let you set up exact request and response sequences, ensuring resources are
+            created or deleted as needed for testing specific API operations. Additionally, you can
+            extract values from responses and pass them between subsequent operations.
           </p>
         </div>
       )}

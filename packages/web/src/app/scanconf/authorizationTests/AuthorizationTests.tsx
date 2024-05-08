@@ -49,6 +49,17 @@ export default function AuthorizationTests() {
       title="tests"
       sections={sections}
       render={(selected) => <Test selected={selected} credentials={authenticationDetails[0]} />}
+      renderEmpty={() => (
+        <div>
+          <h2>Authorization Tests</h2>
+          <p>BOLA and BFLA tests</p>
+          <p>
+            Define advanced security tests, such as testing how your API implementation handles
+            BOLA/IDOR (Broken Object Level Authorization, also known as Insecure Direct Object
+            Reference) attack or BFLA (Broken Function Level Authorization)
+          </p>
+        </div>
+      )}
       renderButtons={() => (
         <NewAuthorizationTestDialog
           credentials={authenticationDetails[0]}
