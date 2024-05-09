@@ -313,10 +313,14 @@ export async function cleanupTempScanDirectory(dir: string) {
   const scanconfFilename = join(dir as string, "scanconf.json");
   const reportFilename = join(dir as string, "report.json");
 
-  unlinkSync(oasFilename);
-  unlinkSync(scanconfFilename);
-  unlinkSync(reportFilename);
-  rmdirSync(dir);
+  try {
+    unlinkSync(oasFilename);
+    unlinkSync(scanconfFilename);
+    unlinkSync(reportFilename);
+    rmdirSync(dir);
+  } catch (ex) {
+    // ignore
+  }
 }
 
 export async function runValidateScanConfigWithCliBinary(
