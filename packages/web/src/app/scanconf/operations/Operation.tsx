@@ -140,14 +140,6 @@ export default function Operation({ operationId }: { operationId: string }) {
         />
       </Header>
 
-      {beforeExecutionResult?.status === "failure" && (
-        <ErrorBanner message="Global Before block failed" />
-      )}
-
-      {afterExecutionResult?.status === "failure" && (
-        <ErrorBanner message="Global After block failed" />
-      )}
-
       <CollapsibleSection
         defaultOpen={false}
         title="Authorization Tests"
@@ -233,6 +225,14 @@ export default function Operation({ operationId }: { operationId: string }) {
           />
         </Content>
       </CollapsibleSection>
+
+      {beforeExecutionResult?.status === "failure" && (
+        <ErrorBanner message="Global Before block failed" />
+      )}
+
+      {afterExecutionResult?.status === "failure" && (
+        <ErrorBanner message="Global After block failed" />
+      )}
 
       {tryResult.length > 0 && (
         <CollapsibleSection title="Result">

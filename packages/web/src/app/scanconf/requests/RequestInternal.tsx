@@ -123,18 +123,6 @@ export default function RequestInternal({
         }}
       />
 
-      {useGlobalBlocks && beforeExecutionResult?.status === "failure" && (
-        <GlobalBlockError>
-          <ErrorBanner message="Global Before block failed" />
-        </GlobalBlockError>
-      )}
-
-      {useGlobalBlocks && afterExecutionResult?.status === "failure" && (
-        <GlobalBlockError>
-          <ErrorBanner message="Global After block failed" />
-        </GlobalBlockError>
-      )}
-
       <CollapsibleSection title="Request">
         <RequestCard
           defaultCollapsed={false}
@@ -176,6 +164,18 @@ export default function RequestInternal({
           </Form>
         </Inputs>
       </CollapsibleSection>
+
+      {useGlobalBlocks && beforeExecutionResult?.status === "failure" && (
+        <GlobalBlockError>
+          <ErrorBanner message="Global Before block failed" />
+        </GlobalBlockError>
+      )}
+
+      {useGlobalBlocks && afterExecutionResult?.status === "failure" && (
+        <GlobalBlockError>
+          <ErrorBanner message="Global After block failed" />
+        </GlobalBlockError>
+      )}
 
       {tryResult.length > 0 && (
         <CollapsibleSection title="Result">
