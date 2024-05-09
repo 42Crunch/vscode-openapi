@@ -69,7 +69,7 @@ const Control = styled.div`
 `;
 
 const Grid = styled.div`
-  margin: 4px;
+  margin: 8px;
   display: grid;
   row-gap: 4px;
   grid-template-columns: 10em 1.5em 1fr 1fr 5em 1em;
