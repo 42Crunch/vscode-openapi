@@ -101,7 +101,7 @@ export type RuntimeConfiguration = {
 };
 
 export type Environment = {
-  variables: Record<string, EnvironmentVariable>;
+  variables: Record<string, EnvironmentVariable | EnvironmentConstant>;
 };
 
 export type EnvironmentVariable = {
@@ -109,6 +109,11 @@ export type EnvironmentVariable = {
   name: string;
   required: boolean;
   default: unknown;
+};
+
+export type EnvironmentConstant = {
+  from: "hardcoded";
+  value: unknown;
 };
 
 export type Operation = {

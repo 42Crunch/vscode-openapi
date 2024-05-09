@@ -74,17 +74,24 @@ function parseEnvironmentVariable(
   oas: BundledSwaggerOrOasSpec,
   file: scan.ConfigurationFileBundle,
   entry: any
-): Result<playbook.EnvironmentVariable, InternalParsingErrors> {
-  if (entry.from !== "environment") {
-    return makeErrorResult("unknown env from");
+): Result<playbook.EnvironmentVariable | playbook.EnvironmentConstant, InternalParsingErrors> {
+  if (entry.from === "environment") {
+    return result<playbook.EnvironmentVariable>({
+      name: value(entry.name),
+      from: value(entry.from),
+      required: value(entry.required),
+      default: value(entry.default),
+    });
   }
 
-  return result<playbook.EnvironmentVariable>({
-    name: value(entry.name),
-    from: value(entry.from),
-    required: value(entry.required),
-    default: value(entry.default),
-  });
+  if (entry.from === "hardcoded") {
+    return result<playbook.EnvironmentConstant>({
+      from: value(entry.from),
+      value: value(entry.value),
+    });
+  }
+
+  return makeErrorResult("unknown env from");
 }
 
 function parseOperation(
