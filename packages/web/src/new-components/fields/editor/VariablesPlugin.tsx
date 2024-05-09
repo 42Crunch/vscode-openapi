@@ -13,7 +13,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import styled from "styled-components";
 import { useLexicalTextEntity } from "@lexical/react/useLexicalTextEntity";
 
-const SUGGESTION_LIST_LENGTH_LIMIT = 10;
+const SUGGESTION_LIST_LENGTH_LIMIT = 100;
 
 function checkForVariables(text: string, minMatchLength: number): MenuTextMatch | null {
   const match = /({{([\w.\-$^}]*))/.exec(text);
@@ -218,10 +218,8 @@ const VariablesMenu = styled.div`
     padding: 0;
     list-style: none;
     margin: 0;
-    // max-height: 200px;
-    // overflow-y: scroll;
-    // -ms-overflow-style: none;
-    // scrollbar-width: none;
+    max-height: 200px;
+    overflow-y: auto;
 
     > li.selected {
       background-color: var(${ThemeColorVariables.listActiveSelectionBackground});
@@ -238,31 +236,11 @@ const VariablesMenu = styled.div`
       display: flex;
       gap: 8px;
       align-items: center;
-
-      // margin: 0;
-      // min-width: 180px;
-      // font-size: 14px;
-      // outline: none;
-      // cursor: pointer;
-      // border-radius: 8px;
-
-      // margin: 0 8px 0 8px;
-      // padding: 8px;
-      // color: #050505;
-      // cursor: pointer;
-      // line-height: 16px;
-      // font-size: 15px;
-      // display: flex;
-      // align-content: center;
-      // flex-direction: row;
-      // flex-shrink: 0;
-      // background-color: #fff;
-      // border-radius: 8px;
-      // border: 0;
+      user-select: none;
     }
   }
 
   > ul::-webkit-scrollbar {
-    // display: none;
+    width: 4px;
   }
 `;
