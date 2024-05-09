@@ -65,9 +65,10 @@ export default (
     if (selection) {
       const text = await vscode.workspace.fs.readFile(selection[0]);
       const report = JSON.parse(Buffer.from(text).toString("utf-8"));
-      if (report?.aid && report?.tid && report.data?.assessmentVersion) {
+      const data = extractAuditReport(report);
+      if (data !== undefined) {
         const uri = editor.document.uri.toString();
-        const audit = await parseAuditReport(cache, editor.document, report.data, {
+        const audit = await parseAuditReport(cache, editor.document, data, {
           value: { uri, hash: "" },
           children: {},
         });
@@ -82,3 +83,12 @@ export default (
     }
   },
 });
+
+function extractAuditReport(report: any) {
+  if (report?.aid && report?.tid && report?.data?.assessmentVersion) {
+    return report.data;
+  } else if (report?.taskId && report?.report) {
+    return report.report;
+  }
+  return undefined;
+}
