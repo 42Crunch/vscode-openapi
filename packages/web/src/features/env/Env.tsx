@@ -15,14 +15,14 @@ export default function Env() {
       <TabContainer
         tabs={[
           {
-            id: "default",
-            title: "Default",
-            content: <Environment name="default" data={data.default} />,
-          },
-          {
             id: "secrets",
             title: "Secrets",
             content: <Environment name="secrets" data={data.secrets} password />,
+          },
+          {
+            id: "default",
+            title: "Default",
+            content: <Environment name="default" data={data.default} />,
           },
         ]}
       />
