@@ -4,7 +4,10 @@ import Form from "../../../new-components/Form";
 import { useAppDispatch, useAppSelector } from "../store";
 import EnvironmentForm from "./EnvironmentForm";
 import { ErrorBanner } from "../components/Banner";
+import ConstantEnvironment from "../components/environment/Environment";
 import { saveEnvironment } from "../slice";
+import { TabContainer } from "../../../new-components/Tabs";
+import { useState } from "react";
 
 export default function Environment({ name }: { name: string }) {
   const dispatch = useAppDispatch();
@@ -14,6 +17,8 @@ export default function Environment({ name }: { name: string }) {
   } = useAppSelector((state) => state.scanconf);
 
   const env = useAppSelector((state) => state.env.data);
+
+  const [activeTab, setActiveTab] = useState("environment");
 
   const environment = environments[name];
 
@@ -26,22 +31,51 @@ export default function Environment({ name }: { name: string }) {
       data={environment}
       saveData={(environment) => dispatch(saveEnvironment({ name, environment }))}
     >
-      <EnvironmentForm missing={missing} />
-      {missing.length > 0 && (
-        <ErrorBanner
-          message={
-            "Some of the required variables are not set, create these in the IDE Environment: " +
-            missing.join(", ")
-          }
-        ></ErrorBanner>
-      )}
+      <TabContainer
+        round
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        tabs={[
+          {
+            id: "environment",
+            title: "External",
+            content: (
+              <>
+                <EnvironmentForm missing={missing} />
+                {missing.length > 0 && (
+                  <ErrorBanner
+                    message={
+                      "Some of the required variables are not set, create these in the IDE Environment: " +
+                      missing.join(", ")
+                    }
+                  ></ErrorBanner>
+                )}
+              </>
+            ),
+          },
+          {
+            id: "constants",
+            title: "Constants",
+            content: <ConstantEnvironment name="constants" />,
+          },
+        ]}
+      />
     </Form>
   );
 }
 
 function wrapEnvironment(env: Playbook.Environment) {
   return {
-    variables: Object.entries(env.variables).map(([key, value]) => ({ key, value })),
+    variables: Object.entries(env.variables)
+      .filter(([key, value]) => value.from === "environment")
+      .map(([key, value]) => ({ key, value })),
+    constants: Object.entries(env.variables)
+      .filter(([key, value]) => value.from === "hardcoded")
+      .map(([key, value]) => ({
+        key,
+        value: (value as Playbook.EnvironmentConstant).value,
+        type: typeof (value as Playbook.EnvironmentConstant).value,
+      })),
   };
 }
 
@@ -54,5 +88,25 @@ function unwrapEnvironment(data: any): Playbook.Environment {
     env.variables[key] = value;
   }
 
+  for (const { key, value, type } of data.constants) {
+    env.variables[key] = {
+      from: "hardcoded",
+      value: convertToType(value, type),
+    };
+  }
+
   return env;
+}
+
+function convertToType(value: string, type: string): unknown {
+  if (type !== "string") {
+    try {
+      return JSON.parse(value);
+    } catch (e) {
+      // failed to convert, return string value
+      return value;
+    }
+  }
+
+  return `${value}`;
 }

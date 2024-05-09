@@ -12,7 +12,7 @@ import { Playbook } from "@xliic/scanconf";
 
 import { TabContainer } from "../../../../new-components/Tabs";
 import ParameterGroup from "../parameters/ParameterGroup";
-import Environment from "../scenario/Environment";
+import Environment from "../environment/Environment";
 import {
   getParameters as getOasParameters,
   getSecurity as getOasSecurity,

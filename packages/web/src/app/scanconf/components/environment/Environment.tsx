@@ -6,7 +6,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import AddNewRow from "./AddNewRow";
 import EnvKeyValue from "./EnvKeyValue";
 import { TriangleExclamation } from "../../../../icons";
-import { MissingVariable } from "./MissingVariable";
+import { MissingVariable } from "../scenario/MissingVariable";
 
 export default function Environment({
   name,

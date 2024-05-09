@@ -10,7 +10,7 @@ import { PlaybookEnvStack } from "../../../core/playbook/playbook-env";
 import Form from "../../../new-components/Form";
 import CollapsibleSection from "../components/CollapsibleSection";
 import Execution from "../components/execution/Execution";
-import Environment from "../components/scenario/Environment";
+import Environment from "../components/environment/Environment";
 import RequestCard from "../components/scenario/RequestCard";
 import { saveRequest } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";

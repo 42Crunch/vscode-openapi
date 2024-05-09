@@ -444,22 +444,26 @@ export function makeEnvEnv(
   const simple: SimpleEnvironment = {};
   const missing: string[] = [];
   for (const [name, variable] of Object.entries(environment.variables)) {
-    if (env.secrets.hasOwnProperty(variable.name)) {
-      result[name] = env.secrets[variable.name];
-      simple[variable.name] = env.secrets[variable.name];
-    } else if (env.default.hasOwnProperty(variable.name)) {
-      result[name] = env.default[variable.name];
-      simple[variable.name] = env.default[variable.name];
-    } else if (!variable.required && variable.default !== undefined) {
-      result[name] = variable.default;
-      // simple environment is for passing a substituted variables to binary or docker
-      // in case if env parameter has a default value, there is no need to pass it
-      // since it's available in the scan config file
-      // additionally, it can be not just a string as in simple environment, but a complex object
-    } else if (variable.required) {
-      // required variables must always come from the environment, no default
-      // values is used for these
-      missing.push(variable.name);
+    if (variable.from === "hardcoded") {
+      result[name] = variable.value;
+    } else if (variable.from === "environment") {
+      if (env.secrets.hasOwnProperty(variable.name)) {
+        result[name] = env.secrets[variable.name];
+        simple[variable.name] = env.secrets[variable.name];
+      } else if (env.default.hasOwnProperty(variable.name)) {
+        result[name] = env.default[variable.name];
+        simple[variable.name] = env.default[variable.name];
+      } else if (!variable.required && variable.default !== undefined) {
+        result[name] = variable.default;
+        // simple environment is for passing a substituted variables to binary or docker
+        // in case if env parameter has a default value, there is no need to pass it
+        // since it's available in the scan config file
+        // additionally, it can be not just a string as in simple environment, but a complex object
+      } else if (variable.required) {
+        // required variables must always come from the environment, no default
+        // values is used for these
+        missing.push(variable.name);
+      }
     }
   }
 

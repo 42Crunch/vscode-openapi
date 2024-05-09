@@ -14,7 +14,7 @@ import { Menu, MenuItem } from "../../../new-components/Menu";
 import { TabContainer } from "../../../new-components/Tabs";
 import Switch from "../../../new-components/fields/Switch";
 import ResponseProcessing from "../components/operation/ResponseProcessing";
-import Environment from "../components/scenario/Environment";
+import Environment from "../components/environment/Environment";
 import { OperationResult } from "../components/scenario/types";
 import { unwrapPlaybookStage, wrapPlaybookStage } from "../components/scenario/util";
 import CollapsibleCard from "../../../new-components/CollapsibleCard";
