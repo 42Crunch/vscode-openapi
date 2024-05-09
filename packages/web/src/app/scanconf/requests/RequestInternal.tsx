@@ -20,6 +20,8 @@ import { extractScanconf, optionallyReplaceLocalhost } from "../operations/util"
 import { makeEnvEnv } from "../../../core/playbook/execute";
 import { runScan } from "../actions";
 import DescriptionTooltip from "../../../new-components/DescriptionTooltip";
+import { findResult } from "../playbook-execution-handler";
+import { ErrorBanner } from "../../../components/Banner";
 
 export default function RequestInternal({
   request,
@@ -49,9 +51,13 @@ export default function RequestInternal({
 
   const credentials = playbook.authenticationDetails[0];
 
+  const beforeExecutionResult = findResult(mockResult, "Global Before");
+  const afterExecutionResult = findResult(mockResult, "Global After");
+  const requestResult = findResult(mockResult, "Request");
+
   const variables = [
     ...DynamicVariableNames,
-    ...getVariableNamesFromEnvStack(mockResult?.[0]?.results?.[0]?.variablesReplaced?.stack || []),
+    ...getVariableNamesFromEnvStack(requestResult?.results?.[0]?.variablesReplaced?.stack || []),
   ];
 
   const [inputs, setInputs] = useState<UnknownEnvironment>({});
@@ -116,6 +122,19 @@ export default function RequestInternal({
           );
         }}
       />
+
+      {useGlobalBlocks && beforeExecutionResult?.status === "failure" && (
+        <GlobalBlockError>
+          <ErrorBanner message="Global Before block failed" />
+        </GlobalBlockError>
+      )}
+
+      {useGlobalBlocks && afterExecutionResult?.status === "failure" && (
+        <GlobalBlockError>
+          <ErrorBanner message="Global After block failed" />
+        </GlobalBlockError>
+      )}
+
       <CollapsibleSection title="Request">
         <RequestCard
           defaultCollapsed={false}
@@ -210,6 +229,11 @@ const Title = styled.div`
   gap: 8px;
   cursor: pointer;
   align-items: center;
+`;
+
+const GlobalBlockError = styled.div`
+  margin-top: 8px;
+  margin-bottom: 8px;
 `;
 
 function getVariableNamesFromEnvStack(env: PlaybookEnvStack): string[] {

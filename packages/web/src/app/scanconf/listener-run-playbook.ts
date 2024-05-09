@@ -143,9 +143,13 @@ export function onMockExecuteRequest(
       effect: async (action, listenerApi) => {
         const {
           requests: { ref },
+          scanconf: {
+            playbook: { before, after },
+          },
           router: {
             current: [parent, page],
           },
+          prefs: { useGlobalBlocks },
         } = listenerApi.getState();
 
         if (parent !== "scanconf" || page !== "requests") {
@@ -161,7 +165,11 @@ export function onMockExecuteRequest(
           listenerApi.dispatch,
           resetMockRequestExecution,
           addMockRequestExecutionStep,
-          [{ name: "requests", requests: [{ ref: ref! }] }],
+          [
+            { name: "Global Before", requests: useGlobalBlocks ? before : [] },
+            { name: "Request", requests: [{ ref: ref! }] },
+            { name: "Global After", requests: useGlobalBlocks ? after : [] },
+          ],
           "http://localhost"
         );
       },
