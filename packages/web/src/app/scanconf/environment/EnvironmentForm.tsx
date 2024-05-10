@@ -168,6 +168,9 @@ const Row = styled.div`
 `;
 
 const Manage = styled.div`
+  display: flex;
+  gap: 4px;
+  align-items: center;
   color: var(${ThemeColorVariables.linkForeground});
   &:hover {
     color: var(${ThemeColorVariables.linkActiveForeground});

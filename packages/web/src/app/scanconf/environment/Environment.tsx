@@ -8,6 +8,7 @@ import ConstantEnvironment from "../components/environment/Environment";
 import { saveEnvironment } from "../slice";
 import { TabContainer } from "../../../new-components/Tabs";
 import { useState } from "react";
+import DescriptionTooltip from "../../../new-components/DescriptionTooltip";
 
 export default function Environment({ name }: { name: string }) {
   const dispatch = useAppDispatch();
@@ -35,10 +36,25 @@ export default function Environment({ name }: { name: string }) {
         round
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        menu={
+          <DescriptionTooltip>
+            <h4>External inputs</h4>
+            <p>
+              These variables allow to pass data from the external environment to the scan. In the
+              IDE, you can set these variables in the Environment tab. If running scan using docker,
+              you can pass these variables using the -e flag.
+            </p>
+            <p>Required variables must be provided, otherwise the scan will fail.</p>
+            <p>
+              Non-required variables can have a default value, which will be used if the variable is
+              not provided. If the variable is provided, the provided value will be used.
+            </p>
+          </DescriptionTooltip>
+        }
         tabs={[
           {
             id: "environment",
-            title: "External",
+            title: "External inputs",
             content: (
               <>
                 <EnvironmentForm missing={missing} />
