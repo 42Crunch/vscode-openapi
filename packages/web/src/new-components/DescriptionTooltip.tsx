@@ -31,7 +31,7 @@ const TooltipIcon = styled.div`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  > svg {
+  & > svg {
     fill: var(${ThemeColorVariables.foreground});
   }
 `;
