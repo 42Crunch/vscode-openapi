@@ -20,6 +20,7 @@ import AuthorizationTests from "./authorizationTests/AuthorizationTests";
 import UpdatePrompt from "./scanconf-update/UpdatePrompt";
 import GeneralError from "../../features/general-error/GeneralError";
 import { showGeneralError } from "../../features/general-error/slice";
+import Help from "./help/Help";
 
 const routes: Routes = [
   {
@@ -81,10 +82,11 @@ const routes: Routes = [
         title: "Settings",
         element: <Settings />,
       },
+
       {
         id: "help",
         title: "Help",
-        link: "https://42crunch.com/tutorial-security-conformance-scan-openapi-swagger-extension-vs-code/",
+        element: <Help />,
       },
     ],
   },

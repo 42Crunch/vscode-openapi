@@ -12,6 +12,7 @@
   "devDependencies": {
     "@hookform/resolvers": "^3.2.0",
     "@lexical/react": "^0.13.0",
+    "@mdx-js/rollup": "^3.0.1",
     "@radix-ui/react-checkbox": "^1.0.0",
     "@radix-ui/react-dialog": "^1.0.4",
     "@radix-ui/react-dropdown-menu": "^2.0.2",
@@ -21,6 +22,7 @@
     "@reduxjs/toolkit": "^2.1.1",
     "@svgr/cli": "^6.2.1",
     "@types/luxon": "^3.2.0",
+    "@types/mdx": "^2.0.13",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "@types/redux-logger": "^3.0.9",

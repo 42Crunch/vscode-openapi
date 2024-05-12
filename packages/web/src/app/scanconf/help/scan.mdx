@@ -1,0 +1,124 @@
+# Introduction
+
+API Conformance Scan is a dynamic API testing tool designed to ensure that your API implementation aligns with its OpenAPI/Swagger definition. By comparing the documented API specification with the actual implementation, Scan helps you identify any discrepancies or inconsistencies.
+
+To achieve this, Scan generates a multitude of requests that deviate from the declared OpenAPI file and sends them to your server. The tool then evaluates each response, providing insights into how well your API implementation matches its documented counterpart.
+
+# Getting Started
+
+## Creating default configuration
+
+When you run Scan for the first time, it generates a default configuration for your OpenAPI file. This initial setup produces a set of "happy path" requests, one for every operation defined in your OpenAPI specification.
+
+Contents of each "happy path" request is available to you in the "Operations" tab of the Scan UI.
+
+These "happy path" requests serve as the foundation for testing, establishing a reliable baseline of expected behavior for each operation. At the start of a test for each operation Scan expects to succesfylly execute a "happy path" request before running the rest of the test.
+
+This default configuration is suitable for simple operations; however, more complex operations may require customizations to ensure effective testing.
+
+## Customizing defaults
+
+### Operations
+
+You can change the default happy path requests by modifying their payloads within the Operations tab. Additionally, you can configure authentication details and fine-tune the body and parameters of each operation either directly or utilize variable interpolation expressions.
+
+### Scenarios
+
+When your API operation relies on pre-existing resources or requires post-execution cleanup, Scenarios come into play. This is particularly useful when you need to set up certain conditions before executing an operation and then tear them down afterwards.
+
+A great example of this is the "update user" operation, which updates a user object. Before calling this operation, you'd typically want to ensure that the user object exists and after the update, remove it. Scenarios enable you to achieve this by adding operations to the "Before" block (e.g., creating the user), using the resulting resource in the happy path of the scenario, and then performing cleanup in the "After" block (e.g., deleting the user).
+
+You can create a Scenario for any operation defined in your OpenAPI in the "Scenarios" tab.
+
+## Trying individual Operations or Scenarios
+
+Before launching your scan, you may want to execute individual Operations or Scenarios to ensure they can be successfully run by the Scan.
+
+To facilitate this process, the Scan UI provides a "Try" feature.
+
+When you click "Try" on an Operation or Scenario, the Scan UI will send relevant requests to the server and allow you to inspect the details of the payload sent and the response received.
+
+## Starting the scan
+
+You can initiate scanning from the "Operations" tab in the Scan UI, where you have two options to do that: scan the entire API by clicking the "Scan all operations" button at the bottom of the list, or click the "Scan" button at the top of a currently selected operation to test just that one operation.
+
+# User Interface
+
+## Operations
+
+Operations tab shows all operations defined in your OpenAPI file. Details of a request configured in this tab are used as a "happy path" request, if not overriden by a Scenario for this request.
+
+You can edit details of a request body and parameters by editing them here. You can also use variable interpolation expressions (such as `{{name}}`) to substitute parameters or parts of
+the body with values from a variables.
+
+### Environment
+
+The Environment tab in each Operation allows you to define variables that can be used for variable interpolation in request bodies and parameters.
+
+You can also leverage variable interpolation expressions within the VALUE field of environment entries, creating values that combine other existing variables and constants.
+
+For instance, by defining an environment variable `username` with a value like `user-{{$randomuint}}@company.com`, you can set its actual value to something like `user-555@company.com`.
+
+### Response processing
+
+The Response Processing feature allows you to extract specific values from an operation's responses and store them in variables, which can then be used in subsequent operations (particularly useful when multiple operations are part of a Scenario).
+
+To achieve this, you can define response processing statements that specify what information to extract, where to find it, and where to store the retrieved data. These statements are organized by response code, so if your operation returns multiple possible codes (e.g., 200, 400, 5XX), you can create separate groups for each.
+
+Each response processing statement consists of a name of the variable where the extracted information will be stored, as well as a source, specifying the location where Scan should look for the desired information, such as request or response body, headers, cookies, path or query string parameters.
+
+Additionally, if you're extracting a value from a request or response body, you can use JsonPointer or JsonPath to pinpoint the exact location of the value you're looking for.
+
+## Scenarios
+
+## Global blocks
+
+## Authentication
+
+Certain operations may require authentication to function properly. Configure authentication settings in the Scan UI's Authentication section.
+
+### Credentials
+
+A "Credential" describes the type of authentication required by an operation, closely following the contents of the relevant OpenAPI's Security Scheme.
+
+These credentials define the authentication requirements and how they should be sent. For example, you can specify using an API key and sending it in a specific HTTP header.
+
+### Credential values
+
+Credential values are primarily related to authorization aspects of your operations. Although all operations might share the same authentication type, some may have different authorization requirements.
+
+For example, while most operations might be accessible to ordinary users, others might require admin privileges.
+
+To effectively test such APIs, you can create distinct credential values for "ordinary" and "admin" users, configuring respective operations to use one or the other.
+
+### Secrets
+
+You may need to use secrets like passwords or API keys within a Credential Value.
+
+The best practice is to avoid storing these sensitive values directly in your scan configuration.
+
+Instead, consider using variables to pass secret values received from external sources. You can set a variable using the "External inputs" feature in the global Environment section of the scan configuration and then utilize variable interpolation to inject the value into your credential.
+
+For instance, you could create an entry in "External inputs" to define the `password1` variable, and then set Credential Value to `{{password1}}`.
+
+### Dynamic Credential Values
+
+In certain situations, you may need to set Credential Values dynamically using information from one or multiple API calls.
+
+A common example is when all operations in an API require authentication with a token returned by a "login" operation.
+
+To achieve this, you can add a call to the "login" operation within your Credential Value, extract the token from its response and store it in a variable named `token`. Then, use the expression `{{token}}` in the Credential Value to access the dynamically retrieved token.
+
+You can leverage operations defined in the OpenAPI to retrieve credentials or create external operations to call APIs that are not part of it.
+
+## Tests
+
+TODO
+
+## Environment
+
+TODO
+
+## Settings
+
+TODO
