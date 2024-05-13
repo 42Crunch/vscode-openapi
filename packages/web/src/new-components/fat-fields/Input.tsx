@@ -28,14 +28,14 @@ export default function Input({
     <>
       <Container>
         <Inner invalid={invalid}>
-          <div>
-            <span>{label}</span> {disabled && <span>(read only)</span>}
-          </div>
-          <input {...field} disabled={disabled} type={password ? "password" : "text"} />
+          <Title>
+            <div>
+              <span>{label}</span> {disabled && <span>(read only)</span>}
+            </div>
+            {description && <DescriptionTooltip>{description}</DescriptionTooltip>}
+          </Title>
+          <InputField {...field} disabled={disabled} type={password ? "password" : "text"} />
         </Inner>
-        <div className="description">
-          {description && <DescriptionTooltip>{description}</DescriptionTooltip>}
-        </div>
       </Container>
       {error && <Error>{error?.message}</Error>}
     </>
@@ -45,17 +45,14 @@ export default function Input({
 const Container = styled.div`
   display: flex;
   flow-direction: column;
+  gap: 4px;
   > div:first-child {
     flex: 1;
   }
   > div.description {
-    width: 0em;
     display: flex;
     align-items: center;
     justify-content: center;
-    > svg {
-      fill: var(${ThemeColorVariables.foreground});
-    }
   }
 `;
 
@@ -76,27 +73,30 @@ const Inner = styled.div`
            border: 1px solid var(${ThemeColorVariables.focusBorder});
          }
       `}
+`;
 
-  > div {
-    font-style: normal;
-    font-weight: 500;
-    font-size: 12px;
-    line-height: 16px;
+const InputField = styled.input`
+  background: transparent;
+  line-height: 20px;
+  border: none;
+  padding: 0;
+  color: var(${ThemeColorVariables.foreground});
+  &::placeholder {
     color: var(${ThemeColorVariables.inputPlaceholderForeground});
   }
-  > input {
-    background: transparent;
-    line-height: 20px;
-    border: none;
-    padding: 0;
-    color: var(${ThemeColorVariables.foreground});
-    &::placeholder {
-      color: var(${ThemeColorVariables.inputPlaceholderForeground});
-    }
-    &:focus {
-      outline: none;
-    }
+  &:focus {
+    outline: none;
   }
+`;
+
+const Title = styled.div`
+  display: flex;
+  justify-content: space-between;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(${ThemeColorVariables.inputPlaceholderForeground});
 `;
 
 const Error = styled.div`
