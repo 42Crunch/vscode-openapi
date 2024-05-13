@@ -31,7 +31,7 @@ to ensure effective testing.
 
 You can change the default happy path requests by modifying their payloads within the Operations tab.
 Additionally, you can configure authentication details and fine-tune the body and parameters
-of each operation either directly or utilize variable interpolation expressions.
+of each operation either directly or utilize variable expressions.
 
 ### Scenarios
 
@@ -69,15 +69,15 @@ Operations tab shows all operations defined in your OpenAPI file. Details of a r
  if not overriden by a Scenario for this request.
 
 You can edit details of a request body and parameters by editing them here.
-You can also use variable interpolation expressions (such as `{{name}}`) to substitute parameters or parts of
+You can also use variable expressions (such as `{{name}}`) to substitute parameters or parts of
 the body with values from a variables.
 
 ### Environment
 
-The Environment tab in each Operation allows you to define variables that can be used for variable
-interpolation in request bodies and parameters.
+The Environment tab in each Operation allows you to define variables that can be used in variable
+expressions in request bodies and parameters.
 
-You can also leverage variable interpolation expressions within the VALUE field of environment entries,
+You can also use variable expression within the VALUE field of environment entries,
 creating values that combine other existing variables and constants.
 
 For instance, by defining an environment variable `username` with a value like `user-{{$randomuint}}@company.com`,
@@ -99,9 +99,24 @@ or response body, headers, cookies, path or query string parameters.
 Additionally, if you're extracting a value from a request or response body, you can use
 JsonPointer or JsonPath to pinpoint the exact location of the value you're looking for.
 
-### Unset variables inputs
+### Unset variables
 
-TODO
+In an Operation, every variable expression must resolve to a value before
+the Operation can be executed. However, it is possible to reference variables
+that do not have a value set.
+
+Unset variables in an Operation may be useful when you plan to use the same
+Operation in multiple Scenarios, each providing a different set of values
+for every variable used in the Operation.
+
+However, if an Operation contains an unset variable, you cannot utilize the
+'Try' feature to test the Operation without first providing a value for it.
+
+To resolve this issue, Scan UI lists all required variables for the Operation
+in "Unset variables" and enables you to provide values for them, allowing you
+to use the 'Try' feature.
+
+Please note that test inputs are not saved to the scan configuration.
 
 ## Scenarios
 
@@ -113,7 +128,7 @@ If you define a scenario for an operation, it will be used to perform a "happy p
 Additionally, if an operation has a defined scenario, you can still use it as is in other scenarios.
 
 
-### Happy Path Scenario
+### Happy path scenario
 
 The  "happy path" scenario is the only type of scenario you can currently create in Scan.
 In future versions of Scan, we plan to introduce additional scenario types.
@@ -127,7 +142,7 @@ These references can also be reordered within the scenario using drag-and-drop f
 Each operation reference within a scenario has its own distinct response processing configuration and
 environment variables, which take precedence over those defined at the operation level.
 
-### Before and After blocks
+### Before and after blocks
 
 Before and after block are used to define operations that should be executed before and after the happy path scenario,
 and serve mainly as a setup and cleanup steps.
@@ -178,12 +193,12 @@ The best practice is to avoid storing these sensitive values directly in your sc
 
 Instead, consider using variables to pass secret values received from external sources.
  You can set a variable using the "External inputs" feature in the global Environment section of the scan configuration
-  and then utilize variable interpolation to inject the value into your credential.
+  and then utilize variable expression to inject the value into your credential.
 
 For instance, you could create an entry in "External inputs" to define the `password1` variable,
 and then set Credential Value to `{{password1}}`.
 
-### Dynamic Credential Values
+### Dynamic credential values
 
 In certain situations, you may need to set Credential Values dynamically using information from one or multiple API calls.
 
@@ -229,7 +244,7 @@ The Settings section allows you to customize the behavior of your Scan.
 In this section, you can configure the logging level and log destination to control the verbosity and output location
  of logs generated during the scan.
 
-### Environment Settings
+### Environment settings
 
 Choose your global environment settings for scanning.
 
@@ -237,22 +252,22 @@ By default, a "default" environment is created, but you can also create addition
 
 # General Concepts
 
-## Variable Substitution
+## Variable substitution
 
 Variable substitution is a powerful feature that enables dynamic changes to your requests and responses.
 
 ### Syntax
 
-Variable substitution uses variable interpolation expressions, which look like this: `{{variable_name}}`.
+Variable substitution uses variable expressions, which look like this: `{{variable_name}}`.
 
-### Definition of Variables
+### Definition of variables
 
 You can define variables in the following sections:
 
 * Global environment section
 * Operation environment section
 * Scenario environment section
-* Response processing section of the operation or scenario
+* Response processing section of the Operation or Scenario
 
 ### Usage
 
@@ -265,13 +280,14 @@ Variables can be used in various parts of your requests and responses, including
 
 When performing variable substitution, the lookup order is as follows: scenario variables, operation variable, global variables.
 
-### Variable Types
+### Variable types
 
 Variables have types, which are defined in the Environment section. You can use variables with types `string`, `number`, `boolean`, or `null`.
 
 ### Variables in JSON
 
-When substituting variables in the request body, always quote the variable interpolation expression, even if you're substituting a number or boolean.
+When substituting variables in the request body, always quote
+ the variable expression, even if you're substituting a number or boolean.
 
 After substitution, the actual type of the variable is used in the request.
 For example, if you have a variable `age` with a numeric value of 10, and use it in a

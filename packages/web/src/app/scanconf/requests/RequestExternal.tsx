@@ -103,21 +103,8 @@ export default function RequestExternal({
         <Title>
           Unset variables
           <DescriptionTooltip>
-            <h4>Unset variables in the Operation.</h4>
-            <p>
-              In certain cases, you might want to use variables which do not have a value in a
-              context of a specific Operation. These might be useful, for example, when you intend
-              to use this Operation in multiple Scenarios, each of which might provide a different
-              set of values through its Environment.
-            </p>
-            <p>
-              However, if the Operation contains an unset variable, you cannot use the 'Try' feature
-              to test the Operation unless you provide a value for it.
-            </p>
-            <p>
-              These inputs enumerate the unset variables and can be used to provide values for them.
-            </p>
-            <p>Please note that test inputs are not saved to the scan configuration.</p>
+            Enter values for these unset variables to 'Try' the Operation. Note that these values
+            will not be persisted in the Scan configuration.
           </DescriptionTooltip>
         </Title>
         <Inputs>
