@@ -11,31 +11,19 @@ export default function Help() {
   return (
     <>
       <Sidebar>
-        {headings.map((heading, index) =>
-          heading.level === 1 ? (
-            <Title
-              key={index}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                heading.element.scrollIntoView({ behavior: "smooth" });
-              }}
-            >
-              {heading.title}
-            </Title>
-          ) : (
-            <Subtitle
-              key={index}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                heading.element.scrollIntoView({ behavior: "smooth" });
-              }}
-            >
-              {heading.title}
-            </Subtitle>
-          )
-        )}
+        {headings.map((heading, index) => (
+          <Title
+            key={index}
+            level={heading.level}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              heading.element.scrollIntoView({ behavior: "smooth" });
+            }}
+          >
+            {heading.title}
+          </Title>
+        ))}
       </Sidebar>
       <Content ref={documentRef} expanded>
         <Scan />
@@ -47,18 +35,29 @@ export default function Help() {
 type Toc = {
   title: string;
   element: HTMLHeadingElement;
-  level: 1 | 2;
+  level: 1 | 2 | 3;
 };
+
+function getHeadingLevel(tagName: "H1" | "H2" | "H3"): 1 | 2 | 3 {
+  switch (tagName) {
+    case "H1":
+      return 1;
+    case "H2":
+      return 2;
+    case "H3":
+      return 3;
+  }
+}
 
 const useToc = (ref: RefObject<HTMLElement>): Toc[] => {
   const [toc, setToc] = useState<Toc[]>([]);
   useEffect(() => {
     const result: Toc[] = [];
     if (ref.current !== null) {
-      for (const element of ref.current.querySelectorAll<HTMLHeadingElement>("h1, h2")) {
-        if ((element.tagName === "H1" || element.tagName === "H2") && element.textContent) {
+      for (const element of ref.current.querySelectorAll<HTMLHeadingElement>("h1, h2, h3")) {
+        if (element.textContent) {
           const title = element.textContent;
-          const level = element.tagName === "H1" ? 1 : 2;
+          const level = getHeadingLevel(element.tagName as "H1" | "H2" | "H3");
           result.push({ title, element, level });
         }
       }
@@ -82,28 +81,37 @@ const Sidebar = styled.div`
   background-color: var(${ThemeColorVariables.background});
 `;
 
-const Title = styled.div`
-  font-weight: 600;
-  font-size: 16px;
-  padding: 8px 8px;
+const Title = styled.div<{ level: 1 | 2 | 3 }>`
   cursor: pointer;
   display: flex;
   align-items: center;
   &:hover {
     background-color: var(${ThemeColorVariables.listHoverBackground});
   }
-`;
 
-const Subtitle = styled.div`
-  padding: 4px 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  font-weight: 500;
-  font-size: 14px;
-  &:hover {
-    background-color: var(${ThemeColorVariables.listHoverBackground});
-  }
+  ${({ level }) =>
+    level === 1 &&
+    `
+    font-weight: 600;
+    font-size: 16px;
+    padding: 8px 8px;
+  `}
+
+  ${({ level }) =>
+    level === 2 &&
+    `
+    font-weight: 500;
+    font-size: 14px;
+    padding: 4px 16px;
+  `}
+
+  ${({ level }) =>
+    level === 3 &&
+    `
+    font-weight: 400;
+    font-size: 12px;
+    padding: 4px 32px;
+  `}
 `;
 
 const Content = styled.div<{ expanded: boolean }>`
