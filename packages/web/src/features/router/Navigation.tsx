@@ -77,12 +77,13 @@ const TitleContent = styled.div`
 
 const NavigationTab = styled.div<{ active?: boolean }>`
   padding: 0 1em;
+  display: flex;
+  align-items: center;
   ${(props) =>
     props.active
       ? `border-bottom: 3px solid var(${ThemeColorVariables.buttonBackground});`
       : `opacity: 0.7; border-bottom: 3px solid transparent; cursor: pointer;`};
   > div {
-    padding: 0.125em;
     border: ${(props) =>
       props.active && ThemeColorVariables.contrastActiveBorder
         ? `1px solid var(${ThemeColorVariables.contrastActiveBorder})`
