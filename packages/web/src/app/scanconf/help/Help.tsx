@@ -3,6 +3,8 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { RefObject, useEffect, useRef, useState } from "react";
 
 import Scan from "./scan.mdx";
+import { useAppDispatch } from "../store";
+import { openLink } from "../../../features/router/slice";
 
 export default function Help() {
   const documentRef = useRef(null);
@@ -26,9 +28,26 @@ export default function Help() {
         ))}
       </Sidebar>
       <Content ref={documentRef} expanded>
-        <Scan />
+        <Scan components={{ Link }} />
       </Content>
     </>
+  );
+}
+
+function Link({ href, children }: { href: string; children: React.ReactNode }) {
+  const dispatch = useAppDispatch();
+
+  return (
+    <a
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dispatch(openLink(href));
+      }}
+      href={href}
+    >
+      {children}
+    </a>
   );
 }
 
