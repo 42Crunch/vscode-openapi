@@ -24,7 +24,7 @@ export default function SecurityRequirement({
           const scheme = requirement[schemeName];
           return (
             <Container key={schemeName}>
-              <Label>Credential value for "{schemeName}"</Label>
+              <Label>Identity for "{schemeName}"</Label>
               <CredentialPicker
                 value={values[schemeName]}
                 scheme={scheme}

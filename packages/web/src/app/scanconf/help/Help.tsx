@@ -142,4 +142,9 @@ const Content = styled.div<{ expanded: boolean }>`
   background-color: var(${ThemeColorVariables.computedOne});
   padding: 16px;
   overflow-y: auto;
+  code {
+    background-color: unset;
+    padding: 0;
+    border-radius: 0;
+  }
 `;
