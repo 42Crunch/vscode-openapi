@@ -39,7 +39,7 @@ export default function Credential({ selected }: { selected: ItemId }) {
         }}
       />
 
-      <CollapsibleSection title="Credential">
+      <CollapsibleSection title="Security Scheme">
         <CredentialDetails
           credential={credential}
           saveCredential={(credential) =>
@@ -51,7 +51,7 @@ export default function Credential({ selected }: { selected: ItemId }) {
 
       <CollapsibleSection
         defaultOpen={false}
-        title="Identities"
+        title="Credentials"
         count={Object.keys(credential.methods).length}
       >
         <Form

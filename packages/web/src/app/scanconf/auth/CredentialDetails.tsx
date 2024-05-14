@@ -75,7 +75,7 @@ export function CredentialGeneral() {
         // description="The idle timeout before re-running requests defined for each credentials value. Example values: '300s', '300ms', '1h',  valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'."
       />
       <Select
-        label="Default identity"
+        label="Default credential name"
         name="default"
         options={methods.map((method: any) => ({ label: method.key, value: method.key }))}
       />

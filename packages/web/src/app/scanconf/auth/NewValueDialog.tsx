@@ -54,8 +54,8 @@ export default function NewValueDialog({
 function ValueForm() {
   return (
     <>
-      <Input label="Name" name="name" />
-      <Input label="Value" name="value" />
+      <Input label="Credential name" name="name" />
+      <Input label="Credential value" name="value" />
     </>
   );
 }

@@ -167,36 +167,36 @@ global initialization and cleanup tasks.
 Certain operations may require authentication to function properly.
 Configure authentication settings in the Scan UI's Authentication section.
 
-### Credentials
+### Security schemes
 
-A "Credential" describes the type of authentication required by an operation,
+A "Security Scheme" describes the type of authentication required by an operation,
 closely following the contents of the relevant OpenAPI's Security Scheme.
 
-These credentials define the authentication requirements and how they should be sent.
+These security schemes define the authentication requirements and how they should be sent.
  For example, you can specify using an API key and sending it in a specific HTTP header.
 
-### Identities
+### Credentials
 
-Identities are primarily related to authorization aspects of your operations.
+Credentials are primarily related to authorization aspects of your operations.
 Although all operations might share the same authentication type, some may have different authorization requirements.
 
 For example, while most operations might be accessible to ordinary users, others might require admin privileges.
 
-To effectively test such APIs, you can create distinct Identites for "ordinary" and
+To effectively test such APIs, you can create distinct Credentials for "ordinary" and
 "admin" users, configuring respective operations to use one or the other.
 
 ### Secrets
 
-You may need to use secrets like passwords or API keys in Identity.
+You may need to use secrets like passwords or API keys as credential values.
 
 The best practice is to avoid storing these sensitive values directly in your scan configuration.
 
-Instead, consider using variables to pass secret values received from external sources.
- You can set a variable using the "External inputs" feature in the global Environment section of the scan configuration
-  and then utilize variable expression to inject the value into your credential.
+Instead, consider using variables to access secret values received from external sources.
+You can create a variable using the "External inputs" feature in the global Environment section of the scan configuration
+and then utilize variable expression to inject the value into your credential.
 
 For instance, you could create an entry in "External inputs" to define the `password1` variable,
-and then set Identity to `{{password1}}`.
+and then set credential value to `{{password1}}`.
 
 ### Dynamic identities
 
@@ -204,9 +204,9 @@ In certain situations, you may need to set identities dynamically using informat
 
 A common example is when all operations in an API require authentication with a token returned by a "login" operation.
 
-To achieve this, you can add a call to the "login" operation within Identity, extract the token from its
-response and store it in a variable named `token`. Then, use the expression `{{token}}` in the Identity to access the dynamically
-retrieved token.
+To achieve this, you can add a call to the "login" operation within credential, extract the token from its
+response and store it in a variable named `token`. Then, use the expression `{{token}}` in the credential value to access
+the dynamically retrieved token.
 
 You can leverage operations defined in the OpenAPI to retrieve credentials or create external operations to call APIs that are not part of it.
 

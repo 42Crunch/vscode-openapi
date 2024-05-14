@@ -74,11 +74,11 @@ export default function NewCredentialDialog({
 
   return (
     <FormDialog
-      title="New credential"
+      title="New security scheme"
       defaultValues={defaultValues}
       schema={schema}
       onSubmit={onSubmit}
-      trigger={<Button style={{ width: "100%" }}>New credential</Button>}
+      trigger={<Button style={{ width: "100%" }}>New security scheme</Button>}
     >
       <NewCredentialForm />
     </FormDialog>

@@ -75,7 +75,7 @@ export default function CredentialValues({
       ),
       content: (
         <Content value={method.key}>
-          <Input label="Identity" name={`methods.${index}.value.credential`} />
+          <Input label="Credential value" name={`methods.${index}.value.credential`} />
           <Requests>
             <Scenario
               oas={oas}

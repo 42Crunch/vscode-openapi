@@ -36,8 +36,8 @@ export default function NewCredentialForm() {
       )}
 
       <Input label="Description" name="description" />
-      <Input label="Credential Name" name="credentialName" />
-      <Input label="Identity" name="credentialValue" />
+      <Input label="Credential name" name="credentialName" />
+      <Input label="Credential value" name="credentialValue" />
     </>
   );
 }

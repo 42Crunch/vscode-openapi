@@ -23,7 +23,7 @@ export default function Auth() {
   };
 
   const sections = authenticationDetails.map((credentials, index) => {
-    const title = index === 0 ? "Default credential group" : `Credential group ${index}`;
+    const title = index === 0 ? "Default group" : `Group ${index}`;
 
     const items = Object.entries(credentials).map(([id, credential]) => ({
       id,
@@ -50,7 +50,7 @@ export default function Auth() {
 
   return (
     <SearchSidebarControlled
-      title="credentials"
+      title="security schemes"
       sections={sections}
       render={(selected) => <Credential selected={selected} />}
       renderButtons={() => (
