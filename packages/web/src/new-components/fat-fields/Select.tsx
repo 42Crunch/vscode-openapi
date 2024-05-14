@@ -6,7 +6,7 @@ import { AngleDown } from "../../icons";
 import DescriptionTooltip from "../DescriptionTooltip";
 
 export type SelectOption = {
-  value: string | number;
+  value: string | number | boolean;
   label: string;
 };
 
@@ -39,18 +39,14 @@ export default function Select({
   };
 
   return (
-    <DescriptionContainer>
-      <PlainSelect
-        options={options}
-        placeholder={placeholder}
-        label={label}
-        selected={selected?.value}
-        onSelectedItemChange={onSelectedItemChange}
-      />
-      <div className="description">
-        {description && <DescriptionTooltip>{description}</DescriptionTooltip>}
-      </div>
-    </DescriptionContainer>
+    <PlainSelect
+      options={options}
+      placeholder={placeholder}
+      label={label}
+      selected={selected?.value}
+      onSelectedItemChange={onSelectedItemChange}
+      description={description}
+    />
   );
 }
 
@@ -60,12 +56,14 @@ export function PlainSelect({
   label,
   selected,
   onSelectedItemChange,
+  description,
 }: {
   options: SelectOption[];
   placeholder?: string;
   label?: string;
   selected?: SelectOption["value"];
   onSelectedItemChange: (item: SelectOption | null | undefined) => void;
+  description?: string;
 }) {
   const selectedItem = options.filter((item) => item.value === selected)?.[0];
 
@@ -81,7 +79,10 @@ export function PlainSelect({
   return (
     <Container>
       <SelectContainer>
-        {label !== undefined && <div>{label}</div>}
+        <Title>
+          <div>{label !== undefined && <span>{label}</span>}</div>
+          {description && <DescriptionTooltip>{description}</DescriptionTooltip>}
+        </Title>
         <Input {...getToggleButtonProps()}>
           <span>{selectedItem ? selectedItem.label : placeholder ?? ""}</span>
           <AngleDown />
@@ -102,23 +103,6 @@ export function PlainSelect({
 function getOptionByValue(options: SelectOption[], value: string): SelectOption | undefined {
   return options.filter((option) => option.value === value)?.[0];
 }
-
-const DescriptionContainer = styled.div`
-  display: flex;
-  flow-direction: column;
-  > div:first-child {
-    flex: 1;
-  }
-  > div.description {
-    width: 0em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    > svg {
-      fill: var(${ThemeColorVariables.foreground});
-    }
-  }
-`;
 
 const Container = styled.div`
   display: flex;
@@ -145,6 +129,16 @@ const SelectContainer = styled.div`
     line-height: 16px;
     color: var(${ThemeColorVariables.inputPlaceholderForeground});
   }
+`;
+
+const Title = styled.div`
+  display: flex;
+  justify-content: space-between;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(${ThemeColorVariables.inputPlaceholderForeground});
 `;
 
 const Input = styled.div`
