@@ -1,11 +1,11 @@
-import { Playbook } from "@xliic/scanconf";
-
 import SearchSidebar from "../../../components/layout/SearchSidebar";
 import Form from "../../../new-components/Form";
 import * as actions from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import environment from "./screen/environment";
 import logging from "./screen/logging";
+import general from "./screen/general";
+import { unwrapSettings, wrapSettings } from "./schema";
 
 const sections = [
   {
@@ -18,9 +18,15 @@ const sections = [
     title: "Environment",
     items: [environment],
   },
+  {
+    id: "general",
+    title: "General",
+    items: [general],
+  },
 ];
 
 const screenById = {
+  [general.id]: general,
   [logging.id]: logging,
   [environment.id]: environment,
 };
@@ -53,15 +59,4 @@ export default function Config() {
       }}
     />
   );
-}
-
-function wrapSettings(settings: Playbook.RuntimeConfiguration) {
-  return {
-    ...settings,
-    logLevel: settings.logLevel !== undefined ? settings.logLevel : "",
-  };
-}
-
-function unwrapSettings(data: any): Playbook.RuntimeConfiguration {
-  return { ...data, logLevel: data.logLevel !== "" ? data.logLevel : undefined };
 }

@@ -1,7 +1,8 @@
 import * as z from "zod";
 
-import Input from "../../../../components/Input";
+import Input from "../../../../new-components/fat-fields/Input";
 import { Container, Title } from "../layout";
+import { schema } from "../schema";
 
 function Environment() {
   return (
@@ -14,12 +15,6 @@ function Environment() {
   );
 }
 
-const schema = z.object({
-  environment: z.string(),
-  logLevel: z.string(),
-  logDestination: z.string(),
-});
-
 const screen: {
   id: string;
   label: string;
@@ -27,7 +22,7 @@ const screen: {
   form: React.FC;
 } = {
   id: "environment",
-  label: "Environment Settings",
+  label: "Environment settings",
   schema,
   form: Environment,
 };
