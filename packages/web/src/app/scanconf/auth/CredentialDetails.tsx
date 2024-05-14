@@ -67,12 +67,12 @@ export function CredentialGeneral() {
       <Input
         label="TTL"
         name="ttl"
-        description="The hard timeout before re-running requests defined for each credentials values. Example values: '300s', '300ms', '1h',  valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'."
+        // description="The hard timeout before re-running requests defined for each credentials values. Example values: '300s', '300ms', '1h',  valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'."
       />
       <Input
         label="TTI"
         name="tti"
-        description="The idle timeout before re-running requests defined for each credentials value. Example values: '300s', '300ms', '1h',  valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'."
+        // description="The idle timeout before re-running requests defined for each credentials value. Example values: '300s', '300ms', '1h',  valid time units are 'ns', 'us' (or 'µs'), 'ms', 's', 'm', 'h'."
       />
       <Select
         label="Default identity"
