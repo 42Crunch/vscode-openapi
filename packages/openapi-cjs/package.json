@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/42Crunch/vscode-openapi.git"
   },
-  "version": "2.0.0",
+  "version": "2.1.0",
   "scripts": {
     "build": "tsc"
   },
@@ -16,6 +16,9 @@
     "LICENSE.txt",
     "dist"
   ],
+  "dependencies": {
+    "@xliic/preserving-json-yaml-parser": "^1.11.0"
+  },
   "devDependencies": {
     "typescript": "*"
   }
