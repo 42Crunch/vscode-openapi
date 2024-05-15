@@ -16,7 +16,7 @@ export async function runScanWithDocker(
   logger: Logger,
   token: string
 ) {
-  logger.info(`Running conformance scan using docker`);
+  logger.info(`Running API Scan using docker`);
 
   const terminal = findOrCreateTerminal();
 

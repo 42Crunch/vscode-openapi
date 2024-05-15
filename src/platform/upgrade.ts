@@ -26,7 +26,7 @@ export const UPGRADE_WARN_LIMIT = 10;
 export async function warnScans(left: number) {
   return vscode.window
     .showInformationMessage(
-      `You have ${left} per-opertion Conformance Scans left. Consider upgrading your 42Crunch subscription.`,
+      `You have ${left} per-opertion API Scans left. Consider upgrading your 42Crunch subscription.`,
       { modal: false },
       { title: "Upgrade", id: "upgrade" }
     )

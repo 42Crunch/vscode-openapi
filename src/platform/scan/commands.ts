@@ -249,7 +249,7 @@ async function createDefaultScanConfig(
         }
 
         vscode.window.showInformationMessage(
-          `Saved Conformance Scan configuration to: ${scanconfUri.toString()}`
+          `Saved API Scan configuration to: ${scanconfUri.toString()}`
         );
 
         return true;

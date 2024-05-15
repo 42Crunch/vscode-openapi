@@ -294,7 +294,7 @@ async function runScan(
   reportView: ScanReportWebView,
   isFullScan: boolean
 ): Promise<void> {
-  logger.info(`Starting API Conformance Scan`);
+  logger.info(`Starting API Scan`);
 
   const oas: BundledSwaggerOrOasSpec = bundle.value;
   const stringOas = stringify(bundle.value);
@@ -344,7 +344,7 @@ async function runScan(
           await offerUpgrade();
           return;
         } else {
-          throw new Error(`Unexpected error running Conformance Scan: ${JSON.stringify(error)}`);
+          throw new Error(`Unexpected error running API Scan: ${JSON.stringify(error)}`);
         }
       }
 
@@ -389,7 +389,7 @@ async function runScan(
       }
 
       const parsedReport = await loadReport(store, tmpApi, logger);
-      logger.info(`Finished API Conformance Scan`);
+      logger.info(`Finished API API Scan`);
       await store.clearTempApi(tmpApi);
 
       if (isFullScan) {
