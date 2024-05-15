@@ -33,7 +33,7 @@ export default function Config() {
     },
     {
       id: "scan",
-      title: "API Scan",
+      title: "API Conformance Scan",
       items: [scanRuntime],
     },
     {

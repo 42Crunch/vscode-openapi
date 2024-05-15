@@ -41,7 +41,7 @@ export function PlatformServices() {
 
   return (
     <>
-      <Title>Runtime for API Scan</Title>
+      <Title>Runtime for API Conformance Scan</Title>
       <Container>
         {/* Only paid customers can select scan runtime */}
         {platformAuthType === "api-token" && (

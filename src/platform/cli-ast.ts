@@ -234,7 +234,7 @@ export async function runScanWithCliBinary(
   scanconf: string,
   isFullScan: boolean
 ): Promise<Result<{ scan: unknown; cli: CliResponse; tempScanDirectory: string }, CliError>> {
-  logger.info(`Running API Scan using 42Crunch API Security Testing Binary`);
+  logger.info(`Running API Conformance Scan using 42Crunch API Security Testing Binary`);
 
   const tmpDir = tmpdir();
   const dir = mkdtempSync(join(`${tmpDir}`, "scan-"));

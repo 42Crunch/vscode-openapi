@@ -14,7 +14,7 @@ export async function runScanWithScandManager(
   logger: Logger,
   token: string
 ): Promise<GeneralError | undefined> {
-  logger.info(`Running API Scan using scand-manager`);
+  logger.info(`Running API Conformance Scan using scand-manager`);
 
   const env: Record<string, string> = {};
 
