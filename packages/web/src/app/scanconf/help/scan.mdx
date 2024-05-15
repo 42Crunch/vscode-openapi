@@ -17,10 +17,10 @@ For a quick introduction to API Conformance Scan, watch our <Link href="https://
 When you run Scan for the first time, it generates a default configuration for your OpenAPI file.
  This initial setup produces a set of "happy path" requests, one for every operation defined in your OpenAPI specification.
 
-Contents of each "happy path" request is available to you in the "Operations" tab of the Scan UI.
+The contents of each "happy path" request is available to you in the "Operations" tab of the Scan UI.
 
 These "happy path" requests serve as the foundation for testing, establishing a reliable baseline of expected behavior for each operation.
-At the start of a test for each operation Scan expects to succesfylly execute a "happy path" request before running the rest of the test.
+At the start of a test for each operation Scan expects to successfully execute a "happy path" request before running the rest of the test.
 
 This default configuration is suitable for simple operations; however, more complex operations may require customizations
 to ensure effective testing.
@@ -144,8 +144,8 @@ environment variables, which take precedence over those defined at the operation
 
 ### Before and after blocks
 
-Before and after block are used to define operations that should be executed before and after the happy path scenario,
-and serve mainly as a setup and cleanup steps.
+Before and after blocks are used to define operations that should be executed before and after the happy path scenario,
+and serve mainly as setup and cleanup steps.
 
 The "Before" and "After" blocks in Scan allow you to define operations that should be executed before and after your Scenario.
 These blocks primarily serve as setup and cleanup steps. These blocks are shared between all scenarios.
@@ -290,15 +290,13 @@ When substituting variables in the request body, always quote
  the variable expression, even if you're substituting a number or boolean.
 
 After substitution, the actual type of the variable is used in the request.
-For example, if you have a variable `age` with a numeric value of 10, and use it in a
-JSON like this: `{ "user_age": "{{age}}" }`, the resulting JSON will be `{ "user_age": 10 }`.
 
-For instance, if you define a variable `age` with a value of 10, and use it in a request body like this:
+For example, if you define a variable `age` with a numeric value of 10, and use it in a request body like this:
 `{ "user_ age": "{{age}}"}` the resulting JSON will be `{ "user_age": 10 }`.
 
 ## Built-in variables
 
-There is a number of built in variables that you can use in your scan configuration.
+There are a number of built in variables that you can use in your scan configuration.
 
  - `$randomString`:  Generates a random alphanumeric string of 20 characters
  - `$randomuint`: Generates a random uint32 integer
