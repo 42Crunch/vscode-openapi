@@ -304,3 +304,28 @@ There are a number of built in variables that you can use in your scan configura
  - `$timestamp`: Generates the current time in UNIX format
  - `$timestamp3339`: Generates the current date and time as defined in RFC 3339
  - `$randomFromSchema`: Generates the values based on the schema defined in your OpenAPI definition
+
+
+## Keeping Configuration in Sync with OpenAPI
+
+The scan configuration must be kept in sync with the OpenAPI file it is based on,
+as it is crucial for accurate and comprehensive testing. To help users keep
+their scan configuration in sync, the Scan UI checks if the scan configuration
+matches the OpenAPI file, and in the presence of changes, offers to update the scan configuration
+accordingly.
+
+The types of changes that the Scan UI can handle are:
+
+- Adding new operations to the OpenAPI file
+- Removing operations from the OpenAPI file
+- Renaming operations (changing their `operationId`)
+- Adding new security schemes to the OpenAPI file
+
+However, changes to the schemas describing operation payloads (body, parameters, etc),
+adding or removing parameters, etc. are not handled by the Scan UI, as these can be customized by the user.
+
+If such changes are made to the OpenAPI file, the user must make appropriate changes to
+the scan configuration manually.
+
+When changes are detected, the Scan UI will prompt you to update the
+scan configuration to reflect the modifications made to the OpenAPI file.
