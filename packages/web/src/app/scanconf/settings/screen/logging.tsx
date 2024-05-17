@@ -39,7 +39,7 @@ const screen: {
   form: React.FC;
 } = {
   id: "logging",
-  label: "Logging configuration",
+  label: "Logging settings",
   schema,
   form: Logging,
 };
