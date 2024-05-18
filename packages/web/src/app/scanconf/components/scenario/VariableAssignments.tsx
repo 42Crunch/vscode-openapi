@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import React from "react";
-import * as Tooltip from "@radix-ui/react-tooltip";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { Playbook } from "@xliic/scanconf";
@@ -44,7 +43,7 @@ function renderSuccessfullAssignment(
 ) {
   return (
     <React.Fragment>
-      <VariableNameWithTooltip name={assignment.name} id={id} />
+      <div>{assignment.name}</div>
       <div>{`${assignment.value}`}</div>
       <div></div>
     </React.Fragment>
@@ -54,7 +53,7 @@ function renderSuccessfullAssignment(
 function renderFailedAssignment(id: string, assignment: PlaybookVariableFailedAssignment) {
   return (
     <React.Fragment>
-      <VariableNameWithTooltip name={assignment.name} id={id} />
+      <div>{assignment.name}</div>
       <div>{formatAssignmentLocation(assignment.assignment, assignment.error)}</div>
       <Error>
         <TriangleExclamation />
@@ -70,21 +69,6 @@ function formatAssignmentLocation(assignment: Playbook.VariableAssignment, error
   } else {
     return `Name "${assignment.name}" is ${error} in the ${assignment.from} ${assignment.in}`;
   }
-}
-
-function VariableNameWithTooltip({ name, id }: { name: string; id: string }) {
-  return (
-    <Tooltip.Provider>
-      <Tooltip.Root>
-        <Tooltip.Trigger asChild>
-          <div>{name}</div>
-        </Tooltip.Trigger>
-        <Tooltip.Portal>
-          <TooltipContent>{id}</TooltipContent>
-        </Tooltip.Portal>
-      </Tooltip.Root>
-    </Tooltip.Provider>
-  );
 }
 
 const Container = styled.div`
@@ -123,13 +107,4 @@ const Error = styled.div`
     fill: var(${ThemeColorVariables.errorForeground});
     padding-right: 4px;
   }
-`;
-
-const TooltipContent = styled(Tooltip.Content)`
-  color: var(${ThemeColorVariables.notificationsForeground});
-  background-color: var(${ThemeColorVariables.notificationsBackground});
-  border: 1px solid var(${ThemeColorVariables.notificationsBorder});
-  border-radius: 4px;
-  padding: 4px 8px;
-  margin-right: 16px;
 `;
