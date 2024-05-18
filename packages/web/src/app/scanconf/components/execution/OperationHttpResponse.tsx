@@ -27,7 +27,16 @@ export default function OperationHttpResponse({
     <Container>
       <CollapsibleCard>
         <BottomDescription style={{ gap: "8px" }}>
-          <ArrowRightFromBracket style={{ transform: "rotate(180deg)" }} />
+          <ArrowRightFromBracket
+            style={{
+              width: 14,
+              minWidth: 14,
+              height: 14,
+              minHeight: 14,
+              fill: `var(${ThemeColorVariables.foreground})`,
+              transform: "rotate(180deg)",
+            }}
+          />
           <BottomItem>
             {`${response?.statusCode} ${response?.statusMessage}`}
             {hasErrors && (

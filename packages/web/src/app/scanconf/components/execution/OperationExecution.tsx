@@ -56,11 +56,6 @@ const Container = styled.div`
   display: flex;
   flex-flow: column;
   gap: 8px;
-  svg {
-    width: 14px;
-    height: 14px;
-    fill: var(${ThemeColorVariables.foreground});
-  }
 `;
 
 function getStatusIcon(status: string) {
