@@ -334,7 +334,7 @@ export async function* executeAuth(
     if (method === undefined) {
       yield {
         event: "auth-aborted",
-        error: `identity: "${credentialName}/${effectiveMethodName}" is not found`,
+        error: `credential: "${credentialName}/${effectiveMethodName}" is not found`,
       };
       return;
     }
