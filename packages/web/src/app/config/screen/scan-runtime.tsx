@@ -156,25 +156,6 @@ export function PlatformServices() {
         {scanRuntime === "cli" && cliDownloadError !== undefined && (
           <ErrorBanner message={cliDownloadError} />
         )}
-
-        {scanRuntime === "cli" && (
-          <div>
-            <p>
-              42Crunch API Security Testing Binary is subject to usage limits for free users, find
-              more details at{" "}
-              <a
-                href="https://42crunch.com/free-user-faq/"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  dispatch(openLink("https://42crunch.com/free-user-faq/"));
-                }}
-              >
-                Free User FAQ
-              </a>
-            </p>
-          </div>
-        )}
       </Container>
     </>
   );
