@@ -160,7 +160,8 @@ export function PlatformServices() {
         {scanRuntime === "cli" && (
           <div>
             <p>
-              42Crunch API Security Testing Binary is subject to usage limits, find more details at{" "}
+              42Crunch API Security Testing Binary is subject to usage limits for free users, find
+              more details at{" "}
               <a
                 href="https://42crunch.com/free-user-faq/"
                 onClick={(e) => {
