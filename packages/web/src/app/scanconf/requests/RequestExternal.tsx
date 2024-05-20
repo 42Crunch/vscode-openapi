@@ -121,13 +121,13 @@ export default function RequestExternal({
 
       {useGlobalBlocks && beforeExecutionResult?.status === "failure" && (
         <GlobalBlockError>
-          <ErrorBanner message="Global Before block failed" />
+          <ErrorBanner message="Check Global Before block" />
         </GlobalBlockError>
       )}
 
       {useGlobalBlocks && afterExecutionResult?.status === "failure" && (
         <GlobalBlockError>
-          <ErrorBanner message="Global After block failed" />
+          <ErrorBanner message="Check Global After block" />
         </GlobalBlockError>
       )}
 

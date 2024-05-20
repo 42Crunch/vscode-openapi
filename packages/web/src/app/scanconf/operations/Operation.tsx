@@ -227,11 +227,11 @@ export default function Operation({ operationId }: { operationId: string }) {
       </CollapsibleSection>
 
       {beforeExecutionResult?.status === "failure" && (
-        <ErrorBanner message="Global Before block failed" />
+        <ErrorBanner message="Check Global Before block" />
       )}
 
       {afterExecutionResult?.status === "failure" && (
-        <ErrorBanner message="Global After block failed" />
+        <ErrorBanner message="Check Global After block" />
       )}
 
       {tryResult.length > 0 && (
