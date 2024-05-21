@@ -84,7 +84,7 @@ const kdbTitles: Record<string, string> = {
   "path-item-method-not-allowed-scan":
     "Scan sends a request using a verb (method) that is not defined for the path in the OpenAPI definition.",
   "path-item-method-not-allowed-no-authn-scan":
-    "Scan sends a request using a verb (method) that is not defined for the path in the OpenAPI definition.",
+    "Scan sends a request without authentication using a verb (method) that is not defined for the path in the OpenAPI definition.",
   "schema-additionalproperties-scan": "Scan sends a request that contains an undefined property.",
   "schema-enum-scan":
     "Scan sends a request that contains a enum value not present in the property '%s' constraining this value.",
