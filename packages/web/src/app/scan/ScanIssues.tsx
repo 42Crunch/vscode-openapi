@@ -83,8 +83,11 @@ const kdbTitles: Record<string, string> = {
     "Scan sends a request where a required security requirement is missing",
   "path-item-method-not-allowed-scan":
     "Scan sends a request using a verb (method) that is not defined for the path in the OpenAPI definition.",
+  "path-item-method-not-allowed-no-authn-scan":
+    "Scan sends a request using a verb (method) that is not defined for the path in the OpenAPI definition.",
   "schema-additionalproperties-scan": "Scan sends a request that contains an undefined property.",
-  "schema-enum-scan": "API accepts a value that is not specified in the enum array",
+  "schema-enum-scan":
+    "Scan sends a request that contains a enum value not present in the property '%s' constraining this value.",
   "schema-format-scan": "Scan sends a request containing a string value with wrong format",
   "schema-maxitems-scan":
     "Scan sends a request containing an array which has more items than what is defined by the property 'maxItems'",
