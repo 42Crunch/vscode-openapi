@@ -139,6 +139,7 @@ export default function Operations() {
   const runScan = (server: string) => {
     const updatedServer = optionallyReplaceLocalhost(
       server,
+      config.platformAuthType,
       config.scanRuntime,
       config.docker.replaceLocalhost,
       config.platform

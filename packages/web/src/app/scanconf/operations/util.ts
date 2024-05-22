@@ -20,11 +20,13 @@ export function extractScanconf(
 
 export function optionallyReplaceLocalhost(
   server: string,
+  platformAuthType: "anond-token" | "api-token",
   runtime: "docker" | "scand-manager" | "cli",
   replaceLocalhost: boolean,
   platform: string
 ) {
   if (
+    platformAuthType === "api-token" &&
     runtime == "docker" &&
     replaceLocalhost &&
     (platform === "darwin" || platform === "win32") &&

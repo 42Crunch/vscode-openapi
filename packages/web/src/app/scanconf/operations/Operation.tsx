@@ -99,6 +99,7 @@ export default function Operation({ operationId }: { operationId: string }) {
         onScan={(server: string) => {
           const updatedServer = optionallyReplaceLocalhost(
             server,
+            config.platformAuthType,
             config.scanRuntime,
             config.docker.replaceLocalhost,
             config.platform

@@ -96,6 +96,7 @@ export default function RequestInternal({
         onScan={(server: string) => {
           const updatedServer = optionallyReplaceLocalhost(
             server,
+            config.platformAuthType,
             config.scanRuntime,
             config.docker.replaceLocalhost,
             config.platform
