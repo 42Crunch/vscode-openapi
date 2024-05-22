@@ -66,18 +66,20 @@ function PlatformConnection() {
   );
 }
 
-const schema = z.object({
-  platformAuthType: z.enum(["anond-token", "api-token"]),
-  platformUrl: z.string().url().startsWith("https://"),
-  anondToken: z.string(),
-  platformApiToken: z
-    .string()
-    .regex(
-      /^(ide_|api_)?[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
-      "Token is invalid"
-    )
-    .or(z.literal("")),
-});
+const schema = z
+  .object({
+    platformAuthType: z.enum(["anond-token", "api-token"]),
+    platformUrl: z.string().url().startsWith("https://"),
+    anondToken: z.string(),
+    platformApiToken: z
+      .string()
+      .regex(
+        /^(ide_|api_)?[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+        "Token is invalid"
+      )
+      .or(z.literal("")),
+  })
+  .catchall(z.unknown());
 
 const screen: ConfigScreen = {
   id: "platform-connection",
