@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 4.26.0 (May ??, 2024)
+## Version 4.26.0 (May 22, 2024)
 
 - Allow all users to run 42Crunch Scan
 - Show 42Crunch icon in the status bar to authenticated users
