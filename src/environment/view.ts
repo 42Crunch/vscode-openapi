@@ -31,7 +31,12 @@ export class EnvironmentWebView extends WebView<Webapp> {
     });
   }
 
-  async sendLoadEnvironment() {
-    this.sendRequest({ command: "loadEnv", payload: await this.envStore.all() });
+  async onStart() {
+    await this.sendColorTheme(vscode.window.activeColorTheme);
+    await this.sendRequest({ command: "loadEnv", payload: await this.envStore.all() });
+  }
+
+  async showEnvironment() {
+    await this.show();
   }
 }

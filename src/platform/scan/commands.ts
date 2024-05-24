@@ -180,8 +180,6 @@ async function editorRunSingleOperationScan(
   }
 
   const view = getScanView(editor.document.uri);
-  await view.show();
-  await view.sendColorTheme(vscode.window.activeColorTheme);
   return view.sendScanOperation(bundle, editor.document, scanconfUri, path, method);
 }
 

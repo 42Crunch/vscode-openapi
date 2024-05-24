@@ -34,6 +34,8 @@ export type TryItTarget = {
 
 export class TryItWebView extends WebView<Webapp> {
   private target?: TryItTarget;
+  private bundle?: Bundle;
+
   constructor(
     extensionPath: string,
     private cache: Cache,
@@ -92,6 +94,32 @@ export class TryItWebView extends WebView<Webapp> {
     return this.target;
   }
 
+  async onStart() {
+    await this.sendColorTheme(vscode.window.activeColorTheme);
+    if (this.target && this.bundle) {
+      await this.sendRequest({ command: "loadEnv", payload: await this.envStore.all() });
+      const prefs = this.prefs[this.target.document.uri.toString()];
+      if (prefs) {
+        await this.sendRequest({ command: "loadPrefs", payload: prefs });
+      }
+      await this.sendLoadConfig();
+
+      const oas = extractSingleOperation(
+        this.target.method as HttpMethod,
+        this.target.path,
+        this.bundle.value
+      );
+
+      await this.sendRequest({
+        command: "tryOperation",
+        payload: {
+          oas,
+          ...this.target,
+        },
+      });
+    }
+  }
+
   async onDispose(): Promise<void> {
     this.target = undefined;
     await super.onDispose();
@@ -99,26 +127,8 @@ export class TryItWebView extends WebView<Webapp> {
 
   async showTryIt(bundle: Bundle, target: TryItTarget) {
     this.target = target;
-
+    this.bundle = bundle;
     await this.show();
-    await this.sendColorTheme(vscode.window.activeColorTheme);
-    await this.sendRequest({ command: "loadEnv", payload: await this.envStore.all() });
-    const prefs = this.prefs[this.target.document.uri.toString()];
-    if (prefs) {
-      await this.sendRequest({ command: "loadPrefs", payload: prefs });
-    }
-
-    await this.sendLoadConfig();
-
-    const oas = extractSingleOperation(target.method as HttpMethod, target.path, bundle.value);
-
-    return this.sendRequest({
-      command: "tryOperation",
-      payload: {
-        oas,
-        ...target,
-      },
-    });
   }
 
   async updateTryIt(bundle: Bundle, versions: BundleDocumentVersions) {

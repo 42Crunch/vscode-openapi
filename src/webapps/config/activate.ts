@@ -19,14 +19,10 @@ export function activate(
   const view = new ConfigWebView(context.extensionPath, configuration, secrets, platform, logger);
 
   vscode.commands.registerCommand("openapi.showConfiguration", async () => {
-    await view.show();
-    await view.sendColorTheme(vscode.window.activeColorTheme);
-    await view.sendLoadConfig();
+    await view.showConfig();
   });
 
   vscode.commands.registerCommand("openapi.showSettings", async () => {
-    await view.show();
-    await view.sendColorTheme(vscode.window.activeColorTheme);
-    await view.sendLoadConfig();
+    await view.showConfig();
   });
 }

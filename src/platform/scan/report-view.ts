@@ -117,6 +117,10 @@ export class ScanReportWebView extends WebView<Webapp> {
     },
   };
 
+  async onStart() {
+    await this.sendColorTheme(vscode.window.activeColorTheme);
+  }
+
   async onDispose(): Promise<void> {
     this.document = undefined;
     if (this.temporaryReportDirectory !== undefined) {
@@ -128,6 +132,7 @@ export class ScanReportWebView extends WebView<Webapp> {
   async sendStartScan(document: vscode.TextDocument) {
     this.document = document;
     this.auditReport = undefined;
+    await this.show();
     return this.sendRequest({ command: "startScan", payload: undefined });
   }
 
@@ -151,14 +156,6 @@ export class ScanReportWebView extends WebView<Webapp> {
 
   setTemporaryReportDirectory(dir: string) {
     this.temporaryReportDirectory = dir;
-  }
-
-  async sendLoadConfig() {
-    const config = await loadConfig(this.configuration, this.secrets);
-    this.sendRequest({
-      command: "loadConfig",
-      payload: config,
-    });
   }
 
   async sendLogMessage(message: string, level: LogLevel) {
@@ -204,16 +201,6 @@ export class ScanReportWebView extends WebView<Webapp> {
       },
     });
   }
-}
-
-function findOrCreateTerminal() {
-  const name = "scan";
-  for (const terminal of vscode.window.terminals) {
-    if (terminal.name === name && terminal.exitStatus === undefined) {
-      return terminal;
-    }
-  }
-  return vscode.window.createTerminal({ name });
 }
 
 async function copyCurl(curl: string) {

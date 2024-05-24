@@ -181,11 +181,8 @@ async function securityAudit(
   pendingAudits[uri] = true;
 
   try {
-    await reportWebView.show();
-    await reportWebView.sendColorTheme(vscode.window.activeColorTheme);
     reportWebView.prefetchKdb();
     await reportWebView.sendStartAudit();
-
     const audit = await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,

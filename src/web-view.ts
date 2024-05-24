@@ -17,6 +17,7 @@ import {
 
 export abstract class WebView<W extends Webapp<Message, Message>> {
   private panel?: vscode.WebviewPanel;
+  private session?: string;
 
   abstract hostHandlers: W["hostHandlers"];
 
@@ -31,6 +32,8 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
   isActive(): boolean {
     return this.panel !== undefined;
   }
+
+  abstract onStart(): Promise<void>;
 
   protected async sendRequest(request: W["consumes"]): Promise<void> {
     if (this.panel) {
@@ -72,26 +75,37 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
     }
   }
 
-  async show(): Promise<void> {
-    if (!this.panel) {
-      const panel = await this.createPanel();
+  protected async show(): Promise<void> {
+    return new Promise(async (resolve, reject) => {
+      if (this.panel) {
+        this.panel.reveal();
+        await this.onStart();
+        resolve();
+        return;
+      }
+      // create the panel
+      const panel = this.createPanel();
       panel.onDidDispose(() => {
         this.onDispose();
       });
-      panel.webview.onDidReceiveMessage(async (message) => {
-        this.handleResponse(message as W["produces"]);
+      panel.webview.onDidReceiveMessage(async (message: any) => {
+        if (message.command === "started" && message.session) {
+          this.panel = panel;
+          this.session = message.session;
+          await this.onStart();
+          resolve();
+        } else {
+          this.handleResponse(message as W["produces"]);
+        }
       });
-      this.panel = panel;
-    } else if (!this.panel.visible) {
-      this.panel.reveal();
-    }
+    });
   }
 
   async onDispose() {
     this.panel = undefined;
   }
 
-  createPanel(): Promise<vscode.WebviewPanel> {
+  createPanel(): vscode.WebviewPanel {
     const panel = vscode.window.createWebviewPanel(
       this.viewId,
       this.viewTitle,
@@ -122,13 +136,7 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
       panel.webview.html = this.getProdHtml(panel);
     }
 
-    return new Promise((resolve, reject) => {
-      panel.webview.onDidReceiveMessage((message: any) => {
-        if (message.command === "started") {
-          resolve(panel);
-        }
-      });
-    });
+    return panel;
   }
 
   private getDevHtml(panel: vscode.WebviewPanel): string {
@@ -163,7 +171,7 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
             vscode.postMessage(message);
           }
         });
-        vscode.postMessage({command: "started"});
+        vscode.postMessage({command: "started", session: crypto.randomUUID()});
       });
     </script>
     </body>
@@ -195,7 +203,7 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
       window.addEventListener("DOMContentLoaded", (event) => {
         const vscode = acquireVsCodeApi();
         window.renderWebView(vscode);
-        vscode.postMessage({command: "started"});
+        vscode.postMessage({command: "started", session: crypto.randomUUID()});
       });
     </script>
     </body>

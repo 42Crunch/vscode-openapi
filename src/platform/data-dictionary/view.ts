@@ -23,7 +23,12 @@ export class DataDictionaryWebView extends WebView<Webapp> {
     });
   }
 
+  async onStart() {
+    await this.sendColorTheme(vscode.window.activeColorTheme);
+  }
+
   async sendShowDictionaries(payload: ShowDictionaryMessage["payload"]) {
-    return this.sendRequest({ command: "showDictionary", payload });
+    await this.show();
+    await this.sendRequest({ command: "showDictionary", payload });
   }
 }

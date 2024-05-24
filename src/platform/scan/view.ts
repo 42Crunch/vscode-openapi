@@ -114,9 +114,6 @@ export class ScanWebView extends WebView<Webapp> {
         const config = await loadConfig(this.configuration, this.secrets);
 
         const reportView = this.getReportView();
-
-        await reportView.show();
-        await reportView.sendColorTheme(vscode.window.activeColorTheme);
         await reportView.sendStartScan(this.target!.document);
 
         return await runScan(
@@ -150,8 +147,6 @@ export class ScanWebView extends WebView<Webapp> {
 
         const reportView = this.getReportView();
 
-        await reportView.show();
-        await reportView.sendColorTheme(vscode.window.activeColorTheme);
         await reportView.sendStartScan(this.target!.document);
 
         return await runScan(
@@ -214,6 +209,29 @@ export class ScanWebView extends WebView<Webapp> {
     },
   };
 
+  async onStart() {
+    await this.sendColorTheme(vscode.window.activeColorTheme);
+    if (this.target) {
+      await this.sendLoadConfig();
+      await this.sendRequest({ command: "loadEnv", payload: await this.envStore.all() });
+      const prefs = this.prefs[this.target.document.uri.toString()];
+      if (prefs) {
+        await this.sendRequest({ command: "loadPrefs", payload: prefs });
+      }
+      const content = await vscode.workspace.fs.readFile(this.target.scanconfUri);
+      const scanconf = new TextDecoder("utf-8").decode(content);
+      await this.sendRequest({
+        command: "showScanconfOperation",
+        payload: {
+          oas: this.target.bundle.value,
+          path: this.target.path,
+          method: this.target.method,
+          scanconf,
+        },
+      });
+    }
+  }
+
   async onDispose(): Promise<void> {
     this.document = undefined;
     await super.onDispose();
@@ -236,27 +254,7 @@ export class ScanWebView extends WebView<Webapp> {
       method,
       path,
     };
-
     await this.show();
-    await this.sendColorTheme(vscode.window.activeColorTheme);
-    await this.sendLoadConfig();
-    await this.sendRequest({ command: "loadEnv", payload: await this.envStore.all() });
-    const prefs = this.prefs[this.target.document.uri.toString()];
-    if (prefs) {
-      await this.sendRequest({ command: "loadPrefs", payload: prefs });
-    }
-    const content = await vscode.workspace.fs.readFile(scanconfUri);
-    const scanconf = new TextDecoder("utf-8").decode(content);
-
-    return this.sendRequest({
-      command: "showScanconfOperation",
-      payload: {
-        oas: bundle.value,
-        path: this.target.path,
-        method: this.target.method,
-        scanconf,
-      },
-    });
   }
 
   async sendLoadConfig() {

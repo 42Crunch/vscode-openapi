@@ -12,8 +12,16 @@ import { Cache } from "../cache";
 import { getLocationByPointer } from "./util";
 import { getArticles } from "./client";
 
+export type Target = {
+  type: "full" | "partial";
+  report: Audit;
+  uri: string;
+  ids: any[];
+};
+
 export class AuditWebView extends WebView<Webapp> {
   private kdb?: Promise<any>;
+  private target?: Target;
 
   hostHandlers: Webapp["hostHandlers"] = {
     copyIssueId: async (issueId: string) => {
@@ -41,6 +49,17 @@ export class AuditWebView extends WebView<Webapp> {
     });
   }
 
+  async onStart() {
+    await this.sendColorTheme(vscode.window.activeColorTheme);
+    await this.sendRequest({ command: "loadKdb", payload: await this.getKdb() });
+    if (this.target && this.target.type === "full") {
+      await this.sendRequest({ command: "showFullReport", payload: this.target.report });
+    } else if (this.target && this.target.type === "partial") {
+      const { report, uri, ids } = this.target;
+      await this.sendRequest({ command: "showPartialReport", payload: { report, uri, ids } });
+    }
+  }
+
   public prefetchKdb() {
     this.kdb = getArticles();
   }
@@ -54,7 +73,8 @@ export class AuditWebView extends WebView<Webapp> {
   }
 
   async sendStartAudit() {
-    return this.sendRequest({ command: "startAudit", payload: undefined });
+    await this.show();
+    await this.sendRequest({ command: "startAudit", payload: undefined });
   }
 
   async sendCancelAudit() {
@@ -62,27 +82,17 @@ export class AuditWebView extends WebView<Webapp> {
   }
 
   async showReport(report: Audit) {
-    const kdb = await this.getKdb();
+    this.target = { type: "full", report, uri: "", ids: [] };
     await this.show();
-    await this.sendRequest({ command: "loadKdb", payload: kdb });
-    await this.sendColorTheme(vscode.window.activeColorTheme);
-    return this.sendRequest({ command: "showFullReport", payload: report });
   }
 
   public async showIds(report: Audit, uri: string, ids: any[]) {
-    const kdb = await this.getKdb();
+    this.target = { type: "partial", report, uri, ids };
     await this.show();
-    await this.sendRequest({ command: "loadKdb", payload: kdb });
-    await this.sendColorTheme(vscode.window.activeColorTheme);
-    this.sendRequest({
-      command: "showPartialReport",
-      payload: { report: report, uri, ids },
-    });
   }
 
   public async showIfVisible(report: Audit) {
     if (this.isActive()) {
-      this.sendRequest({ command: "loadKdb", payload: await this.getKdb() });
       return this.sendRequest({ command: "showFullReport", payload: report });
     }
   }

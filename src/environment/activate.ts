@@ -11,7 +11,6 @@ export function activate(context: vscode.ExtensionContext, envStore: EnvStore) {
   const view = new EnvironmentWebView(context.extensionPath, envStore);
 
   vscode.commands.registerCommand("openapi.showEnvironment", async () => {
-    await view.show();
-    await view.sendLoadEnvironment();
+    await view.showEnvironment();
   });
 }
