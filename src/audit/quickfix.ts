@@ -725,12 +725,75 @@ export function getDeadRefs(targetPointer: string, context: FixContext): [] {
   }
   const deadRefs = [];
   for (const myRef of myRefs) {
-    const pointers = [...refDeps[myRef]].filter((p) => !p.startsWith(targetPointer));
+    // If targetPointer = /paths/~1pets, pointers = [/paths/~1pets~1{petId}/..., /paths/~1pets/...]
+    // Use targetPointer + "/" to filter only target pointer (not all pointers)
+    const pointers = [...refDeps[myRef]].filter((p) => !p.startsWith(targetPointer + "/"));
     if (pointers.length === 0) {
       deadRefs.push(myRef);
+    } else {
+      // If at least one pointer is referenced from any path (not targetPointer path) we must never delete it
+      if (!pointers.some((p) => p.startsWith("/paths/"))) {
+        // Fast check that pointers may belong to dead refs, for example:
+        // myRef = #/components/schemas/Pet
+        // pointers = [/components/schemas/Pets/items]
+        // deadRefs = [#/components/schemas/Pets]
+        // It may help to decrease number of recursive calls in checkIfSomePointerDead
+        const pointersToCheck = pointers.filter((p) => !assertPointerBelongToRefs(p, deadRefs));
+        if (pointersToCheck.length === 0) {
+          deadRefs.push(myRef);
+        } else {
+          // Here we may be unaware of all dead refs, for example
+          // myRef = #/components/schemas/Pet
+          // pointers = [/components/schemas/Pets/items]
+          // deadRefs = []
+          if (checkAllPointersDead(pointersToCheck, refDeps, targetPointer)) {
+            deadRefs.push(myRef);
+          }
+        }
+      }
     }
   }
   return deadRefs;
+}
+
+function assertPointerBelongToRefs(pointer: string, refs: string[]): boolean {
+  const myRef = "#" + pointer;
+  return refs.some((ref) => myRef === ref || myRef.startsWith(ref + "/"));
+}
+
+function checkAllPointersDead(pointers: string[], refDeps: any, targetPointer: string): boolean {
+  for (const pointer of pointers) {
+    for (const ref of Object.keys(refDeps)) {
+      if (assertPointerBelongToRefs(pointer, [ref])) {
+        // Handle possible circular references using p !== pointer
+        const refs = [...refDeps[ref]].filter(
+          (p) => !p.startsWith(targetPointer + "/") && p !== pointer
+        );
+        if (refs.length > 0) {
+          if (refs.some((p) => p.startsWith("/paths/"))) {
+            return false;
+          } else {
+            refs = removeAll(refs, pointers); // Avoid infinite recursion
+            if (refs.length > 0) {
+              return checkAllPointersDead(refs, refDeps, targetPointer);
+            }
+          }
+        }
+      }
+    }
+  }
+  return true;
+}
+
+function removeAll(deleteFrom: string[], pointersToDelete: string[]): string[] {
+  const res: string[] = [];
+  for (const item of deleteFrom) {
+    const index = pointersToDelete.indexOf(item);
+    if (index === -1) {
+      res.push(item);
+    }
+  }
+  return res;
 }
 
 function refWalk(root: any, target: any, refs: Set<string>) {
