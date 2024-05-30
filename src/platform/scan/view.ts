@@ -52,12 +52,8 @@ export type Target = {
 };
 
 export class ScanWebView extends WebView<Webapp> {
-  private document?: vscode.TextDocument;
-  private auditReport?: {
-    report: any;
-    mapping: MappingNode;
-  };
   private target?: Target;
+  private tempApi?: { apiId: string; collectionId: string };
 
   constructor(
     title: string,
@@ -233,7 +229,6 @@ export class ScanWebView extends WebView<Webapp> {
   }
 
   async onDispose(): Promise<void> {
-    this.document = undefined;
     await super.onDispose();
   }
 
@@ -389,8 +384,13 @@ async function runScan(
       }
 
       const parsedReport = await loadReport(store, tmpApi, logger);
-      logger.info(`Finished API API Conformance Scan`);
       await store.clearTempApi(tmpApi);
+      logger.info(`Finished API API Conformance Scan`);
+
+      if (parsedReport === undefined) {
+        reportView.showGeneralError({ message: `Failed to load Scan report` });
+        return;
+      }
 
       if (isFullScan) {
         await reportView.showFullScanReport(parsedReport, oas);
@@ -454,16 +454,11 @@ async function loadReport(
   logger: Logger
 ) {
   const reportId = await waitForReport(store, tmpApi.apiId, 300000);
-
-  // if (reportId === undefined) {
-  //   reportView.showGeneralError({ message: "Failed to load scan report from the platform" });
-  // }
-
-  const report = await store.readScanReportNew(reportId!);
-
-  const parsedReport = JSON.parse(Buffer.from(report, "base64").toString("utf-8"));
-
-  return parsedReport;
+  if (reportId !== undefined) {
+    const report = await store.readScanReportNew(reportId);
+    const parsedReport = JSON.parse(Buffer.from(report, "base64").toString("utf-8"));
+    return parsedReport;
+  }
 }
 
 async function createScanconfToken(
