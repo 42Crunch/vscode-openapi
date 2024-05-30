@@ -688,7 +688,7 @@
         "openapi.platformConformanceScanRuntime": {
           "scope": "machine",
           "type": "string",
-          "default": "docker",
+          "default": "cli",
           "enum": [
             "docker",
             "scand-manager",
