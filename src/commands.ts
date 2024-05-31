@@ -153,7 +153,7 @@ async function createNewTwo(cache: Cache) {
 async function createNewThree(cache: Cache) {
   await createNew(
     `{
-    "openapi":"3.0.2",
+    "openapi":"3.0.3",
     "info": {
       "title":"\${1:API Title}",
       "version":"\${2:1.0}"
@@ -190,7 +190,7 @@ paths:
 
 async function createNewThreeYaml(cache: Cache) {
   await createNew(
-    `openapi: '3.0.2'
+    `openapi: '3.0.3'
 info:
   title: \${1:API Title}
   version: \${2:'1.0'}
