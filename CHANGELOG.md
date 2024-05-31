@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.26.2 (May 31, 2024)
+
+- Add support for floating windows in extension webviews
+- Change default runtime for Scan to API Security Testing Binary
+
 ## Version 4.26.0 (May 22, 2024)
 
 - Allow all users to run 42Crunch Scan
