@@ -41,7 +41,7 @@ export default function HttpRequest({
               title: "Body",
               content: (
                 <Padding>
-                  <Body body={request.body} />
+                  <Body request={request} />
                 </Padding>
               ),
               disabled: request.body === undefined,
