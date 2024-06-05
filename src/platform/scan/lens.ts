@@ -8,26 +8,32 @@ import { getOpenApiVersion } from "../../parsers";
 import { OpenApiVersion } from "../../types";
 
 export class ScanCodelensProvider implements vscode.CodeLensProvider {
-  onDidChangeCodeLenses?: vscode.Event<void>;
+  private lenses: Record<string, vscode.CodeLens[]> = {};
+
   constructor(private cache: Cache) {}
 
   async provideCodeLenses(
     document: vscode.TextDocument,
     token: vscode.CancellationToken
   ): Promise<vscode.CodeLens[]> {
-    const result: (vscode.CodeLens | undefined)[] = [];
     const parsed = this.cache.getParsedDocument(document);
     const version = getOpenApiVersion(parsed);
     if (parsed && version !== OpenApiVersion.Unknown) {
+      const result: (vscode.CodeLens | undefined)[] = [];
       const oas = parsed as unknown as BundledSwaggerOrOasSpec;
       const operations = isOpenapi(oas) ? OpenApi30.getOperations(oas) : Swagger.getOperations(oas);
       for (const [path, method, operation] of operations) {
         result.push(scanLens(document, oas, path, method));
       }
+
       result.push(topScanLens(document, oas));
+
+      this.lenses[document.uri.toString()] = result.filter(
+        (lens): lens is vscode.CodeLens => lens !== undefined
+      );
     }
 
-    return result.filter((lens): lens is vscode.CodeLens => lens !== undefined);
+    return this.lenses[document.uri.toString()];
   }
 }
 
@@ -78,14 +84,8 @@ function topScanLens(
     return undefined;
   }
 
-  const position = document.positionAt(0);
-  const line = document.lineAt(position.line + 1);
-  const range = new vscode.Range(
-    new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
-    new vscode.Position(position.line, line.range.end.character)
-  );
-
-  return new vscode.CodeLens(range, {
+  const line = document.lineAt(0);
+  return new vscode.CodeLens(line.range, {
     title: `Scan`,
     tooltip: "Scan this OpenAPI file",
     command: "openapi.platform.editorRunSingleOperationScan",
