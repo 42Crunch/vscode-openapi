@@ -6,17 +6,18 @@ import { getOpenApiVersion } from "../parsers";
 import { OpenApiVersion } from "../types";
 
 export class TryItCodelensProvider implements vscode.CodeLensProvider {
-  onDidChangeCodeLenses?: vscode.Event<void>;
+  private lenses: Record<string, vscode.CodeLens[]> = {};
+
   constructor(private cache: Cache) {}
 
   async provideCodeLenses(
     document: vscode.TextDocument,
     token: vscode.CancellationToken
   ): Promise<vscode.CodeLens[]> {
-    const result: vscode.CodeLens[] = [];
     const parsed = this.cache.getParsedDocument(document);
     const version = getOpenApiVersion(parsed);
     if (parsed && version !== OpenApiVersion.Unknown) {
+      const result: vscode.CodeLens[] = [];
       const oas = parsed as unknown as BundledSwaggerOrOasSpec;
       const operations = isOpenapi(oas) ? OpenApi30.getOperations(oas) : Swagger.getOperations(oas);
       for (const [path, method, operation] of operations) {
@@ -31,9 +32,11 @@ export class TryItCodelensProvider implements vscode.CodeLensProvider {
           );
         }
       }
+
+      this.lenses[document.uri.toString()] = result;
     }
 
-    return result;
+    return this.lenses[document.uri.toString()];
   }
 }
 
