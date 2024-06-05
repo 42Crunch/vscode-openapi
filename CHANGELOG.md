@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.26.3 (June 5, 2024)
+
+- Fix issue with text editor contents jerking on code lenses being added/removed during editing #275 
+
 ## Version 4.26.2 (May 31, 2024)
 
 - Add support for floating windows in extension webviews
