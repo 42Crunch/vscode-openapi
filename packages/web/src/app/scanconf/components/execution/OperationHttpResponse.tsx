@@ -1,6 +1,7 @@
 import styled from "styled-components";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { Playbook } from "@xliic/scanconf";
 
 import { HttpResponse } from "../../../../../../common/src/http";
 import { PlaybookEnvStack } from "../../../../core/playbook/playbook-env";
@@ -17,9 +18,11 @@ import VariableAssignments from "../scenario/VariableAssignments";
 export default function OperationHttpResponse({
   response,
   variables,
+  requestRef,
 }: {
   response: HttpResponse;
   variables?: PlaybookEnvStack;
+  requestRef?: Playbook.RequestRef;
 }) {
   const hasErrors = hasVariableAssignmentErrors(variables);
 
@@ -51,7 +54,13 @@ export default function OperationHttpResponse({
             {
               id: "body",
               title: "Body",
-              content: <Body response={response} />,
+              content: (
+                <Body
+                  response={response}
+                  requestRef={requestRef}
+                  statusCode={response.statusCode}
+                />
+              ),
             },
             {
               id: "headers",

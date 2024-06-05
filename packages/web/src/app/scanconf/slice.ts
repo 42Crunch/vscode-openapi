@@ -231,6 +231,20 @@ export const slice = createSlice({
     customizeOperation: (state, { payload: operationId }: PayloadAction<string>) => {
       state.playbook.operations[operationId].customized = true;
     },
+
+    createVariable: (
+      state,
+      {
+        payload: { name, jsonPointer, ref, statusCode },
+      }: PayloadAction<{
+        name: string;
+        jsonPointer: String;
+        ref: Playbook.RequestRef;
+        statusCode: number;
+      }>
+    ) => {
+      console.log("creating", name, jsonPointer, ref, statusCode);
+    },
   },
 
   extraReducers: (builder) => {
@@ -297,6 +311,7 @@ export const {
   removeRequest,
   updateOperationAuthorizationTests,
   customizeOperation,
+  createVariable,
 } = slice.actions;
 
 export default slice.reducer;

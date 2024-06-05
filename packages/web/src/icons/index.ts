@@ -16,6 +16,7 @@ export { default as CircleQuestion } from "./CircleQuestion";
 export { default as CircleSolid } from "./CircleSolid";
 export { default as Circle } from "./Circle";
 export { default as Clone } from "./Clone";
+export { default as Copy } from "./Copy";
 export { default as EllipsisVertical } from "./EllipsisVertical";
 export { default as ExclamationCircle } from "./ExclamationCircle";
 export { default as Eye } from "./Eye";

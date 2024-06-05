@@ -42,6 +42,7 @@ export default function OperationExecution({ operation }: { operation: Operation
         <OperationHttpResponse
           response={operation.httpResponse}
           variables={operation.variablesAssigned}
+          requestRef={operation.ref}
         />
       )}
 

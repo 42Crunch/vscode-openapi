@@ -36,4 +36,6 @@ const Container = styled.div`
   white-space: pre-wrap;
   word-break: break-all;
   font-family: monospace;
+  max-height: 400px;
+  overflow-y: auto;
 `;

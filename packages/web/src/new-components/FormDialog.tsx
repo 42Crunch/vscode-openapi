@@ -1,5 +1,5 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { FieldValues, FormProvider, useForm } from "react-hook-form";
 import styled from "styled-components";
 import { ZodObject } from "zod";
@@ -19,8 +19,10 @@ export default function FormDialog({
   schema,
   children,
   noOverflow,
+  open,
+  onOpenChange,
 }: {
-  trigger: JSX.Element;
+  trigger?: JSX.Element;
   defaultValues: FieldValues;
   onSubmit: (values: FieldValues) => void;
   title?: string;
@@ -28,33 +30,35 @@ export default function FormDialog({
   schema?: ZodObject<any>;
   children: ReactNode;
   noOverflow?: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const methods = useForm({
-    defaultValues,
+    values: defaultValues,
     resolver: schema !== undefined ? zodResolver(schema) : undefined,
   });
 
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const effectiveOpen = open ?? internalOpen;
+  const effectiveSetOpen = onOpenChange ?? setInternalOpen;
+
+  useEffect(() => {
+    if (effectiveOpen) {
+      methods.reset();
+    }
+  }, [effectiveOpen]);
 
   return (
-    <Dialog.Root
-      open={open}
-      onOpenChange={(open) => {
-        setOpen(open);
-        if (open) {
-          methods.reset();
-        }
-      }}
-    >
-      <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>
+    <Dialog.Root open={effectiveOpen} onOpenChange={effectiveSetOpen}>
+      {trigger && <Dialog.Trigger asChild>{trigger}</Dialog.Trigger>}
       <Dialog.Portal>
         <Overlay />
-        <DialogContent noOverflow={noOverflow}>
+        <DialogContent $noOverflow={noOverflow}>
           <FormProvider {...methods}>
             <Form
               onSubmit={methods.handleSubmit((data) => {
                 onSubmit(data);
-                setOpen(false);
+                effectiveSetOpen(false);
               })}
             >
               {title && <Dialog.Title>{title}</Dialog.Title>}
@@ -96,7 +100,7 @@ const DialogContent = styled(Dialog.Content)`
   max-width: 450px;
   max-height: 85vh;
   padding: 25px;
-  ${({ noOverflow }: { noOverflow?: boolean }) => !noOverflow && "overflow-y: auto;"}
+  ${({ $noOverflow }: { $noOverflow?: boolean }) => !$noOverflow && "overflow-y: auto;"}
   background-color: var(${ThemeColorVariables.background});
   color: var(${ThemeColorVariables.foreground});
   border-radius: 6px;

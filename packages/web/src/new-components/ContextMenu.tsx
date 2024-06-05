@@ -1,57 +1,27 @@
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import * as RadixContextMenu from "@radix-ui/react-context-menu";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import styled from "styled-components";
-import { Check, EllipsisVertical, Sliders } from "../icons";
 
-export function Menu({
+export function ContextMenu({
   children,
-  icon,
+  menu,
 }: {
   children: React.ReactNode;
-  icon?: "ellipsis" | "sliders";
+  menu: React.ReactNode;
 }) {
   return (
-    <DropdownMenu.Root>
-      <DropdownMenu.Trigger asChild className="menu">
-        <IconButton>{icon === "sliders" ? <Sliders /> : <EllipsisVertical />}</IconButton>
-      </DropdownMenu.Trigger>
-
-      <DropdownMenu.Portal>
-        <DropdownMenuContent side="bottom" align="end">
-          {children}
-        </DropdownMenuContent>
-      </DropdownMenu.Portal>
-    </DropdownMenu.Root>
+    <RadixContextMenu.Root>
+      <RadixContextMenu.Trigger asChild className="menu">
+        {children}
+      </RadixContextMenu.Trigger>
+      <RadixContextMenu.Portal>
+        <DropdownMenuContent>{menu}</DropdownMenuContent>
+      </RadixContextMenu.Portal>
+    </RadixContextMenu.Root>
   );
 }
 
-export function CheckboxMenuItemIndicator() {
-  return (
-    <ItemIndicator>
-      <Check />
-    </ItemIndicator>
-  );
-}
-
-const IconButton = styled.span`
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background-color: transparent;
-  color: transparent;
-  border: none;
-  margin: 0;
-  padding: 0;
-  cursor: pointer;
-  &[data-state="open"] {
-    opacity: 1 !important;
-  }
-  > svg {
-    fill: var(${ThemeColorVariables.foreground});
-  }
-`;
-
-const DropdownMenuContent = styled(DropdownMenu.Content)`
+const DropdownMenuContent = styled(RadixContextMenu.Content)`
   margin: 4px;
   background-color: var(${ThemeColorVariables.dropdownBackground});
   border: 1px solid var(${ThemeColorVariables.dropdownBorder});
@@ -61,7 +31,7 @@ const DropdownMenuContent = styled(DropdownMenu.Content)`
   box-shadow: 0 10px 38px var(${ThemeColorVariables.computedTwo});
 `;
 
-export const MenuItem = styled(DropdownMenu.Item)`
+export const MenuItem = styled(RadixContextMenu.Item)`
   margin: 2px;
   color: var(${ThemeColorVariables.dropdownForeground});
   display: flex;
@@ -81,6 +51,7 @@ export const MenuItem = styled(DropdownMenu.Item)`
   }
 `;
 
+/*
 export const CheckboxMenuItem = styled(DropdownMenu.CheckboxItem)`
   display: flex;
   gap: 8px;
@@ -122,3 +93,5 @@ const ItemIndicator = styled(DropdownMenu.ItemIndicator)`
     fill: var(${ThemeColorVariables.foreground});
   }
 `;
+
+*/
