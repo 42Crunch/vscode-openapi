@@ -8,7 +8,6 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { DynamicVariableNames } from "../../../core/playbook/builtin-variables";
 import { PlaybookEnvStack } from "../../../core/playbook/playbook-env";
-import { FileExport } from "../../../icons";
 import Form from "../../../new-components/Form";
 import CollapsibleSection from "../components/CollapsibleSection";
 import Execution from "../components/execution/Execution";
@@ -20,6 +19,7 @@ import { executeRequest } from "./slice";
 import DescriptionTooltip from "../../../new-components/DescriptionTooltip";
 import { findResult } from "../playbook-execution-handler";
 import { ErrorBanner } from "../../../components/Banner";
+import TryAndServerSelector from "../components/TryAndServerSelector";
 
 export default function RequestExternal({
   request,
@@ -28,7 +28,6 @@ export default function RequestExternal({
   request: Playbook.ExternalStageContent;
   requestRef: Playbook.RequestRef;
 }) {
-  const { oas } = useAppSelector((state) => state.scanconf);
   const useGlobalBlocks = useAppSelector((state) => state.prefs.useGlobalBlocks);
 
   const {
@@ -56,10 +55,6 @@ export default function RequestExternal({
 
   const [inputs, setInputs] = useState<UnknownEnvironment>({});
 
-  const prefs = useAppSelector((state) => state.prefs);
-
-  const server = getPreferredServer(oas, prefs.tryitServer);
-
   useEffect(() => {
     const updated = { ...inputs };
     // remove stale variables
@@ -79,18 +74,7 @@ export default function RequestExternal({
 
   return (
     <Container>
-      <Try>
-        <Action
-          onClick={(e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            onRun(server, inputs);
-          }}
-        >
-          <FileExport />
-          Try
-        </Action>
-      </Try>
+      <TryAndServerSelector onTry={(server: string) => onRun(server, inputs)} menu />
 
       <CollapsibleSection title="Request">
         <RequestCardExternal
@@ -142,25 +126,6 @@ export default function RequestExternal({
 
 const Container = styled.div`
   padding: 8px;
-`;
-
-const Try = styled.div`
-  border: 1px solid var(${ThemeColorVariables.border});
-  display: flex;
-  justify-content: flex-end;
-`;
-
-const Action = styled.div`
-  display: flex;
-  padding: 8px 12px;
-  gap: 4px;
-  cursor: pointer;
-  align-items: center;
-  cusror: pointer;
-  color: var(${ThemeColorVariables.linkForeground});
-  > svg {
-    fill: var(${ThemeColorVariables.linkForeground});
-  }
 `;
 
 const GlobalBlockError = styled.div`
