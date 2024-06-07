@@ -48,7 +48,7 @@ export type ExternalCRequest = {
 export type Responses = Record<string, Response>;
 
 export type Response = {
-  variableAssignments?: VariableAssignments;
+  variableAssignments: VariableAssignments;
   expectations: unknown;
 };
 
@@ -156,7 +156,7 @@ export type StageContent = {
   fuzzing?: boolean;
   auth?: string[];
   environment?: OperationEnvironment;
-  responses?: Responses;
+  responses: Responses;
   defaultResponse: string;
   injectionKey?: string;
   request: CRequest;
@@ -166,7 +166,7 @@ export type StageContent = {
 export type ExternalStageContent = {
   operationId: undefined;
   environment?: OperationEnvironment;
-  responses?: Responses;
+  responses: Responses;
   defaultResponse: string;
   request: ExternalCRequest;
 };
