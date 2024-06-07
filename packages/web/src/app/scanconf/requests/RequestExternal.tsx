@@ -20,6 +20,7 @@ import DescriptionTooltip from "../../../new-components/DescriptionTooltip";
 import { findResult } from "../playbook-execution-handler";
 import { ErrorBanner } from "../../../components/Banner";
 import TryAndServerSelector from "../components/TryAndServerSelector";
+import { makeEnvEnv } from "../../../core/playbook/execute";
 
 export default function RequestExternal({
   request,
@@ -37,6 +38,8 @@ export default function RequestExternal({
   } = useAppSelector((state) => state.requests);
 
   const dispatch = useAppDispatch();
+  const { playbook, servers } = useAppSelector((state) => state.scanconf);
+  const env = useAppSelector((state) => state.env.data);
 
   const onRun = (server: string, inputs: UnknownEnvironment) =>
     dispatch(executeRequest({ server, inputs }));
@@ -54,6 +57,12 @@ export default function RequestExternal({
   ];
 
   const [inputs, setInputs] = useState<UnknownEnvironment>({});
+
+  const {
+    environment: {
+      env: { host },
+    },
+  } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
 
   useEffect(() => {
     const updated = { ...inputs };
@@ -74,7 +83,12 @@ export default function RequestExternal({
 
   return (
     <Container>
-      <TryAndServerSelector onTry={(server: string) => onRun(server, inputs)} menu />
+      <TryAndServerSelector
+        servers={servers}
+        host={host as string | undefined}
+        onTry={(server: string) => onRun(server, inputs)}
+        menu
+      />
 
       <CollapsibleSection title="Request">
         <RequestCardExternal

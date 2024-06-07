@@ -24,7 +24,7 @@ export default function TryAndServerSelector({
 }: {
   onTry: (server: string) => unknown;
   onScan?: (server: string) => unknown;
-  servers?: string[];
+  servers: string[];
   host?: string;
   menu?: boolean;
 }) {
@@ -37,7 +37,7 @@ export default function TryAndServerSelector({
   const setUseGlobalBlocks = (value: boolean) => dispatch(actions.setUseGlobalBlocks(value));
   const setRejectUnauthorized = (value: boolean) => dispatch(actions.setRejectUnauthorized(value));
 
-  const allServers = servers ? [...servers] : [];
+  const allServers = [...servers];
 
   if (host && !allServers.includes(host)) {
     allServers.unshift(host);
@@ -56,20 +56,16 @@ export default function TryAndServerSelector({
   return (
     <Container>
       <Operation>
-        {servers !== undefined ? (
-          <DownshiftCombo
-            options={allServers}
-            selected={selectedServer}
-            onSelectedItemChange={(item) => {
-              if (item) {
-                setSelectedServer(item);
-                setServer(item);
-              }
-            }}
-          />
-        ) : (
-          <div />
-        )}
+        <DownshiftCombo
+          options={allServers}
+          selected={selectedServer}
+          onSelectedItemChange={(item) => {
+            if (item) {
+              setSelectedServer(item);
+              setServer(item);
+            }
+          }}
+        />
 
         <Action
           onClick={(e) => {
