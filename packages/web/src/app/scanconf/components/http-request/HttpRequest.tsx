@@ -1,8 +1,9 @@
 import styled from "styled-components";
 
 import { HttpRequest as HttpRequestType } from "@xliic/common/http";
-
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { Playbook } from "@xliic/scanconf";
+
 import { ArrowRightFromBracket } from "../../../../icons";
 import { TabContainer } from "../../../../new-components/Tabs";
 import CollapsibleCard, { BottomDescription } from "../../../../new-components/CollapsibleCard";
@@ -13,10 +14,14 @@ export default function HttpRequest({
   operationId,
   request,
   defaultCollapsed,
+  requestRef,
+  statusCode,
 }: {
   operationId?: string;
   request: HttpRequestType;
   defaultCollapsed?: boolean;
+  requestRef?: Playbook.RequestRef;
+  statusCode?: number;
 }) {
   return (
     <Container>
@@ -41,7 +46,7 @@ export default function HttpRequest({
               title: "Body",
               content: (
                 <Padding>
-                  <Body request={request} />
+                  <Body request={request} requestRef={requestRef} statusCode={statusCode} />
                 </Padding>
               ),
               disabled: request.body === undefined,

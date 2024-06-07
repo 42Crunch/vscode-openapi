@@ -124,6 +124,7 @@ export default function Operations() {
                       expectations: {
                         httpStatus: 200,
                       },
+                      variableAssignments: {},
                     },
                   },
                 },

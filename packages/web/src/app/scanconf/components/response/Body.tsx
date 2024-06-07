@@ -51,6 +51,7 @@ function JsonBody({
               dispatch(
                 createVariable({
                   name,
+                  location: "response",
                   jsonPointer,
                   ref: requestRef,
                   statusCode,

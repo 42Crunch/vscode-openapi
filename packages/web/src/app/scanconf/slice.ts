@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/openapi";
+import { BundledSwaggerOrOasSpec, getHttpResponseRange, getServerUrls } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 
 import { loadPlaybook } from "./actions";
@@ -235,15 +235,44 @@ export const slice = createSlice({
     createVariable: (
       state,
       {
-        payload: { name, jsonPointer, ref, statusCode },
+        payload: { name, location, jsonPointer, ref, statusCode },
       }: PayloadAction<{
         name: string;
-        jsonPointer: String;
+        location: "request" | "response";
+        jsonPointer: string;
         ref: Playbook.RequestRef;
         statusCode: number;
       }>
     ) => {
-      console.log("creating", name, jsonPointer, ref, statusCode);
+      const target =
+        ref.type === "operation"
+          ? state.playbook.operations[ref.id].request
+          : state.playbook.requests[ref.id];
+
+      const responseRange = getHttpResponseRange(statusCode);
+
+      const responseCode = target.responses[statusCode]
+        ? statusCode
+        : responseRange !== undefined && target.responses[responseRange]
+        ? responseRange
+        : "default";
+
+      if (target.responses[responseCode] === undefined) {
+        target.responses[responseCode] = {
+          variableAssignments: {},
+          expectations: responseCode,
+        };
+      }
+
+      target.responses[responseCode].variableAssignments[name] = {
+        from: location,
+        in: "body",
+        contentType: "json",
+        path: {
+          type: "jsonPointer",
+          value: jsonPointer,
+        },
+      };
     },
   },
 

@@ -31,7 +31,12 @@ export default function OperationExecution({ operation }: { operation: Operation
       )}
 
       {operation.httpRequest !== undefined && (
-        <HttpRequest operationId={operation.operationId} request={operation.httpRequest} />
+        <HttpRequest
+          operationId={operation.operationId}
+          request={operation.httpRequest}
+          statusCode={operation?.httpResponse?.statusCode}
+          requestRef={operation.ref}
+        />
       )}
 
       {operation.httpError !== undefined && (
