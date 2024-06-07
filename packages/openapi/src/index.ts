@@ -63,3 +63,17 @@ export function getOperationById(
 export function getServerUrls(oas: BundledSwaggerOrOasSpec): string[] {
   return isOpenapi(oas) ? OpenApi30.getServerUrls(oas) : Swagger.getServerUrls(oas);
 }
+
+export function getHttpResponseRange(httpStatus: number) {
+  if (httpStatus >= 100 && httpStatus <= 199) {
+    return "1XX";
+  } else if (httpStatus >= 200 && httpStatus <= 299) {
+    return "2XX";
+  } else if (httpStatus >= 300 && httpStatus <= 399) {
+    return "3XX";
+  } else if (httpStatus >= 400 && httpStatus <= 499) {
+    return "4XX";
+  } else if (httpStatus >= 500 && httpStatus <= 599) {
+    return "5XX";
+  }
+}
