@@ -22,14 +22,14 @@ test("execute simple", async () => {
     event: "payload-variables-substituted",
     found: [
       {
-        context: "dynamic",
+        context: { type: "built-in" },
         name: "$randomuint",
-        location: ["request", "body", "value", "name"],
+        location: { type: "request", path: ["body", "value", "name"] },
       },
       {
-        context: "dynamic",
+        context: { type: "built-in" },
         name: "$randomuint",
-        location: ["request", "body", "value", "user"],
+        location: { type: "request", path: ["body", "value", "user"] },
       },
     ],
     missing: [],
@@ -73,7 +73,16 @@ test("execute simple", async () => {
     event: "payload-variables-substituted",
     found: [
       {
-        context: "playbook-test-step-0-request-200",
+        context: {
+          name: "test",
+          responseCode: "200",
+          step: 0,
+          type: "playbook-request",
+        },
+        location: {
+          path: ["parameters", "header", 0, "value"],
+          type: "request",
+        },
         name: "token",
       },
     ],
