@@ -2,9 +2,9 @@ import jsf from "json-schema-faker";
 
 import { LookupFailure, LookupResult, ReplacementResult } from "@xliic/common/env";
 import { OpenApi30, Swagger, BundledSwaggerOrOasSpec, HttpMethod, isOpenapi } from "@xliic/openapi";
-import { Environment } from "@xliic/common/env";
+import { Environment, VariableLocation } from "@xliic/common/env";
 import { Playbook } from "@xliic/scanconf";
-import { Path, simpleClone } from "@xliic/preserving-json-yaml-parser";
+import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 import { deref } from "@xliic/openapi";
 
 import { EnvStackLookupResult, PlaybookEnvStack, lookup } from "./playbook-env";
@@ -30,7 +30,7 @@ export const ENV_VAR_REGEX = () => /{{([\w\-$]+)}}/g;
 export const ENTIRE_ENV_VAR_REGEX = () => /^{{([\w\-$]+)}}$/;
 
 export function replaceEnvironmentVariables(
-  location: string,
+  location: "stage-environment" | "request-environment",
   environment: Environment,
   envStack: PlaybookEnvStack
 ): ReplacementResult<Environment> {
@@ -47,7 +47,7 @@ export function replaceRequestVariables(
   envStack: PlaybookEnvStack
 ): ReplacementResult<Playbook.CRequest | Playbook.ExternalCRequest> {
   let fake: { body: unknown; parameters: unknown };
-  const fakeMaker: FakeMaker = (location: Path) => {
+  const fakeMaker: FakeMaker = () => {
     if (fake === undefined) {
       fake = createFake(oas, operation, (request as Playbook.CRequest).path, request.method);
     }
@@ -60,14 +60,14 @@ export function replaceCredentialVariables(
   credential: string,
   envStack: PlaybookEnvStack
 ): ReplacementResult<string> {
-  return substituteValues(credential, envStack, {}, [], () => ({
+  return substituteValues(credential, envStack, {}, { type: "credential", path: [] }, () => ({
     body: undefined,
     parameters: undefined,
   }));
 }
 
 function replaceObject<T>(
-  location: string,
+  location: "stage-environment" | "request-environment" | "request",
   object: T,
   envStack: PlaybookEnvStack,
   fakeMaker: FakeMaker
@@ -81,7 +81,7 @@ function replaceObject<T>(
         value,
         envStack,
         object,
-        [location, ...sublocation],
+        { type: location, path: sublocation },
         fakeMaker
       );
       missing.push(...replaced.missing);
@@ -103,7 +103,7 @@ function replaceString(
   value: string,
   envStack: PlaybookEnvStack,
   object: unknown,
-  location: Path,
+  location: VariableLocation,
   fakeMaker: FakeMaker
 ): ReplacementResult<unknown> {
   const matches = value.match(ENTIRE_ENV_VAR_REGEX());
@@ -122,7 +122,7 @@ function replaceValue(
   value: string,
   envStack: PlaybookEnvStack,
   object: unknown,
-  location: Path,
+  location: VariableLocation,
   fakeMaker: FakeMaker
 ): ReplacementResult<unknown> {
   const result = lookupOrDynamic(envStack, name, object, location, fakeMaker);
@@ -137,7 +137,7 @@ function substituteValues(
   value: string,
   envStack: PlaybookEnvStack,
   object: unknown,
-  location: Path,
+  location: VariableLocation,
   fakeMaker: FakeMaker
 ): ReplacementResult<string> {
   const missing: LookupFailure[] = [];
@@ -169,12 +169,12 @@ function lookupOrDynamic(
   envStack: PlaybookEnvStack,
   varname: string,
   object: unknown,
-  location: Path,
-  fakeMaker: (location: Path) => { body: unknown; parameters: unknown }
+  location: VariableLocation,
+  fakeMaker: () => { body: unknown; parameters: unknown }
 ): EnvStackLookupResult | undefined {
   if (DynamicVariableNames.includes(varname as DynamicVariableName)) {
     const dynamic = DynamicVariables[varname as DynamicVariableName](object, location, fakeMaker);
-    return { context: "dynamic", value: dynamic, name: varname };
+    return { context: { type: "built-in" }, value: dynamic, name: varname };
   } else {
     return lookup(envStack, varname);
   }

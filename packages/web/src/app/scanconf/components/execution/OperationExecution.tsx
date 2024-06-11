@@ -40,7 +40,9 @@ export default function OperationExecution({ operation }: { operation: Operation
       )}
 
       {operation.httpError !== undefined && (
-        <ErrorBanner message="HTTP Error">{operation.httpError.message}</ErrorBanner>
+        <ErrorBanner message="HTTP Error">
+          {operation.httpError.code} {operation.httpError.message}
+        </ErrorBanner>
       )}
 
       {operation.httpResponse !== undefined && operation.httpResponse !== null && (

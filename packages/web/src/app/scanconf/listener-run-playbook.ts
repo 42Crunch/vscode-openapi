@@ -398,7 +398,7 @@ export function onExecuteRequest(
           addExecutionStep,
           playbooks,
           server,
-          [{ id: "inputs", env: inputs, assignments: [] }]
+          [{ id: { type: "try-inputs" }, env: inputs, assignments: [] }]
         );
       },
     });

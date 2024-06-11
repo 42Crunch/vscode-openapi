@@ -4,6 +4,7 @@ import { LookupResult, LookupFailure } from "@xliic/common/env";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { TriangleExclamation } from "../../../../icons";
+import { PlaybookVariableDefinitionLocation } from "../../../../core/playbook/playbook-env";
 
 export default function VariableUsed({
   found,
@@ -12,16 +13,25 @@ export default function VariableUsed({
   found: LookupResult[] | undefined;
   missing: LookupFailure[] | undefined;
 }) {
+  const uniqueFound =
+    found !== undefined
+      ? [...new Map(found.map((entry) => [entry.name, entry])).values()]
+      : undefined;
+
+  const uniqueMissing =
+    missing !== undefined
+      ? [...new Map(missing.map((entry) => [entry.name, entry])).values()]
+      : undefined;
+
   return (
     <Container>
       <Header>
         <div></div>
-        <div>Name</div>
-        <div>Defined in</div>
-        <div>Used by</div>
+        <div>Variable name</div>
+        <div>Location where the variable is defined</div>
       </Header>
-      {found?.map(renderFound)}
-      {missing?.map(renderMissing)}
+      {uniqueFound?.map(renderFound)}
+      {uniqueMissing?.map(renderMissing)}
     </Container>
   );
 }
@@ -37,8 +47,7 @@ function renderMissing(value: LookupFailure, index: number) {
         />
       </div>
       <div>{value.name}</div>
-      <div>not found</div>
-      <div>{value.location.join("/")}</div>
+      <div>Variable is not found</div>
     </Row>
   );
 }
@@ -48,15 +57,29 @@ function renderFound(value: LookupResult, index: number) {
     <Row key={index}>
       <div></div>
       <div>{value.name}</div>
-      <div>{value.context}</div>
-      <div>{value.location.join("/")}</div>
+      <div>{formatLocation(value.context as PlaybookVariableDefinitionLocation)}</div>
     </Row>
   );
+}
+function formatLocation(location: PlaybookVariableDefinitionLocation) {
+  if (location.type === "global-environment") {
+    return "Global Environment";
+  } else if (location.type === "built-in") {
+    return "Built-in";
+  } else if (location.type === "try-inputs") {
+    return "Try Inputs";
+  } else if (location.type === "stage-environment") {
+    return "Scenario Environment";
+  } else if (location.type === "request-environment") {
+    return "Operation Environment";
+  } else if (location.type === "playbook-request") {
+    return `Scenario step ${location.step + 1}`;
+  }
 }
 
 const Container = styled.div`
   display: grid;
-  grid-template-columns: 2em 16em 1fr 1fr;
+  grid-template-columns: 2em 16em 1fr;
   padding: 8px;
   > div > div {
     padding: 4px;

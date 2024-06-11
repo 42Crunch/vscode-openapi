@@ -7,17 +7,19 @@ export type NamedEnvironment = { name: string; environment: Environment };
 
 export type EnvironmentStack = NamedEnvironment[];
 
+export type VariableLocation = { type: string; path: Path };
+
 export type LookupResult = {
   name: string;
   value: unknown;
-  location: Path;
+  location: VariableLocation;
   offset: number;
-  context: string;
+  context: { type: string };
 };
 
 export type LookupFailure = {
   name: string;
-  location: Path;
+  location: VariableLocation;
 };
 
 export type ReplacementResult<T> = {

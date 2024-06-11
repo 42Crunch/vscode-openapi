@@ -8,6 +8,7 @@ import {
   PlaybookEnvStack,
   PlaybookVariableAssignment,
   PlaybookVariableFailedAssignment,
+  PlaybookVariableDefinitionLocation,
   PlaybookVariableSuccessfullAssignment,
 } from "../../../../core/playbook/playbook-env";
 import { TriangleExclamation } from "../../../../icons";
@@ -27,7 +28,11 @@ export default function VariableAssignments({ assignment }: { assignment: Playbo
   );
 }
 
-function renderAssignments(id: string, assignments: PlaybookVariableAssignment[], key: number) {
+function renderAssignments(
+  id: PlaybookVariableDefinitionLocation,
+  assignments: PlaybookVariableAssignment[],
+  key: number
+) {
   return assignments.map((assignment, index) => (
     <React.Fragment key={`${key}-${index}`}>
       {assignment.error !== undefined
@@ -38,7 +43,7 @@ function renderAssignments(id: string, assignments: PlaybookVariableAssignment[]
 }
 
 function renderSuccessfullAssignment(
-  id: string,
+  id: PlaybookVariableDefinitionLocation,
   assignment: PlaybookVariableSuccessfullAssignment
 ) {
   return (
@@ -50,7 +55,10 @@ function renderSuccessfullAssignment(
   );
 }
 
-function renderFailedAssignment(id: string, assignment: PlaybookVariableFailedAssignment) {
+function renderFailedAssignment(
+  id: PlaybookVariableDefinitionLocation,
+  assignment: PlaybookVariableFailedAssignment
+) {
   return (
     <React.Fragment>
       <div>{assignment.name}</div>

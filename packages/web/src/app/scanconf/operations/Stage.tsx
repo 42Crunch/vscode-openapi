@@ -158,17 +158,16 @@ export default function Stage({
                 title: "Response processing",
                 content: <ResponseProcessing editable responseCodes={responseCodes} />,
               },
-              // TODO re-enable when VariableUsed UI is improved
-              // {
-              //   id: "variables",
-              //   title: "Variables used",
-              //   content: (
-              //     <VariableUsed
-              //       missing={result?.variablesReplaced?.missing}
-              //       found={result?.variablesReplaced?.found}
-              //     />
-              //   ),
-              // },
+              {
+                id: "variables",
+                title: "Variables used",
+                content: (
+                  <VariableUsed
+                    missing={result?.variablesReplaced?.missing}
+                    found={result?.variablesReplaced?.found}
+                  />
+                ),
+              },
             ]}
           />
         </CollapsibleCard>

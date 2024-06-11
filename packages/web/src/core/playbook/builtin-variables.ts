@@ -1,5 +1,7 @@
 import { Path, findByPath } from "@xliic/preserving-json-yaml-parser";
 
+import { VariableLocation } from "@xliic/common/env";
+
 export const DynamicVariableNames = [
   "$randomString",
   "$randomuint",
@@ -11,11 +13,11 @@ export const DynamicVariableNames = [
 
 export type DynamicVariableName = (typeof DynamicVariableNames)[number];
 
-export type FakeMaker = (location: Path) => { body: unknown; parameters: unknown };
+export type FakeMaker = () => { body: unknown; parameters: unknown };
 
 export const DynamicVariables: Record<
   DynamicVariableName,
-  (object: unknown, location: Path, fakerMaker: FakeMaker) => void
+  (object: unknown, location: VariableLocation, fakerMaker: FakeMaker) => void
 > = {
   $randomString: () => generateRandomString(20),
   $randomuint: () => getRandomUint32(),
@@ -25,13 +27,18 @@ export const DynamicVariables: Record<
   $randomFromSchema: randomFromSchema,
 };
 
-function randomFromSchema(object: unknown, location: Path, fakerMaker: FakeMaker): unknown {
-  const fake = fakerMaker(location);
-  if (location?.[0] === "body" && location?.[1] === "value") {
-    return findByPath(fake.body as any, location.slice(2)); // trim body, value
-  } else if (location[0] === "parameters") {
-    const name = findByPath(object as any, [...location.slice(0, -1), "key"]);
-    return (fake.parameters as any)[location[1]][name];
+function randomFromSchema(
+  object: unknown,
+  location: VariableLocation,
+  fakerMaker: FakeMaker
+): unknown {
+  const fake = fakerMaker();
+  if (location.type == "body") {
+    return findByPath(fake.body as any, location.path);
+  } else if (location.type === "parameters") {
+    // TESTME
+    const name = findByPath(object as any, ["parameters", ...location.path.slice(0, -1), "key"]);
+    return (fake.parameters as any)[location.path[0]][name];
   }
 }
 

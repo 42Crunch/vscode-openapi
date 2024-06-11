@@ -19,7 +19,7 @@ export type PlaybookVariableAssignment =
   | PlaybookVariableFailedAssignment;
 
 export type PlaybookEnv = {
-  id: string;
+  id: PlaybookVariableDefinitionLocation;
   env: Environment;
   assignments: PlaybookVariableAssignments;
 };
@@ -27,7 +27,27 @@ export type PlaybookVariableAssignments = PlaybookVariableAssignment[];
 
 export type PlaybookEnvStack = PlaybookEnv[];
 
-export type EnvStackLookupResult = { context: string; value: unknown; name: string };
+export type EnvStackLookupResult = {
+  context: PlaybookVariableDefinitionLocation;
+  value: unknown;
+  name: string;
+};
+
+export type PlaybookStageVariableLocation =
+  | { type: "playbook-request"; name: string; step: number; responseCode: string }
+  | { type: "playbook-stage"; name: string; step: number; responseCode: string };
+
+export type PlaybookVariableDefinitionLocation =
+  | { type: "global-environment" }
+  | { type: "built-in" }
+  | { type: "try-inputs" }
+  | { type: "stage-environment" }
+  | { type: "request-environment" }
+  | PlaybookStageVariableLocation;
+
+export type PlaybookVariableUseLocation =
+  | { type: "stage-environment" }
+  | { type: "request-environment" };
 
 export function lookup(
   envStack: PlaybookEnvStack,

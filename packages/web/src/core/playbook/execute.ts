@@ -128,7 +128,7 @@ async function* executePlaybook(
     );
 
     const stageEnv: PlaybookEnv = {
-      id: "stage-environment",
+      id: { type: "stage-environment" },
       env: replacedStageEnv.value,
       // FIXME can we make replaceEnvVariables return assignments?
       assignments: [],
@@ -143,7 +143,7 @@ async function* executePlaybook(
     );
 
     const requestEnv: PlaybookEnv = {
-      id: "request-environment",
+      id: { type: "request-environment" },
       env: replacedRequestEnv.value,
       assignments: [],
     };
@@ -235,7 +235,7 @@ async function* executePlaybook(
     }
 
     const [requestAssignments, requestAssignmentsError] = assignVariables(
-      `playbook-${name}-step-${i}-request`,
+      { type: "playbook-request", name, step: i, responseCode: "default" },
       request.responses,
       httpRequest,
       response,
@@ -266,7 +266,7 @@ async function* executePlaybook(
     }
 
     const [stepAssignments, stepAssignmentsError] = assignVariables(
-      `playbook-${name}-step-${i}`,
+      { type: "playbook-stage", name, step: i, responseCode: "default" },
       step.responses,
       httpRequest,
       response,
@@ -468,7 +468,7 @@ export function makeEnvEnv(
   }
 
   return {
-    environment: { id: "environment", assignments: [], env: result },
+    environment: { id: { type: "global-environment" }, assignments: [], env: result },
     simple,
     missing,
   };

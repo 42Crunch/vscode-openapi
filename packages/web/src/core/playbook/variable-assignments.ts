@@ -10,6 +10,7 @@ import { NullableResult, Result } from "@xliic/result";
 import {
   PlaybookEnv,
   PlaybookEnvStack,
+  PlaybookStageVariableLocation,
   PlaybookVariableAssignments,
   PlaybookVariableFailedAssignment,
 } from "./playbook-env";
@@ -17,7 +18,7 @@ import { MockHttpResponse, MockHttpResponseType } from "./mock-http";
 import { getHttpResponseRange } from "@xliic/openapi";
 
 export function assignVariables(
-  id: string,
+  id: PlaybookStageVariableLocation,
   responses: Playbook.Responses | undefined,
   httpRequest: HttpRequest,
   httpResponse: HttpResponse | MockHttpResponseType,
@@ -33,7 +34,7 @@ export function assignVariables(
 
   for (const [code, response] of matchingResponses) {
     const [env, assignmentError] = assignValues(
-      `${id}-${code}`,
+      { ...id, responseCode: code },
       response,
       httpRequest,
       httpResponse,
@@ -80,7 +81,7 @@ function checkResponseCodeMatch(
 }
 
 function assignValues(
-  id: string,
+  id: PlaybookStageVariableLocation,
   response: Playbook.Response,
   httpRequest: HttpRequest,
   httpResponse: HttpResponse | MockHttpResponseType,
