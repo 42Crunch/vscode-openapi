@@ -2,9 +2,9 @@ import * as z from "zod";
 
 import { TagRegex } from "@xliic/common/platform";
 
-import Textarea from "../../../components/Textarea";
 import { ConfigScreen } from "../../../features/config/slice";
 import { Container, Title } from "../layout";
+import Textarea from "../../../new-components/fat-fields/Textarea";
 
 export function MandatoryTags() {
   return (

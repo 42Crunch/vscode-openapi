@@ -11,7 +11,7 @@ import ConnectionTestBanner from "../ConnectionTestBanner";
 import { Container, Test, Title } from "../layout";
 import { RadioGroup } from "../../../components/RadioGroup";
 import { useWatch } from "react-hook-form";
-import Textarea from "../../../components/Textarea";
+import Textarea from "../../../new-components/fat-fields/Textarea";
 
 function PlatformConnection() {
   const dispatch = useFeatureDispatch();
