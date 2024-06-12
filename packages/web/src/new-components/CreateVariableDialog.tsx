@@ -5,6 +5,7 @@ import { ENV_VAR_NAME_REGEX, ENV_VAR_NAME_REGEX_MESSAGE } from "../core/playbook
 
 import FormDialog from "./FormDialog";
 import Input from "./fat-fields/Input";
+import Textarea from "./fat-fields/Textarea";
 
 export default function CreateVariableDialog({
   open,
@@ -26,6 +27,7 @@ export default function CreateVariableDialog({
   const schema = z.object({
     varname: z
       .string()
+      .min(1)
       .regex(ENV_VAR_NAME_REGEX(), {
         message: ENV_VAR_NAME_REGEX_MESSAGE,
       })
@@ -50,7 +52,7 @@ export default function CreateVariableDialog({
     >
       <Container>
         <Input label="Name" name="varname" />
-        <Input label="JSON Pointer" name="jsonPointer" />
+        <Textarea label="JSON Pointer" name="jsonPointer" />
       </Container>
     </FormDialog>
   );
