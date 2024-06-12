@@ -160,7 +160,7 @@ export default function Stage({
               },
               {
                 id: "variables",
-                title: "Variables used",
+                title: "Context",
                 content: (
                   <VariableUsed
                     missing={result?.variablesReplaced?.missing}

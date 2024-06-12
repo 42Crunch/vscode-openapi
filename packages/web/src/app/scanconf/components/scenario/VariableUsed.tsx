@@ -69,13 +69,13 @@ function formatLocation(location: PlaybookVariableDefinitionLocation) {
   } else if (location.type === "try-inputs") {
     return "Try Inputs";
   } else if (location.type === "stage-environment") {
-    return "Environment of this scenario step";
+    return "Environment of the current step";
   } else if (location.type === "request-environment") {
-    return "Environment of the Operation of this scenarion step";
+    return "Environment of the Operation in the current step";
   } else if (location.type === "playbook-request") {
-    return `Operation in scenario step ${location.step + 1}`;
+    return `Operation in step ${location.step + 1}`;
   } else if (location.type === "playbook-stage") {
-    return `Scenario step ${location.step + 1}`;
+    return `Step ${location.step + 1}`;
   }
 }
 
