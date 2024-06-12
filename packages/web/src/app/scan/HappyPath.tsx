@@ -24,6 +24,8 @@ export function HappyPath({ operation }: { operation: RuntimeOperationReport }) 
     responsePayloadMatchesContract = outcome?.conformant ? "Yes" : "No";
   }
 
+  const excessiveDataExposure = outcome?.excessiveDataExposure;
+
   return (
     <Container>
       <Item>
@@ -41,6 +43,11 @@ export function HappyPath({ operation }: { operation: RuntimeOperationReport }) 
       <Item>
         <div>Response matches API Contract</div>
         <div>{responsePayloadMatchesContract}</div>
+      </Item>
+
+      <Item>
+        <div>Excessive data exposure found</div>
+        <div>{excessiveDataExposure ? "Yes" : "No"}</div>
       </Item>
 
       {request?.curl && (

@@ -32,6 +32,9 @@ export default function ScanIssue({
 
   const responseCodeExpected = outcome?.status === "correct";
   const conformsToContract = outcome?.conformant;
+  const outcomeError = outcome?.error;
+  const excessiveDataExposure = outcome?.excessiveDataExposure;
+
   const failed = !(responseCodeExpected && conformsToContract);
 
   let contentTypeFound = "N/A";
@@ -53,8 +56,6 @@ export default function ScanIssue({
         ? "No"
         : "Yes";
   }
-
-  const outcomeError = outcome?.error;
 
   return (
     <Container>
@@ -114,6 +115,17 @@ export default function ScanIssue({
                     </>
                   )}
                 </BottomItem>
+                <BottomItem>
+                  {excessiveDataExposure ? (
+                    <>
+                      <ExclamationCircle /> Excessive data exposure: Yes
+                    </>
+                  ) : (
+                    <>
+                      <Check /> Excessive data exposure: No
+                    </>
+                  )}
+                </BottomItem>
               </>
             )}
           </BottomDescription>
@@ -150,6 +162,11 @@ export default function ScanIssue({
               <Item>
                 <div>Response matches API Contract</div>
                 <div>{responsePayloadMatchesContract}</div>
+              </Item>
+
+              <Item>
+                <div>Excessive data exposure found</div>
+                <div>{excessiveDataExposure ? "Yes" : "No"}</div>
               </Item>
 
               {outcome?.apiResponseAnalysis?.[0]?.responseDescription && (
