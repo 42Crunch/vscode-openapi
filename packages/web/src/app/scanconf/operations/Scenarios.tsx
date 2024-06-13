@@ -2,7 +2,6 @@ import styled from "styled-components";
 
 import { Playbook } from "@xliic/scanconf";
 
-import { Menu, MenuItem } from "../../../new-components/Menu";
 import { TabContainer } from "../../../new-components/Tabs";
 import { findResult } from "../playbook-execution-handler";
 import * as actions from "../slice";
@@ -70,13 +69,15 @@ export default function Scenarios({
           goToRequest={goToRequest}
           fuzzing
         />
-        <AddRequest
-          operationIds={operationIds}
-          requestIds={requestIds}
-          onSelect={(selected) =>
-            addStage({ container: "operationScenarios", operationId, scenarioIndex }, selected)
-          }
-        />
+        <PickOperation>
+          <AddRequest
+            operationIds={operationIds}
+            requestIds={requestIds}
+            onSelect={(selected) =>
+              addStage({ container: "operationScenarios", operationId, scenarioIndex }, selected)
+            }
+          />
+        </PickOperation>
       </Container>
     ),
   }));
@@ -95,4 +96,8 @@ const Container = styled.div`
   flex-direction: column;
   gap: 8px;
   margin-top: 8px;
+`;
+
+const PickOperation = styled.div`
+  margin-left: 18px;
 `;

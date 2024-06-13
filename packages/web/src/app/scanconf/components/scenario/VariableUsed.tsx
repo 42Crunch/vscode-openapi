@@ -9,9 +9,11 @@ import { PlaybookVariableDefinitionLocation } from "../../../../core/playbook/pl
 export default function VariableUsed({
   found,
   missing,
+  currentStep,
 }: {
   found: LookupResult[] | undefined;
   missing: LookupFailure[] | undefined;
+  currentStep: number;
 }) {
   const uniqueFound =
     found !== undefined
@@ -23,6 +25,9 @@ export default function VariableUsed({
       ? [...new Map(missing.map((entry) => [entry.name, entry])).values()]
       : undefined;
 
+  uniqueFound?.sort((a, b) => a.name.localeCompare(b.name));
+  uniqueMissing?.sort((a, b) => a.name.localeCompare(b.name));
+
   return (
     <Container>
       <Header>
@@ -30,7 +35,7 @@ export default function VariableUsed({
         <div>Variable name</div>
         <div>Location where the variable is defined</div>
       </Header>
-      {uniqueFound?.map(renderFound)}
+      {uniqueFound?.map((value, index) => renderFound(value, index, currentStep))}
       {uniqueMissing?.map(renderMissing)}
     </Container>
   );
@@ -52,16 +57,17 @@ function renderMissing(value: LookupFailure, index: number) {
   );
 }
 
-function renderFound(value: LookupResult, index: number) {
+function renderFound(value: LookupResult, index: number, currentStep: number) {
   return (
     <Row key={index}>
       <div></div>
       <div>{value.name}</div>
-      <div>{formatLocation(value.context as PlaybookVariableDefinitionLocation)}</div>
+      <div>{formatLocation(value.context as PlaybookVariableDefinitionLocation, currentStep)}</div>
     </Row>
   );
 }
-function formatLocation(location: PlaybookVariableDefinitionLocation) {
+
+function formatLocation(location: PlaybookVariableDefinitionLocation, currentStep: number) {
   if (location.type === "global-environment") {
     return "Global Environment";
   } else if (location.type === "built-in") {
@@ -69,13 +75,32 @@ function formatLocation(location: PlaybookVariableDefinitionLocation) {
   } else if (location.type === "try-inputs") {
     return "Try Inputs";
   } else if (location.type === "stage-environment") {
-    return "Environment of the current step";
+    return `Scenario / Step ${currentStep + 1} / Environment`;
   } else if (location.type === "request-environment") {
-    return "Environment of the Operation in the current step";
+    return `Scenario / Step ${currentStep + 1} / Operation / Environment`;
   } else if (location.type === "playbook-request") {
-    return `Operation in step ${location.step + 1}`;
+    return `${formatScenarioName(location.name)} / Step ${
+      location.step + 1
+    } / Operation / Response processing`;
   } else if (location.type === "playbook-stage") {
-    return `Step ${location.step + 1}`;
+    return `${formatScenarioName(location.name)} / Step ${location.step + 1} / Response processing`;
+  }
+}
+
+function formatScenarioName(name: string) {
+  console.log(name);
+  if (name === "operationScenarios") {
+    return "Scenario";
+  } else if (name === "operationBefore") {
+    return "Before block";
+  } else if (name === "operationAfter") {
+    return "After block";
+  } else if (name === "before") {
+    return "Global before block";
+  } else if (name === "after") {
+    return "Global after block";
+  } else if (name === "credential") {
+    return "Credential";
   }
 }
 

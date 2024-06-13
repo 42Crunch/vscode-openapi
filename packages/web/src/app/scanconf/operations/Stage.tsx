@@ -32,6 +32,7 @@ export default function Stage({
   operations,
   requests,
   goToRequest,
+  stageIndex,
 }: {
   stage: Playbook.StageReference;
   location: Playbook.StageLocation;
@@ -43,6 +44,7 @@ export default function Stage({
   operations: Playbook.Bundle["operations"];
   requests: Playbook.Bundle["requests"];
   goToRequest: (req: Playbook.RequestRef) => void;
+  stageIndex: number;
 }) {
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "stage",
@@ -81,96 +83,100 @@ export default function Stage({
       wrapFormData={wrapPlaybookStage}
       unwrapFormData={unwrapPlaybookStage}
     >
-      <Container
-        ref={drag}
-        style={{
-          opacity: isDragging ? 0.5 : 1,
-          cursor: isDragging ? "move" : "auto",
-        }}
-      >
-        <CollapsibleCard>
-          <Description>
-            <span>
-              {stage.ref.id}
-              <Link
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  goToRequest(stage.ref);
-                }}
-              />
-            </span>
-            <Icons onClick={(e) => e.stopPropagation()}>
-              {missingVariables.length > 0 && (
-                <StageError
-                  message="Unset variables"
-                  description={`There are unset variables in this step of the scenario. You can set their values in the 'Environment' section of the step, or in the 'Response processing' section of the previous steps.`}
+      <Container>
+        <Position>{stageIndex + 1}</Position>
+        <StageContainer
+          ref={drag}
+          style={{
+            opacity: isDragging ? 0.5 : 1,
+            cursor: isDragging ? "move" : "auto",
+          }}
+        >
+          <CollapsibleCard>
+            <Description>
+              <span>
+                {stage.ref.id}
+                <Link
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    goToRequest(stage.ref);
+                  }}
                 />
-              )}
-              {refTarget === undefined && (
-                <StageError
-                  message={`${stage.ref.type}/${stage.ref.id} is missing`}
-                  description="Target of a reference is missing"
-                />
-              )}
-              <ExpectedResponse>
-                <span>Expected Response</span>
-                <DownshiftSelect
-                  name="expectedResponse"
-                  options={responseCodeOptions}
-                  placeholder={defaultResponseCode}
-                />
-              </ExpectedResponse>
-              {fuzzing && (
-                <Fuzzing>
-                  <span>Fuzzing</span>
-                  <Switch name="fuzzing" />
-                </Fuzzing>
-              )}
-              <Grab className="grab">
-                <GripVertical />
-              </Grab>
-              <Menu>
-                <MenuItem onClick={(e) => e.stopPropagation()} onSelect={removeStage}>
-                  <TrashCan />
-                  Delete
-                </MenuItem>
-              </Menu>
-            </Icons>
-          </Description>
-          <TabContainer
-            tabs={[
-              {
-                id: "environment",
-                title: "Environment",
-                content: (
-                  <Environment
-                    name="environment"
-                    variables={availableVariables}
-                    missing={missingVariables}
+              </span>
+              <Icons onClick={(e) => e.stopPropagation()}>
+                {missingVariables.length > 0 && (
+                  <StageError
+                    message="Unset variables"
+                    description={`There are unset variables in this step of the scenario. You can set their values in the 'Environment' section of the step, or in the 'Response processing' section of the previous steps.`}
                   />
-                ),
-                counter: missingVariables.length,
-                counterKind: "error",
-              },
-              {
-                id: "responses",
-                title: "Response processing",
-                content: <ResponseProcessing editable responseCodes={responseCodes} />,
-              },
-              {
-                id: "variables",
-                title: "Context",
-                content: (
-                  <VariableUsed
-                    missing={result?.variablesReplaced?.missing}
-                    found={result?.variablesReplaced?.found}
+                )}
+                {refTarget === undefined && (
+                  <StageError
+                    message={`${stage.ref.type}/${stage.ref.id} is missing`}
+                    description="Target of a reference is missing"
                   />
-                ),
-              },
-            ]}
-          />
-        </CollapsibleCard>
+                )}
+                <ExpectedResponse>
+                  <span>Expected Response</span>
+                  <DownshiftSelect
+                    name="expectedResponse"
+                    options={responseCodeOptions}
+                    placeholder={defaultResponseCode}
+                  />
+                </ExpectedResponse>
+                {fuzzing && (
+                  <Fuzzing>
+                    <span>Fuzzing</span>
+                    <Switch name="fuzzing" />
+                  </Fuzzing>
+                )}
+                <Grab className="grab">
+                  <GripVertical />
+                </Grab>
+                <Menu>
+                  <MenuItem onClick={(e) => e.stopPropagation()} onSelect={removeStage}>
+                    <TrashCan />
+                    Delete
+                  </MenuItem>
+                </Menu>
+              </Icons>
+            </Description>
+            <TabContainer
+              tabs={[
+                {
+                  id: "environment",
+                  title: "Environment",
+                  content: (
+                    <Environment
+                      name="environment"
+                      variables={availableVariables}
+                      missing={missingVariables}
+                    />
+                  ),
+                  counter: missingVariables.length,
+                  counterKind: "error",
+                },
+                {
+                  id: "responses",
+                  title: "Response processing",
+                  content: <ResponseProcessing editable responseCodes={responseCodes} />,
+                },
+                {
+                  id: "variables",
+                  title: "Context",
+                  content: (
+                    <VariableUsed
+                      currentStep={stageIndex}
+                      missing={result?.variablesReplaced?.missing}
+                      found={result?.variablesReplaced?.found}
+                    />
+                  ),
+                },
+              ]}
+            />
+          </CollapsibleCard>
+        </StageContainer>
       </Container>
     </Form>
   );
@@ -210,7 +216,22 @@ function getDefaultResponseCode(
 }
 
 const Container = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+const Position = styled.div`
+  font-weight: 400;
+  font-size: 12px;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+`;
+
+const StageContainer = styled.div`
   background-color: var(${ThemeColorVariables.background});
+  flex: 1;
   .grab,
   .menu {
     opacity: 0;

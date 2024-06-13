@@ -67,6 +67,7 @@ export default function Scenario({
               fuzzing={fuzzing}
               operations={operations}
               requests={requests}
+              stageIndex={stageIndex}
             />
           </React.Fragment>
         );
