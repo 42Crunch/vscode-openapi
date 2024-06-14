@@ -27,16 +27,14 @@ export function MandatoryTags() {
   );
 }
 
-const schema = z
-  .object({
-    platformMandatoryTags: z
-      .string()
-      .regex(
-        new RegExp(TagRegex),
-        "Tags are invalid, must be a comma or space separated list of key:value pairs, e.g. env:dev app:myapp"
-      ),
-  })
-  .catchall(z.unknown());
+const schema = z.object({
+  platformMandatoryTags: z
+    .string()
+    .regex(
+      new RegExp(TagRegex),
+      "Tags are invalid, must be a comma or space separated list of key:value pairs, e.g. env:dev app:myapp"
+    ),
+});
 
 export default function screen(): ConfigScreen {
   return {

@@ -34,24 +34,22 @@ export default function screen(namingConvention?: NamingConvention): ConfigScree
 
   const convention = namingConvention || emptyNamingConvention;
 
-  const schema = z
-    .object({
-      platformTemporaryCollectionName: z.intersection(
-        z
-          .string()
-          .regex(
-            new RegExp(DefaultCollectionNamingPattern),
-            `Collection name is invalid, must match default pattern: ${DefaultCollectionNamingPattern}`
-          ),
-        z
-          .string()
-          .regex(
-            new RegExp(convention.pattern),
-            `Collection name does not match your origanization naming convention. Example of a valid name: ${convention.example}`
-          )
-      ),
-    })
-    .catchall(z.unknown());
+  const schema = z.object({
+    platformTemporaryCollectionName: z.intersection(
+      z
+        .string()
+        .regex(
+          new RegExp(DefaultCollectionNamingPattern),
+          `Collection name is invalid, must match default pattern: ${DefaultCollectionNamingPattern}`
+        ),
+      z
+        .string()
+        .regex(
+          new RegExp(convention.pattern),
+          `Collection name does not match your origanization naming convention. Example of a valid name: ${convention.example}`
+        )
+    ),
+  });
 
   return {
     id: "temporary-collection",

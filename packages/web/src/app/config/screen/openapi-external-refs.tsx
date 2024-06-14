@@ -163,11 +163,9 @@ const RevealTokenInput = styled.button`
   }
 `;
 
-const schema = z
-  .object({
-    approvedHosts: z.array(z.unknown()),
-  })
-  .catchall(z.unknown());
+const schema = z.object({
+  approvedHosts: z.array(z.unknown()),
+});
 
 const screen: ConfigScreen = {
   id: "openapi-external-refs",

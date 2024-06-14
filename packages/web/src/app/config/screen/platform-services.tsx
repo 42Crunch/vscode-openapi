@@ -57,7 +57,13 @@ export function PlatformServices() {
   );
 }
 
-const schema = z.object({}).catchall(z.unknown());
+const schema = z.object({
+  platformServices: z.object({
+    source: z.enum(["auto", "manual"]),
+    manual: z.string(),
+    auto: z.unknown(),
+  }),
+});
 
 const screen: ConfigScreen = {
   id: "platform-services",
