@@ -34,6 +34,7 @@ function PlatformConnection() {
             { value: "anond-token", label: "Freemium token" },
             { value: "api-token", label: "Platform IDE token" },
           ]}
+          direction="row"
         />
 
         {platformAuthType === "anond-token" && (

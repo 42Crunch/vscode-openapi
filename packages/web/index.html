@@ -1,22 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Scan UI</title>
-    <link rel="stylesheet" type="text/css" href="/scan-ui-sample/vscode-styles.css">
-    <link rel="stylesheet" type="text/css" href="/scan-ui-sample/xliic-vars.css">
-  </head>
-  <body>
+    <head>
+      <meta charset="UTF-8">
+      <meta http-equiv="Content-Security-Policy"  content="default-src 'none';  img-src https: data: http://localhost:3000/; script-src http://localhost:3000/ 'unsafe-inline'; style-src http://localhost:3000/ 'unsafe-inline'; connect-src http: https: ws:">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <base href="http://localhost:3000/">
+      <script type="module">
+		  import RefreshRuntime from "/@react-refresh"
+		  RefreshRuntime.injectIntoGlobalHook(window)
+		  window.$RefreshReg$ = () => {}
+		  window.$RefreshSig$ = () => (type) => type
+		  window.__vite_plugin_react_preamble_installed__ = true
+      </script>
+	  <title>Config UI</title>
+      <link rel="stylesheet" type="text/css" href="/scan-ui-sample/vscode-styles.css">
+      <link rel="stylesheet" type="text/css" href="/scan-ui-sample/xliic-vars.css">
+	  <script type="module" src="/@vite/client"></script>
+      <style>
+		:root { --xliic-foreground: var(--vscode-foreground);
+		--xliic-disabledForeground: var(--vscode-disabledForeground);
+		--xliic-background: var(--vscode-editor-background);
+		--xliic-border: var(--vscode-editorGroup-border);
+		--xliic-focusBorder: var(--vscode-focusBorder);
+		--xliic-buttonBorder: var(--vscode-button-border);
+		--xliic-buttonBackground: var(--vscode-button-background);
+		--xliic-buttonForeground: var(--vscode-button-foreground);
+		--xliic-buttonHoverBackground: var(--vscode-button-hoverBackground);
+		--xliic-buttonSecondaryBackground: var(--vscode-button-secondaryBackground);
+		--xliic-buttonSecondaryForeground: var(--vscode-button-secondaryForeground);
+		--xliic-buttonSecondaryHoverBackground: var(--vscode-button-secondaryHoverBackground);
+		--xliic-inputBackground: var(--vscode-input-background);
+		--xliic-inputForeground: var(--vscode-input-foreground);
+		--xliic-inputBorder: var(--vscode-input-border);
+		--xliic-inputPlaceholderForeground: var(--vscode-input-placeholderForeground);
+		--xliic-tabBorder: var(--vscode-tab-border);
+		--xliic-tabActiveBackground: var(--vscode-tab-activeBackground);
+		--xliic-tabActiveForeground: var(--vscode-tab-activeForeground);
+		--xliic-tabInactiveBackground: var(--vscode-tab-inactiveBackground);
+		--xliic-tabInactiveForeground: var(--vscode-tab-inactiveForeground);
+		--xliic-dropdownBackground: var(--vscode-dropdown-background);
+		--xliic-dropdownBorder: var(--vscode-dropdown-border);
+		--xliic-dropdownForeground: var(--vscode-dropdown-foreground);
+		--xliic-checkboxBackground: var(--vscode-checkbox-background);
+		--xliic-checkboxBorder: var(--vscode-checkbox-border);
+		--xliic-checkboxForeground: var(--vscode-checkbox-foreground);
+		--xliic-errorForeground: var(--vscode-errorForeground);
+		--xliic-errorBackground: var(--vscode-inputValidation-errorBackground);
+		--xliic-errorBorder: var(--vscode-inputValidation-errorBorder);
+		--xliic-listActiveSelectionBackground: var(--vscode-list-activeSelectionBackground);
+		--xliic-listActiveSelectionForeground: var(--vscode-list-activeSelectionForeground);
+		--xliic-listHoverBackground: var(--vscode-list-hoverBackground);
+		--xliic-contrastActiveBorder: var(--vscode-contrastActiveBorder);
+		--xliic-linkForeground: var(--vscode-textLink-foreground);
+		--xliic-linkActiveForeground: var(--vscode-textLink-activeForeground);
+		--xliic-badgeForeground: var(--vscode-badge-foreground);
+		--xliic-badgeBackground: var(--vscode-badge-background);
+		--xliic-notificationsForeground: var(--vscode-notifications-foreground);
+		--xliic-notificationsBackground: var(--vscode-notifications-background);
+		--xliic-notificationsBorder: var(--vscode-notifications-border);
+		--xliic-fontSize: var(--vscode-font-size); }
+      </style>
+    </head>
+    <body>
     <div id="root"></div>
-    <script type="module" src="/src/app/scanconf/index.tsx"></script>
+    <script type="module" src="/src/app/config/index.tsx"></script>
     <script>
-      window.addEventListener("DOMContentLoaded", async (event) => {
-        const oas = await (await fetch("/scan-ui-sample/oas.json")).json();
-        const scanconf = await(await fetch("/scan-ui-sample/scanconf.json")).text();
-
-        const host = { postMessage: (message) => console.log("received webapp message", message) };
-
+      window.addEventListener("DOMContentLoaded", (event) => {
+	  
+		const host = { postMessage: (message) => console.log("received webapp message", message) };
         window.renderWebView(host, { kind: "light" });
 
         window.postMessage({
@@ -27,15 +78,65 @@
         });
 
         window.postMessage({
-          command: "showScanconfOperation",
-          payload: {
-            method: "get",
-            path: "/api/user/info",
-            oas,
-            scanconf
-          }
-        });        
+			command: "loadConfig",
+			payload: {
+				"platformUrl": "https://platform.dev.42crunch.com/",
+				"platformAuthType": "api-token",
+				"platformApiToken": "api_9c4c081e-6b3d-41de-86e8-c28d1ba704c6",
+				"anondToken": "",
+				"insecureSslHostnames": [
+					"www.aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.com",
+					"localhost",
+					"www.bbbbbb.com",
+				],
+				"platformServices": {
+					"source": "auto",
+					"manual": "",
+					"auto": "services.dev.42crunch.com:8001"
+				},
+				"scandManager": {
+					"url": "http://127.0.0.1:54470",
+					"auth": "none",
+					"timeout": 300,
+					"header": {
+						"name": "",
+						"value": ""
+					}
+				},
+				"scanRuntime": "cli",
+				"scanImage": "42crunch/scand-agent:v2.0.0",
+				"docker": {
+					"replaceLocalhost": true,
+					"useHostNetwork": true
+				},
+				"platform": "win32",
+				"cli": {
+					"location": "C:\\Users\\viach\\AppData\\Roaming\\42Crunch\\bin\\42c-ast.exe",
+					"found": true
+				},
+				"repository": "https://repo.42crunch.com/downloads",
+				"platformTemporaryCollectionName": "IDE Temp Collection",
+				"platformMandatoryTags": "",
+				"approvedHosts": [
+					{
+						"host": "api.swaggerhub.com",
+						"header": "",
+						"prefix": "",
+						"token": ""
+					},
+					{
+						"host": "testme.org",
+						"header": "Authorization",
+						"prefix": "",
+						"token": ""
+					}
+				],
+				"dataDictionaryPreAuditFix": "never",
+				"defaultPreviewRenderer": "swaggerui",
+				"sortOutlines": true
+			}
+		});		
       });
     </script>
-  </body>
+    </body>
 </html>

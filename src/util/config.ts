@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { Config, ApprovedHostConfiguration } from "@xliic/common/config";
 import { Configuration } from "../configuration";
 import { getCliInfo } from "../platform/cli-ast";
+import { PreviewType } from "../preview";
 
 export async function loadConfig(
   configuration: Configuration,
@@ -34,6 +35,12 @@ export async function loadConfig(
   const derivedAuthType = !anondToken && !!apiToken ? "api-token" : "anond-token";
   const approvedHosts = await getApprovedHostsConfiguration(configuration, secrets);
 
+  const dataDictionaryPreAuditFix = configuration.get<"ask" | "always" | "never">(
+    "dataDictionaryPreAuditFix"
+  );
+  const defaultPreviewRenderer = configuration.get<string>("defaultPreviewRenderer") as PreviewType;
+  const sortOutlines = configuration.get<boolean>("sortOutlines");
+
   return {
     platformUrl,
     platformAuthType: platformAuthType == "" ? derivedAuthType : platformAuthType,
@@ -59,6 +66,9 @@ export async function loadConfig(
     platformTemporaryCollectionName,
     platformMandatoryTags,
     approvedHosts,
+    dataDictionaryPreAuditFix,
+    defaultPreviewRenderer,
+    sortOutlines,
   };
 }
 
@@ -130,6 +140,22 @@ export async function saveConfig(
   }
 
   await processApprovedHosts(configuration, secrets, config.approvedHosts);
+
+  await configuration.update(
+    "dataDictionaryPreAuditFix",
+    config.dataDictionaryPreAuditFix,
+    vscode.ConfigurationTarget.Global
+  );
+  await configuration.update(
+    "defaultPreviewRenderer",
+    config.defaultPreviewRenderer,
+    vscode.ConfigurationTarget.Global
+  );
+  await configuration.update(
+    "sortOutlines",
+    config.sortOutlines,
+    vscode.ConfigurationTarget.Global
+  );
 }
 
 export function deriveServices(platformUrl: string): string {

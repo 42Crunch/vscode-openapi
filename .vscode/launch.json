@@ -21,7 +21,6 @@
         "script": "watch"
       },
       "env": {
-        "XLIIC_WEB_VIEW_DEV_MODE": "true"
       }
     },
     {

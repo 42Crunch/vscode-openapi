@@ -14,7 +14,7 @@ type Preview = {
   documentUri: vscode.Uri;
 };
 
-type PreviewType = keyof Previews;
+export type PreviewType = keyof Previews;
 
 type Previews = {
   redoc?: Preview;

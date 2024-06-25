@@ -34,7 +34,10 @@ export type ConfigScreenId =
   | "mandatory-tags"
   | "scan-runtime"
   | "scan-image"
-  | "openapi-external-refs";
+  | "openapi-external-refs"
+  | "openapi-insecure-ssl-hostnames"
+  | "misc-settings"
+  | "data-dictionary";
 
 export type ConfigScreen = {
   id: ConfigScreenId;
@@ -77,6 +80,9 @@ const initialState: ConfigState = {
     platformTemporaryCollectionName: "",
     platformMandatoryTags: "",
     approvedHosts: [],
+    dataDictionaryPreAuditFix: "ask",
+    defaultPreviewRenderer: "swaggerui",
+    sortOutlines: true,
   },
   platformConnectionTestResult: undefined,
   waitingForPlatformConnectionTest: false,
@@ -96,6 +102,9 @@ const initialState: ConfigState = {
     "scan-image": undefined,
     "scan-runtime": undefined,
     "openapi-external-refs": undefined,
+    "openapi-insecure-ssl-hostnames": undefined,
+    "misc-settings": undefined,
+    "data-dictionary": undefined,
   },
   hasErrors: false,
 };
