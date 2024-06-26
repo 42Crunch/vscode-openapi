@@ -88,7 +88,6 @@ function formatLocation(location: PlaybookVariableDefinitionLocation, currentSte
 }
 
 function formatScenarioName(name: string) {
-  console.log(name);
   if (name === "operationScenarios") {
     return "Scenario";
   } else if (name === "operationBefore") {
