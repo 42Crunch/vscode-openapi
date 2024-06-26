@@ -211,7 +211,7 @@ async function securityAudit(
             );
           } else {
             // cli is not available and user chose to cancel download
-            await vscode.window.showErrorMessage(
+            vscode.window.showErrorMessage(
               "42Crunch API Security Testing Binary is required to run Audit."
             );
             return;

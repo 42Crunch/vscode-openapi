@@ -146,9 +146,7 @@ async function editorRunSingleOperationScan(
     !(await ensureCliDownloaded(configuration, secrets))
   ) {
     // cli is not available and user chose to cancel download
-    await vscode.window.showErrorMessage(
-      "42Crunch API Security Testing Binary is required to run Scan."
-    );
+    vscode.window.showErrorMessage("42Crunch API Security Testing Binary is required to run Scan.");
     return;
   }
 
