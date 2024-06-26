@@ -41,8 +41,6 @@ const asyncExecFile = promisify(execFile);
 
 let lastCliUpdateCheckTime = 0;
 const cliUpdateCheckInterval = 1000 * 60 * 60 * 8; // 8 hours
-let lastCliDownloadCheckTime = 0;
-const cliDownloadCheckInterval = 1000 * 60 * 60 * 48; // 48 hours
 
 export async function createScanConfigWithCliBinary(
   scanconfUri: vscode.Uri,
@@ -124,21 +122,12 @@ export async function testCli(): Promise<CliTestResult> {
 
 export async function ensureCliDownloaded(
   configuration: Configuration,
-  secrets: vscode.SecretStorage,
-  forceDownload = false
+  secrets: vscode.SecretStorage
 ): Promise<boolean> {
   const config = await loadConfig(configuration, secrets);
   const info = getCliInfo();
 
   if (!info.found) {
-    // check if we already offered to download
-
-    const currentTime = Date.now();
-    if (!forceDownload && currentTime - lastCliDownloadCheckTime < cliDownloadCheckInterval) {
-      return false;
-    }
-    lastCliDownloadCheckTime = currentTime;
-
     // offer to download
     await delay(100); // workaround for #133073
     const answer = await vscode.window.showInformationMessage(

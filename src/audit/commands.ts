@@ -21,7 +21,6 @@ import { PlatformStore } from "../platform/stores/platform-store";
 import { AuditContext, Bundle, PendingAudits } from "../types";
 import { extractSingleOperation } from "../util/extract";
 import { setDecorations } from "./decoration";
-import { runAnondAudit } from "./runtime/anond";
 import { runCliAudit } from "./runtime/cli";
 import { runPlatformAudit } from "./runtime/platform";
 import { setAudit } from "./service";
@@ -199,7 +198,7 @@ async function securityAudit(
         if ((await chooseAuditRuntime(configuration, secrets)) === "platform") {
           return runPlatformAudit(editor.document, oas, mapping, cache, store);
         } else {
-          // use CLI or fallback to anond
+          // use CLI
           if (await ensureCliDownloaded(configuration, secrets)) {
             return runCliAudit(
               editor.document,
@@ -211,7 +210,11 @@ async function securityAudit(
               isFullAudit
             );
           } else {
-            return runAnondAudit(editor.document, oas, mapping, cache, configuration, progress);
+            // cli is not available and user chose to cancel download
+            await vscode.window.showErrorMessage(
+              "42Crunch API Security Testing Binary is required to run Audit."
+            );
+            return;
           }
         }
       }

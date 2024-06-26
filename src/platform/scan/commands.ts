@@ -143,7 +143,7 @@ async function editorRunSingleOperationScan(
   if (
     (config.platformAuthType === "anond-token" ||
       (config.platformAuthType === "api-token" && config.scanRuntime === "cli")) &&
-    !(await ensureCliDownloaded(configuration, secrets, true))
+    !(await ensureCliDownloaded(configuration, secrets))
   ) {
     // cli is not available and user chose to cancel download
     await vscode.window.showErrorMessage(
