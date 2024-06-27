@@ -168,23 +168,29 @@ function buildWebviewPanel(
         path.join(context.extensionPath, "webview", "generated", "preview", name, "main.js")
       )
     );
-    panel.webview.html = getWebviewContent(panel.webview, index);
+    const style = panel.webview.asWebviewUri(
+      vscode.Uri.file(
+        path.join(context.extensionPath, "webview", "generated", "preview", name, "style.css")
+      )
+    );
+    panel.webview.html = getWebviewContent(panel.webview, index, style);
   });
 }
 
 // Directive connect-src must be set to allow XHR
-function getWebviewContent(webview: vscode.Webview, index: vscode.Uri) {
+function getWebviewContent(webview: vscode.Webview, index: vscode.Uri, style: vscode.Uri) {
   return `<!DOCTYPE html>
   <html lang="en">
   <head>
 	  <meta charset="UTF-8">
-	  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https: data:; script-src ${webview.cspSource}; style-src 'unsafe-inline'; connect-src http: https:;">
+	  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https: data:; script-src ${webview.cspSource}; style-src ${webview.cspSource} 'unsafe-inline'; connect-src http: https:;">
 	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	  <style>
 	    body {
 		  background-color: #FEFEFE;
 	    }
 	  </style>
+    <link href="${style}" rel="stylesheet"/>
   </head>
   <body>
 	<div id="root"></div>

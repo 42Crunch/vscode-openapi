@@ -1,6 +1,5 @@
-import * as React from 'react';
-import { useEffect, useState } from 'react';
-import { RedocStandalone } from 'redoc';
+import { useEffect, useState } from "react";
+import { RedocStandalone } from "redoc";
 
 declare var acquireVsCodeApi: any;
 
@@ -10,16 +9,16 @@ export const Preview = () => {
   useEffect(() => {
     const vscode = acquireVsCodeApi();
 
-    window.addEventListener('message', (event) => {
+    window.addEventListener("message", (event) => {
       const message = event.data;
       switch (message.command) {
-        case 'preview':
+        case "preview":
           const oas = JSON.parse(message.text);
           setOas(oas);
           break;
       }
     });
-    vscode.postMessage({ command: 'init' });
+    vscode.postMessage({ command: "init" });
   }, []);
 
   if (!oas) {

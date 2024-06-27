@@ -1,10 +1,16 @@
 {
-	"compilerOptions": {
-                "esModuleInterop": true,
-                "resolveJsonModule": true,
-		"module": "commonjs",
-		"target": "es6",
-		"lib": ["es6", "dom"],
-                "jsx": "react"
-	}
+  "compilerOptions": {
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx"
+  }
 }
