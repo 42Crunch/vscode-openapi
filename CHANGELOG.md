@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 4.27.0 (June 27, 2024)
+
+- Make API Security Testing Binary required to run Audits
+- Add ability to extract variables in Scan by clicking on the response body values
+- Add 'Context' tab to the Scan UI to show information about variables used by Operation
+
 ## Version 4.26.3 (June 5, 2024)
 
 - Fix issue with text editor contents jerking on code lenses being added/removed during editing #275 
