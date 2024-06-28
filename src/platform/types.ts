@@ -118,6 +118,11 @@ export type Tag = {
   onlyAdminCanTag?: boolean;
 };
 
+export type TagAndSqg = Tag & {
+  auditSqgName?: string;
+  scanSqgName?: string;
+};
+
 export type Category = {
   id: string;
   name: string;

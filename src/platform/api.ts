@@ -7,7 +7,7 @@ import got, { Method, OptionsOfJSONResponseBody, HTTPError } from "got";
 import { AuditCompliance } from "@xliic/common/audit";
 import { NamingConvention } from "@xliic/common/platform";
 
-import { ApiAuditReport, Category, SearchCollectionsResponse } from "./types";
+import { ApiAuditReport, Category, SearchCollectionsResponse, TagAndSqg } from "./types";
 import {
   Api,
   ListCollectionsResponse,
@@ -297,9 +297,28 @@ export async function getDataDictionaryFormats(
   return formats as DataFormats;
 }
 
-export async function getTags(options: PlatformConnection, logger: Logger): Promise<Tag[]> {
-  const { body } = await got(`api/v2/tags`, gotOptions("GET", options, logger));
-  return <Tag[]>(body as any).list;
+export async function getTags(options: PlatformConnection, logger: Logger): Promise<TagAndSqg[]> {
+  const {
+    body: { list: audit },
+  } = <any>await got(`api/v2/sqgs/audit`, gotOptions("GET", options, logger));
+
+  const {
+    body: { list: scan },
+  } = <any>await got(`api/v2/sqgs/scan`, gotOptions("GET", options, logger));
+
+  const {
+    body: { list: tags },
+  } = <any>await got(`api/v2/tags`, gotOptions("GET", options, logger));
+
+  const tagsWithSqgs = tags.map((tag: Tag) => {
+    const auditSqg = audit.find((sqg: any) => sqg.tagId === tag.tagId);
+    const scanSqg = scan.find((sqg: any) => sqg.tagId === tag.tagId);
+    return { ...tag, auditSqgName: auditSqg?.name, scanSqgName: scanSqg?.name };
+  });
+
+  return tagsWithSqgs.filter(
+    (tag: TagAndSqg) => tag.auditSqgName !== undefined || tag.scanSqgName !== undefined
+  );
 }
 
 export async function getCategories(

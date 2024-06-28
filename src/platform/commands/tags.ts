@@ -4,7 +4,7 @@ import { PlatformStore } from "../stores/platform-store";
 import { getApiConfig, makeApiConfig, saveApiConfig } from "../config";
 import { Configuration } from "../../configuration";
 import { Cache } from "../../cache";
-import { Tag } from "../types";
+import { Tag, TagAndSqg } from "../types";
 import { getMandatoryTags } from "../mandatory-tags";
 
 export default (cache: Cache, store: PlatformStore, confiuration: Configuration) => ({
@@ -68,7 +68,7 @@ export default (cache: Cache, store: PlatformStore, confiuration: Configuration)
   },
 });
 
-function getQuickpickItems(tags: Tag[], mandatoryTags: string[]): TagItemOrSeparator[] {
+function getQuickpickItems(tags: TagAndSqg[], mandatoryTags: string[]): TagItemOrSeparator[] {
   const grouped = groupBy(tags, "categoryName");
   const items: TagItemOrSeparator[] = [];
   // sort keys of the grouped object and iterate over each one with for of loop
@@ -85,7 +85,7 @@ function getQuickpickItems(tags: Tag[], mandatoryTags: string[]): TagItemOrSepar
         label,
         categoryName: tag.categoryName,
         isExclusive: tag.isExclusive,
-        detail: tag.tagDescription,
+        detail: formatSqgDetail(tag),
         onlyAdminCanTag: !!tag.onlyAdminCanTag,
         isMandatory,
         description: tag.onlyAdminCanTag ? "(admin only)" : isMandatory ? "(mandatory)" : undefined,
@@ -171,4 +171,14 @@ type TagItemOrSeparator =
 
 function isSelected(item: TagItem, selection: readonly TagItem[]): boolean {
   return selection.some((selected) => selected.label === item.label);
+}
+
+function formatSqgDetail(tag: TagAndSqg): string | undefined {
+  if (tag.auditSqgName && tag.scanSqgName) {
+    return `Audit SQG: ${tag.auditSqgName}, Scan SQG: ${tag.scanSqgName}`;
+  } else if (tag.auditSqgName) {
+    return `Audit SQG: ${tag.auditSqgName}`;
+  } else if (tag.scanSqgName) {
+    return `Scan SQG: ${tag.scanSqgName}`;
+  }
 }
