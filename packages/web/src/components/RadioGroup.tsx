@@ -10,7 +10,7 @@ export type RadioOption = {
   label: string;
 };
 
-export function RadioGroup({ name, options }: { name: string; options: RadioOption[] }) {
+export function RadioGroup({ name, options, direction }: { name: string; options: RadioOption[]; direction: string }) {
   const id = useId();
 
   const { field } = useController({
@@ -18,7 +18,7 @@ export function RadioGroup({ name, options }: { name: string; options: RadioOpti
   });
 
   return (
-    <Group value={field.value} onValueChange={(value) => field.onChange(value)}>
+    <Group value={field.value} onValueChange={(value) => field.onChange(value)} direction={direction}>
       {options.map((option, index) => (
         <Option key={index}>
           <Item value={option.value} id={`${id}-${index}`}>
@@ -33,9 +33,9 @@ export function RadioGroup({ name, options }: { name: string; options: RadioOpti
   );
 }
 
-const Group = styled(RadixRadioGroup.Root)`
+const Group = styled(RadixRadioGroup.Root)<{ direction: string}>`
   display: flex;
-  flex-direction: row;
+  ${({ direction }) => `flex-direction: ${direction};`}
   gap: 8px;
 `;
 

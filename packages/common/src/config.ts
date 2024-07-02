@@ -30,6 +30,9 @@ export type Config = {
   cliDirectoryOverride: string;
   repository: string;
   approvedHosts: ApprovedHostConfiguration[];
+  dataDictionaryPreAuditFix: "ask" | "always" | "never";
+  defaultPreviewRenderer: "swaggerui" | "redoc";
+  sortOutlines: boolean;
 };
 
 export type ConnectionTestResult = { success: true } | { success: false; message: string };

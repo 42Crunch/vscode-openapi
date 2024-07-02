@@ -16,7 +16,10 @@ import temporaryCollectionMaker from "./screen/temporary-collection";
 import mandatoryTagsMaker from "./screen/mandatory-tags";
 import scanRuntime from "./screen/scan-runtime";
 import openapiExternalRefs from "./screen/openapi-external-refs";
+import openapiInsecureSslHostnames from "./screen/insecure-ssl-hosts";
 import { unwrapFormValues, wrapFormValues } from "./util";
+import dataDictionary from "./screen/data-dictionary";
+import miscSettings from "./screen/misc-settings";
 
 export default function Config() {
   const dispatch = useFeatureDispatch();
@@ -29,7 +32,7 @@ export default function Config() {
     {
       id: "platform",
       title: "42Crunch Platform",
-      items: [platformConnection, platformServices, temporaryCollection, mandatoryTags],
+      items: [platformConnection, platformServices, temporaryCollection, mandatoryTags, dataDictionary],
     },
     {
       id: "scan",
@@ -39,7 +42,7 @@ export default function Config() {
     {
       id: "openapi",
       title: "OpenAPI",
-      items: [openapiExternalRefs],
+      items: [openapiExternalRefs, openapiInsecureSslHostnames, miscSettings],
     },
   ];
 
@@ -50,6 +53,9 @@ export default function Config() {
     [temporaryCollection.id]: temporaryCollection,
     [mandatoryTags.id]: mandatoryTags,
     [openapiExternalRefs.id]: openapiExternalRefs,
+    [openapiInsecureSslHostnames.id]: openapiInsecureSslHostnames,
+    [miscSettings.id]: miscSettings,
+    [dataDictionary.id]: dataDictionary,
   };
 
   useEffect(() => {
