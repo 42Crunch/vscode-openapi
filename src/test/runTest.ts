@@ -16,7 +16,7 @@ async function main() {
     // Passed to --extensionTestsPath
     const extensionTestsPath = path.resolve(__dirname, "./suite/index");
 
-    const vscodeExecutablePath = await downloadAndUnzipVSCode("1.66.2");
+    const vscodeExecutablePath = await downloadAndUnzipVSCode("1.70.0");
 
     const [cli, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
     cp.spawnSync(cli, [...args, "--install-extension", "redhat.vscode-yaml"], {
