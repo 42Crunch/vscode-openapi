@@ -64,7 +64,7 @@ const Button = styled.button`
   color: var(${ThemeColorVariables.buttonForeground});
   border: 1px solid var(${ThemeColorVariables.buttonBorder});
   ${({ waiting }: { disabled?: boolean; waiting?: boolean }) => waiting && "gap: 8px;"}
-
+  ${({ disabled }: { disabled?: boolean }) => disabled && "opacity: .4!important;"}
   > span {
     flex: 1;
   }

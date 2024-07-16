@@ -19,12 +19,14 @@ import { setDecorations } from "./decoration";
 import { PlatformStore } from "../platform/stores/platform-store";
 import { AuditCodelensProvider } from "./lens";
 import { Configuration } from "../configuration";
+import { SignUpWebView } from "../webapps/signup/view";
 
 export function activate(
   context: vscode.ExtensionContext,
   auditContext: AuditContext,
   cache: Cache,
   configuration: Configuration,
+  signUpWebView: SignUpWebView,
   reportWebView: AuditWebView,
   store: PlatformStore
 ): vscode.Disposable {
@@ -82,15 +84,32 @@ export function activate(
 
   vscode.window.onDidChangeActiveTextEditor((editor) => update(editor));
 
-  registerSecurityAudit(context, cache, auditContext, pendingAudits, reportWebView, store);
-  registerSingleOperationAudit(context, cache, auditContext, pendingAudits, reportWebView, store);
+  registerSecurityAudit(
+    context,
+    cache,
+    auditContext,
+    pendingAudits,
+    reportWebView,
+    store,
+    signUpWebView
+  );
+  registerSingleOperationAudit(
+    context,
+    cache,
+    auditContext,
+    pendingAudits,
+    reportWebView,
+    store,
+    signUpWebView
+  );
   registerOutlineSingleOperationAudit(
     context,
     cache,
     auditContext,
     pendingAudits,
     reportWebView,
-    store
+    store,
+    signUpWebView
   );
   registerFocusSecurityAudit(context, cache, auditContext, reportWebView);
   registerFocusSecurityAuditById(context, auditContext, reportWebView);
