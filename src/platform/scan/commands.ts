@@ -30,6 +30,7 @@ import { formatException } from "../util";
 import { loadConfig } from "../../util/config";
 import { runPlatformAudit } from "../../audit/runtime/platform";
 import { Bundle } from "../../types";
+import { SignUpWebView } from "../../webapps/signup/view";
 
 export default (
   cache: Cache,
@@ -37,7 +38,8 @@ export default (
   store: PlatformStore,
   configuration: Configuration,
   secrets: vscode.SecretStorage,
-  getScanView: (uri: vscode.Uri) => ScanWebView
+  getScanView: (uri: vscode.Uri) => ScanWebView,
+  signUpWebView: SignUpWebView
 ) => {
   vscode.commands.registerTextEditorCommand(
     "openapi.platform.editorRunSingleOperationScan",
@@ -50,6 +52,7 @@ export default (
     ): Promise<void> => {
       try {
         await editorRunSingleOperationScan(
+          signUpWebView,
           editor,
           cache,
           store,
@@ -87,6 +90,7 @@ export default (
 
       try {
         await editorRunSingleOperationScan(
+          signUpWebView,
           vscode.window.activeTextEditor,
           cache,
           store,
@@ -121,6 +125,7 @@ export default (
 };
 
 async function editorRunSingleOperationScan(
+  signUpView: SignUpWebView,
   editor: vscode.TextEditor,
   cache: Cache,
   store: PlatformStore,
@@ -130,7 +135,7 @@ async function editorRunSingleOperationScan(
   path: string,
   method: HttpMethod
 ): Promise<void> {
-  if (!(await ensureHasCredentials(configuration, secrets))) {
+  if (!(await ensureHasCredentials(signUpView, configuration, secrets))) {
     return;
   }
 

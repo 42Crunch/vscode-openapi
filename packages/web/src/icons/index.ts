@@ -38,3 +38,5 @@ export { default as TrashCan } from "./TrashCan";
 export { default as Trash } from "./Trash";
 export { default as TriangleExclamation } from "./TriangleExclamation";
 export { default as Xmark } from "./Xmark";
+export { default as CrunchLogo } from "./CrunchLogo";
+export { default as CrunchLogoMain } from "./CrunchLogoMain";

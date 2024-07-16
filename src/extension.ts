@@ -40,6 +40,7 @@ import {
   getApprovedHostnamesTrimmedLowercase,
   removeSecretsForApprovedHosts,
 } from "./util/config";
+import { SignUpWebView } from "./webapps/signup/view";
 
 export async function activate(context: vscode.ExtensionContext) {
   const versionProperty = "openapiVersion";
@@ -119,9 +120,23 @@ export async function activate(context: vscode.ExtensionContext) {
   const envStore = new EnvStore(context.workspaceState, context.secrets);
 
   const prefs = {};
-
+  const signUpWebView = new SignUpWebView(
+    context.extensionPath,
+    configuration,
+    context.secrets,
+    platformStore,
+    logger
+  );
   const reportWebView = new AuditWebView(context.extensionPath, cache);
-  audit.activate(context, auditContext, cache, configuration, reportWebView, platformStore);
+  audit.activate(
+    context,
+    auditContext,
+    cache,
+    configuration,
+    signUpWebView,
+    reportWebView,
+    platformStore
+  );
   preview.activate(context, cache, configuration);
   tryit.activate(context, cache, configuration, envStore, prefs);
   environment.activate(context, envStore);
@@ -134,11 +149,11 @@ export async function activate(context: vscode.ExtensionContext) {
     configuration,
     context.secrets,
     platformStore,
+    signUpWebView,
     reportWebView,
     context.workspaceState,
     envStore,
-    prefs,
-    logger
+    prefs
   );
 
   const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);

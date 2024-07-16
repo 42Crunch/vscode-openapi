@@ -5,11 +5,12 @@ import { PlatformConnection } from "./platform/types";
 import { deriveServices } from "./util/config";
 import { delay } from "./time-util";
 import { Config } from "@xliic/common/config";
+import { SignUpWebView, TokenType } from "./webapps/signup/view";
 
 export async function hasCredentials(
   configuration: Configuration,
   secrets: vscode.SecretStorage
-): Promise<"api-token" | "anond-token" | undefined> {
+): Promise<TokenType> {
   const platformAuthType = configuration.get<Config["platformAuthType"] | "">("platformAuthType");
   const anondToken = getAnondCredentials(configuration);
   const apiToken = await secrets.get("platformApiToken");
@@ -29,13 +30,14 @@ export async function hasCredentials(
 }
 
 export async function ensureHasCredentials(
+  signUpWebView: SignUpWebView,
   configuration: Configuration,
   secrets: vscode.SecretStorage
 ): Promise<boolean> {
-  const credentials = await hasCredentials(configuration, secrets);
+  const credentials = undefined; //await hasCredentials(configuration, secrets);
   if (credentials === undefined) {
     // try asking for credentials if not found
-    const configured = await configureCredentials(configuration, secrets);
+    const configured = await configureCredentials(signUpWebView);
     if (configured === undefined) {
       // or don't do audit if no credentials been supplied
       return false;
@@ -77,17 +79,10 @@ export async function getPlatformCredentials(
   }
 }
 
-export async function configureCredentials(
-  configuration: Configuration,
-  secrets: vscode.SecretStorage
-): Promise<"api-token" | "anond-token" | undefined> {
-  const userType = await chooseNewOrExisting();
-  if (userType === "existing") {
-    return (await configurePlatformUser(configuration, secrets)) ? "api-token" : undefined;
-  } else if (userType === "new") {
-    return (await configureAnondUser(configuration)) ? "anond-token" : undefined;
-  }
-  return undefined;
+export async function configureCredentials(signUpWebView: SignUpWebView): Promise<TokenType> {
+  return new Promise<TokenType>((resolve, _reject) => {
+    signUpWebView.showSignUp(resolve);
+  });
 }
 
 async function chooseNewOrExisting(): Promise<"existing" | "new" | undefined> {

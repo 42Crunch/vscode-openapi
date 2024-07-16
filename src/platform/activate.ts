@@ -25,6 +25,7 @@ import { DataDictionaryCodeActions } from "./data-dictionary/code-actions";
 import { activate as activateLinter } from "./data-dictionary/linter";
 import { activate as activateScan } from "./scan/activate";
 import { EnvStore } from "../envstore";
+import { SignUpWebView } from "../webapps/signup/view";
 
 export async function activate(
   context: vscode.ExtensionContext,
@@ -33,11 +34,11 @@ export async function activate(
   configuration: Configuration,
   secrets: vscode.SecretStorage,
   store: PlatformStore,
+  signUpWebView: SignUpWebView,
   reportWebView: AuditWebView,
   memento: vscode.Memento,
   envStore: EnvStore,
-  prefs: Record<string, Preferences>,
-  logger: Logger
+  prefs: Record<string, Preferences>
 ) {
   const dataDictionaryView = new DataDictionaryWebView(context.extensionPath);
 
@@ -106,6 +107,7 @@ export async function activate(
     store,
     envStore,
     prefs,
+    signUpWebView,
     reportWebView,
     auditContext
   );

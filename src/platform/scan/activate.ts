@@ -13,6 +13,7 @@ import { EnvStore } from "../../envstore";
 import { AuditWebView } from "../../audit/view";
 import { AuditContext } from "../../types";
 import { getOpenapiAlias } from "./config";
+import { SignUpWebView } from "../../webapps/signup/view";
 
 const selectors = {
   json: { scheme: "file", language: "json" },
@@ -29,6 +30,7 @@ export function activate(
   store: PlatformStore,
   envStore: EnvStore,
   prefs: Record<string, Preferences>,
+  signUpWebView: SignUpWebView,
   auditView: AuditWebView,
   auditContext: AuditContext
 ): vscode.Disposable {
@@ -102,7 +104,7 @@ export function activate(
 
   activateLens(configuration.get("codeLens"));
 
-  commands(cache, platformContext, store, configuration, secrets, getScanView);
+  commands(cache, platformContext, store, configuration, secrets, getScanView, signUpWebView);
 
   return new vscode.Disposable(() => disposables.forEach((disposable) => disposable.dispose()));
 }

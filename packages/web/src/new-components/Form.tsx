@@ -11,6 +11,7 @@ export default function Form<T extends FieldValues>({
   unwrapFormData,
   schema,
   children,
+  useFormMode,
 }: {
   data: T;
   saveData: (data: T) => void;
@@ -18,12 +19,13 @@ export default function Form<T extends FieldValues>({
   wrapFormData: (data: T) => FieldValues;
   unwrapFormData: (data: FieldValues) => T;
   schema?: ZodObject<any>;
+  useFormMode?: "onChange" | "onBlur" | "onSubmit" | "onTouched" | "all";
 }) {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const valuesRef = useRef(data);
   const methods = useForm({
     defaultValues: wrapFormData(data),
-    mode: "all",
+    mode: useFormMode ? useFormMode : "all",
     resolver: schema !== undefined ? zodResolver(schema) : undefined,
   });
 

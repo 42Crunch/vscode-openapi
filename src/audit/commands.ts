@@ -26,6 +26,7 @@ import { runPlatformAudit } from "./runtime/platform";
 import { setAudit } from "./service";
 import { AuditWebView } from "./view";
 import { loadConfig } from "../util/config";
+import { SignUpWebView } from "../webapps/signup/view";
 
 export function registerSecurityAudit(
   context: vscode.ExtensionContext,
@@ -33,12 +34,14 @@ export function registerSecurityAudit(
   auditContext: AuditContext,
   pendingAudits: PendingAudits,
   reportWebView: AuditWebView,
-  store: PlatformStore
+  store: PlatformStore,
+  signUpWebView: SignUpWebView
 ) {
   return vscode.commands.registerTextEditorCommand(
     "openapi.securityAudit",
     async (textEditor: vscode.TextEditor, edit) => {
       await securityAudit(
+        signUpWebView,
         context.secrets,
         cache,
         auditContext,
@@ -57,12 +60,14 @@ export function registerSingleOperationAudit(
   auditContext: AuditContext,
   pendingAudits: PendingAudits,
   reportWebView: AuditWebView,
-  store: PlatformStore
+  store: PlatformStore,
+  signUpWebView: SignUpWebView
 ) {
   return vscode.commands.registerTextEditorCommand(
     "openapi.editorSingleOperationAudit",
     async (textEditor: vscode.TextEditor, edit, path: string, method: HttpMethod) => {
       await securityAudit(
+        signUpWebView,
         context.secrets,
         cache,
         auditContext,
@@ -83,7 +88,8 @@ export function registerOutlineSingleOperationAudit(
   auditContext: AuditContext,
   pendingAudits: PendingAudits,
   reportWebView: AuditWebView,
-  store: PlatformStore
+  store: PlatformStore,
+  signUpWebView: SignUpWebView
 ) {
   return vscode.commands.registerCommand(
     "openapi.outlineSingleOperationAudit",
@@ -96,6 +102,7 @@ export function registerOutlineSingleOperationAudit(
       const { path, method } = getPathAndMethod(node);
 
       await securityAudit(
+        signUpWebView,
         context.secrets,
         cache,
         auditContext,
@@ -151,6 +158,7 @@ export function registerFocusSecurityAuditById(
 }
 
 async function securityAudit(
+  signUpWebView: SignUpWebView,
   secrets: vscode.SecretStorage,
   cache: Cache,
   auditContext: AuditContext,
@@ -161,7 +169,7 @@ async function securityAudit(
   path?: string,
   method?: HttpMethod
 ) {
-  if (!(await ensureHasCredentials(configuration, secrets))) {
+  if (!(await ensureHasCredentials(signUpWebView, configuration, secrets))) {
     return;
   }
 

@@ -14,7 +14,7 @@ export function Checkbox({
 }: {
   value: boolean;
   onChange: (value: boolean) => void;
-  label: string;
+  label: string | React.ReactNode;
   size: "medium" | "small";
   description?: string;
 }) {
