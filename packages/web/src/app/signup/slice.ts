@@ -24,7 +24,10 @@ const initialState: SignUpState = {
   anondCredentials: { email: "", anondToken: "" },
   waitingForAnondToken: false,
   anondTokenRequestResult: undefined,
-  platformCredentials: { platformUrl: "https://platform.42crunch.com", platformApiToken: "" },
+  platformCredentials: {
+    platformUrl: "https://42crunch.com/websales-customer-agreement",
+    platformApiToken: "",
+  },
   waitingForPlatformConnectionTest: false,
   platformConnectionTestResult: undefined,
   complete: false,
