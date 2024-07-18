@@ -76,7 +76,8 @@ function checkResponseCodeMatch(
   return (
     httpResponse === MockHttpResponse ||
     httpResponse.statusCode.toString() === code ||
-    getHttpStatusCategory(httpResponse.statusCode) === code
+    getHttpResponseRange(httpResponse.statusCode) === code ||
+    code === "default"
   );
 }
 
@@ -270,10 +271,6 @@ function httpStatusSort(a: string, b: string): number {
   const orderB = b in sortingOrder ? sortingOrder[b] : Number.MAX_SAFE_INTEGER;
 
   return orderA - orderB;
-}
-
-export function getHttpStatusCategory(httpStatus: number) {
-  return getHttpResponseRange(httpStatus) || "default";
 }
 
 export function failedAssigments(env: PlaybookEnvStack): PlaybookVariableFailedAssignment[] {

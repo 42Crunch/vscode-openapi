@@ -1,13 +1,13 @@
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
 import { HttpClient } from "@xliic/common/http";
-import { BundledSwaggerOrOasSpec, getOperationById } from "@xliic/openapi";
+import { BundledSwaggerOrOasSpec, getOperationById, getHttpResponseRange } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 
 import { makeExternalHttpRequest, makeHttpRequest } from "./http";
 import { MockHttpClient, MockHttpResponse } from "./mock-http";
 import { AuthResult, PlaybookExecutorStep } from "./playbook";
 import { PlaybookEnv, PlaybookEnvStack } from "./playbook-env";
-import { assignVariables, failedAssigments, getHttpStatusCategory } from "./variable-assignments";
+import { assignVariables, failedAssigments } from "./variable-assignments";
 import {
   getMissingVariableNames,
   replaceCredentialVariables,
@@ -208,10 +208,10 @@ async function* executePlaybook(
 
     if (response !== MockHttpResponse) {
       if (step.expectedResponse !== undefined) {
-        // check stage expected response
         if (
           String(response?.statusCode) !== step.expectedResponse &&
-          getHttpStatusCategory(response!.statusCode) !== step.expectedResponse
+          getHttpResponseRange(response!.statusCode) !== step.expectedResponse &&
+          request.defaultResponse !== "default"
         ) {
           yield {
             event: "response-processing-error",
@@ -220,10 +220,10 @@ async function* executePlaybook(
           return;
         }
       } else {
-        // check request default response
         if (
           String(response?.statusCode) !== request.defaultResponse &&
-          getHttpStatusCategory(response!.statusCode) !== request.defaultResponse
+          getHttpResponseRange(response!.statusCode) !== request.defaultResponse &&
+          request.defaultResponse !== "default"
         ) {
           yield {
             event: "response-processing-error",
