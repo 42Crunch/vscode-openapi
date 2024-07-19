@@ -787,6 +787,12 @@
           "default": "https://repo.42crunch.com/downloads",
           "description": "Repository URL for 42Crunch API Security Testing Binary"
         },
+        "openapi.cliDirectoryOverride": {
+          "scope": "machine",
+          "type": "string",
+          "default": "",
+          "description": "Overrides default location of 42Crunch API Security Testing Binary download directory"
+        },
         "openapi.securityAuditToken": {
           "scope": "machine",
           "type": "string",
