@@ -1,11 +1,16 @@
-import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   AnondCredentials,
   PlatformConnectionTestError,
   PlatformCredentials,
   AnondTokenResponseResult,
 } from "@xliic/common/signup";
-import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
+
+type FormID =
+  | "BasicSignUpForm"
+  | "PlatformSignUpForm"
+  | "AnondSignUpEmailForm"
+  | "AnondSignUpTokenForm";
 
 export interface SignUpState {
   agreeToTermsAndConditions: boolean;
@@ -15,6 +20,7 @@ export interface SignUpState {
   platformCredentials: PlatformCredentials;
   waitingForPlatformConnectionTest: boolean;
   platformConnectionTestResult?: PlatformConnectionTestError;
+  currentFormId: FormID;
   // If IDE closes the view it has little sense, but if not we do not let a user to mess up
   complete: boolean; // If true, disable all UI components
 }
@@ -25,11 +31,12 @@ const initialState: SignUpState = {
   waitingForAnondToken: false,
   anondTokenRequestResult: undefined,
   platformCredentials: {
-    platformUrl: "https://42crunch.com/websales-customer-agreement",
+    platformUrl: "https://platform.42crunch.com",
     platformApiToken: "",
   },
   waitingForPlatformConnectionTest: false,
   platformConnectionTestResult: undefined,
+  currentFormId: "BasicSignUpForm",
   complete: false,
 };
 
@@ -45,6 +52,12 @@ export const slice = createSlice({
     showAnondTokenResponse: (state, action: PayloadAction<AnondTokenResponseResult>) => {
       state.waitingForAnondToken = false;
       state.anondTokenRequestResult = action.payload;
+      if (
+        state.currentFormId === "AnondSignUpEmailForm" &&
+        state.anondTokenRequestResult?.success
+      ) {
+        state.currentFormId = "AnondSignUpTokenForm";
+      }
     },
     saveAnondEmail: (state, action: PayloadAction<string>) => {
       state.anondCredentials.email = action.payload;
@@ -55,6 +68,9 @@ export const slice = createSlice({
     },
     resetAnondTokenRequestResult: (state, action: PayloadAction<undefined>) => {
       state.anondTokenRequestResult = undefined;
+      if (state.currentFormId === "AnondSignUpTokenForm") {
+        state.currentFormId = "AnondSignUpEmailForm";
+      }
     },
     anondSignUpComplete: (state, action: PayloadAction<AnondCredentials>) => {
       state.complete = true;
@@ -86,6 +102,9 @@ export const slice = createSlice({
     openLink: (state, action: PayloadAction<string>) => {
       // hook for a listener
     },
+    setCurrentFormId: (state, action: PayloadAction<FormID>) => {
+      state.currentFormId = action.payload;
+    },
   },
 });
 
@@ -101,14 +120,7 @@ export const {
   platformSignUpComplete,
   saveAgreeToTermsAndConditions,
   openLink,
+  setCurrentFormId,
 } = slice.actions;
-
-export const useFeatureDispatch: () => Dispatch<
-  ReturnType<(typeof slice.actions)[keyof typeof slice.actions]>
-> = useDispatch;
-
-export const useFeatureSelector: TypedUseSelectorHook<
-  StateFromReducersMapObject<Record<typeof slice.name, typeof slice.reducer>>
-> = useSelector;
 
 export default slice.reducer;

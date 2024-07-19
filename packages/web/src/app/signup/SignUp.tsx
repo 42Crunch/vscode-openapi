@@ -1,13 +1,8 @@
 import styled from "styled-components";
-import * as ReactCheckbox from "@radix-ui/react-checkbox";
 import { Check } from "../../icons";
-import { useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
-import { ThemeColorVariables } from "@xliic/common/theme";
 import {
   requestAnondTokenByEmail,
-  useFeatureDispatch,
-  useFeatureSelector,
   saveAnondEmail,
   saveAnondToken,
   resetAnondTokenRequestResult,
@@ -16,6 +11,7 @@ import {
   savePlatformCredentials,
   saveAgreeToTermsAndConditions,
   openLink,
+  setCurrentFormId,
 } from "./slice";
 import * as z from "zod";
 import { NormalProgressButton } from "../../new-components/ProgressButton";
@@ -24,69 +20,56 @@ import Input from "../../components/Input";
 import { PlatformCredentials } from "@xliic/common/signup";
 import { ErrorBanner } from "../../components/Banner";
 import Textarea from "../../new-components/fat-fields/Textarea";
-
-enum FormIDs {
-  BasicSignUpForm = 'BasicSignUpForm',
-  PlatformSignUpForm = 'PlatformSignUpForm',
-  AnondSignUpEmailForm = 'AnondSignUpEmailForm',
-  AnondSignUpTokenForm = 'AnondSignUpTokenForm',
-}
+import { useAppDispatch, useAppSelector } from "./store";
+import Button from "../../new-components/Button";
+import { CheckboxRoot, Indicator } from "../../components/Checkbox";
 
 const doNothingWrapper = (data: any) => { return data };
 
 export default function BasicSignUpForm() {
 
-  const dispatch = useFeatureDispatch();
-  const {agreeToTermsAndConditions, platformCredentials, anondCredentials, anondTokenRequestResult} = useFeatureSelector((state) => state.signup);
-  const [formId, setCurrentFormId] = useState<FormIDs>(FormIDs.BasicSignUpForm);
+  const dispatch = useAppDispatch();
+  const { agreeToTermsAndConditions, platformCredentials, anondCredentials, currentFormId } = useAppSelector((state) => state.signup);
 
-  if (formId === FormIDs.AnondSignUpEmailForm && anondTokenRequestResult?.success) {
-    setCurrentFormId(FormIDs.AnondSignUpTokenForm);
-  }
   return (
     <>
-      {formId === FormIDs.BasicSignUpForm && (
+      {currentFormId === "BasicSignUpForm" && (
         <Container>
           <Title>42Crunch Audit runs 300+ checks for security best practices in your API. Use your existing platform credentials or provide an email to receive a freemium token.</Title>
           <AgreeToTermsAndConditionsCheckbox/>
           <ButtonsBar>
-            <NormalProgressButton
-              label="I have an existing 42Crunch Platform account"
+            <SimpleButton
               disabled={!agreeToTermsAndConditions}
-              waiting={false}
               onClick={(e) => {
-                setCurrentFormId(FormIDs.PlatformSignUpForm);
+                dispatch(setCurrentFormId("PlatformSignUpForm"));
                 e.preventDefault();
                 e.stopPropagation();
               }}
-            />
-            <NormalProgressButton
-              label="I'm a new user, please email me the token"
+            >I have an existing 42Crunch Platform account</SimpleButton>
+            <SimpleButton
               disabled={!agreeToTermsAndConditions}
-              waiting={false}
               onClick={(e) => {
-                setCurrentFormId(FormIDs.AnondSignUpEmailForm);
+                dispatch(setCurrentFormId("AnondSignUpEmailForm"));
                 e.preventDefault();
                 e.stopPropagation();
               }}
-            />
+            >I'm a new user, please email me the token</SimpleButton>
           </ButtonsBar>
         </Container>
       )}
-      {formId === FormIDs.PlatformSignUpForm && (
+      {currentFormId === "PlatformSignUpForm" && (
         <PlatformSignUpForm data={platformCredentials} backToPrevForm={() =>
-          setCurrentFormId(FormIDs.BasicSignUpForm)
+          dispatch(setCurrentFormId("BasicSignUpForm"))
         }/>
       )}
-      {formId === FormIDs.AnondSignUpEmailForm && (         
+      {currentFormId === "AnondSignUpEmailForm" && (
         <AnondSignUpEmailForm data={{email: anondCredentials.email}} backToPrevForm={() =>
-          setCurrentFormId(FormIDs.BasicSignUpForm)
+          dispatch(setCurrentFormId("BasicSignUpForm"))
         }/>
       )}
-      {formId === FormIDs.AnondSignUpTokenForm && (         
+      {currentFormId === "AnondSignUpTokenForm" && (
         <AnondSignUpTokenForm data={{anondToken: anondCredentials.anondToken}} backToPrevForm={() => {
-            dispatch(resetAnondTokenRequestResult());            
-            setCurrentFormId(FormIDs.AnondSignUpEmailForm);
+            dispatch(resetAnondTokenRequestResult());
           }
         }/>
       )}
@@ -95,8 +78,8 @@ export default function BasicSignUpForm() {
 }
 
 function AnondSignUpEmailForm({data, backToPrevForm}: {data: {email: string}, backToPrevForm: () => void}) {
-  const dispatch = useFeatureDispatch();
-  const {anondTokenRequestResult, waitingForAnondToken, complete } = useFeatureSelector((state) => state.signup);
+  const dispatch = useAppDispatch();
+  const {anondTokenRequestResult, waitingForAnondToken, complete } = useAppSelector((state) => state.signup);
   const schema = z.object({
     email: z.string().min(1, { message: "This field has to be filled." }).email("This is not a valid email.")
   });
@@ -128,22 +111,20 @@ function AnondSignUpEmailForm({data, backToPrevForm}: {data: {email: string}, ba
 
 function ButtonBack({disabled, backToPrevForm}: {disabled: boolean, backToPrevForm: () => void}) {
   return (
-    <NormalProgressButton
-      label="Back"
+    <SimpleButton
       disabled={disabled}
-      waiting={false}
       onClick={(e) => {
         backToPrevForm();
         e.preventDefault();
         e.stopPropagation();
       }}
-    />
+    >Back</SimpleButton>
   );
 }
 
 function ButtonSendEmail() {
-  const dispatch = useFeatureDispatch();
-  const {waitingForAnondToken, complete } = useFeatureSelector((state) => state.signup);
+  const dispatch = useAppDispatch();
+  const {waitingForAnondToken, complete } = useAppSelector((state) => state.signup);
   const email = useWatch({ name: "email" });
   const { formState: { isValid } } = useFormContext();
   return (
@@ -161,8 +142,8 @@ function ButtonSendEmail() {
 }
 
 function AnondSignUpTokenForm({data, backToPrevForm}: {data: {anondToken: string}, backToPrevForm: () => void}) {
-  const dispatch = useFeatureDispatch();
-  const {complete } = useFeatureSelector((state) => state.signup);
+  const dispatch = useAppDispatch();
+  const { complete } = useAppSelector((state) => state.signup);
   const schema = z.object({
     anondToken: z.string().min(1, { message: "This field has to be filled." })
   });
@@ -190,27 +171,25 @@ function AnondSignUpTokenForm({data, backToPrevForm}: {data: {anondToken: string
 }
 
 function ButtonSaveAnondToken() {
-  const dispatch = useFeatureDispatch();
-  const {anondCredentials, waitingForAnondToken: waitingForToken, complete } = useFeatureSelector((state) => state.signup);
+  const dispatch = useAppDispatch();
+  const {anondCredentials, waitingForAnondToken, complete } = useAppSelector((state) => state.signup);
   const anondToken = useWatch({ name: "anondToken" });
   const { formState: { isValid } } = useFormContext();
   return (
-    <NormalProgressButton
-      label="Save"
+    <SimpleButton
       disabled={complete || !isValid}
-      waiting={false}
       onClick={(e) => {
         dispatch(anondSignUpComplete({email: anondCredentials.email, anondToken}));
         e.preventDefault();
         e.stopPropagation();
       }}
-    />
+    >Save</SimpleButton>
   );
 }
 
 function PlatformSignUpForm({data, backToPrevForm}: {data: PlatformCredentials, backToPrevForm: () => void}) {
-  const dispatch = useFeatureDispatch();
-  const {platformConnectionTestResult, complete } = useFeatureSelector((state) => state.signup);
+  const dispatch = useAppDispatch();
+  const {platformConnectionTestResult, complete } = useAppSelector((state) => state.signup);
   const schema = z.object({
     platformUrl: z.string().url().startsWith("https://"),
     platformApiToken: z
@@ -248,8 +227,8 @@ function PlatformSignUpForm({data, backToPrevForm}: {data: PlatformCredentials, 
 }
 
 function ButtonSavePlatformCredentials() {
-  const dispatch = useFeatureDispatch();
-  const { waitingForPlatformConnectionTest, complete } = useFeatureSelector((state) => state.signup);
+  const dispatch = useAppDispatch();
+  const { waitingForPlatformConnectionTest, complete } = useAppSelector((state) => state.signup);
   const platformUrl = useWatch({ name: "platformUrl" });
   const platformApiToken = useWatch({ name: "platformApiToken" });
   const { formState: { isValid } } = useFormContext();
@@ -267,19 +246,9 @@ function ButtonSavePlatformCredentials() {
   );
 }
 
-export function wrapStub(data: any) {
-  console.info("wrapStub = " + data);
-  return data;
-}
-
-export function unwrapStub(data: any): any {
-  console.info("unwrapStub = " + data);
-  return data;
-}
-
 export function AgreeToTermsAndConditionsCheckbox() {
-  const dispatch = useFeatureDispatch();
-  const { agreeToTermsAndConditions } = useFeatureSelector((state) => state.signup);
+  const dispatch = useAppDispatch();
+  const { agreeToTermsAndConditions } = useAppSelector((state) => state.signup);
   return (
     <AgreeToTermsAndConditionsBar>
       <CheckboxRoot
@@ -298,7 +267,7 @@ export function AgreeToTermsAndConditionsCheckbox() {
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          dispatch(openLink("https://42crunch.com"));
+          dispatch(openLink("https://42crunch.com/websales-customer-agreement"));
         }}
       >
         terms & conditions
@@ -341,22 +310,8 @@ const AgreeToTermsAndConditionsBar = styled.div`
   margin-bottom: 16px;
 `;
 
-const CheckboxRoot = styled(ReactCheckbox.Root)`
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(${ThemeColorVariables.checkboxBackground});
-  border-radius: 4px;
-  border-color: var(${ThemeColorVariables.checkboxBorder});
-  border-width: 1px;
-  border-style: solid;
-`;
-
-const Indicator = styled(ReactCheckbox.Indicator)`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  fill: var(${ThemeColorVariables.checkboxForeground});
+const SimpleButton = styled(Button)`
+  &:disabled {
+    opacity: .4;
+  }
 `;

@@ -64,7 +64,6 @@ const Button = styled.button`
   color: var(${ThemeColorVariables.buttonForeground});
   border: 1px solid var(${ThemeColorVariables.buttonBorder});
   ${({ waiting }: { disabled?: boolean; waiting?: boolean }) => waiting && "gap: 8px;"}
-  ${({ disabled }: { disabled?: boolean }) => disabled && "opacity: .4!important;"}
   > span {
     flex: 1;
   }
@@ -73,6 +72,9 @@ const Button = styled.button`
     animation: ${rotation} 2s infinite linear;
     transition: width 0.2s linear;
     ${({ waiting }: { disabled?: boolean; waiting?: boolean }) => !waiting && "width: 0;"}
+  }
+  &:disabled {
+    opacity: .4;
   }
 `;
 

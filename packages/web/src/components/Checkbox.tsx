@@ -34,7 +34,7 @@ const Container = styled.div`
   align-items: center;
 `;
 
-const CheckboxRoot = styled(ReactCheckbox.Root)`
+export const CheckboxRoot = styled(ReactCheckbox.Root)`
   width: 20px;
   height: 20px;
   display: flex;
@@ -47,7 +47,7 @@ const CheckboxRoot = styled(ReactCheckbox.Root)`
   border-style: solid;
 `;
 
-const Indicator = styled(ReactCheckbox.Indicator)`
+export const Indicator = styled(ReactCheckbox.Indicator)`
   display: flex;
   align-items: center;
   justify-content: center;
