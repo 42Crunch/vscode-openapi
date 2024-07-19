@@ -20,7 +20,7 @@ import ConnectionTestBanner from "../ConnectionTestBanner";
 import ProgressBar from "../ProgressBar";
 import { Container, Test, Title } from "../layout";
 
-export function PlatformServices() {
+export function ScanRuntime() {
   const dispatch = useFeatureDispatch();
 
   const {
@@ -112,14 +112,47 @@ export function PlatformServices() {
           </>
         )}
 
-        {scanRuntime === "cli" && <Input label="Download URL" name="repository" />}
+        {scanRuntime === "cli" && (
+          <>
+            <Input label="Download URL" name="repository" />
+            <Input
+              label="Custom binary location (optional, uses default directory if empty)"
+              name="cliDirectoryOverride"
+            />
+          </>
+        )}
+
+        {scanRuntime === "cli" &&
+          (!cli.found || cliTestResult?.success === false || waitingForCliDownload) && (
+            <>
+              <Test>
+                <ValidProgressButton
+                  label="Download"
+                  waiting={waitingForCliDownload}
+                  onClick={(e) => {
+                    dispatch(downloadCli());
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                />
+                {waitingForCliDownload && <ProgressBar progress={cliDownloadPercent} />}
+              </Test>
+              <Banner
+                message={`Download 42Crunch API Security Testing Binary, the binary was not found in ${cli.location}`}
+              />
+            </>
+          )}
+
+        {scanRuntime === "cli" && cliDownloadError !== undefined && (
+          <ErrorBanner message={cliDownloadError} />
+        )}
 
         {scanRuntime === "cli" && cli.found && (
           <>
             <Banner message={`Using 42Crunch API Security Testing Binary in ${cli.location}`} />
             <Test>
               <ValidProgressButton
-                label="Check version"
+                label="Check"
                 waiting={waitingForCliTest}
                 onClick={(e) => {
                   dispatch(testCli());
@@ -132,54 +165,36 @@ export function PlatformServices() {
             </Test>
           </>
         )}
-
-        {scanRuntime === "cli" && !cli.found && (
-          <>
-            <Test>
-              <ValidProgressButton
-                label="Download"
-                waiting={waitingForCliDownload}
-                onClick={(e) => {
-                  dispatch(downloadCli());
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-              />
-              {waitingForCliDownload && <ProgressBar progress={cliDownloadPercent} />}
-            </Test>
-            <Banner
-              message={`Download 42Crunch API Security Testing Binary, the binary was not found in ${cli.location}`}
-            />
-          </>
-        )}
-
-        {scanRuntime === "cli" && cliDownloadError !== undefined && (
-          <ErrorBanner message={cliDownloadError} />
-        )}
       </Container>
     </>
   );
 }
 
-const schema = z
-  .object({
-    scandManager: z
-      .object({
-        timeout: z.coerce
-          .number()
-          .int()
-          .min(1)
-          .max(60 * 60 * 24), // 1 day
-      })
-      .catchall(z.unknown()),
-  })
-  .catchall(z.unknown());
+const schema = z.object({
+  scandManager: z
+    .object({
+      timeout: z.coerce
+        .number()
+        .int()
+        .min(1)
+        .max(60 * 60 * 24), // 1 day
+    })
+    .catchall(z.unknown()),
+  repository: z.string().url(),
+  cliDirectoryOverride: z.union([
+    z.literal(""),
+    z.string().regex(/^(\/.+|[A-Za-z]:\\.+)$/, {
+      message:
+        "Must be an absolute path (e.g. /home/username/42crunch-cli or C:\\Users\\username\\42crunch-cli)",
+    }),
+  ]),
+});
 
 const screen: ConfigScreen = {
   id: "scan-runtime",
   label: "Runtime",
   schema,
-  form: PlatformServices,
+  form: ScanRuntime,
 };
 
 export default screen;

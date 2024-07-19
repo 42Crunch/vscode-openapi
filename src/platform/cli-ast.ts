@@ -44,11 +44,12 @@ const cliUpdateCheckInterval = 1000 * 60 * 60 * 8; // 8 hours
 
 export async function createScanConfigWithCliBinary(
   scanconfUri: vscode.Uri,
-  oas: string
+  oas: string,
+  cliDirectoryOverride: string
 ): Promise<void> {
   const tmpdir = createTempDirectory("scan-");
   const oasFilename = join(tmpdir, "openapi.json");
-  const cli = join(getBinDirectory(), getCliFilename());
+  const cli = join(getBinDirectory(cliDirectoryOverride), getCliFilename());
 
   await writeFile(oasFilename, oas, { encoding: "utf8" });
 
@@ -76,11 +77,14 @@ export async function createScanConfigWithCliBinary(
   }
 }
 
-export async function createDefaultConfigWithCliBinary(oas: string): Promise<string> {
+export async function createDefaultConfigWithCliBinary(
+  oas: string,
+  cliDirectoryOverride: string
+): Promise<string> {
   const tmpdir = createTempDirectory("scanconf-update-");
   const scanconfFilename = join(tmpdir, "scanconf.json");
   const scanconfUri = vscode.Uri.file(scanconfFilename);
-  await createScanConfigWithCliBinary(scanconfUri, oas);
+  await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride);
   const scanconf = await readFile(scanconfFilename, { encoding: "utf8" });
   unlinkSync(scanconfFilename);
   rmdirSync(tmpdir);
@@ -93,13 +97,13 @@ export async function backupConfig(scanconfUri: vscode.Uri): Promise<vscode.Uri>
   return vscode.Uri.file(backup);
 }
 
-export function getCliInfo(): Config["cli"] {
-  const cli = join(getBinDirectory(), getCliFilename());
+export function getCliInfo(cliDirectoryOverride: string): Config["cli"] {
+  const cli = join(getBinDirectory(cliDirectoryOverride), getCliFilename());
   return { location: cli, found: exists(cli) };
 }
 
-export async function testCli(): Promise<CliTestResult> {
-  const cli = getCliInfo();
+export async function testCli(cliDirectoryOverride: string): Promise<CliTestResult> {
+  const cli = getCliInfo(cliDirectoryOverride);
 
   if (cli.found) {
     try {
@@ -125,7 +129,7 @@ export async function ensureCliDownloaded(
   secrets: vscode.SecretStorage
 ): Promise<boolean> {
   const config = await loadConfig(configuration, secrets);
-  const info = getCliInfo();
+  const info = getCliInfo(config.cliDirectoryOverride);
 
   if (!info.found) {
     // offer to download
@@ -144,7 +148,7 @@ export async function ensureCliDownloaded(
         );
         return false;
       }
-      return downloadCliWithProgress(manifest);
+      return downloadCliWithProgress(manifest, config.cliDirectoryOverride);
     }
     return false;
   }
@@ -153,14 +157,17 @@ export async function ensureCliDownloaded(
   const currentTime = Date.now();
   if (currentTime - lastCliUpdateCheckTime > cliUpdateCheckInterval) {
     lastCliUpdateCheckTime = currentTime;
-    checkForCliUpdate(config.repository);
+    checkForCliUpdate(config.repository, config.cliDirectoryOverride);
   }
 
   return true;
 }
 
-async function checkForCliUpdate(repository: string): Promise<boolean> {
-  const test = await testCli();
+async function checkForCliUpdate(
+  repository: string,
+  cliDirectoryOverride: string
+): Promise<boolean> {
+  const test = await testCli(cliDirectoryOverride);
   if (test.success) {
     const manifest = await getCliUpdate(repository, test.version);
     if (manifest !== undefined) {
@@ -172,7 +179,7 @@ async function checkForCliUpdate(repository: string): Promise<boolean> {
       );
 
       if (answer?.id === "download") {
-        return downloadCliWithProgress(manifest);
+        return downloadCliWithProgress(manifest, cliDirectoryOverride);
       }
     }
   }
@@ -180,7 +187,7 @@ async function checkForCliUpdate(repository: string): Promise<boolean> {
   return false;
 }
 
-function downloadCliWithProgress(manifest: CliAstManifestEntry) {
+function downloadCliWithProgress(manifest: CliAstManifestEntry, cliDirectoryOverride: string) {
   return vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
@@ -189,7 +196,7 @@ function downloadCliWithProgress(manifest: CliAstManifestEntry) {
     },
     async (progress, cancellationToken): Promise<boolean> => {
       let previous = 0;
-      for await (const downloadProgress of downloadCli(manifest)) {
+      for await (const downloadProgress of downloadCli(manifest, cliDirectoryOverride)) {
         const increment = (downloadProgress.percent - previous) * 100;
         previous = downloadProgress.percent;
         progress.report({ increment });
@@ -200,11 +207,12 @@ function downloadCliWithProgress(manifest: CliAstManifestEntry) {
 }
 
 export async function* downloadCli(
-  manifest: CliAstManifestEntry
+  manifest: CliAstManifestEntry,
+  cliDirectoryOverride: string
 ): AsyncGenerator<CliDownloadProgress, string, unknown> {
-  ensureDirectories();
+  ensureDirectories(cliDirectoryOverride);
   const tmpCli = yield* downloadToTempFile(manifest);
-  const destinationCli = join(getBinDirectory(), getCliFilename());
+  const destinationCli = join(getBinDirectory(cliDirectoryOverride), getCliFilename());
   await copyFile(tmpCli, destinationCli);
   unlinkSync(tmpCli);
   rmdirSync(dirname(tmpCli));
@@ -236,7 +244,7 @@ export async function runScanWithCliBinary(
 
   logger.info(`Wrote scan configuration to: ${dir}`);
 
-  const cli = join(getBinDirectory(), getCliFilename());
+  const cli = join(getBinDirectory(config.cliDirectoryOverride), getCliFilename());
 
   logger.info(`Running scan using: ${cli}`);
 
@@ -319,7 +327,8 @@ export async function runValidateScanConfigWithCliBinary(
   config: Config,
   logger: Logger,
   oas: string,
-  scanconf: string
+  scanconf: string,
+  cliDirectoryOverride: string
 ): Promise<Result<CliValidateResponse, CliError>> {
   logger.info(`Running Validate Scan Config using 42Crunch API Security Testing Binary`);
 
@@ -333,7 +342,7 @@ export async function runValidateScanConfigWithCliBinary(
 
   logger.info(`Wrote scan configuration to: ${dir}`);
 
-  const cli = join(getBinDirectory(), getCliFilename());
+  const cli = join(getBinDirectory(cliDirectoryOverride), getCliFilename());
 
   logger.info(`Running validate using: ${cli}`);
 
@@ -367,7 +376,8 @@ export async function runAuditWithCliBinary(
   secrets: vscode.SecretStorage,
   logger: Logger,
   oas: string,
-  isFullAudit: boolean
+  isFullAudit: boolean,
+  cliDirectoryOverride: string
 ): Promise<Result<{ audit: unknown; cli: CliResponse }, CliError>> {
   logger.info(`Running Security Audit using 42Crunch API Security Testing Binary`);
 
@@ -377,7 +387,7 @@ export async function runAuditWithCliBinary(
 
   logger.info(`Wrote Audit configuration to: ${dir}`);
 
-  const cli = join(getBinDirectory(), getCliFilename());
+  const cli = join(getBinDirectory(cliDirectoryOverride), getCliFilename());
 
   logger.info(`Running Security Audit using: ${cli}`);
 
@@ -458,8 +468,12 @@ function getCrunchDirectory() {
   }
 }
 
-function getBinDirectory() {
-  return join(getCrunchDirectory(), "bin");
+function getBinDirectory(cliDirectoryOverride: string) {
+  if (cliDirectoryOverride !== undefined && cliDirectoryOverride !== "") {
+    return cliDirectoryOverride;
+  } else {
+    return join(getCrunchDirectory(), "bin");
+  }
 }
 
 function getCliFilename() {
@@ -470,8 +484,8 @@ function getCliFilename() {
   }
 }
 
-function ensureDirectories() {
-  mkdirSync(getBinDirectory(), { recursive: true });
+function ensureDirectories(cliDirectoryOverride: string) {
+  mkdirSync(getBinDirectory(cliDirectoryOverride), { recursive: true });
 }
 
 async function* downloadToTempFile(

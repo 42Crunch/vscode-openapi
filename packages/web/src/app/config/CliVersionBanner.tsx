@@ -6,7 +6,7 @@ export default function CliVersionBanner({ result }: { result?: CliTestResult })
     if (result.success) {
       return <Banner message={result.version} />;
     } else {
-      return <ErrorBanner message="Failed check version">{result.message}</ErrorBanner>;
+      return <ErrorBanner message="Failed">{result.message}</ErrorBanner>;
     }
   }
   return null;

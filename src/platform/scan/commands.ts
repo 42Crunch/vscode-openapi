@@ -170,6 +170,7 @@ async function editorRunSingleOperationScan(
       secrets,
       config.platformAuthType,
       config.scanRuntime,
+      config.cliDirectoryOverride,
       scanconfUri,
       bundle
     ))
@@ -188,6 +189,7 @@ async function createDefaultScanConfig(
   secrets: vscode.SecretStorage,
   platformAuthType: "api-token" | "anond-token",
   scanRuntime: "docker" | "scand-manager" | "cli",
+  cliDirectoryOverride: string,
   scanconfUri: vscode.Uri,
   bundle: Bundle
 ): Promise<boolean> {
@@ -208,7 +210,8 @@ async function createDefaultScanConfig(
             secrets,
             emptyLogger,
             oas,
-            true
+            true,
+            cliDirectoryOverride
           );
 
           if (reportError !== undefined) {
@@ -228,7 +231,7 @@ async function createDefaultScanConfig(
             );
           }
 
-          await createScanConfigWithCliBinary(scanconfUri, oas);
+          await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride);
         } else {
           if (scanRuntime === "cli") {
             const report = await runPlatformAudit(document, oas, bundle.mapping, cache, store);
@@ -237,7 +240,7 @@ async function createDefaultScanConfig(
                 "Your API has structural or semantic issues in its OpenAPI format. Run Security Audit on this file and fix these issues first."
               );
             }
-            await createScanConfigWithCliBinary(scanconfUri, oas);
+            await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride);
           } else {
             // this will run audit on the platform as well
             await createScanConfigWithPlatform(store, scanconfUri, oas);

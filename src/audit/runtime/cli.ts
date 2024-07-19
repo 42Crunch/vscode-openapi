@@ -18,6 +18,8 @@ import {
   warnAudits,
   warnOperationAudits,
 } from "../../platform/upgrade";
+import { Configuration } from "../../configuration";
+import { loadConfig } from "../../util/config";
 
 export async function runCliAudit(
   document: vscode.TextDocument,
@@ -25,6 +27,7 @@ export async function runCliAudit(
   mapping: MappingNode,
   cache: Cache,
   secrets: vscode.SecretStorage,
+  configuration: Configuration,
   progress: vscode.Progress<any>,
   isFullAudit: boolean
 ): Promise<Audit | undefined> {
@@ -36,7 +39,15 @@ export async function runCliAudit(
     debug: (message: string) => null,
   };
 
-  const [result, error] = await runAuditWithCliBinary(secrets, logger, oas, isFullAudit);
+  const config = await loadConfig(configuration, secrets);
+
+  const [result, error] = await runAuditWithCliBinary(
+    secrets,
+    logger,
+    oas,
+    isFullAudit,
+    config.cliDirectoryOverride
+  );
 
   if (error !== undefined) {
     if (error.statusCode === 3 && error.statusMessage === "limits_reached") {

@@ -73,6 +73,7 @@ const initialState: ConfigState = {
     },
     platform: "",
     cli: { found: false, location: "" },
+    cliDirectoryOverride: "",
     repository: "",
     platformTemporaryCollectionName: "",
     platformMandatoryTags: "",

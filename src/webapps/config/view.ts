@@ -107,11 +107,12 @@ export class ConfigWebView extends WebView<Webapp> {
     testCli: async () => {
       return {
         command: "showCliTest",
-        payload: await testCli(),
+        payload: await testCli(this.config!.cliDirectoryOverride),
       };
     },
 
-    downloadCli: () => downloadCliHandler(this.config?.repository),
+    downloadCli: () =>
+      downloadCliHandler(this.config!.repository, this.config!.cliDirectoryOverride),
 
     openLink: async (url: string) => {
       vscode.env.openExternal(vscode.Uri.parse(url));
@@ -139,7 +140,8 @@ export class ConfigWebView extends WebView<Webapp> {
 }
 
 async function* downloadCliHandler(
-  repository?: string
+  repository: string,
+  cliDirectoryOverride: string
 ): AsyncGenerator<ShowCliDownloadMessage, void, unknown> {
   try {
     if (repository === undefined || repository === "") {
@@ -155,7 +157,7 @@ async function* downloadCliHandler(
     }
 
     const location = yield* transformValues(
-      downloadCli(manifest),
+      downloadCli(manifest, cliDirectoryOverride),
       (progress: CliDownloadProgress): ShowCliDownloadMessage => ({
         command: "showCliDownload",
         payload: { completed: false, progress },

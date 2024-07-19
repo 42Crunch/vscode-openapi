@@ -16,6 +16,7 @@ export async function loadConfig(
   const platformServices = configuration.get<string>("platformServices");
   const scandManager = configuration.get<Config["scandManager"]>("platformScandManager");
   const docker = configuration.get<Config["docker"]>("docker");
+  const cliDirectoryOverride = configuration.get<string>("cliDirectoryOverride");
 
   const scanRuntime = configuration.get<"docker" | "scand-manager" | "cli">(
     "platformConformanceScanRuntime"
@@ -54,7 +55,8 @@ export async function loadConfig(
     scanImage,
     docker,
     platform: process.platform,
-    cli: getCliInfo(),
+    cli: getCliInfo(cliDirectoryOverride),
+    cliDirectoryOverride,
     repository,
     platformTemporaryCollectionName,
     platformMandatoryTags,
@@ -96,27 +98,39 @@ export async function saveConfig(
     config.scandManager,
     vscode.ConfigurationTarget.Global
   );
+
   await configuration.update("docker", config.docker, vscode.ConfigurationTarget.Global);
+
   await configuration.update(
     "platformConformanceScanRuntime",
     config.scanRuntime,
     vscode.ConfigurationTarget.Global
   );
+
   await configuration.update(
     "platformConformanceScanImage",
     config.scanImage,
     vscode.ConfigurationTarget.Global
   );
+
   await configuration.update(
     "platformRepository",
     config.repository,
     vscode.ConfigurationTarget.Global
   );
+
+  await configuration.update(
+    "cliDirectoryOverride",
+    config.cliDirectoryOverride,
+    vscode.ConfigurationTarget.Global
+  );
+
   await configuration.update(
     "platformTemporaryCollectionName",
     config.platformTemporaryCollectionName,
     vscode.ConfigurationTarget.Global
   );
+
   await configuration.update(
     "platformMandatoryTags",
     config.platformMandatoryTags,
@@ -125,6 +139,7 @@ export async function saveConfig(
 
   // secrets
   await secrets.store("platformApiToken", config.platformApiToken);
+
   if (config.scandManager.auth == "header") {
     await secrets.store("platformScandManagerHeader", JSON.stringify(config.scandManager.header));
   }

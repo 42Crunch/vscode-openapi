@@ -206,6 +206,7 @@ async function securityAudit(
               mapping,
               cache,
               secrets,
+              configuration,
               progress,
               isFullAudit
             );

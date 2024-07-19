@@ -187,7 +187,7 @@ export class ScanWebView extends WebView<Webapp> {
 
         const scanconf =
           config.scanRuntime === "cli"
-            ? await createDefaultConfigWithCliBinary(stringOas)
+            ? await createDefaultConfigWithCliBinary(stringOas, config.cliDirectoryOverride)
             : await createDefaultConfigWithPlatform(this.store, stringOas);
 
         await backupConfig(this.target!.scanconfUri);
@@ -304,7 +304,8 @@ async function runScan(
         config,
         logger,
         stringOas,
-        scanconf
+        scanconf,
+        config.cliDirectoryOverride
       );
 
       if (validateError !== undefined) {

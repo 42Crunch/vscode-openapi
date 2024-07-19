@@ -27,6 +27,7 @@ export type Config = {
     location: string;
     found: boolean;
   };
+  cliDirectoryOverride: string;
   repository: string;
   approvedHosts: ApprovedHostConfiguration[];
 };
