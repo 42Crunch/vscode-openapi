@@ -125,16 +125,16 @@ export class ConfigWebView extends WebView<Webapp> {
 
   async onStart() {
     await this.sendColorTheme(vscode.window.activeColorTheme);
-    const config = await loadConfig(this.configuration, this.secrets);
+    this.config = await loadConfig(this.configuration, this.secrets);
     if (this.platform.isConnected()) {
       const convention = await this.platform.getCollectionNamingConvention();
       if (convention.pattern !== "") {
-        config.platformCollectionNamingConvention = convention;
+        this.config.platformCollectionNamingConvention = convention;
       }
     }
     await this.sendRequest({
       command: "loadConfig",
-      payload: config,
+      payload: this.config,
     });
   }
 
