@@ -18,7 +18,7 @@ export default function AuditReport() {
         <InvalidReport
           onShowIssues={() => {
             dispatch(changeTab("issues"));
-            dispatch(changeFilter({ domain: "oasconformance" }));
+            dispatch(changeFilter({ domain: "oasconformance", severity: "critical" }));
           }}
         />
       )}
