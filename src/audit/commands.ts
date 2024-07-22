@@ -185,7 +185,7 @@ async function securityAudit(
     const audit = await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
-        title: "Running API Contract Security Audit...",
+        title: "Running API Security Audit...",
         cancellable: false,
       },
       async (progress, cancellationToken): Promise<Audit | undefined> => {

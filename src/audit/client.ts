@@ -22,7 +22,7 @@ async function downloadArticles(): Promise<any> {
   return vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
-      title: "Loading API Contract Security Audit KDB Articles...",
+      title: "Loading API Security Audit KDB Articles...",
       cancellable: false,
     },
     async (progress, cancellationToken): Promise<any> => {

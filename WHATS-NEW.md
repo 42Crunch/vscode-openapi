@@ -5,6 +5,7 @@
 The extension now not only locates but also helps fix security issues in your OpenAPI definition.
 
 ### Individual fixes:
+
 1. Perform the Security Audit by clicking the **42c** button.
 2. When you click some of the error lines in your OpenAPI file, you will see the QuickFix icon show up on the left of the line.
 3. Click the icon and select the QuickFix to apply.
@@ -15,12 +16,13 @@ The extension now not only locates but also helps fix security issues in your Op
 ### Bulk fixes:
 
 If your OpenAPI file contains multiple similar issues - for example, a parameter with the same name is missing the pattern definition - you can fix all such occurrences in one go:
+
 1. Fix the first occurrences and supply the proper values in the code snippet.
 2. Go to the next occurrences and use the bulk QuickFix. This bulk QuickFix will reuse the values that you used previously for the parameter with the same name.
 
 ![Bulk Fixes in VSCode](images/VSCode_OpenAPI_bulk_security_fixes.gif)
 
-## HTML Preview Pane 
+## HTML Preview Pane
 
 You can get a documentation-style preview of the API you are editing by clicking the Preview button ![](images/Preview_button.png) at the top right:
 
@@ -28,19 +30,19 @@ You can get a documentation-style preview of the API you are editing by clicking
 
 ## Support for external HTTP references
 
-OpenAPI definition files can be composite with parts of the API definition stored in external files and referenced in the main file using the `$ref` notation. We now support not only local component files but also ones referenced with HTTP/HTTPS URLs. 
+OpenAPI definition files can be composite with parts of the API definition stored in external files and referenced in the main file using the `$ref` notation. We now support not only local component files but also ones referenced with HTTP/HTTPS URLs.
 
-For security reasons, the domains from which you want such component files to be downloaded should be added to the **Approved Hostnames** list in the extension's setting. 
+For security reasons, the domains from which you want such component files to be downloaded should be added to the **Approved Hostnames** list in the extension's setting.
 
 # What's new in OpenAPI (Swagger) Editor version 3.0
 
 Security Audit now supports composite OpenAPI files.
 
-42Crunch API Contract Security Audit is a static application security testing (SAST) service that OpenAPI (Swagger) Editor invokes for the OpenAPI file currently opened in VS Code when you click the **42c** button at the top right. The extension sends the file to the remote service that performs 200+ security checks, and sends back a report that is rendered in VS Code.
+42Crunch API Security Audit is a static application security testing (SAST) service that OpenAPI (Swagger) Editor invokes for the OpenAPI file currently opened in VS Code when you click the **42c** button at the top right. The extension sends the file to the remote service that performs 200+ security checks, and sends back a report that is rendered in VS Code.
 
 However, OpenAPI definiton files can be composite. In that case, parts of the API definition (for example, schemas for shared payloads types) can be stored in external files and referenced in the main file using the `$ref` notation.
 
-Starting with OpenAPI (Swagger) Editor v3.0, such composite OpenAPI files are fully supported, including auditing. Simply open the main OpenAPI file (JSON or YAML), and click the **42c** button at the top right. The extension  automatically finds and parses all `$ref` references, locates the possible references in other files, aggregates the referenced information in the API contract, and runs the audit for it.
+Starting with OpenAPI (Swagger) Editor v3.0, such composite OpenAPI files are fully supported, including auditing. Simply open the main OpenAPI file (JSON or YAML), and click the **42c** button at the top right. The extension automatically finds and parses all `$ref` references, locates the possible references in other files, aggregates the referenced information in the API contract, and runs the audit for it.
 
 ![](images/composite_openapi_file_security_audit_960.gif)
 
@@ -69,16 +71,18 @@ We have updated our OpenAPI extension to version 2.0. This is a major release wi
 
 ## API Security Audit
 
-OpenAPI Security Audit is a static analysis of OpenAPI files. The service *does not* call the actual API endpoint. It simply looks at the OpenAPI file itself and checks if it is following industry security best practices.
+OpenAPI Security Audit is a static analysis of OpenAPI files. The service _does not_ call the actual API endpoint. It simply looks at the OpenAPI file itself and checks if it is following industry security best practices.
 
 The checks that are run are derived from the [API Security Encyclopedia at APISecurity.io](https://apisecurity.io/encyclopedia/content/api-security-encyclopedia.htm).
 
 **To run Security Audit for the currently opened OpenAPI file:**
+
 - Click the **42c** button at the upper right of the OpenAPI file you are editing.
 
 ![](images/Perform%20REST%20API%20Security%20Audit.gif)
 
 Note:
+
 - To run Security Audit from VS Code, you need a token. On the first time, you are asked to provide your email address. When you supply the address, the extension requests the token to be sent to your mailbox. Once you get the token, paste it in the prompt in VS Code, and you are all set. From now on, all you need to do is to click the button to run the audit.
 
 ### Navigate the issues in the audit report
@@ -94,9 +98,10 @@ After the audit finishes, you get the audit report directly in the VS Code view,
 ![](images/Details%20for%20specific%20issues.gif)
 
 3. For a quick overall look, check the counts in the Status Bar. The different icons match the severity of the issue:
-  - Error: critical or high 
-  - Warning: medium
-  - Info: low
+
+- Error: critical or high
+- Warning: medium
+- Info: low
 
 ![](images/List%20of%20API%20Sec%20Issues.gif)
 
