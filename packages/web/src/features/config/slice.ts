@@ -123,6 +123,8 @@ export const slice = createSlice({
       state.platformConnectionTestResult = undefined;
       state.overlordConnectionTestResult = undefined;
       state.scandManagerConnectionTestResult = undefined;
+      state.cliDownloadError = undefined;
+      state.cliTestResult = undefined;
     },
 
     setError: (state, action: PayloadAction<{ screen: ConfigScreenId; error: string }>) => {
