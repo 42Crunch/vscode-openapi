@@ -106,8 +106,14 @@ export const slice = createSlice({
   initialState,
   reducers: {
     loadConfig: (state, action: PayloadAction<Config>) => {
-      state.data = action.payload;
-      state.ready = true;
+      if (!state.ready) {
+        // first load
+        state.ready = true;
+        state.data = action.payload;
+      } else {
+        // subsequent loads
+        state.data.cli = action.payload.cli;
+      }
     },
 
     saveConfig: (state, action: PayloadAction<Partial<Config>>) => {

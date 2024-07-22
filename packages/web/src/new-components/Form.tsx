@@ -34,7 +34,7 @@ export default function Form<T extends FieldValues>({
     const difference = diff(valuesRef.current, data);
     if (difference.length > 0) {
       valuesRef.current = data;
-      reset(wrapFormData(data));
+      reset(wrapFormData(data), { keepDirtyValues: true });
     }
   }, [data, valuesRef]);
 

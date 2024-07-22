@@ -42,9 +42,13 @@ export class ConfigWebView extends WebView<Webapp> {
   }
 
   hostHandlers: Webapp["hostHandlers"] = {
-    saveConfig: async (config: Config) => {
-      this.config = config;
+    saveConfig: async (config) => {
       await saveConfig(config, this.configuration, this.secrets);
+      this.config = await loadConfig(this.configuration, this.secrets);
+      return {
+        command: "loadConfig",
+        payload: this.config,
+      };
     },
 
     testOverlordConnection: async () => {
