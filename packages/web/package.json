@@ -10,7 +10,7 @@
   },
   "type": "module",
   "devDependencies": {
-    "@hookform/resolvers": "^3.2.0",
+    "@hookform/resolvers": "3.7.0",
     "@lexical/react": "^0.13.0",
     "@mdx-js/rollup": "^3.0.1",
     "@radix-ui/react-checkbox": "^1.0.0",
@@ -43,7 +43,7 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.2.0",
     "react-error-boundary": "^4.0.13",
-    "react-hook-form": "^7.47.0",
+    "react-hook-form": "7.50.1",
     "react-redux": "^9.1.0",
     "redux": "^5.0.1",
     "redux-logger": "^3.0.6",
