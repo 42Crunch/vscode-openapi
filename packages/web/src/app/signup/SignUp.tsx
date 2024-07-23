@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import { Check } from "../../icons";
 import { useFormContext, useWatch } from "react-hook-form";
 import {
   requestAnondTokenByEmail,
@@ -22,7 +21,7 @@ import { ErrorBanner } from "../../components/Banner";
 import Textarea from "../../new-components/fat-fields/Textarea";
 import { useAppDispatch, useAppSelector } from "./store";
 import Button from "../../new-components/Button";
-import { CheckboxRoot, Indicator } from "../../components/Checkbox";
+import { Checkbox } from "../../new-components/Checkbox";
 
 const doNothingWrapper = (data: any) => {
   return data;
@@ -312,17 +311,14 @@ export function AgreeToTermsAndConditionsCheckbox() {
   const { agreeToTermsAndConditions } = useAppSelector((state) => state.signup);
   return (
     <AgreeToTermsAndConditionsBar>
-      <CheckboxRoot
-        checked={agreeToTermsAndConditions}
-        onCheckedChange={(checked: boolean) => {
-          dispatch(saveAgreeToTermsAndConditions(checked));
+      <Checkbox
+        value={agreeToTermsAndConditions}
+        onChange={(value: boolean) => {
+          dispatch(saveAgreeToTermsAndConditions(value));
         }}
-      >
-        <Indicator>
-          <Check />
-        </Indicator>
-      </CheckboxRoot>
-      By clicking checkbox you agree to our
+        label={"By clicking checkbox you agree to our"}
+        size={"medium"}
+      ></Checkbox>
       <a
         href="#"
         onClick={(e) => {
