@@ -282,6 +282,11 @@ export async function runScanWithCliBinary(
     }
   }
 
+  const httpProxy = vscode.workspace.getConfiguration().get<string>("http.proxy");
+  if (httpProxy !== undefined && httpProxy !== "") {
+    scanEnv["HTTPS_PROXY"] = httpProxy;
+  }
+
   try {
     const output = await asyncExecFile(cli, args, {
       cwd: dir as string,
@@ -396,6 +401,12 @@ export async function runAuditWithCliBinary(
 
   const userAgent = getUserAgent();
 
+  const env: Record<string, string> = {};
+  const httpProxy = vscode.workspace.getConfiguration().get<string>("http.proxy");
+  if (httpProxy !== undefined && httpProxy !== "") {
+    env["HTTPS_PROXY"] = httpProxy;
+  }
+
   try {
     const output = await asyncExecFile(
       cli,
@@ -416,7 +427,7 @@ export async function runAuditWithCliBinary(
         "--token",
         String(token),
       ].filter((option) => option !== ""),
-      { cwd: dir as string, windowsHide: true }
+      { cwd: dir as string, windowsHide: true, env }
     );
 
     const report = await readFile(join(dir as string, "report.json"), { encoding: "utf8" });
