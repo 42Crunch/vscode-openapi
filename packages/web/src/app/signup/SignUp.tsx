@@ -24,19 +24,24 @@ import { useAppDispatch, useAppSelector } from "./store";
 import Button from "../../new-components/Button";
 import { CheckboxRoot, Indicator } from "../../components/Checkbox";
 
-const doNothingWrapper = (data: any) => { return data };
+const doNothingWrapper = (data: any) => {
+  return data;
+};
 
 export default function BasicSignUpForm() {
-
   const dispatch = useAppDispatch();
-  const { agreeToTermsAndConditions, platformCredentials, anondCredentials, currentFormId } = useAppSelector((state) => state.signup);
+  const { agreeToTermsAndConditions, platformCredentials, anondCredentials, currentFormId } =
+    useAppSelector((state) => state.signup);
 
   return (
     <>
       {currentFormId === "BasicSignUpForm" && (
         <Container>
-          <Title>42Crunch Audit runs 300+ checks for security best practices in your API. Use your existing platform credentials or provide an email to receive a freemium token.</Title>
-          <AgreeToTermsAndConditionsCheckbox/>
+          <Title>
+            42Crunch Audit runs 300+ checks for security best practices in your API. Use your
+            existing platform credentials or provide an email to receive a freemium token.
+          </Title>
+          <AgreeToTermsAndConditionsCheckbox />
           <ButtonsBar>
             <SimpleButton
               disabled={!agreeToTermsAndConditions}
@@ -45,7 +50,9 @@ export default function BasicSignUpForm() {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-            >I have an existing 42Crunch Platform account</SimpleButton>
+            >
+              I have an existing 42Crunch Platform account
+            </SimpleButton>
             <SimpleButton
               disabled={!agreeToTermsAndConditions}
               onClick={(e) => {
@@ -53,35 +60,52 @@ export default function BasicSignUpForm() {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-            >I'm a new user, please email me the token</SimpleButton>
+            >
+              I'm a new user, please email me the token
+            </SimpleButton>
           </ButtonsBar>
         </Container>
       )}
       {currentFormId === "PlatformSignUpForm" && (
-        <PlatformSignUpForm data={platformCredentials} backToPrevForm={() =>
-          dispatch(setCurrentFormId("BasicSignUpForm"))
-        }/>
+        <PlatformSignUpForm
+          data={platformCredentials}
+          backToPrevForm={() => dispatch(setCurrentFormId("BasicSignUpForm"))}
+        />
       )}
       {currentFormId === "AnondSignUpEmailForm" && (
-        <AnondSignUpEmailForm data={{email: anondCredentials.email}} backToPrevForm={() =>
-          dispatch(setCurrentFormId("BasicSignUpForm"))
-        }/>
+        <AnondSignUpEmailForm
+          data={{ email: anondCredentials.email }}
+          backToPrevForm={() => dispatch(setCurrentFormId("BasicSignUpForm"))}
+        />
       )}
       {currentFormId === "AnondSignUpTokenForm" && (
-        <AnondSignUpTokenForm data={{anondToken: anondCredentials.anondToken}} backToPrevForm={() => {
+        <AnondSignUpTokenForm
+          data={{ anondToken: anondCredentials.anondToken }}
+          backToPrevForm={() => {
             dispatch(resetAnondTokenRequestResult());
-          }
-        }/>
+          }}
+        />
       )}
-  </>
+    </>
   );
 }
 
-function AnondSignUpEmailForm({data, backToPrevForm}: {data: {email: string}, backToPrevForm: () => void}) {
+function AnondSignUpEmailForm({
+  data,
+  backToPrevForm,
+}: {
+  data: { email: string };
+  backToPrevForm: () => void;
+}) {
   const dispatch = useAppDispatch();
-  const {anondTokenRequestResult, waitingForAnondToken, complete } = useAppSelector((state) => state.signup);
+  const { anondTokenRequestResult, waitingForAnondToken, complete } = useAppSelector(
+    (state) => state.signup
+  );
   const schema = z.object({
-    email: z.string().min(1, { message: "This field has to be filled." }).email("This is not a valid email.")
+    email: z
+      .string()
+      .min(1, { message: "This field has to be filled." })
+      .email("This is not a valid email."),
   });
   return (
     <Form
@@ -93,23 +117,31 @@ function AnondSignUpEmailForm({data, backToPrevForm}: {data: {email: string}, ba
       useFormMode={"onChange"}
     >
       <Container>
-      <Title>Enter your email to receive the token</Title>
+        <Title>Enter your email to receive the token</Title>
         <InputContainer>
           <Input label="Email" name="email" disabled={complete} />
           {anondTokenRequestResult && !anondTokenRequestResult.success && (
-            <ErrorBanner message="Unexpected error when trying to request token">{anondTokenRequestResult.message}</ErrorBanner>
+            <ErrorBanner message="Unexpected error when trying to request token">
+              {anondTokenRequestResult.message}
+            </ErrorBanner>
           )}
         </InputContainer>
         <ButtonsBar>
           <ButtonBack disabled={complete || waitingForAnondToken} backToPrevForm={backToPrevForm} />
-          <ButtonSendEmail/>
+          <ButtonSendEmail />
         </ButtonsBar>
       </Container>
     </Form>
   );
 }
 
-function ButtonBack({disabled, backToPrevForm}: {disabled: boolean, backToPrevForm: () => void}) {
+function ButtonBack({
+  disabled,
+  backToPrevForm,
+}: {
+  disabled: boolean;
+  backToPrevForm: () => void;
+}) {
   return (
     <SimpleButton
       disabled={disabled}
@@ -118,15 +150,19 @@ function ButtonBack({disabled, backToPrevForm}: {disabled: boolean, backToPrevFo
         e.preventDefault();
         e.stopPropagation();
       }}
-    >Back</SimpleButton>
+    >
+      Back
+    </SimpleButton>
   );
 }
 
 function ButtonSendEmail() {
   const dispatch = useAppDispatch();
-  const {waitingForAnondToken, complete } = useAppSelector((state) => state.signup);
+  const { waitingForAnondToken, complete } = useAppSelector((state) => state.signup);
   const email = useWatch({ name: "email" });
-  const { formState: { isValid } } = useFormContext();
+  const {
+    formState: { isValid },
+  } = useFormContext();
   return (
     <NormalProgressButton
       label="Request token"
@@ -141,11 +177,17 @@ function ButtonSendEmail() {
   );
 }
 
-function AnondSignUpTokenForm({data, backToPrevForm}: {data: {anondToken: string}, backToPrevForm: () => void}) {
+function AnondSignUpTokenForm({
+  data,
+  backToPrevForm,
+}: {
+  data: { anondToken: string };
+  backToPrevForm: () => void;
+}) {
   const dispatch = useAppDispatch();
   const { complete } = useAppSelector((state) => state.signup);
   const schema = z.object({
-    anondToken: z.string().min(1, { message: "This field has to be filled." })
+    anondToken: z.string().min(1, { message: "This field has to be filled." }),
   });
   return (
     <Form
@@ -157,13 +199,16 @@ function AnondSignUpTokenForm({data, backToPrevForm}: {data: {anondToken: string
       useFormMode={"onChange"}
     >
       <Container>
-        <Title>The token has been sent. If you don't get the mail within a couple minutes, check your spam folder and that the address is correct. Paste the token above.</Title>
-        <InputContainer> 
+        <Title>
+          The token has been sent. If you don't get the mail within a couple minutes, check your
+          spam folder and that the address is correct. Paste the token above.
+        </Title>
+        <InputContainer>
           <Textarea label="Freemium token" name="anondToken" disabled={complete} />
         </InputContainer>
         <ButtonsBar>
           <ButtonBack disabled={complete} backToPrevForm={backToPrevForm} />
-          <ButtonSaveAnondToken/>
+          <ButtonSaveAnondToken />
         </ButtonsBar>
       </Container>
     </Form>
@@ -172,24 +217,36 @@ function AnondSignUpTokenForm({data, backToPrevForm}: {data: {anondToken: string
 
 function ButtonSaveAnondToken() {
   const dispatch = useAppDispatch();
-  const {anondCredentials, waitingForAnondToken, complete } = useAppSelector((state) => state.signup);
+  const { anondCredentials, waitingForAnondToken, complete } = useAppSelector(
+    (state) => state.signup
+  );
   const anondToken = useWatch({ name: "anondToken" });
-  const { formState: { isValid } } = useFormContext();
+  const {
+    formState: { isValid },
+  } = useFormContext();
   return (
     <SimpleButton
       disabled={complete || !isValid}
       onClick={(e) => {
-        dispatch(anondSignUpComplete({email: anondCredentials.email, anondToken}));
+        dispatch(anondSignUpComplete({ email: anondCredentials.email, anondToken }));
         e.preventDefault();
         e.stopPropagation();
       }}
-    >Save</SimpleButton>
+    >
+      Save
+    </SimpleButton>
   );
 }
 
-function PlatformSignUpForm({data, backToPrevForm}: {data: PlatformCredentials, backToPrevForm: () => void}) {
+function PlatformSignUpForm({
+  data,
+  backToPrevForm,
+}: {
+  data: PlatformCredentials;
+  backToPrevForm: () => void;
+}) {
   const dispatch = useAppDispatch();
-  const {platformConnectionTestResult, complete } = useAppSelector((state) => state.signup);
+  const { platformConnectionTestResult, complete } = useAppSelector((state) => state.signup);
   const schema = z.object({
     platformUrl: z.string().url().startsWith("https://"),
     platformApiToken: z
@@ -214,12 +271,14 @@ function PlatformSignUpForm({data, backToPrevForm}: {data: PlatformCredentials, 
           <Input label="Platform URL" name="platformUrl" disabled={complete} />
           <Input label="IDE token" name="platformApiToken" disabled={complete} password />
           {platformConnectionTestResult && (
-          <ErrorBanner message="Failed to connect">{platformConnectionTestResult.error}</ErrorBanner>
-        )}
+            <ErrorBanner message="Failed to connect">
+              {platformConnectionTestResult.error}
+            </ErrorBanner>
+          )}
         </InputContainer>
         <ButtonsBar>
           <ButtonBack disabled={complete} backToPrevForm={backToPrevForm} />
-          <ButtonSavePlatformCredentials/>
+          <ButtonSavePlatformCredentials />
         </ButtonsBar>
       </Container>
     </Form>
@@ -231,14 +290,16 @@ function ButtonSavePlatformCredentials() {
   const { waitingForPlatformConnectionTest, complete } = useAppSelector((state) => state.signup);
   const platformUrl = useWatch({ name: "platformUrl" });
   const platformApiToken = useWatch({ name: "platformApiToken" });
-  const { formState: { isValid } } = useFormContext();
+  const {
+    formState: { isValid },
+  } = useFormContext();
   return (
     <NormalProgressButton
       label="Save"
       disabled={complete || !isValid}
       waiting={waitingForPlatformConnectionTest}
       onClick={(e) => {
-        dispatch(platformSignUpComplete({platformUrl, platformApiToken}));
+        dispatch(platformSignUpComplete({ platformUrl, platformApiToken }));
         e.preventDefault();
         e.stopPropagation();
       }}
@@ -253,13 +314,13 @@ export function AgreeToTermsAndConditionsCheckbox() {
     <AgreeToTermsAndConditionsBar>
       <CheckboxRoot
         checked={agreeToTermsAndConditions}
-        onCheckedChange={(checked: boolean) => { 
+        onCheckedChange={(checked: boolean) => {
           dispatch(saveAgreeToTermsAndConditions(checked));
-         }}
+        }}
       >
-      <Indicator>
-        <Check />
-      </Indicator>
+        <Indicator>
+          <Check />
+        </Indicator>
       </CheckboxRoot>
       By clicking checkbox you agree to our
       <a
@@ -312,6 +373,6 @@ const AgreeToTermsAndConditionsBar = styled.div`
 
 const SimpleButton = styled(Button)`
   &:disabled {
-    opacity: .4;
+    opacity: 0.4;
   }
 `;
