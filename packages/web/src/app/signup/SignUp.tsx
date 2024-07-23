@@ -40,7 +40,6 @@ export default function BasicSignUpForm() {
             42Crunch Audit runs 300+ checks for security best practices in your API. Use your
             existing platform credentials or provide an email to receive a freemium token.
           </Title>
-          <AgreeToTermsAndConditionsCheckbox />
           <ButtonsBar>
             <SimpleButton
               disabled={!agreeToTermsAndConditions}
@@ -63,6 +62,7 @@ export default function BasicSignUpForm() {
               I'm a new user, please email me the token
             </SimpleButton>
           </ButtonsBar>
+          <AgreeToTermsAndConditionsCheckbox />
         </Container>
       )}
       {currentFormId === "PlatformSignUpForm" && (
@@ -335,7 +335,6 @@ export function AgreeToTermsAndConditionsCheckbox() {
 
 const Title = styled.div`
   font-weight: 700;
-  margin-bottom: 16px;
 `;
 
 const Container = styled.div`
@@ -343,6 +342,7 @@ const Container = styled.div`
   flex-wrap: wrap;
   flex-direction: column;
   padding: 16px;
+  gap: 16px;
 `;
 
 const InputContainer = styled.div`
@@ -351,7 +351,6 @@ const InputContainer = styled.div`
   flex-direction: column;
   gap: 6px;
   max-width: 560px;
-  margin-bottom: 6px;
 `;
 
 const ButtonsBar = styled.div`
@@ -364,7 +363,6 @@ const AgreeToTermsAndConditionsBar = styled.div`
   display: flex;
   gap: 5px;
   align-items: center;
-  margin-bottom: 16px;
 `;
 
 const SimpleButton = styled(Button)`
