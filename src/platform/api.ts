@@ -287,6 +287,12 @@ export async function getDataDictionaryFormats(
     } else if (type === "string") {
       props = stringProps;
     }
+
+    // drop empty default values
+    if (value["default"] === "") {
+      delete value["default"];
+    }
+
     for (const prop of props) {
       if (value.hasOwnProperty(prop)) {
         value[prop] = parseInt(value[prop], 10);
