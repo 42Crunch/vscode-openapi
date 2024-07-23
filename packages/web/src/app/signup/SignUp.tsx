@@ -22,6 +22,7 @@ import Textarea from "../../new-components/fat-fields/Textarea";
 import { useAppDispatch, useAppSelector } from "./store";
 import Button from "../../new-components/Button";
 import { Checkbox } from "../../new-components/Checkbox";
+import { useState } from "react";
 
 const doNothingWrapper = (data: any) => {
   return data;
@@ -31,7 +32,7 @@ export default function BasicSignUpForm() {
   const dispatch = useAppDispatch();
   const { agreeToTermsAndConditions, platformCredentials, anondCredentials, currentFormId } =
     useAppSelector((state) => state.signup);
-
+  const [showTermsAndConditionsError, setAcceptTermsAndConditionsError] = useState(false);
   return (
     <>
       {currentFormId === "BasicSignUpForm" && (
@@ -41,27 +42,40 @@ export default function BasicSignUpForm() {
             existing platform credentials or provide an email to receive a freemium token.
           </Title>
           <ButtonsBar>
-            <SimpleButton
-              disabled={!agreeToTermsAndConditions}
+            <Button
+              disabled={false}
               onClick={(e) => {
-                dispatch(setCurrentFormId("PlatformSignUpForm"));
+                if (agreeToTermsAndConditions) {
+                  dispatch(setCurrentFormId("PlatformSignUpForm"));
+                } else {
+                  setAcceptTermsAndConditionsError(true);
+                }
                 e.preventDefault();
                 e.stopPropagation();
               }}
             >
               I have an existing 42Crunch Platform account
-            </SimpleButton>
-            <SimpleButton
-              disabled={!agreeToTermsAndConditions}
+            </Button>
+            <Button
+              disabled={false}
               onClick={(e) => {
-                dispatch(setCurrentFormId("AnondSignUpEmailForm"));
+                if (agreeToTermsAndConditions) {
+                  dispatch(setCurrentFormId("AnondSignUpEmailForm"));
+                } else {
+                  setAcceptTermsAndConditionsError(true);
+                }
                 e.preventDefault();
                 e.stopPropagation();
               }}
             >
               I'm a new user, please email me the token
-            </SimpleButton>
+            </Button>
           </ButtonsBar>
+          {showTermsAndConditionsError && !agreeToTermsAndConditions && (
+            <ErrorBannerContainer>
+              <ErrorBanner message="Please accept Terms and Conditions to continue"></ErrorBanner>
+            </ErrorBannerContainer>
+          )}
           <AgreeToTermsAndConditionsCheckbox />
         </Container>
       )}
@@ -357,6 +371,10 @@ const ButtonsBar = styled.div`
   display: flex;
   gap: 16px;
   align-items: center;
+`;
+
+const ErrorBannerContainer = styled.div`
+  max-width: 600px;
 `;
 
 const AgreeToTermsAndConditionsBar = styled.div`
