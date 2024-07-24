@@ -11,6 +11,7 @@ import {
   saveAgreeToTermsAndConditions,
   openLink,
   setCurrentFormId,
+  showTermsAndConditionsError,
 } from "./slice";
 import * as z from "zod";
 import { NormalProgressButton } from "../../new-components/ProgressButton";
@@ -30,9 +31,10 @@ const doNothingWrapper = (data: any) => {
 
 export default function BasicSignUpForm() {
   const dispatch = useAppDispatch();
-  const { agreeToTermsAndConditions, platformCredentials, anondCredentials, currentFormId } =
-    useAppSelector((state) => state.signup);
-  const [showTermsAndConditionsError, setAcceptTermsAndConditionsError] = useState(false);
+  const { platformCredentials, anondCredentials, currentFormId } = useAppSelector(
+    (state) => state.signup
+  );
+
   return (
     <>
       {currentFormId === "BasicSignUpForm" && (
@@ -45,11 +47,7 @@ export default function BasicSignUpForm() {
             <Button
               disabled={false}
               onClick={(e) => {
-                if (agreeToTermsAndConditions) {
-                  dispatch(setCurrentFormId("PlatformSignUpForm"));
-                } else {
-                  setAcceptTermsAndConditionsError(true);
-                }
+                dispatch(setCurrentFormId("PlatformSignUpForm"));
                 e.preventDefault();
                 e.stopPropagation();
               }}
@@ -59,11 +57,7 @@ export default function BasicSignUpForm() {
             <Button
               disabled={false}
               onClick={(e) => {
-                if (agreeToTermsAndConditions) {
-                  dispatch(setCurrentFormId("AnondSignUpEmailForm"));
-                } else {
-                  setAcceptTermsAndConditionsError(true);
-                }
+                dispatch(setCurrentFormId("AnondSignUpEmailForm"));
                 e.preventDefault();
                 e.stopPropagation();
               }}
@@ -71,12 +65,6 @@ export default function BasicSignUpForm() {
               I'm a new user, please email me the token
             </Button>
           </ButtonsBar>
-          {showTermsAndConditionsError && !agreeToTermsAndConditions && (
-            <ErrorBannerContainer>
-              <ErrorBanner message="Please accept Terms and Conditions to continue"></ErrorBanner>
-            </ErrorBannerContainer>
-          )}
-          <AgreeToTermsAndConditionsCheckbox />
         </Container>
       )}
       {currentFormId === "PlatformSignUpForm" && (
@@ -111,9 +99,13 @@ function AnondSignUpEmailForm({
   backToPrevForm: () => void;
 }) {
   const dispatch = useAppDispatch();
-  const { anondTokenRequestResult, waitingForAnondToken, complete } = useAppSelector(
-    (state) => state.signup
-  );
+  const {
+    agreeToTermsAndConditions,
+    showTermsAndConditionsError,
+    anondTokenRequestResult,
+    waitingForAnondToken,
+    complete,
+  } = useAppSelector((state) => state.signup);
   const schema = z.object({
     email: z
       .string()
@@ -143,6 +135,12 @@ function AnondSignUpEmailForm({
           <ButtonBack disabled={complete || waitingForAnondToken} backToPrevForm={backToPrevForm} />
           <ButtonSendEmail />
         </ButtonsBar>
+        {showTermsAndConditionsError && !agreeToTermsAndConditions && (
+          <ErrorBannerContainer>
+            <ErrorBanner message="Please accept Terms and Conditions to continue"></ErrorBanner>
+          </ErrorBannerContainer>
+        )}
+        <AgreeToTermsAndConditionsCheckbox />
       </Container>
     </Form>
   );
@@ -171,7 +169,9 @@ function ButtonBack({
 
 function ButtonSendEmail() {
   const dispatch = useAppDispatch();
-  const { waitingForAnondToken, complete } = useAppSelector((state) => state.signup);
+  const { agreeToTermsAndConditions, waitingForAnondToken, complete } = useAppSelector(
+    (state) => state.signup
+  );
   const email = useWatch({ name: "email" });
   const {
     formState: { isValid },
@@ -182,7 +182,11 @@ function ButtonSendEmail() {
       disabled={complete || !isValid}
       waiting={waitingForAnondToken}
       onClick={(e) => {
-        dispatch(requestAnondTokenByEmail(email));
+        if (agreeToTermsAndConditions) {
+          dispatch(requestAnondTokenByEmail(email));
+        } else {
+          dispatch(showTermsAndConditionsError(true));
+        }
         e.preventDefault();
         e.stopPropagation();
       }}

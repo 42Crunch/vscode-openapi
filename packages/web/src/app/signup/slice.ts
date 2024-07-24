@@ -14,6 +14,7 @@ type FormID =
 
 export interface SignUpState {
   agreeToTermsAndConditions: boolean;
+  showTermsAndConditionsError: boolean;
   anondCredentials: AnondCredentials;
   waitingForAnondToken: boolean;
   anondTokenRequestResult?: AnondTokenResponseResult;
@@ -27,6 +28,7 @@ export interface SignUpState {
 
 const initialState: SignUpState = {
   agreeToTermsAndConditions: false,
+  showTermsAndConditionsError: false,
   anondCredentials: { email: "", anondToken: "" },
   waitingForAnondToken: false,
   anondTokenRequestResult: undefined,
@@ -98,6 +100,12 @@ export const slice = createSlice({
     },
     saveAgreeToTermsAndConditions: (state, action: PayloadAction<boolean>) => {
       state.agreeToTermsAndConditions = action.payload;
+      if (state.agreeToTermsAndConditions) {
+        state.showTermsAndConditionsError = false;
+      }
+    },
+    showTermsAndConditionsError: (state, action: PayloadAction<boolean>) => {
+      state.showTermsAndConditionsError = action.payload;
     },
     openLink: (state, action: PayloadAction<string>) => {
       // hook for a listener
@@ -119,6 +127,7 @@ export const {
   savePlatformCredentials,
   platformSignUpComplete,
   saveAgreeToTermsAndConditions,
+  showTermsAndConditionsError,
   openLink,
   setCurrentFormId,
 } = slice.actions;
