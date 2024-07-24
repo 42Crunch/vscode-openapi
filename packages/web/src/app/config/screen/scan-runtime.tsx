@@ -56,10 +56,6 @@ export function ScanRuntime() {
           />
         )}
 
-        {platformAuthType === "anond-token" && (
-          <Banner message="Scan runtime is set to use 42Crunch API Security Testing Binary" />
-        )}
-
         {scanRuntime === "docker" && (
           <>
             <Input label="Docker image for 'scand-agent'" name="scanImage" />
@@ -120,6 +116,10 @@ export function ScanRuntime() {
               name="cliDirectoryOverride"
             />
           </>
+        )}
+
+        {platformAuthType === "anond-token" && (
+          <Banner message="Scan runtime is set to use 42Crunch API Security Testing Binary" />
         )}
 
         {scanRuntime === "cli" &&
