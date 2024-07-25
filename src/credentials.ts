@@ -34,7 +34,7 @@ export async function ensureHasCredentials(
   configuration: Configuration,
   secrets: vscode.SecretStorage
 ): Promise<boolean> {
-  const credentials = await hasCredentials(configuration, secrets);
+  const credentials = undefined; //await hasCredentials(configuration, secrets);
   if (credentials === undefined) {
     // try asking for credentials if not found
     const configured = await configureCredentials(signUpWebView);

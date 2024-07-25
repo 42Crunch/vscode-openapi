@@ -7,7 +7,8 @@ import { ThemeState } from "../../features/theme/slice";
 import { makeWebappMessageHandler } from "../webapp";
 import { createListener } from "./listener";
 import { initStore, messageHandlers } from "./store";
-import BasicSignUpForm from "./SignUp";
+import { LeftContainer, RightContainer } from "./SignUp";
+import styled from "styled-components";
 
 function renderWebView(host: Webapp["host"], theme: ThemeState) {
   const store = initStore(createListener(host), theme);
@@ -16,7 +17,10 @@ function renderWebView(host: Webapp["host"], theme: ThemeState) {
     <React.StrictMode>
       <Provider store={store}>
         <ThemeStyles />
-        <BasicSignUpForm />
+        <Container>
+          <LeftContainer />
+          <RightContainer />
+        </Container>
       </Provider>
     </React.StrictMode>
   );
@@ -25,3 +29,10 @@ function renderWebView(host: Webapp["host"], theme: ThemeState) {
 }
 
 (window as any).renderWebView = renderWebView;
+
+const Container = styled.div`
+  display: flex;
+  position: absolute;
+  height: 100%;
+  width: 100%;
+`;
