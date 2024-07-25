@@ -12,7 +12,6 @@ import {
   testScandManagerConnection,
   useFeatureDispatch,
   useFeatureSelector,
-  openLink,
   ConfigScreen,
 } from "../../../features/config/slice";
 import CliVersionBanner from "../CliVersionBanner";
@@ -171,6 +170,7 @@ export function ScanRuntime() {
 }
 
 const schema = z.object({
+  scanRuntime: z.enum(["docker", "scand-manager", "cli"]),
   scandManager: z
     .object({
       timeout: z.coerce
