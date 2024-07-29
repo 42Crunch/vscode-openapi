@@ -9,7 +9,7 @@ export async function loadConfig(
   secrets: vscode.SecretStorage
 ): Promise<Config> {
   const platformAuthType = configuration.get<Config["platformAuthType"] | "">("platformAuthType");
-  const platformUrl = configuration.get<string>("platformUrl");
+  const platformUrl = configuration.get<string>("platformUrl")?.trim();
   const anondToken = configuration.get<string>("securityAuditToken");
   const apiToken = (await secrets.get("platformApiToken")) ?? "";
   const insecureSslHostnames = configuration.get<string[]>("tryit.insecureSslHostnames");
