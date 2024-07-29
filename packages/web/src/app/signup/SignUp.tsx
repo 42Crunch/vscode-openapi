@@ -35,7 +35,6 @@ export function LeftContainer() {
           {currentFormId === "BasicSignUpForm" && (
             <ButtonsContainer>
               <MainButton
-                style={{ marginTop: "20px" }}
                 onClick={(e) => {
                   dispatch(setCurrentFormId("PlatformSignUpForm"));
                   e.preventDefault();
@@ -45,7 +44,6 @@ export function LeftContainer() {
                 Login
               </MainButton>
               <MainButton
-                style={{ marginBottom: "20px" }}
                 onClick={(e) => {
                   dispatch(setCurrentFormId("AnondSignUpEmailForm"));
                   e.preventDefault();
@@ -106,12 +104,6 @@ const CenterTextContainer = styled.div`
   width: 70%;
 `;
 
-const CrunchLogoContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  margin-bottom: 10px;
-`;
-
 const CrunchMainLogoContainer = styled.div`
   margin-bottom: 30px;
 `;
@@ -121,6 +113,7 @@ const FormContainer = styled.div`
   border-color: var(${ThemeColorVariables.border});
   border-width: 2px;
   border-style: solid;
+  padding: 20px;
 `;
 
 const ButtonsContainer = styled.div`

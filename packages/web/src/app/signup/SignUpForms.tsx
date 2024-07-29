@@ -298,7 +298,6 @@ const Container = styled.div`
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
-  padding: 16px;
   gap: 16px;
 `;
 
