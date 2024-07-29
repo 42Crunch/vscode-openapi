@@ -54,7 +54,7 @@ export function AnondSignUpEmailForm({
       wrapFormData={doNothingWrapper}
       unwrapFormData={doNothingWrapper}
       schema={schema}
-      useFormMode={"onChange"}
+      useFormMode={"onBlur"}
     >
       <Container>
         <Title>Enter your email to receive the token</Title>
@@ -153,7 +153,7 @@ export function AnondSignUpTokenForm({
       <Container>
         <Title>
           The token has been sent. If you don't get the mail within a couple minutes, check your
-          spam folder and that the address is correct. Paste the token above.
+          spam folder and that the address is correct.
         </Title>
         <InputContainer style={{ height: "170px" }}>
           <Textarea label="Freemium token" name="anondToken" disabled={complete} />
@@ -247,7 +247,7 @@ function ButtonSavePlatformCredentials() {
   } = useFormContext();
   return (
     <NormalProgressButton
-      label="Save"
+      label="Login"
       disabled={complete || !isValid}
       waiting={waitingForPlatformConnectionTest}
       onClick={(e) => {
@@ -269,19 +269,23 @@ export function AgreeToTermsAndConditionsCheckbox() {
         onChange={(value: boolean) => {
           dispatch(saveAgreeToTermsAndConditions(value));
         }}
-        label={"By clicking checkbox you agree to our"}
+        label={
+          <>
+            I agree to the{" "}
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dispatch(openLink("https://42crunch.com/websales-customer-agreement"));
+              }}
+            >
+              terms & conditions
+            </a>
+          </>
+        }
         size={"medium"}
       ></Checkbox>
-      <a
-        href="#"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          dispatch(openLink("https://42crunch.com/websales-customer-agreement"));
-        }}
-      >
-        terms & conditions
-      </a>
     </AgreeToTermsAndConditionsBar>
   );
 }
