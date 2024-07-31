@@ -96,7 +96,7 @@ const CenterContainer = styled.div`
   margin-left: auto;
   margin-top: 50%;
   margin-bottom: auto;
-  width: 400px;
+  width: 430px;
 `;
 
 const CenterTextContainer = styled.div`
