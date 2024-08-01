@@ -211,7 +211,7 @@ const Subheader = styled.div`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  opacity: 0.8;
+  opacity: 0.4;
 `;
 
 const Menu = styled.div`
