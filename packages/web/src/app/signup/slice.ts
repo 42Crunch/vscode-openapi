@@ -38,7 +38,7 @@ const initialState: SignUpState = {
   },
   waitingForPlatformConnectionTest: false,
   platformConnectionTestResult: undefined,
-  currentFormId: "BasicSignUpForm",
+  currentFormId: "AnondSignUpEmailForm",
   complete: false,
 };
 

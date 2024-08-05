@@ -1,8 +1,7 @@
 import styled from "styled-components";
 import { resetAnondTokenRequestResult, setCurrentFormId } from "./slice";
 import { useAppDispatch, useAppSelector } from "./store";
-import Button from "../../new-components/Button";
-import { CrunchLogo, CrunchLogoMain } from "../../icons";
+import { CrunchLogoMain } from "../../icons";
 import { AnondSignUpEmailForm, AnondSignUpTokenForm, PlatformSignUpForm } from "./SignUpForms";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
@@ -13,10 +12,10 @@ export function RightContainer() {
         <CrunchMainLogoContainer>
           <CrunchLogoMain />
         </CrunchMainLogoContainer>
-        <Title>Enjoying the API Security Audit?</Title>
+        <Title>API Audit & Scan</Title>
         <Text>
-          Check out API Conformance Scan once logged in to check for API contract vulnerabilities at
-          run time.
+          Ensure your API conforms to the API Contract and has no volnurabilities. Check for BOLA,
+          BFLA and other OWASP API risks.
         </Text>
       </CenterTextContainer>
     </ColoredContainer>
@@ -31,50 +30,26 @@ export function LeftContainer() {
   return (
     <Container>
       <CenterContainer>
-        <FormContainer>
-          {currentFormId === "BasicSignUpForm" && (
-            <ButtonsContainer>
-              <MainButton
-                onClick={(e) => {
-                  dispatch(setCurrentFormId("PlatformSignUpForm"));
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-              >
-                Login
-              </MainButton>
-              <MainButton
-                onClick={(e) => {
-                  dispatch(setCurrentFormId("AnondSignUpEmailForm"));
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-              >
-                Signup
-              </MainButton>
-            </ButtonsContainer>
-          )}
-          {currentFormId === "PlatformSignUpForm" && (
-            <PlatformSignUpForm
-              data={platformCredentials}
-              backToPrevForm={() => dispatch(setCurrentFormId("BasicSignUpForm"))}
-            />
-          )}
-          {currentFormId === "AnondSignUpEmailForm" && (
-            <AnondSignUpEmailForm
-              data={{ email: anondCredentials.email }}
-              backToPrevForm={() => dispatch(setCurrentFormId("BasicSignUpForm"))}
-            />
-          )}
-          {currentFormId === "AnondSignUpTokenForm" && (
-            <AnondSignUpTokenForm
-              data={{ anondToken: anondCredentials.anondToken }}
-              backToPrevForm={() => {
-                dispatch(resetAnondTokenRequestResult());
-              }}
-            />
-          )}
-        </FormContainer>
+        {currentFormId === "PlatformSignUpForm" && (
+          <PlatformSignUpForm
+            data={platformCredentials}
+            backToPrevForm={() => dispatch(setCurrentFormId("AnondSignUpEmailForm"))}
+          />
+        )}
+        {currentFormId === "AnondSignUpEmailForm" && (
+          <AnondSignUpEmailForm
+            data={{ email: anondCredentials.email }}
+            backToPrevForm={() => dispatch(setCurrentFormId("PlatformSignUpForm"))}
+          />
+        )}
+        {currentFormId === "AnondSignUpTokenForm" && (
+          <AnondSignUpTokenForm
+            data={{ anondToken: anondCredentials.anondToken }}
+            backToPrevForm={() => {
+              dispatch(resetAnondTokenRequestResult());
+            }}
+          />
+        )}
       </CenterContainer>
     </Container>
   );
@@ -94,9 +69,14 @@ const ColoredContainer = styled(Container)`
 const CenterContainer = styled.div`
   margin-right: auto;
   margin-left: auto;
-  margin-top: 50%;
+  margin-top: auto;
   margin-bottom: auto;
-  width: 430px;
+  width: 460px;
+  height: 430px;
+  border-radius: 7px;
+  border-color: var(${ThemeColorVariables.border});
+  border-width: 2px;
+  border-style: solid;
 `;
 
 const CenterTextContainer = styled.div`
@@ -106,28 +86,6 @@ const CenterTextContainer = styled.div`
 
 const CrunchMainLogoContainer = styled.div`
   margin-bottom: 30px;
-`;
-
-const FormContainer = styled.div`
-  border-radius: 3px;
-  border-color: var(${ThemeColorVariables.border});
-  border-width: 2px;
-  border-style: solid;
-  padding: 20px;
-`;
-
-const ButtonsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  align-items: center;
-`;
-
-const MainButton = styled(Button)`
-  width: 350px;
-  margin-right: 20px;
-  margin-left: 20px;
 `;
 
 const Title = styled.p`

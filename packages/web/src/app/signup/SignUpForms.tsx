@@ -21,6 +21,7 @@ import Textarea from "../../new-components/fat-fields/Textarea";
 import { useAppDispatch, useAppSelector } from "./store";
 import Button from "../../new-components/Button";
 import { Checkbox } from "../../new-components/Checkbox";
+import { ThemeColorVariables } from "@xliic/common/theme";
 
 const doNothingWrapper = (data: any) => {
   return data;
@@ -57,48 +58,58 @@ export function AnondSignUpEmailForm({
       useFormMode={"onBlur"}
     >
       <Container>
-        <Title>Enter your email to receive the token</Title>
+        <CenterHeaderContainer>
+          <Text>Register</Text>
+          <LinkButton
+            text="Existing account"
+            disabled={complete || waitingForAnondToken}
+            backToPrevForm={backToPrevForm}
+          />
+        </CenterHeaderContainer>
         <InputContainer>
+          <Title>Enter a valid email address to receive a once off access token.</Title>
           <Input label="Email" name="email" disabled={complete} />
           {anondTokenRequestResult && !anondTokenRequestResult.success && (
-            <ErrorBanner message="Unexpected error when trying to request token">
-              {anondTokenRequestResult.message}
-            </ErrorBanner>
+            <ErrorBannerContainer>
+              <ErrorBanner message="Unexpected error when trying to request token">
+                {anondTokenRequestResult.message}
+              </ErrorBanner>
+            </ErrorBannerContainer>
           )}
+          {showTermsAndConditionsError && !agreeToTermsAndConditions && (
+            <ErrorBanner message="Please accept Terms and Conditions to continue"></ErrorBanner>
+          )}
+          <AgreeToTermsAndConditionsCheckbox />
         </InputContainer>
         <ButtonsBar>
-          <ButtonBack disabled={complete || waitingForAnondToken} backToPrevForm={backToPrevForm} />
           <ButtonSendEmail />
         </ButtonsBar>
-        {showTermsAndConditionsError && !agreeToTermsAndConditions && (
-          <ErrorBannerContainer>
-            <ErrorBanner message="Please accept Terms and Conditions to continue"></ErrorBanner>
-          </ErrorBannerContainer>
-        )}
-        <AgreeToTermsAndConditionsCheckbox />
       </Container>
     </Form>
   );
 }
 
-export function ButtonBack({
+export function LinkButton({
+  text,
   disabled,
   backToPrevForm,
 }: {
+  text: string;
   disabled: boolean;
   backToPrevForm: () => void;
 }) {
   return (
-    <SimpleButton
+    <LinkRef
+      href="#"
       disabled={disabled}
       onClick={(e) => {
-        backToPrevForm();
         e.preventDefault();
         e.stopPropagation();
+        backToPrevForm();
       }}
     >
-      Back
-    </SimpleButton>
+      {text}
+    </LinkRef>
   );
 }
 
@@ -151,15 +162,22 @@ export function AnondSignUpTokenForm({
       useFormMode={"onChange"}
     >
       <Container>
-        <Title>
-          The token has been sent. If you don't get the mail within a couple minutes, check your
-          spam folder and that the address is correct.
-        </Title>
-        <InputContainer style={{ height: "170px" }}>
+        <CenterHeaderContainer>
+          <Text>Register</Text>
+          <LinkButton
+            text="Enter other email"
+            disabled={complete}
+            backToPrevForm={backToPrevForm}
+          />
+        </CenterHeaderContainer>
+        <InputContainerForTextArea>
+          <Title>
+            An access token was just sent to the email address you supplied. PLease paste the token
+            below to activate your account.
+          </Title>
           <Textarea label="Freemium token" name="anondToken" disabled={complete} />
-        </InputContainer>
+        </InputContainerForTextArea>
         <ButtonsBar>
-          <ButtonBack disabled={complete} backToPrevForm={backToPrevForm} />
           <ButtonSaveAnondToken />
         </ButtonsBar>
       </Container>
@@ -169,9 +187,7 @@ export function AnondSignUpTokenForm({
 
 export function ButtonSaveAnondToken() {
   const dispatch = useAppDispatch();
-  const { anondCredentials, waitingForAnondToken, complete } = useAppSelector(
-    (state) => state.signup
-  );
+  const { anondCredentials, complete } = useAppSelector((state) => state.signup);
   const anondToken = useWatch({ name: "anondToken" });
   const {
     formState: { isValid },
@@ -185,7 +201,7 @@ export function ButtonSaveAnondToken() {
         e.stopPropagation();
       }}
     >
-      Save
+      Activate account
     </SimpleButton>
   );
 }
@@ -218,18 +234,29 @@ export function PlatformSignUpForm({
       useFormMode={"onChange"}
     >
       <Container>
-        <Title>Please enter 42Crunch Platform credentials</Title>
+        <CenterHeaderContainer>
+          <Text>Sign up</Text>
+          <LinkButton
+            text="Create new account"
+            disabled={complete}
+            backToPrevForm={backToPrevForm}
+          />
+        </CenterHeaderContainer>
         <InputContainer>
+          <Title>
+            If you are a subscribing Teams or Enterprise customer, activate your account here.
+          </Title>
           <Input label="Platform URL" name="platformUrl" disabled={complete} />
           <Input label="IDE token" name="platformApiToken" disabled={complete} password />
           {platformConnectionTestResult && (
-            <ErrorBanner message="Failed to connect">
-              {platformConnectionTestResult.error}
-            </ErrorBanner>
+            <ErrorBannerContainer>
+              <ErrorBanner message="Failed to connect">
+                {platformConnectionTestResult.error}
+              </ErrorBanner>
+            </ErrorBannerContainer>
           )}
         </InputContainer>
         <ButtonsBar>
-          <ButtonBack disabled={complete} backToPrevForm={backToPrevForm} />
           <ButtonSavePlatformCredentials />
         </ButtonsBar>
       </Container>
@@ -247,7 +274,7 @@ function ButtonSavePlatformCredentials() {
   } = useFormContext();
   return (
     <NormalProgressButton
-      label="Login"
+      label="Activate account"
       disabled={complete || !isValid}
       waiting={waitingForPlatformConnectionTest}
       onClick={(e) => {
@@ -290,6 +317,25 @@ export function AgreeToTermsAndConditionsCheckbox() {
   );
 }
 
+const CenterHeaderContainer = styled.div`
+  border-bottom-color: var(${ThemeColorVariables.border});
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+`;
+
+const Text = styled.p`
+  margin: 0;
+  font-size: 25px;
+  line-height: 40px;
+  font-weight: 600;
+`;
+
 const Title = styled.div`
   font-weight: 700;
 `;
@@ -298,25 +344,51 @@ const Container = styled.div`
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
-  gap: 16px;
 `;
 
 const InputContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
   flex-direction: column;
-  gap: 6px;
+  gap: 16px;
   max-width: 560px;
+  height: 250px;
+  padding: 16px;
+`;
+
+const InputContainerForTextArea = styled(InputContainer)`
+  > div:nth-child(2) {
+    height: 140px;
+  }
+`;
+
+const LinkRef = styled.a`
+  text-decoration: none;
+  ${({ disabled }: { disabled?: boolean }) => disabled && "opacity: 0.4;"}
+  ${({ disabled }: { disabled?: boolean }) => disabled && "cursor: default;"}
+  ${({ disabled }: { disabled?: boolean }) => disabled && "pointer-events: none;"}
 `;
 
 const ButtonsBar = styled.div`
   display: flex;
   gap: 16px;
-  align-items: center;
+  align-items: stretch;
+  justify-content: center;
+  flex-direction: column;
+  padding: 16px;
+  > button {
+    height: 45px;
+    border-radius: 5px;
+  }
 `;
 
 const ErrorBannerContainer = styled.div`
-  max-width: 600px;
+  > div {
+    max-width: 410px;
+    word-wrap: break-word;
+    overflow-y: auto;
+    max-height: 50px;
+  }
 `;
 
 const AgreeToTermsAndConditionsBar = styled.div`
