@@ -4,10 +4,10 @@
 */
 
 import * as vscode from "vscode";
-import { Configuration } from "../../configuration";
+import { Configuration } from "../../../configuration";
 import { ConfigWebView } from "./view";
-import { PlatformStore } from "../../platform/stores/platform-store";
-import { Logger } from "../../platform/types";
+import { PlatformStore } from "../../../platform/stores/platform-store";
+import { Logger } from "../../../platform/types";
 
 export function activate(
   context: vscode.ExtensionContext,

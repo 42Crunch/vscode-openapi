@@ -120,7 +120,7 @@ export default function VariablesPlugin({
         node.setExists(variables.includes(name));
       }
     });
-  }, [variables]);
+  }, [variables, editor]);
 
   const [queryString, setQueryString] = useState<string | null>(null);
   const [results, setResults] = useState<Array<string>>([]);

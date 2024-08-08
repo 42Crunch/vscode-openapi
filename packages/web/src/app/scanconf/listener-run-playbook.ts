@@ -23,10 +23,16 @@ import {
   executeAuth,
   getExternalEnvironment,
 } from "../../core/playbook/execute";
-import { MockHttpClient, MockHttpResponse } from "../../core/playbook/mock-http";
+import {
+  mockHttpClient,
+  MockHttpClient,
+  MockHttpResponse,
+} from "../../core/http-client/mock-client";
 import { PlaybookExecutorStep } from "../../core/playbook/playbook";
 import { PlaybookEnvStack } from "../../core/playbook/playbook-env";
 import { goTo } from "../../features/router/slice";
+import { sendHttpRequest } from "../../features/http-client/slice";
+
 import {
   addMockAuthRequestsExecutionStep,
   addTryAuthenticationStep,
@@ -69,6 +75,7 @@ import {
   selectSubcredential,
 } from "./slice";
 import { AppDispatch, RootState } from "./store";
+import { webappHttpClient } from "../../core/http-client/webapp-client";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 
@@ -318,7 +325,11 @@ export function onTryExecuteScenario(
 
         await execute(
           listenerApi.getState(),
-          httpClient(host, { https: { rejectUnauthorized } }, listenerApi.take),
+          webappHttpClient(
+            { https: { rejectUnauthorized } },
+            (id: string, request: HttpRequest, config: HttpConfig) =>
+              listenerApi.dispatch(sendHttpRequest({ id, request, config }))
+          ),
           listenerApi.dispatch,
           resetTryExecution,
           addTryExecutionStep,
@@ -354,7 +365,11 @@ export function onExecuteAuthentication(
         listenerApi.dispatch(addTryAuthenticationStep({ event: "request-started" }));
         for await (const step of executeAuth(
           createAuthCache(),
-          httpClient(host, { https: { rejectUnauthorized } }, listenerApi.take),
+          webappHttpClient(
+            { https: { rejectUnauthorized } },
+            (id: string, request: HttpRequest, config: HttpConfig) =>
+              listenerApi.dispatch(sendHttpRequest({ id, request, config }))
+          ),
           oas,
           server,
           playbook,
@@ -392,7 +407,11 @@ export function onExecuteRequest(
 
         await execute(
           listenerApi.getState(),
-          httpClient(host, { https: { rejectUnauthorized } }, listenerApi.take),
+          webappHttpClient(
+            { https: { rejectUnauthorized } },
+            (id: string, request: HttpRequest, config: HttpConfig) =>
+              listenerApi.dispatch(sendHttpRequest({ id, request, config }))
+          ),
           listenerApi.dispatch,
           resetExecuteRequest,
           addExecutionStep,
@@ -424,7 +443,11 @@ export function onExecuteGlobal(startAppListening: AppStartListening, host: Http
 
         await execute(
           listenerApi.getState(),
-          httpClient(host, { https: { rejectUnauthorized } }, listenerApi.take),
+          webappHttpClient(
+            { https: { rejectUnauthorized } },
+            (id: string, request: HttpRequest, config: HttpConfig) =>
+              listenerApi.dispatch(sendHttpRequest({ id, request, config }))
+          ),
           listenerApi.dispatch,
           resetTryGlobal,
           addTryGlobalStep,
@@ -460,51 +483,4 @@ async function execute(
   )) {
     dispatch(addExecutionStepAction(step));
   }
-}
-
-function mockHttpClient(): MockHttpClient {
-  return async () => [MockHttpResponse, undefined];
-}
-
-function httpClient(
-  host: HttpCapableWebappHost,
-  config: HttpConfig,
-  take: (pattern: any) => any
-): HttpClient {
-  const send = makeSend(host, config);
-  const receive = makeReceive(take);
-
-  return async function httpClient(request: HttpRequest): Promise<Result<HttpResponse, HttpError>> {
-    const id = send(request);
-    const received = await receive(id);
-    return received;
-  };
-}
-
-function makeSend(host: HttpCapableWebappHost, config: HttpConfig) {
-  const send = (request: HttpRequest) => {
-    const id = crypto.randomUUID();
-    host.postMessage({
-      command: "sendHttpRequest",
-      payload: { request, id, config },
-    });
-    return id;
-  };
-  return send;
-}
-
-function makeReceive(take: (pattern: any) => any) {
-  return async (id: string): Promise<Result<HttpResponse, HttpError>> => {
-    const [action] = await take((action: any, currentState: any) => {
-      return (
-        (action.type === "http/showHttpResponse" || action.type === "http/showHttpError") &&
-        action?.payload?.id === id
-      );
-    });
-    if (action.type === "http/showHttpResponse") {
-      return [action.payload.response, undefined];
-    } else {
-      return [undefined, action.payload.error];
-    }
-  };
 }
