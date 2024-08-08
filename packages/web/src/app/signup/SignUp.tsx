@@ -6,17 +6,32 @@ import { AnondSignUpEmailForm, AnondSignUpTokenForm, PlatformSignUpForm } from "
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 export function RightContainer() {
+  const { currentFormId } = useAppSelector((state) => state.signup);
+
   return (
     <ColoredContainer>
       <CenterTextContainer>
         <CrunchMainLogoContainer>
           <CrunchLogoMain />
         </CrunchMainLogoContainer>
-        <Title>API Audit & Scan</Title>
-        <Text>
-          Ensure your API conforms to the API Contract and has no volnurabilities. Check for BOLA,
-          BFLA and other OWASP API risks.
-        </Text>
+        {currentFormId === "AnondSignUpEmailForm" && (
+          <Title>#1 API Security testing tools for your IDE, CI/CD and SaaS environments</Title>
+        )}
+        {currentFormId === "AnondSignUpTokenForm" && (
+          <>
+            <Title>API Audit & Scan</Title>
+            <Text>Ensure your API conforms to the API contract and has no vulnerabilities.</Text>
+            <Text>Check for BOLA, BFLA and other OWASP API risks.</Text>
+          </>
+        )}
+        {currentFormId === "PlatformSignUpForm" && (
+          <>
+            <Title>API Capture</Title>
+            <Text>Automatically generate OpenAPI definition files.</Text>
+            <Title>API Protect</Title>
+            <Text>Immediately protect APIs at runtime</Text>
+          </>
+        )}
       </CenterTextContainer>
     </ColoredContainer>
   );
@@ -48,6 +63,10 @@ export function LeftContainer() {
             backToPrevForm={() => {
               dispatch(resetAnondTokenRequestResult());
             }}
+            backToPlatformSignup={() => {
+              dispatch(resetAnondTokenRequestResult());
+              dispatch(setCurrentFormId("PlatformSignUpForm"));
+            }}
           />
         )}
       </CenterContainer>
@@ -59,11 +78,11 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   width: 50%;
-  background-color: var(${ThemeColorVariables.background});
+  background-color: var(${ThemeColorVariables.computedOne});
 `;
 
 const ColoredContainer = styled(Container)`
-  background-color: var(${ThemeColorVariables.computedOne});
+  background-color: var(${ThemeColorVariables.computedTwo});
 `;
 
 const CenterContainer = styled.div`
@@ -89,16 +108,15 @@ const CrunchMainLogoContainer = styled.div`
 `;
 
 const Title = styled.p`
-  padding-bottom: 50px;
-  margin: 0;
-  font-size: 48px;
-  line-height: 60px;
+  font-size: 42px;
+  line-height: 54px;
   font-weight: 700;
+  margin-top: 10px;
+  margin-bottom: 10px;
 `;
 
 const Text = styled.p`
-  margin: 0;
-  font-size: 30px;
-  line-height: 40px;
+  font-size: 26px;
+  line-height: 36px;
   font-weight: 600;
 `;

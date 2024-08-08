@@ -61,17 +61,17 @@ export function AnondSignUpEmailForm({
         <CenterHeaderContainer>
           <Text>Register</Text>
           <LinkButton
-            text="Existing account"
+            text="I have an existing account"
             disabled={complete || waitingForAnondToken}
             backToPrevForm={backToPrevForm}
           />
         </CenterHeaderContainer>
         <InputContainer>
-          <Title>Enter a valid email address to receive a once off access token.</Title>
           <Input label="Email" name="email" disabled={complete} />
+          <Title>Enter a valid email address to receive a once off access token.</Title>
           {anondTokenRequestResult && !anondTokenRequestResult.success && (
             <ErrorBannerContainer>
-              <ErrorBanner message="Unexpected error when trying to request token">
+              <ErrorBanner message="Unexpected error when trying to request a token">
                 {anondTokenRequestResult.message}
               </ErrorBanner>
             </ErrorBannerContainer>
@@ -124,7 +124,7 @@ export function ButtonSendEmail() {
   } = useFormContext();
   return (
     <NormalProgressButton
-      label="Request token"
+      label="Request a token"
       disabled={complete || !isValid}
       waiting={waitingForAnondToken}
       onClick={(e) => {
@@ -143,9 +143,11 @@ export function ButtonSendEmail() {
 export function AnondSignUpTokenForm({
   data,
   backToPrevForm,
+  backToPlatformSignup,
 }: {
   data: { anondToken: string };
   backToPrevForm: () => void;
+  backToPlatformSignup: () => void;
 }) {
   const dispatch = useAppDispatch();
   const { complete } = useAppSelector((state) => state.signup);
@@ -165,18 +167,27 @@ export function AnondSignUpTokenForm({
         <CenterHeaderContainer>
           <Text>Register</Text>
           <LinkButton
-            text="Enter other email"
+            text="I have an existing account"
+            disabled={complete}
+            backToPrevForm={backToPlatformSignup}
+          />
+        </CenterHeaderContainer>
+        <InputContainer>
+          <div>
+            <p>
+              We just sent you an access token to the email address you provided. Enter the token
+              below to activate your account.
+            </p>
+            <p>If you did not get the token, check your spam mail.</p>
+          </div>
+          <Textarea label="Token" name="anondToken" disabled={complete} />
+          <LinkButton
+            text="Resubmit email request"
             disabled={complete}
             backToPrevForm={backToPrevForm}
           />
-        </CenterHeaderContainer>
-        <InputContainerForTextArea>
-          <Title>
-            An access token was just sent to the email address you supplied. PLease paste the token
-            below to activate your account.
-          </Title>
-          <Textarea label="Freemium token" name="anondToken" disabled={complete} />
-        </InputContainerForTextArea>
+        </InputContainer>
+
         <ButtonsBar>
           <ButtonSaveAnondToken />
         </ButtonsBar>
@@ -235,16 +246,12 @@ export function PlatformSignUpForm({
     >
       <Container>
         <CenterHeaderContainer>
-          <Text>Sign up</Text>
-          <LinkButton
-            text="Create new account"
-            disabled={complete}
-            backToPrevForm={backToPrevForm}
-          />
+          <Text>Sign in</Text>
+          <LinkButton text="Register" disabled={complete} backToPrevForm={backToPrevForm} />
         </CenterHeaderContainer>
         <InputContainer>
           <Title>
-            If you are a subscribing Teams or Enterprise customer, activate your account here.
+            If you are an existing Teams or Enterprise customer, activate your account here.
           </Title>
           <Input label="Platform URL" name="platformUrl" disabled={complete} />
           <Input label="IDE token" name="platformApiToken" disabled={complete} password />
@@ -337,7 +344,7 @@ const Text = styled.p`
 `;
 
 const Title = styled.div`
-  font-weight: 700;
+  font-weight: normal;
 `;
 
 const Container = styled.div`
@@ -348,18 +355,11 @@ const Container = styled.div`
 
 const InputContainer = styled.div`
   display: flex;
-  flex-wrap: wrap;
   flex-direction: column;
   gap: 16px;
   max-width: 560px;
   height: 250px;
   padding: 16px;
-`;
-
-const InputContainerForTextArea = styled(InputContainer)`
-  > div:nth-child(2) {
-    height: 140px;
-  }
 `;
 
 const LinkRef = styled.a`

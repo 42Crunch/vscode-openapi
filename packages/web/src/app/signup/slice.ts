@@ -33,7 +33,7 @@ const initialState: SignUpState = {
   waitingForAnondToken: false,
   anondTokenRequestResult: undefined,
   platformCredentials: {
-    platformUrl: "https://platform.42crunch.com",
+    platformUrl: "",
     platformApiToken: "",
   },
   waitingForPlatformConnectionTest: false,
