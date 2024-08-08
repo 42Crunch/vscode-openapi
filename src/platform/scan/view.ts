@@ -20,10 +20,10 @@ import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
 import { AuditContext, Bundle, MappingNode } from "../../types";
 import { loadConfig } from "../../util/config";
-import { WebView } from "../../web-view";
+import { WebView } from "../../webapps/web-view";
 import { PlatformStore } from "../stores/platform-store";
 import { Logger } from "../types";
-import { executeHttpRequest } from "./http-handler";
+import { executeHttpRequest } from "../../webapps/http-handler";
 import { ScanReportWebView } from "./report-view";
 import {
   runScanWithCliBinary,
