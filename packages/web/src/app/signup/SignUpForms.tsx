@@ -76,10 +76,10 @@ export function AnondSignUpEmailForm({
               </ErrorBanner>
             </ErrorBannerContainer>
           )}
+          <AgreeToTermsAndConditionsCheckbox />
           {showTermsAndConditionsError && !agreeToTermsAndConditions && (
             <ErrorBanner message="Please accept Terms and Conditions to continue"></ErrorBanner>
           )}
-          <AgreeToTermsAndConditionsCheckbox />
         </InputContainer>
         <ButtonsBar>
           <ButtonSendEmail />
@@ -325,9 +325,9 @@ export function AgreeToTermsAndConditionsCheckbox() {
 }
 
 const CenterHeaderContainer = styled.div`
-  border-bottom-color: var(${ThemeColorVariables.border});
-  border-bottom-width: 1px;
-  border-bottom-style: solid;
+  // border-bottom-color: var(${ThemeColorVariables.border});
+  // border-bottom-width: 1px;
+  // border-bottom-style: solid;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -378,7 +378,7 @@ const ButtonsBar = styled.div`
   padding: 16px;
   > button {
     height: 45px;
-    border-radius: 5px;
+    border-radius: 2px;
   }
 `;
 

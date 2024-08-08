@@ -92,15 +92,17 @@ const CenterContainer = styled.div`
   margin-bottom: auto;
   width: 460px;
   height: 430px;
-  border-radius: 7px;
-  border-color: var(${ThemeColorVariables.border});
-  border-width: 2px;
-  border-style: solid;
+
+  // border-radius: 7px;
+  // border-color: var(${ThemeColorVariables.border});
+  // border-width: 2px;
+  // border-style: solid;
 `;
 
 const CenterTextContainer = styled.div`
   margin: auto;
   width: 70%;
+  min-height: 430px;
 `;
 
 const CrunchMainLogoContainer = styled.div`
