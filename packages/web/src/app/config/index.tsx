@@ -2,7 +2,6 @@ import { Webapp } from "@xliic/common/webapp/config";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
-import styled from "styled-components";
 import ThemeStyles from "../../features/theme/ThemeStyles";
 import { ThemeState } from "../../features/theme/slice";
 import { makeWebappMessageHandler } from "../webapp";

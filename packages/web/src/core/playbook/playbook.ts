@@ -4,7 +4,7 @@ import { Playbook } from "@xliic/scanconf";
 import { LookupResult, LookupFailure } from "@xliic/common/env";
 
 import { PlaybookEnvStack } from "./playbook-env";
-import { MockHttpResponseType } from "./mock-http";
+import { MockHttpResponseType } from "../http-client/mock-client";
 
 export type AuthResult = Record<
   string,

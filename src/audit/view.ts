@@ -7,7 +7,7 @@ import * as vscode from "vscode";
 import { Webapp } from "@xliic/common/webapp/audit";
 import { Audit } from "@xliic/common/audit";
 
-import { WebView } from "../web-view";
+import { WebView } from "../webapps/web-view";
 import { Cache } from "../cache";
 import { getLocationByPointer } from "./util";
 import { getArticles } from "./client";

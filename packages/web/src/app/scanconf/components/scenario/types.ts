@@ -3,7 +3,7 @@ import { HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
 import { Playbook } from "@xliic/scanconf";
 
 import { PlaybookEnvStack } from "../../../../core/playbook/playbook-env";
-import { MockHttpResponseType } from "../../../../core/playbook/mock-http";
+import { MockHttpResponseType } from "../../../../core/http-client/mock-client";
 
 export type VariableReplacement = {
   stack: PlaybookEnvStack;

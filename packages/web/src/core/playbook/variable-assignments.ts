@@ -14,7 +14,7 @@ import {
   PlaybookVariableAssignments,
   PlaybookVariableFailedAssignment,
 } from "./playbook-env";
-import { MockHttpResponse, MockHttpResponseType } from "./mock-http";
+import { MockHttpResponse, MockHttpResponseType } from "../http-client/mock-client";
 import { getHttpResponseRange } from "@xliic/openapi";
 
 export function assignVariables(

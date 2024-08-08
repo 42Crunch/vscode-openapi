@@ -18,9 +18,9 @@ import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
 import { AuditContext, MappingNode } from "../../types";
 import { loadConfig } from "../../util/config";
-import { WebView } from "../../web-view";
+import { WebView } from "../../webapps/web-view";
 import { PlatformStore } from "../stores/platform-store";
-import { executeHttpRequest } from "./http-handler";
+import { executeHttpRequest } from "../../webapps/http-handler";
 import { cleanupTempScanDirectory } from "../cli-ast";
 
 export class ScanReportWebView extends WebView<Webapp> {

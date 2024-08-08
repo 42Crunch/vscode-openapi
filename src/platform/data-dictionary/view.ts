@@ -6,7 +6,7 @@
 import * as vscode from "vscode";
 import { Webapp } from "@xliic/common/webapp/data-dictionary";
 import { ShowDictionaryMessage } from "@xliic/common/data-dictionary";
-import { WebView } from "../../web-view";
+import { WebView } from "../../webapps/web-view";
 
 export class DataDictionaryWebView extends WebView<Webapp> {
   hostHandlers = {

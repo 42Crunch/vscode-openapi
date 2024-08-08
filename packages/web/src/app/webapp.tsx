@@ -11,7 +11,12 @@ export function makeWebappMessageHandler(store: any, handlers: any) {
     if (command) {
       const handler = handlers[command];
       if (handler) {
-        store.dispatch(handler(payload));
+        const action = handler(payload);
+        if (action) {
+          store.dispatch(action);
+        } else {
+          console.log(`Skipping dispatch for command: ${command}`);
+        }
       } else {
         console.error(`Unable to find handler for command: ${command}`);
       }
@@ -21,11 +26,15 @@ export function makeWebappMessageHandler(store: any, handlers: any) {
   };
 }
 
-export function startListeners(listeners: Record<string, () => unknown>) {
+export function startListeners(listeners: Record<string, (() => unknown) | undefined>) {
   const listenerNames = Object.keys(listeners);
   for (const listenerName of listenerNames) {
-    console.log("starting listener for: ", listenerName);
-    listeners[listenerName]();
+    if (listeners[listenerName]) {
+      console.log("starting listener for: ", listenerName);
+      listeners[listenerName]();
+    } else {
+      console.log("skipping listener for: ", listenerName);
+    }
   }
 }
 

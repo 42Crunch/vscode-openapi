@@ -29,7 +29,7 @@ import * as preview from "./preview";
 import * as platform from "./platform/activate";
 import * as tryit from "./tryit/activate";
 import * as environment from "./environment/activate";
-import * as config from "./webapps/config/activate";
+import * as config from "./webapps/views/config/activate";
 import { PlatformStore } from "./platform/stores/platform-store";
 import { Logger } from "./platform/types";
 import { getPlatformCredentials, hasCredentials } from "./credentials";

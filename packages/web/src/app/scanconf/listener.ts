@@ -3,6 +3,7 @@ import { createListenerMiddleware, TypedStartListening } from "@reduxjs/toolkit"
 import { Webapp } from "@xliic/common/webapp/scanconf";
 
 import { startNavigationListening } from "../../features/router/listener";
+import { onSendHttpRequest } from "../../features/http-client/listener";
 import { Routes } from "../../features/router/RouterContext";
 import { startListeners } from "../webapp";
 import {
@@ -47,6 +48,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
     executeTryAuthenticationListener,
     executeTryGlobalListener,
     executeMockGlobalListener,
+    executeSendHttpRequestListener: onSendHttpRequest(startAppListening, host),
     executeShowScanconfOperationListener: onShowScanconf(startAppListening),
     executeLoadUpdatedScanconfListener: onLoadUpdatedScanconf(startAppListening, host),
     executeSkipScanconfUpdate: onScanconfSkipUpdate(startAppListening),

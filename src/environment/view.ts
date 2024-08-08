@@ -9,7 +9,7 @@ import { NamedEnvironment } from "@xliic/common/env";
 
 import { Webapp } from "@xliic/common/webapp/environment";
 
-import { WebView } from "../web-view";
+import { WebView } from "../webapps/web-view";
 import { EnvStore } from "../envstore";
 
 export class EnvironmentWebView extends WebView<Webapp> {

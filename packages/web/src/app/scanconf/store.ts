@@ -14,6 +14,7 @@ import prefs, { loadPrefs } from "../../features/prefs/slice";
 import router from "../../features/router/slice";
 import generalError, { showGeneralError } from "../../features/general-error/slice";
 import theme, { changeTheme, ThemeState } from "../../features/theme/slice";
+import client from "../../features/http-client/slice";
 import {
   showHttpError,
   showHttpResponse,
@@ -29,6 +30,7 @@ import scanconfUpdate from "./scanconf-update/slice";
 
 const reducer = {
   theme,
+  client,
   scanconf,
   scanconfUpdate,
   operations,

@@ -12,7 +12,7 @@ import { Config } from "@xliic/common/config";
 
 import { Bundle } from "../types";
 
-import { WebView } from "../web-view";
+import { WebView } from "../webapps/web-view";
 import { executeHttpRequest } from "./http-handler";
 import { executeCreateSchemaRequest } from "./create-schema-handler";
 import { Cache } from "../cache";

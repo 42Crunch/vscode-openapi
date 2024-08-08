@@ -13,15 +13,16 @@ import {
   ConnectionTestResult,
   ShowCliDownloadMessage,
 } from "@xliic/common/config";
-import { Configuration } from "../../configuration";
+import { Configuration } from "../../../configuration";
 import { WebView } from "../../web-view";
-import { PlatformStore } from "../../platform/stores/platform-store";
-import * as scandManagerApi from "../../platform/api-scand-manager";
-import { Logger } from "../../platform/types";
-import { loadConfig, saveConfig } from "../../util/config";
-import { downloadCli, testCli } from "../../platform/cli-ast";
+import { PlatformStore } from "../../../platform/stores/platform-store";
+import * as scandManagerApi from "../../../platform/api-scand-manager";
+import { Logger } from "../../../platform/types";
+import { loadConfig, saveConfig } from "../../../util/config";
+import { downloadCli, testCli } from "../../../platform/cli-ast";
 import { transformValues } from "./utils-gen";
-import { getCliUpdate } from "../../platform/cli-ast-update";
+import { getCliUpdate } from "../../../platform/cli-ast-update";
+import { executeHttpRequest } from "../../http-handler";
 
 export class ConfigWebView extends WebView<Webapp> {
   private config?: Config;
@@ -121,6 +122,8 @@ export class ConfigWebView extends WebView<Webapp> {
     openLink: async (url: string) => {
       vscode.env.openExternal(vscode.Uri.parse(url));
     },
+
+    sendHttpRequest: ({ id, request, config }) => executeHttpRequest(id, request, config),
   };
 
   async onStart() {
