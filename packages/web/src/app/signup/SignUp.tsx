@@ -29,7 +29,7 @@ export function RightContainer() {
             <Title>API Capture</Title>
             <Text>Automatically generate OpenAPI definition files.</Text>
             <Title>API Protect</Title>
-            <Text>Immediately protect APIs at runtime</Text>
+            <Text>Immediately protect APIs at runtime.</Text>
           </>
         )}
       </CenterTextContainer>

@@ -69,6 +69,7 @@ export function AnondSignUpEmailForm({
         <InputContainer>
           <Input label="Email" name="email" disabled={complete} />
           <Title>Enter a valid email address to receive a once off access token.</Title>
+
           {anondTokenRequestResult && !anondTokenRequestResult.success && (
             <ErrorBannerContainer>
               <ErrorBanner message="Unexpected error when trying to request a token">
@@ -80,6 +81,13 @@ export function AnondSignUpEmailForm({
           {showTermsAndConditionsError && !agreeToTermsAndConditions && (
             <ErrorBanner message="Please accept Terms and Conditions to continue"></ErrorBanner>
           )}
+          <div>
+            Register your own free account to:
+            <ul>
+              <li>Audit OpenAPI contracts</li>
+              <li>Scan APIs</li>
+            </ul>
+          </div>
         </InputContainer>
         <ButtonsBar>
           <ButtonSendEmail />
@@ -179,13 +187,29 @@ export function AnondSignUpTokenForm({
               below to activate your account.
             </p>
             <p>If you did not get the token, check your spam mail.</p>
+
+            <LinkButton
+              text="Resubmit email request"
+              disabled={complete}
+              backToPrevForm={backToPrevForm}
+            />
           </div>
           <Textarea label="Token" name="anondToken" disabled={complete} />
-          <LinkButton
-            text="Resubmit email request"
-            disabled={complete}
-            backToPrevForm={backToPrevForm}
-          />
+
+          <div>Audit and Scan usage allowances apply, upgrade options available.</div>
+          <div>
+            Developer support{" "}
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dispatch(openLink("https://developers.42crunch.com/"));
+              }}
+            >
+              community
+            </a>
+          </div>
         </InputContainer>
 
         <ButtonsBar>
