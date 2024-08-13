@@ -9,7 +9,7 @@ import { HttpMethod } from "@xliic/openapi";
 import { stringify } from "@xliic/preserving-json-yaml-parser";
 
 import { Cache } from "../../cache";
-import { Configuration } from "../../configuration";
+import { Configuration, configuration } from "../../configuration";
 import { ensureHasCredentials } from "../../credentials";
 import { OperationIdNode } from "../../outlines/nodes/operation-ids";
 import { OperationNode } from "../../outlines/nodes/paths";
@@ -208,11 +208,14 @@ async function createDefaultScanConfig(
       try {
         const oas = stringify(bundle.value);
 
+        const config = await loadConfig(configuration, secrets);
+
         if (platformAuthType === "anond-token") {
           // free users must use CLI for scan, there is no need to fallback to anond for initial audit
           // if there is no CLI available, they will not be able to run scan or create a scan config in any case
           const [report, reportError] = await runAuditWithCliBinary(
             secrets,
+            config,
             emptyLogger,
             oas,
             true,
@@ -239,12 +242,29 @@ async function createDefaultScanConfig(
           await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride);
         } else {
           if (scanRuntime === "cli") {
-            const report = await runPlatformAudit(document, oas, bundle.mapping, cache, store);
-            if (report?.openapiState !== "valid") {
+            const [report, reportError] = await runAuditWithCliBinary(
+              secrets,
+              config,
+              emptyLogger,
+              oas,
+              true,
+              cliDirectoryOverride
+            );
+
+            if (reportError !== undefined) {
+              throw new Error(
+                "Failed to run Audit for Conformance Scan: " + reportError.statusMessage
+                  ? reportError.statusMessage
+                  : JSON.stringify(reportError)
+              );
+            }
+
+            if ((report.audit as any).openapiState !== "valid") {
               throw new Error(
                 "Your API has structural or semantic issues in its OpenAPI format. Run Security Audit on this file and fix these issues first."
               );
             }
+
             await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride);
           } else {
             // this will run audit on the platform as well

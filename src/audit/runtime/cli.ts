@@ -43,6 +43,7 @@ export async function runCliAudit(
 
   const [result, error] = await runAuditWithCliBinary(
     secrets,
+    config,
     logger,
     oas,
     isFullAudit,

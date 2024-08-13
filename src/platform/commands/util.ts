@@ -1,7 +1,5 @@
 import * as vscode from "vscode";
-import { configurePlatformUser, getPlatformCredentials } from "../../credentials";
 import { PlatformStore } from "../stores/platform-store";
-import { configuration } from "../../configuration";
 
 export default (context: vscode.ExtensionContext, store: PlatformStore) => ({
   copyToClipboard: async (value: string, message: string) => {

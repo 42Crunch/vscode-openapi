@@ -379,6 +379,7 @@ export async function runValidateScanConfigWithCliBinary(
 
 export async function runAuditWithCliBinary(
   secrets: vscode.SecretStorage,
+  config: Config,
   logger: Logger,
   oas: string,
   isFullAudit: boolean,
@@ -396,39 +397,47 @@ export async function runAuditWithCliBinary(
 
   logger.info(`Running Security Audit using: ${cli}`);
 
-  // CLI audits currently used only by free users
-  const token = getAnondCredentials(configuration);
-
   const userAgent = getUserAgent();
 
   const env: Record<string, string> = {};
+
+  const args = [
+    "audit",
+    "run",
+    "openapi.json",
+    "--output",
+    "report.json",
+    "--output-format",
+    "json",
+    "--verbose",
+    "error",
+    "--user-agent",
+    userAgent,
+    "--enrich=false",
+  ];
+
+  if (!isFullAudit) {
+    args.push("--is-operation");
+  }
+
+  if (config.platformAuthType === "anond-token") {
+    const anondToken = getAnondCredentials(configuration);
+    args.push("--token", String(anondToken));
+  } else {
+    const platformConnection = await getPlatformCredentials(configuration, secrets);
+    if (platformConnection !== undefined) {
+      env["API_KEY"] = platformConnection.apiToken!;
+      env["PLATFORM_HOST"] = platformConnection.platformUrl;
+    }
+  }
+
   const httpProxy = vscode.workspace.getConfiguration().get<string>("http.proxy");
   if (httpProxy !== undefined && httpProxy !== "") {
     env["HTTPS_PROXY"] = httpProxy;
   }
 
   try {
-    const output = await asyncExecFile(
-      cli,
-      [
-        "audit",
-        "run",
-        "openapi.json",
-        "--output",
-        "report.json",
-        "--output-format",
-        "json",
-        "--verbose",
-        "error",
-        "--user-agent",
-        userAgent,
-        "--enrich=false",
-        isFullAudit ? "" : "--is-operation",
-        "--token",
-        String(token),
-      ].filter((option) => option !== ""),
-      { cwd: dir as string, windowsHide: true, env }
-    );
+    const output = await asyncExecFile(cli, args, { cwd: dir as string, windowsHide: true, env });
 
     const report = await readFile(join(dir as string, "report.json"), { encoding: "utf8" });
     const parsed = JSON.parse(report);
