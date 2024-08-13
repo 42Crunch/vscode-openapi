@@ -12,6 +12,7 @@ import { PlatformStore } from "../../platform/stores/platform-store";
 import { Logger } from "../../platform/types";
 import { requestToken } from "../../audit/client";
 import { AnondCredentials, PlatformCredentials } from "@xliic/common/signup";
+import { delay } from "../../time-util";
 
 export type TokenType = "anond-token" | "api-token" | undefined;
 
@@ -60,6 +61,7 @@ export class SignUpWebView extends WebView<Webapp> {
         anondCredentials.anondToken,
         vscode.ConfigurationTarget.Global
       );
+      await delay(3000);
       this.close("anond-token");
     },
     platformSignUpComplete: async (platformCredentials: PlatformCredentials) => {
@@ -76,6 +78,7 @@ export class SignUpWebView extends WebView<Webapp> {
           vscode.ConfigurationTarget.Global
         );
         await this.secrets.store("platformApiToken", platformCredentials.platformApiToken);
+        await delay(3000);
         this.close("api-token");
       } else {
         this.sendRequest({
