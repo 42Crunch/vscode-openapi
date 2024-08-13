@@ -1,5 +1,14 @@
 # Changelog
 
+## Version 4.28.0 (August 13, 2024)
+
+- New UI for logins and signups for 42Crunch platform
+- Do not rely on platform API calls when creating Scan configuration for enterprise customers, if CLI runtime is choosen
+- Do not display warnings when displaying high priority semantic/structural issues in the Audit
+- Better handling of http proxies when CLI binary is used
+- Allow specifying location for the CLI binary
+- Fix issue in the Scan when using response processing with 'default' responses
+
 ## Version 4.27.0 (June 27, 2024)
 
 - Make API Security Testing Binary required to run Audits
