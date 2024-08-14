@@ -79,15 +79,19 @@ function VariableAssignment({ name, remove }: { name: string; remove: () => void
   const { getValues } = useFormContext();
 
   const type = getValues(`${name}.value.in`);
+  const from = getValues(`${name}.value.from`);
 
   return (
     <Row>
       <Input name={`${name}.key`} label="name" />
-      {type === "body" ? (
-        <VariableAssignmentBody key={`${name}-value`} name={name} />
-      ) : (
-        <VariableAssignmentParameter key={`${name}-value`} name={name} />
+      {type === "body" && <VariableAssignmentBody key={`${name}-value`} name={name} />}
+      {type !== "body" && from === "request" && (
+        <VariableAssignmentParameterRequest key={`${name}-value`} name={name} />
       )}
+      {type !== "body" && from === "response" && (
+        <VariableAssignmentParameterResponse key={`${name}-value`} name={name} />
+      )}
+
       <Remove
         onClick={(e) => {
           e.preventDefault();
@@ -146,7 +150,7 @@ function VariableAssignmentBody({ name }: { name: string }) {
   );
 }
 
-function VariableAssignmentParameter({ name }: { name: string }) {
+function VariableAssignmentParameterRequest({ name }: { name: string }) {
   return (
     <>
       <Select
@@ -163,6 +167,30 @@ function VariableAssignmentParameter({ name }: { name: string }) {
           { value: "header", label: "header" },
           { value: "cookie", label: "cookie" },
           { value: "path", label: "path" },
+        ]}
+      />
+      <div />
+
+      <Input name={`${name}.value.name`} label="name" />
+    </>
+  );
+}
+
+function VariableAssignmentParameterResponse({ name }: { name: string }) {
+  return (
+    <>
+      <Select
+        name={`${name}.value.from`}
+        options={[
+          { value: "request", label: "request" },
+          { value: "response", label: "response" },
+        ]}
+      />
+      <Select
+        name={`${name}.value.in`}
+        options={[
+          { value: "header", label: "header" },
+          { value: "cookie", label: "cookie" },
         ]}
       />
       <div />
