@@ -26,7 +26,21 @@ export const UPGRADE_WARN_LIMIT = 10;
 export async function warnScans(left: number) {
   return vscode.window
     .showInformationMessage(
-      `You have ${left} per-opertion API Scans left. Consider upgrading your 42Crunch subscription.`,
+      `You have ${left} API Scans left this month. Consider upgrading your 42Crunch subscription.`,
+      { modal: false },
+      { title: "Upgrade", id: "upgrade" }
+    )
+    .then((choice) => {
+      if (choice?.id === "upgrade") {
+        vscode.env.openExternal(vscode.Uri.parse("https://42crunch.com/ide-upgrade/"));
+      }
+    });
+}
+
+export async function warnOperationScans(left: number) {
+  return vscode.window
+    .showInformationMessage(
+      `You have ${left} per-opertion API Scans left this month. Consider upgrading your 42Crunch subscription.`,
       { modal: false },
       { title: "Upgrade", id: "upgrade" }
     )
@@ -40,7 +54,7 @@ export async function warnScans(left: number) {
 export async function warnOperationAudits(left: number) {
   return vscode.window
     .showInformationMessage(
-      `You have ${left} per-opertion Security Audits left. Consider upgrading your 42Crunch subscription.`,
+      `You have ${left} per-opertion Security Audits left this month. Consider upgrading your 42Crunch subscription.`,
       { modal: false },
       { title: "Upgrade", id: "upgrade" }
     )
@@ -54,7 +68,7 @@ export async function warnOperationAudits(left: number) {
 export async function warnAudits(left: number) {
   return vscode.window
     .showInformationMessage(
-      `You have ${left}  Security Audits left. Consider upgrading your 42Crunch subscription.`,
+      `You have ${left} Security Audits left this month. Consider upgrading your 42Crunch subscription.`,
       { modal: false },
       { title: "Upgrade", id: "upgrade" }
     )
