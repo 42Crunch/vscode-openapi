@@ -95,7 +95,7 @@ function gotOptions(
       request: 10000,
     },
     hooks: getHooks(method, logger),
-    ...headers,
+    headers,
   };
 }
 
@@ -110,7 +110,7 @@ function gotOptionsText(
     prefixUrl: connection.url,
     responseType: "text",
     hooks: getHooks(method, logger),
-    ...headers,
+    headers,
   };
 }
 
