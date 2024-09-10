@@ -4,19 +4,28 @@ import type { ConfigState } from "../../features/config/slice";
 import { sendHttpRequest } from "./slice";
 import { HttpConfig, HttpRequest } from "@xliic/common/http";
 
-export const platformApi = createApi({
-  reducerPath: "platformApi",
+export const freemiumdApi = createApi({
+  reducerPath: "freemiumdApi",
   baseQuery: webappBaseQuery,
   endpoints: (builder) => ({
-    getTags: builder.query<number, string>({
-      query: () => `api/v2/tags`,
+    getSubscription: builder.query<number, string>({
+      query: (token) => ({
+        path: `subscription?token=${encodeURIComponent(token)}`,
+      }),
     }),
   }),
 });
 
-async function webappBaseQuery(args: any, { signal, dispatch, getState }: any, extraOptions: any) {
+async function webappBaseQuery(
+  args: { path: string },
+  { signal, dispatch, getState }: any,
+  extraOptions: any
+) {
   const { config }: { config: ConfigState } = getState();
   const { platformUrl, platformApiToken } = config.data;
+
+  console.log("go a", args);
+  debugger;
 
   const client = webappHttpClient(
     { https: { rejectUnauthorized: true } },
@@ -25,7 +34,7 @@ async function webappBaseQuery(args: any, { signal, dispatch, getState }: any, e
   );
 
   const [response, error] = await client({
-    url: `${platformUrl}/${args}`,
+    url: `https://stateless.dev.42crunch.com/api/v1/anon/{args.path}`,
     method: "get",
     headers: {
       Accept: "application/json",
@@ -41,4 +50,4 @@ async function webappBaseQuery(args: any, { signal, dispatch, getState }: any, e
   }
 }
 
-export const { useGetTagsQuery } = platformApi;
+export const { useGetSubscriptionQuery } = freemiumdApi;

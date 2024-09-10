@@ -19,12 +19,14 @@ import theme, { changeTheme, ThemeState } from "../../features/theme/slice";
 import client from "../../features/http-client/slice";
 
 import { platformApi } from "../../features/http-client/platform-api";
+import { freemiumdApi } from "../../features/http-client/freemiumd-api";
 
 const reducer = {
   theme,
   config,
   client,
   [platformApi.reducerPath]: platformApi.reducer,
+  [freemiumdApi.reducerPath]: freemiumdApi.reducer,
 };
 
 export const messageHandlers: Webapp["webappHandlers"] = {
@@ -45,7 +47,7 @@ export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme:
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware()
         .prepend(listenerMiddleware.middleware)
-        .concat(logger, platformApi.middleware),
+        .concat(logger, platformApi.middleware, freemiumdApi.middleware),
     preloadedState: {
       theme,
     },

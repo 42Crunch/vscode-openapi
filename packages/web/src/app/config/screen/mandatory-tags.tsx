@@ -6,10 +6,14 @@ import { ConfigScreen } from "../../../features/config/slice";
 import { Container, Title } from "../layout";
 import Textarea from "../../../new-components/fat-fields/Textarea";
 import { useGetTagsQuery } from "../../../features/http-client/platform-api";
+import { useGetSubscriptionQuery } from "../../../features/http-client/freemiumd-api";
 
 export function MandatoryTags() {
   // Using a query hook automatically fetches data and returns query values
-  const { data, error, isLoading } = useGetTagsQuery("bulbasaur");
+  //const { data, error, isLoading } = useGetTagsQuery("bulbasaur");
+  const { data, error, isLoading } = useGetSubscriptionQuery(
+    "CiAJIzvS9t4haZEfuTEdwkSmCyHI1nfsDQWP6TYU8SR+RxIYQKFQxVzU46oge4/bKRAhJQbL7EYLKleiGnzjTOQF6YT6Ri2rtO09Hf+0uTPZsU/aQ+p6vnBN+Yk1JbT0pDz/gw6EvuJkQZjpPC6CIQC5xPIz2d5iYmrD2Uzp4gRkZFDGNkOtO8ure56toeL0k9gG0qdlPvErsKQbUeLVsQpZuLwhkLlk7+6yp/4mKjTEy0wdYbWvFMrD"
+  );
 
   return (
     <>
