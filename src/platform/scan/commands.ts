@@ -7,6 +7,7 @@ import * as vscode from "vscode";
 
 import { HttpMethod } from "@xliic/openapi";
 import { stringify } from "@xliic/preserving-json-yaml-parser";
+import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 
 import { Cache } from "../../cache";
 import { Configuration, configuration } from "../../configuration";
@@ -28,9 +29,9 @@ import { createScanConfigWithPlatform } from "./runtime/platform";
 import { ScanWebView } from "./view";
 import { formatException } from "../util";
 import { loadConfig } from "../../util/config";
-import { runPlatformAudit } from "../../audit/runtime/platform";
-import { Bundle } from "../../types";
+import { Bundle, OpenApiVersion } from "../../types";
 import { SignUpWebView } from "../../webapps/signup/view";
+import { getOpenApiVersion } from "../../parsers";
 
 export default (
   cache: Cache,
@@ -63,17 +64,7 @@ export default (
           method
         );
       } catch (ex: any) {
-        if (
-          ex?.response?.statusCode === 409 &&
-          ex?.response?.body?.code === 109 &&
-          ex?.response?.body?.message === "limit reached"
-        ) {
-          vscode.window.showErrorMessage(
-            "You have reached your maximum number of APIs. Please contact support@42crunch.com to upgrade your account."
-          );
-        } else {
-          vscode.window.showErrorMessage(formatException("Failed to scan:", ex));
-        }
+        vscode.window.showErrorMessage(formatException("Failed to scan:", ex));
       }
     }
   );
@@ -101,15 +92,42 @@ export default (
           method
         );
       } catch (ex: any) {
-        if (
-          ex?.response?.statusCode === 409 &&
-          ex?.response?.body?.code === 109 &&
-          ex?.response?.body?.message === "limit reached"
-        ) {
-          vscode.window.showErrorMessage(
-            "You have reached your maximum number of APIs. Please contact support@42crunch.com to upgrade your account."
+        vscode.window.showErrorMessage(formatException("Failed to scan:", ex));
+      }
+    }
+  );
+
+  vscode.commands.registerTextEditorCommand(
+    "openapi.platform.editorRunFirstOperationScan",
+    async (editor: vscode.TextEditor, edit: vscode.TextEditorEdit): Promise<void> => {
+      const parsed = cache.getParsedDocument(editor.document);
+      const version = getOpenApiVersion(parsed);
+      if (parsed && version !== OpenApiVersion.Unknown) {
+        const oas = parsed as unknown as BundledSwaggerOrOasSpec;
+
+        const firstPath = Object.keys(oas.paths)[0];
+        if (firstPath === undefined) {
+          return undefined;
+        }
+
+        const firstMethod = Object.keys(oas.paths[firstPath])[0];
+        if (firstMethod === undefined) {
+          return undefined;
+        }
+
+        try {
+          await editorRunSingleOperationScan(
+            signUpWebView,
+            editor,
+            cache,
+            store,
+            configuration,
+            secrets,
+            getScanView,
+            firstPath,
+            firstMethod as HttpMethod
           );
-        } else {
+        } catch (ex: any) {
           vscode.window.showErrorMessage(formatException("Failed to scan:", ex));
         }
       }
