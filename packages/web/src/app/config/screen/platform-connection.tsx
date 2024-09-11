@@ -12,6 +12,7 @@ import { Container, Test, Title } from "../layout";
 import { RadioGroup } from "../../../components/RadioGroup";
 import { useWatch } from "react-hook-form";
 import Textarea from "../../../new-components/fat-fields/Textarea";
+import Subscription from "../Subscription";
 
 function PlatformConnection() {
   const dispatch = useFeatureDispatch();
@@ -22,6 +23,7 @@ function PlatformConnection() {
   } = useFeatureSelector((state) => state.config);
 
   const platformAuthType = useWatch({ name: "platformAuthType" });
+  const anondToken = useWatch({ name: "anondToken" });
 
   return (
     <>
@@ -37,9 +39,10 @@ function PlatformConnection() {
         />
 
         {platformAuthType === "anond-token" && (
-          <div>
+          <>
             <Textarea label="Freemium token" name="anondToken" />
-          </div>
+            {anondToken !== "" && <Subscription token={anondToken} />}
+          </>
         )}
 
         {platformAuthType === "api-token" && (
