@@ -71,32 +71,6 @@ const Container = styled.div`
   max-width: 560px;
 `;
 
-const Section = styled.div`
-  display: grid;
-  grid-template-columns: 7fr 3fr;
-  gap: 4px;
-  padding-top: 8px;
-  border-top: 1px solid var(${ThemeColorVariables.border});
-  > :nth-child(1) {
-    grid-column: 1;
-    grid-row: 1;
-  }
-  > :nth-child(2) {
-    grid-column: 1;
-    grid-row: 2;
-  }
-  > :nth-child(3) {
-    grid-column: 2;
-    grid-row: span 2;
-    align-self: center;
-    justify-self: end;
-  }
-  > :nth-child(4) {
-    grid-column: span 2;
-    grid-row: 3;
-  }
-`;
-
 const Title = styled.div`
   font-weight: 700;
 `;
@@ -109,4 +83,30 @@ const Subtitle = styled.div`
 const Counters = styled.div`
   font-weight: 600;
   font-size: 110%;
+`;
+
+const Section = styled.div`
+  display: grid;
+  grid-template-columns: 7fr 3fr;
+  gap: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(${ThemeColorVariables.border});
+  > ${Title} {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  > ${Subtitle} {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  > ${Counters} {
+    grid-column: 2;
+    grid-row: span 2;
+    align-self: center;
+    justify-self: end;
+  }
+  > :nth-child(4) {
+    grid-column: span 2;
+    grid-row: 3;
+  }
 `;
