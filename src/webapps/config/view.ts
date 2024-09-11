@@ -127,9 +127,14 @@ export class ConfigWebView extends WebView<Webapp> {
     await this.sendColorTheme(vscode.window.activeColorTheme);
     this.config = await loadConfig(this.configuration, this.secrets);
     if (this.platform.isConnected()) {
-      const convention = await this.platform.getCollectionNamingConvention();
-      if (convention.pattern !== "") {
-        this.config.platformCollectionNamingConvention = convention;
+      try {
+        // this could throw if the token has become invalid since the start
+        const convention = await this.platform.getCollectionNamingConvention();
+        if (convention.pattern !== "") {
+          this.config.platformCollectionNamingConvention = convention;
+        }
+      } catch (ex) {
+        // can't get naming convention if the token is invalid
       }
     }
     await this.sendRequest({
