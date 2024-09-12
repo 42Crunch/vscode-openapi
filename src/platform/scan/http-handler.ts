@@ -58,6 +58,9 @@ export async function executeHttpRequestRaw(
       https: {
         rejectUnauthorized: config?.https?.rejectUnauthorized ?? true,
       },
+      retry: {
+        limit: 0,
+      },
     });
 
     const responseHeaders: [string, string][] = [];
