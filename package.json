@@ -108,6 +108,11 @@
           "group": "navigation"
         },
         {
+          "when": "openapiTwoEnabled && resourceScheme =~ /^file$/ || openapiThreeEnabled && resourceScheme =~ /^file$/",
+          "command": "openapi.platform.editorRunFirstOperationScan",
+          "group": "navigation"
+        },
+        {
           "when": "openapiTwoEnabled || openapiThreeEnabled",
           "command": "openapi.preview",
           "group": "navigation"
@@ -497,11 +502,20 @@
       },
       {
         "command": "openapi.securityAudit",
-        "title": "OpenAPI: perform security audit",
+        "title": "OpenAPI: API Audit",
         "enablement": "!openapiErrors",
         "icon": {
-          "light": "./resources/42crunch_icon.svg",
-          "dark": "./resources/42crunch_icon.svg"
+          "light": "./resources/42crunch_icon_audit.svg",
+          "dark": "./resources/42crunch_icon_audit.svg"
+        }
+      },
+      {
+        "command": "openapi.platform.editorRunFirstOperationScan",
+        "title": "OpenAPI: API Scan",
+        "enablement": "!openapiErrors",
+        "icon": {
+          "light": "./resources/42crunch_icon_scan.svg",
+          "dark": "./resources/42crunch_icon_scan.svg"
         }
       },
       {
