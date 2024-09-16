@@ -5,9 +5,13 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { Banner, ErrorBanner } from "../../components/Banner";
 import { useGetSubscriptionQuery } from "../../features/http-client/freemiumd-api";
 import ProgressBar from "./ProgressBar";
+import Button from "../../new-components/Button";
+import { useAppDispatch } from "./store";
+import { openLink } from "../../features/config/slice";
 
 export default function Subscription({ token }: { token: string }) {
   const { data, error, isLoading } = useGetSubscriptionQuery(token);
+  const dispatch = useAppDispatch();
 
   if (isLoading) {
     return (
@@ -29,12 +33,45 @@ export default function Subscription({ token }: { token: string }) {
 
   return (
     <Container>
-      <Title>Subscription</Title>
-
       <Section>
-        <Title>Type</Title>
-        <Subtitle>Subscription type</Subtitle>
-        <Counters>{data?.subscriptionKind}</Counters>
+        <Title>Subscription: {data?.subscriptionKind}</Title>
+        <Subtitle>Upgrade your subscription plan to remove the limitations</Subtitle>
+        <Counters>
+          {data?.subscriptionKind === "free" && (
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dispatch(
+                  openLink(
+                    `https://42crunch.com/single-user-pricing/?prefilled_email=${encodeURIComponent(
+                      data.userEmail
+                    )}`
+                  )
+                );
+              }}
+            >
+              Upgrade
+            </Button>
+          )}
+          {data?.subscriptionKind !== "free" && data?.userEmail !== undefined && (
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dispatch(
+                  openLink(
+                    `https://billing.stripe.com/p/login/3csaGd9xzf5k7n2aEE?prefilled_email=${encodeURIComponent(
+                      data.userEmail
+                    )}`
+                  )
+                );
+              }}
+            >
+              Manage
+            </Button>
+          )}
+        </Counters>
       </Section>
 
       <Section>
