@@ -39,6 +39,7 @@ export function registerSecurityAudit(
     "openapi.securityAudit",
     async (textEditor: vscode.TextEditor, edit) => {
       await securityAudit(
+        context.workspaceState,
         context.secrets,
         cache,
         auditContext,
@@ -63,6 +64,7 @@ export function registerSingleOperationAudit(
     "openapi.editorSingleOperationAudit",
     async (textEditor: vscode.TextEditor, edit, path: string, method: HttpMethod) => {
       await securityAudit(
+        context.workspaceState,
         context.secrets,
         cache,
         auditContext,
@@ -96,6 +98,7 @@ export function registerOutlineSingleOperationAudit(
       const { path, method } = getPathAndMethod(node);
 
       await securityAudit(
+        context.workspaceState,
         context.secrets,
         cache,
         auditContext,
@@ -151,6 +154,7 @@ export function registerFocusSecurityAuditById(
 }
 
 async function securityAudit(
+  memento: vscode.Memento,
   secrets: vscode.SecretStorage,
   cache: Cache,
   auditContext: AuditContext,
@@ -196,7 +200,7 @@ async function securityAudit(
           : stringify(extractSingleOperation(method, path as string, value));
         // paid users always run audit using the platform, free users use CLI or fallback to anond
         if ((await chooseAuditRuntime(configuration, secrets)) === "platform") {
-          return runPlatformAudit(editor.document, oas, mapping, cache, store);
+          return runPlatformAudit(editor.document, oas, mapping, cache, store, memento);
         } else {
           // use CLI
           if (await ensureCliDownloaded(configuration, secrets)) {

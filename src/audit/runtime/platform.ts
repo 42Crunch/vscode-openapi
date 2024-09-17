@@ -11,16 +11,19 @@ import { PlatformStore } from "../../platform/stores/platform-store";
 import { MappingNode } from "../../types";
 import { parseAuditReport } from "../audit";
 import { formatException } from "../../platform/util";
+import { TAGS_DATA_KEY } from "../../webapps/views/tags/view";
+import { TagData } from "@xliic/common/tags";
 
 export async function runPlatformAudit(
   document: vscode.TextDocument,
   oas: string,
   mapping: MappingNode,
   cache: Cache,
-  store: PlatformStore
+  store: PlatformStore,
+  memento?: vscode.Memento
 ): Promise<Audit | undefined> {
   try {
-    const tmpApi = await store.createTempApi(oas);
+    const tmpApi = await store.createTempApi(oas, getTagIds(memento, document.uri.fsPath));
     const report = await store.getAuditReport(tmpApi.apiId);
     const compliance = await store.readAuditCompliance(report.tid);
     const todoReport = await store.readAuditReportSqgTodo(report.tid);
@@ -45,4 +48,12 @@ export async function runPlatformAudit(
       );
     }
   }
+}
+
+function getTagIds(memento: vscode.Memento | undefined, filePath: string): string[] | undefined {
+  if (memento) {
+    const tagData = memento.get(TAGS_DATA_KEY, {}) as TagData;
+    return tagData[filePath] ? tagData[filePath].map((tagEntry) => tagEntry.tagId) : undefined;
+  }
+  return undefined;
 }

@@ -247,7 +247,10 @@ export class PlatformStore {
     return api;
   }
 
-  async createTempApi(json: string): Promise<{ apiId: string; collectionId: string }> {
+  async createTempApi(
+    json: string,
+    localTagIds?: string[]
+  ): Promise<{ apiId: string; collectionId: string }> {
     const collectionId = await this.findOrCreateTempCollection();
 
     const tagIds: string[] = [];
@@ -255,6 +258,9 @@ export class PlatformStore {
     if (mandatoryTags.length > 0) {
       const platformTags = await getTags(this.getConnection(), this.logger);
       tagIds.push(...getMandatoryTagsIds(mandatoryTags, platformTags));
+    }
+    if (localTagIds) {
+      tagIds.push(...localTagIds);
     }
 
     // if the api naming convention is configured, use its example as the api name
