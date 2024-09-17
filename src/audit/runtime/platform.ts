@@ -11,16 +11,19 @@ import { PlatformStore } from "../../platform/stores/platform-store";
 import { MappingNode } from "../../types";
 import { parseAuditReport } from "../audit";
 import { formatException } from "../../platform/util";
+import { TAGS_DATA_KEY } from "../../webapps/views/tags/view";
+import { TagData, TagDataEntry } from "@xliic/common/tags";
 
 export async function runPlatformAudit(
   document: vscode.TextDocument,
   oas: string,
   mapping: MappingNode,
   cache: Cache,
-  store: PlatformStore
+  store: PlatformStore,
+  memento?: vscode.Memento
 ): Promise<Audit | undefined> {
   try {
-    const tmpApi = await store.createTempApi(oas);
+    const tmpApi = await store.createTempApi(oas, getTagDataEntry(memento, document.uri.fsPath));
     const report = await store.getAuditReport(tmpApi.apiId);
     const compliance = await store.readAuditCompliance(report.tid);
     const todoReport = await store.readAuditReportSqgTodo(report.tid);
@@ -44,5 +47,15 @@ export async function runPlatformAudit(
         formatException("Unexpected error when trying to audit API using the platform:", ex)
       );
     }
+  }
+}
+
+function getTagDataEntry(
+  memento: vscode.Memento | undefined,
+  filePath: string
+): TagDataEntry | undefined {
+  if (memento) {
+    const tagData = memento.get(TAGS_DATA_KEY, {}) as TagData;
+    return tagData[filePath];
   }
 }

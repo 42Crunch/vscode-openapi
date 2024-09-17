@@ -1,7 +1,13 @@
 import * as vscode from "vscode";
 import { PlatformStore } from "../stores/platform-store";
+import { configuration } from "../../configuration";
+import { TagsWebView } from "../../webapps/views/tags/view";
 
-export default (context: vscode.ExtensionContext, store: PlatformStore) => ({
+export default (
+  context: vscode.ExtensionContext,
+  store: PlatformStore,
+  tagsWebView: TagsWebView
+) => ({
   copyToClipboard: async (value: string, message: string) => {
     vscode.env.clipboard.writeText(value);
     const disposable = vscode.window.setStatusBarMessage(message);
@@ -19,5 +25,9 @@ export default (context: vscode.ExtensionContext, store: PlatformStore) => ({
       const uri = vscode.Uri.parse(platformUrl + `/collections/${collectionId}`);
       vscode.env.openExternal(uri);
     }
+  },
+
+  setTags: async (uri: vscode.Uri) => {
+    await tagsWebView.showTagsWebView(uri);
   },
 });
