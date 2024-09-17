@@ -16,7 +16,7 @@ import { FavoritesStore } from "./stores/favorites-store";
 import { ImportedUrlStore } from "./stores/imported-url-store";
 import { PlatformFS } from "./fs-provider";
 import { isPlatformUri } from "./util";
-import { CodelensProvider } from "./codelens";
+import { CodelensProvider, PlatformTagCodelensProvider } from "./codelens";
 import { refreshAuditReport } from "./audit";
 import { AuditWebView } from "../audit/view";
 import { DataDictionaryWebView } from "./data-dictionary/view";
@@ -26,6 +26,7 @@ import { activate as activateLinter } from "./data-dictionary/linter";
 import { activate as activateScan } from "./scan/activate";
 import { EnvStore } from "../envstore";
 import { SignUpWebView } from "../webapps/signup/view";
+import { TagsWebView } from "../webapps/views/tags/view";
 
 export async function activate(
   context: vscode.ExtensionContext,
@@ -129,6 +130,15 @@ export async function activate(
     }
   });
 
+  const tagsWebView = new TagsWebView(
+    context.extensionPath,
+    memento,
+    configuration,
+    secrets,
+    store,
+    logger
+  );
+
   registerCommands(
     context,
     platformContext,
@@ -140,6 +150,7 @@ export async function activate(
     provider,
     tree,
     reportWebView,
+    tagsWebView,
     dataDictionaryView,
     dataDictionaryDiagnostics
   );
@@ -150,5 +161,12 @@ export async function activate(
       { scheme: platformUriScheme, language: "jsonc" },
     ],
     new CodelensProvider(store)
+  );
+
+  Object.values(selectors).map((selector) =>
+    vscode.languages.registerCodeLensProvider(
+      selector,
+      new PlatformTagCodelensProvider(cache, configuration, secrets, memento)
+    )
   );
 }

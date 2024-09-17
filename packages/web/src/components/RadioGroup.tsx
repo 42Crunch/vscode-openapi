@@ -33,6 +33,31 @@ export function RadioGroup({ name, options }: { name: string; options: RadioOpti
   );
 }
 
+export function RadioGroup2({
+  value,
+  options,
+  onValueChange,
+}: {
+  value: string;
+  options: RadioOption[];
+  onValueChange: (value: string) => void;
+}) {
+  return (
+    <Group value={value} onValueChange={onValueChange}>
+      {options.map((option, index) => (
+        <Option key={index}>
+          <Item value={option.value} id={`radio-group-item-${index}`}>
+            <Indicator>
+              <Circle />
+            </Indicator>
+          </Item>
+          <label htmlFor={`radio-group-label-${index}`}>{option.label}</label>
+        </Option>
+      ))}
+    </Group>
+  );
+}
+
 const Group = styled(RadixRadioGroup.Root)`
   display: flex;
   flex-direction: row;

@@ -18,6 +18,7 @@ import { CollectionsProvider } from "./explorer/provider";
 import { ExplorerNode } from "./explorer/nodes/base";
 import { AuditWebView } from "../audit/view";
 import { DataDictionaryWebView } from "./data-dictionary/view";
+import { TagsWebView } from "../webapps/views/tags/view";
 
 export function registerCommands(
   context: vscode.ExtensionContext,
@@ -30,12 +31,13 @@ export function registerCommands(
   provider: CollectionsProvider,
   tree: vscode.TreeView<ExplorerNode>,
   reportWebView: AuditWebView,
+  tagsWebView: TagsWebView,
   dataDictionaryView: DataDictionaryWebView,
   dataDictionaryDiagnostics: vscode.DiagnosticCollection
 ): vscode.Disposable[] {
   const commands: any = {};
   Object.assign(commands, misc(store, favorites, provider, tree));
-  Object.assign(commands, util(context, store));
+  Object.assign(commands, util(context, store, tagsWebView));
   Object.assign(commands, createApi(store, importedUrls, provider, tree, cache));
   Object.assign(commands, filter(store, provider));
   Object.assign(commands, report(store, context, auditContext, cache, reportWebView));
