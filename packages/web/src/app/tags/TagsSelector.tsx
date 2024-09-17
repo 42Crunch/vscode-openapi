@@ -71,7 +71,7 @@ export function TagsSelector({
           placeholder="Tag or category name"
           {...getInputProps(getDropdownProps({ preventKeyAction: isOpen }))}
         />
-        <DownShiftButton aria-label="toggle menu" type="button" {...getToggleButtonProps()}>
+        <DownShiftButton type="button" {...getToggleButtonProps()}>
           &#8595;
         </DownShiftButton>
       </DownShiftContainer>
@@ -207,19 +207,17 @@ const MainComboboxContainer = styled.div`
 `;
 
 const DownShiftContainer = styled.div`
-  display: inline-flex;
+  display: flex;
+  flex-direction: row;
   gap: 0.5rem;
   align-items: center;
-  flex-wrap: wrap;
-  background-color: var(${ThemeColorVariables.computedOne});
 `;
 
 const DownShiftInput = styled.input`
   min-width: 540px;
   background-color: var(${ThemeColorVariables.inputBackground});
-  border: none;
   border-radius: 3px;
-  border-bottom: 1px solid var(${ThemeColorVariables.border});
+  border: 1px solid var(${ThemeColorVariables.border});
   color: var(${ThemeColorVariables.inputForeground});
   height: 25px;
 `;
@@ -228,7 +226,9 @@ const DownShiftButton = styled.button`
   padding-left: 0.5rem;
   padding-right: 0.5rem;
   height: 25px;
-  border: none;
+  border-color: var(${ThemeColorVariables.border});
+  border-width: 1px;
+  border-style: solid;
   border-radius: 3px;
   color: var(${ThemeColorVariables.buttonForeground});
   background-color: var(${ThemeColorVariables.buttonBackground});

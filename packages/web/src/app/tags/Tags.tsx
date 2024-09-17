@@ -249,6 +249,9 @@ const Header = styled.div`
   flex-direction: row;
   gap: 20px;
   background-color: var(${ThemeColorVariables.computedOne});
+  border-color: var(${ThemeColorVariables.border});
+  border-width: 1px;
+  border-style: solid;
   border-radius: 3px;
   align-items: center;
   justify-content: space-between;
