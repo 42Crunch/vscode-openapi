@@ -3,15 +3,16 @@ import { HttpConfig, HttpRequest } from "@xliic/common/http";
 import { webappHttpClient } from "../../core/http-client/webapp-client";
 import { sendHttpRequest } from "./slice";
 import { ConfigState } from "../../features/config/slice";
+import { CategoryResponseEntry, TagResponseEntry } from "./types";
 
 export const tagsApi = createApi({
   reducerPath: "tagsApi",
   baseQuery: webappBaseQuery,
   endpoints: (builder) => ({
-    getCategories: builder.query<any[], void>({
+    getCategories: builder.query<CategoryResponseEntry[], void>({
       query: () => `api/v2/categories`,
     }),
-    getTags: builder.query<any[], void>({
+    getTags: builder.query<TagResponseEntry[], void>({
       query: () => `api/v2/tags`,
     }),
   }),

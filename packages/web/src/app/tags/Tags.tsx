@@ -37,10 +37,7 @@ export function MainSubContainer() {
 
   const { targetFileName, tagData } = useAppSelector((state) => state.tags);
   // Get all categories (with tags) to show in combobox
-  const categories = getCategories(
-    (categoryList as CategoryResponseEntry[]) || [],
-    (tagList as TagResponseEntry[]) || []
-  );
+  const categories = getCategories(categoryList || [], tagList || []);
   // Keep all tag selections in local state
   const initSelectedTagIds = new Set<string>();
   if (tagData) {
