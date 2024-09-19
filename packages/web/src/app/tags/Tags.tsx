@@ -7,12 +7,18 @@ import CollapsibleCard, {
   BottomItem,
   TopDescription,
 } from "../../components/CollapsibleCard";
-import { Category, CategoryResponseEntry, Tag, TagResponseEntry } from "./types";
+import { Category, CategoryResponseEntry, SearchableItem, Tag, TagResponseEntry } from "./types";
 import { ErrorBanner } from "../../components/Banner";
-import { useGetCategoriesQuery, useGetTagsQuery } from "./tags-api";
+import {
+  useGetApisFromCollectionQuery,
+  useGetCategoriesQuery,
+  useGetCollectionsQuery,
+  useGetTagsQuery,
+} from "./tags-api";
 import { TagData, TagEntry } from "@xliic/common/tags";
 import React from "react";
 import { saveTags } from "./slice";
+import { SearchSelector } from "./SearchSelector";
 
 export function MainContainer() {
   const { targetFileName, tagData } = useAppSelector((state) => state.tags);
@@ -47,6 +53,13 @@ export function MainSubContainer() {
   }
   const dispatch = useAppDispatch();
   const [selectedTagIds, setSelectedTagIds] = React.useState(initSelectedTagIds);
+
+  const {
+    data: collsList,
+    error: errorColls,
+    isLoading: isLoadingColls,
+  } = useGetCollectionsQuery();
+  const [collectionItem, setCollectionItem] = React.useState<SearchableItem | undefined>(undefined);
 
   return (
     <>
@@ -87,6 +100,53 @@ export function MainSubContainer() {
             />
           )}
         </Header>
+        <Header>
+          {isLoadingColls && <HeaderSpan>Loading collections from the server...</HeaderSpan>}
+          {!isLoadingColls && <HeaderSpan>Get tags from api in collection</HeaderSpan>}
+          {!isLoadingColls && (
+            <SearchSelector
+              itemsList={
+                collsList?.map((collEntry) => ({
+                  id: collEntry.desc.id,
+                  name: collEntry.desc.name,
+                })) || []
+              }
+              onItemSelected={(item: SearchableItem): void => {
+                console.info("item sel = " + item);
+                setCollectionItem(item);
+                //dispatch(saveTags(getTagDataToSave(targetFileName, categories, newSelectedTagIds)));
+              }}
+            />
+          )}
+        </Header>
+        {collectionItem && (
+          <HeaderForApi
+            targetFileName={targetFileName}
+            collectionItem={collectionItem}
+            categories={categories}
+            selectedTagIds={selectedTagIds}
+            onTagSelected={(categoryId: string, tagId: string, selected: boolean): void => {
+              const newSelectedTagIds = new Set<string>(selectedTagIds);
+              if (selected) {
+                newSelectedTagIds.add(tagId);
+                for (const category of categories) {
+                  if (category.categoryId === categoryId && !category.multipleChoicesAllowed) {
+                    for (const tag of category.tags) {
+                      if (tag.tagId !== tagId) {
+                        newSelectedTagIds.delete(tag.tagId);
+                      }
+                    }
+                    break;
+                  }
+                }
+              } else {
+                newSelectedTagIds.delete(tagId);
+              }
+              setSelectedTagIds(newSelectedTagIds);
+              dispatch(saveTags(getTagDataToSave(targetFileName, categories, newSelectedTagIds)));
+            }}
+          />
+        )}
         <HeaderError>
           {errorCategories && (
             <ErrorBanner message="Failed to load categories">
@@ -102,6 +162,69 @@ export function MainSubContainer() {
       </HeaderContainer>
       <SelectionsContainer categories={categories} selectedTagIds={selectedTagIds} />
     </>
+  );
+}
+
+function HeaderForApi({
+  targetFileName,
+  collectionItem,
+  categories,
+  selectedTagIds,
+  onTagSelected,
+}: {
+  targetFileName: string;
+  collectionItem: SearchableItem;
+  categories: Category[];
+  selectedTagIds: Set<string>;
+  onTagSelected: (categoryId: string, tagId: string, selected: boolean) => void;
+}) {
+  const {
+    data: apiList,
+    error: errorApi,
+    isLoading: isLoadingApi,
+  } = useGetApisFromCollectionQuery(collectionItem.id);
+  //const [collectionId, setCollectionId] = React.useState("");
+
+  return (
+    <Header>
+      {isLoadingApi && (
+        <HeaderSpan>
+          Loading apis for collection {collectionItem.name} from the server...
+        </HeaderSpan>
+      )}
+      {!isLoadingApi && <HeaderSpan>Get tags from api in {collectionItem.name}</HeaderSpan>}
+      {!isLoadingApi && (
+        <SearchSelector
+          itemsList={
+            apiList?.map((apiEntry) => ({
+              id: apiEntry.desc.id,
+              name: apiEntry.desc.name,
+              children: apiEntry.tags.map((tag) => tag.categoryName + ": " + tag.tagName),
+            })) || []
+          }
+          onItemSelected={(item: SearchableItem): void => {
+            // todo: better
+            const adminOnlyTagIds = new Set<string>();
+            const temp: any = {};
+            for (const category of categories) {
+              for (const tag of category.tags) {
+                temp[tag.tagId] = category.categoryId;
+                if (tag.onlyAdminCanTag) {
+                  adminOnlyTagIds.add(tag.tagId);
+                }
+              }
+            }
+            const tagIdsFromApi = apiList
+              ?.filter((api) => api.desc.id === item.id)[0]
+              ?.tags.filter((tag) => !adminOnlyTagIds.has(tag.tagId))
+              .map((tag) => tag.tagId);
+            for (const id of tagIdsFromApi || []) {
+              onTagSelected(temp[id], id, true);
+            }
+          }}
+        />
+      )}
+    </Header>
   );
 }
 

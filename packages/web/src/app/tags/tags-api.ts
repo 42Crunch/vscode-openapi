@@ -3,7 +3,12 @@ import { HttpConfig, HttpRequest } from "@xliic/common/http";
 import { webappHttpClient } from "../../core/http-client/webapp-client";
 import { sendHttpRequest } from "./slice";
 import { ConfigState } from "../../features/config/slice";
-import { CategoryResponseEntry, TagResponseEntry } from "./types";
+import {
+  ApiResponseEntry,
+  CategoryResponseEntry,
+  CollectionResponseEntry,
+  TagResponseEntry,
+} from "./types";
 
 export const tagsApi = createApi({
   reducerPath: "tagsApi",
@@ -14,6 +19,13 @@ export const tagsApi = createApi({
     }),
     getTags: builder.query<TagResponseEntry[], void>({
       query: () => `api/v2/tags`,
+    }),
+    getCollections: builder.query<CollectionResponseEntry[], void>({
+      query: () => `api/v2/collections?listOption=ALL&perPage=0`,
+    }),
+    getApisFromCollection: builder.query<ApiResponseEntry[], string>({
+      query: (collectionId: string) =>
+        `api/v2/collections/${collectionId}/apis?withTags=true&perPage=0`,
     }),
   }),
 });
@@ -48,4 +60,9 @@ async function webappBaseQuery(args: any, { signal, dispatch, getState }: any, e
   }
 }
 
-export const { useGetCategoriesQuery, useGetTagsQuery } = tagsApi;
+export const {
+  useGetCategoriesQuery,
+  useGetTagsQuery,
+  useGetCollectionsQuery,
+  useGetApisFromCollectionQuery,
+} = tagsApi;
