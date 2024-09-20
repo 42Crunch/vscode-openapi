@@ -1,6 +1,7 @@
 export type SearchableItem = {
   id: string;
   name: string;
+  entry: any;
   children?: string[];
 };
 

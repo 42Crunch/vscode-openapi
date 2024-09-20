@@ -42,9 +42,6 @@ export function SearchSelector({
       switch (type) {
         case useCombobox.stateChangeTypes.InputKeyDownEnter:
         case useCombobox.stateChangeTypes.ItemClick:
-          if (state.selectedItem) {
-            onItemSelected(state.selectedItem);
-          }
           return {
             ...changes,
             isOpen: false,
@@ -53,11 +50,16 @@ export function SearchSelector({
           return changes;
       }
     },
-    onStateChange({ inputValue: newInputValue, type }) {
+    onStateChange({ inputValue: newInputValue, type, selectedItem: newSelectedItem }) {
       switch (type) {
         case useCombobox.stateChangeTypes.InputKeyDownEnter:
         case useCombobox.stateChangeTypes.ItemClick:
         case useCombobox.stateChangeTypes.InputBlur:
+          if (newSelectedItem) {
+            onItemSelected(newSelectedItem);
+            setInputValue("");
+          }
+          break;
           break;
         case useCombobox.stateChangeTypes.InputChange:
           setInputValue(newInputValue || "");
@@ -83,7 +85,7 @@ export function SearchSelector({
         {isOpen &&
           items.map((item, index) => (
             <DropDownListElement key={item.id} {...getItemProps({ item, index })}>
-              <CategorySpan>{item.name}</CategorySpan>
+              <SearchSpan value={item.name} searchValue={inputValue}></SearchSpan>
               <CategoryNoteSpan>UUID: {item.id}</CategoryNoteSpan>
               {item.children && (
                 <div>
@@ -97,6 +99,34 @@ export function SearchSelector({
           ))}
       </DropDownList>
     </MainComboboxContainer>
+  );
+}
+
+function SearchSpan({ value, searchValue }: { value: string; searchValue: string }) {
+  if (!searchValue || !value) {
+    return <span>{value}</span>;
+  }
+  let i = -1;
+  let j = 0;
+  value = value.toLowerCase();
+  searchValue = searchValue.toLocaleLowerCase();
+  const chunks: { text: string; mark: boolean }[] = [];
+  while ((i = value.indexOf(searchValue, i + 1)) != -1) {
+    chunks.push({ text: value.substring(j, i), mark: false });
+    j = i + searchValue.length;
+    chunks.push({ text: value.substring(i, j), mark: true });
+  }
+  chunks.push({ text: value.substring(j), mark: false });
+  return (
+    <span>
+      {chunks.map((chunk, index) => {
+        if (chunk.mark) {
+          return <mark key={index}>{chunk.text}</mark>;
+        } else {
+          return chunk.text;
+        }
+      })}
+    </span>
   );
 }
 

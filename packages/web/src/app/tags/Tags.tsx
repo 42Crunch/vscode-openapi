@@ -7,7 +7,14 @@ import CollapsibleCard, {
   BottomItem,
   TopDescription,
 } from "../../components/CollapsibleCard";
-import { Category, CategoryResponseEntry, SearchableItem, Tag, TagResponseEntry } from "./types";
+import {
+  ApiResponseEntry,
+  Category,
+  CategoryResponseEntry,
+  SearchableItem,
+  Tag,
+  TagResponseEntry,
+} from "./types";
 import { ErrorBanner } from "../../components/Banner";
 import {
   useGetApisFromCollectionQuery,
@@ -44,6 +51,10 @@ export function MainSubContainer() {
   const { targetFileName, tagData } = useAppSelector((state) => state.tags);
   // Get all categories (with tags) to show in combobox
   const categories = getCategories(categoryList || [], tagList || []);
+  const tagIdToCategoryMap: Record<string, Category> = {};
+  categories.forEach((category) =>
+    category.tags.forEach((tag) => (tagIdToCategoryMap[tag.tagId] = category))
+  );
   // Keep all tag selections in local state
   const initSelectedTagIds = new Set<string>();
   if (tagData) {
@@ -60,6 +71,7 @@ export function MainSubContainer() {
     isLoading: isLoadingColls,
   } = useGetCollectionsQuery();
   const [collectionItem, setCollectionItem] = React.useState<SearchableItem | undefined>(undefined);
+  const [apiItem, setApiItem] = React.useState<SearchableItem | undefined>(undefined);
 
   return (
     <>
@@ -101,18 +113,38 @@ export function MainSubContainer() {
           )}
         </Header>
         <Header>
-          {isLoadingColls && <HeaderSpan>Loading collections from the server...</HeaderSpan>}
-          {!isLoadingColls && <HeaderSpan>Get tags from api in collection</HeaderSpan>}
+          <HeaderSelector
+            isLoading={isLoadingColls}
+            isLoadingText="Loading collections from the server..."
+            itemTypeText="collection"
+            collectionItem={collectionItem}
+            onItemRemoved={(item: SearchableItem): void => {
+              if (apiItem) {
+                const tagIds = (apiItem.entry as ApiResponseEntry).tags.map((tag) => tag.tagId);
+                const newSelectedTagIds = getUpdatedSelectedTagIds(
+                  selectedTagIds,
+                  tagIdToCategoryMap,
+                  tagIds,
+                  false
+                );
+                setSelectedTagIds(newSelectedTagIds);
+                dispatch(saveTags(getTagDataToSave(targetFileName, categories, newSelectedTagIds)));
+              }
+              setApiItem(undefined);
+              setCollectionItem(undefined);
+            }}
+          />
           {!isLoadingColls && (
             <SearchSelector
               itemsList={
                 collsList?.map((collEntry) => ({
                   id: collEntry.desc.id,
                   name: collEntry.desc.name,
+                  entry: collEntry,
                 })) || []
               }
               onItemSelected={(item: SearchableItem): void => {
-                console.info("item sel = " + item);
+                //console.info("item sel = " + item);
                 setCollectionItem(item);
                 //dispatch(saveTags(getTagDataToSave(targetFileName, categories, newSelectedTagIds)));
               }}
@@ -121,27 +153,29 @@ export function MainSubContainer() {
         </Header>
         {collectionItem && (
           <HeaderForApi
-            targetFileName={targetFileName}
+            apiItem={apiItem}
             collectionItem={collectionItem}
-            categories={categories}
-            selectedTagIds={selectedTagIds}
-            onTagSelected={(categoryId: string, tagId: string, selected: boolean): void => {
-              const newSelectedTagIds = new Set<string>(selectedTagIds);
-              if (selected) {
-                newSelectedTagIds.add(tagId);
-                for (const category of categories) {
-                  if (category.categoryId === categoryId && !category.multipleChoicesAllowed) {
-                    for (const tag of category.tags) {
-                      if (tag.tagId !== tagId) {
-                        newSelectedTagIds.delete(tag.tagId);
-                      }
-                    }
-                    break;
-                  }
-                }
-              } else {
-                newSelectedTagIds.delete(tagId);
-              }
+            onItemRemoved={(item: SearchableItem): void => {
+              setApiItem(undefined);
+              const tagIds = (item.entry as ApiResponseEntry).tags.map((tag) => tag.tagId);
+              const newSelectedTagIds = getUpdatedSelectedTagIds(
+                selectedTagIds,
+                tagIdToCategoryMap,
+                tagIds,
+                false
+              );
+              setSelectedTagIds(newSelectedTagIds);
+              dispatch(saveTags(getTagDataToSave(targetFileName, categories, newSelectedTagIds)));
+            }}
+            onItemSelected={(item: SearchableItem): void => {
+              setApiItem(item);
+              const tagIds = (item.entry as ApiResponseEntry).tags.map((tag) => tag.tagId);
+              const newSelectedTagIds = getUpdatedSelectedTagIds(
+                selectedTagIds,
+                tagIdToCategoryMap,
+                tagIds,
+                true
+              );
               setSelectedTagIds(newSelectedTagIds);
               dispatch(saveTags(getTagDataToSave(targetFileName, categories, newSelectedTagIds)));
             }}
@@ -165,63 +199,105 @@ export function MainSubContainer() {
   );
 }
 
-function HeaderForApi({
-  targetFileName,
+function getUpdatedSelectedTagIds(
+  selectedTagIds: Set<string>,
+  tagIdToCategoryMap: Record<string, Category>,
+  tagIds: string[],
+  selected: boolean
+): Set<string> {
+  const result = new Set<string>(selectedTagIds);
+  if (selected) {
+    tagIds.forEach((tagId) => {
+      const category = tagIdToCategoryMap[tagId];
+      // Setting tags with onlyAdminCanTag will cause audit failure, skip it
+      if (!category.onlyAdminCanTag) {
+        result.add(tagId);
+        // Unset tag siblings if necessary
+        if (!category.multipleChoicesAllowed) {
+          category.tags
+            .filter((tag) => tag.tagId !== tagId)
+            .forEach((tag) => result.delete(tag.tagId));
+        }
+      }
+    });
+  } else {
+    tagIds.forEach((tagId) => result.delete(tagId));
+  }
+  return result;
+}
+
+function HeaderSelector({
+  isLoading,
+  isLoadingText,
+  itemTypeText,
   collectionItem,
-  categories,
-  selectedTagIds,
-  onTagSelected,
+  onItemRemoved,
 }: {
-  targetFileName: string;
+  isLoading: boolean;
+  isLoadingText: string;
+  itemTypeText: string;
+  collectionItem: SearchableItem | undefined;
+  onItemRemoved: (item: SearchableItem) => void;
+}) {
+  return (
+    <HeaderHeaderSelectorContainer>
+      {isLoading && <HeaderSpan>{isLoadingText}</HeaderSpan>}
+      {!isLoading && !collectionItem && <HeaderSpan>Select a {itemTypeText}</HeaderSpan>}
+      {!isLoading && collectionItem && (
+        <HeaderItem>
+          <HeaderSpan>Selected {itemTypeText}</HeaderSpan>
+          <HeaderItemSpan>{collectionItem.name}</HeaderItemSpan>
+          <HeaderItemRemoverSpan
+            onClick={(e) => {
+              e.stopPropagation();
+              onItemRemoved(collectionItem);
+            }}
+          >
+            &#10005;
+          </HeaderItemRemoverSpan>
+        </HeaderItem>
+      )}
+    </HeaderHeaderSelectorContainer>
+  );
+}
+
+function HeaderForApi({
+  apiItem,
+  collectionItem,
+  onItemRemoved,
+  onItemSelected,
+}: {
+  apiItem: SearchableItem | undefined;
   collectionItem: SearchableItem;
-  categories: Category[];
-  selectedTagIds: Set<string>;
-  onTagSelected: (categoryId: string, tagId: string, selected: boolean) => void;
+  onItemRemoved: (item: SearchableItem) => void;
+  onItemSelected: (item: SearchableItem) => void;
 }) {
   const {
     data: apiList,
     error: errorApi,
     isLoading: isLoadingApi,
   } = useGetApisFromCollectionQuery(collectionItem.id);
-  //const [collectionId, setCollectionId] = React.useState("");
 
   return (
     <Header>
-      {isLoadingApi && (
-        <HeaderSpan>
-          Loading apis for collection {collectionItem.name} from the server...
-        </HeaderSpan>
-      )}
-      {!isLoadingApi && <HeaderSpan>Get tags from api in {collectionItem.name}</HeaderSpan>}
+      <HeaderSelector
+        isLoading={isLoadingApi}
+        isLoadingText="Loading APIs from the server..."
+        itemTypeText="api"
+        collectionItem={apiItem}
+        onItemRemoved={onItemRemoved}
+      />
       {!isLoadingApi && (
         <SearchSelector
           itemsList={
             apiList?.map((apiEntry) => ({
               id: apiEntry.desc.id,
               name: apiEntry.desc.name,
+              entry: apiEntry,
               children: apiEntry.tags.map((tag) => tag.categoryName + ": " + tag.tagName),
             })) || []
           }
-          onItemSelected={(item: SearchableItem): void => {
-            // todo: better
-            const adminOnlyTagIds = new Set<string>();
-            const temp: any = {};
-            for (const category of categories) {
-              for (const tag of category.tags) {
-                temp[tag.tagId] = category.categoryId;
-                if (tag.onlyAdminCanTag) {
-                  adminOnlyTagIds.add(tag.tagId);
-                }
-              }
-            }
-            const tagIdsFromApi = apiList
-              ?.filter((api) => api.desc.id === item.id)[0]
-              ?.tags.filter((tag) => !adminOnlyTagIds.has(tag.tagId))
-              .map((tag) => tag.tagId);
-            for (const id of tagIdsFromApi || []) {
-              onTagSelected(temp[id], id, true);
-            }
-          }}
+          onItemSelected={onItemSelected}
         />
       )}
     </Header>
@@ -383,9 +459,37 @@ const HeaderError = styled.div`
   gap: 7px;
 `;
 
+const HeaderHeaderSelectorContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 7px;
+`;
+
+const HeaderItem = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+`;
+
 const HeaderSpan = styled.span`
   font-weight: bold;
   padding: 15px;
+`;
+
+const HeaderItemSpan = styled.span`
+  font-weight: bold;
+  padding: 3px;
+  border-color: var(${ThemeColorVariables.border});
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 3px;
+`;
+
+const HeaderItemRemoverSpan = styled.span`
+  font-weight: bold;
+  cursor: pointer;
+  padding: 1px;
 `;
 
 const Container = styled.div`
