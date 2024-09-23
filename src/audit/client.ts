@@ -6,7 +6,7 @@
 import * as vscode from "vscode";
 import got from "got";
 
-const TOKEN_URL = "https://stateless.42crunch.com/api/v1/anon/token";
+const TOKEN_URL = "https://stateless.dev.42crunch.com/api/v1/anon/token";
 const ARTICLES_URL = "https://platform.42crunch.com/kdb/audit-with-yaml.json";
 
 let cachedArticles: Promise<any> | undefined = undefined;

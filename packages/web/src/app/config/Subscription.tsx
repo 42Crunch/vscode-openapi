@@ -45,7 +45,7 @@ export default function Subscription({ token }: { token: string }) {
                 e.stopPropagation();
                 dispatch(
                   openLink(
-                    `https://42crunch.com/single-user-pricing/?prefilled_email=${encodeURIComponent(
+                    `https://42crunch.com/developer-pricing/?prefilled_email=${encodeURIComponent(
                       data.userEmail
                     )}`
                   )
