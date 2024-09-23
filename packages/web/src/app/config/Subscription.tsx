@@ -83,28 +83,32 @@ export default function Subscription({ token }: { token: string }) {
 
       <Section>
         <Title>Audit</Title>
-        <Subtitle>Current Audit usage</Subtitle>
+        <Subtitle>Audit credits left</Subtitle>
         <Counters>
-          {data?.currentAuditUsage} / {data!.monthlyAudit + data!.bonusAuditOp}{" "}
+          {data!.monthlyAudit + data!.bonusAuditOp - data!.currentAuditUsage} /{" "}
+          {data!.monthlyAudit + data!.bonusAuditOp}{" "}
           <DescriptionTooltip icon="question">
             Monthly: {data!.monthlyAudit} Bonus: {data!.bonusAuditOp}
           </DescriptionTooltip>
         </Counters>
         <ProgressBar
-          progress={data!.currentAuditUsage / (data!.monthlyAudit + data!.bonusAuditOp)}
+          progress={1 - data!.currentAuditUsage / (data!.monthlyAudit + data!.bonusAuditOp)}
         />
       </Section>
 
       <Section>
         <Title>Scan</Title>
-        <Subtitle>Current Scan usage</Subtitle>
+        <Subtitle>Scan credits left</Subtitle>
         <Counters>
-          {data?.currentScanUsage} / {data!.monthlyScan + data!.bonusScanOp}{" "}
+          {data!.monthlyScan + data!.bonusScanOp - data!.currentScanUsage} /{" "}
+          {data!.monthlyScan + data!.bonusScanOp}{" "}
           <DescriptionTooltip icon="question">
             Monthly: {data!.monthlyScan} Bonus: {data!.bonusScanOp}
           </DescriptionTooltip>
         </Counters>
-        <ProgressBar progress={data!.currentScanUsage / (data!.monthlyScan + data!.bonusScanOp)} />
+        <ProgressBar
+          progress={1 - data!.currentScanUsage / (data!.monthlyScan + data!.bonusScanOp)}
+        />
       </Section>
     </Container>
   );
