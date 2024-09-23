@@ -23,7 +23,6 @@ import {
 } from "../cli-ast";
 import { PlatformStore } from "../stores/platform-store";
 import { Logger, PlatformContext } from "../types";
-import { offerUpgrade } from "../upgrade";
 import { getOrCreateScanconfUri, getScanconfUri } from "./config";
 import { createScanConfigWithPlatform } from "./runtime/platform";
 import { ScanWebView } from "./view";
@@ -231,32 +230,6 @@ async function createDefaultScanConfig(
         if (platformAuthType === "anond-token") {
           // free users must use CLI for scan, there is no need to fallback to anond for initial audit
           // if there is no CLI available, they will not be able to run scan or create a scan config in any case
-          const [report, reportError] = await runAuditWithCliBinary(
-            secrets,
-            config,
-            emptyLogger,
-            oas,
-            true,
-            cliDirectoryOverride
-          );
-
-          if (reportError !== undefined) {
-            if (reportError.statusCode === 3 && reportError.statusMessage === "limits_reached") {
-              await offerUpgrade();
-              return false;
-            } else {
-              throw new Error(
-                reportError.statusMessage ? reportError.statusMessage : JSON.stringify(reportError)
-              );
-            }
-          }
-
-          if ((report.audit as any).openapiState !== "valid") {
-            throw new Error(
-              "Your API has structural or semantic issues in its OpenAPI format. Run Security Audit on this file and fix these issues first."
-            );
-          }
-
           await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride);
         } else {
           if (scanRuntime === "cli") {
