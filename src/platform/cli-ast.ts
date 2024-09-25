@@ -40,7 +40,7 @@ import { extensionQualifiedId } from "../types";
 const asyncExecFile = promisify(execFile);
 
 let lastCliUpdateCheckTime = 0;
-const cliUpdateCheckInterval = 1000 * 60 * 60 * 8; // 8 hours
+const cliUpdateCheckInterval = 1000 * 60 * 60 * 1; // 1 hour
 
 export async function createScanConfigWithCliBinary(
   scanconfUri: vscode.Uri,
