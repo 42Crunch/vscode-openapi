@@ -12,11 +12,11 @@ export async function offerUpgrade(): Promise<unknown> {
     .showInformationMessage(
       "Thank you for using the 42Crunch API Security Testing services. You have reached the limit of your monthly Freemium allowance. You have the option to wait until your free monthly allowance resets or upgrade your 42Crunch subscription.",
       { modal: true },
-      { title: "Upgrade", id: "upgrade" }
+      { title: "View subscription", id: "upgrade" }
     )
     .then((choice) => {
       if (choice?.id === "upgrade") {
-        vscode.env.openExternal(vscode.Uri.parse("https://42crunch.com/ide-upgrade/"));
+        vscode.commands.executeCommand("openapi.showConfiguration");
       }
     });
 }
@@ -28,11 +28,11 @@ export async function warnScans(left: number) {
     .showInformationMessage(
       `You have ${left} API Scans left this month. Your usage allowance resets every month. Upgrade to increase allowances.`,
       { modal: false },
-      { title: "Upgrade", id: "upgrade" }
+      { title: "View subscription", id: "upgrade" }
     )
     .then((choice) => {
       if (choice?.id === "upgrade") {
-        vscode.env.openExternal(vscode.Uri.parse("https://42crunch.com/ide-upgrade/"));
+        vscode.commands.executeCommand("openapi.showConfiguration");
       }
     });
 }
@@ -42,11 +42,11 @@ export async function warnOperationScans(left: number) {
     .showInformationMessage(
       `You have ${left} per-opertion API Scans left this month. Your usage allowance resets every month. Upgrade to increase allowances.`,
       { modal: false },
-      { title: "Upgrade", id: "upgrade" }
+      { title: "View subscription", id: "upgrade" }
     )
     .then((choice) => {
       if (choice?.id === "upgrade") {
-        vscode.env.openExternal(vscode.Uri.parse("https://42crunch.com/ide-upgrade/"));
+        vscode.commands.executeCommand("openapi.showConfiguration");
       }
     });
 }
@@ -56,11 +56,11 @@ export async function warnOperationAudits(left: number) {
     .showInformationMessage(
       `You have ${left} per-opertion Security Audits left this month. Your usage allowance resets every month. Upgrade to increase allowances.`,
       { modal: false },
-      { title: "Upgrade", id: "upgrade" }
+      { title: "View subscription", id: "upgrade" }
     )
     .then((choice) => {
       if (choice?.id === "upgrade") {
-        vscode.env.openExternal(vscode.Uri.parse("https://42crunch.com/ide-upgrade/"));
+        vscode.commands.executeCommand("openapi.showConfiguration");
       }
     });
 }
@@ -70,11 +70,11 @@ export async function warnAudits(left: number) {
     .showInformationMessage(
       `You have ${left} Security Audits left this month. Your usage allowance resets every month. Upgrade to increase allowances.`,
       { modal: false },
-      { title: "Upgrade", id: "upgrade" }
+      { title: "View subscription", id: "upgrade" }
     )
     .then((choice) => {
       if (choice?.id === "upgrade") {
-        vscode.env.openExternal(vscode.Uri.parse("https://42crunch.com/ide-upgrade/"));
+        vscode.commands.executeCommand("openapi.showConfiguration");
       }
     });
 }
