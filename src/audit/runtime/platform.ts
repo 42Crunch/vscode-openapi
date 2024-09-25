@@ -53,7 +53,10 @@ export async function runPlatformAudit(
 function getTagIds(memento: vscode.Memento | undefined, filePath: string): string[] | undefined {
   if (memento) {
     const tagData = memento.get(TAGS_DATA_KEY, {}) as TagData;
-    return tagData[filePath] ? tagData[filePath].map((tagEntry) => tagEntry.tagId) : undefined;
+    const data = tagData[filePath];
+    if (Array.isArray(data)) {
+      return data.map((tagEntry) => tagEntry.tagId);
+    }
   }
   return undefined;
 }

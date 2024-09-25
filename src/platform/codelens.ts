@@ -76,13 +76,27 @@ export class PlatformTagCodelensProvider implements vscode.CodeLensProvider<Tags
     if (targetFileName) {
       const selectedTagNames: string[] = [];
       const tagsData = this.memento.get(TAGS_DATA_KEY, {}) as TagData;
-      (tagsData[targetFileName] || []).forEach((tagEntry) =>
-        selectedTagNames.push(tagEntry.tagName)
-      );
+      let title;
+      let tooltip;
+      const data = tagsData[targetFileName];
+      if (data) {
+        if (Array.isArray(data)) {
+          data.forEach((tagEntry) => selectedTagNames.push(tagEntry.tagName));
+          title = `Tags: ${selectedTagNames.length} selected`;
+          tooltip =
+            selectedTagNames.length > 0 ? "My tags are: " + `${selectedTagNames.join(", ")}` : "";
+        } else {
+          title = `Tags: 1 api selected`;
+          tooltip =
+            "File bound to api " + `${data.apiName}` + " in collection " + `${data.collectionName}`;
+        }
+      } else {
+        title = "Tags: 0 selected";
+        tooltip = "Neither tags nor bound api selected";
+      }
       codeLens.command = {
-        title: `Tags: ${selectedTagNames.length} selected`,
-        tooltip:
-          selectedTagNames.length > 0 ? "My tags are: " + `${selectedTagNames.join(", ")}` : "",
+        title,
+        tooltip,
         command: "openapi.platform.setTags",
         arguments: [codeLens.uri],
       };

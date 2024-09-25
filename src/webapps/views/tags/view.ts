@@ -56,7 +56,11 @@ export class TagsWebView extends WebView<Webapp> {
     saveTags: async (data: TagData) => {
       const tagData = this.memento.get(TAGS_DATA_KEY, {}) as TagData;
       for (const [key, value] of Object.entries(data)) {
-        tagData[key] = value;
+        if (value) {
+          tagData[key] = value;
+        } else {
+          delete tagData[key];
+        }
       }
       await this.memento.update(TAGS_DATA_KEY, tagData);
     },

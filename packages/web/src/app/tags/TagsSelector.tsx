@@ -3,6 +3,7 @@ import React from "react";
 import { Category, Tag } from "./types";
 import styled from "styled-components";
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { AngleDown } from "../../icons";
 
 export function TagsSelector({
   categories,
@@ -71,9 +72,7 @@ export function TagsSelector({
           placeholder="Tag or category name"
           {...getInputProps(getDropdownProps({ preventKeyAction: isOpen }))}
         />
-        <DownShiftButton type="button" {...getToggleButtonProps()}>
-          &#8595;
-        </DownShiftButton>
+        <AngleDown {...getToggleButtonProps()} />
       </DownShiftContainer>
       <DropDownList className={` ${!(isOpen && items.length) && "hidden"}`} {...getMenuProps()}>
         {isOpen &&
@@ -211,6 +210,10 @@ const DownShiftContainer = styled.div`
   flex-direction: row;
   gap: 0.5rem;
   align-items: center;
+  > svg {
+    margin-left: 3px;
+    fill: var(${ThemeColorVariables.foreground});
+  }
 `;
 
 const DownShiftInput = styled.input`
@@ -220,18 +223,6 @@ const DownShiftInput = styled.input`
   border: 1px solid var(${ThemeColorVariables.border});
   color: var(${ThemeColorVariables.inputForeground});
   height: 25px;
-`;
-
-const DownShiftButton = styled.button`
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  height: 25px;
-  border-color: var(${ThemeColorVariables.border});
-  border-width: 1px;
-  border-style: solid;
-  border-radius: 3px;
-  color: var(${ThemeColorVariables.buttonForeground});
-  background-color: var(${ThemeColorVariables.buttonBackground});
 `;
 
 const DropDownList = styled.ul`

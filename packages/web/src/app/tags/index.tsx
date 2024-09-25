@@ -8,7 +8,7 @@ import { makeWebappMessageHandler } from "../webapp";
 import { createListener } from "./listener";
 import { initStore, messageHandlers } from "./store";
 import styled from "styled-components";
-import { MainContainer } from "./Tags";
+import { RootContainer } from "./Tags";
 
 function renderWebView(host: Webapp["host"], theme: ThemeState) {
   const store = initStore(createListener(host), theme);
@@ -17,9 +17,7 @@ function renderWebView(host: Webapp["host"], theme: ThemeState) {
     <React.StrictMode>
       <Provider store={store}>
         <ThemeStyles />
-        <Container>
-          <MainContainer />
-        </Container>
+        <RootContainer />
       </Provider>
     </React.StrictMode>
   );
@@ -28,10 +26,3 @@ function renderWebView(host: Webapp["host"], theme: ThemeState) {
 }
 
 (window as any).renderWebView = renderWebView;
-
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 10px;
-`;
