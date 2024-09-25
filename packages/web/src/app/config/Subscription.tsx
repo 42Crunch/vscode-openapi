@@ -8,13 +8,12 @@ import ProgressBar from "./ProgressBar";
 import Button from "../../new-components/Button";
 import { useAppDispatch } from "./store";
 import { openLink } from "../../features/config/slice";
-import DescriptionTooltip from "../../new-components/DescriptionTooltip";
 
 export default function Subscription({ token }: { token: string }) {
   const { data, error, isLoading } = useGetSubscriptionQuery(token);
   const dispatch = useAppDispatch();
 
-  if (isLoading) {
+  if (isLoading || data === undefined) {
     return (
       <Container>
         <Banner message="Loading subscription status..." />
@@ -35,10 +34,10 @@ export default function Subscription({ token }: { token: string }) {
   return (
     <Container>
       <Section>
-        <Title>Subscription: {data?.subscriptionKind}</Title>
-        <Subtitle>Upgrade your subscription plan to remove the limitations</Subtitle>
+        <Title>Subscription type: {data?.subscriptionKind}</Title>
+        <Subtitle>Upgrade or manage your subscription plan</Subtitle>
         <Counters>
-          {data?.subscriptionKind === "free" && (
+          {data.subscriptionKind === "free" && (
             <Button
               onClick={(e) => {
                 e.preventDefault();
@@ -55,7 +54,7 @@ export default function Subscription({ token }: { token: string }) {
               Upgrade
             </Button>
           )}
-          {data?.subscriptionKind !== "free" && data?.userEmail !== undefined && (
+          {data.subscriptionKind !== "free" && (
             <Button
               onClick={(e) => {
                 e.preventDefault();
@@ -76,39 +75,27 @@ export default function Subscription({ token }: { token: string }) {
       </Section>
 
       <Section>
-        <Title>Billing period</Title>
-        <Subtitle>Billing period starts</Subtitle>
-        <Counters>{data?.periodStart}</Counters>
+        <Title>Subscription date</Title>
+        <Subtitle>Date when your monthly allowance started</Subtitle>
+        <Counters>{data.periodStart}</Counters>
       </Section>
 
       <Section>
         <Title>Audit</Title>
-        <Subtitle>Audit credits left</Subtitle>
+        <Subtitle>Monthly operation audits left</Subtitle>
         <Counters>
-          {data!.monthlyAudit + data!.bonusAuditOp - data!.currentAuditUsage} /{" "}
-          {data!.monthlyAudit + data!.bonusAuditOp}{" "}
-          <DescriptionTooltip icon="question">
-            Monthly: {data!.monthlyAudit} Bonus: {data!.bonusAuditOp}
-          </DescriptionTooltip>
+          {data.monthlyAudit - data.currentAuditUsage} / {data.monthlyAudit}
         </Counters>
-        <ProgressBar
-          progress={1 - data!.currentAuditUsage / (data!.monthlyAudit + data!.bonusAuditOp)}
-        />
+        <ProgressBar reversed label="" progress={1 - data.currentAuditUsage / data.monthlyAudit} />
       </Section>
 
       <Section>
         <Title>Scan</Title>
-        <Subtitle>Scan credits left</Subtitle>
+        <Subtitle>Monthly operation scans left</Subtitle>
         <Counters>
-          {data!.monthlyScan + data!.bonusScanOp - data!.currentScanUsage} /{" "}
-          {data!.monthlyScan + data!.bonusScanOp}{" "}
-          <DescriptionTooltip icon="question">
-            Monthly: {data!.monthlyScan} Bonus: {data!.bonusScanOp}
-          </DescriptionTooltip>
+          {data.monthlyScan - data.currentScanUsage} / {data.monthlyScan}
         </Counters>
-        <ProgressBar
-          progress={1 - data!.currentScanUsage / (data!.monthlyScan + data!.bonusScanOp)}
-        />
+        <ProgressBar reversed label="" progress={1 - data.currentScanUsage / data.monthlyScan} />
       </Section>
     </Container>
   );
