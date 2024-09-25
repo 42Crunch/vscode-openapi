@@ -1,105 +1,206 @@
-import { useMultipleSelection, useCombobox } from "downshift";
-import React from "react";
-import { Category, SearchableItem, Tag } from "./types";
-import styled from "styled-components";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { AngleDown } from "../../icons";
+import styled from "styled-components";
+import { RootSearchSelector, SelectOption } from "./RootSearchSelector";
+import { ApiResponseEntry, CollectionResponseEntry, TagResponseEntry } from "./types";
 
-export function SearchSelector({
-  itemsList,
+export function CollectionSearchSelector({
+  collections,
   onItemSelected,
 }: {
-  itemsList: SearchableItem[];
-  onItemSelected: (item: SearchableItem) => void;
+  collections: CollectionResponseEntry[] | undefined;
+  onItemSelected: (item: SelectOption<CollectionResponseEntry>) => void;
 }) {
-  const [inputValue, setInputValue] = React.useState("");
-
-  function getFilteredItems(items: SearchableItem[], inputValue: string): SearchableItem[] {
-    const searchValue = inputValue.toLowerCase();
-    return items.filter((item) => {
-      return (
-        item.name.toLocaleLowerCase().includes(searchValue) ||
-        item.id.toLocaleLowerCase().includes(searchValue)
-      );
-    });
+  const options: SelectOption<CollectionResponseEntry>[] = [];
+  if (collections) {
+    collections.forEach((collEntry) =>
+      options.push({
+        value: collEntry,
+        label: collEntry.desc.name,
+      })
+    );
   }
-
-  const items = React.useMemo(
-    () => getFilteredItems(itemsList, inputValue),
-    [itemsList, inputValue]
-  );
-  const { getDropdownProps } = useMultipleSelection({
-    selectedItems: itemsList,
-  });
-
-  const { isOpen, getToggleButtonProps, getMenuProps, getInputProps, getItemProps } = useCombobox({
-    items,
-    itemToString(item) {
-      return item ? item.name : "null";
-    },
-    inputValue,
-    stateReducer(state, actionAndChanges) {
-      const { changes, type } = actionAndChanges;
-      switch (type) {
-        case useCombobox.stateChangeTypes.InputKeyDownEnter:
-        case useCombobox.stateChangeTypes.ItemClick:
-          return {
-            ...changes,
-            isOpen: false,
-          };
-        default:
-          return changes;
-      }
-    },
-    onStateChange({ inputValue: newInputValue, type, selectedItem: newSelectedItem }) {
-      switch (type) {
-        case useCombobox.stateChangeTypes.InputKeyDownEnter:
-        case useCombobox.stateChangeTypes.ItemClick:
-        case useCombobox.stateChangeTypes.InputBlur:
-          if (newSelectedItem) {
-            onItemSelected(newSelectedItem);
-            setInputValue("");
-          }
-          break;
-          break;
-        case useCombobox.stateChangeTypes.InputChange:
-          setInputValue(newInputValue || "");
-          break;
-        default:
-          break;
-      }
-    },
-  });
-
   return (
-    <MainComboboxContainer>
-      <DownShiftContainer>
-        <DownShiftInput
-          placeholder="Name or UUID"
-          {...getInputProps(getDropdownProps({ preventKeyAction: isOpen }))}
-        />
-        <AngleDown {...getToggleButtonProps()} />
-      </DownShiftContainer>
-      <DropDownList className={`${!(isOpen && items.length) && "hidden"}`} {...getMenuProps()}>
-        {isOpen &&
-          items.map((item, index) => (
-            <DropDownListElement key={item.id} {...getItemProps({ item, index })}>
-              <SearchSpan value={item.name} searchValue={inputValue}></SearchSpan>
-              <CategoryNoteSpan>UUID: {item.id}</CategoryNoteSpan>
-              {item.children && (
-                <div>
-                  {item.children.map((tagItem, tagItemIndex) => {
-                    return <span key={`${item.id}-${tagItemIndex}`}>{tagItem} </span>;
-                  })}
-                </div>
-              )}
-              <CategorySeparator />
-            </DropDownListElement>
-          ))}
-      </DropDownList>
-    </MainComboboxContainer>
+    <RootSearchSelector
+      options={options}
+      placeholder="Collection name or UUID"
+      filter={(
+        items: SelectOption<CollectionResponseEntry>[],
+        inputValue: string
+      ): SelectOption<CollectionResponseEntry>[] => {
+        const searchValue = inputValue.toLowerCase();
+        return items.filter((item) => {
+          return (
+            item.value.desc.name.toLocaleLowerCase().includes(searchValue) ||
+            item.value.desc.id.toLocaleLowerCase().includes(searchValue)
+          );
+        });
+      }}
+      renderer={(
+        item: SelectOption<CollectionResponseEntry>,
+        index: number,
+        inputValue: string
+      ) => {
+        return (
+          <>
+            <SearchSpan value={item.label} searchValue={inputValue}></SearchSpan>
+            <CategoryNoteSpan>UUID: {item.value.desc.id}</CategoryNoteSpan>
+            <CategorySeparator />
+          </>
+        );
+      }}
+      onItemSelected={onItemSelected}
+    />
   );
 }
+
+export function ApiSearchSelector({
+  apis,
+  onItemSelected,
+}: {
+  apis: ApiResponseEntry[] | undefined;
+  onItemSelected: (item: SelectOption<ApiResponseEntry>) => void;
+}) {
+  const options: SelectOption<ApiResponseEntry>[] = [];
+  if (apis) {
+    apis.forEach((collEntry) =>
+      options.push({
+        value: collEntry,
+        label: collEntry.desc.name,
+      })
+    );
+  }
+  return (
+    <RootSearchSelector
+      options={options}
+      placeholder="API name or UUID"
+      filter={(
+        items: SelectOption<ApiResponseEntry>[],
+        inputValue: string
+      ): SelectOption<ApiResponseEntry>[] => {
+        const searchValue = inputValue.toLowerCase();
+        return items.filter((item) => {
+          return (
+            item.value.desc.name.toLocaleLowerCase().includes(searchValue) ||
+            item.value.desc.id.toLocaleLowerCase().includes(searchValue)
+          );
+        });
+      }}
+      renderer={(item: SelectOption<ApiResponseEntry>, index: number, inputValue: string) => {
+        return (
+          <>
+            <SearchSpan value={item.label} searchValue={inputValue}></SearchSpan>
+            <CategoryNoteSpan>UUID: {item.value.desc.id}</CategoryNoteSpan>
+            {item.value.tags.length > 0 && (
+              <div>
+                {item.value.tags.map((tagItem: TagResponseEntry, tagItemIndex) => {
+                  return <span key={`api-tag-${tagItemIndex}`}>{tagItem.tagName} </span>;
+                })}
+              </div>
+            )}
+            <CategorySeparator />
+          </>
+        );
+      }}
+      onItemSelected={onItemSelected}
+    />
+  );
+}
+
+// export function SearchSelector({
+//   itemsList,
+//   onItemSelected,
+// }: {
+//   itemsList: SearchableItem[];
+//   onItemSelected: (item: SearchableItem) => void;
+// }) {
+//   const [inputValue, setInputValue] = React.useState("");
+
+//   function getFilteredItems(items: SearchableItem[], inputValue: string): SearchableItem[] {
+//     const searchValue = inputValue.toLowerCase();
+//     return items.filter((item) => {
+//       return (
+//         item.name.toLocaleLowerCase().includes(searchValue) ||
+//         item.id.toLocaleLowerCase().includes(searchValue)
+//       );
+//     });
+//   }
+
+//   const items = React.useMemo(
+//     () => getFilteredItems(itemsList, inputValue),
+//     [itemsList, inputValue]
+//   );
+//   const { getDropdownProps } = useMultipleSelection({
+//     selectedItems: itemsList,
+//   });
+
+//   const { isOpen, getToggleButtonProps, getMenuProps, getInputProps, getItemProps } = useCombobox({
+//     items,
+//     itemToString(item) {
+//       return item ? item.name : "null";
+//     },
+//     inputValue,
+//     stateReducer(state, actionAndChanges) {
+//       const { changes, type } = actionAndChanges;
+//       switch (type) {
+//         case useCombobox.stateChangeTypes.InputKeyDownEnter:
+//         case useCombobox.stateChangeTypes.ItemClick:
+//           return {
+//             ...changes,
+//             isOpen: false,
+//           };
+//         default:
+//           return changes;
+//       }
+//     },
+//     onStateChange({ inputValue: newInputValue, type, selectedItem: newSelectedItem }) {
+//       switch (type) {
+//         case useCombobox.stateChangeTypes.InputKeyDownEnter:
+//         case useCombobox.stateChangeTypes.ItemClick:
+//         case useCombobox.stateChangeTypes.InputBlur:
+//           if (newSelectedItem) {
+//             onItemSelected(newSelectedItem);
+//             setInputValue("");
+//           }
+//           break;
+//           break;
+//         case useCombobox.stateChangeTypes.InputChange:
+//           setInputValue(newInputValue || "");
+//           break;
+//         default:
+//           break;
+//       }
+//     },
+//   });
+
+//   return (
+//     <MainComboboxContainer>
+//       <DownShiftContainer>
+//         <DownShiftInput
+//           placeholder="Name or UUID"
+//           {...getInputProps(getDropdownProps({ preventKeyAction: isOpen }))}
+//         />
+//         <AngleDown {...getToggleButtonProps()} />
+//       </DownShiftContainer>
+//       <DropDownList className={`${!(isOpen && items.length) && "hidden"}`} {...getMenuProps()}>
+//         {isOpen &&
+//           items.map((item, index) => (
+//             <DropDownListElement key={item.id} {...getItemProps({ item, index })}>
+//               <SearchSpan value={item.name} searchValue={inputValue}></SearchSpan>
+//               <CategoryNoteSpan>UUID: {item.id}</CategoryNoteSpan>
+//               {item.children && (
+//                 <div>
+//                   {item.children.map((tagItem, tagItemIndex) => {
+//                     return <span key={`${item.id}-${tagItemIndex}`}>{tagItem} </span>;
+//                   })}
+//                 </div>
+//               )}
+//               <CategorySeparator />
+//             </DropDownListElement>
+//           ))}
+//       </DropDownList>
+//     </MainComboboxContainer>
+//   );
+// }
 
 function SearchSpan({ value, searchValue }: { value: string; searchValue: string }) {
   if (!searchValue || !value) {

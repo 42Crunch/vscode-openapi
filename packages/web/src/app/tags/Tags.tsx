@@ -26,7 +26,7 @@ export function SelectionPanel({
 }) {
   const data = tagData[targetFileName];
   const [selectionOption, setSelectionOption] = React.useState<string>(
-    Array.isArray(data) ? "option-select-tag" : "option-bind-api"
+    data === null || Array.isArray(data) ? "option-select-tag" : "option-bind-api"
   );
   return (
     <Container>

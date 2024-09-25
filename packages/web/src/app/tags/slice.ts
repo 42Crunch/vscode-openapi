@@ -31,6 +31,9 @@ export const slice = createSlice({
     },
     saveTags: (state, action: PayloadAction<TagData>) => {
       // hook for a listener
+      if (state.tagData) {
+        state.tagData[state.targetFileName] = action.payload[state.targetFileName];
+      }
     },
     sendHttpRequest: (
       state,

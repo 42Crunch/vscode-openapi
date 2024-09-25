@@ -3,11 +3,13 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import React from "react";
 import styled from "styled-components";
 import { BottomDescription, BottomItem } from "../../components/CollapsibleCard";
-import { SearchSelector } from "./SearchSelector";
+import { ApiSearchSelector, CollectionSearchSelector } from "./SearchSelector";
 import { saveTags } from "./slice";
 import { useAppDispatch } from "./store";
 import { useGetApisFromCollectionQuery, useGetCollectionsQuery } from "./tags-api";
-import { SearchableItem } from "./types";
+import { ApiResponseEntry, CollectionResponseEntry, SearchableItem } from "./types";
+import { SelectOption } from "./RootSearchSelector";
+import { ErrorBanner } from "../../components/Banner";
 
 export function BindToApiPanel({
   targetFileName,
@@ -17,96 +19,104 @@ export function BindToApiPanel({
   tagData: TagData;
 }) {
   const dispatch = useAppDispatch();
-
+  const targetData = tagData[targetFileName];
+  const selectedApiId = Array.isArray(targetData) ? undefined : targetData?.apiId;
+  const selectedColId = Array.isArray(targetData) ? undefined : targetData?.collectionId;
   const {
     data: collsList,
     error: errorColls,
     isLoading: isLoadingColls,
   } = useGetCollectionsQuery();
-  const [collectionItem, setCollectionItem] = React.useState<SearchableItem | undefined>(undefined);
-  const [apiItem, setApiItem] = React.useState<SearchableItem | undefined>(undefined);
+  const [collectionId, setCollectionId] = React.useState<string | undefined>(selectedColId);
+  const [apiId, setApiId] = React.useState<string | undefined>(undefined);
+
+  const collection = collsList?.filter((c) => c.desc.id === collectionId)[0];
 
   return (
-    <div>
-      <HeaderContainer>
+    <HeaderContainer>
+      <div>
         <Header>
-          <HeaderSelector
+          <SelectionStatus
             isLoading={isLoadingColls}
             isLoadingText="Loading collections from the server..."
             itemTypeText="collection"
-            collectionItem={collectionItem}
-            onItemRemoved={(item: SearchableItem): void => {
-              dispatch(saveTags({ targetFileName: null }));
-              setApiItem(undefined);
-              setCollectionItem(undefined);
+            item={collection}
+            onItemRemoved={(item: CollectionResponseEntry): void => {
+              if (apiId) {
+                dispatch(saveTags({ [targetFileName]: null }));
+              }
+              setApiId(undefined);
+              setCollectionId(undefined);
             }}
           />
           {!isLoadingColls && (
-            <SearchSelector
-              itemsList={
-                collsList?.map((collEntry) => ({
-                  id: collEntry.desc.id,
-                  name: collEntry.desc.name,
-                  entry: collEntry,
-                })) || []
-              }
-              onItemSelected={(item: SearchableItem): void => {
-                setCollectionItem(item);
+            <CollectionSearchSelector
+              collections={collsList}
+              onItemSelected={(item: SelectOption<CollectionResponseEntry>): void => {
+                setCollectionId(item.value.desc.id);
               }}
             />
           )}
         </Header>
-        {collectionItem && (
-          <HeaderForApi
-            apiItem={apiItem}
-            collectionItem={collectionItem}
-            onItemRemoved={(item: SearchableItem): void => {
-              setApiItem(undefined);
-              dispatch(saveTags({ targetFileName: null }));
-            }}
-            onItemSelected={(item: SearchableItem): void => {
-              setApiItem(item);
-              const tagData: TagData = {};
-              tagData[targetFileName] = {
-                apiId: item.id,
-                apiName: item.name,
-                collectionName: collectionItem.name,
-              } as ApiEntry;
-              dispatch(saveTags(tagData));
-            }}
-          />
-        )}
-        <HeaderError></HeaderError>
-      </HeaderContainer>
-    </div>
+        <HeaderError>
+          {errorColls && (
+            <ErrorBanner message="Failed to load collections">
+              HTTPError: Response code {errorColls.code} ({errorColls.message})
+            </ErrorBanner>
+          )}
+        </HeaderError>
+      </div>
+
+      {collection && (
+        <ApiSelectionPanel
+          apiId={selectedApiId}
+          collection={collection}
+          onItemRemoved={(item: ApiResponseEntry): void => {
+            setApiId(undefined);
+            dispatch(saveTags({ [targetFileName]: null }));
+          }}
+          onItemSelected={(item: SelectOption<ApiResponseEntry>): void => {
+            setApiId(item.value.desc.id);
+            const tagData: TagData = {};
+            tagData[targetFileName] = {
+              apiId: item.value.desc.id,
+              apiName: item.value.desc.name,
+              collectionId: collection.desc.id,
+              collectionName: collection.desc.name,
+            } as ApiEntry;
+            dispatch(saveTags(tagData));
+          }}
+        />
+      )}
+    </HeaderContainer>
   );
 }
 
-function HeaderSelector({
+function SelectionStatus<T>({
   isLoading,
   isLoadingText,
   itemTypeText,
-  collectionItem,
+  item,
   onItemRemoved,
 }: {
   isLoading: boolean;
   isLoadingText: string;
   itemTypeText: string;
-  collectionItem: SearchableItem | undefined;
-  onItemRemoved: (item: SearchableItem) => void;
+  item: T | undefined;
+  onItemRemoved: (item: T) => void;
 }) {
   return (
     <HeaderHeaderSelectorContainer>
       {isLoading && <HeaderSpan>{isLoadingText}</HeaderSpan>}
-      {!isLoading && !collectionItem && <HeaderSpan>Select a {itemTypeText}</HeaderSpan>}
-      {!isLoading && collectionItem && (
+      {!isLoading && !item && <HeaderSpan>Select a {itemTypeText}</HeaderSpan>}
+      {!isLoading && item && (
         <HeaderItem>
           <HeaderSpan>Selected {itemTypeText}</HeaderSpan>
-          <HeaderItemSpan>{collectionItem.name}</HeaderItemSpan>
+          <HeaderItemSpan>{(item as any).desc.name}</HeaderItemSpan>
           <HeaderItemRemoverSpan
             onClick={(e) => {
               e.stopPropagation();
-              onItemRemoved(collectionItem);
+              onItemRemoved(item);
             }}
           >
             &#10005;
@@ -117,46 +127,45 @@ function HeaderSelector({
   );
 }
 
-function HeaderForApi({
-  apiItem,
-  collectionItem,
+function ApiSelectionPanel({
+  apiId,
+  collection,
   onItemRemoved,
   onItemSelected,
 }: {
-  apiItem: SearchableItem | undefined;
-  collectionItem: SearchableItem;
-  onItemRemoved: (item: SearchableItem) => void;
-  onItemSelected: (item: SearchableItem) => void;
+  apiId: string | undefined;
+  collection: CollectionResponseEntry;
+  onItemRemoved: (item: ApiResponseEntry) => void;
+  onItemSelected: (item: SelectOption<ApiResponseEntry>) => void;
 }) {
   const {
     data: apiList,
     error: errorApi,
     isLoading: isLoadingApi,
-  } = useGetApisFromCollectionQuery(collectionItem.id);
+  } = useGetApisFromCollectionQuery(collection.desc.id);
+
+  const api = apiList?.filter((a) => a.desc.id === apiId)[0];
 
   return (
-    <Header>
-      <HeaderSelector
-        isLoading={isLoadingApi}
-        isLoadingText="Loading APIs from the server..."
-        itemTypeText="api"
-        collectionItem={apiItem}
-        onItemRemoved={onItemRemoved}
-      />
-      {!isLoadingApi && (
-        <SearchSelector
-          itemsList={
-            apiList?.map((apiEntry) => ({
-              id: apiEntry.desc.id,
-              name: apiEntry.desc.name,
-              entry: apiEntry,
-              children: apiEntry.tags.map((tag) => tag.categoryName + ": " + tag.tagName),
-            })) || []
-          }
-          onItemSelected={onItemSelected}
+    <div>
+      <Header>
+        <SelectionStatus
+          isLoading={isLoadingApi}
+          isLoadingText="Loading APIs from the server..."
+          itemTypeText="api"
+          item={api}
+          onItemRemoved={onItemRemoved}
         />
-      )}
-    </Header>
+        {!isLoadingApi && <ApiSearchSelector apis={apiList} onItemSelected={onItemSelected} />}
+      </Header>
+      <HeaderError>
+        {errorApi && (
+          <ErrorBanner message="Failed to load apis">
+            HTTPError: Response code {errorApi.code} ({errorApi.message})
+          </ErrorBanner>
+        )}
+      </HeaderError>
+    </div>
   );
 }
 
@@ -221,65 +230,4 @@ const HeaderItemRemoverSpan = styled.span`
   font-weight: bold;
   cursor: pointer;
   padding: 1px;
-`;
-
-const Container = styled.div`
-  display: flex;
-  align-items: stretch;
-  background-color: var(${ThemeColorVariables.computedOne});
-  flex-direction: column;
-  flex-wrap: nowrap;
-  justify-content: space-evenly;
-`;
-
-const CardTagsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px;
-  padding-left: 25px;
-`;
-
-const TopDescriptionContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-`;
-
-const TopDescriptionName = styled.div`
-  padding-right: 10px;
-`;
-
-const TopDescriptionCounter = styled.div`
-  background-color: var(${ThemeColorVariables.badgeBackground});
-  border-radius: 3px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 20px;
-  height: 20px;
-  color: var(${ThemeColorVariables.badgeForeground});
-`;
-
-const CategoryBottomDescription = styled(BottomDescription)`
-  font-weight: smaller;
-  color: var(${ThemeColorVariables.disabledForeground});
-`;
-
-const TagBottomItemContainer = styled(BottomItem)`
-  display: flex;
-  align-items: flex-start;
-  opacity: 1;
-  flex-direction: column;
-  padding: 5px;
-`;
-
-const TagBottomItem = styled.div`
-  font-weight: bold;
-`;
-
-const TagBottomDescription = styled.div`
-  font-weight: smaller;
-  color: var(${ThemeColorVariables.disabledForeground});
 `;

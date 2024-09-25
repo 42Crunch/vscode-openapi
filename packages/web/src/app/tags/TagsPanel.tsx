@@ -263,37 +263,9 @@ const HeaderError = styled.div`
   gap: 7px;
 `;
 
-const HeaderHeaderSelectorContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  gap: 7px;
-`;
-
-const HeaderItem = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 10px;
-`;
-
 const HeaderSpan = styled.span`
   font-weight: bold;
   padding: 15px;
-`;
-
-const HeaderItemSpan = styled.span`
-  font-weight: bold;
-  padding: 3px;
-  border-color: var(${ThemeColorVariables.border});
-  border-width: 1px;
-  border-style: solid;
-  border-radius: 3px;
-`;
-
-const HeaderItemRemoverSpan = styled.span`
-  font-weight: bold;
-  cursor: pointer;
-  padding: 1px;
 `;
 
 const Container = styled.div`
