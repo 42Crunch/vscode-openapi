@@ -2,12 +2,25 @@ import styled from "styled-components";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
 
-export default function ProgressBar({ progress }: { progress: number }) {
+export default function ProgressBar({
+  progress,
+  label,
+  reversed,
+}: {
+  progress: number;
+  label?: string;
+  reversed?: boolean;
+}) {
   const percents = Math.ceil(progress * 100);
+  const actualLabel = label !== undefined ? label : `${percents}%`;
   return (
     <ProgressBarContainer>
-      <ProgressBarBack>{percents}%</ProgressBarBack>
-      <ProgressBarFront progress={progress}>{percents}%</ProgressBarFront>
+      <ProgressBarBack>{actualLabel}</ProgressBarBack>
+      {reversed ? (
+        <ProgressBarFrontReversed progress={progress}>{actualLabel}</ProgressBarFrontReversed>
+      ) : (
+        <ProgressBarFront progress={progress}>{actualLabel}</ProgressBarFront>
+      )}
     </ProgressBarContainer>
   );
 }
@@ -45,4 +58,8 @@ const ProgressBarFront = styled.div`
   background-color: var(${ThemeColorVariables.buttonBackground});
   clip-path: inset(0 ${({ progress }: { progress: number }) => 100 - progress * 100}% 0 0);
   transition: clip-path 0.3s linear;
+`;
+
+const ProgressBarFrontReversed = styled(ProgressBarFront)`
+  clip-path: inset(0 0 0 ${({ progress }: { progress: number }) => 100 - progress * 100}%);
 `;
