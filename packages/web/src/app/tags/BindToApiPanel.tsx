@@ -3,12 +3,12 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import React from "react";
 import styled from "styled-components";
 import { BottomDescription, BottomItem } from "../../components/CollapsibleCard";
-import { ApiSearchSelector, CollectionSearchSelector } from "./SearchSelector";
+import { ApiSearchSelector, CollectionSearchSelector } from "./Selectors";
 import { saveTags } from "./slice";
 import { useAppDispatch } from "./store";
 import { useGetApisFromCollectionQuery, useGetCollectionsQuery } from "./tags-api";
 import { ApiResponseEntry, CollectionResponseEntry, SearchableItem } from "./types";
-import { SelectOption } from "./RootSearchSelector";
+import { SelectOption } from "./SearchSelector";
 import { ErrorBanner } from "../../components/Banner";
 
 export function BindToApiPanel({

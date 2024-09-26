@@ -12,7 +12,7 @@ import { MappingNode } from "../../types";
 import { parseAuditReport } from "../audit";
 import { formatException } from "../../platform/util";
 import { TAGS_DATA_KEY } from "../../webapps/views/tags/view";
-import { TagData } from "@xliic/common/tags";
+import { TagData, TagDataEntry } from "@xliic/common/tags";
 
 export async function runPlatformAudit(
   document: vscode.TextDocument,
@@ -23,7 +23,7 @@ export async function runPlatformAudit(
   memento?: vscode.Memento
 ): Promise<Audit | undefined> {
   try {
-    const tmpApi = await store.createTempApi(oas, getTagIds(memento, document.uri.fsPath));
+    const tmpApi = await store.createTempApi(oas, getTagDataEntry(memento, document.uri.fsPath));
     const report = await store.getAuditReport(tmpApi.apiId);
     const compliance = await store.readAuditCompliance(report.tid);
     const todoReport = await store.readAuditReportSqgTodo(report.tid);
@@ -50,13 +50,12 @@ export async function runPlatformAudit(
   }
 }
 
-function getTagIds(memento: vscode.Memento | undefined, filePath: string): string[] | undefined {
+function getTagDataEntry(
+  memento: vscode.Memento | undefined,
+  filePath: string
+): TagDataEntry | undefined {
   if (memento) {
     const tagData = memento.get(TAGS_DATA_KEY, {}) as TagData;
-    const data = tagData[filePath];
-    if (Array.isArray(data)) {
-      return data.map((tagEntry) => tagEntry.tagId);
-    }
+    return tagData[filePath];
   }
-  return undefined;
 }

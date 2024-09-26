@@ -35,6 +35,7 @@ import {
   readAuditCompliance,
   readAuditReportSqgTodo,
   getTags,
+  getCategories,
 } from "../api";
 import {
   Api,
@@ -47,6 +48,7 @@ import {
   UserData,
   Tag,
 } from "../types";
+import { TagDataEntry } from "@xliic/common/tags";
 
 export interface CollectionsView {
   collections: CollectionData[];
@@ -249,7 +251,7 @@ export class PlatformStore {
 
   async createTempApi(
     json: string,
-    localTagIds?: string[]
+    tagDataEntry?: TagDataEntry
   ): Promise<{ apiId: string; collectionId: string }> {
     const collectionId = await this.findOrCreateTempCollection();
 
@@ -259,9 +261,15 @@ export class PlatformStore {
       const platformTags = await getTags(this.getConnection(), this.logger);
       tagIds.push(...getMandatoryTagsIds(mandatoryTags, platformTags));
     }
-    if (localTagIds) {
-      tagIds.push(...localTagIds);
+    if (tagDataEntry) {
+      if (Array.isArray(tagDataEntry)) {
+        tagIds.push(...tagDataEntry.map((tagEntry) => tagEntry.tagId));
+      } else {
+        tagIds.push(...(await this.getTagsFromApi(tagDataEntry.collectionId, tagDataEntry.apiId)));
+      }
     }
+    console.info("### tagIds ###");
+    tagIds.forEach((tagId) => console.info("### tagId = " + tagId));
 
     // if the api naming convention is configured, use its example as the api name
     // this way we don't have to come up with a name that matches its pattern
@@ -438,9 +446,33 @@ export class PlatformStore {
     return this.formats;
   }
 
-  async getTags(): Promise<any> {
+  async getTags(): Promise<Tag[]> {
+    const categories = await getCategories(this.getConnection(), this.logger);
     const tags = await getTags(this.getConnection(), this.logger);
+    for (const tag of tags) {
+      tag.onlyAdminCanTag = categories.some(
+        (category) => category.id === tag.categoryId && category.onlyAdminCanTag
+      );
+    }
     return tags;
+  }
+
+  async getTagsFromApi(collectionId: string, apiId: string): Promise<string[]> {
+    const resp = await listApis(collectionId, this.getConnection(), this.logger);
+    const tags = resp.list.filter((api) => api.desc.id === apiId)[0]?.tags;
+    const tagIds: string[] = [];
+    if (tags && tags.length > 0) {
+      const allTags = await this.getTags();
+      const adminTagIds = new Set(
+        allTags.filter((tag) => tag.onlyAdminCanTag).map((tag) => tag.tagId)
+      );
+      tags.forEach((tag) => {
+        if (!adminTagIds.has(tag.tagId)) {
+          tagIds.push(tag.tagId);
+        }
+      });
+    }
+    return tagIds;
   }
 
   async refresh(): Promise<void> {

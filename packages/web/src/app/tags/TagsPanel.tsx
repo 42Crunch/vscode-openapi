@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "./store";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { TagsSelector } from "./TagsSelector";
+//import { TagsSelector } from "./TagsSelector";
 import CollapsibleCard, {
   BottomDescription,
   BottomItem,
@@ -13,6 +13,7 @@ import { useGetCategoriesQuery, useGetTagsQuery } from "./tags-api";
 import { TagData, TagEntry } from "@xliic/common/tags";
 import React from "react";
 import { saveTags } from "./slice";
+import { TagsSelector } from "./Selectors";
 
 export function TagsPanel({
   targetFileName,
@@ -211,7 +212,7 @@ function getCategories(
         categoryName: categoryEntry.name,
         categoryDescription: categoryEntry.description,
         onlyAdminCanTag: categoryEntry.onlyAdminCanTag,
-        multipleChoicesAllowed: categoryEntry.isExclusive,
+        multipleChoicesAllowed: !categoryEntry.isExclusive,
         tags: [],
       };
       categories.push(category);

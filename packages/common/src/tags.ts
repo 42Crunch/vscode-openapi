@@ -5,7 +5,8 @@ export type ApiEntry = {
   collectionName: string;
 };
 export type TagEntry = { tagId: string; tagName: string };
-export type TagData = Record<string, TagEntry[] | ApiEntry | null>;
+export type TagDataEntry = TagEntry[] | ApiEntry | null;
+export type TagData = Record<string, TagDataEntry>;
 
 export type LoadTags = {
   command: "loadTags";
