@@ -10,7 +10,10 @@ import { useAppDispatch } from "./store";
 import { openLink } from "../../features/config/slice";
 
 export default function Subscription({ token }: { token: string }) {
-  const { data, error, isLoading } = useGetSubscriptionQuery(token);
+  const { data, error, isLoading } = useGetSubscriptionQuery(token, {
+    refetchOnFocus: true,
+    pollingInterval: 1000 * 60 * 10, // refresh every 10 minutes
+  });
   const dispatch = useAppDispatch();
 
   if (isLoading || data === undefined) {
@@ -86,7 +89,7 @@ export default function Subscription({ token }: { token: string }) {
         <Counters>
           {data.monthlyAudit - data.currentAuditUsage} / {data.monthlyAudit}
         </Counters>
-        <ProgressBar reversed label="" progress={1 - data.currentAuditUsage / data.monthlyAudit} />
+        <ProgressBar label="" progress={1 - data.currentAuditUsage / data.monthlyAudit} />
       </Section>
 
       <Section>
@@ -95,7 +98,7 @@ export default function Subscription({ token }: { token: string }) {
         <Counters>
           {data.monthlyScan - data.currentScanUsage} / {data.monthlyScan}
         </Counters>
-        <ProgressBar reversed label="" progress={1 - data.currentScanUsage / data.monthlyScan} />
+        <ProgressBar label="" progress={1 - data.currentScanUsage / data.monthlyScan} />
       </Section>
     </Container>
   );
