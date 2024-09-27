@@ -120,7 +120,9 @@ export class ConfigWebView extends WebView<Webapp> {
       downloadCliHandler(this.config!.repository, this.config!.cliDirectoryOverride),
 
     openLink: async (url: string) => {
-      vscode.env.openExternal(vscode.Uri.parse(url));
+      // @ts-ignore
+      // workaround for vscode https://github.com/microsoft/vscode/issues/85930
+      vscode.env.openExternal(url);
     },
 
     sendHttpRequest: ({ id, request, config }) => executeHttpRequest(id, request, config),
