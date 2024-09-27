@@ -64,7 +64,7 @@ export default function Subscription({ token }: { token: string }) {
                 e.stopPropagation();
                 dispatch(
                   openLink(
-                    `http://billing.stripe.com/p/login/test_cN28zp7RgbGp3qobII?prefilled_email=${encodeURIComponent(
+                    `https://billing.stripe.com/p/login/test_cN28zp7RgbGp3qobII?prefilled_email=${encodeURIComponent(
                       data.userEmail
                     )}`
                   )
