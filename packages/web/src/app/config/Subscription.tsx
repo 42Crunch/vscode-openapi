@@ -16,20 +16,20 @@ export default function Subscription({ token }: { token: string }) {
   });
   const dispatch = useAppDispatch();
 
-  if (isLoading || data === undefined) {
-    return (
-      <Container>
-        <Banner message="Loading subscription status..." />
-      </Container>
-    );
-  }
-
   if (error) {
     return (
       <Container>
         <ErrorBanner message="Failed to load subscription status">
           {error.code} {error.message}
         </ErrorBanner>
+      </Container>
+    );
+  }
+
+  if (isLoading || data === undefined) {
+    return (
+      <Container>
+        <Banner message="Loading subscription status..." />
       </Container>
     );
   }
