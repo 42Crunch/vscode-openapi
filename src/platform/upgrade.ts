@@ -23,20 +23,6 @@ export async function offerUpgrade(): Promise<unknown> {
 
 export const UPGRADE_WARN_LIMIT = 10;
 
-export async function warnScans(left: number) {
-  return vscode.window
-    .showInformationMessage(
-      `You have ${left} API Scans left this month. Your usage allowance resets every month. Upgrade to increase allowances.`,
-      { modal: false },
-      { title: "View subscription", id: "upgrade" }
-    )
-    .then((choice) => {
-      if (choice?.id === "upgrade") {
-        vscode.commands.executeCommand("openapi.showConfiguration");
-      }
-    });
-}
-
 export async function warnOperationScans(left: number) {
   return vscode.window
     .showInformationMessage(
@@ -55,20 +41,6 @@ export async function warnOperationAudits(left: number) {
   return vscode.window
     .showInformationMessage(
       `You have ${left} per-opertion Security Audits left this month. Your usage allowance resets every month. Upgrade to increase allowances.`,
-      { modal: false },
-      { title: "View subscription", id: "upgrade" }
-    )
-    .then((choice) => {
-      if (choice?.id === "upgrade") {
-        vscode.commands.executeCommand("openapi.showConfiguration");
-      }
-    });
-}
-
-export async function warnAudits(left: number) {
-  return vscode.window
-    .showInformationMessage(
-      `You have ${left} Security Audits left this month. Your usage allowance resets every month. Upgrade to increase allowances.`,
       { modal: false },
       { title: "View subscription", id: "upgrade" }
     )
