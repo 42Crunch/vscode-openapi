@@ -565,9 +565,7 @@ function formatException({
 export type CliResponse = {
   statusCode: number;
   statusMessage: string;
-  remainingFullAudit?: number;
   remainingPerOperationAudit?: number;
-  remainingFullScan?: number;
   remainingPerOperationScan?: number;
   scanLogs?: CliLogEntry[];
 };

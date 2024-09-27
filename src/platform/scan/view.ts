@@ -33,7 +33,7 @@ import {
 } from "../cli-ast";
 import { runScanWithDocker } from "./runtime/docker";
 import { runScanWithScandManager } from "./runtime/scand-manager";
-import { UPGRADE_WARN_LIMIT, offerUpgrade, warnOperationScans, warnScans } from "../upgrade";
+import { UPGRADE_WARN_LIMIT, offerUpgrade, warnOperationScans } from "../upgrade";
 import { formatException } from "../util";
 import { createDefaultConfigWithPlatform } from "./runtime/platform";
 
@@ -347,13 +347,6 @@ async function runScan(
       reportView.setTemporaryReportDirectory(result.tempScanDirectory);
 
       if (
-        isFullScan &&
-        result.cli.remainingFullScan !== undefined &&
-        result.cli.remainingFullScan < UPGRADE_WARN_LIMIT
-      ) {
-        warnScans(result.cli.remainingFullScan);
-      } else if (
-        !isFullScan &&
         result.cli.remainingPerOperationScan !== undefined &&
         result.cli.remainingPerOperationScan < UPGRADE_WARN_LIMIT
       ) {
