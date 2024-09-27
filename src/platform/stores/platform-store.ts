@@ -268,8 +268,6 @@ export class PlatformStore {
         tagIds.push(...(await this.getTagsFromApi(tagDataEntry.collectionId, tagDataEntry.apiId)));
       }
     }
-    console.info("### tagIds ###");
-    tagIds.forEach((tagId) => console.info("### tagId = " + tagId));
 
     // if the api naming convention is configured, use its example as the api name
     // this way we don't have to come up with a name that matches its pattern
@@ -279,7 +277,7 @@ export class PlatformStore {
     const api = await createApi(
       collectionId,
       apiName,
-      tagIds,
+      Array.from(new Set<string>(tagIds).values()),
       Buffer.from(json),
       this.getConnection(),
       this.logger
