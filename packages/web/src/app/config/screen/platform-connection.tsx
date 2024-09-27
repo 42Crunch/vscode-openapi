@@ -72,7 +72,7 @@ function PlatformConnection() {
 const schema = z.object({
   platformAuthType: z.enum(["anond-token", "api-token"]),
   platformUrl: z.string().url().startsWith("https://"),
-  anondToken: z.string(),
+  anondToken: z.string().trim(),
   platformApiToken: z
     .string()
     .regex(
