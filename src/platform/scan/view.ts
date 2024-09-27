@@ -335,7 +335,7 @@ async function runScan(
 
       if (error !== undefined) {
         if (error.statusCode === 3 && error.statusMessage === "limits_reached") {
-          await offerUpgrade();
+          await offerUpgrade(isFullScan);
           return;
         } else {
           throw new Error(

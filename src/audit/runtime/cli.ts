@@ -47,7 +47,7 @@ export async function runCliAudit(
 
   if (error !== undefined) {
     if (error.statusCode === 3 && error.statusMessage === "limits_reached") {
-      await offerUpgrade();
+      await offerUpgrade(isFullAudit);
       return;
     } else {
       throw new Error(`Unexpected error running Security Audit: ${JSON.stringify(error)}`);
