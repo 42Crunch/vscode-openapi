@@ -26,7 +26,7 @@ export const UPGRADE_WARN_LIMIT = 10;
 export async function warnOperationScans(left: number) {
   return vscode.window
     .showInformationMessage(
-      `You have ${left} per-opertion API Scans left this month. Your usage allowance resets every month. Upgrade to increase allowances.`,
+      `You have ${left} per-operation API Scans left this month. Your usage allowance resets every month. Upgrade to increase allowances.`,
       { modal: false },
       { title: "View subscription", id: "upgrade" }
     )
@@ -40,7 +40,7 @@ export async function warnOperationScans(left: number) {
 export async function warnOperationAudits(left: number) {
   return vscode.window
     .showInformationMessage(
-      `You have ${left} per-opertion Security Audits left this month. Your usage allowance resets every month. Upgrade to increase allowances.`,
+      `You have ${left} per-operation Security Audits left this month. Your usage allowance resets every month. Upgrade to increase allowances.`,
       { modal: false },
       { title: "View subscription", id: "upgrade" }
     )
