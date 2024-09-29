@@ -6,47 +6,33 @@
 import * as vscode from "vscode";
 import { delay } from "../time-util";
 
-export async function offerUpgrade(): Promise<unknown> {
+export async function offerUpgrade(isFull: boolean): Promise<unknown> {
   await delay(100); // workaround for #133073
+
+  const message = isFull
+    ? "You have insufficient operations allowance left this month to run a full Audit or Scan. As an alternative you can run single-operation ones, upgrade to increase your allowance or wait until the monthly allowance resets."
+    : "Thank you for using the 42Crunch API Security Testing services. You have reached the limit of your monthly Freemium allowance. You have the option to wait until your free monthly allowance resets or upgrade your 42Crunch subscription.";
   return vscode.window
-    .showInformationMessage(
-      "Thank you for using the 42Crunch API Security Testing services. You have reached the limit of your monthly Freemium allowance. You have the option to wait until your free monthly allowance resets or upgrade your 42Crunch subscription.",
-      { modal: true },
-      { title: "Upgrade", id: "upgrade" }
-    )
+    .showInformationMessage(message, { modal: true }, { title: "View subscription", id: "upgrade" })
     .then((choice) => {
       if (choice?.id === "upgrade") {
-        vscode.env.openExternal(vscode.Uri.parse("https://42crunch.com/ide-upgrade/"));
+        vscode.commands.executeCommand("openapi.showConfiguration");
       }
     });
 }
 
 export const UPGRADE_WARN_LIMIT = 10;
 
-export async function warnScans(left: number) {
-  return vscode.window
-    .showInformationMessage(
-      `You have ${left} API Scans left this month. Your usage allowance resets every month. Upgrade to increase allowances.`,
-      { modal: false },
-      { title: "Upgrade", id: "upgrade" }
-    )
-    .then((choice) => {
-      if (choice?.id === "upgrade") {
-        vscode.env.openExternal(vscode.Uri.parse("https://42crunch.com/ide-upgrade/"));
-      }
-    });
-}
-
 export async function warnOperationScans(left: number) {
   return vscode.window
     .showInformationMessage(
-      `You have ${left} per-opertion API Scans left this month. Your usage allowance resets every month. Upgrade to increase allowances.`,
+      `You have ${left} per-operation API Scans left this month. Your usage allowance resets every month. Upgrade to increase allowances.`,
       { modal: false },
-      { title: "Upgrade", id: "upgrade" }
+      { title: "View subscription", id: "upgrade" }
     )
     .then((choice) => {
       if (choice?.id === "upgrade") {
-        vscode.env.openExternal(vscode.Uri.parse("https://42crunch.com/ide-upgrade/"));
+        vscode.commands.executeCommand("openapi.showConfiguration");
       }
     });
 }
@@ -54,27 +40,13 @@ export async function warnOperationScans(left: number) {
 export async function warnOperationAudits(left: number) {
   return vscode.window
     .showInformationMessage(
-      `You have ${left} per-opertion Security Audits left this month. Your usage allowance resets every month. Upgrade to increase allowances.`,
+      `You have ${left} per-operation Security Audits left this month. Your usage allowance resets every month. Upgrade to increase allowances.`,
       { modal: false },
-      { title: "Upgrade", id: "upgrade" }
+      { title: "View subscription", id: "upgrade" }
     )
     .then((choice) => {
       if (choice?.id === "upgrade") {
-        vscode.env.openExternal(vscode.Uri.parse("https://42crunch.com/ide-upgrade/"));
-      }
-    });
-}
-
-export async function warnAudits(left: number) {
-  return vscode.window
-    .showInformationMessage(
-      `You have ${left} Security Audits left this month. Your usage allowance resets every month. Upgrade to increase allowances.`,
-      { modal: false },
-      { title: "Upgrade", id: "upgrade" }
-    )
-    .then((choice) => {
-      if (choice?.id === "upgrade") {
-        vscode.env.openExternal(vscode.Uri.parse("https://42crunch.com/ide-upgrade/"));
+        vscode.commands.executeCommand("openapi.showConfiguration");
       }
     });
 }

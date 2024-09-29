@@ -2,12 +2,13 @@ import styled from "styled-components";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
 
-export default function ProgressBar({ progress }: { progress: number }) {
+export default function ProgressBar({ progress, label }: { progress: number; label?: string }) {
   const percents = Math.ceil(progress * 100);
+  const actualLabel = label !== undefined ? label : `${percents}%`;
   return (
     <ProgressBarContainer>
-      <ProgressBarBack>{percents}%</ProgressBarBack>
-      <ProgressBarFront progress={progress}>{percents}%</ProgressBarFront>
+      <ProgressBarBack>{actualLabel}</ProgressBarBack>
+      <ProgressBarFront progress={progress}>{actualLabel}</ProgressBarFront>
     </ProgressBarContainer>
   );
 }

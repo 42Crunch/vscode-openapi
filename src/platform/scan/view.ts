@@ -20,10 +20,10 @@ import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
 import { AuditContext, Bundle, MappingNode } from "../../types";
 import { loadConfig } from "../../util/config";
-import { WebView } from "../../web-view";
+import { WebView } from "../../webapps/web-view";
 import { PlatformStore } from "../stores/platform-store";
 import { Logger } from "../types";
-import { executeHttpRequest } from "./http-handler";
+import { executeHttpRequest } from "../../webapps/http-handler";
 import { ScanReportWebView } from "./report-view";
 import {
   runScanWithCliBinary,
@@ -33,7 +33,7 @@ import {
 } from "../cli-ast";
 import { runScanWithDocker } from "./runtime/docker";
 import { runScanWithScandManager } from "./runtime/scand-manager";
-import { UPGRADE_WARN_LIMIT, offerUpgrade, warnOperationScans, warnScans } from "../upgrade";
+import { UPGRADE_WARN_LIMIT, offerUpgrade, warnOperationScans } from "../upgrade";
 import { formatException } from "../util";
 import { createDefaultConfigWithPlatform } from "./runtime/platform";
 
@@ -335,7 +335,7 @@ async function runScan(
 
       if (error !== undefined) {
         if (error.statusCode === 3 && error.statusMessage === "limits_reached") {
-          await offerUpgrade();
+          await offerUpgrade(isFullScan);
           return;
         } else {
           throw new Error(
@@ -347,13 +347,6 @@ async function runScan(
       reportView.setTemporaryReportDirectory(result.tempScanDirectory);
 
       if (
-        isFullScan &&
-        result.cli.remainingFullScan !== undefined &&
-        result.cli.remainingFullScan < UPGRADE_WARN_LIMIT
-      ) {
-        warnScans(result.cli.remainingFullScan);
-      } else if (
-        !isFullScan &&
         result.cli.remainingPerOperationScan !== undefined &&
         result.cli.remainingPerOperationScan < UPGRADE_WARN_LIMIT
       ) {

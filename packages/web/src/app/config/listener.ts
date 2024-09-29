@@ -7,6 +7,7 @@ import { Webapp } from "@xliic/common/webapp/config";
 import { AppDispatch, RootState } from "./store";
 import { startListeners } from "../webapp";
 import * as listener from "../../features/config/listener";
+import { onSendHttpRequest } from "../../features/http-client/listener";
 
 const listenerMiddleware = createListenerMiddleware();
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
@@ -21,6 +22,7 @@ export function createListener(host: Webapp["host"]) {
     testCli: listener.onTestCli(startAppListening, host),
     downloadCli: listener.onDownloadCli(startAppListening, host),
     openLink: listener.onOpenLink(startAppListening, host),
+    sendHttpRequest: onSendHttpRequest(startAppListening, host),
   };
 
   startListeners(listeners);

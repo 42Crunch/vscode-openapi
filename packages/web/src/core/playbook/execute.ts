@@ -4,7 +4,7 @@ import { BundledSwaggerOrOasSpec, getOperationById, getHttpResponseRange } from 
 import { Playbook } from "@xliic/scanconf";
 
 import { makeExternalHttpRequest, makeHttpRequest } from "./http";
-import { MockHttpClient, MockHttpResponse } from "./mock-http";
+import { MockHttpClient, MockHttpResponse } from "../http-client/mock-client";
 import { AuthResult, PlaybookExecutorStep } from "./playbook";
 import { PlaybookEnv, PlaybookEnvStack } from "./playbook-env";
 import { assignVariables, failedAssigments } from "./variable-assignments";

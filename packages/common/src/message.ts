@@ -17,7 +17,7 @@ export type Webapp<C extends Message, P extends Message> = {
 
   webappHandlers: UnionToIntersection<
     C extends Message
-      ? { [key in C["command"]]: ActionCreatorWithPayload<C["payload"], string> }
+      ? { [key in C["command"]]: ActionCreatorWithPayload<C["payload"], string> | (() => null) }
       : never
   >;
 

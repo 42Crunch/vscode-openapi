@@ -2,6 +2,7 @@
 
 ## Version 4.29.0 (September ??, 2024)
 
+- Show subscription status in the Config webapp
 - Do not automatically re-try failing HTTP request sent from Scan / Try it UIs
 
 ## Version 4.28.0 (August 13, 2024)

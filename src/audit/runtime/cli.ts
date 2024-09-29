@@ -12,12 +12,7 @@ import { Cache } from "../../cache";
 import { MappingNode } from "../../types";
 import { parseAuditReport } from "../audit";
 import { runAuditWithCliBinary } from "../../platform/cli-ast";
-import {
-  UPGRADE_WARN_LIMIT,
-  offerUpgrade,
-  warnAudits,
-  warnOperationAudits,
-} from "../../platform/upgrade";
+import { UPGRADE_WARN_LIMIT, offerUpgrade, warnOperationAudits } from "../../platform/upgrade";
 import { Configuration } from "../../configuration";
 import { loadConfig } from "../../util/config";
 
@@ -52,7 +47,7 @@ export async function runCliAudit(
 
   if (error !== undefined) {
     if (error.statusCode === 3 && error.statusMessage === "limits_reached") {
-      await offerUpgrade();
+      await offerUpgrade(isFullAudit);
       return;
     } else {
       throw new Error(`Unexpected error running Security Audit: ${JSON.stringify(error)}`);
@@ -60,17 +55,10 @@ export async function runCliAudit(
   }
 
   if (
-    !isFullAudit &&
     result.cli.remainingPerOperationAudit !== undefined &&
     result.cli.remainingPerOperationAudit < UPGRADE_WARN_LIMIT
   ) {
     warnOperationAudits(result.cli.remainingPerOperationAudit);
-  } else if (
-    isFullAudit &&
-    result.cli.remainingFullAudit !== undefined &&
-    result.cli.remainingFullAudit < UPGRADE_WARN_LIMIT
-  ) {
-    warnAudits(result.cli.remainingFullAudit);
   }
 
   return await parseAuditReport(cache, document, result.audit, mapping);

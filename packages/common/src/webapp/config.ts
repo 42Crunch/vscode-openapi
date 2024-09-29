@@ -15,6 +15,7 @@ import {
 } from "../config";
 import { ChangeThemeMessage } from "../theme";
 import { OpenLinkMessage } from "../link";
+import { SendHttpRequestMessage, ShowHttpErrorMessage, ShowHttpResponseMessage } from "../http";
 
 export type Webapp = App<
   // consumes
@@ -24,7 +25,9 @@ export type Webapp = App<
   | ShowOverlordConnectionTestMessage
   | ShowScandManagerConnectionTestMessage
   | ShowCliTestMessage
-  | ShowCliDownloadMessage,
+  | ShowCliDownloadMessage
+  | ShowHttpResponseMessage
+  | ShowHttpErrorMessage,
   // produces
   | SaveConfigMessage
   | TestPlatformConnectionMessage
@@ -33,4 +36,5 @@ export type Webapp = App<
   | TestCliMessage
   | DownloadCliMessage
   | OpenLinkMessage
+  | SendHttpRequestMessage
 >;
