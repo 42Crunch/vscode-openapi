@@ -7,7 +7,7 @@ import * as vscode from "vscode";
 
 import { Webapp } from "@xliic/common/webapp/signup";
 import { Configuration } from "../../configuration";
-import { WebView } from "../../web-view";
+import { WebView } from "../web-view";
 import { PlatformStore } from "../../platform/stores/platform-store";
 import { Logger } from "../../platform/types";
 import { requestToken } from "../../audit/client";
