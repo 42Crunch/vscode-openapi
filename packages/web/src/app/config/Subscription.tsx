@@ -47,7 +47,7 @@ export default function Subscription({ token }: { token: string }) {
                 e.stopPropagation();
                 dispatch(
                   openLink(
-                    `https://42crunch.com/single-user-pricing/?prefilled_email=${encodeURIComponent(
+                    `https://42crunch.com/single-user-pricing/?email=${encodeURIComponent(
                       data.userEmail
                     )}`
                   )
@@ -64,7 +64,7 @@ export default function Subscription({ token }: { token: string }) {
                 e.stopPropagation();
                 dispatch(
                   openLink(
-                    `https://billing.stripe.com/p/login/test_cN28zp7RgbGp3qobII?prefilled_email=${encodeURIComponent(
+                    `https://billing.stripe.com/p/login/3csaGd9xzf5k7n2aEE?prefilled_email=${encodeURIComponent(
                       data.userEmail
                     )}`
                   )

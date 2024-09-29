@@ -34,7 +34,7 @@ async function webappBaseQuery(
   { signal, dispatch, getState }: any,
   extraOptions: any
 ) {
-  const url = `https://stateless.dev.42crunch.com/api/v1/anon/${args.path}`;
+  const url = `https://stateless.42crunch.com/api/v1/anon/${args.path}`;
 
   const client = webappHttpClient(
     { https: { rejectUnauthorized: true } },
