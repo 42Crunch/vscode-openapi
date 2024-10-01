@@ -10,6 +10,55 @@ You can use these API testing tools by registering for our Freemium service with
 
 Both OAS v2 and v3.0.x are supported, in JSON or YAML format.
 
+## OpenAPI Editing
+
+The plugin supports code navigation, linting, SwaggerUI or ReDoc preview, IntelliSense, schema enforcement and generation, schema definition links and snippets.
+
+- [Creating OpenAPI files](#creating-openapi-files)
+- [Navigating an API definition - View elements in the explorer view](#navigating-an-api-definition)
+- [Add new elements](#add-new-elements-in-the-openapi-explorer)
+- [Use IntelliSense](#use-intellisense)
+- [Jump to a reference](#jump-to-a-reference)
+- [Sort entries in the navigation pane](#sort-entries-in-the-navigation-pane)
+- [Preview OpenAPI documentation](#preview-openapi-documentation)
+- [Execute operations with "Try it"](#execute-operations-with-try-it)
+- [Generate JSON schemas based on the response content](#generate-json-schemas-based-on-the-response-content)
+- [Configure authentication for external references in OpenAPI files](#configure-authentication-for-external-references-in-openapi-files)
+- Split your OpenAPI into multiple files linked via $ref
+- Use quick fixes and bulk quick fixes
+- Use Code snippets to add paths, operations, components, security
+
+## Activating API Audit
+
+A static analysis that lets you check the quality and security of your API definition as you work on it. [Video explainer](https://vimeo.com/873235173)
+
+- [Running an audit](#running-an-audit)
+- [Navigating the issues in the audit report](#navigating-the-issues-in-the-audit-report)
+  - [Priority issues](#priority-issues)
+  - [Full issue list](#full-issue-list)
+- [Issues details](#issues-details)
+- [Fixing issues](#fixing-issues)
+
+## Activating API Scan
+
+A dynamic conformance and security tool that tests the API for conformance to the API definition and security vulnerabilities.
+[Video explainer](https://vimeo.com/884864394/b167153ec4)
+
+- [Conformance to the API Definition](#new-dynamic-api-security-testing)
+- [Launching the Scan](#launching-42crunch-scan)
+
+The free version of API Scan runs locally in your own environment and requires no API file to be uploaded.
+
+## Freemium
+
+This service lets users of our OpenAPI editor extension who are not customers run the API Audit and Scan tests on their APIs.
+
+- [Getting a Freemium Token](#getting-a-freemium-token)
+
+## Support and Documentation:
+
+We’ve recently launched our developer community where you’ll be able to help, get tips-n-tricks and keep up to speed with all the latest developments: https://developers.42crunch.com/
+
 ## Quick start
 
 After installing the plugin, open any JSON or YAML file that contains an OpenAPI definition. The plugin automatically detects that this is an OpenAPI file, and the **/API** button is shown in the left-hand panel.
