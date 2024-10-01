@@ -1,9 +1,9 @@
-export type SearchableItem = {
-  id: string;
-  name: string;
-  entry: any;
-  children?: string[];
-};
+// export type SearchableItem = {
+//   id: string;
+//   name: string;
+//   entry: any;
+//   children?: string[];
+// };
 
 export type CollectionResponseEntry = {
   desc: {
@@ -43,6 +43,8 @@ export type ApiResponseEntry = {
   };
   tags: TagResponseEntry[];
 };
+
+export type ResponseEntry = CollectionResponseEntry | ApiResponseEntry;
 
 export type TagResponseEntry = {
   tagId: string;

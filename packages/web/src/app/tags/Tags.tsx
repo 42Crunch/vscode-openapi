@@ -2,7 +2,7 @@ import { TagData } from "@xliic/common/tags";
 import React from "react";
 import styled from "styled-components";
 import { RadioGroup2 } from "../../components/RadioGroup";
-import { BindToApiPanel } from "./BindToApiPanel";
+import { BindPanel } from "./BindPanel";
 import { useAppSelector } from "./store";
 import { TagsPanel } from "./TagsPanel";
 
@@ -45,7 +45,7 @@ export function SelectionPanel({
         <TagsPanel targetFileName={targetFileName} tagData={tagData} />
       )}
       {selectionOption === "option-bind-api" && (
-        <BindToApiPanel targetFileName={targetFileName} tagData={tagData} />
+        <BindPanel targetFileName={targetFileName} tagData={tagData} />
       )}
     </Container>
   );

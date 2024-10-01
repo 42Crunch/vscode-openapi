@@ -5,35 +5,29 @@ import {
   ApiResponseEntry,
   Category,
   CollectionResponseEntry,
+  ResponseEntry,
   Tag,
   TagResponseEntry,
 } from "./types";
 
-export function CollectionSearchSelector({
-  collections,
+export function CollectionOrApiSearchSelector({
+  type,
+  options,
   onItemSelected,
 }: {
-  collections: CollectionResponseEntry[] | undefined;
-  onItemSelected: (item: SelectOption<CollectionResponseEntry>) => void;
+  type: "collection" | "api";
+  options: SelectOption<ResponseEntry>[];
+  onItemSelected: (item: SelectOption<ResponseEntry>) => void;
 }) {
-  const options: SelectOption<CollectionResponseEntry>[] = [];
-  if (collections) {
-    collections.forEach((collEntry) =>
-      options.push({
-        value: collEntry,
-        label: collEntry.desc.name,
-      })
-    );
-  }
   return (
     <SearchSelector
       options={options}
-      placeholder="Collection name or UUID"
+      placeholder={(type === "collection" ? "Collection" : "API") + " name or UUID"}
       keepOpen={false}
       filter={(
-        items: SelectOption<CollectionResponseEntry>[],
+        items: SelectOption<ResponseEntry>[],
         inputValue: string
-      ): SelectOption<CollectionResponseEntry>[] => {
+      ): SelectOption<ResponseEntry>[] => {
         const searchValue = inputValue.toLowerCase();
         return items.filter((item) => {
           return (
@@ -42,11 +36,7 @@ export function CollectionSearchSelector({
           );
         });
       }}
-      renderer={(
-        item: SelectOption<CollectionResponseEntry>,
-        index: number,
-        inputValue: string
-      ) => {
+      renderer={(item: SelectOption<ResponseEntry>, index: number, inputValue: string) => {
         return (
           <>
             <SearchSpan value={item.label} searchValue={inputValue}></SearchSpan>
@@ -57,65 +47,15 @@ export function CollectionSearchSelector({
               ></SearchSpan>
             </CategoryNoteSpan>
             <CategorySeparator />
-          </>
-        );
-      }}
-      onItemSelected={onItemSelected}
-    />
-  );
-}
-
-export function ApiSearchSelector({
-  apis,
-  onItemSelected,
-}: {
-  apis: ApiResponseEntry[] | undefined;
-  onItemSelected: (item: SelectOption<ApiResponseEntry>) => void;
-}) {
-  const options: SelectOption<ApiResponseEntry>[] = [];
-  if (apis) {
-    apis.forEach((collEntry) =>
-      options.push({
-        value: collEntry,
-        label: collEntry.desc.name,
-      })
-    );
-  }
-  return (
-    <SearchSelector
-      options={options}
-      placeholder="API name or UUID"
-      keepOpen={false}
-      filter={(
-        items: SelectOption<ApiResponseEntry>[],
-        inputValue: string
-      ): SelectOption<ApiResponseEntry>[] => {
-        const searchValue = inputValue.toLowerCase();
-        return items.filter((item) => {
-          return (
-            item.value.desc.name.toLocaleLowerCase().includes(searchValue) ||
-            item.value.desc.id.toLocaleLowerCase().includes(searchValue)
-          );
-        });
-      }}
-      renderer={(item: SelectOption<ApiResponseEntry>, index: number, inputValue: string) => {
-        return (
-          <>
-            <SearchSpan value={item.label} searchValue={inputValue}></SearchSpan>
-            <CategoryNoteSpan>
-              <SearchSpan
-                value={`UUID: ${item.value.desc.id}`}
-                searchValue={inputValue}
-              ></SearchSpan>
-            </CategoryNoteSpan>
-            {item.value.tags.length > 0 && (
+            {type === "api" && (item.value as ApiResponseEntry).tags.length > 0 && (
               <div>
-                {item.value.tags.map((tagItem: TagResponseEntry, tagItemIndex) => {
-                  return <span key={`api-tag-${tagItemIndex}`}>{tagItem.tagName} </span>;
-                })}
+                {(item.value as ApiResponseEntry).tags.map(
+                  (tagItem: TagResponseEntry, tagItemIndex: number) => {
+                    return <span key={`api-tag-${tagItemIndex}`}>{tagItem.tagName} </span>;
+                  }
+                )}
               </div>
             )}
-            <CategorySeparator />
           </>
         );
       }}
@@ -137,6 +77,7 @@ export function TagsSelector({
   if (categories) {
     categories.forEach((item) =>
       options.push({
+        id: item.categoryId,
         value: item,
         label: item.categoryId,
       })

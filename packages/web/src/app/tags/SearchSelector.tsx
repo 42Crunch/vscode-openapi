@@ -5,9 +5,9 @@ import styled from "styled-components";
 import { AngleDown } from "../../icons";
 
 export type SelectOption<T> = {
+  id: string;
   value: T;
   label: string;
-  disabled?: boolean;
 };
 
 export function SearchSelector<T>({
