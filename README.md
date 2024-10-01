@@ -1,10 +1,12 @@
-# OpenAPI Tools for Visual Studio Code
+# OpenAPI Editing with API quality, Conformance and Security Testing
 
-This [Visual Studio Code](https://code.visualstudio.com/) (VS Code) [extension](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) adds rich support for the [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification) (OAS) (formerly known as the Swagger specification). The plugin supports code navigation, linting, SwaggerUI or ReDoc preview, IntelliSense, schema enforcement and generation, schema definition links, snippets as well as static and dynamic security analysis.
+This [Visual Studio Code](https://code.visualstudio.com/) (VS Code) [extension](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) adds rich support for the [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification) (OAS) (formerly known as the Swagger specification) and makes it easier and faster to navigate your OpenAPI definitions.
 
-The extension integrates with [42Crunch Audit](https://42crunch.com/free-user-faq/) and [42Crunch Scan](https://42crunch.com/free-user-faq/), so that you can check the quality and the security of your APIs directly in VS Code.
+The extension also comes with the 42Crunch API testing tools (Audit and Scan) so that you can check the quality, conformance and security of your APIs directly in VS Code. Stop malformed data and security vulnerabilities sneaking into your code and prevent API attacks such as BOLA, BPLA and other OWASP API Top 10 risks.
 
-If you are a 42Crunch customer or have an account of a 42Crunch platform, you can also directly access API collections and security reports through the integrated platform navigator.
+You can use these API testing tools by registering for our Freemium service within the extension, with free monthly test allowances. Simply click on the Audit or Scan icon in the Editor tool.
+
+42Crunch subscribers with an account on the 42Crunch platform have unlimited usage of Audit and Scan and can also directly access API collections and security risk assessment reports.
 
 Both OAS v2 and v3.0.x are supported, in JSON or YAML format.
 
@@ -115,10 +117,11 @@ Try it comes with a number of limitations:
 ### Configure authentication for external references in OpenAPI files
 
 If you use references to schemas served by an authenticated HTTP service (such as an Schema Registry service or a repository), you'll need to configure the list of approved hosts in the extension settings. To do this:
+
 1. On the **File** menu, click **Preferences > Settings**.
 2. Expand the **Extensions** section and click **OpenAPI**.
 3. Locate the **Openapi: Approved Hostnames** setting, click on **Add item**, and write the hostname you need for resolving external references.
-![Configure approved hosts and authentication](./images/Configure%20approved%20hosts.png)
+   ![Configure approved hosts and authentication](./images/Configure%20approved%20hosts.png)
 
 In case some of the approved hosts requires authentication, you can configure it in the OpenAPI > External References section of the `42Crunch: Open Settings` command view:
 
