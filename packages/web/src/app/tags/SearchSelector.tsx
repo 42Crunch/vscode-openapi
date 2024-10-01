@@ -71,7 +71,8 @@ export function SearchSelector<T>({
       }
     },
   });
-
+  const buttonProps = getToggleButtonProps();
+  delete buttonProps.ref;
   return (
     <MainComboboxContainer>
       <DownShiftContainer>
@@ -79,7 +80,7 @@ export function SearchSelector<T>({
           placeholder={placeholder}
           {...getInputProps(getDropdownProps({ preventKeyAction: isOpen }))}
         />
-        <AngleDown {...getToggleButtonProps()} />
+        <AngleDown {...buttonProps} />
       </DownShiftContainer>
       <DropDownList className={`${!(isOpen && items.length) && "hidden"}`} {...getMenuProps()}>
         {isOpen &&
