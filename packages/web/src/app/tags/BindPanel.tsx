@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { ErrorBanner } from "../../components/Banner";
 import { SelectOption } from "./SearchSelector";
 import { CollectionOrApiSearchSelector } from "./Selectors";
-import { saveTags } from "./slice";
+import { saveTags, saveTagsInStateOnly } from "./slice";
 import { useAppDispatch } from "./store";
 import { useGetApisFromCollectionQuery, useGetCollectionsQuery } from "./tags-api";
 import { ApiResponseEntry, ResponseEntry, TagResponseEntry } from "./types";
@@ -25,6 +25,7 @@ export function BindPanel({
   // Previously selected ids from IDE
   const initApiId = Array.isArray(targetData) ? undefined : targetData?.apiId;
   const initColId = Array.isArray(targetData) ? undefined : targetData?.collectionId;
+  const initColName = Array.isArray(targetData) ? undefined : targetData?.collectionName;
   // Current manually selected options
   const [colOption, setColOption] = React.useState<SelectOptionState>(undefined);
   const [apiOption, setApiOption] = React.useState<SelectOptionState>(undefined);
@@ -36,11 +37,9 @@ export function BindPanel({
         selectedOptionId={colOption ? colOption.id : initColId}
         getQueryParameter={() => ""}
         onOptionRemoved={(option: SelectOption<ResponseEntry>): void => {
-          if (apiOption) {
-            dispatch(saveTags({ [targetFileName]: null }));
-          }
           setApiOption(undefined);
           setColOption(undefined);
+          dispatch(saveTags({ [targetFileName]: null }));
         }}
         onOptionSelected={(option: SelectOption<ResponseEntry>): void => {
           setColOption(option);
@@ -54,7 +53,15 @@ export function BindPanel({
           getQueryParameter={() => (colOption ? colOption.value.desc.id : initColId) as string}
           onOptionRemoved={(option: SelectOption<ResponseEntry>): void => {
             setApiOption(undefined);
-            dispatch(saveTags({ [targetFileName]: null }));
+            const tagData: TagData = {};
+            tagData[targetFileName] = {
+              apiId: "",
+              apiName: "",
+              collectionId: colOption?.value.desc.id || initColId,
+              collectionName: colOption?.value.desc.name || initColName,
+            } as ApiEntry;
+            // Save in state, do not notify IDE
+            dispatch(saveTagsInStateOnly(tagData));
           }}
           onOptionSelected={(option: SelectOption<ResponseEntry>): void => {
             setApiOption(option);
@@ -62,8 +69,8 @@ export function BindPanel({
             tagData[targetFileName] = {
               apiId: option.value.desc.id,
               apiName: option.value.desc.name,
-              collectionId: colOption?.value.desc.id,
-              collectionName: colOption?.value.desc.name,
+              collectionId: colOption?.value.desc.id || initColId,
+              collectionName: colOption?.value.desc.name || initColName,
             } as ApiEntry;
             dispatch(saveTags(tagData));
           }}

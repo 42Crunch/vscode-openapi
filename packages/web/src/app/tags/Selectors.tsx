@@ -9,6 +9,7 @@ import {
   Tag,
   TagResponseEntry,
 } from "./types";
+import Tags from "../../icons/Tags";
 
 export function CollectionOrApiSearchSelector({
   type,
@@ -46,16 +47,22 @@ export function CollectionOrApiSearchSelector({
                 searchValue={inputValue}
               ></SearchSpan>
             </CategoryNoteSpan>
-            <CategorySeparator />
+
             {type === "api" && (item.value as ApiResponseEntry).tags.length > 0 && (
-              <div>
+              <HeaderOptionContainerTagInfo>
+                {(item.value as ApiResponseEntry).tags.length > 0 && <Tags />}
                 {(item.value as ApiResponseEntry).tags.map(
                   (tagItem: TagResponseEntry, tagItemIndex: number) => {
-                    return <span key={`api-tag-${tagItemIndex}`}>{tagItem.tagName} </span>;
+                    return (
+                      <HeaderOptionTagSpan key={`api-tag-${tagItemIndex}`}>
+                        {tagItem.categoryName}: {tagItem.tagName}
+                      </HeaderOptionTagSpan>
+                    );
                   }
                 )}
-              </div>
+              </HeaderOptionContainerTagInfo>
             )}
+            <CategorySeparator />
           </>
         );
       }}
@@ -261,4 +268,23 @@ const CategorySeparator = styled.div`
 
 const Input = styled.input`
   accent-color: var(${ThemeColorVariables.checkboxBackground});
+`;
+
+const HeaderOptionContainerTagInfo = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  > svg {
+    margin-left: 3px;
+    fill: var(${ThemeColorVariables.foreground});
+  }
+`;
+
+const HeaderOptionTagSpan = styled.div`
+  border-color: var(${ThemeColorVariables.border});
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 5px;
+  padding: 3px;
 `;

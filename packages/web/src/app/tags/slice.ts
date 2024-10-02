@@ -29,6 +29,11 @@ export const slice = createSlice({
       state.targetFileName = action.payload.targetFileName;
       state.tagData = action.payload.data;
     },
+    saveTagsInStateOnly: (state, action: PayloadAction<TagData>) => {
+      if (state.tagData) {
+        state.tagData[state.targetFileName] = action.payload[state.targetFileName];
+      }
+    },
     saveTags: (state, action: PayloadAction<TagData>) => {
       // hook for a listener
       if (state.tagData) {
@@ -50,7 +55,13 @@ export const slice = createSlice({
   },
 });
 
-export const { loadTags, saveTags, sendHttpRequest, showHttpResponse, showHttpError } =
-  slice.actions;
+export const {
+  loadTags,
+  saveTagsInStateOnly,
+  saveTags,
+  sendHttpRequest,
+  showHttpResponse,
+  showHttpError,
+} = slice.actions;
 
 export default slice.reducer;
