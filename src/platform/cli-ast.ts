@@ -163,7 +163,7 @@ export async function ensureCliDownloaded(
   return true;
 }
 
-async function checkForCliUpdate(
+export async function checkForCliUpdate(
   repository: string,
   cliDirectoryOverride: string
 ): Promise<boolean> {
