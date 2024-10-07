@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 4.29.1 (October 7, 2024)
+## Version 4.29.2 (October 7, 2024)
 
 - Remove whitespace characters during the freemium signup flow
 
