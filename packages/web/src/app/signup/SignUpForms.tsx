@@ -224,6 +224,7 @@ export function ButtonSaveAnondToken() {
   const dispatch = useAppDispatch();
   const { anondCredentials, complete } = useAppSelector((state) => state.signup);
   const anondToken = useWatch({ name: "anondToken" });
+  console.log("my token", anondToken);
   const {
     formState: { isValid },
   } = useFormContext();
@@ -231,7 +232,9 @@ export function ButtonSaveAnondToken() {
     <SimpleButton
       disabled={complete || !isValid}
       onClick={(e) => {
-        dispatch(anondSignUpComplete({ email: anondCredentials.email, anondToken }));
+        dispatch(
+          anondSignUpComplete({ email: anondCredentials.email, anondToken: anondToken.trim() })
+        );
         e.preventDefault();
         e.stopPropagation();
       }}
