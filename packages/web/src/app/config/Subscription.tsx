@@ -10,7 +10,7 @@ import { useAppDispatch } from "./store";
 import { openLink } from "../../features/config/slice";
 
 export default function Subscription({ token }: { token: string }) {
-  const { data, error, isLoading } = useGetSubscriptionQuery(token, {
+  const { data, error, isLoading } = useGetSubscriptionQuery(token.trim(), {
     refetchOnFocus: true,
     pollingInterval: 1000 * 60 * 10, // refresh every 10 minutes
   });
