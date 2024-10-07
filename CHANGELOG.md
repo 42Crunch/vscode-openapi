@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.29.1 (October 7, 2024)
+
+- Remove whitespace characters during the freemium signup flow
+
 ## Version 4.29.0 (October 1, 2024)
 
 - Show subscription status in the Config webapp
