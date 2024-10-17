@@ -1,7 +1,7 @@
 import { TagData } from "@xliic/common/tags";
 import React from "react";
 import styled from "styled-components";
-import { RadioGroup2 } from "../../components/RadioGroup";
+import RadioGroup from "../../new-components/RadioGroup";
 import { BindPanel } from "./BindPanel";
 import { useAppSelector } from "./store";
 import { TagsPanel } from "./TagsPanel";
@@ -31,7 +31,7 @@ export function SelectionPanel({
   return (
     <Container>
       <Title>Select Tag or Bind to API</Title>
-      <RadioGroup2
+      <RadioGroup
         value={selectionOption}
         options={[
           { value: "option-select-tag", label: "Select Tag" },
