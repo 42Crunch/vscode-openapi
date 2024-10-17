@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import * as RadixRadioGroup from "@radix-ui/react-radio-group";
-import { useController } from "react-hook-form";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { Circle } from "../icons";
 import { useId } from "react";
@@ -10,30 +9,7 @@ export type RadioOption = {
   label: string;
 };
 
-export function RadioGroup({ name, options }: { name: string; options: RadioOption[] }) {
-  const id = useId();
-
-  const { field } = useController({
-    name,
-  });
-
-  return (
-    <Group value={field.value} onValueChange={(value) => field.onChange(value)}>
-      {options.map((option, index) => (
-        <Option key={index}>
-          <Item value={option.value} id={`${id}-${index}`}>
-            <Indicator>
-              <Circle />
-            </Indicator>
-          </Item>
-          <label htmlFor={`${id}-${index}`}>{option.label}</label>
-        </Option>
-      ))}
-    </Group>
-  );
-}
-
-export function RadioGroup2({
+export default function RadioGroup({
   value,
   options,
   onValueChange,
@@ -42,16 +18,18 @@ export function RadioGroup2({
   options: RadioOption[];
   onValueChange: (value: string) => void;
 }) {
+  const id = useId();
+
   return (
     <Group value={value} onValueChange={onValueChange}>
       {options.map((option, index) => (
         <Option key={index}>
-          <Item value={option.value} id={`radio-group-item-${index}`}>
+          <Item value={option.value} id={`${id}-${index}`}>
             <Indicator>
               <Circle />
             </Indicator>
           </Item>
-          <label htmlFor={`radio-group-label-${index}`}>{option.label}</label>
+          <label htmlFor={`${id}-${index}`}>{option.label}</label>
         </Option>
       ))}
     </Group>
