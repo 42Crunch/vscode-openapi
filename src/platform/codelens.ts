@@ -83,16 +83,15 @@ export class PlatformTagCodelensProvider implements vscode.CodeLensProvider<Tags
         if (Array.isArray(data)) {
           data.forEach((tagEntry) => selectedTagNames.push(tagEntry.tagName));
           title = `Tags: ${selectedTagNames.length} selected`;
-          tooltip =
-            selectedTagNames.length > 0 ? "My tags are: " + `${selectedTagNames.join(", ")}` : "";
+          tooltip = selectedTagNames.length > 0 ? "Tags: " + `${selectedTagNames.join(", ")}` : "";
         } else {
-          title = `Tags: 1 api selected`;
+          title = `Tags: linked to API`;
           tooltip =
-            "File bound to api " + `${data.apiName}` + " in collection " + `${data.collectionName}`;
+            "Linked to API " + `${data.apiName}` + " in collection " + `${data.collectionName}`;
         }
       } else {
         title = "Tags: 0 selected";
-        tooltip = "Neither tags nor bound api selected";
+        tooltip = "No tags selected";
       }
       codeLens.command = {
         title,
