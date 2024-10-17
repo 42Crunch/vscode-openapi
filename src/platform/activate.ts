@@ -39,7 +39,8 @@ export async function activate(
   reportWebView: AuditWebView,
   memento: vscode.Memento,
   envStore: EnvStore,
-  prefs: Record<string, Preferences>
+  prefs: Record<string, Preferences>,
+  logger: Logger
 ) {
   const dataDictionaryView = new DataDictionaryWebView(context.extensionPath);
 
