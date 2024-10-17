@@ -1,7 +1,9 @@
-import { ApiEntry, TagData } from "@xliic/common/tags";
-import { ThemeColorVariables } from "@xliic/common/theme";
 import React from "react";
 import styled from "styled-components";
+
+import { ApiEntry, TagData } from "@xliic/common/tags";
+import { ThemeColorVariables } from "@xliic/common/theme";
+
 import { ErrorBanner } from "../../components/Banner";
 import { SelectOption } from "./SearchSelector";
 import { CollectionOrApiSearchSelector } from "./Selectors";
@@ -9,11 +11,11 @@ import { saveTags, saveTagsInStateOnly } from "./slice";
 import { useAppDispatch } from "./store";
 import { useGetApisFromCollectionQuery, useGetCollectionsQuery } from "./tags-api";
 import { ApiResponseEntry, ResponseEntry, TagResponseEntry } from "./types";
-import Tags from "../../icons/Tags";
+import { Tags, TrashCan } from "../../icons";
 
 type SelectOptionState = SelectOption<ResponseEntry> | undefined;
 
-export function BindPanel({
+export function ApiPanel({
   targetFileName,
   tagData,
 }: {
@@ -116,9 +118,7 @@ function SelectPanel({
             {"Loading " + (type === "collection" ? "collections" : "APIs") + " from the server..."}
           </HeaderSpan>
         )}
-        {!isLoading && (
-          <HeaderSpan>{"Select " + (type === "collection" ? "collection" : "API")}</HeaderSpan>
-        )}
+        {!isLoading && <HeaderSpan>{type === "collection" ? "Collection" : "API"}</HeaderSpan>}
         {!isLoading && (
           <CollectionOrApiSearchSelector
             type={type}
@@ -139,7 +139,7 @@ function SelectPanel({
                   (tagItem: TagResponseEntry, tagItemIndex: number) => {
                     return (
                       <HeaderOptionTagSpan key={`api-tag-${tagItemIndex}`}>
-                        {tagItem.categoryName}: {tagItem.tagName}
+                        {tagItem.categoryName}:{tagItem.tagName}
                       </HeaderOptionTagSpan>
                     );
                   }
@@ -154,7 +154,7 @@ function SelectPanel({
                 onOptionRemoved(option);
               }}
             >
-              &#10005;
+              <TrashCan />
             </HeaderOptionRemoverSpan>
           </HeaderOptionContainerAction>
         </HeaderOptionContainer>
@@ -200,6 +200,7 @@ const Header = styled.div`
   border-radius: 3px;
   align-items: center;
   justify-content: space-between;
+  padding: 16px;
 `;
 
 const HeaderOptionContainer = styled.div`
@@ -218,7 +219,7 @@ const HeaderOptionContainerInfo = styled.div`
   flex-direction: column;
   width: 97%;
   gap: 10px;
-  padding: 10px;
+  padding: 16px;
 `;
 
 const HeaderOptionContainerAction = styled.div`
@@ -235,7 +236,6 @@ const HeaderError = styled.div`
 
 const HeaderSpan = styled.span`
   font-weight: bold;
-  padding: 17px;
 `;
 
 const HeaderOptionSpan = styled.span`
@@ -250,7 +250,10 @@ const HeaderOptionNoteSpan = styled.span`
 const HeaderOptionRemoverSpan = styled.span`
   font-weight: bold;
   cursor: pointer;
-  padding: 1px;
+  padding: 16px;
+  > svg {
+    fill: var(${ThemeColorVariables.foreground});
+  }
 `;
 
 const HeaderOptionContainerTagInfo = styled.div`
@@ -270,4 +273,5 @@ const HeaderOptionTagSpan = styled.div`
   border-style: solid;
   border-radius: 5px;
   padding: 3px;
+  font-size: 90%;
 `;

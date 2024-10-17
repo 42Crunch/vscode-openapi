@@ -1,7 +1,10 @@
 import styled from "styled-components";
-import { useAppDispatch, useAppSelector } from "./store";
+import React from "react";
+
 import { ThemeColorVariables } from "@xliic/common/theme";
-//import { TagsSelector } from "./TagsSelector";
+import { TagData, TagEntry } from "@xliic/common/tags";
+
+import { useAppDispatch } from "./store";
 import CollapsibleCard, {
   BottomDescription,
   BottomItem,
@@ -10,8 +13,6 @@ import CollapsibleCard, {
 import { Category, CategoryResponseEntry, Tag, TagResponseEntry } from "./types";
 import { ErrorBanner } from "../../components/Banner";
 import { useGetCategoriesQuery, useGetTagsQuery } from "./tags-api";
-import { TagData, TagEntry } from "@xliic/common/tags";
-import React from "react";
 import { saveTags } from "./slice";
 import { TagsSelector } from "./Selectors";
 
@@ -123,11 +124,7 @@ function HeaderSelectionSummary({
     }
   }
   const selTagsCount = selectedTagIds.size;
-  return (
-    <HeaderSpan>
-      {selTagsCount} tags in {selCategoriesCount} categories selected in file {targetFileName}
-    </HeaderSpan>
-  );
+  return <HeaderSpan>{selTagsCount} tags selected</HeaderSpan>;
 }
 
 function SelectionsContainer({
@@ -256,6 +253,7 @@ const Header = styled.div`
   border-radius: 3px;
   align-items: center;
   justify-content: space-between;
+  padding: 16px;
 `;
 
 const HeaderError = styled.div`
@@ -266,7 +264,6 @@ const HeaderError = styled.div`
 
 const HeaderSpan = styled.span`
   font-weight: bold;
-  padding: 15px;
 `;
 
 const Container = styled.div`
