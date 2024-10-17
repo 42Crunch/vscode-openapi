@@ -2,7 +2,7 @@ import { TagData } from "@xliic/common/tags";
 import React from "react";
 import styled from "styled-components";
 import RadioGroup from "../../new-components/RadioGroup";
-import { BindPanel } from "./BindPanel";
+import { ApiPanel } from "./ApiPanel";
 import { useAppSelector } from "./store";
 import { TagsPanel } from "./TagsPanel";
 
@@ -30,12 +30,12 @@ export function SelectionPanel({
   );
   return (
     <Container>
-      <Title>Select Tag or Bind to API</Title>
+      <Title>Specify tags, or link the platform API to {targetFileName}</Title>
       <RadioGroup
         value={selectionOption}
         options={[
-          { value: "option-select-tag", label: "Select Tag" },
-          { value: "option-bind-api", label: "Bind to API" },
+          { value: "option-select-tag", label: "Tags" },
+          { value: "option-bind-api", label: "Link to API" },
         ]}
         onValueChange={(value: string) => {
           setSelectionOption(value);
@@ -45,7 +45,7 @@ export function SelectionPanel({
         <TagsPanel targetFileName={targetFileName} tagData={tagData} />
       )}
       {selectionOption === "option-bind-api" && (
-        <BindPanel targetFileName={targetFileName} tagData={tagData} />
+        <ApiPanel targetFileName={targetFileName} tagData={tagData} />
       )}
     </Container>
   );

@@ -82,7 +82,7 @@ export function SearchSelector<T>({
         />
         <AngleDown {...buttonProps} />
       </DownShiftContainer>
-      <DropDownList className={`${!(isOpen && items.length) && "hidden"}`} {...getMenuProps()}>
+      <DropDownList {...getMenuProps()} isOpen={isOpen}>
         {isOpen &&
           items.map((item, index) => (
             <DropDownListElement key={`li-${index}`} {...getItemProps({ item, index })}>
@@ -131,7 +131,7 @@ const SearchMark = styled.mark`
 `;
 
 const MainComboboxContainer = styled.div`
-  width: 592px;
+  position: relative;
 `;
 
 const DownShiftContainer = styled.div`
@@ -157,13 +157,40 @@ const DownShiftInput = styled.input`
 
 const DropDownList = styled.ul`
   position: absolute;
-  width: inherit;
-  background-color: var(${ThemeColorVariables.dropdownBackground});
-  overflow-y: scroll;
-  max-height: 30rem;
-  z-index: 10;
-  margin-top: 5px;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  margin: 0;
+  list-style: none;
   padding-inline-start: 1px;
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: var(${ThemeColorVariables.dropdownBackground});
+  color: var(${ThemeColorVariables.dropdownForeground});
+
+  ${({ isOpen }: { isOpen: boolean }) =>
+    isOpen &&
+    `
+    border: 1px solid var(${ThemeColorVariables.dropdownBorder});
+    padding: 4px;
+  `}
+
+  & > li {
+    padding: 8px 4px;
+    cursor: pointer;
+  }
+
+  & > li:hover {
+    background-color: var(${ThemeColorVariables.listHoverBackground});
+  }
+
+  & > li[aria-disabled="true"] {
+    color: var(${ThemeColorVariables.disabledForeground});
+  }
+
+  & > li[aria-disabled="true"]:hover {
+    background-color: transparent;
+  }
 `;
 
 const DropDownListElement = styled.li`

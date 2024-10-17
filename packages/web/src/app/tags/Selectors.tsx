@@ -62,7 +62,6 @@ export function CollectionOrApiSearchSelector({
                 )}
               </HeaderOptionContainerTagInfo>
             )}
-            <CategorySeparator />
           </>
         );
       }}
@@ -144,7 +143,6 @@ export function TagsSelector({
                   }
                 })}
             </CategoryTagsContainer>
-            <CategorySeparator />
           </>
         );
       }}
@@ -261,11 +259,6 @@ const CategoryTagsContainer = styled.div`
   padding-bottom: 15px;
 `;
 
-const CategorySeparator = styled.div`
-  height: 1px;
-  background-color: var(${ThemeColorVariables.border});
-`;
-
 const Input = styled.input`
   accent-color: var(${ThemeColorVariables.checkboxBackground});
 `;
@@ -287,4 +280,5 @@ const HeaderOptionTagSpan = styled.div`
   border-style: solid;
   border-radius: 5px;
   padding: 3px;
+  font-size: 90%;
 `;
