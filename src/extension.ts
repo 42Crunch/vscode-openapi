@@ -35,11 +35,7 @@ import { Logger } from "./platform/types";
 import { getPlatformCredentials, hasCredentials } from "./credentials";
 import { EnvStore } from "./envstore";
 import { debounce } from "./util/debounce";
-import {
-  getApprovedHostnames,
-  getApprovedHostnamesTrimmedLowercase,
-  removeSecretsForApprovedHosts,
-} from "./util/config";
+import { getApprovedHostnamesTrimmedLowercase, removeSecretsForApprovedHosts } from "./util/config";
 import { SignUpWebView } from "./webapps/signup/view";
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -153,7 +149,8 @@ export async function activate(context: vscode.ExtensionContext) {
     reportWebView,
     context.workspaceState,
     envStore,
-    prefs
+    prefs,
+    logger
   );
 
   const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
