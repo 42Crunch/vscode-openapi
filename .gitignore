@@ -10,3 +10,4 @@ src/.log/
 /.idea/
 schema/generated/*.json
 packages/dist
+tsconfig.tsbuildinfo
