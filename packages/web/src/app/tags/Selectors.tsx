@@ -4,11 +4,10 @@ import { SearchSelector, SearchSpan, SelectOption } from "./SearchSelector";
 import {
   ApiResponseEntry,
   Category,
-  CollectionResponseEntry,
   ResponseEntry,
   Tag,
   TagResponseEntry,
-} from "./types";
+} from "../../features/http-client/platform-api";
 import Tags from "../../icons/Tags";
 
 export function CollectionOrApiSearchSelector({

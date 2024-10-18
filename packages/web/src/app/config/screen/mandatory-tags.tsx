@@ -5,17 +5,11 @@ import { TagRegex } from "@xliic/common/platform";
 import { ConfigScreen } from "../../../features/config/slice";
 import { Container, Title } from "../layout";
 import Textarea from "../../../new-components/fat-fields/Textarea";
-import { useGetTagsQuery } from "../../../features/http-client/platform-api";
 
 export function MandatoryTags() {
-  // Using a query hook automatically fetches data and returns query values
-  const { data, error, isLoading } = useGetTagsQuery("bulbasaur");
-
   return (
     <>
       <Title>Mandatory Tags</Title>
-
-      {error ? <div>Error: {error.message}</div> : <div>Tags: {JSON.stringify(data)}</div>}
 
       <p>
         42Crunch platform mandatory tags, these tags will be added to every API created on the

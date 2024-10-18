@@ -1,7 +1,9 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+
 import { HttpRequest, HttpResponse, HttpError, HttpConfig } from "@xliic/common/http";
 import { TagData } from "@xliic/common/tags";
-import { Category } from "./types";
+
+import { Category } from "../../features/http-client/platform-api";
 
 export interface TagsState {
   targetFileName: string;
