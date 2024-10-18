@@ -1,12 +1,9 @@
+**/node_modules
+.git
 out
-node_modules
 .vscode-test
 .DS_Store
 webview/generated
 src/generated/*.json
-src/.log/
-.cache/
-/.idea/
 schema/generated/*.json
-packages/dist
-tsconfig.tsbuildinfo
+**/tsconfig.tsbuildinfo
