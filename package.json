@@ -52,7 +52,8 @@
     "compile": "tsc -b",
     "watch": "tsc -b -w",
     "pretest": "npm run build",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "lint": "eslint --format json --output-file eslint-report.json"
   },
   "contributes": {
     "viewsContainers": {
@@ -924,6 +925,7 @@
     "yaml-language-server-parser": "^0.1.2"
   },
   "devDependencies": {
+    "@eslint/js": "^9.13.0",
     "@types/glob": "^8.1.0",
     "@types/js-yaml": "^4.0.3",
     "@types/mocha": "^10.0.7",
@@ -931,9 +933,12 @@
     "@types/semver": "^6.2.0",
     "@types/vscode": "1.70.0",
     "@vscode/test-electron": "^2.3.4",
+    "eslint": "^9.13.0",
     "glob": "^8.1.0",
+    "globals": "^15.11.0",
     "marked": "^4.0.10",
     "mocha": "^10.6.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "typescript-eslint": "^8.10.0"
   }
 }
