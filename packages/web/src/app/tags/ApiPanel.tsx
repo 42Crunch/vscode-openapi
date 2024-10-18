@@ -9,8 +9,13 @@ import { SelectOption } from "./SearchSelector";
 import { CollectionOrApiSearchSelector } from "./Selectors";
 import { saveTags, saveTagsInStateOnly } from "./slice";
 import { useAppDispatch } from "./store";
-import { useGetApisFromCollectionQuery, useGetCollectionsQuery } from "./tags-api";
-import { ApiResponseEntry, ResponseEntry, TagResponseEntry } from "./types";
+import {
+  ApiResponseEntry,
+  ResponseEntry,
+  TagResponseEntry,
+  useGetApisFromCollectionQuery,
+  useGetCollectionsQuery,
+} from "../../features/http-client/platform-api";
 import { Tags, TrashCan } from "../../icons";
 
 type SelectOptionState = SelectOption<ResponseEntry> | undefined;

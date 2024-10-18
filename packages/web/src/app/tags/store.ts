@@ -3,19 +3,23 @@ import {
   ListenerMiddlewareInstance,
   StateFromReducersMapObject,
 } from "@reduxjs/toolkit";
-import { Webapp } from "@xliic/common/webapp/tags";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import logger from "redux-logger";
+
+import { Webapp } from "@xliic/common/webapp/tags";
+
 import theme, { changeTheme, ThemeState } from "../../features/theme/slice";
 import tags, { loadTags, showHttpError, showHttpResponse } from "./slice";
-import { tagsApi } from "./tags-api";
+import { platformApi } from "../../features/http-client/platform-api";
 import config, { loadConfig } from "../../features/config/slice";
+import client from "../../features/http-client/slice";
 
 const reducer = {
   theme,
   config,
+  client,
   tags,
-  [tagsApi.reducerPath]: tagsApi.reducer,
+  [platformApi.reducerPath]: platformApi.reducer,
 };
 
 export const messageHandlers: Webapp["webappHandlers"] = {
@@ -32,7 +36,7 @@ export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme:
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware()
         .prepend(listenerMiddleware.middleware)
-        .concat(logger, tagsApi.middleware),
+        .concat(logger, platformApi.middleware),
     preloadedState: {
       theme,
     },

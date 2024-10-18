@@ -10,9 +10,15 @@ import CollapsibleCard, {
   BottomItem,
   TopDescription,
 } from "../../components/CollapsibleCard";
-import { Category, CategoryResponseEntry, Tag, TagResponseEntry } from "./types";
 import { ErrorBanner } from "../../components/Banner";
-import { useGetCategoriesQuery, useGetTagsQuery } from "./tags-api";
+import {
+  useGetCategoriesQuery,
+  useGetTagsQuery,
+  Category,
+  CategoryResponseEntry,
+  Tag,
+  TagResponseEntry,
+} from "../../features/http-client/platform-api";
 import { saveTags } from "./slice";
 import { TagsSelector } from "./Selectors";
 

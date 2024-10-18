@@ -8,11 +8,29 @@ export const platformApi = createApi({
   reducerPath: "platformApi",
   baseQuery: webappBaseQuery,
   endpoints: (builder) => ({
-    getTags: builder.query<number, string>({
+    getCategories: builder.query<CategoryResponseEntry[], void>({
+      query: () => `api/v2/categories`,
+      transformResponse: extractList,
+    }),
+    getTags: builder.query<TagResponseEntry[], void>({
       query: () => `api/v2/tags`,
+      transformResponse: extractList,
+    }),
+    getCollections: builder.query<CollectionResponseEntry[], void>({
+      query: () => `api/v2/collections?listOption=ALL&perPage=0`,
+      transformResponse: extractList,
+    }),
+    getApisFromCollection: builder.query<ApiResponseEntry[], string>({
+      query: (collectionId: string) =>
+        `api/v2/collections/${collectionId}/apis?withTags=true&perPage=0`,
+      transformResponse: extractList,
     }),
   }),
 });
+
+function extractList(response: any) {
+  return response.list;
+}
 
 async function webappBaseQuery(args: any, { signal, dispatch, getState }: any, extraOptions: any) {
   const { config }: { config: ConfigState } = getState();
@@ -41,4 +59,91 @@ async function webappBaseQuery(args: any, { signal, dispatch, getState }: any, e
   }
 }
 
-export const { useGetTagsQuery } = platformApi;
+export type CollectionResponseEntry = {
+  desc: {
+    id: string;
+    name: string;
+    technicalName: string;
+  };
+  summary: {
+    apis: number;
+    writeApis: boolean;
+  };
+  teamCounter: number;
+  userCounter: number;
+};
+
+export type ApiResponseEntry = {
+  desc: {
+    id: string;
+    cid: string;
+    name: string;
+    technicalName: string;
+    specfile?: string;
+  };
+  assessment: {
+    last: string;
+    isValid: boolean;
+    isProcessed: boolean;
+    grade: number;
+    numErrors: number;
+    numInfos: number;
+    numLows: number;
+    numMediums: number;
+    numHighs: number;
+    numCriticals: number;
+    releasable: boolean;
+    oasVersion: string;
+  };
+  tags: TagResponseEntry[];
+};
+
+export type ResponseEntry = CollectionResponseEntry | ApiResponseEntry;
+
+export type TagResponseEntry = {
+  tagId: string;
+  tagName: string;
+  tagDescription: string;
+  color: string;
+  dependencies: any;
+  isExclusive: boolean;
+  isFreeForm: boolean;
+  isProtected: boolean;
+  categoryDescription: string;
+  categoryId: string;
+  categoryName: string;
+};
+
+export type CategoryResponseEntry = {
+  id: string;
+  name: string;
+  color: string;
+  description: string;
+  isExclusive: boolean;
+  isFreeForm: boolean;
+  isProtected: boolean;
+  onlyAdminCanTag: boolean;
+};
+
+export type Tag = {
+  tagId: string;
+  tagName: string;
+  tagDescription: string;
+  onlyAdminCanTag: boolean;
+};
+
+export type Category = {
+  categoryId: string;
+  categoryName: string;
+  categoryDescription: string;
+  onlyAdminCanTag: boolean;
+  multipleChoicesAllowed: boolean;
+  tags: Tag[];
+};
+
+export const {
+  useGetTagsQuery,
+  useGetCategoriesQuery,
+  useGetCollectionsQuery,
+  useGetApisFromCollectionQuery,
+} = platformApi;
