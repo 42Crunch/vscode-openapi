@@ -52,7 +52,8 @@
     "compile": "tsc -b",
     "watch": "tsc -b -w",
     "pretest": "npm run build",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "lint": "eslint --format json --output-file eslint-report.json"
   },
   "contributes": {
     "viewsContainers": {
