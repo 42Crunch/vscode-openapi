@@ -1,6 +1,13 @@
 import { ThemeColorVariables } from "@xliic/common/theme";
 import styled from "styled-components";
 import { Category, Tag } from "../../features/http-client/platform-api";
+import { Check, Circle } from "../../icons";
+import {
+  Container,
+  Indicator as CheckIndicator,
+  MediumCheckboxRoot,
+} from "../../new-components/Checkbox";
+import { Group, Indicator as RadioIndicator, Item, Option } from "../../new-components/RadioGroup";
 import { SearchSelector, SearchSpan, SelectOption } from "./SearchSelector";
 
 export function TagsSelector({
@@ -48,33 +55,53 @@ export function TagsSelector({
               <CategoryWarningNoteSpan>Only admin can tag</CategoryWarningNoteSpan>
             )}
             <CategoryTagsContainer key={`${item.value.categoryId}${index}`}>
-              {item.value.tags
-                .filter((tag) => isCategoryOrTagVisible(item.value, tag, inputValue))
-                .map((tag, tagIndex) => {
-                  if (item.value.multipleChoicesAllowed) {
-                    return (
-                      <TagCheckboxButton
-                        key={`${tag.tagId}${tagIndex}`}
-                        category={item.value}
-                        tag={tag}
-                        checked={selectedTagIds.has(tag.tagId)}
-                        inputValue={inputValue}
-                        onTagSelected={onTagSelected}
-                      ></TagCheckboxButton>
-                    );
-                  } else {
-                    return (
-                      <TagRadioButton
-                        key={`${tag.tagId}${tagIndex}`}
-                        category={item.value}
-                        tag={tag}
-                        checked={selectedTagIds.has(tag.tagId)}
-                        inputValue={inputValue}
-                        onTagSelected={onTagSelected}
-                      ></TagRadioButton>
-                    );
-                  }
-                })}
+              {!item.value.multipleChoicesAllowed && (
+                <TagRadioButtonGroup
+                  value={getRadioGroupDefaultValue(item.value, selectedTagIds)}
+                  onValueChange={(tagId: string) => {
+                    const category = item.value;
+                    if (category.onlyAdminCanTag) {
+                      return;
+                    }
+                    // Last argument is always true as this hadler
+                    // is called only if radio button gets selected
+                    onTagSelected(category.categoryId, tagId, true);
+                  }}
+                >
+                  {item.value.tags
+                    .filter((tag) => isCategoryOrTagVisible(item.value, tag, inputValue))
+                    .map((tag, tagIndex) => {
+                      return (
+                        <TagRadioButton
+                          key={`${tag.tagId}${tagIndex}`}
+                          category={item.value}
+                          tag={tag}
+                          checked={selectedTagIds.has(tag.tagId)}
+                          inputValue={inputValue}
+                          onTagSelected={onTagSelected}
+                        ></TagRadioButton>
+                      );
+                    })}
+                </TagRadioButtonGroup>
+              )}
+              {item.value.multipleChoicesAllowed && (
+                <>
+                  {item.value.tags
+                    .filter((tag) => isCategoryOrTagVisible(item.value, tag, inputValue))
+                    .map((tag, tagIndex) => {
+                      return (
+                        <TagCheckboxButton
+                          key={`${tag.tagId}${tagIndex}`}
+                          category={item.value}
+                          tag={tag}
+                          checked={selectedTagIds.has(tag.tagId)}
+                          inputValue={inputValue}
+                          onTagSelected={onTagSelected}
+                        ></TagCheckboxButton>
+                      );
+                    })}
+                </>
+              )}
             </CategoryTagsContainer>
           </>
         );
@@ -82,6 +109,15 @@ export function TagsSelector({
       onItemSelected={(item: SelectOption<Category>) => {}}
     />
   );
+}
+
+function getRadioGroupDefaultValue(category: Category, selectedTagIds: Set<string>): string {
+  for (const tag of category.tags) {
+    if (selectedTagIds.has(tag.tagId)) {
+      return tag.tagId;
+    }
+  }
+  return "";
 }
 
 function isCategoryOrTagVisible(category: Category, tag: Tag, inputValue: string) {
@@ -119,18 +155,23 @@ function TagCheckboxButton({
   onTagSelected: (categoryId: string, tagId: string, selected: boolean) => void;
 }) {
   return (
-    <label style={{ paddingLeft: `${tag.onlyAdminCanTag ? "17px" : "0px"}` }}>
-      {!tag.onlyAdminCanTag && (
-        <Input
-          type="checkbox"
-          checked={checked}
-          onChange={(e) => {
-            onTagSelected(category.categoryId, tag.tagId, e.currentTarget.checked);
-          }}
-        />
-      )}
-      <SearchSpan value={tag.tagName} searchValue={inputValue}></SearchSpan>
-    </label>
+    <Container>
+      <MediumCheckboxRoot
+        checked={checked}
+        onCheckedChange={(checked) => {
+          if (typeof checked === "boolean") {
+            onTagSelected(category.categoryId, tag.tagId, checked);
+          }
+        }}
+      >
+        <CheckIndicator>
+          <Check />
+        </CheckIndicator>
+      </MediumCheckboxRoot>
+      <label style={{ paddingLeft: `${tag.onlyAdminCanTag ? "20px" : "0px"}` }}>
+        <SearchSpan value={tag.tagName} searchValue={inputValue}></SearchSpan>
+      </label>
+    </Container>
   );
 }
 
@@ -148,28 +189,39 @@ function TagRadioButton({
   onTagSelected: (categoryId: string, tagId: string, selected: boolean) => void;
 }) {
   return (
-    <label style={{ paddingLeft: `${tag.onlyAdminCanTag ? "17px" : "0px"}` }}>
+    <Option>
       {!tag.onlyAdminCanTag && (
-        <Input
-          type="radio"
-          checked={checked}
-          onChange={(e) => {
-            if (category.onlyAdminCanTag) {
-              return;
-            }
-            onTagSelected(category.categoryId, tag.tagId, e.currentTarget.checked);
-          }}
-          onClick={(e) => {
-            if (e.currentTarget.checked && checked && !category.onlyAdminCanTag) {
-              onTagSelected(category.categoryId, tag.tagId, false);
-            }
-          }}
-        />
+        <Item value={tag.tagId}>
+          <RadioIndicator>
+            <Circle
+              // Dirty workaround, but we have to catch click events on the svg element as
+              // radix radio group supports neither toggling nor unclick event handling
+              onClick={(e) => {
+                const mySpan = e.currentTarget.parentElement;
+                if (mySpan && mySpan.tagName === "SPAN") {
+                  const checked = mySpan.dataset.state === "checked";
+                  if (checked && !category.onlyAdminCanTag) {
+                    // This call will make getRadioGroupDefaultValue return empty value implicitly
+                    // Empty default value for the radio group is interpreted as nothing is selected
+                    // Thus if a user clicks on the same radio button again, it fires onValueChange event and toggle
+                    onTagSelected(category.categoryId, tag.tagId, false);
+                  }
+                }
+              }}
+            />
+          </RadioIndicator>
+        </Item>
       )}
-      <SearchSpan value={tag.tagName} searchValue={inputValue}></SearchSpan>
-    </label>
+      <label style={{ paddingLeft: `${tag.onlyAdminCanTag ? "20px" : "0px"}` }}>
+        <SearchSpan value={tag.tagName} searchValue={inputValue}></SearchSpan>
+      </label>
+    </Option>
   );
 }
+
+const TagRadioButtonGroup = styled(Group)`
+  flex-direction: column;
+`;
 
 const CategorySpan = styled.span`
   font-weight: bold;
@@ -190,8 +242,4 @@ const CategoryTagsContainer = styled.div`
   flex-direction: column;
   gap: 5px;
   padding-bottom: 15px;
-`;
-
-const Input = styled.input`
-  accent-color: var(${ThemeColorVariables.checkboxBackground});
 `;

@@ -36,19 +36,19 @@ export default function RadioGroup({
   );
 }
 
-const Group = styled(RadixRadioGroup.Root)`
+export const Group = styled(RadixRadioGroup.Root)`
   display: flex;
   flex-direction: row;
   gap: 8px;
 `;
 
-const Option = styled.div`
+export const Option = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
 `;
 
-const Item = styled(RadixRadioGroup.Item)`
+export const Item = styled(RadixRadioGroup.Item)`
   width: 20px;
   height: 20px;
   border-radius: 100%;
@@ -61,7 +61,7 @@ const Item = styled(RadixRadioGroup.Item)`
   justify-content: center;
 `;
 
-const Indicator = styled(RadixRadioGroup.Indicator)`
+export const Indicator = styled(RadixRadioGroup.Indicator)`
   display: flex;
   align-items: center;
   justify-content: center;
