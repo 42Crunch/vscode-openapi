@@ -61,9 +61,15 @@ export class SignUpWebView extends WebView<Webapp> {
         anondCredentials.anondToken,
         vscode.ConfigurationTarget.Global
       );
+      await this.configuration.update(
+        "platformAuthType",
+        "anond-token",
+        vscode.ConfigurationTarget.Global
+      );
       await delay(3000);
       this.close("anond-token");
     },
+
     platformSignUpComplete: async (platformCredentials: PlatformCredentials) => {
       const credentials = {
         platformUrl: platformCredentials.platformUrl,
@@ -78,6 +84,11 @@ export class SignUpWebView extends WebView<Webapp> {
           vscode.ConfigurationTarget.Global
         );
         await this.secrets.store("platformApiToken", platformCredentials.platformApiToken);
+        await this.configuration.update(
+          "platformAuthType",
+          "api-token",
+          vscode.ConfigurationTarget.Global
+        );
         await delay(3000);
         this.close("api-token");
       } else {
