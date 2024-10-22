@@ -21,7 +21,7 @@ import {
   HeaderOptionRemoverSpan,
   HeaderOptionSpan,
 } from "./ApiPanel";
-import { TagsSelector } from "./Selectors";
+import { TagsSelector } from "./TagsSelector";
 import { saveTags } from "./slice";
 import { useAppDispatch } from "./store";
 
