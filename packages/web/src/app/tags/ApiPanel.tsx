@@ -6,7 +6,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { ErrorBanner } from "../../components/Banner";
 import { SelectOption } from "./SearchSelector";
-import { CollectionOrApiSearchSelector } from "./Selectors";
+import { CollectionOrApiSearchSelector } from "./CollectionOrApiSearchSelector";
 import { saveTags, saveTagsInStateOnly } from "./slice";
 import { useAppDispatch } from "./store";
 import {
