@@ -43,13 +43,13 @@ export function Checkbox({
   );
 }
 
-const Container = styled.div`
+export const Container = styled.div`
   display: flex;
   gap: 8px;
   align-items: center;
 `;
 
-const MediumCheckboxRoot = styled(ReactCheckbox.Root)`
+export const MediumCheckboxRoot = styled(ReactCheckbox.Root)`
   width: 20px;
   height: 20px;
   display: flex;
@@ -75,7 +75,7 @@ const SmallCheckboxRoot = styled(ReactCheckbox.Root)`
   border-style: solid;
 `;
 
-const Indicator = styled(ReactCheckbox.Indicator)`
+export const Indicator = styled(ReactCheckbox.Indicator)`
   display: flex;
   align-items: center;
   justify-content: center;

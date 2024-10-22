@@ -154,7 +154,7 @@ function SelectionsContainer({
   return (
     <Container>
       {getSelectedTags(categories, selectedTagIds).map((item, index) => (
-        <HeaderOptionContainer>
+        <HeaderOptionContainer key={`${item.tagId}${index}`}>
           <HeaderOptionContainerInfo>
             <HeaderOptionSpan>{item.fullTagName}</HeaderOptionSpan>
             <HeaderOptionNoteSpan>UUID: {item.tagId}</HeaderOptionNoteSpan>
