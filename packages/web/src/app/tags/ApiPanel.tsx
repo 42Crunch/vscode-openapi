@@ -208,7 +208,7 @@ const Header = styled.div`
   padding: 16px;
 `;
 
-const HeaderOptionContainer = styled.div`
+export const HeaderOptionContainer = styled.div`
   display: flex;
   flex-direction: row;
   min-height: 50px;
@@ -219,7 +219,7 @@ const HeaderOptionContainer = styled.div`
   border-radius: 3px;
 `;
 
-const HeaderOptionContainerInfo = styled.div`
+export const HeaderOptionContainerInfo = styled.div`
   display: flex;
   flex-direction: column;
   width: 97%;
@@ -227,7 +227,7 @@ const HeaderOptionContainerInfo = styled.div`
   padding: 16px;
 `;
 
-const HeaderOptionContainerAction = styled.div`
+export const HeaderOptionContainerAction = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -239,20 +239,20 @@ const HeaderError = styled.div`
   gap: 7px;
 `;
 
-const HeaderSpan = styled.span`
+export const HeaderSpan = styled.span`
   font-weight: bold;
 `;
 
-const HeaderOptionSpan = styled.span`
+export const HeaderOptionSpan = styled.span`
   font-weight: bold;
 `;
 
-const HeaderOptionNoteSpan = styled.span`
+export const HeaderOptionNoteSpan = styled.span`
   font-weight: smaller;
   color: var(${ThemeColorVariables.disabledForeground});
 `;
 
-const HeaderOptionRemoverSpan = styled.span`
+export const HeaderOptionRemoverSpan = styled.span`
   font-weight: bold;
   cursor: pointer;
   padding: 16px;
