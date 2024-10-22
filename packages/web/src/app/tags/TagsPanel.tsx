@@ -1,26 +1,29 @@
-import styled from "styled-components";
 import React from "react";
+import styled from "styled-components";
 
-import { ThemeColorVariables } from "@xliic/common/theme";
 import { TagData, TagEntry } from "@xliic/common/tags";
+import { ThemeColorVariables } from "@xliic/common/theme";
 
-import { useAppDispatch } from "./store";
-import CollapsibleCard, {
-  BottomDescription,
-  BottomItem,
-  TopDescription,
-} from "../../components/CollapsibleCard";
 import { ErrorBanner } from "../../components/Banner";
 import {
-  useGetCategoriesQuery,
-  useGetTagsQuery,
   Category,
   CategoryResponseEntry,
-  Tag,
   TagResponseEntry,
+  useGetCategoriesQuery,
+  useGetTagsQuery,
 } from "../../features/http-client/platform-api";
-import { saveTags } from "./slice";
+import { TrashCan } from "../../icons";
+import {
+  HeaderOptionContainer,
+  HeaderOptionContainerAction,
+  HeaderOptionContainerInfo,
+  HeaderOptionNoteSpan,
+  HeaderOptionRemoverSpan,
+  HeaderOptionSpan,
+} from "./ApiPanel";
 import { TagsSelector } from "./Selectors";
+import { saveTags } from "./slice";
+import { useAppDispatch } from "./store";
 
 export function TagsPanel({
   targetFileName,
@@ -54,6 +57,27 @@ export function TagsPanel({
   const dispatch = useAppDispatch();
   const [selectedTagIds, setSelectedTagIds] = React.useState(initSelectedTagIds);
 
+  const onTagSelected = function (categoryId: string, tagId: string, selected: boolean): void {
+    const newSelectedTagIds = new Set<string>(selectedTagIds);
+    if (selected) {
+      newSelectedTagIds.add(tagId);
+      for (const category of categories) {
+        if (category.categoryId === categoryId && !category.multipleChoicesAllowed) {
+          for (const tag of category.tags) {
+            if (tag.tagId !== tagId) {
+              newSelectedTagIds.delete(tag.tagId);
+            }
+          }
+          break;
+        }
+      }
+    } else {
+      newSelectedTagIds.delete(tagId);
+    }
+    setSelectedTagIds(newSelectedTagIds);
+    dispatch(saveTags(getTagDataToSave(targetFileName, categories, newSelectedTagIds)));
+  };
+
   return (
     <div>
       <HeaderContainer>
@@ -70,26 +94,7 @@ export function TagsPanel({
             <TagsSelector
               categories={categories}
               selectedTagIds={selectedTagIds}
-              onTagSelected={(categoryId: string, tagId: string, selected: boolean): void => {
-                const newSelectedTagIds = new Set<string>(selectedTagIds);
-                if (selected) {
-                  newSelectedTagIds.add(tagId);
-                  for (const category of categories) {
-                    if (category.categoryId === categoryId && !category.multipleChoicesAllowed) {
-                      for (const tag of category.tags) {
-                        if (tag.tagId !== tagId) {
-                          newSelectedTagIds.delete(tag.tagId);
-                        }
-                      }
-                      break;
-                    }
-                  }
-                } else {
-                  newSelectedTagIds.delete(tagId);
-                }
-                setSelectedTagIds(newSelectedTagIds);
-                dispatch(saveTags(getTagDataToSave(targetFileName, categories, newSelectedTagIds)));
-              }}
+              onTagSelected={onTagSelected}
             />
           )}
         </Header>
@@ -106,7 +111,11 @@ export function TagsPanel({
           )}
         </HeaderError>
       </HeaderContainer>
-      <SelectionsContainer categories={categories} selectedTagIds={selectedTagIds} />
+      <SelectionsContainer
+        categories={categories}
+        selectedTagIds={selectedTagIds}
+        onTagSelected={onTagSelected}
+      />
     </div>
   );
 }
@@ -136,52 +145,53 @@ function HeaderSelectionSummary({
 function SelectionsContainer({
   categories,
   selectedTagIds,
+  onTagSelected,
 }: {
   categories: Category[];
   selectedTagIds: Set<string>;
+  onTagSelected: (categoryId: string, tagId: string, selected: boolean) => void;
 }) {
   return (
     <Container>
-      {getSelectedCateries(categories, selectedTagIds).map((item, index) => (
-        <CollapsibleCard key={`card-${item.categoryId}`}>
-          <TopDescription>
-            <TopDescriptionContainer>
-              <TopDescriptionName>{item.categoryName}</TopDescriptionName>
-              <TopDescriptionCounter>
-                {getSelectedTags(item, selectedTagIds).length}
-              </TopDescriptionCounter>
-            </TopDescriptionContainer>
-          </TopDescription>
-          <CategoryBottomDescription>{`Description: ${item.categoryDescription}`}</CategoryBottomDescription>
-          <CardTagsContainer>
-            {getSelectedTags(item, selectedTagIds).map((item2, index) => (
-              <TagBottomItemContainer key={`bottom-item-${item2.tagId}`}>
-                <TagBottomItem>{item2.tagName}</TagBottomItem>
-                <TagBottomDescription>{item2.tagDescription}</TagBottomDescription>
-              </TagBottomItemContainer>
-            ))}
-          </CardTagsContainer>
-        </CollapsibleCard>
+      {getSelectedTags(categories, selectedTagIds).map((item, index) => (
+        <HeaderOptionContainer>
+          <HeaderOptionContainerInfo>
+            <HeaderOptionSpan>{item.fullTagName}</HeaderOptionSpan>
+            <HeaderOptionNoteSpan>UUID: {item.tagId}</HeaderOptionNoteSpan>
+          </HeaderOptionContainerInfo>
+          <HeaderOptionContainerAction>
+            <HeaderOptionRemoverSpan
+              onClick={(e) => {
+                e.stopPropagation();
+                onTagSelected(item.categoryId, item.tagId, false);
+              }}
+            >
+              <TrashCan />
+            </HeaderOptionRemoverSpan>
+          </HeaderOptionContainerAction>
+        </HeaderOptionContainer>
       ))}
     </Container>
   );
 }
 
-function getSelectedCateries(categories: Category[], selectedTagIds: Set<string>): Category[] {
-  return categories.filter((category) => {
+function getSelectedTags(
+  categories: Category[],
+  selectedTagIds: Set<string>
+): { categoryId: string; tagId: string; fullTagName: string }[] {
+  const res = [];
+  for (const category of categories) {
     for (const tag of category.tags) {
       if (selectedTagIds.has(tag.tagId)) {
-        return true;
+        res.push({
+          categoryId: category.categoryId,
+          tagId: tag.tagId,
+          fullTagName: category.categoryName + ": " + tag.tagName,
+        });
       }
     }
-    return false;
-  });
-}
-
-function getSelectedTags(category: Category, selectedTagIds: Set<string>): Tag[] {
-  return category.tags.filter((tag) => {
-    return selectedTagIds.has(tag.tagId);
-  });
+  }
+  return res;
 }
 
 function getTagDataToSave(
@@ -279,56 +289,5 @@ const Container = styled.div`
   flex-direction: column;
   flex-wrap: nowrap;
   justify-content: space-evenly;
-`;
-
-const CardTagsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-  padding: 10px;
-  padding-left: 25px;
-`;
-
-const TopDescriptionContainer = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-`;
-
-const TopDescriptionName = styled.div`
-  padding-right: 10px;
-`;
-
-const TopDescriptionCounter = styled.div`
-  background-color: var(${ThemeColorVariables.badgeBackground});
-  border-radius: 3px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 20px;
-  height: 20px;
-  color: var(${ThemeColorVariables.badgeForeground});
-`;
-
-const CategoryBottomDescription = styled(BottomDescription)`
-  font-weight: smaller;
-  color: var(${ThemeColorVariables.disabledForeground});
-`;
-
-const TagBottomItemContainer = styled(BottomItem)`
-  display: flex;
-  align-items: flex-start;
-  opacity: 1;
-  flex-direction: column;
-  padding: 5px;
-`;
-
-const TagBottomItem = styled.div`
-  font-weight: bold;
-`;
-
-const TagBottomDescription = styled.div`
-  font-weight: smaller;
-  color: var(${ThemeColorVariables.disabledForeground});
+  gap: 5px;
 `;
