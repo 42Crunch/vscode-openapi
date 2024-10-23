@@ -263,7 +263,13 @@ export class PlatformStore {
     }
     if (tagDataEntry) {
       if (Array.isArray(tagDataEntry)) {
-        tagIds.push(...tagDataEntry.map((tagEntry) => tagEntry.tagId));
+        const platformTags = await getTags(this.getConnection(), this.logger);
+        tagIds.push(
+          ...getActiveTagsIds(
+            tagDataEntry.map((tagEntry) => tagEntry.tagId),
+            platformTags
+          )
+        );
       } else {
         tagIds.push(...(await this.getTagsFromApi(tagDataEntry.collectionId, tagDataEntry.apiId)));
       }
@@ -456,9 +462,21 @@ export class PlatformStore {
   }
 
   async getTagsFromApi(collectionId: string, apiId: string): Promise<string[]> {
+    const colls = await this.getAllCollections();
+    const myColls = colls.filter((col) => col.desc.id === collectionId);
+    if (myColls.length === 0) {
+      throw new Error(
+        `The collection "${collectionId}" is not found. Please change the file api link.`
+      );
+    }
     const resp = await listApis(collectionId, this.getConnection(), this.logger);
-    const tags = resp.list.filter((api) => api.desc.id === apiId)[0]?.tags;
+    const myApis = resp.list.filter((api) => api.desc.id === apiId);
+    if (myApis.length === 0) {
+      throw new Error(`The api "${apiId}" is not found. Please change the file api link.`);
+    }
+    const tags = myApis[0]?.tags;
     const tagIds: string[] = [];
+    // Should we warn a user if the linked api has no tags?
     if (tags && tags.length > 0) {
       const allTags = await this.getTags();
       const adminTagIds = new Set(
@@ -608,6 +626,22 @@ function getMandatoryTagsIds(tags: string[], platformTags: Tag[]): string[] {
         `The mandatory tag "${tag}" is not found. Please change the mandatory tags in your settings.`
       );
     }
+  }
+  return tagIds;
+}
+
+function getActiveTagsIds(tagIds: string[], platformTags: Tag[]): string[] {
+  const deadTagIds = [];
+  const activeTagIds = new Set<string>(platformTags.map((tag) => tag.tagId));
+  for (const tagId of tagIds) {
+    if (!activeTagIds.has(tagId)) {
+      deadTagIds.push(tagId);
+    }
+  }
+  if (deadTagIds.length > 0) {
+    throw new Error(
+      `The following tags are not found: ${deadTagIds.join(", ")}. Please change the file tags.`
+    );
   }
   return tagIds;
 }
