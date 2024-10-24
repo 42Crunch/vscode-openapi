@@ -6,8 +6,7 @@
 import * as vscode from "vscode";
 import got from "got";
 
-const TOKEN_URL = "https://stateless.42crunch.com/api/v1/anon/token";
-const ARTICLES_URL = "https://platform.42crunch.com/kdb/audit-with-yaml.json";
+import { freemiumdUrl, kdbUrl } from "@xliic/common/endpoints";
 
 let cachedArticles: Promise<any> | undefined = undefined;
 
@@ -27,7 +26,7 @@ async function downloadArticles(): Promise<any> {
     },
     async (progress, cancellationToken): Promise<any> => {
       try {
-        const response = await got(ARTICLES_URL);
+        const response = await got(kdbUrl);
         return JSON.parse(response.body);
       } catch (error) {
         throw new Error(`Failed to read articles.json: ${error}`);
@@ -37,7 +36,7 @@ async function downloadArticles(): Promise<any> {
 }
 
 export async function requestToken(email: string) {
-  const response = await got(TOKEN_URL, {
+  const response = await got(`${freemiumdUrl}/api/v1/anon/token`, {
     method: "POST",
     form: { email },
     headers: {
