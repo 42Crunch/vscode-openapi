@@ -107,6 +107,10 @@ const CenterTextContainer = styled.div`
 
 const CrunchMainLogoContainer = styled.div`
   margin-bottom: 30px;
+  > svg {
+    width: 60px;
+    height: 60px;
+  }
 `;
 
 const Title = styled.p`
