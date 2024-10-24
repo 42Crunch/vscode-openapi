@@ -104,7 +104,7 @@ function SelectPanel({
     type === "collection"
       ? useGetCollectionsQuery()
       : useGetApisFromCollectionQuery(getQueryParameter());
-  const options: SelectOption<ResponseEntry>[] = [];
+  let options: SelectOption<ResponseEntry>[] = [];
   if (data) {
     data.forEach((entry) =>
       options.push({
@@ -115,6 +115,10 @@ function SelectPanel({
     );
   }
   const option = options?.filter((o) => o.id === selectedOptionId)[0];
+  if (option) {
+    // Do not suggest the option if it is already selected
+    options = options?.filter((o) => o.id !== option.id);
+  }
   return (
     <Container>
       <Header>
