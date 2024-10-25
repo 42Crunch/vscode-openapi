@@ -20,6 +20,7 @@ export const Test = styled.div`
   }
   > div:last-child {
     flex: 1;
+    align-self: stretch;
   }
 `;
 
