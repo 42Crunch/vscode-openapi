@@ -21,6 +21,8 @@ export function TagsSelector({
 }) {
   const options: SelectOption<Category>[] = [];
   if (categories) {
+    // Move not selectable tags down the list
+    categories.sort((a, b) => (a.onlyAdminCanTag ? 1 : 0) - (b.onlyAdminCanTag ? 1 : 0));
     categories.forEach((item) =>
       options.push({
         id: item.categoryId,
@@ -54,55 +56,57 @@ export function TagsSelector({
             {item.value.onlyAdminCanTag && (
               <CategoryWarningNoteSpan>Only admin can tag</CategoryWarningNoteSpan>
             )}
-            <CategoryTagsContainer key={`${item.value.categoryId}${index}`}>
-              {!item.value.multipleChoicesAllowed && (
-                <TagRadioButtonGroup
-                  value={getRadioGroupDefaultValue(item.value, selectedTagIds)}
-                  onValueChange={(tagId: string) => {
-                    const category = item.value;
-                    if (category.onlyAdminCanTag) {
-                      return;
-                    }
-                    // Last argument is always true as this hadler
-                    // is called only if radio button gets selected
-                    onTagSelected(category.categoryId, tagId, true);
-                  }}
-                >
-                  {item.value.tags
-                    .filter((tag) => isCategoryOrTagVisible(item.value, tag, inputValue))
-                    .map((tag, tagIndex) => {
-                      return (
-                        <TagRadioButton
-                          key={`${tag.tagId}${tagIndex}`}
-                          category={item.value}
-                          tag={tag}
-                          checked={selectedTagIds.has(tag.tagId)}
-                          inputValue={inputValue}
-                          onTagSelected={onTagSelected}
-                        ></TagRadioButton>
-                      );
-                    })}
-                </TagRadioButtonGroup>
-              )}
-              {item.value.multipleChoicesAllowed && (
-                <>
-                  {item.value.tags
-                    .filter((tag) => isCategoryOrTagVisible(item.value, tag, inputValue))
-                    .map((tag, tagIndex) => {
-                      return (
-                        <TagCheckboxButton
-                          key={`${tag.tagId}${tagIndex}`}
-                          category={item.value}
-                          tag={tag}
-                          checked={selectedTagIds.has(tag.tagId)}
-                          inputValue={inputValue}
-                          onTagSelected={onTagSelected}
-                        ></TagCheckboxButton>
-                      );
-                    })}
-                </>
-              )}
-            </CategoryTagsContainer>
+            {!item.value.onlyAdminCanTag && (
+              <CategoryTagsContainer key={`${item.value.categoryId}${index}`}>
+                {!item.value.multipleChoicesAllowed && (
+                  <TagRadioButtonGroup
+                    value={getRadioGroupDefaultValue(item.value, selectedTagIds)}
+                    onValueChange={(tagId: string) => {
+                      const category = item.value;
+                      if (category.onlyAdminCanTag) {
+                        return;
+                      }
+                      // Last argument is always true as this hadler
+                      // is called only if radio button gets selected
+                      onTagSelected(category.categoryId, tagId, true);
+                    }}
+                  >
+                    {item.value.tags
+                      .filter((tag) => isCategoryOrTagVisible(item.value, tag, inputValue))
+                      .map((tag, tagIndex) => {
+                        return (
+                          <TagRadioButton
+                            key={`${tag.tagId}${tagIndex}`}
+                            category={item.value}
+                            tag={tag}
+                            checked={selectedTagIds.has(tag.tagId)}
+                            inputValue={inputValue}
+                            onTagSelected={onTagSelected}
+                          ></TagRadioButton>
+                        );
+                      })}
+                  </TagRadioButtonGroup>
+                )}
+                {item.value.multipleChoicesAllowed && (
+                  <>
+                    {item.value.tags
+                      .filter((tag) => isCategoryOrTagVisible(item.value, tag, inputValue))
+                      .map((tag, tagIndex) => {
+                        return (
+                          <TagCheckboxButton
+                            key={`${tag.tagId}${tagIndex}`}
+                            category={item.value}
+                            tag={tag}
+                            checked={selectedTagIds.has(tag.tagId)}
+                            inputValue={inputValue}
+                            onTagSelected={onTagSelected}
+                          ></TagCheckboxButton>
+                        );
+                      })}
+                  </>
+                )}
+              </CategoryTagsContainer>
+            )}
           </>
         );
       }}
