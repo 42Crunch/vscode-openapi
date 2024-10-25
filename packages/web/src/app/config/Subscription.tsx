@@ -1,6 +1,7 @@
 import styled from "styled-components";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { upgradeUrl } from "@xliic/common/endpoints";
 
 import { Banner, ErrorBanner } from "../../components/Banner";
 import { useGetSubscriptionQuery } from "../../features/http-client/freemiumd-api";
@@ -45,13 +46,7 @@ export default function Subscription({ token }: { token: string }) {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                dispatch(
-                  openLink(
-                    `https://42crunch.com/single-user-pricing/?email=${encodeURIComponent(
-                      data.userEmail
-                    )}`
-                  )
-                );
+                dispatch(openLink(`${upgradeUrl}?email=${encodeURIComponent(data.userEmail)}`));
               }}
             >
               Upgrade
@@ -63,11 +58,7 @@ export default function Subscription({ token }: { token: string }) {
                 e.preventDefault();
                 e.stopPropagation();
                 dispatch(
-                  openLink(
-                    `https://billing.stripe.com/p/login/3csaGd9xzf5k7n2aEE?prefilled_email=${encodeURIComponent(
-                      data.userEmail
-                    )}`
-                  )
+                  openLink(`${upgradeUrl}?prefilled_email=${encodeURIComponent(data.userEmail)}`)
                 );
               }}
             >

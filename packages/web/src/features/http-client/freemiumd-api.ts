@@ -1,7 +1,10 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
+
+import { HttpConfig, HttpRequest } from "@xliic/common/http";
+import { freemiumdUrl } from "@xliic/common/endpoints";
+
 import { webappHttpClient } from "../../core/http-client/webapp-client";
 import { sendHttpRequest } from "./slice";
-import { HttpConfig, HttpRequest } from "@xliic/common/http";
 
 export type Subscription = {
   userEmail: string;
@@ -34,7 +37,7 @@ async function webappBaseQuery(
   { signal, dispatch, getState }: any,
   extraOptions: any
 ) {
-  const url = `https://stateless.42crunch.com/api/v1/anon/${args.path}`;
+  const url = `${freemiumdUrl}/api/v1/anon/${args.path}`;
 
   const client = webappHttpClient(
     { https: { rejectUnauthorized: true } },

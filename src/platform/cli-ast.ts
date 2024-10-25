@@ -27,6 +27,7 @@ import * as vscode from "vscode";
 import { CliDownloadProgress, CliTestResult, Config } from "@xliic/common/config";
 import { SimpleEnvironment } from "@xliic/common/env";
 import { Result } from "@xliic/result";
+import { cliFreemiumdHost } from "@xliic/common/endpoints";
 
 import { Configuration, configuration } from "../configuration";
 import { getAnondCredentials, getPlatformCredentials } from "../credentials";
@@ -260,8 +261,8 @@ export async function runScanWithCliBinary(
     "report.json",
     "--output-format",
     "json",
-    // "--freemium-host",
-    // "stateless.dev.42crunch.com:443",
+    "--freemium-host",
+    cliFreemiumdHost,
     "--verbose",
     "error",
     "--user-agent",
@@ -411,8 +412,8 @@ export async function runAuditWithCliBinary(
     "report.json",
     "--output-format",
     "json",
-    // "--freemium-host",
-    // "stateless.dev.42crunch.com:443",
+    "--freemium-host",
+    cliFreemiumdHost,
     "--verbose",
     "error",
     "--user-agent",
