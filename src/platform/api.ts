@@ -44,6 +44,19 @@ function gotOptions(
     hooks: {
       afterResponse: [logRequest],
     },
+    retry: {
+      errorCodes: [
+        "ENOMEM",
+        "ETIMEDOUT",
+        "ECONNRESET",
+        "EADDRINUSE",
+        "ECONNREFUSED",
+        "EPIPE",
+        "ENOTFOUND",
+        "ENETUNREACH",
+        "EAI_AGAIN",
+      ],
+    },
   };
 }
 
