@@ -19,7 +19,7 @@ import { PlatformStore } from "../../../platform/stores/platform-store";
 import * as scandManagerApi from "../../../platform/api-scand-manager";
 import { Logger } from "../../../platform/types";
 import { loadConfig, saveConfig } from "../../../util/config";
-import { downloadCli, testCli } from "../../../platform/cli-ast";
+import { checkForCliUpdate, downloadCli, testCli } from "../../../platform/cli-ast";
 import { transformValues } from "./utils-gen";
 import { getCliUpdate } from "../../../platform/cli-ast-update";
 import { executeHttpRequest } from "../../http-handler";
@@ -110,9 +110,17 @@ export class ConfigWebView extends WebView<Webapp> {
     },
 
     testCli: async () => {
+      const result = await testCli(this.config!.cliDirectoryOverride);
+
+      // if the binary was found, check for updates
+      // otherwise the download button will be shown in the web UI
+      if (result.success) {
+        checkForCliUpdate(this.config!.repository, this.config!.cliDirectoryOverride);
+      }
+
       return {
         command: "showCliTest",
-        payload: await testCli(this.config!.cliDirectoryOverride),
+        payload: result,
       };
     },
 
