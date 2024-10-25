@@ -4,7 +4,7 @@ export type ApiEntry = {
   collectionId: string;
   collectionName: string;
 };
-export type TagEntry = { tagId: string; tagName: string };
+export type TagEntry = { tagId: string; tagName: string; categoryName: string };
 export type TagDataEntry = TagEntry[] | ApiEntry | null;
 export type TagData = Record<string, TagDataEntry>;
 

@@ -48,7 +48,7 @@ import {
   UserData,
   Tag,
 } from "../types";
-import { TagDataEntry } from "@xliic/common/tags";
+import { TagDataEntry, TagEntry } from "@xliic/common/tags";
 
 export interface CollectionsView {
   collections: CollectionData[];
@@ -264,12 +264,7 @@ export class PlatformStore {
     if (tagDataEntry) {
       if (Array.isArray(tagDataEntry)) {
         const platformTags = await getTags(this.getConnection(), this.logger);
-        tagIds.push(
-          ...getActiveTagsIds(
-            tagDataEntry.map((tagEntry) => tagEntry.tagId),
-            platformTags
-          )
-        );
+        tagIds.push(...getActiveTagsIds(tagDataEntry, platformTags));
       } else {
         tagIds.push(...(await this.getTagsFromApi(tagDataEntry.collectionId, tagDataEntry.apiId)));
       }
@@ -462,13 +457,6 @@ export class PlatformStore {
   }
 
   async getTagsFromApi(collectionId: string, apiId: string): Promise<string[]> {
-    const colls = await this.getAllCollections();
-    const myColls = colls.filter((col) => col.desc.id === collectionId);
-    if (myColls.length === 0) {
-      throw new Error(
-        `The collection "${collectionId}" is not found. Please change the file api link.`
-      );
-    }
     const resp = await listApis(collectionId, this.getConnection(), this.logger);
     const myApis = resp.list.filter((api) => api.desc.id === apiId);
     if (myApis.length === 0) {
@@ -476,7 +464,6 @@ export class PlatformStore {
     }
     const tags = myApis[0]?.tags;
     const tagIds: string[] = [];
-    // Should we warn a user if the linked api has no tags?
     if (tags && tags.length > 0) {
       const allTags = await this.getTags();
       const adminTagIds = new Set(
@@ -630,20 +617,20 @@ function getMandatoryTagsIds(tags: string[], platformTags: Tag[]): string[] {
   return tagIds;
 }
 
-function getActiveTagsIds(tagIds: string[], platformTags: Tag[]): string[] {
-  const deadTagIds = [];
+function getActiveTagsIds(tagEntries: TagEntry[], platformTags: Tag[]): string[] {
+  const deadTags = [];
   const activeTagIds = new Set<string>(platformTags.map((tag) => tag.tagId));
-  for (const tagId of tagIds) {
-    if (!activeTagIds.has(tagId)) {
-      deadTagIds.push(tagId);
+  for (const tagEntry of tagEntries) {
+    if (!activeTagIds.has(tagEntry.tagId)) {
+      deadTags.push(`${tagEntry.categoryName}: ${tagEntry.tagName}`);
     }
   }
-  if (deadTagIds.length > 0) {
+  if (deadTags.length > 0) {
     throw new Error(
-      `The following tags are not found: ${deadTagIds.join(", ")}. Please change the file tags.`
+      `The following tags are not found: ${deadTags.join(", ")}. Please change the file tags.`
     );
   }
-  return tagIds;
+  return tagEntries.map((tagEntry) => tagEntry.tagId);
 }
 
 function delay(ms: number) {

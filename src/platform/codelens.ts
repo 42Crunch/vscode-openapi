@@ -81,7 +81,9 @@ export class PlatformTagCodelensProvider implements vscode.CodeLensProvider<Tags
       const data = tagsData[targetFileName];
       if (data) {
         if (Array.isArray(data)) {
-          data.forEach((tagEntry) => selectedTagNames.push(tagEntry.tagName));
+          data.forEach((tagEntry) =>
+            selectedTagNames.push(`${tagEntry.categoryName}: ${tagEntry.tagName}`)
+          );
           title = `Tags: ${selectedTagNames.length} selected`;
           tooltip = selectedTagNames.length > 0 ? "Tags: " + `${selectedTagNames.join(", ")}` : "";
         } else {

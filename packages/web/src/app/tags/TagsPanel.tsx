@@ -204,7 +204,11 @@ function getTagDataToSave(
   for (const category of categories) {
     for (const tag of category.tags) {
       if (selectedTagIds.has(tag.tagId)) {
-        tagEntries.push({ tagId: tag.tagId, tagName: tag.tagName });
+        tagEntries.push({
+          tagId: tag.tagId,
+          tagName: tag.tagName,
+          categoryName: category.categoryName,
+        });
       }
     }
   }
