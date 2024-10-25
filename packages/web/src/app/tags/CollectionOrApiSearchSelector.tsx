@@ -22,6 +22,7 @@ export function CollectionOrApiSearchSelector({
       options={options}
       placeholder={(type === "collection" ? "Collection" : "API") + " name or UUID"}
       keepOpen={false}
+      applyHoverCss={true}
       filter={(
         items: SelectOption<ResponseEntry>[],
         inputValue: string

@@ -3,11 +3,11 @@ import styled from "styled-components";
 import { Category, Tag } from "../../features/http-client/platform-api";
 import { Check, Circle } from "../../icons";
 import {
-  Container,
   Indicator as CheckIndicator,
+  Container,
   MediumCheckboxRoot,
 } from "../../new-components/Checkbox";
-import { Group, Indicator as RadioIndicator, Item, Option } from "../../new-components/RadioGroup";
+import { Group, Item, Option, Indicator as RadioIndicator } from "../../new-components/RadioGroup";
 import { SearchSelector, SearchSpan, SelectOption } from "./SearchSelector";
 
 export function TagsSelector({
@@ -36,6 +36,7 @@ export function TagsSelector({
       options={options}
       placeholder="Tag or category name"
       keepOpen={true}
+      applyHoverCss={false}
       filter={(items: SelectOption<Category>[], inputValue: string): SelectOption<Category>[] => {
         const searchValue = inputValue.toLowerCase();
         return items.filter((category) => {
@@ -61,15 +62,6 @@ export function TagsSelector({
                 {!item.value.multipleChoicesAllowed && (
                   <TagRadioButtonGroup
                     value={getRadioGroupDefaultValue(item.value, selectedTagIds)}
-                    onValueChange={(tagId: string) => {
-                      const category = item.value;
-                      if (category.onlyAdminCanTag) {
-                        return;
-                      }
-                      // Last argument is always true as this hadler
-                      // is called only if radio button gets selected
-                      onTagSelected(category.categoryId, tagId, true);
-                    }}
                   >
                     {item.value.tags
                       .filter((tag) => isCategoryOrTagVisible(item.value, tag, inputValue))
@@ -159,23 +151,27 @@ function TagCheckboxButton({
   onTagSelected: (categoryId: string, tagId: string, selected: boolean) => void;
 }) {
   return (
-    <Container>
-      <MediumCheckboxRoot
-        checked={checked}
-        onCheckedChange={(checked) => {
-          if (typeof checked === "boolean") {
-            onTagSelected(category.categoryId, tag.tagId, checked);
-          }
-        }}
-      >
+    <CheckboxContainer
+      onClick={(e) => {
+        if (tag.onlyAdminCanTag) {
+          return;
+        }
+        const button = e.currentTarget.children[0];
+        if (button) {
+          const isNowChecked = (button as any).dataset.state === "checked";
+          onTagSelected(category.categoryId, tag.tagId, !isNowChecked);
+        }
+      }}
+    >
+      <MediumCheckboxRoot checked={checked}>
         <CheckIndicator>
           <Check />
         </CheckIndicator>
       </MediumCheckboxRoot>
-      <label style={{ paddingLeft: `${tag.onlyAdminCanTag ? "20px" : "0px"}` }}>
+      <label>
         <SearchSpan value={tag.tagName} searchValue={inputValue}></SearchSpan>
       </label>
-    </Container>
+    </CheckboxContainer>
   );
 }
 
@@ -193,35 +189,69 @@ function TagRadioButton({
   onTagSelected: (categoryId: string, tagId: string, selected: boolean) => void;
 }) {
   return (
-    <Option>
+    <RadioButtonContainer
+      onClick={(e) => {
+        if (tag.onlyAdminCanTag) {
+          return;
+        }
+        const button = e.currentTarget.children[0];
+        if (button) {
+          const isNowChecked = (button as any).dataset.state === "checked";
+          onTagSelected(category.categoryId, tag.tagId, !isNowChecked);
+        }
+      }}
+    >
       {!tag.onlyAdminCanTag && (
         <Item value={tag.tagId}>
           <RadioIndicator>
-            <Circle
-              // Dirty workaround, but we have to catch click events on the svg element as
-              // radix radio group supports neither toggling nor unclick event handling
-              onClick={(e) => {
-                const mySpan = e.currentTarget.parentElement;
-                if (mySpan && mySpan.tagName === "SPAN") {
-                  const checked = mySpan.dataset.state === "checked";
-                  if (checked && !category.onlyAdminCanTag) {
-                    // This call will make getRadioGroupDefaultValue return empty value implicitly
-                    // Empty default value for the radio group is interpreted as nothing is selected
-                    // Thus if a user clicks on the same radio button again, it fires onValueChange event and toggle
-                    onTagSelected(category.categoryId, tag.tagId, false);
-                  }
-                }
-              }}
-            />
+            <Circle />
           </RadioIndicator>
         </Item>
       )}
-      <label style={{ paddingLeft: `${tag.onlyAdminCanTag ? "20px" : "0px"}` }}>
+      <label>
         <SearchSpan value={tag.tagName} searchValue={inputValue}></SearchSpan>
       </label>
-    </Option>
+    </RadioButtonContainer>
   );
 }
+
+const CheckboxContainer = styled(Container)`
+  padding: 2px;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 3px;
+  border-color: var(${ThemeColorVariables.dropdownBackground});
+  cursor: pointer;
+  & > button {
+    cursor: pointer;
+  }
+  & > label {
+    cursor: pointer;
+  }
+  :hover {
+    background-color: var(${ThemeColorVariables.listHoverBackground});
+    border-color: var(${ThemeColorVariables.border});
+  }
+`;
+
+const RadioButtonContainer = styled(Option)`
+  padding: 2px;
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 3px;
+  border-color: var(${ThemeColorVariables.dropdownBackground});
+  cursor: pointer;
+  & > button {
+    cursor: pointer;
+  }
+  & > label {
+    cursor: pointer;
+  }
+  :hover {
+    background-color: var(${ThemeColorVariables.listHoverBackground});
+    border-color: var(${ThemeColorVariables.border});
+  }
+`;
 
 const TagRadioButtonGroup = styled(Group)`
   flex-direction: column;
@@ -245,5 +275,4 @@ const CategoryTagsContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 5px;
-  padding-bottom: 15px;
 `;

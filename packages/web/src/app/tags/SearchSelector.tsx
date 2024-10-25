@@ -14,6 +14,7 @@ export function SearchSelector<T>({
   options,
   placeholder,
   keepOpen,
+  applyHoverCss,
   filter,
   renderer,
   onItemSelected,
@@ -21,6 +22,7 @@ export function SearchSelector<T>({
   options: SelectOption<T>[];
   placeholder: string;
   keepOpen: boolean;
+  applyHoverCss: boolean;
   filter: (items: SelectOption<T>[], inputValue: string) => SelectOption<T>[];
   renderer: (item: SelectOption<T>, index: number, inputValue: string) => JSX.Element;
   onItemSelected: (item: SelectOption<T>) => void;
@@ -73,6 +75,7 @@ export function SearchSelector<T>({
   });
   const buttonProps = getToggleButtonProps();
   delete buttonProps.ref;
+  const DownShiftList = applyHoverCss ? DropDownList : DropDownListDefault;
   return (
     <MainComboboxContainer>
       <DownShiftContainer>
@@ -82,14 +85,14 @@ export function SearchSelector<T>({
         />
         <AngleDown {...buttonProps} />
       </DownShiftContainer>
-      <DropDownList {...getMenuProps()} isOpen={isOpen}>
+      <DownShiftList {...getMenuProps()} isOpen={isOpen}>
         {isOpen &&
           items.map((item, index) => (
             <DropDownListElement key={`li-${index}`} {...getItemProps({ item, index })}>
               {renderer(item, index, inputValue)}
             </DropDownListElement>
           ))}
-      </DropDownList>
+      </DownShiftList>
     </MainComboboxContainer>
   );
 }
@@ -155,7 +158,7 @@ const DownShiftInput = styled.input`
   cursor: pointer;
 `;
 
-const DropDownList = styled.ul`
+const DropDownListDefault = styled.ul`
   position: absolute;
   z-index: 1;
   left: 0;
@@ -177,11 +180,6 @@ const DropDownList = styled.ul`
 
   & > li {
     padding: 8px 4px;
-    cursor: pointer;
-  }
-
-  & > li:hover {
-    background-color: var(${ThemeColorVariables.listHoverBackground});
   }
 
   & > li[aria-disabled="true"] {
@@ -193,13 +191,23 @@ const DropDownList = styled.ul`
   }
 `;
 
+const DropDownList = styled(DropDownListDefault)`
+  & > li {
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 3px;
+    border-color: var(${ThemeColorVariables.dropdownBackground});
+    cursor: pointer;
+  }
+
+  & > li:hover {
+    background-color: var(${ThemeColorVariables.listHoverBackground});
+    border-color: var(${ThemeColorVariables.border});
+  }
+`;
+
 const DropDownListElement = styled.li`
   display: flex;
   gap: 5px;
   flex-direction: column;
-  padding-bottom: 0.5rem;
-  padding-top: 0.5rem;
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-  cursor: pointer;
 `;
