@@ -4,7 +4,7 @@ This [Visual Studio Code](https://code.visualstudio.com/) (VS Code) [extension](
 
 The extension also comes with the 42Crunch API testing tools (Audit and Scan) so that you can check the quality, conformance and security of your APIs directly in VS Code. Stop malformed data and security vulnerabilities sneaking into your code and prevent API attacks such as BOLA, BPLA and other OWASP API Top 10 risks.
 
-You can use these API testing tools by registering for our Freemium service within the extension, with free monthly test allowances. Simply click on the Audit or Scan icon in the Editor tool.
+You can use these API testing tools by registering for our Freemium service within the extension, with free monthly test allowances. Simply click on the Audit or Scan icon in the Editor toolbar.
 
 42Crunch subscribers with an account on the 42Crunch platform have unlimited usage of Audit and Scan and can also directly access API collections and security risk assessment reports.
 
@@ -15,7 +15,7 @@ Both OAS v2 and v3.0.x are supported, in JSON or YAML format.
 The plugin supports code navigation, linting, SwaggerUI or ReDoc preview, IntelliSense, schema enforcement and generation, schema definition links and snippets.
 
 - [Creating OpenAPI files](#creating-openapi-files)
-- [Navigating an API definition - View elements in the explorer view](#navigating-an-api-definition)
+- [Navigating an API definition](#navigating-an-api-definition)
 - [Add new elements](#add-new-elements-in-the-openapi-explorer)
 - [Use IntelliSense](#use-intellisense)
 - [Jump to a reference](#jump-to-a-reference)
@@ -25,7 +25,7 @@ The plugin supports code navigation, linting, SwaggerUI or ReDoc preview, Intell
 - [Generate JSON schemas based on the response content](#generate-json-schemas-based-on-the-response-content)
 - [Configure authentication for external references in OpenAPI files](#configure-authentication-for-external-references-in-openapi-files)
 - Split your OpenAPI into multiple files linked via $ref
-- Use quick fixes and bulk quick fixes
+- Use quick fixes to automatically resolve problems in your OpenAPI
 - Use Code snippets to add paths, operations, components, security
 
 ## Activating API Audit
@@ -94,8 +94,8 @@ You can home in on elements in the OpenAPI explorer view, or jump directly to th
 
 ### Add new elements in the OpenAPI explorer
 
-1. In OpenAPI explorer pane, go to the section where you want to add a new element and right on the relevant node to open a context menu.
-2. Click the item you want to add from the dropdown list.
+1. In OpenAPI explorer pane, go to the section where you want to add a new element and right-click on the relevant node to open a context menu.
+2. Click the item you want to add from the list.
 
 ![Add new API path and verb](./images/Add%20paths%20and%20verbs.gif?raw=true)
 
@@ -143,7 +143,7 @@ To change the default OpenAPI Preview rendering engine:
 
 With "Try it", you can invoke operations defined in your OpenAPI directly from VS Code:
 
-- Click on "Try it" in the code lens which is displayed right below the HTTP verb (e.g. "get", "post") of your operation and in the examples section.
+- Click on "Try it" code lens which is displayed right below the HTTP verb (e.g. "get", "post") of your operation and in the examples section.
 - The payload data will be generated based on the request JSON Schema, or the first example available. You can edit this information before sending the request.
 
 ![TryIt view](./images/tryit.png)
@@ -210,7 +210,7 @@ Watch this short [video](https://42crunch.com/free-user-faq/#Free-API-Security-T
 
 ### Running an audit
 
-You can use OpenAPI extension to check the quality of your API as you work on it. You can run the audit directly from VS Code by clicking the **42C** button in the upper right corner. Alternatively, you can run an audit for an individual endpoint.
+You can use OpenAPI extension to check the quality of your API as you work on it. You can run the audit directly from VS Code by clicking the Audit button in the toolbar. Alternatively, you can run an audit for an individual endpoint using the code lens.
 
 ![](./images/StartAudit.png)
 
@@ -272,7 +272,7 @@ APIs which thoroughly enforce compliance to an established contract are far more
 
 ### Launching 42Crunch Scan
 
-Scans are run at the operation level only. We recommend you use the 42Crunch API Security Testing Binary to run scans. The alternative is to run a docker image locally. 42Crunch customers can also leverage our [scand manager](https://github.com/42Crunch/scand-manager), by deploying an API-driven scan engine on Kubernetes.
+We recommend you use the 42Crunch API Security Testing Binary to run scans. The alternative is to run a docker image locally. 42Crunch customers can also leverage our [scand manager](https://github.com/42Crunch/scand-manager), by deploying an API-driven scan engine on Kubernetes.
 
 In order to run a scan, you will need :
 
@@ -292,7 +292,7 @@ When you first launch a scan, you are presented with the scan configuration view
 
   Similarly to requests, you can test an individual scenario to ensure it is built correctly before starting a scan: the scan engine will execute the scenario and if successful, launch automatically dozens of tests using the data provided in the OpenAPI file. The scan will send bad verbs, bad data types, bad data formats as well as authentication tests.
 
-  ![](/Volumes/MYDATA/Product/vscode-openapi/images/ScanScenarios.png)
+  ![](./images/ScanScenarios.png)
 
 Once the scan has run, you are presented with a results page. The summary shows if the scan got a testing baseline by running the HappyPath test. Additional testing results are visible from the tests list. For each issue, you can easily reproduce the problem using a curl request.
 
