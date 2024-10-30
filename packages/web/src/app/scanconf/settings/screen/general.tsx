@@ -48,6 +48,12 @@ function General() {
         />
 
         <Input
+          name="reportMaxSize"
+          label="Max scan report size"
+          description="The maximum scan report size (in bytes). The scan stops when the size limit is reached."
+        />
+
+        <Input
           name="reportMaxIssues"
           label="Max reported issues"
           description="The maximum number of problems that Conformance Scan can uncover and include in the scan report before it must stop. This setting helps to control the report size: you can iterate on scanning your API, and as you fix the problems found in previous scans, the scan keeps including subsequently discovered problems."

@@ -14,6 +14,7 @@ export const schema = z.object({
   responseFollowRedirection: z.boolean(),
   maxScanDuration: z.coerce.number(),
   reportMaxIssues: z.coerce.number(),
+  reportMaxSize: z.coerce.number(),
   responseMaxBodySizeScan: z.coerce.number(),
   reportMaxHttpResponseSizeHappyPath: z.coerce.number(),
   reportMaxBodySizeHappyPath: z.coerce.number(),
