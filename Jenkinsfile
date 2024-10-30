@@ -5,6 +5,10 @@ pipeline {
         buildDiscarder(logRotator(numToKeepStr:'5'))
     }
 
+    triggers {
+        pollSCM('H */4 * * 1-5')
+    }
+
     stages {
         stage('Checkout sources') {
             steps {
