@@ -1,5 +1,5 @@
 import { TagData } from "@xliic/common/tags";
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import RadioGroup from "../../new-components/RadioGroup";
 import { ApiPanel } from "./ApiPanel";
@@ -28,6 +28,12 @@ export function SelectionPanel({
   const [selectionOption, setSelectionOption] = React.useState<string>(
     data === null || Array.isArray(data) ? "option-select-tag" : "option-bind-api"
   );
+  useEffect(() => {
+    // Recalc selection option value if targetFileName has been changed
+    setSelectionOption(
+      data === null || Array.isArray(data) ? "option-select-tag" : "option-bind-api"
+    );
+  }, [targetFileName, data]);
   return (
     <Container>
       <Title>Specify tags, or link the platform API to {targetFileName}</Title>
