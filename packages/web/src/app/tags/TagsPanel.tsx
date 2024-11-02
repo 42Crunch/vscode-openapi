@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-import { TagData, TagDataEntry, TagEntry } from "@xliic/common/tags";
+import { TagData, TagEntry } from "@xliic/common/tags";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { ErrorBanner } from "../../components/Banner";
@@ -27,10 +27,10 @@ import { useAppDispatch } from "./store";
 
 export function TagsPanel({
   targetFileName,
-  tagDataEntry,
+  tagData,
 }: {
   targetFileName: string;
-  tagDataEntry: TagEntry[];
+  tagData: TagData;
 }) {
   const {
     data: categoryList,
@@ -48,8 +48,9 @@ export function TagsPanel({
   );
   // Keep all tag selections in local state
   const initSelectedTagIds = new Set<string>();
-  if (tagDataEntry) {
-    for (const tagEntry of tagDataEntry) {
+  // todo better for type
+  if (tagData && tagData[targetFileName] && Array.isArray(tagData[targetFileName])) {
+    for (const tagEntry of tagData[targetFileName]) {
       initSelectedTagIds.add(tagEntry.tagId);
     }
   }

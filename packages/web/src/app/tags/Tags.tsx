@@ -1,5 +1,5 @@
-import { ApiEntry, TagData, TagEntry } from "@xliic/common/tags";
-import React, { useEffect } from "react";
+import { TagData } from "@xliic/common/tags";
+import React from "react";
 import styled from "styled-components";
 import RadioGroup from "../../new-components/RadioGroup";
 import { ApiPanel } from "./ApiPanel";
@@ -28,12 +28,6 @@ export function SelectionPanel({
   const [selectionOption, setSelectionOption] = React.useState<string>(
     data === null || Array.isArray(data) ? "option-select-tag" : "option-bind-api"
   );
-  useEffect(() => {
-    // Recalc selection option value if targetFileName has been changed
-    setSelectionOption(
-      data === null || Array.isArray(data) ? "option-select-tag" : "option-bind-api"
-    );
-  }, [targetFileName, data]);
   return (
     <Container>
       <Title>Specify tags, or link the platform API to {targetFileName}</Title>
@@ -47,11 +41,11 @@ export function SelectionPanel({
           setSelectionOption(value);
         }}
       />
-      {selectionOption === "option-select-tag" && Array.isArray(data) && (
-        <TagsPanel targetFileName={targetFileName} tagDataEntry={data as TagEntry[]} />
+      {selectionOption === "option-select-tag" && (
+        <TagsPanel targetFileName={targetFileName} tagData={tagData} />
       )}
-      {selectionOption === "option-bind-api" && !Array.isArray(data) && (
-        <ApiPanel targetFileName={targetFileName} tagDataEntry={data as ApiEntry} />
+      {selectionOption === "option-bind-api" && (
+        <ApiPanel targetFileName={targetFileName} tagData={tagData} />
       )}
     </Container>
   );

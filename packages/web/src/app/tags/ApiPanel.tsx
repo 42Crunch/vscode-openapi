@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-import { ApiEntry, TagData, TagDataEntry } from "@xliic/common/tags";
+import { ApiEntry, TagData } from "@xliic/common/tags";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { ErrorBanner } from "../../components/Banner";
@@ -22,16 +22,17 @@ type SelectOptionState = SelectOption<ResponseEntry> | undefined;
 
 export function ApiPanel({
   targetFileName,
-  tagDataEntry,
+  tagData,
 }: {
   targetFileName: string;
-  tagDataEntry: ApiEntry;
+  tagData: TagData;
 }) {
   const dispatch = useAppDispatch();
+  const targetData = tagData[targetFileName];
   // Previously selected ids from IDE
-  const initApiId = tagDataEntry?.apiId;
-  const initColId = tagDataEntry?.collectionId;
-  const initColName = tagDataEntry?.collectionName;
+  const initApiId = Array.isArray(targetData) ? undefined : targetData?.apiId;
+  const initColId = Array.isArray(targetData) ? undefined : targetData?.collectionId;
+  const initColName = Array.isArray(targetData) ? undefined : targetData?.collectionName;
   // Current manually selected options
   const [colOption, setColOption] = React.useState<SelectOptionState>(undefined);
   const [apiOption, setApiOption] = React.useState<SelectOptionState>(undefined);
