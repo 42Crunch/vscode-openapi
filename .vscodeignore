@@ -28,3 +28,5 @@ total-issues.txt
 total-lines.txt
 eslint-report.json
 eslint.config.mjs
+issues-per-1k-lines.txt
+stats.txt

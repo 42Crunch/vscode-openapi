@@ -11,7 +11,7 @@ RUN npm ci
 RUN npm run lint || true
 RUN jq '[.[] | .errorCount + .warningCount] | add' eslint-report.json > total-issues.txt
 # Calculate stats
-RUN echo "scale=3; `cat total-issues.txt` / `cat total-lines.txt` * 1000" | bc -l > issues-per-1k-lines.txt
+RUN echo "`cat total-issues.txt` / `cat total-lines.txt` * 1000" | bc -l > issues-per-1k-lines.txt
 RUN echo "Total lines: `cat total-lines.txt`" > stats.txt
 RUN echo "Total issues: `cat total-issues.txt`" >> stats.txt
 RUN echo "Issues per 1000 lines: `cat issues-per-1k-lines.txt`" >> stats.txt
