@@ -268,6 +268,7 @@ export const HeaderOptionRemoverSpan = styled.span`
 const HeaderOptionContainerTagInfo = styled.div`
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
   > svg {
