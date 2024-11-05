@@ -23,6 +23,7 @@ pipeline {
             steps {
                 sh 'cp /build/*.vsix .'
                 sh 'cp /build/spdx-report.json .'
+                sh 'cp /build/stats.txt .'
                 script {
                     def issues = sh(script: 'cat /build/total-issues.txt', returnStdout: true).trim().toInteger()
                     def lines = sh(script: 'cat /build/total-lines.txt', returnStdout: true).trim().toInteger()
@@ -36,7 +37,7 @@ pipeline {
 
         stage('Archive Artifacts') {
             steps {
-                archiveArtifacts artifacts: '*.vsix, spdx-report.json'
+                archiveArtifacts artifacts: '*.vsix, spdx-report.json, stats.txt'
             }
         }
     }
