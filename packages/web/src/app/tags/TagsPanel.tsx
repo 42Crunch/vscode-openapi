@@ -42,15 +42,11 @@ export function TagsPanel({
 
   // Get all categories (with tags) to show in combobox
   const categories = getCategories(categoryList || [], tagList || []);
-  const tagIdToCategoryMap: Record<string, Category> = {};
-  categories.forEach((category) =>
-    category.tags.forEach((tag) => (tagIdToCategoryMap[tag.tagId] = category))
-  );
   // Keep all tag selections in local state
   const initSelectedTagIds = new Set<string>();
-  // todo better for type
-  if (tagData && tagData[targetFileName] && Array.isArray(tagData[targetFileName])) {
-    for (const tagEntry of tagData[targetFileName]) {
+  const tagEntries = tagData[targetFileName];
+  if (tagData && tagEntries && Array.isArray(tagEntries)) {
+    for (const tagEntry of tagEntries) {
       initSelectedTagIds.add(tagEntry.tagId);
     }
   }
@@ -72,7 +68,20 @@ export function TagsPanel({
         }
       }
     } else {
-      newSelectedTagIds.delete(tagId);
+      if (tagId === "") {
+        // User removes all tags not existing on the server
+        const loadedTagIds = new Set<string>();
+        categories.forEach((category) =>
+          category.tags.forEach((tag) => loadedTagIds.add(tag.tagId))
+        );
+        for (const selTagId of selectedTagIds) {
+          if (!loadedTagIds.has(selTagId)) {
+            newSelectedTagIds.delete(selTagId);
+          }
+        }
+      } else {
+        newSelectedTagIds.delete(tagId);
+      }
     }
     setSelectedTagIds(newSelectedTagIds);
     dispatch(saveTags(getTagDataToSave(targetFileName, categories, newSelectedTagIds)));
@@ -83,13 +92,7 @@ export function TagsPanel({
       <HeaderContainer>
         <Header>
           {loading && <HeaderSpan>Loading data from the server...</HeaderSpan>}
-          {!loading && (
-            <HeaderSelectionSummary
-              targetFileName={targetFileName}
-              categories={categories}
-              selectedTagIds={selectedTagIds}
-            />
-          )}
+          {!loading && <HeaderSelectionSummary selectedTagIds={selectedTagIds} />}
           {!loading && (
             <TagsSelector
               categories={categories}
@@ -111,53 +114,46 @@ export function TagsPanel({
           )}
         </HeaderError>
       </HeaderContainer>
-      <SelectionsContainer
-        categories={categories}
-        selectedTagIds={selectedTagIds}
-        onTagSelected={onTagSelected}
-      />
+      {Array.isArray(tagEntries) && (
+        <SelectionsContainer
+          tagEntries={tagEntries}
+          categories={categories}
+          selectedTagIds={selectedTagIds}
+          onTagSelected={onTagSelected}
+        />
+      )}
     </div>
   );
 }
 
-function HeaderSelectionSummary({
-  targetFileName,
-  categories,
-  selectedTagIds,
-}: {
-  targetFileName: string;
-  categories: Category[];
-  selectedTagIds: Set<string>;
-}) {
-  let selCategoriesCount = 0;
-  for (const category of categories) {
-    for (const tag of category.tags) {
-      if (selectedTagIds.has(tag.tagId)) {
-        selCategoriesCount += 1;
-        break;
-      }
-    }
-  }
+function HeaderSelectionSummary({ selectedTagIds }: { selectedTagIds: Set<string> }) {
   const selTagsCount = selectedTagIds.size;
   return <HeaderSpan>{selTagsCount} tags selected</HeaderSpan>;
 }
 
 function SelectionsContainer({
+  tagEntries,
   categories,
   selectedTagIds,
   onTagSelected,
 }: {
+  tagEntries: TagEntry[];
   categories: Category[];
   selectedTagIds: Set<string>;
   onTagSelected: (categoryId: string, tagId: string, selected: boolean) => void;
 }) {
   return (
     <Container>
-      {getSelectedTags(categories, selectedTagIds).map((item, index) => (
-        <HeaderOptionContainer key={`${item.tagId}${index}`}>
+      {getSelectedTags(tagEntries, categories, selectedTagIds).map((item, index) => (
+        <HeaderOptionContainer key={`${item.tagId}${index}`} isLoaded={item.loaded}>
           <HeaderOptionContainerInfo>
-            <HeaderOptionSpan>{item.fullTagName}</HeaderOptionSpan>
-            <HeaderOptionNoteSpan>UUID: {item.tagId}</HeaderOptionNoteSpan>
+            <HeaderOptionSpan>
+              {item.loaded
+                ? item.fullTagName
+                : "These tags do not exist on the server, please remove them"}
+            </HeaderOptionSpan>
+            {item.loaded && <HeaderOptionNoteSpan>UUID: {item.tagId}</HeaderOptionNoteSpan>}
+            {!item.loaded && <HeaderOptionNoteSpan>{item.fullTagName}</HeaderOptionNoteSpan>}
           </HeaderOptionContainerInfo>
           <HeaderOptionContainerAction>
             <HeaderOptionRemoverSpan
@@ -176,20 +172,43 @@ function SelectionsContainer({
 }
 
 function getSelectedTags(
+  tagEntries: TagEntry[],
   categories: Category[],
   selectedTagIds: Set<string>
-): { categoryId: string; tagId: string; fullTagName: string }[] {
+): { categoryId: string; tagId: string; fullTagName: string; loaded: boolean }[] {
   const res = [];
+  const loadedTagIds = new Set<string>();
   for (const category of categories) {
     for (const tag of category.tags) {
+      loadedTagIds.add(tag.tagId);
       if (selectedTagIds.has(tag.tagId)) {
         res.push({
           categoryId: category.categoryId,
           tagId: tag.tagId,
           fullTagName: category.categoryName + ": " + tag.tagName,
+          loaded: true,
         });
       }
     }
+  }
+  const deadFullTagNames = [];
+  const idToEntry = new Map<string, TagEntry>();
+  tagEntries.forEach((tagEntry) => idToEntry.set(tagEntry.tagId, tagEntry));
+  for (const selTagId of selectedTagIds) {
+    if (!loadedTagIds.has(selTagId)) {
+      const myTagEntry = idToEntry.get(selTagId);
+      if (myTagEntry) {
+        deadFullTagNames.push(myTagEntry.categoryName + ": " + myTagEntry.tagName);
+      }
+    }
+  }
+  if (deadFullTagNames.length > 0) {
+    res.push({
+      categoryId: "",
+      tagId: "",
+      fullTagName: deadFullTagNames.join(", "),
+      loaded: false,
+    });
   }
   return res;
 }

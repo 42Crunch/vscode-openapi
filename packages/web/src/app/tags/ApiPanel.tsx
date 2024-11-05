@@ -5,18 +5,16 @@ import { ApiEntry, TagData } from "@xliic/common/tags";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { ErrorBanner } from "../../components/Banner";
-import { SelectOption } from "./SearchSelector";
-import { CollectionOrApiSearchSelector } from "./CollectionOrApiSearchSelector";
-import { saveTags, saveTagsInStateOnly } from "./slice";
-import { useAppDispatch } from "./store";
 import {
-  ApiResponseEntry,
   ResponseEntry,
-  TagResponseEntry,
   useGetApisFromCollectionQuery,
   useGetCollectionsQuery,
 } from "../../features/http-client/platform-api";
-import { Tags, TrashCan } from "../../icons";
+import { TrashCan } from "../../icons";
+import { CollectionOrApiSearchSelector } from "./CollectionOrApiSearchSelector";
+import { SelectOption } from "./SearchSelector";
+import { saveTags, saveTagsInStateOnly } from "./slice";
+import { useAppDispatch } from "./store";
 
 type SelectOptionState = SelectOption<ResponseEntry> | undefined;
 
@@ -29,21 +27,21 @@ export function ApiPanel({
 }) {
   const dispatch = useAppDispatch();
   const targetData = tagData[targetFileName];
-  // Previously selected ids from IDE
-  const initApiId = Array.isArray(targetData) ? undefined : targetData?.apiId;
-  const initColId = Array.isArray(targetData) ? undefined : targetData?.collectionId;
-  const initColName = Array.isArray(targetData) ? undefined : targetData?.collectionName;
+  // Previously selected data from IDE
+  const apiEntry: ApiEntry | undefined =
+    targetData === null || Array.isArray(targetData) ? undefined : targetData;
   // Current manually selected options
   const [colOption, setColOption] = React.useState<SelectOptionState>(undefined);
   const [apiOption, setApiOption] = React.useState<SelectOptionState>(undefined);
-  const showApiSelector = colOption || initColId;
+  const showApiSelector = colOption || apiEntry?.collectionId;
   return (
     <HeaderContainer>
       <SelectPanel
         type="collection"
-        selectedOptionId={colOption ? colOption.id : initColId}
+        apiEntry={apiEntry}
+        selectedOptionId={colOption ? colOption.id : apiEntry?.collectionId}
         getQueryParameter={() => ""}
-        onOptionRemoved={(option: SelectOption<ResponseEntry>): void => {
+        onOptionRemoved={(): void => {
           setApiOption(undefined);
           setColOption(undefined);
           dispatch(saveTags({ [targetFileName]: null }));
@@ -56,16 +54,19 @@ export function ApiPanel({
       {showApiSelector && (
         <SelectPanel
           type="api"
-          selectedOptionId={apiOption ? apiOption.id : initApiId}
-          getQueryParameter={() => (colOption ? colOption.value.desc.id : initColId) as string}
-          onOptionRemoved={(option: SelectOption<ResponseEntry>): void => {
+          apiEntry={apiEntry}
+          selectedOptionId={apiOption ? apiOption.id : apiEntry?.apiId}
+          getQueryParameter={() =>
+            (colOption ? colOption.value.desc.id : apiEntry?.collectionId) as string
+          }
+          onOptionRemoved={(): void => {
             setApiOption(undefined);
             const tagData: TagData = {};
             tagData[targetFileName] = {
               apiId: "",
               apiName: "",
-              collectionId: colOption?.value.desc.id || initColId,
-              collectionName: colOption?.value.desc.name || initColName,
+              collectionId: colOption?.value.desc.id || apiEntry?.collectionId,
+              collectionName: colOption?.value.desc.name || apiEntry?.collectionName,
             } as ApiEntry;
             // Save in state, do not notify IDE
             dispatch(saveTagsInStateOnly(tagData));
@@ -76,8 +77,8 @@ export function ApiPanel({
             tagData[targetFileName] = {
               apiId: option.value.desc.id,
               apiName: option.value.desc.name,
-              collectionId: colOption?.value.desc.id || initColId,
-              collectionName: colOption?.value.desc.name || initColName,
+              collectionId: colOption?.value.desc.id || apiEntry?.collectionId,
+              collectionName: colOption?.value.desc.name || apiEntry?.collectionName,
             } as ApiEntry;
             dispatch(saveTags(tagData));
           }}
@@ -89,15 +90,17 @@ export function ApiPanel({
 
 function SelectPanel({
   type,
+  apiEntry,
   selectedOptionId,
   getQueryParameter,
   onOptionRemoved,
   onOptionSelected,
 }: {
   type: "collection" | "api";
+  apiEntry: ApiEntry | undefined;
   selectedOptionId: string | undefined;
   getQueryParameter: () => string;
-  onOptionRemoved: (option: SelectOption<ResponseEntry>) => void;
+  onOptionRemoved: () => void;
   onOptionSelected: (option: SelectOption<ResponseEntry>) => void;
 }) {
   const { data, error, isLoading } =
@@ -137,37 +140,26 @@ function SelectPanel({
         )}
       </Header>
       {!isLoading && option && (
-        <HeaderOptionContainer>
-          <HeaderOptionContainerInfo>
-            <HeaderOptionSpan>{option.label}</HeaderOptionSpan>
-            <HeaderOptionNoteSpan>UUID: {option.value.desc.id}</HeaderOptionNoteSpan>
-            {type === "api" && (
-              <HeaderOptionContainerTagInfo>
-                {(option.value as ApiResponseEntry).tags.length > 0 && <Tags />}
-                {(option.value as ApiResponseEntry).tags.map(
-                  (tagItem: TagResponseEntry, tagItemIndex: number) => {
-                    return (
-                      <HeaderOptionTagSpan key={`api-tag-${tagItemIndex}`}>
-                        {tagItem.categoryName}:{tagItem.tagName}
-                      </HeaderOptionTagSpan>
-                    );
-                  }
-                )}
-              </HeaderOptionContainerTagInfo>
-            )}
-          </HeaderOptionContainerInfo>
-          <HeaderOptionContainerAction>
-            <HeaderOptionRemoverSpan
-              onClick={(e) => {
-                e.stopPropagation();
-                onOptionRemoved(option);
-              }}
-            >
-              <TrashCan />
-            </HeaderOptionRemoverSpan>
-          </HeaderOptionContainerAction>
-        </HeaderOptionContainer>
+        <HeaderOptionPanel
+          id={`UUID: ${option.value.desc.id}`}
+          name={option.label}
+          isLoaded={true}
+          onOptionRemoved={onOptionRemoved}
+        />
       )}
+      {!isLoading &&
+        !option &&
+        apiEntry &&
+        ((type === "collection" && apiEntry.collectionId) ||
+          (type === "api" && apiEntry.apiId)) && (
+          <HeaderOptionPanel
+            id={type === "collection" ? apiEntry.collectionId : apiEntry.apiId}
+            name={type === "collection" ? apiEntry.collectionName : apiEntry.apiName}
+            error={`This ${type} not found on the server`}
+            isLoaded={false}
+            onOptionRemoved={onOptionRemoved}
+          />
+        )}
       <HeaderError>
         {error && (
           <ErrorBanner
@@ -178,6 +170,40 @@ function SelectPanel({
         )}
       </HeaderError>
     </Container>
+  );
+}
+
+function HeaderOptionPanel({
+  id,
+  name,
+  error,
+  isLoaded,
+  onOptionRemoved,
+}: {
+  id: string;
+  name: string;
+  error?: string;
+  isLoaded: boolean;
+  onOptionRemoved: () => void;
+}) {
+  return (
+    <HeaderOptionContainer isLoaded={isLoaded}>
+      <HeaderOptionContainerInfo>
+        <HeaderOptionSpan>{name}</HeaderOptionSpan>
+        <HeaderOptionNoteSpan>UUID: {id}</HeaderOptionNoteSpan>
+        {!isLoaded && <HeaderOptionErrorSpan>{error}</HeaderOptionErrorSpan>}
+      </HeaderOptionContainerInfo>
+      <HeaderOptionContainerAction>
+        <HeaderOptionRemoverSpan
+          onClick={(e) => {
+            e.stopPropagation();
+            onOptionRemoved();
+          }}
+        >
+          <TrashCan />
+        </HeaderOptionRemoverSpan>
+      </HeaderOptionContainerAction>
+    </HeaderOptionContainer>
   );
 }
 
@@ -221,6 +247,11 @@ export const HeaderOptionContainer = styled.div`
   border-width: 1px;
   border-style: solid;
   border-radius: 3px;
+  ${({ isLoaded }: { isLoaded: boolean }) =>
+    !isLoaded &&
+    `
+     border-color: var(${ThemeColorVariables.errorBorder});
+  `}
 `;
 
 export const HeaderOptionContainerInfo = styled.div`
@@ -249,6 +280,10 @@ export const HeaderSpan = styled.span`
 
 export const HeaderOptionSpan = styled.span`
   font-weight: bold;
+`;
+
+export const HeaderOptionErrorSpan = styled.span`
+  color: var(${ThemeColorVariables.errorForeground});
 `;
 
 export const HeaderOptionNoteSpan = styled.span`

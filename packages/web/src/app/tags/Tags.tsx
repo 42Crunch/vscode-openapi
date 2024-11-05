@@ -33,7 +33,7 @@ export function SelectionPanel({
     setSelectionOption(
       data === null || Array.isArray(data) ? "option-select-tag" : "option-bind-api"
     );
-  }, [targetFileName, data]);
+  }, [targetFileName]);
   return (
     <Container>
       <Title>Specify tags, or link the platform API to {targetFileName}</Title>
