@@ -119,7 +119,7 @@ export function TagsPanel({
           )}
         </HeaderError>
       </HeaderContainer>
-      {Array.isArray(tagEntries) && (
+      {!loading && Array.isArray(tagEntries) && (
         <SelectionsContainer
           tagEntries={tagEntries}
           categories={categories}
