@@ -8,6 +8,7 @@ import { ErrorBanner } from "../../components/Banner";
 import {
   Category,
   CategoryResponseEntry,
+  refreshOptions,
   TagResponseEntry,
   useGetCategoriesQuery,
   useGetTagsQuery,
@@ -36,8 +37,12 @@ export function TagsPanel({
     data: categoryList,
     error: errorCategories,
     isLoading: isLoadingCategories,
-  } = useGetCategoriesQuery();
-  const { data: tagList, error: errorTags, isLoading: isLoadingTags } = useGetTagsQuery();
+  } = useGetCategoriesQuery(undefined, refreshOptions);
+  const {
+    data: tagList,
+    error: errorTags,
+    isLoading: isLoadingTags,
+  } = useGetTagsQuery(undefined, refreshOptions);
   const loading = isLoadingCategories || isLoadingTags;
 
   // Get all categories (with tags) to show in combobox

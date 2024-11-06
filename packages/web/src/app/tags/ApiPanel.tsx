@@ -6,6 +6,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { ErrorBanner } from "../../components/Banner";
 import {
+  refreshOptions,
   ResponseEntry,
   useGetApisFromCollectionQuery,
   useGetCollectionsQuery,
@@ -105,8 +106,8 @@ function SelectPanel({
 }) {
   const { data, error, isLoading } =
     type === "collection"
-      ? useGetCollectionsQuery()
-      : useGetApisFromCollectionQuery(getQueryParameter());
+      ? useGetCollectionsQuery(undefined, refreshOptions)
+      : useGetApisFromCollectionQuery(getQueryParameter(), refreshOptions);
   let options: SelectOption<ResponseEntry>[] = [];
   if (data) {
     data.forEach((entry) =>

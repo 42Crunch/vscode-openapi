@@ -4,6 +4,11 @@ import type { ConfigState } from "../../features/config/slice";
 import { sendHttpRequest } from "./slice";
 import { HttpConfig, HttpRequest } from "@xliic/common/http";
 
+export const refreshOptions = {
+  refetchOnFocus: true,
+  pollingInterval: 1000 * 60 * 10, // refresh every 10 minutes
+};
+
 export const platformApi = createApi({
   reducerPath: "platformApi",
   baseQuery: webappBaseQuery,
