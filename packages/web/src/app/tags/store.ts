@@ -5,6 +5,7 @@ import {
 } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import logger from "redux-logger";
+import { setupListeners } from "@reduxjs/toolkit/query";
 
 import { Webapp } from "@xliic/common/webapp/tags";
 
@@ -30,8 +31,8 @@ export const messageHandlers: Webapp["webappHandlers"] = {
   showHttpError,
 };
 
-export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme: ThemeState) =>
-  configureStore({
+export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme: ThemeState) => {
+  const store = configureStore({
     reducer,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware()
@@ -41,6 +42,11 @@ export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme:
       theme,
     },
   });
+
+  setupListeners(store.dispatch);
+
+  return store;
+};
 
 export type RootState = StateFromReducersMapObject<typeof reducer>;
 export type AppDispatch = ReturnType<typeof initStore>["dispatch"];
