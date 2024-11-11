@@ -1,6 +1,5 @@
 import styled from "styled-components";
 import * as RadixRadioGroup from "@radix-ui/react-radio-group";
-import { useController } from "react-hook-form";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { Circle } from "../icons";
 import { useId } from "react";
@@ -10,15 +9,19 @@ export type RadioOption = {
   label: string;
 };
 
-export function RadioGroup({ name, options }: { name: string; options: RadioOption[] }) {
+export default function RadioGroup({
+  value,
+  options,
+  onValueChange,
+}: {
+  value: string;
+  options: RadioOption[];
+  onValueChange: (value: string) => void;
+}) {
   const id = useId();
 
-  const { field } = useController({
-    name,
-  });
-
   return (
-    <Group value={field.value} onValueChange={(value) => field.onChange(value)}>
+    <Group value={value} onValueChange={onValueChange}>
       {options.map((option, index) => (
         <Option key={index}>
           <Item value={option.value} id={`${id}-${index}`}>
@@ -33,19 +36,19 @@ export function RadioGroup({ name, options }: { name: string; options: RadioOpti
   );
 }
 
-const Group = styled(RadixRadioGroup.Root)`
+export const Group = styled(RadixRadioGroup.Root)`
   display: flex;
   flex-direction: row;
   gap: 8px;
 `;
 
-const Option = styled.div`
+export const Option = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
 `;
 
-const Item = styled(RadixRadioGroup.Item)`
+export const Item = styled(RadixRadioGroup.Item)`
   width: 20px;
   height: 20px;
   border-radius: 100%;
@@ -58,7 +61,7 @@ const Item = styled(RadixRadioGroup.Item)`
   justify-content: center;
 `;
 
-const Indicator = styled(RadixRadioGroup.Indicator)`
+export const Indicator = styled(RadixRadioGroup.Indicator)`
   display: flex;
   align-items: center;
   justify-content: center;

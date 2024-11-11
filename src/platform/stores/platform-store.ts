@@ -35,6 +35,7 @@ import {
   readAuditCompliance,
   readAuditReportSqgTodo,
   getTags,
+  getCategories,
 } from "../api";
 import {
   Api,
@@ -47,6 +48,7 @@ import {
   UserData,
   Tag,
 } from "../types";
+import { TagDataEntry, TagEntry } from "@xliic/common/tags";
 
 export interface CollectionsView {
   collections: CollectionData[];
@@ -247,7 +249,10 @@ export class PlatformStore {
     return api;
   }
 
-  async createTempApi(json: string): Promise<{ apiId: string; collectionId: string }> {
+  async createTempApi(
+    json: string,
+    tagDataEntry?: TagDataEntry
+  ): Promise<{ apiId: string; collectionId: string }> {
     const collectionId = await this.findOrCreateTempCollection();
 
     const tagIds: string[] = [];
@@ -255,6 +260,14 @@ export class PlatformStore {
     if (mandatoryTags.length > 0) {
       const platformTags = await getTags(this.getConnection(), this.logger);
       tagIds.push(...getMandatoryTagsIds(mandatoryTags, platformTags));
+    }
+    if (tagDataEntry) {
+      if (Array.isArray(tagDataEntry)) {
+        const platformTags = await getTags(this.getConnection(), this.logger);
+        tagIds.push(...getActiveTagsIds(tagDataEntry, platformTags));
+      } else {
+        tagIds.push(...(await this.getTagsFromApi(tagDataEntry.collectionId, tagDataEntry.apiId)));
+      }
     }
 
     // if the api naming convention is configured, use its example as the api name
@@ -265,7 +278,7 @@ export class PlatformStore {
     const api = await createApi(
       collectionId,
       apiName,
-      tagIds,
+      Array.from(new Set<string>(tagIds).values()),
       Buffer.from(json),
       this.getConnection(),
       this.logger
@@ -432,9 +445,37 @@ export class PlatformStore {
     return this.formats;
   }
 
-  async getTags(): Promise<any> {
+  async getTags(): Promise<Tag[]> {
+    const categories = await getCategories(this.getConnection(), this.logger);
     const tags = await getTags(this.getConnection(), this.logger);
+    for (const tag of tags) {
+      tag.onlyAdminCanTag = categories.some(
+        (category) => category.id === tag.categoryId && category.onlyAdminCanTag
+      );
+    }
     return tags;
+  }
+
+  async getTagsFromApi(collectionId: string, apiId: string): Promise<string[]> {
+    const resp = await listApis(collectionId, this.getConnection(), this.logger);
+    const myApis = resp.list.filter((api) => api.desc.id === apiId);
+    if (myApis.length === 0) {
+      throw new Error(`The api "${apiId}" is not found. Please change the file api link.`);
+    }
+    const tags = myApis[0]?.tags;
+    const tagIds: string[] = [];
+    if (tags && tags.length > 0) {
+      const allTags = await this.getTags();
+      const adminTagIds = new Set(
+        allTags.filter((tag) => tag.onlyAdminCanTag).map((tag) => tag.tagId)
+      );
+      tags.forEach((tag) => {
+        if (!adminTagIds.has(tag.tagId)) {
+          tagIds.push(tag.tagId);
+        }
+      });
+    }
+    return tagIds;
   }
 
   async refresh(): Promise<void> {
@@ -574,6 +615,22 @@ function getMandatoryTagsIds(tags: string[], platformTags: Tag[]): string[] {
     }
   }
   return tagIds;
+}
+
+function getActiveTagsIds(tagEntries: TagEntry[], platformTags: Tag[]): string[] {
+  const deadTags = [];
+  const activeTagIds = new Set<string>(platformTags.map((tag) => tag.tagId));
+  for (const tagEntry of tagEntries) {
+    if (!activeTagIds.has(tagEntry.tagId)) {
+      deadTags.push(`${tagEntry.categoryName}: ${tagEntry.tagName}`);
+    }
+  }
+  if (deadTags.length > 0) {
+    throw new Error(
+      `The following tags are not found: ${deadTags.join(", ")}. Please change the file tags.`
+    );
+  }
+  return tagEntries.map((tagEntry) => tagEntry.tagId);
 }
 
 function delay(ms: number) {

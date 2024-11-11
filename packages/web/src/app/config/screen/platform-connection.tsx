@@ -9,7 +9,7 @@ import {
 } from "../../../features/config/slice";
 import ConnectionTestBanner from "../ConnectionTestBanner";
 import { Container, Test, Title } from "../layout";
-import { RadioGroup } from "../../../components/RadioGroup";
+import { RadioGroup } from "../../../new-components/fields/RadioGroup";
 import { useWatch } from "react-hook-form";
 import Textarea from "../../../new-components/fat-fields/Textarea";
 import Subscription from "../Subscription";

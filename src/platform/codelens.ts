@@ -1,6 +1,13 @@
 import * as vscode from "vscode";
 import { PlatformStore } from "./stores/platform-store";
 import { getApiId } from "./util";
+import { Cache } from "../cache";
+import { getOpenApiVersion } from "../parsers";
+import { OpenApiVersion } from "../types";
+import { TAGS_DATA_KEY } from "../webapps/views/tags/view";
+import { TagData } from "@xliic/common/tags";
+import { hasCredentials } from "../credentials";
+import { Configuration } from "../configuration";
 
 export class CodelensProvider implements vscode.CodeLensProvider {
   onDidChangeCodeLenses?: vscode.Event<void>;
@@ -36,5 +43,71 @@ export class CodelensProvider implements vscode.CodeLensProvider {
     });
 
     return [collectionLens, apiLens, uuidLens];
+  }
+}
+
+export class PlatformTagCodelensProvider implements vscode.CodeLensProvider<TagsLens> {
+  onDidChangeCodeLenses?: vscode.Event<void>;
+
+  constructor(
+    private cache: Cache,
+    private configuration: Configuration,
+    private secrets: vscode.SecretStorage,
+    private memento: vscode.Memento
+  ) {}
+
+  async provideCodeLenses(
+    document: vscode.TextDocument,
+    token: vscode.CancellationToken
+  ): Promise<TagsLens[]> {
+    const credentials = await hasCredentials(this.configuration, this.secrets);
+    if (credentials === "api-token") {
+      const parsed = this.cache.getParsedDocument(document);
+      const version = getOpenApiVersion(parsed);
+      if (parsed && version !== OpenApiVersion.Unknown) {
+        return [new TagsLens(document.uri)];
+      }
+    }
+    return [];
+  }
+
+  async resolveCodeLens(codeLens: TagsLens, token: vscode.CancellationToken): Promise<TagsLens> {
+    const targetFileName = codeLens.uri?.fsPath;
+    if (targetFileName) {
+      const selectedTagNames: string[] = [];
+      const tagsData = this.memento.get(TAGS_DATA_KEY, {}) as TagData;
+      let title;
+      let tooltip;
+      const data = tagsData[targetFileName];
+      if (data) {
+        if (Array.isArray(data)) {
+          data.forEach((tagEntry) =>
+            selectedTagNames.push(`${tagEntry.categoryName}: ${tagEntry.tagName}`)
+          );
+          title = `Tags: ${selectedTagNames.length} selected`;
+          tooltip = selectedTagNames.length > 0 ? "Tags: " + `${selectedTagNames.join(", ")}` : "";
+        } else {
+          title = `Tags: linked to API`;
+          tooltip =
+            "Linked to API " + `${data.apiName}` + " in collection " + `${data.collectionName}`;
+        }
+      } else {
+        title = "Tags: 0 selected";
+        tooltip = "No tags selected";
+      }
+      codeLens.command = {
+        title,
+        tooltip,
+        command: "openapi.platform.setTags",
+        arguments: [codeLens.uri],
+      };
+    }
+    return codeLens;
+  }
+}
+
+class TagsLens extends vscode.CodeLens {
+  constructor(public uri: vscode.Uri) {
+    super(new vscode.Range(0, 1, 0, 1024));
   }
 }

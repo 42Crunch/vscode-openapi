@@ -24,6 +24,7 @@ export interface ListApisResponse {
 export interface Api {
   desc: ApiDescriptor;
   assessment: AssessSummary;
+  tags?: Tag[];
 }
 
 export interface ApiDescriptor {
@@ -106,7 +107,19 @@ export type ApiAuditReport = {
 };
 
 export type Tag = {
+  categoryId: string;
   categoryName: string;
   tagName: string;
   tagId: string;
+  onlyAdminCanTag?: boolean;
+};
+
+export type Category = {
+  id: string;
+  name: string;
+  description?: string;
+  isExclusive: boolean;
+  isFreeForm: boolean;
+  isProtected: boolean;
+  onlyAdminCanTag: boolean;
 };
