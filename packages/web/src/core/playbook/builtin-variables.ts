@@ -33,12 +33,11 @@ function randomFromSchema(
   fakerMaker: FakeMaker
 ): unknown {
   const fake = fakerMaker();
-  if (location.type == "body") {
-    return findByPath(fake.body as any, location.path);
-  } else if (location.type === "parameters") {
-    // TESTME
-    const name = findByPath(object as any, ["parameters", ...location.path.slice(0, -1), "key"]);
-    return (fake.parameters as any)[location.path[0]][name];
+  if (location.path[0] == "body" && location.path[1] === "value") {
+    return findByPath(fake.body as any, location.path.slice(2));
+  } else if (location.path[0] === "parameters") {
+    const name = findByPath(object as any, [...location.path.slice(0, -1), "key"]);
+    return (fake.parameters as any)[location.path[1]][name];
   }
 }
 
