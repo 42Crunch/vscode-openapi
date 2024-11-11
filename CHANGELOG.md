@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 4.30.0 (November 12, 2024)
+
+- Added ability to tag local API files or link them to the platform APIs
+- Updated Scan configuration web UI to allow specifying reportMaxSize option
+- Added extra check for the CLI binary updates when testes in the Config web UI
+- Added workaround for ENOMEM exceptions when invoking the platform APIs
+
 ## Version 4.29.2 (October 7, 2024)
 
 - Remove whitespace characters during the freemium signup flow
