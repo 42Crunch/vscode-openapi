@@ -6,6 +6,7 @@
 - Updated Scan configuration web UI to allow specifying reportMaxSize option
 - Added extra check for the CLI binary updates when testes in the Config web UI
 - Added workaround for ENOMEM exceptions when invoking the platform APIs
+- Fix issue with example background colors in SwaggerUI preview #295
 
 ## Version 4.29.2 (October 7, 2024)
 
