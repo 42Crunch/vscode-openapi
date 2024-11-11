@@ -1,6 +1,6 @@
 # What's New
 
-Version 4.29 of OpenAPI editor now includes new features that let you test your APIs locally for quality, conformance and security directly in the IDE.
+Version 4.30 of OpenAPI editor now includes new features that let you test your APIs locally for quality, conformance and security directly in the IDE.
 
 Our testing tools include:
 
@@ -8,7 +8,7 @@ Our testing tools include:
 
 - [API Scan](https://42crunch.com/api-conformance-scan/) - A dynamic conformance and security tool that tests the API for conformance to the API definition and remediate any security vulnerabilities. Prevent API attacks such as BOLA, BPLA and other OWASP API Top 10 risks.
 
-If you’re not already a 42Crunch subscriber then you can still use these API testing tools for free by registering for the [Freemium service](https://42crunch.com/freemium/).
+If you’re not already a 42Crunch subscriber then you can still use these API testing tools for free by [registering](command:openapi.platform.openSignUp). Learn more about the [Freemium service](https://42crunch.com/freemium/).
 
 Freemium includes:
 

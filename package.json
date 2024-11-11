@@ -462,6 +462,10 @@
         "title": "Open in Web UI"
       },
       {
+        "command": "openapi.platform.openSignUp",
+        "title": "42Crunch: signup for freemium offering"
+      },
+      {
         "command": "openapi.v3addServer",
         "enablement": "view == openapiOutline",
         "title": "Add server"

@@ -26,7 +26,8 @@ export function create(context: vscode.ExtensionContext) {
   const panel = vscode.window.createWebviewPanel(
     "whatsNew",
     "What's new in OpenAPI Editor",
-    vscode.ViewColumn.Active
+    vscode.ViewColumn.Active,
+    { enableCommandUris: true }
   );
   panel.webview.html = getHtml(contents);
   return panel;

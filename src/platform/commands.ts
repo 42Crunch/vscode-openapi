@@ -19,11 +19,13 @@ import { ExplorerNode } from "./explorer/nodes/base";
 import { AuditWebView } from "../audit/view";
 import { DataDictionaryWebView } from "./data-dictionary/view";
 import { TagsWebView } from "../webapps/views/tags/view";
+import { SignUpWebView } from "../webapps/signup/view";
 
 export function registerCommands(
   context: vscode.ExtensionContext,
   platformContext: PlatformContext,
   auditContext: AuditContext,
+  secrets: vscode.SecretStorage,
   store: PlatformStore,
   favorites: FavoritesStore,
   importedUrls: ImportedUrlStore,
@@ -32,12 +34,13 @@ export function registerCommands(
   tree: vscode.TreeView<ExplorerNode>,
   reportWebView: AuditWebView,
   tagsWebView: TagsWebView,
+  signUpWebView: SignUpWebView,
   dataDictionaryView: DataDictionaryWebView,
   dataDictionaryDiagnostics: vscode.DiagnosticCollection
 ): vscode.Disposable[] {
   const commands: any = {};
   Object.assign(commands, misc(store, favorites, provider, tree));
-  Object.assign(commands, util(context, store, tagsWebView));
+  Object.assign(commands, util(secrets, store, tagsWebView, signUpWebView));
   Object.assign(commands, createApi(store, importedUrls, provider, tree, cache));
   Object.assign(commands, filter(store, provider));
   Object.assign(commands, report(store, context, auditContext, cache, reportWebView));
