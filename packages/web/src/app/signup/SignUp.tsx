@@ -15,13 +15,14 @@ export function RightContainer() {
           <CrunchLogoMain />
         </CrunchMainLogoContainer>
         {currentFormId === "AnondSignUpEmailForm" && (
-          <Title>#1 API Security testing tools for your IDE, CI/CD and SaaS environments</Title>
+          <Title>
+            Register to check your API for quality, conformance and security vulnerabilities,
+            including BOLA, BFLA & BOPLA
+          </Title>
         )}
         {currentFormId === "AnondSignUpTokenForm" && (
           <>
-            <Title>API Audit & Scan</Title>
-            <Text>Ensure your API conforms to the API contract and has no vulnerabilities.</Text>
-            <Text>Check for BOLA, BFLA and other OWASP API risks.</Text>
+            <Title>#1 API Security testing tools for your IDE, CICD and SaaS environments</Title>
           </>
         )}
         {currentFormId === "PlatformSignUpForm" && (

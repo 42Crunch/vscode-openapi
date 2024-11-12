@@ -144,6 +144,7 @@ export async function activate(
     context,
     platformContext,
     auditContext,
+    secrets,
     store,
     favoriteCollections,
     importedUrls,
@@ -152,6 +153,7 @@ export async function activate(
     tree,
     reportWebView,
     tagsWebView,
+    signUpWebView,
     dataDictionaryView,
     dataDictionaryDiagnostics
   );

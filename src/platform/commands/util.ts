@@ -2,11 +2,14 @@ import * as vscode from "vscode";
 import { PlatformStore } from "../stores/platform-store";
 import { configuration } from "../../configuration";
 import { TagsWebView } from "../../webapps/views/tags/view";
+import { SignUpWebView, TokenType } from "../../webapps/signup/view";
+import { configureCredentials, hasCredentials } from "../../credentials";
 
 export default (
-  context: vscode.ExtensionContext,
+  secrets: vscode.SecretStorage,
   store: PlatformStore,
-  tagsWebView: TagsWebView
+  tagsWebView: TagsWebView,
+  signUpWebView: SignUpWebView
 ) => ({
   copyToClipboard: async (value: string, message: string) => {
     vscode.env.clipboard.writeText(value);
@@ -29,5 +32,20 @@ export default (
 
   setTags: async (uri: vscode.Uri) => {
     await tagsWebView.showTagsWebView(uri);
+  },
+
+  openSignUp: async () => {
+    const credentials = await hasCredentials(configuration, secrets);
+    if (credentials === undefined) {
+      await configureCredentials(signUpWebView);
+    } else {
+      const response = await vscode.window.showInformationMessage(
+        "Already registered, check Settings for details.",
+        "Open Settings"
+      );
+      if (response === "Open Settings") {
+        vscode.commands.executeCommand("openapi.showSettings");
+      }
+    }
   },
 });
