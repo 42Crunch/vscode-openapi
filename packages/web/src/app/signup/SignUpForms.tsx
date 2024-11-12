@@ -82,10 +82,10 @@ export function AnondSignUpEmailForm({
             <ErrorBanner message="Please accept Terms and Conditions to continue"></ErrorBanner>
           )}
           <div>
-            Register your own free account to:
+            Register for your free API security testing account to:
             <ul>
-              <li>Audit OpenAPI contracts</li>
-              <li>Scan APIs</li>
+              <li>Audit your OpenAPI contracts for quality and conformance</li>
+              <li>Scan your APIs for conformance and security vulnerabilities</li>
             </ul>
           </div>
         </InputContainer>
@@ -184,7 +184,7 @@ export function AnondSignUpTokenForm({
           <div>
             <p>
               We just sent you an access token to the email address you provided. Enter the token
-              below to activate your account.
+              below to activate your API security testing account.
             </p>
             <p>If you did not get the token, check your spam mail.</p>
 
@@ -196,7 +196,20 @@ export function AnondSignUpTokenForm({
           </div>
           <Textarea label="Token" name="anondToken" disabled={complete} />
 
-          <div>Audit and Scan usage allowances apply, upgrade options available.</div>
+          <div>
+            Audit and Scan usage allowances apply, upgrade{" "}
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dispatch(openLink("https://42crunch.com/single-user-pricing/"));
+              }}
+            >
+              options
+            </a>{" "}
+            available.
+          </div>
           <div>
             Developer support{" "}
             <a

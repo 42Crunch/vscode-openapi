@@ -463,7 +463,7 @@
       },
       {
         "command": "openapi.platform.openSignUp",
-        "title": "42Crunch: signup for freemium offering"
+        "title": "42Crunch: Signup for the freemium offering"
       },
       {
         "command": "openapi.v3addServer",
