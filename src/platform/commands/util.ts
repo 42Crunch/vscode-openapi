@@ -39,9 +39,13 @@ export default (
     if (credentials === undefined) {
       await configureCredentials(signUpWebView);
     } else {
-      await vscode.window.showInformationMessage(
-        "Already registered, check Configuration for details."
+      const response = await vscode.window.showInformationMessage(
+        "Already registered, check Settings for details.",
+        "Open Settings"
       );
+      if (response === "Open Settings") {
+        vscode.commands.executeCommand("openapi.showSettings");
+      }
     }
   },
 });
