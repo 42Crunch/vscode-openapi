@@ -2,7 +2,7 @@
 
 Rich support for the OpenAPI Specification (OAS) / Swagger specification making it quicker and easier to create, edit and navigate your OpenAPI definitions.
 
-Also check the quality, conformance and security of your APIs from inside VS Code, with the bundled 42Crunch API security testing tools - [API Audit](#activating-api-audit) and [API Scan](#activating-api-scan) for static and dynamic security testing. Audit and Scan are available to both our freemium users and to 42Crunch platform subscribers. Monthly usage limitations apply for freemium users. [Upgrade options](https://42crunch.com/single-user-pricing/) available.
+Also check the quality, conformance and security of your APIs from inside VS Code, with the bundled 42Crunch API security testing tools - [API Audit](#activating-api-audit) and [API Scan](#activating-api-scan). Audit and Scan are available to both our freemium users and to 42Crunch platform subscribers. Monthly usage limitations apply for freemium users. [Upgrade options](https://42crunch.com/single-user-pricing/) available.
 
 ## OpenAPI Editing
 
