@@ -1,18 +1,13 @@
 # OpenAPI Editing with API quality, Conformance and Security Testing
 
-This [Visual Studio Code](https://code.visualstudio.com/) (VS Code) [extension](https://marketplace.visualstudio.com/items?itemName=42Crunch.vscode-openapi) adds rich support for the [OpenAPI Specification](https://github.com/OAI/OpenAPI-Specification) (OAS) (formerly known as the Swagger specification) and makes it easier and faster to navigate your OpenAPI definitions.
+Rich support for the OpenAPI Specification (OAS) / Swagger specification making it quicker and easier to create, edit and navigate your OpenAPI definitions.
 
-The extension also comes with the 42Crunch API testing tools (Audit and Scan) so that you can check the quality, conformance and security of your APIs directly in VS Code. Stop malformed data and security vulnerabilities sneaking into your code and prevent API attacks such as BOLA, BPLA and other OWASP API Top 10 risks.
-
-You can use these API testing tools by registering for our Freemium service within the extension, with free monthly test allowances. Simply click on the Audit or Scan icon in the Editor toolbar.
-
-42Crunch subscribers with an account on the 42Crunch platform have unlimited usage of Audit and Scan and can also directly access API collections and security risk assessment reports.
-
-Both OAS v2 and v3.0.x are supported, in JSON or YAML format.
+Also check the quality, conformance and security of your APIs from inside VS Code, with the bundled 42Crunch API security testing tools - [API Audit](#activating-api-audit) and [API Scan](#activating-api-scan). Audit and Scan are available to both our freemium users and to 42Crunch platform subscribers. Monthly usage limitations apply for freemium users. [Upgrade options](https://42crunch.com/single-user-pricing/) available.
 
 ## OpenAPI Editing
 
 The plugin supports code navigation, linting, SwaggerUI or ReDoc preview, IntelliSense, schema enforcement and generation, schema definition links and snippets.
+It also supports both OpenAPI v2 and v3.0.x in JSON or YAML format. [QuickStart](#quick-start)
 
 - [Creating OpenAPI files](#creating-openapi-files)
 - [Navigating an API definition](#navigating-an-api-definition)
@@ -30,7 +25,7 @@ The plugin supports code navigation, linting, SwaggerUI or ReDoc preview, Intell
 
 ## Activating API Audit
 
-A static analysis that lets you check the quality and security of your API definition as you work on it. [Video explainer](https://vimeo.com/873235173)
+A static analysis that lets you check the quality, conformance (to the OpenAPI specification) and security of your API definition. [Video explainer](https://vimeo.com/873235173)
 
 - [Running an audit](#running-an-audit)
 - [Navigating the issues in the audit report](#navigating-the-issues-in-the-audit-report)
@@ -41,7 +36,7 @@ A static analysis that lets you check the quality and security of your API defin
 
 ## Activating API Scan
 
-A dynamic conformance and security tool that tests the API for conformance to the API definition and security vulnerabilities.
+A dynamic conformance and security tool that tests the API for conformance to the API definition and security vulnerabilities. The free version of API Scan runs locally in your own environment and does not require your API to be uploaded to the 42Crunch platform.
 [Video explainer](https://vimeo.com/884864394/b167153ec4)
 
 - [Conformance to the API Definition](#new-dynamic-api-security-testing)
