@@ -140,7 +140,7 @@ function SelectPanel({
           />
         )}
       </Header>
-      {!isLoading && option && (
+      {!isLoading && !error && option && (
         <HeaderOptionPanel
           id={`UUID: ${option.value.desc.id}`}
           name={option.label}
@@ -149,6 +149,7 @@ function SelectPanel({
         />
       )}
       {!isLoading &&
+        !error &&
         !option &&
         apiEntry &&
         ((type === "collection" && apiEntry.collectionId) ||
