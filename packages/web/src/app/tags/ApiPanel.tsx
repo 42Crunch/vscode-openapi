@@ -6,12 +6,14 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { ErrorBanner } from "../../components/Banner";
 import {
+  ApiResponseEntry,
   refreshOptions,
   ResponseEntry,
+  TagResponseEntry,
   useGetApisFromCollectionQuery,
   useGetCollectionsQuery,
 } from "../../features/http-client/platform-api";
-import { TrashCan } from "../../icons";
+import { Tags, TrashCan } from "../../icons";
 import { CollectionOrApiSearchSelector } from "./CollectionOrApiSearchSelector";
 import { SelectOption } from "./SearchSelector";
 import { saveTags, saveTagsInStateOnly } from "./slice";
@@ -144,6 +146,7 @@ function SelectPanel({
         <HeaderOptionPanel
           id={`UUID: ${option.value.desc.id}`}
           name={option.label}
+          tags={type === "collection" ? undefined : (option.value as ApiResponseEntry).tags}
           isLoaded={true}
           onOptionRemoved={onOptionRemoved}
         />
@@ -179,12 +182,14 @@ function HeaderOptionPanel({
   id,
   name,
   error,
+  tags,
   isLoaded,
   onOptionRemoved,
 }: {
   id: string;
   name: string;
   error?: string;
+  tags?: TagResponseEntry[];
   isLoaded: boolean;
   onOptionRemoved: () => void;
 }) {
@@ -193,6 +198,18 @@ function HeaderOptionPanel({
       <HeaderOptionContainerInfo>
         <HeaderOptionSpan>{name}</HeaderOptionSpan>
         <HeaderOptionNoteSpan>UUID: {id}</HeaderOptionNoteSpan>
+        {tags && (
+          <HeaderOptionContainerTagInfo>
+            {tags.length > 0 && <Tags />}
+            {tags.map((tagItem: TagResponseEntry, tagItemIndex: number) => {
+              return (
+                <HeaderOptionTagSpan key={`api-tag-${tagItemIndex}`}>
+                  {tagItem.categoryName}: {tagItem.tagName}
+                </HeaderOptionTagSpan>
+              );
+            })}
+          </HeaderOptionContainerTagInfo>
+        )}
         {!isLoaded && <HeaderOptionErrorSpan>{error}</HeaderOptionErrorSpan>}
       </HeaderOptionContainerInfo>
       <HeaderOptionContainerAction>
