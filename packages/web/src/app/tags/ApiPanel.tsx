@@ -50,7 +50,9 @@ export function ApiPanel({
           dispatch(saveTags({ [targetFileName]: null }));
         }}
         onOptionSelected={(option: SelectOption<ResponseEntry>): void => {
+          setApiOption(undefined);
           setColOption(option);
+          dispatch(saveTags({ [targetFileName]: null }));
         }}
       ></SelectPanel>
 
@@ -160,7 +162,7 @@ function SelectPanel({
           <HeaderOptionPanel
             id={type === "collection" ? apiEntry.collectionId : apiEntry.apiId}
             name={type === "collection" ? apiEntry.collectionName : apiEntry.apiName}
-            error={`This ${type} not found on the server`}
+            error={`This ${type} is not found on the server`}
             isLoaded={false}
             onOptionRemoved={onOptionRemoved}
           />
