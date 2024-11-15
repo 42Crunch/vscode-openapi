@@ -6,12 +6,14 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { ErrorBanner } from "../../components/Banner";
 import {
+  ApiResponseEntry,
   refreshOptions,
   ResponseEntry,
+  TagResponseEntry,
   useGetApisFromCollectionQuery,
   useGetCollectionsQuery,
 } from "../../features/http-client/platform-api";
-import { TrashCan } from "../../icons";
+import { Tags, TrashCan } from "../../icons";
 import { CollectionOrApiSearchSelector } from "./CollectionOrApiSearchSelector";
 import { SelectOption } from "./SearchSelector";
 import { saveTags, saveTagsInStateOnly } from "./slice";
@@ -48,7 +50,9 @@ export function ApiPanel({
           dispatch(saveTags({ [targetFileName]: null }));
         }}
         onOptionSelected={(option: SelectOption<ResponseEntry>): void => {
+          setApiOption(undefined);
           setColOption(option);
+          dispatch(saveTags({ [targetFileName]: null }));
         }}
       ></SelectPanel>
 
@@ -144,6 +148,7 @@ function SelectPanel({
         <HeaderOptionPanel
           id={`UUID: ${option.value.desc.id}`}
           name={option.label}
+          tags={type === "collection" ? undefined : (option.value as ApiResponseEntry).tags}
           isLoaded={true}
           onOptionRemoved={onOptionRemoved}
         />
@@ -157,7 +162,7 @@ function SelectPanel({
           <HeaderOptionPanel
             id={type === "collection" ? apiEntry.collectionId : apiEntry.apiId}
             name={type === "collection" ? apiEntry.collectionName : apiEntry.apiName}
-            error={`This ${type} not found on the server`}
+            error={`This ${type} is not found on the server`}
             isLoaded={false}
             onOptionRemoved={onOptionRemoved}
           />
@@ -179,12 +184,14 @@ function HeaderOptionPanel({
   id,
   name,
   error,
+  tags,
   isLoaded,
   onOptionRemoved,
 }: {
   id: string;
   name: string;
   error?: string;
+  tags?: TagResponseEntry[];
   isLoaded: boolean;
   onOptionRemoved: () => void;
 }) {
@@ -193,6 +200,18 @@ function HeaderOptionPanel({
       <HeaderOptionContainerInfo>
         <HeaderOptionSpan>{name}</HeaderOptionSpan>
         <HeaderOptionNoteSpan>UUID: {id}</HeaderOptionNoteSpan>
+        {tags && (
+          <HeaderOptionContainerTagInfo>
+            {tags.length > 0 && <Tags />}
+            {tags.map((tagItem: TagResponseEntry, tagItemIndex: number) => {
+              return (
+                <HeaderOptionTagSpan key={`api-tag-${tagItemIndex}`}>
+                  {tagItem.categoryName}: {tagItem.tagName}
+                </HeaderOptionTagSpan>
+              );
+            })}
+          </HeaderOptionContainerTagInfo>
+        )}
         {!isLoaded && <HeaderOptionErrorSpan>{error}</HeaderOptionErrorSpan>}
       </HeaderOptionContainerInfo>
       <HeaderOptionContainerAction>

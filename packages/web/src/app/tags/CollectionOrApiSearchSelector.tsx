@@ -49,14 +49,10 @@ export function CollectionOrApiSearchSelector({
             {type === "api" && (item.value as ApiResponseEntry).tags.length > 0 && (
               <HeaderOptionContainerTagInfo>
                 {(item.value as ApiResponseEntry).tags.length > 0 && <Tags />}
-                {(item.value as ApiResponseEntry).tags.map(
-                  (tagItem: TagResponseEntry, tagItemIndex: number) => {
-                    return (
-                      <HeaderOptionTagSpan key={`api-tag-${tagItemIndex}`}>
-                        {tagItem.categoryName}: {tagItem.tagName}
-                      </HeaderOptionTagSpan>
-                    );
-                  }
+                {(item.value as ApiResponseEntry).tags.length > 0 && (
+                  <HeaderOptionTagsCount>
+                    {`${(item.value as ApiResponseEntry).tags.length} tags`}
+                  </HeaderOptionTagsCount>
                 )}
               </HeaderOptionContainerTagInfo>
             )}
@@ -76,19 +72,14 @@ const CategoryNoteSpan = styled.span`
 const HeaderOptionContainerTagInfo = styled.div`
   display: flex;
   flex-direction: row;
-  align-items: center;
-  gap: 10px;
+  align-items: flex-end;
+  gap: 5px;
   > svg {
     margin-left: 3px;
     fill: var(${ThemeColorVariables.foreground});
   }
 `;
 
-const HeaderOptionTagSpan = styled.div`
-  border-color: var(${ThemeColorVariables.border});
-  border-width: 1px;
-  border-style: solid;
-  border-radius: 5px;
-  padding: 3px;
+const HeaderOptionTagsCount = styled.div`
   font-size: 90%;
 `;
