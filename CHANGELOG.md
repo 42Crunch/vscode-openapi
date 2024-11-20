@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 4.30.0 (November 12, 2024)
+## Version 4.30.0 (November 20, 2024)
 
 - Added ability to tag local API files or link them to the platform APIs
 - Updated Scan configuration web UI to allow specifying reportMaxSize option
