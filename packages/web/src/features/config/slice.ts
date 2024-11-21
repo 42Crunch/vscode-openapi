@@ -32,8 +32,11 @@ export type ConfigScreenId =
   | "platform-services"
   | "temporary-collection"
   | "mandatory-tags"
+  | "runtime-binary"
+  | "runtime-scand-manager"
+  | "runtime-docker"
+  | "audit-runtime"
   | "scan-runtime"
-  | "scan-image"
   | "openapi-external-refs";
 
 export type ConfigScreen = {
@@ -94,7 +97,10 @@ const initialState: ConfigState = {
     "platform-services": undefined,
     "temporary-collection": undefined,
     "mandatory-tags": undefined,
-    "scan-image": undefined,
+    "runtime-binary": undefined,
+    "runtime-docker": undefined,
+    "runtime-scand-manager": undefined,
+    "audit-runtime": undefined,
     "scan-runtime": undefined,
     "openapi-external-refs": undefined,
   },
