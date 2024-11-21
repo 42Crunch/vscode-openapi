@@ -14,6 +14,11 @@ import platformConnection from "./screen/platform-connection";
 import platformServices from "./screen/platform-services";
 import temporaryCollectionMaker from "./screen/temporary-collection";
 import mandatoryTagsMaker from "./screen/mandatory-tags";
+import runtimeBinary from "./screen/runtime-binary";
+import runtimeScandManager from "./screen/runtime-scand-manager";
+import runtimeDocker from "./screen/runtime-docker";
+import auditRuntime from "./screen/audit-runtime";
+
 import scanRuntime from "./screen/scan-runtime";
 import openapiExternalRefs from "./screen/openapi-external-refs";
 import { unwrapFormValues, wrapFormValues } from "./util";
@@ -29,12 +34,19 @@ export default function Config() {
     {
       id: "platform",
       title: "42Crunch Platform",
-      items: [platformConnection, platformServices, temporaryCollection, mandatoryTags],
+      items: [
+        platformConnection,
+        platformServices,
+        temporaryCollection,
+        mandatoryTags,
+        auditRuntime,
+        scanRuntime,
+      ],
     },
     {
-      id: "scan",
-      title: "API Conformance Scan",
-      items: [scanRuntime],
+      id: "runtime",
+      title: "Runtimes",
+      items: [runtimeBinary, runtimeScandManager, runtimeDocker],
     },
     {
       id: "openapi",
@@ -46,9 +58,13 @@ export default function Config() {
   const screenById = {
     [platformConnection.id]: platformConnection,
     [platformServices.id]: platformServices,
+    [auditRuntime.id]: auditRuntime,
     [scanRuntime.id]: scanRuntime,
     [temporaryCollection.id]: temporaryCollection,
     [mandatoryTags.id]: mandatoryTags,
+    [runtimeBinary.id]: runtimeBinary,
+    [runtimeScandManager.id]: runtimeScandManager,
+    [runtimeDocker.id]: runtimeDocker,
     [openapiExternalRefs.id]: openapiExternalRefs,
   };
 
