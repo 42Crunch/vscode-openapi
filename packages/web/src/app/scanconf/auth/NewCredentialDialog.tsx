@@ -38,7 +38,9 @@ export default function NewCredentialDialog({
     in: z.string(),
     name: z.string(),
     description: z.string(),
-    credentialName: z.string().regex(/^\w+$/),
+    credentialName: z.string().regex(ENV_VAR_NAME_REGEX(), {
+      message: ENV_VAR_NAME_REGEX_MESSAGE,
+    }),
     credentialValue: z.string().min(1),
   });
 
