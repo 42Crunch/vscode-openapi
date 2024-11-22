@@ -27,14 +27,16 @@ export function ScanRuntime() {
         )}
 
         {platformAuthType === "anond-token" && (
-          <Banner message="Scan runtime is set to use 42Crunch API Security Testing Binary" />
+          <Banner message="API Scan runtime is configured to use 42Crunch API Security Testing Binary" />
         )}
       </Container>
     </>
   );
 }
 
-const schema = z.object({});
+const schema = z.object({
+  scanRuntime: z.enum(["docker", "scand-manager", "cli"]),
+});
 
 const screen: ConfigScreen = {
   id: "scan-runtime",

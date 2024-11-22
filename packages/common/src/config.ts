@@ -21,6 +21,7 @@ export type Config = {
   };
   scandManager: ScandManagerConnection;
   scanRuntime: "docker" | "scand-manager" | "cli";
+  auditRuntime: "platform" | "cli";
   scanImage: string;
   platform: string;
   cli: {

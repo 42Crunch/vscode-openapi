@@ -18,6 +18,7 @@ export async function loadConfig(
   const docker = configuration.get<Config["docker"]>("docker");
   const cliDirectoryOverride = configuration.get<string>("cliDirectoryOverride");
 
+  const auditRuntime = configuration.get<"platform" | "cli">("platformAuditRuntime");
   const scanRuntime = configuration.get<"docker" | "scand-manager" | "cli">(
     "platformConformanceScanRuntime"
   );
@@ -51,6 +52,7 @@ export async function loadConfig(
       header:
         scandManagerHeader !== undefined ? JSON.parse(scandManagerHeader) : { name: "", value: "" },
     },
+    auditRuntime,
     scanRuntime,
     scanImage,
     docker,
@@ -100,6 +102,12 @@ export async function saveConfig(
   );
 
   await configuration.update("docker", config.docker, vscode.ConfigurationTarget.Global);
+
+  await configuration.update(
+    "platformAuditRuntime",
+    config.auditRuntime,
+    vscode.ConfigurationTarget.Global
+  );
 
   await configuration.update(
     "platformConformanceScanRuntime",
