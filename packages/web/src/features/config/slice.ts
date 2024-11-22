@@ -68,6 +68,7 @@ const initialState: ConfigState = {
         value: "",
       },
     },
+    auditRuntime: "platform",
     scanRuntime: "docker",
     scanImage: "",
     docker: {
