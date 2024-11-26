@@ -2,7 +2,7 @@
   "name": "vscode-openapi",
   "author": "42Crunch",
   "displayName": "OpenAPI (Swagger) Editor",
-  "description": "OpenAPI extension for Visual Studio Code",
+  "description": "OpenAPI editing, validation and preview in VS Code",
   "license": "AGPL-3.0-only",
   "version": "4.30.0",
   "publisher": "42Crunch",
