@@ -344,6 +344,10 @@
         "title": "42Crunch: Open Settings"
       },
       {
+        "command": "openapi.showCapture",
+        "title": "42Crunch: convert HAAR/Postman files"
+      },
+      {
         "command": "openapi.outline.resetSearch",
         "title": "Remove search filter",
         "enablement": "view == openapiOutline && viewItem == outlineSearch",
