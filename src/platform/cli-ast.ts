@@ -385,6 +385,7 @@ export async function runAuditWithCliBinary(
   config: Config,
   logger: Logger,
   oas: string,
+  tags: string[],
   isFullAudit: boolean,
   cliDirectoryOverride: string
 ): Promise<Result<{ audit: unknown; cli: CliResponse }, CliError>> {
@@ -449,6 +450,7 @@ export async function runAuditWithCliBinary(
 
     unlinkSync(join(dir as string, "report.json"));
     unlinkSync(join(dir as string, "openapi.json"));
+    unlinkSync(join(dir as string, "todo.json"));
     rmdirSync(dir);
 
     const cliResponse = JSON.parse(output.stdout);

@@ -238,6 +238,7 @@ async function createDefaultScanConfig(
               config,
               emptyLogger,
               oas,
+              [],
               true,
               cliDirectoryOverride
             );

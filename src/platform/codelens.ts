@@ -4,8 +4,7 @@ import { getApiId } from "./util";
 import { Cache } from "../cache";
 import { getOpenApiVersion } from "../parsers";
 import { OpenApiVersion } from "../types";
-import { TAGS_DATA_KEY } from "../webapps/views/tags/view";
-import { TagData } from "@xliic/common/tags";
+import { TagData, TAGS_DATA_KEY } from "@xliic/common/tags";
 import { hasCredentials } from "../credentials";
 import { Configuration } from "../configuration";
 
