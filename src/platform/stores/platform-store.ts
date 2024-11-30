@@ -1,4 +1,4 @@
-import { Event, EventEmitter } from "vscode";
+import { Event, EventEmitter, TextDocument, Memento } from "vscode";
 import { DataFormat, FullDataDictionary } from "@xliic/common/data-dictionary";
 import { NamingConvention, DefaultCollectionNamingPattern, TagRegex } from "@xliic/common/platform";
 import { Configuration } from "../../configuration";
@@ -48,7 +48,7 @@ import {
   UserData,
   Tag,
 } from "../types";
-import { TagDataEntry, TagEntry } from "@xliic/common/tags";
+import { TagData, TagDataEntry, TagEntry, TAGS_DATA_KEY } from "@xliic/common/tags";
 
 export interface CollectionsView {
   collections: CollectionData[];
@@ -266,7 +266,9 @@ export class PlatformStore {
         const platformTags = await getTags(this.getConnection(), this.logger);
         tagIds.push(...getActiveTagsIds(tagDataEntry, platformTags));
       } else {
-        tagIds.push(...(await this.getTagsFromApi(tagDataEntry.collectionId, tagDataEntry.apiId)));
+        tagIds.push(
+          ...(await this.getTagsIdsFromApi(tagDataEntry.collectionId, tagDataEntry.apiId))
+        );
       }
     }
 
@@ -456,7 +458,7 @@ export class PlatformStore {
     return tags;
   }
 
-  async getTagsFromApi(collectionId: string, apiId: string): Promise<string[]> {
+  async getTagsIdsFromApi(collectionId: string, apiId: string): Promise<string[]> {
     const resp = await listApis(collectionId, this.getConnection(), this.logger);
     const myApis = resp.list.filter((api) => api.desc.id === apiId);
     if (myApis.length === 0) {
@@ -476,6 +478,50 @@ export class PlatformStore {
       });
     }
     return tagIds;
+  }
+
+  async getTagsForDocument(document: TextDocument, memento: Memento): Promise<string[]> {
+    const mandatoryTags = getMandatoryTags(this.configuration);
+    const tagDataEntry = getTagDataEntry(memento, document.uri.fsPath);
+    if (tagDataEntry) {
+      if (!Array.isArray(tagDataEntry)) {
+        if (this.isConnected()) {
+          const platformApiTags = await this.getTagsFromApi(
+            tagDataEntry.collectionId,
+            tagDataEntry.apiId
+          );
+          return Array.from(new Set([...mandatoryTags, ...platformApiTags]));
+        } else {
+          return [];
+        }
+      } else {
+        const tags = tagDataEntry.map((tag) => `${tag.categoryName}:${tag.tagName}`);
+        return Array.from(new Set([...mandatoryTags, ...tags]));
+      }
+    }
+    return mandatoryTags;
+  }
+
+  async getTagsFromApi(collectionId: string, apiId: string): Promise<string[]> {
+    const resp = await listApis(collectionId, this.getConnection(), this.logger);
+    const myApis = resp.list.filter((api) => api.desc.id === apiId);
+    if (myApis.length === 0) {
+      throw new Error(`The api "${apiId}" is not found. Please change the file api link.`);
+    }
+    const apiTags = myApis[0]?.tags;
+    const tags: string[] = [];
+    if (apiTags && apiTags.length > 0) {
+      const allTags = await this.getTags();
+      const adminTagIds = new Set(
+        allTags.filter((tag) => tag.onlyAdminCanTag).map((tag) => tag.tagId)
+      );
+      apiTags.forEach((tag) => {
+        if (!adminTagIds.has(tag.tagId)) {
+          tags.push(`${tag.categoryName}:${tag.tagName}`);
+        }
+      });
+    }
+    return tags;
   }
 
   async refresh(): Promise<void> {
@@ -579,7 +625,7 @@ export class PlatformStore {
   }
 }
 
-function getMandatoryTags(configuration: Configuration): string[] {
+export function getMandatoryTags(configuration: Configuration): string[] {
   const tags: string[] = [];
 
   const platformMandatoryTags = configuration.get<string>("platformMandatoryTags");
@@ -631,6 +677,16 @@ function getActiveTagsIds(tagEntries: TagEntry[], platformTags: Tag[]): string[]
     );
   }
   return tagEntries.map((tagEntry) => tagEntry.tagId);
+}
+
+export function getTagDataEntry(
+  memento: Memento | undefined,
+  filePath: string
+): TagDataEntry | undefined {
+  if (memento) {
+    const tagData = memento.get(TAGS_DATA_KEY, {}) as TagData;
+    return tagData[filePath];
+  }
 }
 
 function delay(ms: number) {

@@ -13,10 +13,8 @@ import { Logger } from "../../../platform/types";
 
 import { HttpConfig, HttpError, HttpRequest } from "@xliic/common/http";
 import { executeHttpRequestRaw } from "../../http-handler";
-import { TagData, TagEntry } from "@xliic/common/tags";
+import { TagData, TagEntry, TAGS_DATA_KEY } from "@xliic/common/tags";
 import { loadConfig } from "../../../util/config";
-
-export const TAGS_DATA_KEY = "openapi-42crunch.environment-tags-data";
 
 export class TagsWebView extends WebView<Webapp> {
   private uri: vscode.Uri | undefined;

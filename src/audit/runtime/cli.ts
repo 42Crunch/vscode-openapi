@@ -20,6 +20,7 @@ export async function runCliAudit(
   document: vscode.TextDocument,
   oas: string,
   mapping: MappingNode,
+  tags: string[],
   cache: Cache,
   secrets: vscode.SecretStorage,
   configuration: Configuration,
@@ -41,6 +42,7 @@ export async function runCliAudit(
     config,
     logger,
     oas,
+    tags,
     isFullAudit,
     config.cliDirectoryOverride
   );

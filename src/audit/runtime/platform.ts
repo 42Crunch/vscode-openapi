@@ -7,12 +7,10 @@ import * as vscode from "vscode";
 import { Audit } from "@xliic/common/audit";
 
 import { Cache } from "../../cache";
-import { PlatformStore } from "../../platform/stores/platform-store";
+import { getTagDataEntry, PlatformStore } from "../../platform/stores/platform-store";
 import { MappingNode } from "../../types";
 import { parseAuditReport } from "../audit";
 import { formatException } from "../../platform/util";
-import { TAGS_DATA_KEY } from "../../webapps/views/tags/view";
-import { TagData, TagDataEntry } from "@xliic/common/tags";
 
 export async function runPlatformAudit(
   document: vscode.TextDocument,
@@ -47,15 +45,5 @@ export async function runPlatformAudit(
         formatException("Unexpected error when trying to audit API using the platform:", ex)
       );
     }
-  }
-}
-
-function getTagDataEntry(
-  memento: vscode.Memento | undefined,
-  filePath: string
-): TagDataEntry | undefined {
-  if (memento) {
-    const tagData = memento.get(TAGS_DATA_KEY, {}) as TagData;
-    return tagData[filePath];
   }
 }
