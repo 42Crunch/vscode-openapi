@@ -1,20 +1,18 @@
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
-import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { $createLineBreakNode, $createParagraphNode, $getRoot } from "lexical";
+import { $createLineBreakNode, $createParagraphNode, $createTextNode, $getRoot } from "lexical";
 
 import { useEffect, useState } from "react";
 import { useController } from "react-hook-form";
 import styled from "styled-components";
 import { VariableNode } from "./editor/VariableNode";
 import VariablesPlugin from "./editor/VariablesPlugin";
-import { createLineNodes } from "./editor/utils";
 import { CircleCheck, ExclamationCircle } from "../../icons";
-import { EditorFocusPlugin } from "./EditorFocusPlugin";
 
 export default function JsonEditor({ name, variables }: { name: string; variables: string[] }) {
   const {
@@ -33,7 +31,7 @@ export default function JsonEditor({ name, variables }: { name: string; variable
       const paragraph = $createParagraphNode();
       const lines = serialized.split("\n");
       for (let i = 0; i < lines.length; i++) {
-        paragraph.append(...createLineNodes(lines[i]));
+        paragraph.append($createTextNode(lines[i]));
         if (i < lines.length - 1) {
           paragraph.append($createLineBreakNode());
         }
@@ -48,9 +46,6 @@ export default function JsonEditor({ name, variables }: { name: string; variable
     nodes: [VariableNode],
   };
 
-  // this is a workaround for https://github.com/facebook/lexical/issues/4853
-  const [hasFocus, setFocus] = useState(false);
-
   return (
     <Container>
       <LexicalComposer initialConfig={initialConfig}>
@@ -60,9 +55,8 @@ export default function JsonEditor({ name, variables }: { name: string; variable
           ErrorBoundary={LexicalErrorBoundary}
         />
         <HistoryPlugin />
-        {hasFocus && <VariablesPlugin variables={variables} />}
+        <VariablesPlugin variables={variables} />
         <FormPlugin name={name} />
-        <EditorFocusPlugin onFocus={(focus) => setFocus(focus)} />
       </LexicalComposer>
     </Container>
   );
