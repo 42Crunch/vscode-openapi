@@ -1,17 +1,18 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import * as ReactDOM from "react-dom";
+import styled from "styled-components";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { useLexicalTextEntity } from "@lexical/react/useLexicalTextEntity";
 import {
   LexicalTypeaheadMenuPlugin,
   MenuOption,
   MenuTextMatch,
 } from "@lexical/react/LexicalTypeaheadMenuPlugin";
-import { $nodesOfType, TextNode } from "lexical";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import * as ReactDOM from "react-dom";
-import { $createVariableNode, VariableNode } from "./VariableNode";
+import { $getNodeByKey, TextNode } from "lexical";
+
 import { ThemeColorVariables } from "@xliic/common/theme";
 
-import styled from "styled-components";
-import { useLexicalTextEntity } from "@lexical/react/useLexicalTextEntity";
+import { $createVariableNode, VariableNode } from "./VariableNode";
 
 const SUGGESTION_LIST_LENGTH_LIMIT = 100;
 
@@ -85,13 +86,10 @@ export default function VariablesPlugin({
 }): JSX.Element | null {
   const [editor] = useLexicalComposerContext();
 
-  const createVariableNode = useCallback(
-    (textNode: TextNode): VariableNode => {
-      const name = textNode.getTextContent().slice(2, -2);
-      return $createVariableNode(textNode.getTextContent(), variables.includes(name));
-    },
-    [variables]
-  );
+  const createVariableNode = useCallback((textNode: TextNode): VariableNode => {
+    const name = textNode.getTextContent().slice(2, -2);
+    return $createVariableNode(textNode.getTextContent(), variables.includes(name));
+  }, []);
 
   const getVariableMatch = useCallback((text: string) => {
     const matchArr = /({{[\w-$]+}})/.exec(text);
@@ -113,14 +111,27 @@ export default function VariablesPlugin({
   useLexicalTextEntity(getVariableMatch, VariableNode, createVariableNode);
 
   useEffect(() => {
-    editor.update(() => {
-      const nodes = $nodesOfType(VariableNode);
-      for (const node of nodes) {
-        const name = node.getTextContent().slice(2, -2);
-        node.setExists(variables.includes(name));
-      }
-    });
-  }, [variables, editor]);
+    editor.registerMutationListener(
+      VariableNode,
+      (mutations) => {
+        editor.update(() => {
+          for (let [nodeKey, mutation] of mutations) {
+            if (mutation === "created" || mutation === "updated") {
+              const node = $getNodeByKey<VariableNode>(nodeKey);
+              if (node) {
+                const name = node.getTextContent().slice(2, -2);
+                const exists = variables.includes(name);
+                if (exists !== node.getExists()) {
+                  node.setExists(exists);
+                }
+              }
+            }
+          }
+        });
+      },
+      { skipInitialization: false }
+    );
+  }, [editor]);
 
   const [queryString, setQueryString] = useState<string | null>(null);
   const [results, setResults] = useState<Array<string>>([]);

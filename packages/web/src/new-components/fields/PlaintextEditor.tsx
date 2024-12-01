@@ -5,13 +5,12 @@ import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { $createLineBreakNode, $createParagraphNode, $getRoot } from "lexical";
+import { $createLineBreakNode, $createParagraphNode, $createTextNode, $getRoot } from "lexical";
 
 import { useEffect } from "react";
 import { useController } from "react-hook-form";
 import styled from "styled-components";
 import { VariableNode } from "./editor/VariableNode";
-import { createLineNodes } from "./editor/utils";
 
 export default function PlaintextEditor({ name }: { name: string }) {
   const {
@@ -28,7 +27,7 @@ export default function PlaintextEditor({ name }: { name: string }) {
       const paragraph = $createParagraphNode();
       const lines = value.split("\n");
       for (let i = 0; i < lines.length; i++) {
-        paragraph.append(...createLineNodes(lines[i]));
+        paragraph.append($createTextNode(lines[i]));
         if (i < lines.length - 1) {
           paragraph.append($createLineBreakNode());
         }
