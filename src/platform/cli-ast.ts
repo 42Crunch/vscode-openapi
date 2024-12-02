@@ -42,6 +42,7 @@ const asyncExecFile = promisify(execFile);
 
 let lastCliUpdateCheckTime = 0;
 const cliUpdateCheckInterval = 1000 * 60 * 60 * 1; // 1 hour
+const execMaxBuffer = 1024 * 1024 * 20; // 20MB
 
 export async function createScanConfigWithCliBinary(
   scanconfUri: vscode.Uri,
@@ -67,7 +68,7 @@ export async function createScanConfigWithCliBinary(
         scanconfUri.fsPath,
         "openapi.json",
       ],
-      { cwd: tmpdir, windowsHide: true }
+      { cwd: tmpdir, windowsHide: true, maxBuffer: execMaxBuffer }
     );
 
     // clean the temp directory
@@ -108,7 +109,10 @@ export async function testCli(cliDirectoryOverride: string): Promise<CliTestResu
 
   if (cli.found) {
     try {
-      const { stdout } = await asyncExecFile(cli.location, ["--version"], { windowsHide: true });
+      const { stdout } = await asyncExecFile(cli.location, ["--version"], {
+        windowsHide: true,
+        maxBuffer: execMaxBuffer,
+      });
       const version = stdout.split("\n")?.[0]; // get the first line only
       const match = version.match(/(\d+\.\d+\.\d+.*)$/);
       if (match !== null) {
@@ -295,6 +299,7 @@ export async function runScanWithCliBinary(
       cwd: dir as string,
       windowsHide: true,
       env: scanEnv,
+      maxBuffer: execMaxBuffer,
     });
 
     const report = await readFile(reportFilename, { encoding: "utf8" });
@@ -358,7 +363,7 @@ export async function runValidateScanConfigWithCliBinary(
     const output = await asyncExecFile(
       cli,
       ["scan", "conf", "validate", "openapi.json", "--conf-file", "scanconf.json"],
-      { cwd: dir as string, windowsHide: true, env: scanEnv }
+      { cwd: dir as string, windowsHide: true, env: scanEnv, maxBuffer: execMaxBuffer }
     );
 
     const cliResponse = JSON.parse(output.stdout);
@@ -442,7 +447,12 @@ export async function runAuditWithCliBinary(
   }
 
   try {
-    const output = await asyncExecFile(cli, args, { cwd: dir as string, windowsHide: true, env });
+    const output = await asyncExecFile(cli, args, {
+      cwd: dir as string,
+      windowsHide: true,
+      env,
+      maxBuffer: execMaxBuffer,
+    });
 
     const report = await readFile(join(dir as string, "report.json"), { encoding: "utf8" });
     const parsed = JSON.parse(report);
