@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.30.1 (December 3, 2024)
+
+- Increase stdout buffer size when running the Scan using the CLI binary
+
 ## Version 4.30.0 (November 20, 2024)
 
 - Added ability to tag local API files or link them to the platform APIs
