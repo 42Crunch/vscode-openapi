@@ -8,6 +8,7 @@ import { SimpleEnvironment } from "@xliic/common/env";
 import * as vscode from "vscode";
 import { EnvStore } from "../../../envstore";
 import { Logger } from "../../types";
+import { delay } from "../../../time-util";
 
 export async function runScanWithDocker(
   envStore: EnvStore,
@@ -39,8 +40,10 @@ export async function runScanWithDocker(
       ? "--network host"
       : "";
 
-  terminal.sendText(`docker run ${hostNetwork} --rm ${envString} ${config.scanImage}`);
+  terminal.sendText("");
   terminal.show();
+  await delay(2000);
+  terminal.sendText(`docker run ${hostNetwork} --rm ${envString} ${config.scanImage}`);
 
   return undefined;
 }
