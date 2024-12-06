@@ -5,7 +5,7 @@ import { RuntimeOperationReport } from "@xliic/common/scan-report";
 
 import { HappyPath } from "./HappyPath";
 import CollapsibleCard from "../../new-components/CollapsibleCard";
-import { Check, CircleCheck, ExclamationCircle, TriangleExclamation } from "../../icons";
+import { Check, TriangleExclamation } from "../../icons";
 
 export function HappyPathCard({
   operation,
@@ -16,17 +16,21 @@ export function HappyPathCard({
   operationId: string;
   defaultCollapsed: boolean;
 }) {
+  const successes = operation.scenarios?.map((scenario) => scenario?.outcome?.testSuccessful);
+  const hasSuccess = successes !== undefined && successes.every((success) => success !== undefined);
+  const isSuccessOrFuzzed = hasSuccess ? successes.every((success) => success) : operation.fuzzed;
+
   return (
     <Container>
       <CollapsibleCard defaultCollapsed={defaultCollapsed}>
         <Top>
           <span>{operationId}</span>
-          <span>{operation.fuzzed ? "Passed" : "Failed"}</span>
+          <span>{isSuccessOrFuzzed ? "Passed" : "Failed"}</span>
         </Top>
         <Bottom>
           <Method>{operation.method}</Method>
           <Path>{operation.path}</Path>
-          {operation.fuzzed ? <Check /> : <TriangleExclamation />}
+          {isSuccessOrFuzzed ? <Check /> : <TriangleExclamation />}
         </Bottom>
         <HappyPath operation={operation} />
       </CollapsibleCard>

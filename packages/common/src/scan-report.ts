@@ -808,6 +808,9 @@ export interface OutcomeReport {
   /**
    * An array of the results from analyzing the received API response against the OpenAPI definition of the scanned API.
    */
+
+  testSuccessful?: boolean;
+
   apiResponseAnalysis:
     | {
         /**
