@@ -20,3 +20,5 @@ export type SaveTags = {
   command: "saveTags";
   payload: TagData;
 };
+
+export const TAGS_DATA_KEY = "openapi-42crunch.environment-tags-data";

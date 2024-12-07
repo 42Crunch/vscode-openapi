@@ -206,16 +206,19 @@ async function securityAudit(
         const oas = isFullAudit
           ? stringify(value)
           : stringify(extractSingleOperation(method, path as string, value));
-        // paid users always run audit using the platform, free users use CLI or fallback to anond
         if ((await chooseAuditRuntime(configuration, secrets)) === "platform") {
           return runPlatformAudit(editor.document, oas, mapping, cache, store, memento);
         } else {
           // use CLI
           if (await ensureCliDownloaded(configuration, secrets)) {
+            const tags = store.isConnected()
+              ? await store.getTagsForDocument(editor.document, memento)
+              : [];
             return runCliAudit(
               editor.document,
               oas,
               mapping,
+              tags,
               cache,
               secrets,
               configuration,
@@ -272,5 +275,10 @@ async function chooseAuditRuntime(
   secrets: vscode.SecretStorage
 ): Promise<"platform" | "cli"> {
   const config = await loadConfig(configuration, secrets);
-  return config.platformAuthType === "api-token" ? "platform" : "cli";
+  // paid users are allowed to choose the runtime, freemium users always use the cli
+  if (config.platformAuthType === "api-token") {
+    return config.auditRuntime;
+  } else {
+    return "cli";
+  }
 }

@@ -6,7 +6,7 @@ import { useAppDispatch } from "./store";
 export default function SqgLevelViolations({ sqg, stats }: { sqg: Sqg; stats: Stats }) {
   const dispatch = useAppDispatch();
 
-  const rules = sqg.directives.issueRules;
+  const rules = sqg.directives.issueRules ?? [];
   const byIssue = stats.byIssue;
 
   const found = byIssue.filter((issue) => rules.includes(issue.id));

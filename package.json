@@ -714,9 +714,22 @@
             "cli"
           ],
           "enumDescriptions": [
-            "Use Docker to run 42Crunch API Conformance Scan",
-            "Use Scand-Manager to run 42Crunch API Conformance Scan",
-            "Use 42Crunch API Security Testing Binary to run Conformance Scan and Security Audit"
+            "Use Docker to run 42Crunch API Scan",
+            "Use Scand-Manager to run 42Crunch API Scan",
+            "Use 42Crunch API Security Testing Binary to run API Scan"
+          ]
+        },
+        "openapi.platformAuditRuntime": {
+          "scope": "machine",
+          "type": "string",
+          "default": "platform",
+          "enum": [
+            "platform",
+            "cli"
+          ],
+          "enumDescriptions": [
+            "Use 42Crunch platform to run API Audit",
+            "Use 42Crunch API Security Testing Binary to run API Audit"
           ]
         },
         "openapi.docker": {

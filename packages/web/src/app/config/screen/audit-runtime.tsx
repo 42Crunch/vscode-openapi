@@ -15,27 +15,27 @@ export function AuditRuntime() {
       <Container>
         {/* Only paid customers can select audit runtime */}
         {platformAuthType === "api-token" && (
-          <p>TODO</p>
-          // <Select
-          //   label="Runtime"
-          //   name="scanRuntime"
-          //   options={[
-          //     { value: "docker", label: "Docker" },
-          //     { value: "scand-manager", label: "Scand manager" },
-          //     { value: "cli", label: "42Crunch API Security Testing Binary" },
-          //   ]}
-          // />
+          <Select
+            label="Runtime"
+            name="auditRuntime"
+            options={[
+              { value: "platform", label: "Platform" },
+              { value: "cli", label: "42Crunch API Security Testing Binary" },
+            ]}
+          />
         )}
 
         {platformAuthType === "anond-token" && (
-          <Banner message="Audit runtime is set to use 42Crunch API Security Testing Binary" />
+          <Banner message="API Audit runtime is configured to use 42Crunch API Security Testing Binary" />
         )}
       </Container>
     </>
   );
 }
 
-const schema = z.object({});
+const schema = z.object({
+  auditRuntime: z.enum(["platform", "cli"]),
+});
 
 const screen: ConfigScreen = {
   id: "audit-runtime",
