@@ -63,5 +63,16 @@ export async function runCliAudit(
     warnOperationAudits(result.cli.remainingPerOperationAudit);
   }
 
-  return await parseAuditReport(cache, document, result.audit, mapping);
+  const audit = await parseAuditReport(cache, document, result.audit, mapping);
+
+  if (result.todo !== undefined) {
+    const { issues: todo } = await parseAuditReport(cache, document, result.todo, mapping);
+    audit.todo = todo;
+  }
+
+  if (result.compliance !== undefined) {
+    audit.compliance = result.compliance as any;
+  }
+
+  return audit;
 }

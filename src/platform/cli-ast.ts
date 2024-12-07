@@ -393,7 +393,9 @@ export async function runAuditWithCliBinary(
   tags: string[],
   isFullAudit: boolean,
   cliDirectoryOverride: string
-): Promise<Result<{ audit: unknown; cli: CliResponse }, CliError>> {
+): Promise<
+  Result<{ audit: unknown; todo: unknown; compliance: unknown; cli: CliResponse }, CliError>
+> {
   logger.info(`Running Security Audit using 42Crunch API Security Testing Binary`);
 
   const dir = createTempDirectory("audit-");
@@ -431,6 +433,10 @@ export async function runAuditWithCliBinary(
     args.push("--is-operation");
   }
 
+  if (tags.length > 0) {
+    args.push("--tag", tags.join(","));
+  }
+
   if (config.platformAuthType === "anond-token") {
     const anondToken = getAnondCredentials(configuration);
     args.push("--token", String(anondToken));
@@ -455,16 +461,32 @@ export async function runAuditWithCliBinary(
       maxBuffer: execMaxBuffer,
     });
 
-    const report = await readFile(join(dir as string, "report.json"), { encoding: "utf8" });
+    const openapiFilename = join(dir, "openapi.json");
+    const reportFilename = join(dir, "report.json");
+    const todoFilename = join(dir, "todo.json");
+    const sqgFilename = join(dir, "sqg.json");
+
+    const report = await readFile(reportFilename, { encoding: "utf8" });
     const parsed = JSON.parse(report);
 
-    unlinkSync(join(dir as string, "report.json"));
-    unlinkSync(join(dir as string, "openapi.json"));
-    unlinkSync(join(dir as string, "todo.json"));
+    const todo = await readTodoReport(todoFilename);
+    const compliance = await readSqgReport(sqgFilename);
+
+    unlinkSync(reportFilename);
+    unlinkSync(openapiFilename);
+
+    if (exists(todoFilename)) {
+      unlinkSync(todoFilename);
+    }
+
+    if (exists(sqgFilename)) {
+      unlinkSync(sqgFilename);
+    }
+
     rmdirSync(dir);
 
     const cliResponse = JSON.parse(output.stdout);
-    return [{ audit: parsed, cli: cliResponse }, undefined];
+    return [{ audit: parsed, todo, compliance, cli: cliResponse }, undefined];
   } catch (ex: any) {
     if (ex.code === 3) {
       // limit reached
@@ -619,4 +641,18 @@ function parseCliJsonResponse(response: string): CliResponse | undefined {
 function getUserAgent() {
   const extension = vscode.extensions.getExtension(extensionQualifiedId)!;
   return `42Crunch-VSCode/${extension.packageJSON.version}`;
+}
+
+async function readTodoReport(todoFilename: string) {
+  if (exists(todoFilename)) {
+    const report = await readFile(todoFilename, { encoding: "utf8" });
+    return JSON.parse(report);
+  }
+}
+
+async function readSqgReport(sqgReportFilename: string) {
+  if (exists(sqgReportFilename)) {
+    const report = await readFile(sqgReportFilename, { encoding: "utf8" });
+    return JSON.parse(report);
+  }
 }

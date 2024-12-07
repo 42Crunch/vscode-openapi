@@ -86,7 +86,7 @@ export type Sqg = {
         transport: SeverityLevelOrNone;
       };
     };
-    issueRules: string[];
+    issueRules?: string[];
   };
 };
 
