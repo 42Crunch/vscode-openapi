@@ -4,6 +4,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import ThemeStyles from "../features/theme/ThemeStyles";
 import Router from "../features/router/Router";
 import Navigation from "../features/router/Navigation";
+import ConfirmationDialog from "../features/confirmation-dialog/ConfirmationDialog";
 
 export function makeWebappMessageHandler(store: any, handlers: any) {
   return function webappMessageHandler(event: MessageEvent<any>) {
@@ -60,6 +61,7 @@ export function NavigationRouterApp() {
   return (
     <ErrorBoundary FallbackComponent={Fallback}>
       <ThemeStyles />
+      <ConfirmationDialog />
       <NavigationContainer>
         <Navigation />
       </NavigationContainer>

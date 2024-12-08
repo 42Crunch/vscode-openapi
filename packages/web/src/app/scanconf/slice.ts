@@ -232,6 +232,10 @@ export const slice = createSlice({
       state.playbook.operations[operationId].customized = true;
     },
 
+    removeCustomizationForOperation: (state, { payload: operationId }: PayloadAction<string>) => {
+      state.playbook.operations[operationId].customized = false;
+    },
+
     createVariable: (
       state,
       {
@@ -340,6 +344,7 @@ export const {
   removeRequest,
   updateOperationAuthorizationTests,
   customizeOperation,
+  removeCustomizationForOperation,
   createVariable,
 } = slice.actions;
 

@@ -27,6 +27,7 @@ import operations from "./operations/slice";
 import requests from "./requests/slice";
 import scanconf from "./slice";
 import scanconfUpdate from "./scanconf-update/slice";
+import confirmationDialog from "../../features/confirmation-dialog/slice";
 
 const reducer = {
   theme,
@@ -42,6 +43,7 @@ const reducer = {
   config,
   global,
   generalError,
+  confirmationDialog,
 };
 
 export const messageHandlers: Webapp["webappHandlers"] = {
