@@ -2,12 +2,10 @@ import { TypedStartListening } from "@reduxjs/toolkit";
 
 import { parse } from "@xliic/scanconf";
 import { Result } from "@xliic/result";
-import { compare, update } from "@xliic/scanconf-changes";
-import { Webapp } from "@xliic/common/webapp/scanconf";
 
 import { goTo } from "../../../features/router/slice";
 import { AppDispatch, RootState } from "../store";
-import { showScanconfOperation, loadPlaybook, loadUpdatedScanconf } from "../actions";
+import { loadPlaybook } from "../actions";
 import { skipScanconfUpdate } from "../scanconf-update/slice";
 import { showGeneralError } from "../../../features/general-error/slice";
 

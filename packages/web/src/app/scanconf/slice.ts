@@ -233,6 +233,22 @@ export const slice = createSlice({
     },
 
     removeCustomizationForOperation: (state, { payload: operationId }: PayloadAction<string>) => {
+      state.playbook.operations[operationId].customTests = undefined;
+      state.playbook.operations[operationId].authorizationTests = [];
+      state.playbook.operations[operationId].before = [];
+      state.playbook.operations[operationId].after = [];
+      state.playbook.operations[operationId].scenarios = [
+        {
+          key: "happy.path",
+          requests: [
+            {
+              fuzzing: true,
+              ref: { type: "operation", id: operationId },
+            },
+          ],
+          fuzzing: true,
+        },
+      ];
       state.playbook.operations[operationId].customized = false;
     },
 
