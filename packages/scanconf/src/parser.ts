@@ -113,7 +113,7 @@ function parseOperation(
 
 function isOperationCustomized(operation: scan.Operation): boolean {
   const requestsFromFirstScenario = operation.scenarios?.[0]?.requests;
-  const firstStageFromFirstScenarion = requestsFromFirstScenario?.[0];
+  const firstStageFromFirstScenario = requestsFromFirstScenario?.[0];
 
   const hasCustomTests = operation.customTests && operation.customTests.length > 0;
   const hasAuthorizationTests =
@@ -124,7 +124,7 @@ function isOperationCustomized(operation: scan.Operation): boolean {
   const hasMoreThanOneRequestInFirstScenario =
     requestsFromFirstScenario && requestsFromFirstScenario.length > 1;
   const isFirstStageCustomized =
-    firstStageFromFirstScenarion !== undefined && isStageCustomized(firstStageFromFirstScenarion);
+    firstStageFromFirstScenario !== undefined && isStageCustomized(firstStageFromFirstScenario);
 
   return (
     hasCustomTests ||
