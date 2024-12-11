@@ -96,7 +96,7 @@ const schema = z.object({
 
 const screen: ConfigScreen = {
   id: "runtime-binary",
-  label: "Binary",
+  label: "42Crunch Binary",
   schema,
   form: RuntimeBinary,
 };
