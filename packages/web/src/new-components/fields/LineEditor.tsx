@@ -1,11 +1,17 @@
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
-import LexicalErrorBoundary from "@lexical/react/LexicalErrorBoundary";
+import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
-import { $createParagraphNode, $getRoot, BLUR_COMMAND, COMMAND_PRIORITY_LOW } from "lexical";
-import { HTMLAttributes, useEffect, useState } from "react";
+import {
+  $createParagraphNode,
+  $createTextNode,
+  $getRoot,
+  BLUR_COMMAND,
+  COMMAND_PRIORITY_LOW,
+} from "lexical";
+import { HTMLAttributes, useEffect } from "react";
 import { useController } from "react-hook-form";
 import styled from "styled-components";
 
@@ -14,8 +20,6 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import RemoveLinebreaksPlugin from "./editor/RemoveLinebreaksPlugin";
 import { VariableNode } from "./editor/VariableNode";
 import VariablesPlugin from "./editor/VariablesPlugin";
-import { createLineNodes } from "./editor/utils";
-import { EditorFocusPlugin } from "./EditorFocusPlugin";
 
 export default function LineEditor({
   name,
@@ -48,7 +52,7 @@ export default function LineEditor({
     namespace: "editor",
     editorState: () => {
       const paragraph = $createParagraphNode();
-      paragraph.append(...createLineNodes(encode ? encode(field.value) : field.value));
+      paragraph.append($createTextNode(encode ? encode(field.value) : field.value));
       $getRoot().append(paragraph);
     },
     theme: {
@@ -58,9 +62,6 @@ export default function LineEditor({
     onError,
     nodes: [VariableNode],
   };
-
-  // this is a workaround for https://github.com/facebook/lexical/issues/4853
-  const [hasFocus, setFocus] = useState(false);
 
   return (
     <Container {...attrs} onBlur={field.onBlur}>
@@ -72,9 +73,8 @@ export default function LineEditor({
             ErrorBoundary={LexicalErrorBoundary}
           />
           <HistoryPlugin />
-          {hasFocus && variables !== undefined && <VariablesPlugin variables={variables} />}
+          {variables !== undefined && <VariablesPlugin variables={variables} />}
           <FormPlugin name={name} decode={decode} />
-          <EditorFocusPlugin onFocus={(focus) => setFocus(focus)} />
           <RemoveLinebreaksPlugin />
         </>
       </LexicalComposer>
