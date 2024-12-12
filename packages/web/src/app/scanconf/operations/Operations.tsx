@@ -2,8 +2,10 @@ import { SearchSidebarControlled } from "../../../components/layout/SearchSideba
 import { useAppDispatch, useAppSelector } from "../store";
 import Operation from "./Operation";
 import { setOperationId } from "./slice";
-import { customizeOperation } from "../slice";
+import { customizeOperation, removeCustomizationForOperation } from "../slice";
+import { requestConfirmation } from "../../../features/confirmation-dialog/slice";
 import NewScenarioDialog from "./NewScenarioDialog";
+import { Menu, MenuItem } from "../../../new-components/Menu";
 
 export default function Operations() {
   const dispatch = useAppDispatch();
@@ -18,7 +20,34 @@ export default function Operations() {
 
   const items = Object.entries(operations)
     .filter(([id, operation]) => operation.customized)
-    .map(([id, operation]) => ({ id, label: id }));
+    .map(([id, operation]) => ({
+      id,
+      label: id,
+      menu: (
+        <>
+          <Menu>
+            <MenuItem
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() =>
+                dispatch(
+                  requestConfirmation({
+                    title: "Delete scenario",
+                    message: `Are you sure you want to delete scenario for operation "${id}"?`,
+                    actions: [
+                      removeCustomizationForOperation(id),
+                      // if removing the current operation, clear the operationId
+                      setOperationId(operationId === id ? undefined : operationId),
+                    ],
+                  })
+                )
+              }
+            >
+              Delete
+            </MenuItem>
+          </Menu>
+        </>
+      ),
+    }));
 
   const sections = [
     {

@@ -24,6 +24,7 @@ import {
   saveSettings,
   updateOperationAuthorizationTests,
   createVariable,
+  removeCustomizationForOperation,
 } from "../slice";
 import { updateScanconf } from "../scanconf-update/slice";
 import { AppDispatch, RootState } from "../store";
@@ -73,7 +74,8 @@ const listeners = (
           removeAuthorizationTest,
           addAuthorizationTest,
           updateOperationAuthorizationTests,
-          createVariable
+          createVariable,
+          removeCustomizationForOperation
         ),
         effect: async (action, listenerApi) => {
           const { scanconf: state } = listenerApi.getState();

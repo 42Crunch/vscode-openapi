@@ -1,7 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
-import { getOperation, makeOperationId } from "@xliic/openapi";
-
 import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
 import { showScanconfOperation } from "../actions";
 import { ExecutionResult } from "../components/scenario/types";
@@ -28,7 +26,7 @@ export const slice = createSlice({
   name: "operations",
   initialState,
   reducers: {
-    setOperationId: (state, { payload: operationId }: PayloadAction<string>) => {
+    setOperationId: (state, { payload: operationId }: PayloadAction<string | undefined>) => {
       state.operationId = operationId;
       state.scenarioId = 0;
       state.tryCurrent = { auth: [] };
