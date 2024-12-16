@@ -1,9 +1,19 @@
+export interface CaptureItem {
+  files: string[];
+  quickgenId: string | undefined;
+  prepareOptions: PrepareOptions | undefined;
+  progressStatus: ProgressStatus | undefined;
+  logMessage: string;
+}
+
+export type ProgressStatus = "Finished" | "In progress" | "Failed";
+
 export type ResponseError = { success: false; error: string };
 
 // Initial message to show capture web app
 export type ShowCaptureWindow = {
   command: "showCaptureWindow";
-  payload: undefined; // TODO: will contain info about currently running capture process stored in IDE
+  payload: CaptureItem[];
 };
 
 // Messages to select HAR/Postman files input
@@ -101,7 +111,3 @@ export type ShowDownloadResult = {
 };
 
 export type DownloadResultResponse = { success: true; file: string } | ResponseError;
-
-// TODO:
-// How we get token or other credentials to auth on the capture service?
-// What to store in IDE if window is closed = what payload to pass in ShowCaptureWindow

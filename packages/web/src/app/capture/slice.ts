@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
+  CaptureItem,
   DownloadResultResponse,
   ExecutionStartResponse,
   ExecutionStatusResponse,
@@ -10,9 +11,9 @@ import {
   Status,
   UploadFileResponse,
 } from "@xliic/common/capture";
-//import { HttpRequest, HttpResponse, HttpError, HttpConfig } from "@xliic/common/http";
 
 export interface CaptureState {
+  items: CaptureItem[];
   files: string[];
   quickgenId: string | undefined;
   prepareRespError: string | undefined;
@@ -32,6 +33,7 @@ export interface CaptureState {
 }
 
 const initialState: CaptureState = {
+  items: [],
   files: [],
   quickgenId: undefined,
   prepareRespError: undefined,
@@ -54,8 +56,8 @@ export const slice = createSlice({
   name: "capture",
   initialState,
   reducers: {
-    showCaptureWindow: (state, action: PayloadAction<undefined>) => {
-      // todo
+    showCaptureWindow: (state, action: PayloadAction<CaptureItem[]>) => {
+      state.items = action.payload;
     },
     browseFiles: (state, action: PayloadAction<undefined>) => {
       // -> IDE

@@ -15,6 +15,11 @@ import Input from "../../components/Input";
 import Form from "../../new-components/Form";
 import { PrepareOptions } from "@xliic/common/capture";
 import styled from "styled-components";
+import CollapsibleCard, {
+  BottomDescription,
+  BottomItem,
+  TopDescription,
+} from "../../components/CollapsibleCard";
 
 function wrapPrepareOptions(env: PrepareOptions) {
   return env;
@@ -31,6 +36,7 @@ function unwrapPrepareOptions(data: any): PrepareOptions {
 export function RootContainer() {
   const dispatch = useAppDispatch();
   const {
+    items,
     files,
     quickgenId,
     prepareRespError,
@@ -95,7 +101,29 @@ export function RootContainer() {
   }, [startComplete, statusPoolingCounter]);
 
   return (
-    <>
+    <Container>
+      <Header>
+        <HeaderConter>{items.length} files</HeaderConter>
+      </Header>
+      {items.map((item, index) => (
+        <CollapsibleCard key={`item-${index}`}>
+          <TopDescription>{item.progressStatus}</TopDescription>
+          <BottomDescription>
+            <BottomDescription>
+              <BottomItem>
+                <div>foo</div>
+              </BottomItem>
+              <BottomItem>
+                <div>bar</div>
+              </BottomItem>
+            </BottomDescription>
+          </BottomDescription>
+          <div>
+            <div>todo</div>
+          </div>
+        </CollapsibleCard>
+      ))}
+      ///////////////////
       {
         <>
           <div>Select HAR/Postman files to convert</div>
@@ -182,7 +210,7 @@ export function RootContainer() {
           </LinkRef>
         </div>
       )}
-    </>
+    </Container>
   );
 }
 
@@ -191,4 +219,32 @@ const LinkRef = styled.a`
   ${({ disabled }: { disabled?: boolean }) => disabled && "opacity: 0.4;"}
   ${({ disabled }: { disabled?: boolean }) => disabled && "cursor: default;"}
   ${({ disabled }: { disabled?: boolean }) => disabled && "pointer-events: none;"}
+`;
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+`;
+
+const Header = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+`;
+
+const HeaderConter = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+`;
+
+const HeaderAction = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
 `;

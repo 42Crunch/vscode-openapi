@@ -168,7 +168,35 @@ export class CaptureWebView extends WebView<Webapp> {
     //const config = await loadConfig(this.configuration, this.secrets);
     this.sendRequest({
       command: "showCaptureWindow",
-      payload: undefined,
+      payload: [
+        {
+          files: ["/abc"],
+          quickgenId: "aasdsaddr615er1ytfeghcvaghd1",
+          prepareOptions: {
+            basePath: "/basePath1",
+            servers: [],
+          },
+          progressStatus: "Finished",
+          logMessage: "logMessage1",
+        },
+        {
+          files: ["/abc", "/abc123"],
+          quickgenId: "bbbdsaddr615er1ytfeghcvaghd1",
+          prepareOptions: {
+            basePath: "/basePath2",
+            servers: [],
+          },
+          progressStatus: "In progress",
+          logMessage: "logMessage2",
+        },
+        {
+          files: ["/abc", "/abc123", "/abc123ewrewrewrew"],
+          quickgenId: "tredsaddr615er1ytfeghcvaghd1",
+          prepareOptions: undefined,
+          progressStatus: "Failed",
+          logMessage: "logMessageErrorHere",
+        },
+      ],
     });
     // const tagData = this.memento.get(TAGS_DATA_KEY, {}) as TagData;
     // const targetFileName = this.uri?.fsPath;
