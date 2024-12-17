@@ -1,12 +1,15 @@
 export interface CaptureItem {
+  id: string;
   files: string[];
   quickgenId: string | undefined;
-  prepareOptions: PrepareOptions | undefined;
-  progressStatus: ProgressStatus | undefined;
-  logMessage: string;
+  prepareOptions: PrepareOptions;
+  progressStatus: ProgressStatus;
+  log: string[];
+  downloadedFile: string | undefined;
 }
 
-export type ProgressStatus = "Finished" | "In progress" | "Failed";
+// Status New is never shown and used only for internal needs
+export type ProgressStatus = "New" | "Finished" | "In progress" | "Failed";
 
 export type ResponseError = { success: false; error: string };
 
@@ -32,9 +35,13 @@ export type FilesList = {
 };
 
 // Prepare (called if convert button is pushed)
+export type ConvertOptions = FilesList & {
+  options: PrepareOptions;
+};
+
 export type Prepare = {
-  command: "prepare";
-  payload: PrepareOptions;
+  command: "prepare"; // todo: rename to convert later because it is not only preparing now
+  payload: ConvertOptions;
 };
 
 export type ShowPrepareResponse = {

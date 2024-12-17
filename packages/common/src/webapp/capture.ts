@@ -2,10 +2,7 @@ import {
   BrowseFiles,
   BrowseFilesComplete,
   DownloadResult,
-  ExecutionStart,
-  ExecutionStatus,
   Prepare,
-  PrepareUploadFile,
   ShowCaptureWindow,
   ShowDownloadResult,
   ShowExecutionStartResponse,
@@ -28,11 +25,5 @@ export type Webapp = App<
   | ShowExecutionStatusResponse
   | ShowDownloadResult,
   // produces
-  | BrowseFiles
-  | Prepare
-  | PrepareUploadFile
-  | ExecutionStart
-  | ExecutionStatus
-  | DownloadResult
-  | OpenLinkMessage
+  BrowseFiles | Prepare | DownloadResult | OpenLinkMessage
 >;

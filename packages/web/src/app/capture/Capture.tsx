@@ -1,14 +1,6 @@
 import { useAppDispatch, useAppSelector } from "./store";
 import Button from "../../new-components/Button";
-import {
-  browseFiles,
-  downloadResult,
-  executionStart,
-  executionStatus,
-  openLink,
-  prepare,
-  prepareUploadFile,
-} from "./slice";
+import { browseFiles, downloadResult, openLink, setPrepareOptions2, prepare } from "./slice";
 import { useEffect, useState } from "react";
 import ProgressBar from "../config/ProgressBar";
 import Input from "../../components/Input";
@@ -20,6 +12,7 @@ import CollapsibleCard, {
   BottomItem,
   TopDescription,
 } from "../../components/CollapsibleCard";
+import { ThemeColorVariables } from "@xliic/common/theme";
 
 function wrapPrepareOptions(env: PrepareOptions) {
   return env;
@@ -35,98 +28,13 @@ function unwrapPrepareOptions(data: any): PrepareOptions {
 
 export function RootContainer() {
   const dispatch = useAppDispatch();
-  const {
-    items,
-    files,
-    quickgenId,
-    prepareRespError,
-    prepareUploadFileInProgress,
-    prepareUploadFileProgress,
-    startInProgress,
-    startComplete,
-    status,
-    statusInProgress,
-    statusPoolingCounter,
-    downloadComplete,
-    downloadRespError,
-    downloadedFile,
-  } = useAppSelector((state) => state.capture);
-
-  const [prepareOptions, setPrepareOptions] = useState<PrepareOptions>({
-    basePath: "",
-    servers: [],
-  });
-
-  useEffect(() => {
-    if (quickgenId && !prepareRespError) {
-      dispatch(
-        prepareUploadFile({
-          quickgenId,
-          files,
-        })
-      );
-    }
-  }, [quickgenId]);
-
-  useEffect(() => {
-    if (quickgenId && !prepareUploadFileInProgress && prepareUploadFileProgress === 1) {
-      dispatch(
-        executionStart({
-          quickgenId,
-        })
-      );
-    }
-  }, [prepareUploadFileInProgress]);
-
-  useEffect(() => {
-    if (quickgenId && startComplete) {
-      if (statusPoolingCounter > 0) {
-        setTimeout(() => {
-          console.info(">>> executionStatus " + statusPoolingCounter + ", status = " + status);
-          dispatch(
-            executionStatus({
-              quickgenId,
-            })
-          );
-        }, 1500);
-      } else {
-        console.info(">>> executionStatus " + statusPoolingCounter + ", status = " + status);
-        dispatch(
-          executionStatus({
-            quickgenId,
-          })
-        );
-      }
-    }
-  }, [startComplete, statusPoolingCounter]);
+  const { items } = useAppSelector((state) => state.capture);
 
   return (
     <Container>
       <Header>
         <HeaderConter>{items.length} files</HeaderConter>
-      </Header>
-      {items.map((item, index) => (
-        <CollapsibleCard key={`item-${index}`}>
-          <TopDescription>{item.progressStatus}</TopDescription>
-          <BottomDescription>
-            <BottomDescription>
-              <BottomItem>
-                <div>foo</div>
-              </BottomItem>
-              <BottomItem>
-                <div>bar</div>
-              </BottomItem>
-            </BottomDescription>
-          </BottomDescription>
-          <div>
-            <div>todo</div>
-          </div>
-        </CollapsibleCard>
-      ))}
-      ///////////////////
-      {
-        <>
-          <div>Select HAR/Postman files to convert</div>
+        <HeaderAction>
           <Button
             disabled={false}
             onClick={(e) => {
@@ -135,81 +43,116 @@ export function RootContainer() {
               e.stopPropagation();
             }}
           >
-            Browse
+            Upload
           </Button>
-        </>
-      }
-      {files.length > 0 && (
-        <>
-          <div>Selected files: </div>
-          {files.map((file, index) => (
-            <div key={index}>{file}</div>
-          ))}
-
-          <Form
-            wrapFormData={wrapPrepareOptions}
-            unwrapFormData={unwrapPrepareOptions}
-            data={prepareOptions}
-            saveData={(data) => setPrepareOptions(data)}
-          >
-            <Input label="Base Path" name="basePath" />
-          </Form>
-
-          <Button
-            disabled={false}
-            onClick={(e) => {
-              //console.info("prepareOptions=" + prepareOptions);
-              dispatch(prepare(prepareOptions));
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-          >
-            Convert
-          </Button>
-        </>
-      )}
-      {quickgenId && (
-        <>
-          <div>Prepare quickgenId = {quickgenId}</div>
-        </>
-      )}
-      {prepareUploadFileInProgress && <ProgressBar progress={prepareUploadFileProgress} />}
-      {!prepareUploadFileInProgress && prepareUploadFileProgress === 1 && <div>Upload OK</div>}
-      {startInProgress && <div>Starting execution...</div>}
-      {startComplete && <div>Started!</div>}
-      {statusInProgress && <div>waiting for status</div>}
-      {!statusInProgress && status && <div>Status = {status}</div>}
-      {quickgenId && status === "finished" && (
-        <>
-          <div>OpenAPI file is ready: </div>
-          <Button
-            disabled={false}
-            onClick={(e) => {
-              dispatch(downloadResult({ quickgenId }));
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-          >
-            Download
-          </Button>
-        </>
-      )}
-      {downloadComplete && (
-        <div>
-          File downloaded{" "}
-          <LinkRef
-            href="#"
-            disabled={false}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              dispatch(openLink(downloadedFile || ""));
-            }}
-          >
-            {downloadedFile}
-          </LinkRef>
-        </div>
-      )}
+        </HeaderAction>
+      </Header>
+      {items.map((item, index) => (
+        <CollapsibleCard key={`item-${item.id}`} defaultCollapsed={item.progressStatus !== "New"}>
+          {item.quickgenId && (
+            <TopDescription>
+              <TopDescriptionId>{item.quickgenId}</TopDescriptionId>
+              <TopDescriptionProgressStatus failed={item.progressStatus === "Failed"}>
+                {item.progressStatus}
+              </TopDescriptionProgressStatus>
+            </TopDescription>
+          )}
+          <TableDescription>
+            <Grid>
+              <TableHeader>
+                <div>Selected Files</div>
+                <div>Prepare Options</div>
+                <div>Log</div>
+              </TableHeader>
+              <Fields>
+                <Row>
+                  <CellContainer>
+                    {item.files && (
+                      <FilesCell>
+                        {item.files.map((file, index) => (
+                          <span key={`file-${index}`}>{file}</span>
+                        ))}
+                      </FilesCell>
+                    )}
+                  </CellContainer>
+                  <CellContainer>
+                    {item.progressStatus !== "New" && item.prepareOptions.basePath && (
+                      <PrepareOptionsCell>
+                        basePath = {item.prepareOptions?.basePath}
+                      </PrepareOptionsCell>
+                    )}
+                    {item.progressStatus === "New" && (
+                      <PrepareOptionsCell>
+                        <Form
+                          wrapFormData={wrapPrepareOptions}
+                          unwrapFormData={unwrapPrepareOptions}
+                          data={item.prepareOptions}
+                          saveData={(data) => {
+                            dispatch(setPrepareOptions2(data));
+                          }}
+                        >
+                          <Input label="Base Path" name="basePath" />
+                        </Form>
+                      </PrepareOptionsCell>
+                    )}
+                  </CellContainer>
+                  <CellContainer>
+                    {item.log.length > 0 && (
+                      <LogsCell>
+                        {item.log.map((msg, index) => (
+                          <span key={`log-msg-${index}`}>{msg}</span>
+                        ))}
+                      </LogsCell>
+                    )}
+                  </CellContainer>
+                </Row>
+              </Fields>
+            </Grid>
+            {item.progressStatus === "New" && (
+              <ConvertButton
+                disabled={false}
+                onClick={(e) => {
+                  dispatch(prepare({ files: item.files, options: item.prepareOptions }));
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              >
+                Convert
+              </ConvertButton>
+            )}
+            {item.progressStatus === "Finished" && (
+              <FileReadyContainer>
+                <ConvertButton
+                  disabled={false}
+                  onClick={(e) => {
+                    dispatch(downloadResult({ quickgenId: item.quickgenId as string }));
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                >
+                  Download
+                </ConvertButton>
+                {item.downloadedFile && (
+                  <div>
+                    File downloaded{" "}
+                    <LinkRef
+                      href="#"
+                      disabled={false}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        dispatch(openLink(item.downloadedFile || ""));
+                      }}
+                    >
+                      {item.downloadedFile}
+                    </LinkRef>
+                  </div>
+                )}
+              </FileReadyContainer>
+            )}
+          </TableDescription>
+        </CollapsibleCard>
+      ))}
     </Container>
   );
 }
@@ -230,21 +173,118 @@ const Container = styled.div`
 
 const Header = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 16px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(${ThemeColorVariables.computedOne});
+  border-color: var(${ThemeColorVariables.border});
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 3px;
 `;
 
 const HeaderConter = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 16px;
+  padding: 7px;
+  padding-left: 16px;
+  font-weight: bold;
 `;
 
 const HeaderAction = styled.div`
   display: flex;
   flex-direction: column;
+  padding: 7px;
+  padding-right: 16px;
+  width: 120px;
+`;
+
+const TopDescriptionId = styled.div`
+  width: 200px;
+`;
+
+const TopDescriptionProgressStatus = styled.div<{ failed: boolean }>`
+  display: flex;
+  width: 80px;
+  padding: 3px;
+  flex-direction: row;
+  justify-content: center;
+  border-color: var(${ThemeColorVariables.border});
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 3px;
+  ${({ failed }) =>
+    failed
+      ? `background-color: var(${ThemeColorVariables.errorBackground});`
+      : `background-color: var(${ThemeColorVariables.computedOne});`}
+  ${({ failed }) =>
+    failed
+      ? `border-color: var(${ThemeColorVariables.errorBorder});`
+      : `border-color: var(${ThemeColorVariables.border});`}
+`;
+
+const TableDescription = styled.div`
+  display: flex;
+  flex-direction: column;
   gap: 10px;
   padding: 16px;
+`;
+
+const Grid = styled.div`
+  display: grid;
+  row-gap: 4px;
+  grid-template-columns: 1fr 1fr 1fr;
+`;
+
+const TableHeader = styled.div`
+  display: contents;
+  & > div {
+    padding: 4px 8px;
+    background-color: var(${ThemeColorVariables.computedOne});
+    text-transform: uppercase;
+    font-size: 90%;
+    font-weight: 600;
+  }
+`;
+
+const Fields = styled.div`
+  display: contents;
+  & > div > div {
+    border-bottom: 1px solid var(${ThemeColorVariables.border});
+  }
+`;
+
+const Row = styled.div`
+  display: contents;
+`;
+
+const CellContainer = styled.div`
+  padding: 4px 8px;
+`;
+
+const FilesCell = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+`;
+
+const PrepareOptionsCell = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const LogsCell = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+`;
+
+const ConvertButton = styled(Button)`
+  width: 120px;
+`;
+
+const FileReadyContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 `;

@@ -14,7 +14,13 @@ import { Logger } from "../../../platform/types";
 import { HttpConfig, HttpError, HttpRequest } from "@xliic/common/http";
 import { executeHttpRequestRaw } from "../../http-handler";
 import { loadConfig } from "../../../util/config";
-import { FilesList, PrepareOptions, QuickGenId, Status } from "@xliic/common/capture";
+import {
+  ConvertOptions,
+  FilesList,
+  PrepareOptions,
+  QuickGenId,
+  Status,
+} from "@xliic/common/capture";
 import { delay } from "../../../time-util";
 
 //export const CAPTURE_DATA_KEY = "openapi-42crunch.environment-capture-data";
@@ -61,16 +67,24 @@ export class CaptureWebView extends WebView<Webapp> {
         payload: { files },
       });
     },
-    prepare: async (payload: PrepareOptions) => {
+    prepare: async (payload: ConvertOptions) => {
       // TODO: send prepare request to the capture server
       // PrepareResponse = { success: true; quickgen_id: string } | ResponseError
       await delay(1000);
+
+      ///////////////////////////////////
+      // Inform web app about quickgenId
+      ///////////////////////////////////
+      const quickgenId = "QWEdsaddr615er1ytfeghcvaghU9";
       this.sendRequest({
         command: "showPrepareResponse",
-        payload: { success: true, quickgenId: "qwewqeq-21321312-qewqeqw-eqw-e12-31-qwq" },
+        payload: { success: true, quickgenId: quickgenId },
       });
-    },
-    prepareUploadFile: async (payload: QuickGenId & FilesList) => {
+
+      ///////////////////////////////////
+      // Uploading files
+      ///////////////////////////////////
+      await delay(1000);
       // TODO: send prepare request to the capture server
       // export type UploadFileResponse =
       // | { completed: false; progress: UploadFileProgress }
@@ -94,8 +108,7 @@ export class CaptureWebView extends WebView<Webapp> {
         command: "showPrepareUploadFileResponse",
         payload: { completed: true, success: true },
       });
-    },
-    executionStart: async (payload: QuickGenId) => {
+
       // TODO: send start request to the capture server
       // ExecutionStartResponse = { success: boolean; message: string };
       await delay(1000);
@@ -103,33 +116,36 @@ export class CaptureWebView extends WebView<Webapp> {
         command: "showExecutionStartResponse",
         payload: { success: true, message: "ok, but not used" },
       });
-    },
-    executionStatus: async (payload: QuickGenId) => {
+
       // TODO: send status request to the capture server
       // export type ShowExecutionStatusResponse = {
       //   command: "showExecutionStatusResponse";
       //   payload: ExecutionStatusResponse;
       // };
-      if (this.statusIndex < this.statuses.length) {
-        const status = this.statuses[this.statusIndex];
-        this.statusIndex += 1;
-        this.sendRequest({
-          command: "showExecutionStatusResponse",
-          payload: {
-            success: true,
-            status: status as Status,
-            message: "ok, not used yet",
-          },
-        });
-      } else {
-        this.sendRequest({
-          command: "showExecutionStatusResponse",
-          payload: {
-            success: true,
-            status: "finished" as Status,
-            message: "ok, not used yet",
-          },
-        });
+      this.statusIndex = 0;
+      while (this.statusIndex < this.statuses.length) {
+        await delay(1000);
+        if (this.statusIndex < this.statuses.length) {
+          const status = this.statuses[this.statusIndex];
+          this.statusIndex += 1;
+          this.sendRequest({
+            command: "showExecutionStatusResponse",
+            payload: {
+              success: true,
+              status: status as Status,
+              message: "ok, not used yet",
+            },
+          });
+        } else {
+          this.sendRequest({
+            command: "showExecutionStatusResponse",
+            payload: {
+              success: true,
+              status: "finished" as Status,
+              message: "ok, not used yet",
+            },
+          });
+        }
       }
     },
     downloadResult: async (payload: QuickGenId) => {
@@ -170,31 +186,47 @@ export class CaptureWebView extends WebView<Webapp> {
       command: "showCaptureWindow",
       payload: [
         {
-          files: ["/abc"],
+          id: "weqweqwq",
+          files: ["d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml"],
           quickgenId: "aasdsaddr615er1ytfeghcvaghd1",
           prepareOptions: {
             basePath: "/basePath1",
             servers: [],
           },
           progressStatus: "Finished",
-          logMessage: "logMessage1",
+          log: ["logMessage1"],
+          downloadedFile: undefined,
         },
         {
-          files: ["/abc", "/abc123"],
+          id: "weqweqwq2131",
+          files: [
+            "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
+            "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
+          ],
           quickgenId: "bbbdsaddr615er1ytfeghcvaghd1",
           prepareOptions: {
             basePath: "/basePath2",
             servers: [],
           },
           progressStatus: "In progress",
-          logMessage: "logMessage2",
+          log: ["logMessage1", "logMessage2"],
+          downloadedFile: undefined,
         },
         {
-          files: ["/abc", "/abc123", "/abc123ewrewrewrew"],
+          id: "weqweqwq4363463gsdgsd",
+          files: [
+            "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
+            "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
+            "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
+          ],
           quickgenId: "tredsaddr615er1ytfeghcvaghd1",
-          prepareOptions: undefined,
+          prepareOptions: {
+            basePath: "",
+            servers: [],
+          },
           progressStatus: "Failed",
-          logMessage: "logMessageErrorHere",
+          log: ["logMessage1", "logMessage2", "logMessageErrorHere"],
+          downloadedFile: undefined,
         },
       ],
     });
