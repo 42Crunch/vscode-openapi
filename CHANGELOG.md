@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 4.31.0 (December XX, 2024)
+
+- Implement support for SQGs in Audit when using CLI binary
+- Add ability to select CLI binary as a runtime for Audit for enterprise customers
+- Support taging of local OpenAPI files with platform tags
+- Allow removing Scenarios in Scan config UI
+
 ## Version 4.30.1 (December 3, 2024)
 
 - Increase stdout buffer size when running the Scan using the CLI binary
