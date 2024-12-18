@@ -6,29 +6,16 @@
 import * as vscode from "vscode";
 
 import { Webapp } from "@xliic/common/webapp/capture";
-import { Configuration } from "../../../configuration";
 import { WebView } from "../../web-view";
-import { PlatformStore } from "../../../platform/stores/platform-store";
-import { Logger } from "../../../platform/types";
 
-import { HttpConfig, HttpError, HttpRequest } from "@xliic/common/http";
-import { executeHttpRequestRaw } from "../../http-handler";
-import { loadConfig } from "../../../util/config";
-import {
-  ConvertOptions,
-  FilesList,
-  PrepareOptions,
-  QuickGenId,
-  Status,
-} from "@xliic/common/capture";
+import { CaptureItem, PrepareOptions } from "@xliic/common/capture";
 import { delay } from "../../../time-util";
 
-//export const CAPTURE_DATA_KEY = "openapi-42crunch.environment-capture-data";
+export type Status = "pending" | "running" | "finished" | "failed";
 
 export class CaptureWebView extends WebView<Webapp> {
   private uri: vscode.Uri | undefined;
-  private statuses: string[] = ["pending", "running", "running", "running", "finished"];
-  private statusIndex = 0;
+  private items: CaptureItem[];
 
   constructor(
     extensionPath: string
@@ -39,7 +26,8 @@ export class CaptureWebView extends WebView<Webapp> {
     // private logger: Logger
   ) {
     super(extensionPath, "capture", "Capture Files Convert", vscode.ViewColumn.One);
-
+    this.items = [];
+    tempInitItems(this.items);
     vscode.window.onDidChangeActiveColorTheme((e) => {
       if (this.isActive()) {
         this.sendColorTheme(e);
@@ -48,7 +36,7 @@ export class CaptureWebView extends WebView<Webapp> {
   }
 
   hostHandlers: Webapp["hostHandlers"] = {
-    browseFiles: async (payload: string) => {
+    browseFiles: async (payload: { id: string; options: PrepareOptions | undefined }) => {
       const uris = await vscode.window.showOpenDialog({
         title: "Select HAAR or postman files",
         canSelectFiles: true,
@@ -62,96 +50,58 @@ export class CaptureWebView extends WebView<Webapp> {
       if (uris && Array.isArray(uris)) {
         uris.forEach((e) => files.push(e.fsPath));
       }
+      let item;
+      const id = payload.id;
+      if (id) {
+        item = this.items.filter((item) => item.id === id)[0];
+        if (files.length > 0) {
+          item.files = files;
+        }
+        if (payload.options) {
+          item.prepareOptions = payload.options;
+        }
+      } else {
+        item = this.getNewItem(files);
+        this.items.unshift(item);
+      }
       this.sendRequest({
-        command: "browseFilesComplete",
-        payload: { id: payload, files },
+        command: "saveCapture",
+        payload: item,
       });
     },
-    convert: async (payload: ConvertOptions) => {
-      // TODO: send prepare request to the capture server
-      // PrepareResponse = { success: true; quickgen_id: string } | ResponseError
-      await delay(1000);
+    convert: async (payload: { id: string; files: string[]; options: PrepareOptions }) => {
       const id = payload.id;
-      ///////////////////////////////////
-      // Inform web app about quickgenId
-      ///////////////////////////////////
-      const quickgenId = "QWEdsaddr615er1ytfeghcvaghU9";
-      this.sendRequest({
-        command: "showPrepareResponse",
-        payload: { id, success: true, quickgenId: quickgenId },
-      });
+      const item = this.items.filter((item) => item.id === id)[0];
+      item.files = payload.files;
+      item.prepareOptions = payload.options;
 
-      ///////////////////////////////////
-      // Uploading files
-      ///////////////////////////////////
+      // TODO: send prepare request and get quickgenId
+      const quickgenId = "QWEdsaddr615er1ytfehcvaghU9";
       await delay(1000);
-      // TODO: send prepare request to the capture server
-      // export type UploadFileResponse =
-      // | { completed: false; progress: UploadFileProgress }
-      // | { completed: true; success: true }
-      // | { completed: true; success: false; error: string };
+      this.showPrepareResponse(item, quickgenId, true, "");
+
+      // TODO: upload files request
+      await delay(1000);
       const n = 10;
       for (let i = 0; i <= n; i++) {
-        await delay(200);
-        this.sendRequest({
-          command: "showPrepareUploadFileResponse",
-          payload: {
-            id,
-            completed: false,
-            progress: {
-              percent: i / n,
-            },
-          },
-        });
+        await delay(300);
+        this.showPrepareUploadFileResponse(item, false, i / n);
       }
-      await delay(100);
-      this.sendRequest({
-        command: "showPrepareUploadFileResponse",
-        payload: { id, completed: true, success: true },
-      });
+      await delay(300);
+      this.showPrepareUploadFileResponse(item, true, 1.0);
 
-      // TODO: send start request to the capture server
-      // ExecutionStartResponse = { success: boolean; message: string };
+      // TODO: send start request
       await delay(1000);
-      this.sendRequest({
-        command: "showExecutionStartResponse",
-        payload: { id, success: true, message: "ok, but not used" },
-      });
+      this.showExecutionStartResponse(item, true, "ok, but not used yet");
 
-      // TODO: send status request to the capture server
-      // export type ShowExecutionStatusResponse = {
-      //   command: "showExecutionStatusResponse";
-      //   payload: ExecutionStatusResponse;
-      // };
-      this.statusIndex = 0;
-      while (this.statusIndex < this.statuses.length) {
+      // TODO: send status request
+      const statuses: string[] = ["pending", "running", "running", "running", "finished"];
+      for (const status of statuses) {
         await delay(1000);
-        if (this.statusIndex < this.statuses.length) {
-          const status = this.statuses[this.statusIndex];
-          this.statusIndex += 1;
-          this.sendRequest({
-            command: "showExecutionStatusResponse",
-            payload: {
-              id,
-              success: true,
-              status: status as Status,
-              message: "ok, not used yet",
-            },
-          });
-        } else {
-          this.sendRequest({
-            command: "showExecutionStatusResponse",
-            payload: {
-              id,
-              success: true,
-              status: "finished" as Status,
-              message: "ok, not used yet",
-            },
-          });
-        }
+        this.showExecutionStatusResponse(item, status as Status, true, "ok, not used yet");
       }
     },
-    downloadResult: async (payload: QuickGenId & { id: string }) => {
+    downloadFile: async (payload: { id: string; quickgenId: string }) => {
       // TODO: send download request to the capture server
       // DownloadResultResponse = { success: true; file: string } | ResponseError;
       const uri = await vscode.window.showSaveDialog({
@@ -170,10 +120,8 @@ export class CaptureWebView extends WebView<Webapp> {
         await vscode.workspace.fs.writeFile(uri, encoder.encode(JSON.stringify(example, null, 2)));
       }
       const id = payload.id;
-      this.sendRequest({
-        command: "showDownloadResult",
-        payload: { id, success: true, file: uri ? uri.fsPath : "" },
-      });
+      const item = this.items.filter((item) => item.id === id)[0];
+      this.showDownloadResult(item, uri ? uri.fsPath : "", true, "");
     },
     openLink: async (payload: string) => {
       //console.info("openLink=" + payload);
@@ -183,72 +131,160 @@ export class CaptureWebView extends WebView<Webapp> {
   };
 
   async onStart() {
-    this.statusIndex = 0;
     await this.sendColorTheme(vscode.window.activeColorTheme);
     //const config = await loadConfig(this.configuration, this.secrets);
     this.sendRequest({
       command: "showCaptureWindow",
-      payload: [
-        {
-          id: "weqweqwq",
-          files: ["d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml"],
-          quickgenId: "aasdsaddr615er1ytfeghcvaghd1",
-          prepareOptions: {
-            basePath: "/basePath1",
-            servers: [],
-          },
-          progressStatus: "Finished",
-          log: ["logMessage1"],
-          downloadedFile: undefined,
-        },
-        {
-          id: "weqweqwq2131",
-          files: [
-            "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
-            "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
-          ],
-          quickgenId: "bbbdsaddr615er1ytfeghcvaghd1",
-          prepareOptions: {
-            basePath: "/basePath2",
-            servers: [],
-          },
-          progressStatus: "In progress",
-          log: ["logMessage1", "logMessage2"],
-          downloadedFile: undefined,
-        },
-        {
-          id: "weqweqwq4363463gsdgsd",
-          files: [
-            "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
-            "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
-            "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
-          ],
-          quickgenId: "tredsaddr615er1ytfeghcvaghd1",
-          prepareOptions: {
-            basePath: "",
-            servers: [],
-          },
-          progressStatus: "Failed",
-          log: ["logMessage1", "logMessage2", "logMessageErrorHere"],
-          downloadedFile: undefined,
-        },
-      ],
+      payload: this.items,
     });
-    // const tagData = this.memento.get(TAGS_DATA_KEY, {}) as TagData;
-    // const targetFileName = this.uri?.fsPath;
-    // if (targetFileName) {
-    //   if (!tagData[targetFileName]) {
-    //     tagData[targetFileName] = [] as TagEntry[];
-    //   }
-    //   this.sendRequest({
-    //     command: "loadCapture",
-    //     payload: { targetFileName, data: tagData },
-    //   });
-    // }
   }
 
   async showCaptureWebView() {
     //this.uri = uri;
     await this.show();
   }
+
+  getNewItem(files: string[]): CaptureItem {
+    return {
+      id: crypto.randomUUID(),
+      files: files,
+      quickgenId: undefined,
+      prepareOptions: {
+        basePath: "",
+        servers: [],
+      },
+      progressStatus: "New",
+      log: [],
+      downloadedFile: undefined,
+    };
+  }
+
+  showPrepareResponse(item: CaptureItem, quickgenId: string, success: boolean, error: string) {
+    if (success) {
+      item.quickgenId = quickgenId;
+      item.progressStatus = "In progress";
+      item.log.push("Prepare done");
+    } else {
+      item.progressStatus = "Failed";
+      item.log.push("Prepare failed: " + error);
+    }
+    this.sendRequestSilently({
+      command: "saveCapture",
+      payload: item,
+    });
+  }
+
+  showPrepareUploadFileResponse(item: CaptureItem, completed: boolean, percent: number) {
+    if (completed) {
+      item.log.push("All files have been uploaded to the capture server");
+    } else {
+      const log = item.log;
+      percent = 100 * percent;
+      if (log[log.length - 1].startsWith("Uploading selected files")) {
+        log[log.length - 1] = "Uploading selected files " + percent + "%";
+      } else {
+        log.push("Uploading selected files " + percent + "%");
+      }
+    }
+    // todo: handle error
+    this.sendRequestSilently({
+      command: "saveCapture",
+      payload: item,
+    });
+  }
+
+  showExecutionStartResponse(item: CaptureItem, success: boolean, message: string) {
+    if (success) {
+      item.log.push("Remote execution has been started");
+    } else {
+      item.log.push("Start remote execution failed: " + message);
+    }
+    this.sendRequestSilently({
+      command: "saveCapture",
+      payload: item,
+    });
+  }
+
+  showExecutionStatusResponse(item: CaptureItem, status: Status, success: boolean, error: string) {
+    if (success) {
+      const log = item.log;
+      if (log[log.length - 1].startsWith("Current execution status is")) {
+        log[log.length - 1] = "Current execution status is " + status;
+      } else {
+        log.push("Current execution status is " + status);
+      }
+      if (status === "finished") {
+        item.progressStatus = "Finished";
+      } else if (status === "failed") {
+        item.progressStatus = "Failed";
+      }
+    } else {
+      item.log.push("Execution failed: " + error);
+    }
+    this.sendRequestSilently({
+      command: "saveCapture",
+      payload: item,
+    });
+  }
+
+  showDownloadResult(item: CaptureItem, downloadedFile: string, success: boolean, error: string) {
+    if (success) {
+      item.downloadedFile = downloadedFile;
+    } else {
+      item.log.push("Download failed: " + error);
+    }
+    this.sendRequestSilently({
+      command: "saveCapture",
+      payload: item,
+    });
+  }
+}
+
+// TODO: only to dev, remove later
+function tempInitItems(items: CaptureItem[]): void {
+  [
+    {
+      id: "weqweqwq",
+      files: ["d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml"],
+      quickgenId: "aasdsaddr615er1ytfeghcvaghd1",
+      prepareOptions: {
+        basePath: "/basePath1",
+        servers: [],
+      },
+      progressStatus: "Finished",
+      log: ["logMessage1"],
+      downloadedFile: undefined,
+    },
+    {
+      id: "weqweqwq2131",
+      files: [
+        "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
+        "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
+      ],
+      quickgenId: "bbbdsaddr615er1ytfeghcvaghd1",
+      prepareOptions: {
+        basePath: "/basePath2",
+        servers: [],
+      },
+      progressStatus: "In progress",
+      log: ["logMessage1", "logMessage2"],
+      downloadedFile: undefined,
+    },
+    {
+      id: "weqweqwq4363463gsdgsd",
+      files: [
+        "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
+        "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
+        "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
+      ],
+      quickgenId: "tredsaddr615er1ytfeghcvaghd1",
+      prepareOptions: {
+        basePath: "",
+        servers: [],
+      },
+      progressStatus: "Failed",
+      log: ["logMessage1", "logMessage2", "logMessageErrorHere"],
+      downloadedFile: undefined,
+    },
+  ].forEach((item) => items.push(item as CaptureItem));
 }

@@ -3,24 +3,12 @@ import {
   ListenerMiddlewareInstance,
   StateFromReducersMapObject,
 } from "@reduxjs/toolkit";
-import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-//import logger from "redux-logger";
 import { setupListeners } from "@reduxjs/toolkit/query";
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 
 import { Webapp } from "@xliic/common/webapp/capture";
 import theme, { changeTheme, ThemeState } from "../../features/theme/slice";
-import capture, {
-  browseFilesComplete,
-  showCaptureWindow,
-  showDownloadResult,
-  showExecutionStartResponse,
-  showExecutionStatusResponse,
-  showPrepareResponse,
-  showPrepareUploadFileResponse,
-} from "./slice";
-//import { platformApi } from "../../features/http-client/platform-api";
-// import config, { loadConfig } from "../../features/config/slice";
-// import client from "../../features/http-client/slice";
+import capture, { saveCapture, showCaptureWindow } from "./slice";
 
 const reducer = {
   theme,
@@ -30,12 +18,7 @@ const reducer = {
 export const messageHandlers: Webapp["webappHandlers"] = {
   changeTheme,
   showCaptureWindow,
-  browseFilesComplete,
-  showPrepareResponse,
-  showPrepareUploadFileResponse,
-  showExecutionStartResponse,
-  showExecutionStatusResponse,
-  showDownloadResult,
+  saveCapture,
 };
 
 export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme: ThemeState) => {
@@ -43,7 +26,6 @@ export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme:
     reducer,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware().prepend(listenerMiddleware.middleware),
-    //.concat(logger, platformApi.middleware),
     preloadedState: {
       theme,
     },

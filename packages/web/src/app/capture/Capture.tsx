@@ -5,7 +5,7 @@ import CollapsibleCard, { TopDescription } from "../../components/CollapsibleCar
 import Input from "../../components/Input";
 import Button from "../../new-components/Button";
 import Form from "../../new-components/Form";
-import { browseFiles, convert, downloadResult, openLink, setPrepareOptions } from "./slice";
+import { browseFiles, convert, downloadFile, openLink, setPrepareOptions } from "./slice";
 import { useAppDispatch, useAppSelector } from "./store";
 
 function wrapPrepareOptions(env: PrepareOptions) {
@@ -29,7 +29,9 @@ export function RootContainer() {
             disabled={false}
             onClick={(e) => {
               const newIds = items.filter((item) => item.progressStatus === "New");
-              dispatch(browseFiles(newIds.length === 1 ? newIds[0].id : ""));
+              const id = newIds.length === 1 ? newIds[0].id : "";
+              const options = newIds.length === 1 ? newIds[0].prepareOptions : undefined;
+              dispatch(browseFiles({ id, options }));
               e.preventDefault();
               e.stopPropagation();
             }}
@@ -116,9 +118,7 @@ export function RootContainer() {
                 <ConvertButton
                   disabled={false}
                   onClick={(e) => {
-                    dispatch(
-                      downloadResult({ id: item.id, quickgenId: item.quickgenId as string })
-                    );
+                    dispatch(downloadFile({ id: item.id, quickgenId: item.quickgenId as string }));
                     e.preventDefault();
                     e.stopPropagation();
                   }}

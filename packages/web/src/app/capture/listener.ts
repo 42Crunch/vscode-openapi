@@ -4,10 +4,9 @@ import {
   UnsubscribeListener,
 } from "@reduxjs/toolkit";
 import { Webapp } from "@xliic/common/webapp/capture";
-//import { onSendHttpRequest } from "../../features/http-client/listener";
 import { AppDispatch, RootState } from "./store";
 import { startListeners } from "../webapp";
-import { browseFiles, downloadResult, openLink, convert } from "./slice";
+import { browseFiles, downloadFile, openLink, convert } from "./slice";
 
 const listenerMiddleware = createListenerMiddleware();
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
@@ -35,12 +34,12 @@ export function createListener(host: Webapp["host"]) {
           });
         },
       }),
-    downloadResult: () =>
+    downloadFile: () =>
       startAppListening({
-        actionCreator: downloadResult,
+        actionCreator: downloadFile,
         effect: async (action, listenerApi) => {
           host.postMessage({
-            command: "downloadResult",
+            command: "downloadFile",
             payload: action.payload,
           });
         },
