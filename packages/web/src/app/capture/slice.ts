@@ -24,34 +24,52 @@ export const slice = createSlice({
     },
     setPrepareOptions: (state, action: PayloadAction<PrepareOptions & { id: string }>) => {
       const id = action.payload.id;
-      if (id) {
-        const item = state.items.filter((item) => item.id === id)[0];
-        item.prepareOptions = action.payload;
-      }
+      const item = state.items.filter((item) => item.id === id)[0];
+      item.prepareOptions = action.payload;
     },
     convert: (
       state,
       action: PayloadAction<{ id: string; files: string[]; options: PrepareOptions }>
     ) => {
+      const id = action.payload.id;
+      const item = state.items.filter((item) => item.id === id)[0];
+      if (item.quickgenId && item.progressStatus === "Failed") {
+        // Restart requested
+        item.progressStatus = "In progress";
+        item.log = [];
+        item.downloadedFile = undefined;
+      }
       // -> IDE
     },
     saveCapture: (state, action: PayloadAction<CaptureItem>) => {
+      let found = false;
       const id = action.payload.id;
-      if (id) {
-        let found = false;
-        for (let i = 0; i < state.items.length; i++) {
-          if (state.items[i].id === id) {
-            state.items[i] = action.payload;
-            found = true;
-            break;
-          }
+      for (let i = 0; i < state.items.length; i++) {
+        if (state.items[i].id === id) {
+          state.items[i] = action.payload;
+          found = true;
+          break;
         }
-        if (!found) {
-          state.items.unshift(action.payload);
-        }
+      }
+      if (!found) {
+        state.items.unshift(action.payload);
       }
     },
     downloadFile: (state, action: PayloadAction<{ id: string; quickgenId: string }>) => {
+      // -> IDE
+    },
+    deleteJob: (state, action: PayloadAction<{ id: string; quickgenId: string }>) => {
+      let index = -1;
+      const id = action.payload.id;
+      for (let i = 0; i < state.items.length; i++) {
+        if (state.items[i].id === id) {
+          index = i;
+          break;
+        }
+      }
+      if (index > -1) {
+        state.items.splice(index, 1);
+      }
       // -> IDE
     },
     openLink: (state, action: PayloadAction<string>) => {
@@ -67,6 +85,7 @@ export const {
   convert,
   saveCapture,
   downloadFile,
+  deleteJob,
   openLink,
 } = slice.actions;
 export default slice.reducer;

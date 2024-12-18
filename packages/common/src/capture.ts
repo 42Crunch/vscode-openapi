@@ -39,3 +39,8 @@ export type DownloadFile = {
   command: "downloadFile";
   payload: { id: string; quickgenId: string };
 };
+
+export type DeleteJob = {
+  command: "deleteJob";
+  payload: { id: string; quickgenId: string };
+};

@@ -5,8 +5,16 @@ import CollapsibleCard, { TopDescription } from "../../components/CollapsibleCar
 import Input from "../../components/Input";
 import Button from "../../new-components/Button";
 import Form from "../../new-components/Form";
-import { browseFiles, convert, downloadFile, openLink, setPrepareOptions } from "./slice";
+import {
+  browseFiles,
+  convert,
+  deleteJob,
+  downloadFile,
+  openLink,
+  setPrepareOptions,
+} from "./slice";
 import { useAppDispatch, useAppSelector } from "./store";
+import { TrashCan } from "../../icons";
 
 function wrapPrepareOptions(env: PrepareOptions) {
   return env;
@@ -42,12 +50,29 @@ export function RootContainer() {
       </Header>
       {items.map((item, index) => (
         <CollapsibleCard key={`item-${item.id}`} defaultCollapsed={item.progressStatus !== "New"}>
-          <TopDescription>
-            <TopDescriptionId>{item.quickgenId}</TopDescriptionId>
-            <TopDescriptionProgressStatus failed={item.progressStatus === "Failed"}>
-              {item.progressStatus}
-            </TopDescriptionProgressStatus>
-          </TopDescription>
+          <TopDescriptionMain>
+            <TopDescriptionLeft>
+              <TopDescriptionId>{item.quickgenId}</TopDescriptionId>
+              <TopDescriptionProgressStatus failed={item.progressStatus === "Failed"}>
+                {item.progressStatus}
+              </TopDescriptionProgressStatus>
+            </TopDescriptionLeft>
+            <TopDescriptionRight>
+              {item.progressStatus !== "In progress" && (
+                <TopDescriptionAction>
+                  <TopDescriptionRemoverSpan
+                    onClick={(e) => {
+                      dispatch(deleteJob({ id: item.id, quickgenId: item.quickgenId as string }));
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                  >
+                    <TrashCan />
+                  </TopDescriptionRemoverSpan>
+                </TopDescriptionAction>
+              )}
+            </TopDescriptionRight>
+          </TopDescriptionMain>
           <TableDescription>
             <Grid>
               <TableHeader>
@@ -61,7 +86,7 @@ export function RootContainer() {
                     {item.files && (
                       <FilesCell>
                         {item.files.map((file, index) => (
-                          <span key={`file-${index}`}>{file}</span>
+                          <span key={`item-${item.id}-file-${index}`}>{file}</span>
                         ))}
                       </FilesCell>
                     )}
@@ -91,8 +116,26 @@ export function RootContainer() {
                     {item.log.length > 0 && (
                       <LogsCell>
                         {item.log.map((msg, index) => (
-                          <span key={`log-msg-${index}`}>{msg}</span>
+                          <div key={`item-${item.id}-log-${index}`}>
+                            <span>{msg}</span>
+                          </div>
                         ))}
+                        {item.downloadedFile && (
+                          <div key={`item-${item.id}-log-${item.log.length}`}>
+                            Saved to{" "}
+                            <LinkRef
+                              href="#"
+                              disabled={false}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                dispatch(openLink(item.downloadedFile || ""));
+                              }}
+                            >
+                              {item.downloadedFile}
+                            </LinkRef>
+                          </div>
+                        )}
                       </LogsCell>
                     )}
                   </CellContainer>
@@ -125,22 +168,22 @@ export function RootContainer() {
                 >
                   Download
                 </ConvertButton>
-                {item.downloadedFile && (
-                  <div>
-                    File downloaded{" "}
-                    <LinkRef
-                      href="#"
-                      disabled={false}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        dispatch(openLink(item.downloadedFile || ""));
-                      }}
-                    >
-                      {item.downloadedFile}
-                    </LinkRef>
-                  </div>
-                )}
+              </FileReadyContainer>
+            )}
+            {item.progressStatus === "Failed" && (
+              <FileReadyContainer>
+                <ConvertButton
+                  disabled={false}
+                  onClick={(e) => {
+                    dispatch(
+                      convert({ id: item.id, files: item.files, options: item.prepareOptions })
+                    );
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                >
+                  Restart
+                </ConvertButton>
               </FileReadyContainer>
             )}
           </TableDescription>
@@ -192,6 +235,20 @@ const HeaderAction = styled.div`
   width: 120px;
 `;
 
+export const TopDescriptionMain = styled(TopDescription)`
+  justify-content: space-between;
+`;
+
+export const TopDescriptionLeft = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+`;
+
+export const TopDescriptionRight = styled.div`
+  padding-right: 3px;
+`;
+
 const TopDescriptionId = styled.div`
   width: 200px;
 `;
@@ -214,6 +271,21 @@ const TopDescriptionProgressStatus = styled.div<{ failed: boolean }>`
     failed
       ? `border-color: var(${ThemeColorVariables.errorBorder});`
       : `border-color: var(${ThemeColorVariables.border});`}
+`;
+
+export const TopDescriptionAction = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+`;
+
+export const TopDescriptionRemoverSpan = styled.span`
+  font-weight: bold;
+  cursor: pointer;
+  // padding: 16px;
+  > svg {
+    fill: var(${ThemeColorVariables.foreground});
+  }
 `;
 
 const TableDescription = styled.div`

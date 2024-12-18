@@ -75,6 +75,13 @@ export class CaptureWebView extends WebView<Webapp> {
       item.files = payload.files;
       item.prepareOptions = payload.options;
 
+      if (item.quickgenId && item.progressStatus === "Failed") {
+        // Restart requested
+        item.progressStatus = "In progress";
+        item.log = [];
+        item.downloadedFile = undefined;
+        // TODO: delete item.quickgenId on the server!!!
+      }
       // TODO: send prepare request and get quickgenId
       const quickgenId = "QWEdsaddr615er1ytfehcvaghU9";
       await delay(1000);
@@ -103,7 +110,6 @@ export class CaptureWebView extends WebView<Webapp> {
     },
     downloadFile: async (payload: { id: string; quickgenId: string }) => {
       // TODO: send download request to the capture server
-      // DownloadResultResponse = { success: true; file: string } | ResponseError;
       const uri = await vscode.window.showSaveDialog({
         title: "Save OpenAPI file",
         //defaultUri: "Uri",
@@ -122,6 +128,20 @@ export class CaptureWebView extends WebView<Webapp> {
       const id = payload.id;
       const item = this.items.filter((item) => item.id === id)[0];
       this.showDownloadResult(item, uri ? uri.fsPath : "", true, "");
+    },
+    deleteJob: async (payload: { id: string; quickgenId: string }) => {
+      let index = -1;
+      const id = payload.id;
+      for (let i = 0; i < this.items.length; i++) {
+        if (this.items[i].id === id) {
+          index = i;
+          break;
+        }
+      }
+      if (index > -1) {
+        this.items.splice(index, 1);
+      }
+      // TODO: send delete request with quickgenId
     },
     openLink: async (payload: string) => {
       //console.info("openLink=" + payload);
@@ -279,7 +299,7 @@ function tempInitItems(items: CaptureItem[]): void {
       ],
       quickgenId: "tredsaddr615er1ytfeghcvaghd1",
       prepareOptions: {
-        basePath: "",
+        basePath: "/basePath3",
         servers: [],
       },
       progressStatus: "Failed",

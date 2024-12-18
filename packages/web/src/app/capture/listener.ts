@@ -6,7 +6,7 @@ import {
 import { Webapp } from "@xliic/common/webapp/capture";
 import { AppDispatch, RootState } from "./store";
 import { startListeners } from "../webapp";
-import { browseFiles, downloadFile, openLink, convert } from "./slice";
+import { browseFiles, downloadFile, openLink, convert, deleteJob } from "./slice";
 
 const listenerMiddleware = createListenerMiddleware();
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
@@ -40,6 +40,16 @@ export function createListener(host: Webapp["host"]) {
         effect: async (action, listenerApi) => {
           host.postMessage({
             command: "downloadFile",
+            payload: action.payload,
+          });
+        },
+      }),
+    deleteJob: () =>
+      startAppListening({
+        actionCreator: deleteJob,
+        effect: async (action, listenerApi) => {
+          host.postMessage({
+            command: "deleteJob",
             payload: action.payload,
           });
         },
