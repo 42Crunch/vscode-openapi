@@ -7,7 +7,7 @@ import { Webapp } from "@xliic/common/webapp/capture";
 //import { onSendHttpRequest } from "../../features/http-client/listener";
 import { AppDispatch, RootState } from "./store";
 import { startListeners } from "../webapp";
-import { browseFiles, downloadResult, openLink, prepare } from "./slice";
+import { browseFiles, downloadResult, openLink, convert } from "./slice";
 
 const listenerMiddleware = createListenerMiddleware();
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
@@ -25,12 +25,12 @@ export function createListener(host: Webapp["host"]) {
           });
         },
       }),
-    prepare: () =>
+    convert: () =>
       startAppListening({
-        actionCreator: prepare,
+        actionCreator: convert,
         effect: async (action, listenerApi) => {
           host.postMessage({
-            command: "prepare",
+            command: "convert",
             payload: action.payload,
           });
         },

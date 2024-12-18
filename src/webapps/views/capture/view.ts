@@ -48,7 +48,7 @@ export class CaptureWebView extends WebView<Webapp> {
   }
 
   hostHandlers: Webapp["hostHandlers"] = {
-    browseFiles: async (payload: undefined) => {
+    browseFiles: async (payload: string) => {
       const uris = await vscode.window.showOpenDialog({
         title: "Select HAAR or postman files",
         canSelectFiles: true,
@@ -64,21 +64,21 @@ export class CaptureWebView extends WebView<Webapp> {
       }
       this.sendRequest({
         command: "browseFilesComplete",
-        payload: { files },
+        payload: { id: payload, files },
       });
     },
-    prepare: async (payload: ConvertOptions) => {
+    convert: async (payload: ConvertOptions) => {
       // TODO: send prepare request to the capture server
       // PrepareResponse = { success: true; quickgen_id: string } | ResponseError
       await delay(1000);
-
+      const id = payload.id;
       ///////////////////////////////////
       // Inform web app about quickgenId
       ///////////////////////////////////
       const quickgenId = "QWEdsaddr615er1ytfeghcvaghU9";
       this.sendRequest({
         command: "showPrepareResponse",
-        payload: { success: true, quickgenId: quickgenId },
+        payload: { id, success: true, quickgenId: quickgenId },
       });
 
       ///////////////////////////////////
@@ -96,6 +96,7 @@ export class CaptureWebView extends WebView<Webapp> {
         this.sendRequest({
           command: "showPrepareUploadFileResponse",
           payload: {
+            id,
             completed: false,
             progress: {
               percent: i / n,
@@ -106,7 +107,7 @@ export class CaptureWebView extends WebView<Webapp> {
       await delay(100);
       this.sendRequest({
         command: "showPrepareUploadFileResponse",
-        payload: { completed: true, success: true },
+        payload: { id, completed: true, success: true },
       });
 
       // TODO: send start request to the capture server
@@ -114,7 +115,7 @@ export class CaptureWebView extends WebView<Webapp> {
       await delay(1000);
       this.sendRequest({
         command: "showExecutionStartResponse",
-        payload: { success: true, message: "ok, but not used" },
+        payload: { id, success: true, message: "ok, but not used" },
       });
 
       // TODO: send status request to the capture server
@@ -131,6 +132,7 @@ export class CaptureWebView extends WebView<Webapp> {
           this.sendRequest({
             command: "showExecutionStatusResponse",
             payload: {
+              id,
               success: true,
               status: status as Status,
               message: "ok, not used yet",
@@ -140,6 +142,7 @@ export class CaptureWebView extends WebView<Webapp> {
           this.sendRequest({
             command: "showExecutionStatusResponse",
             payload: {
+              id,
               success: true,
               status: "finished" as Status,
               message: "ok, not used yet",
@@ -148,7 +151,7 @@ export class CaptureWebView extends WebView<Webapp> {
         }
       }
     },
-    downloadResult: async (payload: QuickGenId) => {
+    downloadResult: async (payload: QuickGenId & { id: string }) => {
       // TODO: send download request to the capture server
       // DownloadResultResponse = { success: true; file: string } | ResponseError;
       const uri = await vscode.window.showSaveDialog({
@@ -166,9 +169,10 @@ export class CaptureWebView extends WebView<Webapp> {
         const encoder = new TextEncoder();
         await vscode.workspace.fs.writeFile(uri, encoder.encode(JSON.stringify(example, null, 2)));
       }
+      const id = payload.id;
       this.sendRequest({
         command: "showDownloadResult",
-        payload: { success: true, file: uri ? uri.fsPath : "" },
+        payload: { id, success: true, file: uri ? uri.fsPath : "" },
       });
     },
     openLink: async (payload: string) => {

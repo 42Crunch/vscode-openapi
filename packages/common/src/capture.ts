@@ -8,10 +8,9 @@ export interface CaptureItem {
   downloadedFile: string | undefined;
 }
 
-// Status New is never shown and used only for internal needs
 export type ProgressStatus = "New" | "Finished" | "In progress" | "Failed";
 
-export type ResponseError = { success: false; error: string };
+export type ResponseError = { id: string; success: false; error: string };
 
 // Initial message to show capture web app
 export type ShowCaptureWindow = {
@@ -22,7 +21,7 @@ export type ShowCaptureWindow = {
 // Messages to select HAR/Postman files input
 export type BrowseFiles = {
   command: "browseFiles";
-  payload: undefined;
+  payload: string;
 };
 
 export type BrowseFilesComplete = {
@@ -31,16 +30,17 @@ export type BrowseFilesComplete = {
 };
 
 export type FilesList = {
+  id: string;
   files: string[];
 };
 
-// Prepare (called if convert button is pushed)
+// Main message to start converting
 export type ConvertOptions = FilesList & {
   options: PrepareOptions;
 };
 
-export type Prepare = {
-  command: "prepare"; // todo: rename to convert later because it is not only preparing now
+export type Convert = {
+  command: "convert";
   payload: ConvertOptions;
 };
 
@@ -54,13 +54,7 @@ export type PrepareOptions = {
   servers: string[];
 };
 
-export type PrepareResponse = { success: true; quickgenId: string } | ResponseError;
-
-// Upload File (called after web app gets quickgenId)
-export type PrepareUploadFile = {
-  command: "prepareUploadFile";
-  payload: QuickGenId & FilesList;
-};
+export type PrepareResponse = { id: string; success: true; quickgenId: string } | ResponseError;
 
 export type ShowPrepareUploadFileResponse = {
   command: "showPrepareUploadFileResponse";
@@ -68,18 +62,12 @@ export type ShowPrepareUploadFileResponse = {
 };
 
 export type UploadFileResponse =
-  | { completed: false; progress: UploadFileProgress }
-  | { completed: true; success: true }
-  | { completed: true; success: false; error: string };
+  | { id: string; completed: false; progress: UploadFileProgress }
+  | { id: string; completed: true; success: true }
+  | { id: string; completed: true; success: false; error: string };
 
 export type UploadFileProgress = {
   percent: number; // 0 <= value <= 1
-};
-
-// Start (called after web app gets upload file success = true response)
-export type ExecutionStart = {
-  command: "executionStart";
-  payload: QuickGenId;
 };
 
 export type ShowExecutionStartResponse = {
@@ -88,13 +76,7 @@ export type ShowExecutionStartResponse = {
 };
 
 export type QuickGenId = { quickgenId: string };
-export type ExecutionStartResponse = { success: boolean; message: string };
-
-// Status (called periodically after web app has been successfully started)
-export type ExecutionStatus = {
-  command: "executionStatus";
-  payload: QuickGenId;
-};
+export type ExecutionStartResponse = { id: string; success: boolean; message: string };
 
 export type ShowExecutionStatusResponse = {
   command: "showExecutionStatusResponse";
@@ -103,13 +85,13 @@ export type ShowExecutionStatusResponse = {
 
 export type Status = "pending" | "running" | "finished" | "failed";
 export type ExecutionStatusResponse =
-  | { success: true; status: Status; message: string }
+  | { id: string; success: true; status: Status; message: string }
   | ResponseError;
 
-// Download results openapi (called if execution status = finished)
+// Download openapi file
 export type DownloadResult = {
   command: "downloadResult";
-  payload: QuickGenId; // todo: add default uri to save to?
+  payload: QuickGenId & { id: string };
 };
 
 export type ShowDownloadResult = {
@@ -117,4 +99,4 @@ export type ShowDownloadResult = {
   payload: DownloadResultResponse;
 };
 
-export type DownloadResultResponse = { success: true; file: string } | ResponseError;
+export type DownloadResultResponse = { id: string; success: true; file: string } | ResponseError;

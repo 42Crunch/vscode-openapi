@@ -1,28 +1,18 @@
-import { useAppDispatch, useAppSelector } from "./store";
-import Button from "../../new-components/Button";
-import { browseFiles, downloadResult, openLink, setPrepareOptions2, prepare } from "./slice";
-import { useEffect, useState } from "react";
-import ProgressBar from "../config/ProgressBar";
-import Input from "../../components/Input";
-import Form from "../../new-components/Form";
 import { PrepareOptions } from "@xliic/common/capture";
-import styled from "styled-components";
-import CollapsibleCard, {
-  BottomDescription,
-  BottomItem,
-  TopDescription,
-} from "../../components/CollapsibleCard";
 import { ThemeColorVariables } from "@xliic/common/theme";
+import styled from "styled-components";
+import CollapsibleCard, { TopDescription } from "../../components/CollapsibleCard";
+import Input from "../../components/Input";
+import Button from "../../new-components/Button";
+import Form from "../../new-components/Form";
+import { browseFiles, convert, downloadResult, openLink, setPrepareOptions } from "./slice";
+import { useAppDispatch, useAppSelector } from "./store";
 
 function wrapPrepareOptions(env: PrepareOptions) {
   return env;
 }
 
 function unwrapPrepareOptions(data: any): PrepareOptions {
-  // const env: UnknownEnvironment = {};
-  // for (const { key, value, type } of data.env) {
-  //   env[key] = convertToType(value, type);
-  // }
   return data;
 }
 
@@ -38,7 +28,8 @@ export function RootContainer() {
           <Button
             disabled={false}
             onClick={(e) => {
-              dispatch(browseFiles());
+              const newIds = items.filter((item) => item.progressStatus === "New");
+              dispatch(browseFiles(newIds.length === 1 ? newIds[0].id : ""));
               e.preventDefault();
               e.stopPropagation();
             }}
@@ -49,14 +40,12 @@ export function RootContainer() {
       </Header>
       {items.map((item, index) => (
         <CollapsibleCard key={`item-${item.id}`} defaultCollapsed={item.progressStatus !== "New"}>
-          {item.quickgenId && (
-            <TopDescription>
-              <TopDescriptionId>{item.quickgenId}</TopDescriptionId>
-              <TopDescriptionProgressStatus failed={item.progressStatus === "Failed"}>
-                {item.progressStatus}
-              </TopDescriptionProgressStatus>
-            </TopDescription>
-          )}
+          <TopDescription>
+            <TopDescriptionId>{item.quickgenId}</TopDescriptionId>
+            <TopDescriptionProgressStatus failed={item.progressStatus === "Failed"}>
+              {item.progressStatus}
+            </TopDescriptionProgressStatus>
+          </TopDescription>
           <TableDescription>
             <Grid>
               <TableHeader>
@@ -88,7 +77,7 @@ export function RootContainer() {
                           unwrapFormData={unwrapPrepareOptions}
                           data={item.prepareOptions}
                           saveData={(data) => {
-                            dispatch(setPrepareOptions2(data));
+                            dispatch(setPrepareOptions({ id: item.id, ...data }));
                           }}
                         >
                           <Input label="Base Path" name="basePath" />
@@ -112,7 +101,9 @@ export function RootContainer() {
               <ConvertButton
                 disabled={false}
                 onClick={(e) => {
-                  dispatch(prepare({ files: item.files, options: item.prepareOptions }));
+                  dispatch(
+                    convert({ id: item.id, files: item.files, options: item.prepareOptions })
+                  );
                   e.preventDefault();
                   e.stopPropagation();
                 }}
@@ -125,7 +116,9 @@ export function RootContainer() {
                 <ConvertButton
                   disabled={false}
                   onClick={(e) => {
-                    dispatch(downloadResult({ quickgenId: item.quickgenId as string }));
+                    dispatch(
+                      downloadResult({ id: item.id, quickgenId: item.quickgenId as string })
+                    );
                     e.preventDefault();
                     e.stopPropagation();
                   }}
