@@ -183,10 +183,10 @@ export class CaptureWebView extends WebView<Webapp> {
     if (success) {
       item.quickgenId = quickgenId;
       item.progressStatus = "In progress";
-      item.log.push("Prepare done");
+      item.log.push(`Job ${quickgenId} has been created`);
     } else {
       item.progressStatus = "Failed";
-      item.log.push("Prepare failed: " + error);
+      item.log.push("Failed to create job: " + error);
     }
     this.sendRequestSilently({
       command: "saveCapture",
@@ -196,14 +196,14 @@ export class CaptureWebView extends WebView<Webapp> {
 
   showPrepareUploadFileResponse(item: CaptureItem, completed: boolean, percent: number) {
     if (completed) {
-      item.log.push("All files have been uploaded to the capture server");
+      item.log.push("All files have been uploaded");
     } else {
       const log = item.log;
       percent = 100 * percent;
-      if (log[log.length - 1].startsWith("Uploading selected files")) {
-        log[log.length - 1] = "Uploading selected files " + percent + "%";
+      if (log[log.length - 1].startsWith("Uploading files")) {
+        log[log.length - 1] = `Uploading files: ${percent}%`;
       } else {
-        log.push("Uploading selected files " + percent + "%");
+        log.push(`Uploading files: ${percent}%`);
       }
     }
     // todo: handle error
@@ -215,9 +215,10 @@ export class CaptureWebView extends WebView<Webapp> {
 
   showExecutionStartResponse(item: CaptureItem, success: boolean, message: string) {
     if (success) {
-      item.log.push("Remote execution has been started");
+      item.log.push("Job has been started");
     } else {
-      item.log.push("Start remote execution failed: " + message);
+      item.progressStatus = "Failed";
+      item.log.push("Job failed to start: " + message);
     }
     this.sendRequestSilently({
       command: "saveCapture",
@@ -228,10 +229,10 @@ export class CaptureWebView extends WebView<Webapp> {
   showExecutionStatusResponse(item: CaptureItem, status: Status, success: boolean, error: string) {
     if (success) {
       const log = item.log;
-      if (log[log.length - 1].startsWith("Current execution status is")) {
-        log[log.length - 1] = "Current execution status is " + status;
+      if (log[log.length - 1].startsWith("Job status: ")) {
+        log[log.length - 1] = `Job status: ${status}`;
       } else {
-        log.push("Current execution status is " + status);
+        log.push(`Job status: ${status}`);
       }
       if (status === "finished") {
         item.progressStatus = "Finished";
@@ -239,7 +240,8 @@ export class CaptureWebView extends WebView<Webapp> {
         item.progressStatus = "Failed";
       }
     } else {
-      item.log.push("Execution failed: " + error);
+      item.progressStatus = "Failed";
+      item.log.push("Job execution failed: " + error);
     }
     this.sendRequestSilently({
       command: "saveCapture",
