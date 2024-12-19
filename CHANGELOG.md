@@ -4,7 +4,7 @@
 
 - Implement support for SQGs in Audit when using CLI binary
 - Add ability to select CLI binary as a runtime for Audit for enterprise customers
-- Support taging of local OpenAPI files with platform tags
+- Support tagging of local OpenAPI files with platform tags
 - Allow removing Scenarios in Scan config UI
 
 ## Version 4.30.1 (December 3, 2024)
