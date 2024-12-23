@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 4.31.0 (December XX, 2024)
+## Version 4.31.0 (December 23, 2024)
 
 - Implement support for SQGs in Audit when using CLI binary
 - Add ability to select CLI binary as a runtime for Audit for enterprise customers
