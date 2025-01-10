@@ -91,6 +91,15 @@ export default function Subscription({ token }: { token: string }) {
         </Counters>
         <ProgressBar label="" progress={1 - data.currentScanUsage / data.monthlyScan} />
       </Section>
+
+      <Section>
+        <Title>Capture</Title>
+        <Subtitle>Monthly operation capture left</Subtitle>
+        <Counters>
+          {data.monthlyCapture - data.currentCaptureUsage} / {data.monthlyCapture}
+        </Counters>
+        <ProgressBar label="" progress={1 - data.currentScanUsage / data.monthlyScan} />
+      </Section>
     </Container>
   );
 }

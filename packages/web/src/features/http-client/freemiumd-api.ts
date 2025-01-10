@@ -16,6 +16,9 @@ export type Subscription = {
   monthlyScan: number;
   bonusScanOp: number;
   currentScanUsage: number;
+  monthlyCapture: number;
+  bonusCaptureOp: number;
+  currentCaptureUsage: number;
 };
 
 export const freemiumdApi = createApi({
