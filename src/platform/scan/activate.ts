@@ -83,6 +83,11 @@ export function activate(
     return reportViews[viewId];
   };
 
+  const getExistingReportView = (uri: vscode.Uri): ScanReportWebView => {
+    const viewId = uri.toString();
+    return reportViews[viewId];
+  };
+
   const scanCodelensProvider = new ScanCodelensProvider(cache);
 
   function activateLens(enabled: boolean) {
@@ -104,7 +109,16 @@ export function activate(
 
   activateLens(configuration.get("codeLens"));
 
-  commands(cache, platformContext, store, configuration, secrets, getScanView, signUpWebView);
+  commands(
+    cache,
+    platformContext,
+    store,
+    configuration,
+    secrets,
+    getScanView,
+    getExistingReportView,
+    signUpWebView
+  );
 
   return new vscode.Disposable(() => disposables.forEach((disposable) => disposable.dispose()));
 }

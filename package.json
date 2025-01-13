@@ -672,6 +672,10 @@
       {
         "command": "openapi.platform.editorOpenScanconfig",
         "title": "42Crunch: Open Scan Configuration file for the current OpenAPI file"
+      },
+      {
+        "command": "openapi.platform.editorExportScanReport",
+        "title": "42Crunch: Export Scan Report file for the current OpenAPI file"
       }
     ],
     "keybindings": [

@@ -7,9 +7,7 @@ import got from "got";
 import { execFile } from "node:child_process";
 import { once } from "node:events";
 import {
-  accessSync,
   chmodSync,
-  constants,
   createWriteStream,
   mkdirSync,
   mkdtempSync,
@@ -37,6 +35,7 @@ import { loadConfig } from "../util/config";
 import { delay } from "../time-util";
 import { CliAstManifestEntry, getCliUpdate } from "./cli-ast-update";
 import { extensionQualifiedId } from "../types";
+import { createTempDirectory, exists } from "../util/fs";
 
 const asyncExecFile = promisify(execFile);
 
@@ -318,21 +317,6 @@ export async function runScanWithCliBinary(
   }
 }
 
-export async function cleanupTempScanDirectory(dir: string) {
-  const oasFilename = join(dir as string, "openapi.json");
-  const scanconfFilename = join(dir as string, "scanconf.json");
-  const reportFilename = join(dir as string, "report.json");
-
-  try {
-    unlinkSync(oasFilename);
-    unlinkSync(scanconfFilename);
-    unlinkSync(reportFilename);
-    rmdirSync(dir);
-  } catch (ex) {
-    // ignore
-  }
-}
-
 export async function runValidateScanConfigWithCliBinary(
   secrets: vscode.SecretStorage,
   envStore: EnvStore,
@@ -501,21 +485,6 @@ export async function runAuditWithCliBinary(
         throw new Error(formatException(error));
       }
     }
-  }
-}
-
-function createTempDirectory(prefix: string) {
-  const tmpDir = tmpdir();
-  const dir = mkdtempSync(join(`${tmpDir}`, prefix));
-  return dir;
-}
-
-export function exists(filename: string) {
-  try {
-    accessSync(filename, constants.F_OK);
-    return true;
-  } catch (err) {
-    return false;
   }
 }
 

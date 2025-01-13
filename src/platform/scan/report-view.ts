@@ -17,11 +17,12 @@ import { Cache } from "../../cache";
 import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
 import { AuditContext, MappingNode } from "../../types";
-import { loadConfig } from "../../util/config";
 import { WebView } from "../../webapps/web-view";
 import { PlatformStore } from "../stores/platform-store";
 import { executeHttpRequest } from "../../webapps/http-handler";
-import { cleanupTempScanDirectory } from "../cli-ast";
+import { join } from "node:path";
+import { exists } from "../../util/fs";
+import { rmdirSync, unlinkSync } from "node:fs";
 
 export class ScanReportWebView extends WebView<Webapp> {
   private document?: vscode.TextDocument;
@@ -201,10 +202,36 @@ export class ScanReportWebView extends WebView<Webapp> {
       },
     });
   }
+
+  async exportReport(destination: vscode.Uri) {
+    const reportUri = vscode.Uri.file(join(this.temporaryReportDirectory!, "report.json"));
+    vscode.workspace.fs.copy(reportUri, destination, { overwrite: true });
+  }
 }
 
 async function copyCurl(curl: string) {
   vscode.env.clipboard.writeText(curl);
   const disposable = vscode.window.setStatusBarMessage(`Curl command copied to the clipboard`);
   setTimeout(() => disposable.dispose(), 1000);
+}
+
+async function cleanupTempScanDirectory(dir: string) {
+  const oasFilename = join(dir as string, "openapi.json");
+  const scanconfFilename = join(dir as string, "scanconf.json");
+  const reportFilename = join(dir as string, "report.json");
+
+  try {
+    if (exists(oasFilename)) {
+      unlinkSync(oasFilename);
+    }
+    if (exists(scanconfFilename)) {
+      unlinkSync(scanconfFilename);
+    }
+    if (exists(reportFilename)) {
+      unlinkSync(reportFilename);
+    }
+    rmdirSync(dir);
+  } catch (ex) {
+    // ignore
+  }
 }
