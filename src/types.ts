@@ -71,6 +71,7 @@ export interface AuditContext {
   auditsByDocument: DocumentAudits;
   decorations: DocumentDecorations;
   diagnostics: vscode.DiagnosticCollection;
+  auditTempDirectories: Record<string, string>;
 }
 
 export interface AuditDiagnostic extends vscode.Diagnostic {

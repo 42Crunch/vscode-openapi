@@ -1,11 +1,9 @@
 import styled, { keyframes } from "styled-components";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { TriangleExclamation } from "../../icons";
-import { useAppDispatch, useAppSelector } from "./store";
-import { showAuditReport } from "./slice";
+import { useAppSelector } from "./store";
 
 export default function Starting() {
-  const dispatch = useAppDispatch();
   const { error } = useAppSelector((state) => state.scan);
 
   return (
@@ -14,18 +12,6 @@ export default function Starting() {
         <ErrorMessage>
           <TriangleExclamation />
           <div>{error.message}</div>
-
-          {error.code === "audit-error" && (
-            <Button
-              onClick={(e) => {
-                dispatch(showAuditReport());
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-            >
-              View report
-            </Button>
-          )}
         </ErrorMessage>
       )}
       {!error && (

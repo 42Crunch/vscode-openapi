@@ -11,6 +11,9 @@ import { getTagDataEntry, PlatformStore } from "../../platform/stores/platform-s
 import { MappingNode } from "../../types";
 import { parseAuditReport } from "../audit";
 import { formatException } from "../../platform/util";
+import { createTempDirectory } from "../../util/fs";
+import { writeFile } from "node:fs/promises";
+import { saveAuditReportToTempDirectory } from "../util";
 
 export async function runPlatformAudit(
   document: vscode.TextDocument,
@@ -19,7 +22,7 @@ export async function runPlatformAudit(
   cache: Cache,
   store: PlatformStore,
   memento?: vscode.Memento
-): Promise<Audit | undefined> {
+): Promise<{ audit: Audit; tempAuditDirectory: string } | undefined> {
   try {
     const tmpApi = await store.createTempApi(oas, getTagDataEntry(memento, document.uri.fsPath));
     const report = await store.getAuditReport(tmpApi.apiId);
@@ -30,7 +33,8 @@ export async function runPlatformAudit(
     const { issues: todo } = await parseAuditReport(cache, document, todoReport.data, mapping);
     audit.compliance = compliance;
     audit.todo = todo;
-    return audit;
+    const tempAuditDirectory = await saveAuditReportToTempDirectory(report.data);
+    return { audit, tempAuditDirectory };
   } catch (ex: any) {
     if (
       ex?.response?.statusCode === 409 &&

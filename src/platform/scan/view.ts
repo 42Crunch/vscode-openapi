@@ -36,6 +36,8 @@ import { runScanWithScandManager } from "./runtime/scand-manager";
 import { UPGRADE_WARN_LIMIT, offerUpgrade, warnOperationScans } from "../upgrade";
 import { formatException } from "../util";
 import { createDefaultConfigWithPlatform } from "./runtime/platform";
+import { createTempDirectory } from "../../util/fs";
+import { writeFile } from "fs/promises";
 
 export type BundleDocumentVersions = Record<string, number>;
 
@@ -392,6 +394,11 @@ async function runScan(
         reportView.showGeneralError({ message: `Failed to load Scan report` });
         return;
       }
+
+      // save report to a temporary directory
+      const tempDir = createTempDirectory("scan-report");
+      await writeFile(`${tempDir}/report.json`, JSON.stringify(parsedReport));
+      reportView.setTemporaryReportDirectory(tempDir);
 
       if (isFullScan) {
         await reportView.showFullScanReport(parsedReport, oas);

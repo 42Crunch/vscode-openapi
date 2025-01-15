@@ -10,6 +10,7 @@ import {
   registerFocusSecurityAuditById,
   registerSingleOperationAudit,
   registerOutlineSingleOperationAudit,
+  registerExportAuditReport,
 } from "./commands";
 import { AuditWebView } from "./view";
 import { AuditContext, PendingAudits } from "../types";
@@ -20,6 +21,7 @@ import { PlatformStore } from "../platform/stores/platform-store";
 import { AuditCodelensProvider } from "./lens";
 import { Configuration } from "../configuration";
 import { SignUpWebView } from "../webapps/signup/view";
+import { clearAuditReportTempDirectories } from "./util";
 
 export function activate(
   context: vscode.ExtensionContext,
@@ -93,6 +95,7 @@ export function activate(
     store,
     signUpWebView
   );
+
   registerSingleOperationAudit(
     context,
     cache,
@@ -102,6 +105,7 @@ export function activate(
     store,
     signUpWebView
   );
+
   registerOutlineSingleOperationAudit(
     context,
     cache,
@@ -114,6 +118,11 @@ export function activate(
   registerFocusSecurityAudit(context, cache, auditContext, reportWebView);
   registerFocusSecurityAuditById(context, auditContext, reportWebView);
   registerQuickfixes(context, cache, auditContext, store, reportWebView);
+  registerExportAuditReport(context, auditContext);
 
   return new vscode.Disposable(() => disposables.forEach((disposable) => disposable.dispose()));
+}
+
+export async function deactivate(auditContext: AuditContext) {
+  await clearAuditReportTempDirectories(auditContext);
 }

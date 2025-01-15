@@ -3,6 +3,7 @@ import * as yaml from "js-yaml";
 
 import { accessSync, constants, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirnameUri, relative } from "../../fs-util";
+import { exists, existsDir } from "../../util/fs";
 
 export type ConfigFile = {
   apis: Record<string, { alias: string }>;
@@ -148,22 +149,4 @@ export function getGitRoot(oasUri: vscode.Uri): vscode.Uri | undefined {
     }
   }
   return undefined;
-}
-
-export function exists(filename: string) {
-  try {
-    accessSync(filename, constants.F_OK);
-    return true;
-  } catch (err) {
-    return false;
-  }
-}
-
-export function existsDir(filename: string): boolean {
-  try {
-    const stats = statSync(filename);
-    return stats.isDirectory();
-  } catch (err) {
-    return false;
-  }
 }

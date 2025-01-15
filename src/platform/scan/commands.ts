@@ -31,6 +31,8 @@ import { loadConfig } from "../../util/config";
 import { Bundle, OpenApiVersion } from "../../types";
 import { SignUpWebView } from "../../webapps/signup/view";
 import { getOpenApiVersion } from "../../parsers";
+import { ScanReportWebView } from "./report-view";
+import { existsUri } from "../../util/fs";
 
 export default (
   cache: Cache,
@@ -39,6 +41,7 @@ export default (
   configuration: Configuration,
   secrets: vscode.SecretStorage,
   getScanView: (uri: vscode.Uri) => ScanWebView,
+  getExistingReportView: (uri: vscode.Uri) => ScanReportWebView,
   signUpWebView: SignUpWebView
 ) => {
   vscode.commands.registerTextEditorCommand(
@@ -139,6 +142,25 @@ export default (
       await editorOpenScanconfig(editor);
     }
   );
+
+  vscode.commands.registerTextEditorCommand(
+    "openapi.platform.exportScanReport",
+    async (editor: vscode.TextEditor, edit: vscode.TextEditorEdit): Promise<void> => {
+      const view = getExistingReportView(editor.document.uri);
+      if (view === undefined) {
+        vscode.window.showErrorMessage("No scan report found for the current document.");
+        return;
+      }
+
+      const destination = await vscode.window.showSaveDialog({
+        filters: { JSON: ["json"] },
+      });
+
+      if (destination !== undefined) {
+        await view.exportReport(destination);
+      }
+    }
+  );
 };
 
 async function editorRunSingleOperationScan(
@@ -184,7 +206,7 @@ async function editorRunSingleOperationScan(
   const scanconfUri = getOrCreateScanconfUri(editor.document.uri, title);
 
   if (
-    (scanconfUri === undefined || !(await exists(scanconfUri))) &&
+    (scanconfUri === undefined || !(await existsUri(scanconfUri))) &&
     !(await createDefaultScanConfig(
       editor.document,
       store,
@@ -281,7 +303,7 @@ async function createDefaultScanConfig(
 
 async function editorOpenScanconfig(editor: vscode.TextEditor): Promise<void> {
   const scanconfUri = getScanconfUri(editor.document.uri);
-  if (scanconfUri === undefined || !exists(scanconfUri)) {
+  if (scanconfUri === undefined || !existsUri(scanconfUri)) {
     await vscode.window.showErrorMessage(
       "No scan configuration found for the current document. Please create one first by running a scan.",
       { modal: true }
@@ -290,15 +312,6 @@ async function editorOpenScanconfig(editor: vscode.TextEditor): Promise<void> {
   }
 
   await vscode.window.showTextDocument(scanconfUri);
-}
-
-async function exists(uri: vscode.Uri): Promise<boolean> {
-  try {
-    const stat = await vscode.workspace.fs.stat(uri);
-    return true;
-  } catch (e) {
-    return false;
-  }
 }
 
 const emptyLogger: Logger = {

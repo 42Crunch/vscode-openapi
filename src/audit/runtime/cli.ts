@@ -26,7 +26,7 @@ export async function runCliAudit(
   configuration: Configuration,
   progress: vscode.Progress<any>,
   isFullAudit: boolean
-): Promise<Audit | undefined> {
+): Promise<{ audit: Audit; tempAuditDirectory: string } | undefined> {
   const logger: Logger = {
     fatal: (message: string) => null,
     error: (message: string) => null,
@@ -74,5 +74,5 @@ export async function runCliAudit(
     audit.compliance = result.compliance as any;
   }
 
-  return audit;
+  return { audit, tempAuditDirectory: result.tempAuditDirectory };
 }

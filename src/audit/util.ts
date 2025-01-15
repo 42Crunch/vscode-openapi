@@ -7,6 +7,10 @@ import {
   Parsed,
   parseJsonPointer,
 } from "@xliic/preserving-json-yaml-parser";
+import { createTempDirectory, exists } from "../util/fs";
+import { rmdir, unlink, writeFile } from "node:fs/promises";
+import { AuditContext } from "../types";
+import { join } from "node:path";
 
 export function getLocationByPointer(
   document: vscode.TextDocument,
@@ -77,4 +81,36 @@ function findLocationForJsonPointerResolvingRefs(
     return [getLocation(current, path[i]), current[path[i]]];
   }
   return [undefined, undefined];
+}
+
+export async function saveAuditReportToTempDirectory(data: any) {
+  const tempAuditDirectory = createTempDirectory("audit-report");
+  await writeFile(`${tempAuditDirectory}/report.json`, JSON.stringify(data, null, 2));
+  return tempAuditDirectory;
+}
+
+export async function clearAuditReportTempDirectories(auditContext: AuditContext) {
+  for (const dir of Object.values(auditContext.auditTempDirectories)) {
+    const openapiFilename = join(dir, "openapi.json");
+    if (await exists(openapiFilename)) {
+      await unlink(openapiFilename);
+    }
+
+    const reportFilename = join(dir, "report.json");
+    if (await exists(reportFilename)) {
+      await unlink(reportFilename);
+    }
+
+    const todoFilename = join(dir, "todo.json");
+    if (await exists(todoFilename)) {
+      await unlink(todoFilename);
+    }
+
+    const sqgFilename = join(dir, "sqg.json");
+    if (await exists(sqgFilename)) {
+      await unlink(sqgFilename);
+    }
+
+    await rmdir(dir);
+  }
 }

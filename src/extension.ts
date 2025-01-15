@@ -38,6 +38,14 @@ import { debounce } from "./util/debounce";
 import { getApprovedHostnamesTrimmedLowercase, removeSecretsForApprovedHosts } from "./util/config";
 import { SignUpWebView } from "./webapps/signup/view";
 
+const auditContext: AuditContext = {
+  auditsByMainDocument: {},
+  auditsByDocument: {},
+  decorations: {},
+  diagnostics: undefined as any,
+  auditTempDirectories: {},
+};
+
 export async function activate(context: vscode.ExtensionContext) {
   const versionProperty = "openapiVersion";
   const openapiExtension = vscode.extensions.getExtension(extensionQualifiedId)!;
@@ -96,12 +104,11 @@ export async function activate(context: vscode.ExtensionContext) {
 
   yamlSchemaContributor.activate(context, cache, configuration);
 
-  const auditContext: AuditContext = {
-    auditsByMainDocument: {},
-    auditsByDocument: {},
-    decorations: {},
-    diagnostics: vscode.languages.createDiagnosticCollection("audits"),
-  };
+  auditContext.auditsByMainDocument = {};
+  auditContext.auditsByDocument = {};
+  auditContext.decorations = {};
+  auditContext.diagnostics = vscode.languages.createDiagnosticCollection("audits");
+  auditContext.auditTempDirectories = {};
 
   const logger: Logger = {
     fatal: (message: string) => null,
@@ -231,4 +238,6 @@ export async function activate(context: vscode.ExtensionContext) {
   await reloadCredentials();
 }
 
-export function deactivate() {}
+export async function deactivate() {
+  await audit.deactivate(auditContext);
+}

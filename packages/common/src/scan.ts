@@ -60,11 +60,6 @@ export type ShowJsonPointerMessage = {
   payload: string;
 };
 
-export type ShowAuditReportMessage = {
-  command: "showAuditReport";
-  payload: undefined;
-};
-
 export type StartScanMessage = {
   command: "startScan";
   payload: undefined;

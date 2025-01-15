@@ -8,13 +8,7 @@ import { Webapp } from "@xliic/common/webapp/scan";
 import { AppDispatch, RootState } from "./store";
 import { showEnvWindow } from "../../features/env/slice";
 import { setSecretForSecurity, setScanServer } from "../../features/prefs/slice";
-import {
-  runScan,
-  sendHttpRequest,
-  sendCurlRequest,
-  showJsonPointer,
-  showAuditReport,
-} from "./slice";
+import { sendHttpRequest, sendCurlRequest, showJsonPointer } from "./slice";
 
 import { startNavigationListening } from "../../features/router/listener";
 import { Routes } from "../../features/router/RouterContext";
@@ -67,17 +61,6 @@ export function createListener(host: Webapp["host"], routes: Routes) {
           host.postMessage({
             command: "showJsonPointer",
             payload: action.payload,
-          });
-        },
-      }),
-
-    showAuditReport: () =>
-      startAppListening({
-        actionCreator: showAuditReport,
-        effect: async (action, listenerApi) => {
-          host.postMessage({
-            command: "showAuditReport",
-            payload: undefined,
           });
         },
       }),

@@ -27,6 +27,8 @@ import { setAudit } from "./service";
 import { AuditWebView } from "./view";
 import { loadConfig } from "../util/config";
 import { SignUpWebView } from "../webapps/signup/view";
+import { exists } from "../util/fs";
+import { join } from "node:path";
 
 export function registerSecurityAudit(
   context: vscode.ExtensionContext,
@@ -160,6 +162,33 @@ export function registerFocusSecurityAuditById(
   );
 }
 
+export function registerExportAuditReport(
+  context: vscode.ExtensionContext,
+  auditContext: AuditContext
+) {
+  return vscode.commands.registerCommand("openapi.exportAuditReport", async () => {
+    if (!vscode.window.activeTextEditor) {
+      vscode.window.showErrorMessage("No active editor");
+      return;
+    }
+    const documentUri = vscode.window.activeTextEditor.document.uri.toString();
+    const tempAuditDirectory = auditContext.auditTempDirectories[documentUri];
+
+    if (tempAuditDirectory && (await exists(`${tempAuditDirectory}/report.json`))) {
+      const destination = await vscode.window.showSaveDialog({
+        filters: { JSON: ["json"] },
+      });
+
+      if (destination !== undefined) {
+        const reportUri = vscode.Uri.file(join(tempAuditDirectory, "report.json"));
+        vscode.workspace.fs.copy(reportUri, destination, { overwrite: true });
+      }
+    } else {
+      vscode.window.showErrorMessage("No audit report found for this document");
+    }
+  });
+}
+
 async function securityAudit(
   signUpWebView: SignUpWebView,
   memento: vscode.Memento,
@@ -194,13 +223,16 @@ async function securityAudit(
   try {
     reportWebView.prefetchKdb();
     await reportWebView.sendStartAudit();
-    const audit = await vscode.window.withProgress(
+    const result = await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
         title: "Running API Security Audit...",
         cancellable: false,
       },
-      async (progress, cancellationToken): Promise<Audit | undefined> => {
+      async (
+        progress,
+        cancellationToken
+      ): Promise<{ audit: Audit; tempAuditDirectory: string } | undefined> => {
         const isFullAudit = path === undefined || method === undefined;
         const { value, mapping } = await bundleOrThrow(cache, editor.document);
         const oas = isFullAudit
@@ -236,10 +268,10 @@ async function securityAudit(
       }
     );
 
-    if (audit) {
-      setAudit(auditContext, uri, audit);
+    if (result) {
+      setAudit(auditContext, uri, result.audit, result.tempAuditDirectory);
       setDecorations(editor, auditContext);
-      await reportWebView.showReport(audit);
+      await reportWebView.showReport(result.audit);
     } else {
       await reportWebView.sendCancelAudit();
     }

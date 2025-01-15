@@ -212,8 +212,6 @@ export const slice = createSlice({
     sendCurlRequest: (state, action: PayloadAction<string>) => {},
 
     showJsonPointer: (state, action: PayloadAction<string>) => {},
-
-    showAuditReport: (state, action: PayloadAction<undefined>) => {},
   },
 });
 
@@ -229,7 +227,6 @@ export const {
   sendCurlRequest,
   showHttpResponse,
   showJsonPointer,
-  showAuditReport,
   changeTab,
   changeFilter,
 } = slice.actions;
