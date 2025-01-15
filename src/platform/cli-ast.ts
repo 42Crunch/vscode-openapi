@@ -35,7 +35,7 @@ import { loadConfig } from "../util/config";
 import { delay } from "../time-util";
 import { CliAstManifestEntry, getCliUpdate } from "./cli-ast-update";
 import { extensionQualifiedId } from "../types";
-import { createTempDirectory, exists } from "../util/fs";
+import { createTempDirectory, existsSync } from "../util/fs";
 
 const asyncExecFile = promisify(execFile);
 
@@ -100,7 +100,7 @@ export async function backupConfig(scanconfUri: vscode.Uri): Promise<vscode.Uri>
 
 export function getCliInfo(cliDirectoryOverride: string): Config["cli"] {
   const cli = join(getBinDirectory(cliDirectoryOverride), getCliFilename());
-  return { location: cli, found: exists(cli) };
+  return { location: cli, found: existsSync(cli) };
 }
 
 export async function testCli(cliDirectoryOverride: string): Promise<CliTestResult> {
@@ -378,7 +378,16 @@ export async function runAuditWithCliBinary(
   isFullAudit: boolean,
   cliDirectoryOverride: string
 ): Promise<
-  Result<{ audit: unknown; todo: unknown; compliance: unknown; cli: CliResponse }, CliError>
+  Result<
+    {
+      audit: unknown;
+      todo: unknown;
+      compliance: unknown;
+      cli: CliResponse;
+      tempAuditDirectory: string;
+    },
+    CliError
+  >
 > {
   logger.info(`Running Security Audit using 42Crunch API Security Testing Binary`);
 
@@ -456,21 +465,11 @@ export async function runAuditWithCliBinary(
     const todo = await readTodoReport(todoFilename);
     const compliance = await readSqgReport(sqgFilename);
 
-    unlinkSync(reportFilename);
-    unlinkSync(openapiFilename);
-
-    if (exists(todoFilename)) {
-      unlinkSync(todoFilename);
-    }
-
-    if (exists(sqgFilename)) {
-      unlinkSync(sqgFilename);
-    }
-
-    rmdirSync(dir);
-
     const cliResponse = JSON.parse(output.stdout);
-    return [{ audit: parsed, todo, compliance, cli: cliResponse }, undefined];
+    return [
+      { audit: parsed, todo, compliance, cli: cliResponse, tempAuditDirectory: dir },
+      undefined,
+    ];
   } catch (ex: any) {
     if (ex.code === 3) {
       // limit reached
@@ -613,14 +612,14 @@ function getUserAgent() {
 }
 
 async function readTodoReport(todoFilename: string) {
-  if (exists(todoFilename)) {
+  if (existsSync(todoFilename)) {
     const report = await readFile(todoFilename, { encoding: "utf8" });
     return JSON.parse(report);
   }
 }
 
 async function readSqgReport(sqgReportFilename: string) {
-  if (exists(sqgReportFilename)) {
+  if (existsSync(sqgReportFilename)) {
     const report = await readFile(sqgReportFilename, { encoding: "utf8" });
     return JSON.parse(report);
   }

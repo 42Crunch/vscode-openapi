@@ -10,7 +10,6 @@ import { Preferences } from "@xliic/common/prefs";
 import { Webapp } from "@xliic/common/webapp/scan";
 import * as vscode from "vscode";
 import { parseAuditReport } from "../../audit/audit";
-import { setAudit } from "../../audit/service";
 import { getLocationByPointer } from "../../audit/util";
 import { AuditWebView } from "../../audit/view";
 import { Cache } from "../../cache";
@@ -21,16 +20,11 @@ import { WebView } from "../../webapps/web-view";
 import { PlatformStore } from "../stores/platform-store";
 import { executeHttpRequest } from "../../webapps/http-handler";
 import { join } from "node:path";
-import { exists } from "../../util/fs";
+import { existsSync } from "../../util/fs";
 import { rmdirSync, unlinkSync } from "node:fs";
 
 export class ScanReportWebView extends WebView<Webapp> {
   private document?: vscode.TextDocument;
-  private auditReport?: {
-    report: any;
-    mapping: MappingNode;
-  };
-
   private temporaryReportDirectory?: string;
 
   constructor(
@@ -41,9 +35,7 @@ export class ScanReportWebView extends WebView<Webapp> {
     private secrets: vscode.SecretStorage,
     private store: PlatformStore,
     private envStore: EnvStore,
-    private prefs: Record<string, Preferences>,
-    private auditView: AuditWebView,
-    private auditContext: AuditContext
+    private prefs: Record<string, Preferences>
   ) {
     super(extensionPath, "scan", title, vscode.ViewColumn.One, "eye");
     envStore.onEnvironmentDidChange((env) => {
@@ -104,18 +96,6 @@ export class ScanReportWebView extends WebView<Webapp> {
         editor.revealRange(textLine.range, vscode.TextEditorRevealType.AtTop);
       }
     },
-
-    showAuditReport: async () => {
-      const uri = this.document!.uri.toString();
-      const audit = await parseAuditReport(
-        this.cache,
-        this.document!,
-        this.auditReport!.report,
-        this.auditReport!.mapping
-      );
-      setAudit(this.auditContext, uri, audit);
-      await this.auditView.showReport(audit);
-    },
   };
 
   async onStart() {
@@ -132,27 +112,8 @@ export class ScanReportWebView extends WebView<Webapp> {
 
   async sendStartScan(document: vscode.TextDocument) {
     this.document = document;
-    this.auditReport = undefined;
     await this.show();
     return this.sendRequest({ command: "startScan", payload: undefined });
-  }
-
-  async sendAuditError(document: vscode.TextDocument, report: any, mapping: MappingNode) {
-    this.document = document;
-
-    this.auditReport = {
-      report,
-      mapping,
-    };
-
-    return this.sendRequest({
-      command: "showGeneralError",
-      payload: {
-        message:
-          "OpenAPI has failed Security Audit. Please run API Security Audit, fix the issues and try running the Scan again.",
-        code: "audit-error",
-      },
-    });
   }
 
   setTemporaryReportDirectory(dir: string) {
@@ -221,13 +182,13 @@ async function cleanupTempScanDirectory(dir: string) {
   const reportFilename = join(dir as string, "report.json");
 
   try {
-    if (exists(oasFilename)) {
+    if (existsSync(oasFilename)) {
       unlinkSync(oasFilename);
     }
-    if (exists(scanconfFilename)) {
+    if (existsSync(scanconfFilename)) {
       unlinkSync(scanconfFilename);
     }
-    if (exists(reportFilename)) {
+    if (existsSync(reportFilename)) {
       unlinkSync(reportFilename);
     }
     rmdirSync(dir);

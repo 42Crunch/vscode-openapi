@@ -8,6 +8,7 @@ import { AuditContext } from "../types";
 import { PlatformStore } from "./stores/platform-store";
 import { getApiId, isPlatformUri } from "./util";
 import { setAudit } from "../audit/service";
+import { saveAuditReportToTempDirectory } from "../audit/util";
 
 export async function refreshAuditReport(
   store: PlatformStore,
@@ -21,6 +22,7 @@ export async function refreshAuditReport(
     const report = await store.getAuditReport(apiId);
     const compliance = await store.readAuditCompliance(report.tid);
     const todoReport = await store.readAuditReportSqgTodo(report.tid);
+    const tempAuditDirectory = await saveAuditReportToTempDirectory(report.data);
 
     const mapping = {
       value: { uri, hash: "" },
@@ -41,7 +43,7 @@ export async function refreshAuditReport(
         auditContext.diagnostics.set(document.uri, undefined);
         auditContext.decorations[uri] = [];
       } else {
-        setAudit(auditContext, uri, audit);
+        setAudit(auditContext, uri, audit, tempAuditDirectory);
       }
       if (vscode.window.activeTextEditor?.document === document) {
         setDecorations(vscode.window.activeTextEditor, auditContext);

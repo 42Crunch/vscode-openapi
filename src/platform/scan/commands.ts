@@ -144,7 +144,7 @@ export default (
   );
 
   vscode.commands.registerTextEditorCommand(
-    "openapi.platform.editorExportScanReport",
+    "openapi.platform.exportScanReport",
     async (editor: vscode.TextEditor, edit: vscode.TextEditorEdit): Promise<void> => {
       const view = getExistingReportView(editor.document.uri);
       if (view === undefined) {

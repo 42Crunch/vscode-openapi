@@ -9,6 +9,7 @@ import { AuditWebView } from "../../audit/view";
 import { parseAuditReport } from "../../audit/audit";
 import { setDecorations } from "../../audit/decoration";
 import { setAudit } from "../../audit/service";
+import { saveAuditReportToTempDirectory } from "../../audit/util";
 
 export default (
   store: PlatformStore,
@@ -72,7 +73,8 @@ export default (
           value: { uri, hash: "" },
           children: {},
         });
-        setAudit(auditContext, uri, audit);
+        const tempAuditDirectory = await saveAuditReportToTempDirectory(report);
+        setAudit(auditContext, uri, audit, tempAuditDirectory);
         setDecorations(editor, auditContext);
         await reportWebView.showReport(audit);
       } else {

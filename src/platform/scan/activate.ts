@@ -74,9 +74,7 @@ export function activate(
         secrets,
         store,
         envStore,
-        prefs,
-        auditView,
-        auditContext
+        prefs
       );
     }
 

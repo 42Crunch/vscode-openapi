@@ -9,8 +9,14 @@ import { AuditContext, IssuesByDocument, MappingNode } from "../types";
 import { getLocationByPointer } from "./util";
 import { fromInternalUri } from "../external-refs";
 
-export function updateAuditContext(context: AuditContext, uri: string, audit: Audit) {
+export function updateAuditContext(
+  context: AuditContext,
+  uri: string,
+  audit: Audit,
+  auditTempDirectory: string
+) {
   context.auditsByMainDocument[uri] = audit;
+  context.auditTempDirectories[uri] = auditTempDirectory;
 
   const auditsBySubDocument = {
     [audit.summary.documentUri]: audit,

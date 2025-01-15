@@ -3,7 +3,6 @@ import {
   ScanOperationMessage,
   ShowScanReportMessage,
   ShowJsonPointerMessage,
-  ShowAuditReportMessage,
   StartScanMessage,
   ShowFullScanReportMessage,
 } from "../scan";
@@ -40,5 +39,4 @@ export type Webapp = App<
   | SendHttpRequestMessage
   | SendCurlRequestMessage
   | ShowJsonPointerMessage
-  | ShowAuditReportMessage
 >;
