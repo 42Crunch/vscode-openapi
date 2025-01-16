@@ -30,6 +30,7 @@ import * as platform from "./platform/activate";
 import * as tryit from "./tryit/activate";
 import * as environment from "./environment/activate";
 import * as config from "./webapps/views/config/activate";
+import * as capture from "./webapps/views/capture/activate";
 import { PlatformStore } from "./platform/stores/platform-store";
 import { Logger } from "./platform/types";
 import { getPlatformCredentials, hasCredentials } from "./credentials";
@@ -150,6 +151,7 @@ export async function activate(context: vscode.ExtensionContext) {
   tryit.activate(context, cache, configuration, envStore, prefs);
   environment.activate(context, envStore);
   config.activate(context, configuration, context.secrets, platformStore, logger);
+  capture.activate(context, configuration, context.secrets, platformStore, logger);
 
   await platform.activate(
     context,
