@@ -104,6 +104,10 @@
         "contents": "No OpenAPI file selected.\n[New OpenAPI file](command:openapi.createNewThreeYaml)"
       },
       {
+        "view": "openapiNotSelectedOutline",
+        "contents": "Convert HAR/Postman files to OpenAPI.\n[Convert](command:openapi.showCapture)"
+      },
+      {
         "view": "platformWelcome",
         "contents": "Please enter 42Crunch Platform credentials.\n[Configure](command:openapi.showConfiguration)"
       }
@@ -354,6 +358,10 @@
       {
         "command": "openapi.showSettings",
         "title": "42Crunch: Open Settings"
+      },
+      {
+        "command": "openapi.showCapture",
+        "title": "42Crunch: Convert HAR/Postman files to OpenAPI"
       },
       {
         "command": "openapi.outline.resetSearch",

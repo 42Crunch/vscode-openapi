@@ -43,6 +43,12 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
     }
   }
 
+  protected async sendRequestSilently(request: W["consumes"]): Promise<void> {
+    if (this.panel) {
+      await this.panel!.webview.postMessage(request);
+    }
+  }
+
   async sendColorTheme(theme: vscode.ColorTheme) {
     const kindMap: Record<vscode.ColorThemeKind, ChangeThemePayload["kind"]> = {
       [vscode.ColorThemeKind.Light]: "light",

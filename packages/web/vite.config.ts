@@ -32,6 +32,7 @@ export default defineConfig(({ command, mode }) => {
           scanconf: resolve(__dirname, "src/app/scanconf/index.tsx"),
           signup: resolve(__dirname, "src/app/signup/index.tsx"),
           tags: resolve(__dirname, "src/app/tags/index.tsx"),
+          capture: resolve(__dirname, "src/app/capture/index.tsx"),
         },
         fileName: (format, name) => {
           return `${name}.js`;
