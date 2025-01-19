@@ -11,6 +11,7 @@ export enum OpenApiVersion {
   Unknown,
   V2,
   V3,
+  V3_1,
 }
 
 type Node = any;

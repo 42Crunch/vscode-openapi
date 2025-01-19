@@ -44,6 +44,12 @@ export function getOpenApiVersion(root: any): OpenApiVersion {
     root?.openapi?.match(/^3\.0\.\d(-.+)?$/)
   ) {
     return OpenApiVersion.V3;
+  } else if (
+    root?.openapi &&
+    typeof root?.openapi === "string" &&
+    root?.openapi?.match(/^3\.1\.\d(-.+)?$/)
+  ) {
+    return OpenApiVersion.V3_1;
   } else {
     return OpenApiVersion.Unknown;
   }

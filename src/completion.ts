@@ -32,6 +32,18 @@ const targetMapping: { [key in OpenApiVersion]: any } = {
     items: "/components/schemas", // for completion inside JSON Schema objects
     properties: "/components/schemas",
   },
+  [OpenApiVersion.V3_1]: {
+    schema: "/components/schemas",
+    responses: "/components/responses",
+    parameters: "/components/parameters",
+    examples: "/components/examples",
+    requestBody: "/components/requestBodies",
+    callbacks: "/components/callbacks",
+    headers: "/components/headers",
+    links: "/components/links",
+    items: "/components/schemas", // for completion inside JSON Schema objects
+    properties: "/components/schemas",
+  },
 };
 
 export class CompletionItemProvider implements vscode.CompletionItemProvider {
