@@ -24,14 +24,20 @@ export class RootNode extends AbstractOutlineNode {
         res.push(new SearchNode(this, this.context));
       }
       res.push(new GeneralNode(this, this.node));
-      if (this.context.version == OpenApiVersion.V3) {
+      if (
+        this.context.version == OpenApiVersion.V3 ||
+        this.context.version == OpenApiVersion.V3_1
+      ) {
         res.push(new ServersNode(this, this.node["servers"]));
       }
       res.push(new SecurityNode(this, this.node["security"]));
       res.push(new TagsNode(this, this.node["tags"], this.node["paths"]));
       res.push(new OperationIdsNode(this, this.node["paths"]));
       res.push(new PathsNode(this, this.node["paths"]));
-      if (this.context.version == OpenApiVersion.V3) {
+      if (
+        this.context.version == OpenApiVersion.V3 ||
+        this.context.version == OpenApiVersion.V3_1
+      ) {
         res.push(new ComponentsNode(this, this.node["components"]));
       } else {
         for (const key of panelsVer2) {

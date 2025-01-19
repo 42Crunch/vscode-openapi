@@ -47,6 +47,17 @@ const destinationMap = {
     headers: ["components", "headers"],
     links: ["components", "links"],
   },
+
+  [OpenApiVersion.V3_1]: {
+    parameters: ["components", "parameters"],
+    schema: ["components", "schemas"],
+    responses: ["components", "responses"],
+    examples: ["components", "examples"],
+    requestBody: ["components", "requestBodies"],
+    callbacks: ["components", "callbacks"],
+    headers: ["components", "headers"],
+    links: ["components", "links"],
+  },
 };
 
 function refToUri(ref: string) {
