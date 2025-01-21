@@ -161,7 +161,7 @@ definitions:
       schemas:
         type: object
         additionalProperties:
-          $ref: '#'
+          $ref: '#/definitions/unspecified-schema'
       responses:
         type: object
         additionalProperties:
@@ -235,8 +235,21 @@ definitions:
         type: array
         items:
           $ref: '#/definitions/parameter-or-reference'
-    patternProperties:
-      '^(get|put|post|delete|options|head|patch|trace)$':
+      get:
+        $ref: '#/definitions/operation'
+      put:
+        $ref: '#/definitions/operation'
+      post:
+        $ref: '#/definitions/operation'
+      delete:
+        $ref: '#/definitions/operation'
+      options:
+        $ref: '#/definitions/operation'
+      head:
+        $ref: '#/definitions/operation'
+      patch:
+        $ref: '#/definitions/operation'
+      trace:
         $ref: '#/definitions/operation'
     allOf:
       - $ref: '#/definitions/specification-extensions'
@@ -321,7 +334,7 @@ definitions:
         default: false
         type: boolean
       schema:
-        $ref: '#'
+        $ref: '#/definitions/unspecified-schema'
       content:
         $ref: '#/definitions/content'
         minProperties: 1
@@ -470,7 +483,7 @@ definitions:
     type: object
     properties:
       schema:
-        $ref: '#'
+        $ref: '#/definitions/unspecified-schema'
       encoding:
         type: object
         additionalProperties:
@@ -655,7 +668,7 @@ definitions:
         default: false
         type: boolean
       schema:
-        $ref: '#'
+        $ref: '#/definitions/unspecified-schema'
       content:
         $ref: '#/definitions/content'
         minProperties: 1
@@ -721,6 +734,11 @@ definitions:
         type: string
       description:
         type: string
+
+  unspecified-schema:
+    $comment: Schema accepting any valid JSON Schema
+    type: object
+    additionalProperties: true
 
   schema:
     $comment: https://spec.openapis.org/oas/v3.1#schema-object
