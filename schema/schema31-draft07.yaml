@@ -314,134 +314,129 @@ definitions:
     additionalProperties: false
 
   parameter:
-    $comment: https://spec.openapis.org/oas/v3.1#parameter-object
     type: object
     properties:
       name:
         type: string
       in:
-        enum:
-          - query
-          - header
-          - path
-          - cookie
+        type: string
       description:
         type: string
       required:
-        default: false
         type: boolean
+        default: false
       deprecated:
-        default: false
         type: boolean
+        default: false
+      allowEmptyValue:
+        type: boolean
+        default: false
+      style:
+        type: string
+      explode:
+        type: boolean
+      allowReserved:
+        type: boolean
+        default: false
       schema:
         $ref: '#/definitions/unspecified-schema'
       content:
-        $ref: '#/definitions/content'
+        type: object
+        additionalProperties:
+          $ref: '#/definitions/media-type'
         minProperties: 1
         maxProperties: 1
+      example: {}
+      examples:
+        type: object
+        additionalProperties:
+          oneOf:
+            - $ref: '#/definitions/example'
+            - $ref: '#/definitions/reference'
+    patternProperties:
+      '^x-': {}
+    additionalProperties: false
     required:
       - name
       - in
-    oneOf:
-      - required:
-        - schema
-      - required:
-        - content
     allOf:
-      - if:
-          properties:
-            in:
-              const: query
-          required:
-            - in
-        then:
-          properties:
-            allowEmptyValue:
-              default: false
-              type: boolean
-      - if:
-          properties:
-            schema: {}
-          required:
-            - schema
-        then:
-          allOf:
-            - $ref: '#/definitions/styles-for-form'
-            - properties:
-                style:
-                  type: string
-                explode:
-                  type: boolean
-            - $ref: '#/definitions/examples'
-            - if:
-                properties:
-                  in:
-                    const: path
-                required:
-                  - in
-              then:
-                properties:
-                  style:
-                    default: simple
-                    enum:
-                      - matrix
-                      - label
-                      - simple
-                  required:
-                    const: true
-                required:
-                  - required
-            - if:
-                properties:
-                  in:
-                    const: header
-                required:
-                  - in
-              then:
-                properties:
-                  style:
-                    default: simple
-                    const: simple
-            - if:
-                properties:
-                  in:
-                    const: query
-                required:
-                  - in
-              then:
-                properties:
-                  style:
-                    default: form
-                    enum:
-                      - form
-                      - spaceDelimited
-                      - pipeDelimited
-                      - deepObject
-                  allowReserved:
-                    default: false
-                    type: boolean
-            - if:
-                properties:
-                  in:
-                    const: cookie
-                required:
-                  - in
-              then:
-                properties:
-                  style:
-                    default: form
-                    const: form
-    additionalProperties: false
+      - $ref: '#/definitions/ExampleXORExamples'
+      - $ref: '#/definitions/SchemaXORContent'
+    oneOf:
+      - $ref: '#/definitions/PathParameter'
+      - $ref: '#/definitions/QueryParameter'
+      - $ref: '#/definitions/HeaderParameter'
+      - $ref: '#/definitions/CookieParameter'
+
+  ExampleXORExamples:
+    description: Example and examples are mutually exclusive
+    not:
+      required: [example, examples]
+
+  SchemaXORContent:
+    description: Schema and content are mutually exclusive, at least one is required
+    not:
+      required: [schema, content]
+    oneOf:
+      - required: [schema]
+      - required: [content]
+        description: Some properties are not allowed if content is present
+        allOf:
+          - not:
+              required: [style]
+          - not:
+              required: [explode]
+          - not:
+              required: [allowReserved]
+          - not:
+              required: [example]
+          - not:
+              required: [examples]
+
+  PathParameter:
+    description: Parameter in path
+    required:
+      - required
+    properties:
+      in:
+        enum: [path]
+      style:
+        enum: [matrix, label, simple]
+        default: simple
+      required:
+        enum: [true]
+
+  QueryParameter:
+    description: Parameter in query
+    properties:
+      in:
+        enum: [query]
+      style:
+        enum: [form, spaceDelimited, pipeDelimited, deepObject]
+        default: form
+
+  HeaderParameter:
+    description: Parameter in header
+    properties:
+      in:
+        enum: [header]
+      style:
+        enum: [simple]
+        default: simple
+
+  CookieParameter:
+    description: Parameter in cookie
+    properties:
+      in:
+        enum: [cookie]
+      style:
+        enum: [form]
+        default: form
 
   parameter-or-reference:
-    if:
-      type: object
-      required:
-        - $ref
-    then:
-      $ref: '#/definitions/reference'
-    else:
-      $ref: '#/definitions/parameter'
+    oneOf:
+      - $ref: '#/definitions/parameter'
+      - $ref: '#/definitions/reference'
 
   request-body:
     $comment: https://spec.openapis.org/oas/v3.1#request-body-object
@@ -461,14 +456,9 @@ definitions:
     additionalProperties: false
 
   request-body-or-reference:
-    if:
-      type: object
-      required:
-        - $ref
-    then:
-      $ref: '#/definitions/reference'
-    else:
-      $ref: '#/definitions/request-body'
+    oneOf:
+      - $ref: '#/definitions/reference'
+      - $ref: '#/definitions/request-body'
 
   content:
     $comment: https://spec.openapis.org/oas/v3.1#fixed-fields-10
@@ -563,14 +553,9 @@ definitions:
     additionalProperties: false
 
   response-or-reference:
-    if:
-      type: object
-      required:
-        - $ref
-    then:
-      $ref: '#/definitions/reference'
-    else:
-      $ref: '#/definitions/response'
+    oneOf:
+      - $ref: '#/definitions/reference'
+      - $ref: '#/definitions/response'
 
   callbacks:
     $comment: https://spec.openapis.org/oas/v3.1#callback-object
@@ -581,14 +566,9 @@ definitions:
       $ref: '#/definitions/path-item'
 
   callbacks-or-reference:
-    if:
-      type: object
-      required:
-        - $ref
-    then:
-      $ref: '#/definitions/reference'
-    else:
-      $ref: '#/definitions/callbacks'
+    oneOf:
+      - $ref: '#/definitions/reference'
+      - $ref: '#/definitions/callbacks'
 
   example:
     $comment: https://spec.openapis.org/oas/v3.1#example-object
@@ -611,14 +591,9 @@ definitions:
     additionalProperties: false
 
   example-or-reference:
-    if:
-      type: object
-      required:
-        - $ref
-    then:
-      $ref: '#/definitions/reference'
-    else:
-      $ref: '#/definitions/example'
+    oneOf:
+      - $ref: '#/definitions/reference'
+      - $ref: '#/definitions/example'
 
   link:
     $comment: https://spec.openapis.org/oas/v3.1#link-object
@@ -646,14 +621,9 @@ definitions:
     additionalProperties: false
 
   link-or-reference:
-    if:
-      type: object
-      required:
-        - $ref
-    then:
-      $ref: '#/definitions/reference'
-    else:
-      $ref: '#/definitions/link'
+    oneOf:
+      - $ref: '#/definitions/reference'
+      - $ref: '#/definitions/link'
 
   header:
     $comment: https://spec.openapis.org/oas/v3.1#header-object
@@ -698,14 +668,9 @@ definitions:
     additionalProperties: false
 
   header-or-reference:
-    if:
-      type: object
-      required:
-        - $ref
-    then:
-      $ref: '#/definitions/reference'
-    else:
-      $ref: '#/definitions/header'
+    oneOf:
+      - $ref: '#/definitions/reference'
+      - $ref: '#/definitions/header'
 
   tag:
     $comment: https://spec.openapis.org/oas/v3.1#tag-object
@@ -734,6 +699,9 @@ definitions:
         type: string
       description:
         type: string
+    required:
+      - $ref
+    additionalProperties: false
 
   unspecified-schema:
     $comment: Schema accepting any valid JSON Schema
@@ -747,102 +715,227 @@ definitions:
       - boolean
 
   security-scheme:
-    $comment: https://spec.openapis.org/oas/v3.1#security-scheme-object
+    oneOf:
+      - $ref: '#/definitions/APIKeySecurityScheme'
+      - $ref: '#/definitions/HTTPSecurityScheme'
+      - $ref: '#/definitions/OAuth2SecurityScheme'
+      - $ref: '#/definitions/OpenIdConnectSecurityScheme'
+      - $ref: '#/definitions/MutualTLSSecurityScheme'
+
+  APIKeySecurityScheme:
     type: object
-    properties:
-      type:
-        enum:
-          - apiKey
-          - http
-          - mutualTLS
-          - oauth2
-          - openIdConnect
-      description:
-        type: string
     required:
       - type
-    allOf:
-      - $ref: '#/definitions/specification-extensions'
-      - if:
-          properties:
-            type:
-              const: apiKey
-          required:
-            - type
-        then:
-          properties:
-            name:
-              type: string
-            in:
-              enum:
-                - query
-                - header
-                - cookie
-          required:
-            - name
-            - in
-      - if:
-          properties:
-            type:
-              const: http
-          required:
-            - type
-        then:
-          properties:
-            scheme:
-              type: string
-          required:
-            - scheme
-      - if:
-          properties:
-            type:
-              const: http
-            scheme:
+      - name
+      - in
+    properties:
+      type:
+        type: string
+        enum:
+          - apiKey
+      name:
+        type: string
+      in:
+        type: string
+        enum:
+          - header
+          - query
+          - cookie
+      description:
+        type: string
+    patternProperties:
+      '^x-': {}
+    additionalProperties: false
+
+  HTTPSecurityScheme:
+    type: object
+    required:
+      - scheme
+      - type
+    properties:
+      scheme:
+        type: string
+      bearerFormat:
+        type: string
+      description:
+        type: string
+      type:
+        type: string
+        enum:
+          - http
+    patternProperties:
+      '^x-': {}
+    additionalProperties: false
+    oneOf:
+      - description: Bearer
+        properties:
+          scheme:
+            type: string
+            pattern: ^[Bb][Ee][Aa][Rr][Ee][Rr]$
+      - description: Non Bearer
+        not:
+          required: [bearerFormat]
+        properties:
+          scheme:
+            not:
               type: string
               pattern: ^[Bb][Ee][Aa][Rr][Ee][Rr]$
-          required:
-            - type
-            - scheme
-        then:
-          properties:
-            bearerFormat:
-              type: string
-      - if:
-          properties:
-            type:
-              const: oauth2
-          required:
-            - type
-        then:
-          properties:
-            flows:
-              $ref: '#/definitions/oauth-flows'
-          required:
-            - flows
-      - if:
-          properties:
-            type:
-              const: openIdConnect
-          required:
-            - type
-        then:
-          properties:
-            openIdConnectUrl:
-              type: string
-              format: uri
-          required:
-            - openIdConnectUrl
+
+  OAuth2SecurityScheme:
+    type: object
+    required:
+      - type
+      - flows
+    properties:
+      type:
+        type: string
+        enum:
+          - oauth2
+      flows:
+        $ref: '#/definitions/OAuthFlows'
+      description:
+        type: string
+    patternProperties:
+      '^x-': {}
+    additionalProperties: false
+
+  OAuthFlows:
+    type: object
+    properties:
+      implicit:
+        $ref: '#/definitions/ImplicitOAuthFlow'
+      password:
+        $ref: '#/definitions/PasswordOAuthFlow'
+      clientCredentials:
+        $ref: '#/definitions/ClientCredentialsFlow'
+      authorizationCode:
+        $ref: '#/definitions/AuthorizationCodeOAuthFlow'
+    patternProperties:
+      '^x-': {}
+    additionalProperties: false
+
+  ImplicitOAuthFlow:
+    type: object
+    required:
+      - authorizationUrl
+      - scopes
+    properties:
+      authorizationUrl:
+        type: string
+        format: uri-reference
+      refreshUrl:
+        type: string
+        format: uri-reference
+      scopes:
+        type: object
+        additionalProperties:
+          type: string
+    patternProperties:
+      '^x-': {}
+    additionalProperties: false
+
+  PasswordOAuthFlow:
+    type: object
+    required:
+      - tokenUrl
+      - scopes
+    properties:
+      tokenUrl:
+        type: string
+        format: uri-reference
+      refreshUrl:
+        type: string
+        format: uri-reference
+      scopes:
+        type: object
+        additionalProperties:
+          type: string
+    patternProperties:
+      '^x-': {}
+    additionalProperties: false
+
+  ClientCredentialsFlow:
+    type: object
+    required:
+      - tokenUrl
+      - scopes
+    properties:
+      tokenUrl:
+        type: string
+        format: uri-reference
+      refreshUrl:
+        type: string
+        format: uri-reference
+      scopes:
+        type: object
+        additionalProperties:
+          type: string
+    patternProperties:
+      '^x-': {}
+    additionalProperties: false
+
+  AuthorizationCodeOAuthFlow:
+    type: object
+    required:
+      - authorizationUrl
+      - tokenUrl
+      - scopes
+    properties:
+      authorizationUrl:
+        type: string
+        format: uri-reference
+      tokenUrl:
+        type: string
+        format: uri-reference
+      refreshUrl:
+        type: string
+        format: uri-reference
+      scopes:
+        type: object
+        additionalProperties:
+          type: string
+    patternProperties:
+      '^x-': {}
+    additionalProperties: false
+
+  OpenIdConnectSecurityScheme:
+    type: object
+    required:
+      - type
+      - openIdConnectUrl
+    properties:
+      type:
+        type: string
+        enum:
+          - openIdConnect
+      openIdConnectUrl:
+        type: string
+        format: uri-reference
+      description:
+        type: string
+    patternProperties:
+      '^x-': {}
+    additionalProperties: false
+
+  MutualTLSSecurityScheme:
+    type: object
+    required:
+      - type
+    properties:
+      type:
+        type: string
+        enum:
+          - mutualTLS
+      description:
+        type: string
+    patternProperties:
+      '^x-': {}
     additionalProperties: false
 
   security-scheme-or-reference:
-    if:
-      type: object
-      required:
-        - $ref
-    then:
-      $ref: '#/definitions/reference'
-    else:
-      $ref: '#/definitions/security-scheme'
+    oneOf:
+      - $ref: '#/definitions/reference'
+      - $ref: '#/definitions/security-scheme'
 
   oauth-flows:
     type: object
