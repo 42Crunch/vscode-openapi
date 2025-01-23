@@ -3,6 +3,7 @@ export interface CaptureItem {
   files: string[];
   quickgenId: string | undefined;
   prepareOptions: PrepareOptions;
+  isPrepareOptionsValid: boolean;
   progressStatus: ProgressStatus;
   pollingCounter: number;
   log: string[];
