@@ -1,11 +1,13 @@
-import * as z from "zod";
 import { PrepareOptions } from "@xliic/common/capture";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import styled from "styled-components";
+import * as z from "zod";
 import CollapsibleCard, { TopDescription } from "../../components/CollapsibleCard";
 import Input from "../../components/Input";
+import { TrashCan } from "../../icons";
 import Button from "../../new-components/Button";
 import Form from "../../new-components/Form";
+import { ProgressButton } from "../../new-components/ProgressButton";
 import {
   browseFiles,
   convert,
@@ -13,10 +15,9 @@ import {
   downloadFile,
   openLink,
   setPrepareOptions,
+  setPrepareOptionsNotValid,
 } from "./slice";
 import { useAppDispatch, useAppSelector } from "./store";
-import { TrashCan } from "../../icons";
-import { ProgressButton } from "../../new-components/ProgressButton";
 
 function wrapPrepareOptions(env: PrepareOptions) {
   return { basePath: env.basePath, servers: env.servers.join(",") };
@@ -126,6 +127,9 @@ export function RootContainer() {
                           saveData={(data) => {
                             dispatch(setPrepareOptions({ id: item.id, ...data }));
                           }}
+                          onInvalidData={() => {
+                            dispatch(setPrepareOptionsNotValid({ id: item.id }));
+                          }}
                         >
                           <Input label="Base Path" name="basePath" />
                           <Input label="Servers" name="servers" />
@@ -166,6 +170,7 @@ export function RootContainer() {
             {item.progressStatus !== "Finished" && (
               <ConvertButton
                 label="Convert"
+                disabled={!item.isPrepareOptionsValid}
                 waiting={item.progressStatus === "In progress"}
                 onClick={(e) => {
                   dispatch(

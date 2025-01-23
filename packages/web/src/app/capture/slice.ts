@@ -26,6 +26,12 @@ export const slice = createSlice({
       const id = action.payload.id;
       const item = state.items.filter((item) => item.id === id)[0];
       item.prepareOptions = action.payload;
+      item.isPrepareOptionsValid = true;
+    },
+    setPrepareOptionsNotValid: (state, action: PayloadAction<{ id: string }>) => {
+      const id = action.payload.id;
+      const item = state.items.filter((item) => item.id === id)[0];
+      item.isPrepareOptionsValid = false;
     },
     convert: (
       state,
@@ -79,6 +85,7 @@ export const {
   showCaptureWindow,
   browseFiles,
   setPrepareOptions,
+  setPrepareOptionsNotValid,
   convert,
   saveCapture,
   downloadFile,
