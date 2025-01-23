@@ -8,6 +8,7 @@ const x42Config = JSON.parse(fs.readFileSync("schema/x42c-config.json", "utf8"))
 const schemasRoot = JSON.parse(fs.readFileSync("schema/openapi.json", "utf8"));
 const schemasV2 = JSON.parse(fs.readFileSync("schema/openapi-2.0.json", "utf8"));
 const schemasV3 = JSON.parse(fs.readFileSync("schema/openapi-3.0-2019-04-02.json", "utf8"));
+const schemasV31 = JSON.parse(fs.readFileSync("schema/schema31-draft07.json", "utf8"));
 
 const refs = new Set();
 collectRefs("target", x42Config, refs);
@@ -129,3 +130,4 @@ function getType(value) {
 writeFileSync("openapi.json", schemasRoot);
 writeFileSync("openapi-2.0.json", schemasV2);
 writeFileSync("openapi-3.0-2019-04-02.json", schemasV3);
+writeFileSync("schema31-draft07.json", schemasV31);

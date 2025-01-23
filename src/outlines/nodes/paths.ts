@@ -25,6 +25,26 @@ export class PathsNode extends AbstractOutlineNode {
   }
 }
 
+export class WebhooksNode extends AbstractOutlineNode {
+  constructor(parent: OutlineNode, node: any) {
+    super(
+      parent,
+      "/webhooks",
+      "Webhooks",
+      vscode.TreeItemCollapsibleState.Expanded,
+      node,
+      parent.context
+    );
+    this.icon = "webhook.svg";
+    this.contextValue = "paths";
+    this.searchable = false;
+  }
+
+  getChildren(): OutlineNode[] {
+    return this.getChildrenByKey((key, pointer, node) => new PathNode(this, pointer, key, node));
+  }
+}
+
 export class PathNode extends AbstractOutlineNode {
   path: string;
   constructor(parent: OutlineNode, pointer: string, key: string, node: any) {
