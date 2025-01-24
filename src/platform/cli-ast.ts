@@ -64,14 +64,25 @@ export async function createScanConfigWithCliBinary(
         "--output-format",
         "json",
         "--output",
-        scanconfUri.fsPath,
+        "scanconfig.json",
         "openapi.json",
       ],
       { cwd: tmpdir, windowsHide: true, maxBuffer: execMaxBuffer }
     );
 
+    // create scan config directory if does not exist
+    const scanconfDir = dirname(scanconfUri.fsPath);
+    if (!existsSync(scanconfDir)) {
+      mkdirSync(scanconfDir, { recursive: true });
+    }
+
+    // copy scanconfig to the destination
+    const scanconfigFilename = join(tmpdir, "scanconfig.json");
+    await copyFile(scanconfigFilename, scanconfUri.fsPath);
+
     // clean the temp directory
     unlinkSync(oasFilename);
+    unlinkSync(scanconfigFilename);
     rmdirSync(tmpdir);
   } catch (ex: any) {
     throw new Error(formatException(ex));
@@ -454,7 +465,6 @@ export async function runAuditWithCliBinary(
       maxBuffer: execMaxBuffer,
     });
 
-    const openapiFilename = join(dir, "openapi.json");
     const reportFilename = join(dir, "report.json");
     const todoFilename = join(dir, "todo.json");
     const sqgFilename = join(dir, "sqg.json");
