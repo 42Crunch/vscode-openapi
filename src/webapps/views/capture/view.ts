@@ -367,7 +367,7 @@ export async function requestStart(token: string, quickgenId: string) {
   const response = await got(
     `${freemiumdUrl}/capture/api/1.0/quickgen/${quickgenId}/execution/start`,
     {
-      method: "GET",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `token ${token}`,
