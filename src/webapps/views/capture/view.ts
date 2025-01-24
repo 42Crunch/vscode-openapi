@@ -13,6 +13,7 @@ import FormData from "form-data";
 import got from "got";
 import { Configuration } from "../../../configuration";
 import { getAnondCredentials } from "../../../credentials";
+import { freemiumdUrl } from "@xliic/common/endpoints-dev";
 
 const pollingDelayMs = 5 * 1000; // 5s
 const pollingTimeMs = 5 * 60 * 1000; // 5min
@@ -319,20 +320,17 @@ export class CaptureWebView extends WebView<Webapp> {
 }
 
 export async function requestPrepare(token: string, prepareOptions: PrepareOptions) {
-  const response = await got(
-    `https://stateless.dev.42crunch.com/capture/api/1.0/quickgen/prepare/`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `token ${token}`,
-      },
-      json: {
-        base_path: prepareOptions.basePath,
-        servers: prepareOptions.servers,
-      },
-    }
-  );
+  const response = await got(`${freemiumdUrl}/capture/api/1.0/quickgen/prepare`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `token ${token}`,
+    },
+    json: {
+      base_path: prepareOptions.basePath,
+      servers: prepareOptions.servers,
+    },
+  });
   return JSON.parse(response.body)["quickgen_id"];
 }
 
@@ -348,7 +346,7 @@ export async function requestUpload(
     form.append("file", fs.createReadStream(fsPath));
   }
   const response = await got(
-    `https://stateless.dev.42crunch.com/capture/api/1.0/quickgen/${quickgenId}/prepare/upload-file/`,
+    `${freemiumdUrl}/capture/api/1.0/quickgen/${quickgenId}/prepare/upload-file`,
     {
       method: "POST",
       headers: {
@@ -364,7 +362,7 @@ export async function requestUpload(
 
 export async function requestStart(token: string, quickgenId: string) {
   const response = await got(
-    `https://stateless.dev.42crunch.com/capture/api/1.0/quickgen/${quickgenId}/execution/start/`,
+    `${freemiumdUrl}/capture/api/1.0/quickgen/${quickgenId}/execution/start`,
     {
       method: "GET",
       headers: {
@@ -378,7 +376,7 @@ export async function requestStart(token: string, quickgenId: string) {
 
 export async function requestStatus(token: string, quickgenId: string) {
   const response = await got(
-    `https://stateless.dev.42crunch.com/capture/api/1.0/quickgen/${quickgenId}/execution/status/`,
+    `${freemiumdUrl}/capture/api/1.0/quickgen/${quickgenId}/execution/status`,
     {
       method: "GET",
       headers: {
@@ -392,7 +390,7 @@ export async function requestStatus(token: string, quickgenId: string) {
 
 export async function requestDownload(token: string, quickgenId: string) {
   const response = await got(
-    `https://stateless.dev.42crunch.com/capture/api/1.0/quickgen/${quickgenId}/results/openapi/`,
+    `${freemiumdUrl}/capture/api/1.0/quickgen/${quickgenId}/results/openapi`,
     {
       method: "GET",
       headers: {
@@ -405,15 +403,12 @@ export async function requestDownload(token: string, quickgenId: string) {
 }
 
 export async function requestDelete(token: string, quickgenId: string) {
-  const response = await got(
-    `https://stateless.dev.42crunch.com/capture/api/1.0/quickgen/${quickgenId}/delete/`,
-    {
-      method: "DELETE",
-      headers: {
-        Authorization: `token ${token}`,
-      },
-    }
-  );
+  const response = await got(`${freemiumdUrl}/capture/api/1.0/quickgen/${quickgenId}/delete`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `token ${token}`,
+    },
+  });
   return JSON.parse(response.body);
 }
 
@@ -424,54 +419,3 @@ function getError(error: any): string {
   }
   return `${error}`;
 }
-
-// function tempInitItems(items: CaptureItem[]): void {
-//   [
-//     {
-//       id: "weqweqwq",
-//       files: ["d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml"],
-//       quickgenId: "15011a7d-b5e8-4d20-bd73-d2c6b0b28acb",
-//       prepareOptions: {
-//         basePath: "/basePath1",
-//         servers: [],
-//       },
-//       progressStatus: "Finished",
-//       pollingCounter: 0,
-//       log: ["logMessage1"],
-//       downloadedFile: undefined,
-//     },
-//     {
-//       id: "weqweqwq2131",
-//       files: [
-//         "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
-//         "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
-//       ],
-//       quickgenId: "99011a7d-b5e8-4d20-bd73-d2c6b0b28acb",
-//       prepareOptions: {
-//         basePath: "/basePath2",
-//         servers: [],
-//       },
-//       progressStatus: "In progress",
-//       pollingCounter: 0,
-//       log: ["logMessage1", "logMessage2"],
-//       downloadedFile: undefined,
-//     },
-//     {
-//       id: "weqweqwq4363463gsdgsd",
-//       files: [
-//         "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
-//         "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
-//         "d:\\work\\crunch\\ide-openapi-tests\\tryit\\httpbin-multipart.yaml",
-//       ],
-//       quickgenId: "23451a7d-b5e8-4d20-bd73-d2c6b0b28acb",
-//       prepareOptions: {
-//         basePath: "/basePath3",
-//         servers: [],
-//       },
-//       progressStatus: "Failed",
-//       pollingCounter: 0,
-//       log: ["logMessage1", "logMessage2", "logMessageErrorHere"],
-//       downloadedFile: undefined,
-//     },
-//   ].forEach((item) => items.push(item as CaptureItem));
-// }
