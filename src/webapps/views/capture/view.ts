@@ -24,7 +24,7 @@ export class CaptureWebView extends WebView<Webapp> {
   private items: CaptureItem[];
 
   constructor(extensionPath: string, private configuration: Configuration) {
-    super(extensionPath, "capture", "Capture Files Convert", vscode.ViewColumn.One);
+    super(extensionPath, "capture", "Capture", vscode.ViewColumn.One);
     this.items = [];
     //tempInitItems(this.items);
     vscode.window.onDidChangeActiveColorTheme((e) => {
