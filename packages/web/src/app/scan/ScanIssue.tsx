@@ -34,6 +34,7 @@ export default function ScanIssue({
   const conformsToContract = outcome?.conformant;
   const outcomeError = outcome?.error;
   const excessiveDataExposure = outcome?.excessiveDataExposure;
+  const responseAnalysis = outcome?.apiResponseAnalysis || [];
 
   const failed = !(responseCodeExpected && conformsToContract);
 
@@ -169,10 +170,14 @@ export default function ScanIssue({
                 <div>{excessiveDataExposure ? "Yes" : "No"}</div>
               </Item>
 
-              {outcome?.apiResponseAnalysis?.[0]?.responseDescription && (
+              {responseAnalysis.length > 0 && (
                 <Item>
-                  <div>Response analysis</div>
-                  <div> {outcome?.apiResponseAnalysis?.[0]?.responseDescription}</div>
+                  <div>Response Analysis</div>
+                  <div>
+                    {responseAnalysis.map((analysis, index) => (
+                      <div key={index}>{analysis.responseDescription}</div>
+                    ))}
+                  </div>
                 </Item>
               )}
 

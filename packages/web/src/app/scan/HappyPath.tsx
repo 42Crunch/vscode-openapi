@@ -26,6 +26,8 @@ export function HappyPath({ operation }: { operation: RuntimeOperationReport }) 
 
   const excessiveDataExposure = outcome?.excessiveDataExposure;
 
+  const responseAnalysis = outcome?.apiResponseAnalysis || [];
+
   return (
     <Container>
       <Item>
@@ -49,6 +51,17 @@ export function HappyPath({ operation }: { operation: RuntimeOperationReport }) 
         <div>Excessive data exposure found</div>
         <div>{excessiveDataExposure ? "Yes" : "No"}</div>
       </Item>
+
+      {responseAnalysis.length > 0 && (
+        <Item>
+          <div>Response Analysis</div>
+          <div>
+            {responseAnalysis.map((analysis, index) => (
+              <div key={index}>{analysis.responseDescription}</div>
+            ))}
+          </div>
+        </Item>
+      )}
 
       {request?.curl && (
         <Item>
