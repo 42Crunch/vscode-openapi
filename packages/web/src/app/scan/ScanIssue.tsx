@@ -36,7 +36,7 @@ export default function ScanIssue({
   const excessiveDataExposure = outcome?.excessiveDataExposure;
   const responseAnalysis = outcome?.apiResponseAnalysis || [];
 
-  const failed = !(responseCodeExpected && conformsToContract);
+  const failed = outcome?.testSuccessful === false || !(responseCodeExpected && conformsToContract);
 
   let contentTypeFound = "N/A";
   let responsePayloadMatchesContract = "N/A";
