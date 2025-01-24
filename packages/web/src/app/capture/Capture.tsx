@@ -350,7 +350,7 @@ const PrepareOptionsCell = styled.div`
 const LogsCell = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 8px;
   overflow-y: auto;
   max-height: 200px;
 `;
