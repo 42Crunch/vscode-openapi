@@ -166,10 +166,12 @@ export async function activate(
     new CodelensProvider(store)
   );
 
-  Object.values(selectors).map((selector) =>
-    vscode.languages.registerCodeLensProvider(
-      selector,
-      new PlatformTagCodelensProvider(cache, configuration, secrets, memento)
-    )
+  vscode.languages.registerCodeLensProvider(
+    [
+      { scheme: "file", language: "json" },
+      { scheme: "file", language: "jsonc" },
+      { scheme: "file", language: "yaml" },
+    ],
+    new PlatformTagCodelensProvider(cache, configuration, secrets, memento)
   );
 }
