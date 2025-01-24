@@ -176,11 +176,14 @@ export class CaptureWebView extends WebView<Webapp> {
       if (index > -1) {
         this.items.splice(index, 1);
       }
-      try {
-        const anondToken = getAnondCredentials(this.configuration);
-        await requestDelete(anondToken, payload.quickgenId);
-      } catch (error) {
-        // Silent removal
+      // If prepare fails, there will be no quickgenId defined
+      if (payload.quickgenId) {
+        try {
+          const anondToken = getAnondCredentials(this.configuration);
+          await requestDelete(anondToken, payload.quickgenId);
+        } catch (error) {
+          // Silent removal
+        }
       }
     },
     openLink: async (payload: string) => {
