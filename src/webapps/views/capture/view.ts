@@ -73,7 +73,6 @@ export class CaptureWebView extends WebView<Webapp> {
       const anondToken = getAnondCredentials(this.configuration);
       const id = payload.id;
       const item = this.items.filter((item) => item.id === id)[0];
-      item.isPrepareOptionsValid = true;
       this.setPrepareOptions(item.prepareOptions, payload.options);
       item.files = payload.files;
       item.log = [];
@@ -213,7 +212,6 @@ export class CaptureWebView extends WebView<Webapp> {
         basePath: "/",
         servers: [],
       },
-      isPrepareOptionsValid: false, // Due to empty servers
       progressStatus: "New",
       pollingCounter: 0,
       log: [],
