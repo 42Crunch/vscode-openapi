@@ -1,5 +1,6 @@
-import { PrepareOptions } from "@xliic/common/capture";
+import { CaptureItem, PrepareOptions } from "@xliic/common/capture";
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { useFormContext } from "react-hook-form";
 import styled from "styled-components";
 import * as z from "zod";
 import CollapsibleCard, { TopDescription } from "../../components/CollapsibleCard";
@@ -15,7 +16,6 @@ import {
   downloadFile,
   openLink,
   setPrepareOptions,
-  setPrepareOptionsNotValid,
 } from "./slice";
 import { useAppDispatch, useAppSelector } from "./store";
 
@@ -93,111 +93,121 @@ export function RootContainer() {
             </TopDescriptionRight>
           </TopDescriptionMain>
           <TableDescription>
-            <Grid>
-              <TableHeader>
-                <div>Selected Files</div>
-                <div>Prepare Options</div>
-                <div>Log</div>
-              </TableHeader>
-              <Fields>
-                <Row>
-                  <CellContainer>
-                    {item.files && (
-                      <FilesCell>
-                        {item.files.map((file, index) => (
-                          <span key={`item-${item.id}-file-${index}`}>{file}</span>
-                        ))}
-                      </FilesCell>
-                    )}
-                  </CellContainer>
-                  <CellContainer>
-                    {item.progressStatus !== "New" && item.prepareOptions.basePath && (
-                      <PrepareOptionsCell>
-                        <div>Base Path = {item.prepareOptions?.basePath}</div>
-                        <div>Servers = {item.prepareOptions.servers.join(", ")}</div>
-                      </PrepareOptionsCell>
-                    )}
-                    {item.progressStatus === "New" && (
-                      <PrepareOptionsCell>
-                        <Form
-                          wrapFormData={wrapPrepareOptions}
-                          unwrapFormData={unwrapPrepareOptions}
-                          data={item.prepareOptions}
-                          schema={schema}
-                          saveData={(data) => {
-                            dispatch(setPrepareOptions({ id: item.id, ...data }));
-                          }}
-                          onInvalidData={() => {
-                            dispatch(setPrepareOptionsNotValid({ id: item.id }));
-                          }}
-                        >
+            <Form
+              wrapFormData={wrapPrepareOptions}
+              unwrapFormData={unwrapPrepareOptions}
+              useFormMode={"onChange"}
+              data={item.prepareOptions}
+              schema={schema}
+              saveData={(data) => {
+                dispatch(setPrepareOptions({ id: item.id, ...data }));
+              }}
+            >
+              <Grid>
+                <TableHeader>
+                  <div>Selected Files</div>
+                  <div>Prepare Options</div>
+                  <div>Log</div>
+                </TableHeader>
+                <Fields>
+                  <Row>
+                    <CellContainer>
+                      {item.files && (
+                        <FilesCell>
+                          {item.files.map((file, index) => (
+                            <span key={`item-${item.id}-file-${index}`}>{file}</span>
+                          ))}
+                        </FilesCell>
+                      )}
+                    </CellContainer>
+                    <CellContainer>
+                      {item.progressStatus !== "New" && item.prepareOptions.basePath && (
+                        <PrepareOptionsCell>
+                          <div>Base Path = {item.prepareOptions?.basePath}</div>
+                          <div>Servers = {item.prepareOptions.servers.join(", ")}</div>
+                        </PrepareOptionsCell>
+                      )}
+                      {item.progressStatus === "New" && (
+                        <PrepareOptionsCell>
                           <Input label="Base Path" name="basePath" />
                           <Input label="Servers" name="servers" />
-                        </Form>
-                      </PrepareOptionsCell>
-                    )}
-                  </CellContainer>
-                  <CellContainer>
-                    {item.log.length > 0 && (
-                      <LogsCell>
-                        {item.log.map((msg, index) => (
-                          <div key={`item-${item.id}-log-${index}`}>
-                            <span>{msg}</span>
-                          </div>
-                        ))}
-                        {item.downloadedFile && (
-                          <div key={`item-${item.id}-log-${item.log.length}`}>
-                            Saved to{" "}
-                            <LinkRef
-                              href="#"
-                              disabled={false}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                dispatch(openLink(item.downloadedFile || ""));
-                              }}
-                            >
-                              {item.downloadedFile}
-                            </LinkRef>
-                          </div>
-                        )}
-                      </LogsCell>
-                    )}
-                  </CellContainer>
-                </Row>
-              </Fields>
-            </Grid>
-            {item.progressStatus !== "Finished" && (
-              <ConvertButton
-                label="Convert"
-                disabled={!item.isPrepareOptionsValid}
-                waiting={item.progressStatus === "In progress"}
-                onClick={(e) => {
-                  dispatch(
-                    convert({ id: item.id, files: item.files, options: item.prepareOptions })
-                  );
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-              />
-            )}
-            {item.progressStatus === "Finished" && (
-              <FileReadyContainer>
-                <ConvertButton
-                  label="Download"
-                  waiting={false}
-                  onClick={(e) => {
-                    dispatch(downloadFile({ id: item.id, quickgenId: item.quickgenId as string }));
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
-                />
-              </FileReadyContainer>
-            )}
+                        </PrepareOptionsCell>
+                      )}
+                    </CellContainer>
+                    <CellContainer>
+                      {item.log.length > 0 && (
+                        <LogsCell>
+                          {item.log.map((msg, index) => (
+                            <div key={`item-${item.id}-log-${index}`}>
+                              <span>{msg}</span>
+                            </div>
+                          ))}
+                          {item.downloadedFile && (
+                            <div key={`item-${item.id}-log-${item.log.length}`}>
+                              Saved to{" "}
+                              <LinkRef
+                                href="#"
+                                disabled={false}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  dispatch(openLink(item.downloadedFile || ""));
+                                }}
+                              >
+                                {item.downloadedFile}
+                              </LinkRef>
+                            </div>
+                          )}
+                        </LogsCell>
+                      )}
+                    </CellContainer>
+                  </Row>
+                </Fields>
+              </Grid>
+              {item.progressStatus !== "Finished" && <ConvertButton item={item} />}
+              {item.progressStatus === "Finished" && (
+                <FileReadyContainer>
+                  <BasicProgressButton
+                    label="Download"
+                    waiting={false}
+                    onClick={(e) => {
+                      dispatch(
+                        downloadFile({ id: item.id, quickgenId: item.quickgenId as string })
+                      );
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                  />
+                </FileReadyContainer>
+              )}
+            </Form>
           </TableDescription>
         </CollapsibleCard>
       ))}
     </Container>
+  );
+}
+
+function ConvertButton({ item }: { item: CaptureItem }) {
+  const {
+    trigger,
+    formState: { isValid },
+  } = useFormContext();
+  const dispatch = useAppDispatch();
+  return (
+    <BasicProgressButton
+      label="Convert"
+      waiting={item.progressStatus === "In progress"}
+      onClick={(e) => {
+        if (isValid) {
+          dispatch(convert({ id: item.id, files: item.files, options: item.prepareOptions }));
+        } else {
+          trigger();
+        }
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+    />
   );
 }
 
@@ -355,7 +365,7 @@ const LogsCell = styled.div`
   max-height: 200px;
 `;
 
-const ConvertButton = styled(ProgressButton)`
+const BasicProgressButton = styled(ProgressButton)`
   height: 30px;
   width: 120px;
 `;

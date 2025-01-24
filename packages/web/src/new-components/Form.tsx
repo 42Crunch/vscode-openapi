@@ -12,7 +12,6 @@ export default function Form<T extends FieldValues>({
   schema,
   children,
   useFormMode,
-  onInvalidData,
 }: {
   data: T;
   saveData: (data: T) => void;
@@ -21,7 +20,6 @@ export default function Form<T extends FieldValues>({
   unwrapFormData: (data: FieldValues) => T;
   schema?: ZodObject<any>;
   useFormMode?: "onChange" | "onBlur" | "onSubmit" | "onTouched" | "all";
-  onInvalidData?: () => void;
 }) {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const valuesRef = useRef(data);
@@ -61,10 +59,6 @@ export default function Form<T extends FieldValues>({
           saveData(updated);
         })();
       }, 250);
-    }
-
-    if (onInvalidData && !isValid) {
-      onInvalidData();
     }
   }, [formState, valuesRef]);
 
