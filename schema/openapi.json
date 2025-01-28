@@ -11,7 +11,19 @@
       "if": {
         "properties": { "openapi": { "pattern": "^3\\.1\\.\\d(-.+)?$" } }
       },
-      "then": { "$ref": "schema31-draft07.json" },
+      "then": {
+        "if": {
+          "not": {
+            "required": ["jsonSchemaDialect"]
+          }
+        },
+        "then": {
+          "$ref": "openapi-3.1-draft07-2020.json"
+        },
+        "else": {
+          "$ref": "openapi-3.1-draft07-unknown.json"
+        }
+      },
       "else": {
         "if": {
           "properties": { "openapi": { "pattern": "^3\\.0\\.\\d(-.+)?$" } }
