@@ -7,6 +7,8 @@ import { Cache } from "../../cache";
 import { getOpenApiVersion } from "../../parsers";
 import { OpenApiVersion } from "../../types";
 
+const supportedVersions = [OpenApiVersion.V2, OpenApiVersion.V3];
+
 export class ScanCodelensProvider implements vscode.CodeLensProvider {
   private lenses: Record<string, vscode.CodeLens[]> = {};
 
@@ -17,8 +19,7 @@ export class ScanCodelensProvider implements vscode.CodeLensProvider {
     token: vscode.CancellationToken
   ): Promise<vscode.CodeLens[]> {
     const parsed = this.cache.getParsedDocument(document);
-    const version = getOpenApiVersion(parsed);
-    if (parsed && version !== OpenApiVersion.Unknown) {
+    if (supportedVersions.includes(getOpenApiVersion(parsed))) {
       const result: (vscode.CodeLens | undefined)[] = [];
       const oas = parsed as unknown as BundledSwaggerOrOasSpec;
       const operations = isOpenapi(oas) ? OpenApi30.getOperations(oas) : Swagger.getOperations(oas);

@@ -8,6 +8,8 @@ import { TagData, TAGS_DATA_KEY } from "@xliic/common/tags";
 import { hasCredentials } from "../credentials";
 import { Configuration } from "../configuration";
 
+const supportedVersions = [OpenApiVersion.V2, OpenApiVersion.V3, OpenApiVersion.V3_1];
+
 export class CodelensProvider implements vscode.CodeLensProvider {
   onDidChangeCodeLenses?: vscode.Event<void>;
   constructor(private store: PlatformStore) {}
@@ -62,8 +64,7 @@ export class PlatformTagCodelensProvider implements vscode.CodeLensProvider<Tags
     const credentials = await hasCredentials(this.configuration, this.secrets);
     if (credentials === "api-token") {
       const parsed = this.cache.getParsedDocument(document);
-      const version = getOpenApiVersion(parsed);
-      if (parsed && version !== OpenApiVersion.Unknown) {
+      if (supportedVersions.includes(getOpenApiVersion(parsed))) {
         return [new TagsLens(document.uri)];
       }
     }
