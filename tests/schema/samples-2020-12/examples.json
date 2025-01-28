@@ -1,0 +1,19 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sample API",
+    "version": "1.0.0"
+  },
+  "components": {
+    "schemas": {
+      "Example": {
+        "examples": [
+          {
+            "name": "John Doe",
+            "age": 30
+          }
+        ]
+      }
+    }
+  }
+}

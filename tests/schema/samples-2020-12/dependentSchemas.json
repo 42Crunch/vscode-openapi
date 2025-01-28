@@ -1,0 +1,25 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sample API",
+    "version": "1.0.0"
+  },
+  "components": {
+    "schemas": {
+      "Example": {
+        "type": "object",
+        "properties": {
+          "credit_card": { "type": "number" }
+        },
+        "dependentSchemas": {
+          "credit_card": {
+            "properties": {
+              "billing_address": { "type": "string" }
+            },
+            "required": ["billing_address"]
+          }
+        }
+      }
+    }
+  }
+}
