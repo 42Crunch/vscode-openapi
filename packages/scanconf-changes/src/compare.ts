@@ -3,6 +3,7 @@ import {
   HttpMethod,
   OpenApi30,
   Swagger,
+  getOperations,
   isOpenapi,
   makeOperationId,
 } from "@xliic/openapi";
@@ -38,7 +39,7 @@ export function operationsAdded(
 ): OperationAdded[] {
   // operations present in OAS but missing from scanconf
   const scanconfOperations = scanconf.operations || {};
-  return getOperations(oas)
+  return myGetOperations(oas)
     .filter((operation) => !scanconfOperations[operation.operationId])
     .map((operation) => ({
       type: "operation-added",
@@ -51,7 +52,7 @@ export function operationsRemoved(
   scanconf: Scanconf.ConfigurationFileBundle
 ): OperationRemoved[] {
   const scanconfOperations = scanconf.operations || {};
-  const oasOperationIds = getOperations(oas).map((operation) => operation.operationId);
+  const oasOperationIds = myGetOperations(oas).map((operation) => operation.operationId);
   const scanconfOperationIds = Object.keys(scanconfOperations);
 
   const removedIds = scanconfOperationIds.filter(
@@ -82,8 +83,8 @@ export function operationsRemoved(
   return removed;
 }
 
-export function getOperations(oas: BundledSwaggerOrOasSpec): OperationId[] {
-  const operations = isOpenapi(oas) ? OpenApi30.getOperations(oas) : Swagger.getOperations(oas);
+export function myGetOperations(oas: BundledSwaggerOrOasSpec): OperationId[] {
+  const operations = getOperations(oas);
 
   return operations.map(([path, method, operation]) => ({
     path,

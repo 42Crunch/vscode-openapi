@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 
-import { OpenApi30, Swagger, BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/openapi";
+import { BundledSwaggerOrOasSpec, getOperations } from "@xliic/openapi";
 import { getLocation } from "@xliic/preserving-json-yaml-parser";
 
 import { Cache } from "../cache";
@@ -22,7 +22,7 @@ export class AuditCodelensProvider implements vscode.CodeLensProvider {
     if (supportedVersions.includes(getOpenApiVersion(parsed))) {
       const result: (vscode.CodeLens | undefined)[] = [];
       const oas = parsed as unknown as BundledSwaggerOrOasSpec;
-      const operations = isOpenapi(oas) ? OpenApi30.getOperations(oas) : Swagger.getOperations(oas);
+      const operations = getOperations(oas);
       for (const [path, method, operation] of operations) {
         result.push(auditLens(document, oas, path, method));
       }
@@ -44,7 +44,14 @@ function auditLens(
   path: string,
   method: string
 ): vscode.CodeLens | undefined {
-  const location = getLocation(oas.paths[path], method);
+  const pathItem = oas.paths?.[path];
+
+  if (!pathItem) {
+    return undefined;
+  }
+
+  const location = getLocation(pathItem, method);
+
   if (!location) {
     return undefined;
   }

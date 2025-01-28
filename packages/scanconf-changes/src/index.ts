@@ -1,6 +1,6 @@
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Scanconf } from "@xliic/scanconf";
-import { compare, getOperations } from "./compare";
+import { compare, myGetOperations } from "./compare";
 import { OperationId } from "./types";
 
 import { update } from "./update";
@@ -18,7 +18,7 @@ function getCommonOperations(
   oas: BundledSwaggerOrOasSpec,
   scanconfOperations: Record<string, Scanconf.Operation>
 ): OperationId[] {
-  return getOperations(oas).filter((operation) => !!scanconfOperations[operation.operationId]);
+  return myGetOperations(oas).filter((operation) => !!scanconfOperations[operation.operationId]);
 }
 
 // paths missing from scanconf, must be paths recently added to the OAS
@@ -26,7 +26,7 @@ function pathsMissingFromScanconf(
   oas: BundledSwaggerOrOasSpec,
   scanconf: Scanconf.ConfigurationFileBundle
 ): string[] {
-  const oasPaths = Object.keys(oas.paths);
+  const oasPaths = Object.keys(oas.paths ?? {});
   const scanconfPaths = Object.keys(scanconf.operations || {});
 
   return difference(oasPaths, scanconfPaths);
@@ -37,7 +37,7 @@ function pathsMissingFromOas(
   oas: BundledSwaggerOrOasSpec,
   scanconf: Scanconf.ConfigurationFileBundle
 ): string[] {
-  const oasPaths = Object.keys(oas.paths);
+  const oasPaths = Object.keys(oas.paths ?? {});
   const scanconfPaths = Object.keys(scanconf.operations || {});
 
   return difference(scanconfPaths, oasPaths);

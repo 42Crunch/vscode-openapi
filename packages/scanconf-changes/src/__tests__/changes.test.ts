@@ -69,7 +69,7 @@ test("find added operation", async () => {
 
 test("find renamed operation", async () => {
   const oasWithRename = structuredClone(originalOas);
-  oasWithRename.paths["/foo"]["get"]!.operationId = "zomg";
+  (oasWithRename.paths as any)["/foo"]["get"]!.operationId = "zomg";
   const changes = compare(oasWithRename, originalScanconf);
   expect(changes).toEqual([
     {
