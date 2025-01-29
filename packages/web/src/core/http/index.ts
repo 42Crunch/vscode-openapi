@@ -3,11 +3,10 @@ import SwaggerClient from "swagger-client";
 import {
   OpenApi30,
   Swagger,
-  BundledSwaggerOrOasSpec,
   HttpMethod,
   isOpenapi,
-  RefOr,
   deref,
+  BundledSwaggerOrOas30Spec,
 } from "@xliic/openapi";
 import { HttpConfig, HttpRequest } from "@xliic/common/http";
 import { Config } from "@xliic/common/config";
@@ -27,7 +26,7 @@ import { ENV_VAR_REGEX } from "../playbook/variables";
 
 export async function makeHttpRequest(
   config: Config,
-  oas: BundledSwaggerOrOasSpec,
+  oas: BundledSwaggerOrOas30Spec,
   method: HttpMethod,
   path: string,
   values: TryitOperationValues,

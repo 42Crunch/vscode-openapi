@@ -3,10 +3,11 @@ import { useFormContext, useWatch } from "react-hook-form";
 import {
   OpenApi30,
   Swagger,
-  BundledSwaggerOrOasSpec,
   isOpenapi,
   HttpMethod,
   deref,
+  BundledSwaggerOrOas30Spec,
+  OpenApi3,
 } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 
@@ -36,7 +37,7 @@ export default function OperationTabs({
   settings,
   availableVariables,
 }: {
-  oas: BundledSwaggerOrOasSpec;
+  oas: BundledSwaggerOrOas30Spec;
   credentials: Playbook.Credentials;
   settings?: JSX.Element;
   path: string;
@@ -63,7 +64,7 @@ function makeOasTabs(
   isBodyPresent: boolean
 ) {
   const parameters = getOasParameters(oas, path, method);
-  const operation = OpenApi30.getOperation(oas, path, method);
+  const operation = OpenApi3.getOperation(oas, path, method);
   const requestBody = deref<OpenApi30.RequestBody>(oas, operation?.requestBody);
   const scanconfParameters = useWatch({ name: "parameters" });
 

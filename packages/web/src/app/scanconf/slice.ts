@@ -1,12 +1,17 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-import { BundledSwaggerOrOasSpec, getHttpResponseRange, getServerUrls } from "@xliic/openapi";
+import {
+  BundledSwaggerOrOas30Spec,
+  BundledSwaggerOrOasSpec,
+  getHttpResponseRange,
+  getServerUrls,
+} from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 
 import { loadPlaybook } from "./actions";
 
 export type State = {
-  oas: BundledSwaggerOrOasSpec;
+  oas: BundledSwaggerOrOas30Spec;
   playbook: Playbook.Bundle;
   servers: string[];
 

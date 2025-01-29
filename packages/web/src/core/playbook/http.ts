@@ -4,12 +4,11 @@ import SwaggerClient from "swagger-client";
 import {
   OpenApi30,
   Swagger,
-  BundledSwaggerOrOasSpec,
   HttpMethod,
-  getOperation,
   isOpenapi,
   deref,
-  RefOr,
+  BundledSwaggerOrOas30Spec,
+  OpenApi3,
 } from "@xliic/openapi";
 import { HttpRequest } from "@xliic/common/http";
 import { Result } from "@xliic/result";
@@ -20,7 +19,7 @@ import { getParameters } from "./util-swagger";
 import { AuthResult } from "./playbook";
 
 export async function makeHttpRequest(
-  oas: BundledSwaggerOrOasSpec,
+  oas: BundledSwaggerOrOas30Spec,
   server: string,
   operationId: string | undefined,
   request: Playbook.CRequest,
@@ -62,7 +61,7 @@ async function makeHttpRequestForOas(
   request: Playbook.CRequest,
   security: AuthResult
 ): Promise<HttpRequest> {
-  const operation = getOperation(oas, request.path, request.method);
+  const operation = OpenApi3.getOperation(oas, request.path, request.method);
 
   if (operation === undefined) {
     throw new Error(`operation not found for ${request.method} ${request.path}`);
@@ -95,7 +94,7 @@ async function makeHttpRequestForSwagger(
   request: Playbook.CRequest,
   security: AuthResult
 ): Promise<HttpRequest> {
-  const operation = getOperation(oas, request.path, request.method);
+  const operation = Swagger.getOperation(oas, request.path, request.method);
 
   if (operation === undefined) {
     throw new Error(`operation not found for ${request.method} ${request.path}`);
