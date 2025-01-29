@@ -5,7 +5,7 @@
 
 import * as vscode from "vscode";
 
-import { HttpMethod } from "@xliic/openapi";
+import { BundledSwaggerOrOas30Spec, HttpMethod } from "@xliic/openapi";
 import { stringify } from "@xliic/preserving-json-yaml-parser";
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 
@@ -103,9 +103,9 @@ export default (
     "openapi.platform.editorRunFirstOperationScan",
     async (editor: vscode.TextEditor, edit: vscode.TextEditorEdit): Promise<void> => {
       const parsed = cache.getParsedDocument(editor.document);
-      const version = getOpenApiVersion(parsed);
-      if (parsed && version !== OpenApiVersion.Unknown) {
-        const oas = parsed as unknown as BundledSwaggerOrOasSpec;
+      const supportedVersions = [OpenApiVersion.V2, OpenApiVersion.V3];
+      if (supportedVersions.includes(getOpenApiVersion(parsed))) {
+        const oas = parsed as unknown as BundledSwaggerOrOas30Spec;
 
         const firstPath = Object.keys(oas.paths)[0];
         if (firstPath === undefined) {
