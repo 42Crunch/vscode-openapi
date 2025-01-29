@@ -1,6 +1,13 @@
 import * as vscode from "vscode";
 
-import { OpenApi30, Swagger, BundledSwaggerOrOasSpec, isOpenapi } from "@xliic/openapi";
+import {
+  OpenApi30,
+  Swagger,
+  BundledSwaggerOrOasSpec,
+  isOpenapi,
+  BundledSwaggerOrOas30Spec,
+  OpenApi3,
+} from "@xliic/openapi";
 import { getLocation } from "@xliic/preserving-json-yaml-parser";
 
 import { Cache } from "../../cache";
@@ -21,8 +28,8 @@ export class ScanCodelensProvider implements vscode.CodeLensProvider {
     const parsed = this.cache.getParsedDocument(document);
     if (supportedVersions.includes(getOpenApiVersion(parsed))) {
       const result: (vscode.CodeLens | undefined)[] = [];
-      const oas = parsed as unknown as BundledSwaggerOrOasSpec;
-      const operations = isOpenapi(oas) ? OpenApi30.getOperations(oas) : Swagger.getOperations(oas);
+      const oas = parsed as unknown as BundledSwaggerOrOas30Spec;
+      const operations = isOpenapi(oas) ? OpenApi3.getOperations(oas) : Swagger.getOperations(oas);
       for (const [path, method, operation] of operations) {
         result.push(scanLens(document, oas, path, method));
       }
@@ -40,7 +47,7 @@ export class ScanCodelensProvider implements vscode.CodeLensProvider {
 
 function scanLens(
   document: vscode.TextDocument,
-  oas: BundledSwaggerOrOasSpec,
+  oas: BundledSwaggerOrOas30Spec,
   path: string,
   method: string
 ): vscode.CodeLens | undefined {
@@ -66,7 +73,7 @@ function scanLens(
 
 function topScanLens(
   document: vscode.TextDocument,
-  oas: BundledSwaggerOrOasSpec
+  oas: BundledSwaggerOrOas30Spec
 ): vscode.CodeLens | undefined {
   // find first operation's path and method, and bail if not found
   const firstPath = Object.keys(oas.paths)[0];

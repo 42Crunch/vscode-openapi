@@ -4,7 +4,7 @@
 */
 
 import { parseJsonPointer, Path, simpleClone } from "@xliic/preserving-json-yaml-parser";
-import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
+import { BundledSwaggerOrOas30Spec, BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
 
 export function walk(current: any, parent: any, path: string[], visitor: any) {
   for (const key of Object.keys(current)) {
@@ -17,31 +17,11 @@ export function walk(current: any, parent: any, path: string[], visitor: any) {
   }
 }
 
-export function extractSinglePath(path: string, oas: any): BundledSwaggerOrOasSpec {
-  const visited = new Set<string>();
-  crawl(oas, oas["paths"][path], visited);
-
-  const cloned: any = simpleClone(oas);
-  delete cloned["paths"];
-  delete cloned["components"];
-  delete cloned["definitions"];
-
-  // copy single path and path parameters
-  cloned["paths"] = { [path]: oas["paths"][path] };
-
-  // copy security schemes
-  if (oas?.["components"]?.["securitySchemes"]) {
-    cloned["components"] = { securitySchemes: oas["components"]["securitySchemes"] };
-  }
-  copyByPointer(oas, cloned, Array.from(visited));
-  return cloned as BundledSwaggerOrOasSpec;
-}
-
 export function extractSingleOperation(
   method: HttpMethod,
   path: string,
   oas: any
-): BundledSwaggerOrOasSpec {
+): BundledSwaggerOrOas30Spec {
   const visited = new Set<string>();
   crawl(oas, oas["paths"][path][method], visited);
   if (oas["paths"][path]["parameters"]) {
@@ -62,7 +42,7 @@ export function extractSingleOperation(
     cloned["components"] = { securitySchemes: oas["components"]["securitySchemes"] };
   }
   copyByPointer(oas, cloned, Array.from(visited));
-  return cloned as BundledSwaggerOrOasSpec;
+  return cloned as BundledSwaggerOrOas30Spec;
 }
 
 function crawl(root: any, current: any, visited: Set<string>) {
