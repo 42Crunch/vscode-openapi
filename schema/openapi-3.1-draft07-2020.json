@@ -502,7 +502,7 @@
           "default": false
         },
         "schema": {
-          "$ref": "#/definitions/schema"
+          "$ref": "#/definitions/schema-or-ref"
         },
         "content": {
           "type": "object",
@@ -761,7 +761,7 @@
       "type": "object",
       "properties": {
         "schema": {
-          "$ref": "#/definitions/schema"
+          "$ref": "#/definitions/schema-or-ref"
         },
         "encoding": {
           "type": "object",
@@ -1001,7 +1001,7 @@
           "type": "boolean"
         },
         "schema": {
-          "$ref": "#/definitions/schema"
+          "$ref": "#/definitions/schema-or-ref"
         },
         "content": {
           "$ref": "#/definitions/content",
@@ -1077,6 +1077,16 @@
         "$ref"
       ],
       "additionalProperties": false
+    },
+    "schema-or-ref": {
+      "oneOf": [
+        {
+          "$ref": "#/definitions/reference"
+        },
+        {
+          "$ref": "#/definitions/schema"
+        }
+      ]
     },
     "schema": {
       "$comment": "Schema following JSON Schema Draft 2020-12 core and validation vocabularies",
