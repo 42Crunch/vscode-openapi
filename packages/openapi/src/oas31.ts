@@ -2,7 +2,7 @@ import { HttpMethod, HttpMethods } from "./http";
 import { deref, RefOr } from "./ref";
 
 export type Spec = {
-  openapi: "3.1.0";
+  openapi: "3.1.0" | "3.1.1";
   info: Info;
   jsonSchemaDialect?: string;
   tags?: Tag[];
@@ -317,10 +317,37 @@ export type ParameterStyle =
   | "pipeDelimited"
   | "deepObject";
 
-export function getOperation(
-  oas: BundledSpec,
-  path: string,
-  method: HttpMethod
-): Operation | undefined {
-  return deref(oas, oas?.paths?.[path])?.[method];
-}
+export type ResolvedParameter = Parameter & {
+  schema?: Schema;
+};
+
+export type OperationParametersMap = Record<ParameterLocation, Record<string, ResolvedParameter>>;
+
+export type ResolvedOperationSecurity = Record<string, SecurityScheme>[];
+
+// export function getParametersMap(
+//   oas: BundledSpec,
+//   pathParameters: Parameter[],
+//   operationParameters: Parameter[]
+// ): OperationParametersMap {
+//   const result: OperationParametersMap = {
+//     query: {},
+//     header: {},
+//     path: {},
+//     cookie: {},
+//   };
+
+//   // path parameters first, to allow them to be overriden
+//   for (const parameter of pathParameters) {
+//     const schema = deref(oas, parameter.schema);
+//     result[parameter.in][parameter.name] = { ...parameter, schema };
+//   }
+
+//   // potentially override path parameters using ones defined in the operation itself
+//   for (const parameter of operationParameters) {
+//     const schema = deref(oas, parameter.schema);
+//     result[parameter.in][parameter.name] = { ...parameter, schema };
+//   }
+
+//   return result;
+//}
