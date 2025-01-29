@@ -4,17 +4,14 @@ import { EnvData } from "@xliic/common/env";
 import {
   HttpClient,
   HttpConfig,
-  HttpError,
   HttpRequest,
-  HttpResponse,
   SendHttpRequestMessage,
   ShowHttpErrorMessage,
   ShowHttpResponseMessage,
 } from "@xliic/common/http";
 import { Webapp } from "@xliic/common/message";
-import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
+import { BundledSwaggerOrOas30Spec } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
-import { Result } from "@xliic/result";
 
 import { createAuthCache } from "../../core/playbook/auth-cache";
 import {
@@ -460,7 +457,7 @@ export function onExecuteGlobal(startAppListening: AppStartListening, host: Http
 
 async function execute(
   state: {
-    scanconf: { oas: BundledSwaggerOrOasSpec; playbook: Playbook.Bundle };
+    scanconf: { oas: BundledSwaggerOrOas30Spec; playbook: Playbook.Bundle };
     env: { data: EnvData };
   },
   httpClient: HttpClient | MockHttpClient,

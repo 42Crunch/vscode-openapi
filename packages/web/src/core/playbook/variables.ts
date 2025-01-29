@@ -1,7 +1,13 @@
 import jsf from "json-schema-faker";
 
 import { LookupFailure, LookupResult, ReplacementResult } from "@xliic/common/env";
-import { OpenApi30, Swagger, BundledSwaggerOrOasSpec, HttpMethod, isOpenapi } from "@xliic/openapi";
+import {
+  OpenApi30,
+  Swagger,
+  HttpMethod,
+  isOpenapi,
+  BundledSwaggerOrOas30Spec,
+} from "@xliic/openapi";
 import { Environment, VariableLocation } from "@xliic/common/env";
 import { Playbook } from "@xliic/scanconf";
 import { simpleClone } from "@xliic/preserving-json-yaml-parser";
@@ -41,7 +47,7 @@ export function replaceEnvironmentVariables(
 }
 
 export function replaceRequestVariables(
-  oas: BundledSwaggerOrOasSpec,
+  oas: BundledSwaggerOrOas30Spec,
   request: Playbook.CRequest | Playbook.ExternalCRequest,
   operation: OpenApi30.Operation | Swagger.Operation | undefined,
   envStack: PlaybookEnvStack
@@ -181,7 +187,7 @@ function lookupOrDynamic(
 }
 
 function createFake(
-  oas: BundledSwaggerOrOasSpec,
+  oas: BundledSwaggerOrOas30Spec,
   operation: OpenApi30.Operation | Swagger.Operation | undefined,
   path: string,
   method: HttpMethod

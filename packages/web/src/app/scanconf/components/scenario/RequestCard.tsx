@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
+import { BundledSwaggerOrOas30Spec } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
@@ -22,7 +22,7 @@ export default function RequestCard({
   defaultCollapsed,
   availableVariables,
 }: {
-  oas: BundledSwaggerOrOasSpec;
+  oas: BundledSwaggerOrOas30Spec;
   requestRef: Playbook.RequestRef;
   credentials: Playbook.Credentials;
   stage: Playbook.StageContent;

@@ -1,6 +1,6 @@
 import { createAction } from "@reduxjs/toolkit";
 import { HttpConfig, HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
-import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
+import { BundledSwaggerOrOas30Spec } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 
 import {
@@ -20,7 +20,7 @@ export const showScanconfOperation = createAction<OasWithScanconfPathMethod>(
 export const loadUpdatedScanconf = createAction<OasWithScanconf>("scanconf/loadUpdatedScanconf");
 
 export const loadPlaybook = createAction<{
-  oas: BundledSwaggerOrOasSpec;
+  oas: BundledSwaggerOrOas30Spec;
   playbook: Playbook.Bundle;
 }>("scanconf/loadPlaybook");
 

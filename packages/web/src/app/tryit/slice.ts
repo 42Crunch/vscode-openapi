@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
-import { BundledSwaggerOrOasSpec, HttpMethod, isOpenapi } from "@xliic/openapi";
+import { BundledSwaggerOrOas30Spec, HttpMethod, isOpenapi } from "@xliic/openapi";
 import { OasWithOperation, TryitOperationValues } from "@xliic/common/tryit";
 import { HttpRequest, HttpResponse, HttpError, HttpConfig } from "@xliic/common/http";
 import { createDefaultValues } from "../../util";
@@ -9,7 +9,7 @@ import { createDefaultValues as createSwaggerDefaultValues } from "../../util-sw
 import { GeneralError } from "@xliic/common/error";
 
 export interface OasState {
-  oas: BundledSwaggerOrOasSpec;
+  oas: BundledSwaggerOrOas30Spec;
   path?: string;
   method?: HttpMethod;
   example?: {

@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
+import { BundledSwaggerOrOas30Spec, HttpMethod } from "@xliic/openapi";
 
 import OperationTabs from "./OperationTabs";
 
@@ -10,7 +10,7 @@ export default function Operation({
   path,
   method,
 }: {
-  oas: BundledSwaggerOrOasSpec;
+  oas: BundledSwaggerOrOas30Spec;
   settings?: JSX.Element;
   path: string;
   method: HttpMethod;

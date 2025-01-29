@@ -1,10 +1,11 @@
 import {
   OpenApi30,
   Swagger,
-  BundledSwaggerOrOasSpec,
   HttpMethod,
   isOpenapi,
   deref,
+  BundledSwaggerOrOas30Spec,
+  OpenApi3,
 } from "@xliic/openapi";
 
 import { Tab, TabContainer } from "../../new-components/Tabs";
@@ -30,7 +31,7 @@ export default function OperationTabs({
   method,
   settings,
 }: {
-  oas: BundledSwaggerOrOasSpec;
+  oas: BundledSwaggerOrOas30Spec;
   settings?: JSX.Element;
   path: string;
   method: HttpMethod;
@@ -52,7 +53,7 @@ export default function OperationTabs({
 
 function makeOasTabs(oas: OpenApi30.BundledSpec, path: string, method: HttpMethod) {
   const parameters = getOasParameters(oas, path, method);
-  const operation = OpenApi30.getOperation(oas, path, method);
+  const operation = OpenApi3.getOperation(oas, path, method);
   const requestBody = deref<OpenApi30.RequestBody>(oas, operation?.requestBody);
 
   return [
