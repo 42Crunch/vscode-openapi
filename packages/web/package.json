@@ -42,7 +42,7 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.2.0",
     "react-error-boundary": "^4.0.13",
-    "react-hook-form": "7.54.0",
+    "react-hook-form": "7.54.2",
     "react-redux": "^9.1.0",
     "redux": "^5.0.1",
     "redux-logger": "^3.0.6",
