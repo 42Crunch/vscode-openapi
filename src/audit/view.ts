@@ -11,6 +11,7 @@ import { WebView } from "../webapps/web-view";
 import { Cache } from "../cache";
 import { getLocationByPointer } from "./util";
 import { getArticles } from "./client";
+import { Configuration } from "../configuration";
 
 export type Target = {
   type: "full" | "partial";
@@ -39,7 +40,7 @@ export class AuditWebView extends WebView<Webapp> {
     },
   };
 
-  constructor(extensionPath: string, private cache: Cache) {
+  constructor(extensionPath: string, private cache: Cache, private configuration: Configuration) {
     super(extensionPath, "audit", "Security Audit Report", vscode.ViewColumn.Two);
 
     vscode.window.onDidChangeActiveColorTheme((e) => {
@@ -61,7 +62,7 @@ export class AuditWebView extends WebView<Webapp> {
   }
 
   public prefetchKdb() {
-    this.kdb = getArticles();
+    this.kdb = getArticles(this.configuration.get<boolean>("internalUseDevEndpoints"));
   }
 
   private async getKdb() {

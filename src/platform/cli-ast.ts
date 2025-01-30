@@ -25,7 +25,7 @@ import * as vscode from "vscode";
 import { CliDownloadProgress, CliTestResult, Config } from "@xliic/common/config";
 import { SimpleEnvironment } from "@xliic/common/env";
 import { Result } from "@xliic/result";
-import { cliFreemiumdHost } from "@xliic/common/endpoints";
+import { getEndpoints } from "@xliic/common/endpoints";
 
 import { Configuration, configuration } from "../configuration";
 import { getAnondCredentials, getPlatformCredentials } from "../credentials";
@@ -248,6 +248,7 @@ export async function runScanWithCliBinary(
 ): Promise<Result<{ scan: unknown; cli: CliResponse; tempScanDirectory: string }, CliError>> {
   logger.info(`Running API Conformance Scan using 42Crunch API Security Testing Binary`);
 
+  const { cliFreemiumdHost } = getEndpoints(config.internalUseDevEndpoints);
   const tmpDir = tmpdir();
   const dir = mkdtempSync(join(`${tmpDir}`, "scan-"));
   const oasFilename = join(dir as string, "openapi.json");
@@ -400,6 +401,8 @@ export async function runAuditWithCliBinary(
     CliError
   >
 > {
+  const { cliFreemiumdHost } = getEndpoints(config.internalUseDevEndpoints);
+
   logger.info(`Running Security Audit using 42Crunch API Security Testing Binary`);
 
   const dir = createTempDirectory("audit-");

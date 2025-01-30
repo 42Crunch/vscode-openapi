@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
 import { HttpConfig, HttpRequest } from "@xliic/common/http";
-import { freemiumdUrl } from "@xliic/common/endpoints";
+import { getEndpoints } from "@xliic/common/endpoints";
 
 import { webappHttpClient } from "../../core/http-client/webapp-client";
 import { sendHttpRequest } from "./slice";
@@ -40,6 +40,7 @@ async function webappBaseQuery(
   { signal, dispatch, getState }: any,
   extraOptions: any
 ) {
+  const { freemiumdUrl } = getEndpoints(getState().config.data.internalUseDevEndpoints);
   const url = `${freemiumdUrl}/api/v1/anon/${args.path}`;
 
   const client = webappHttpClient(

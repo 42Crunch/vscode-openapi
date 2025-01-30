@@ -37,7 +37,8 @@ export type ConfigScreenId =
   | "runtime-docker"
   | "audit-runtime"
   | "scan-runtime"
-  | "openapi-external-refs";
+  | "openapi-external-refs"
+  | "dev-endpoints";
 
 export type ConfigScreen = {
   id: ConfigScreenId;
@@ -82,6 +83,8 @@ const initialState: ConfigState = {
     platformTemporaryCollectionName: "",
     platformMandatoryTags: "",
     approvedHosts: [],
+    internalUseDevEndpoints: false,
+    internalFeatures: false,
   },
   platformConnectionTestResult: undefined,
   waitingForPlatformConnectionTest: false,
@@ -104,6 +107,7 @@ const initialState: ConfigState = {
     "audit-runtime": undefined,
     "scan-runtime": undefined,
     "openapi-external-refs": undefined,
+    "dev-endpoints": undefined,
   },
   hasErrors: false,
 };

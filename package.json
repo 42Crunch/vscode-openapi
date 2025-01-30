@@ -908,6 +908,18 @@
           "type": "boolean",
           "default": true,
           "description": "Show TryIt/Audit/Scan CodeLenses"
+        },
+        "openapi.internalFeatures": {
+          "scope": "application",
+          "type": "boolean",
+          "default": false,
+          "deprecationMessage": "This is an internal setting and should not be used by end users."
+        },
+        "openapi.internalUseDevEndpoints": {
+          "scope": "application",
+          "type": "boolean",
+          "default": false,
+          "deprecationMessage": "This is an internal setting and should not be used by end users."
         }
       }
     },

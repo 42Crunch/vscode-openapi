@@ -4,7 +4,7 @@ import * as quickfixes from "../../generated/quickfixes.json";
 
 suite("Quickfix keys", () => {
   test("Make sure quickfix keys exits in KDB and are not deprecated", async () => {
-    const articles = await getArticles();
+    const articles = await getArticles(true); // useDevEndpoints
     const missing = new Set<string>();
     const deprecated = new Set<string>();
     for (const fix of quickfixes.fixes) {
@@ -23,7 +23,7 @@ suite("Quickfix keys", () => {
   });
 
   test("Make sure quickfix keys exits in KDB and are not deprecated", async () => {
-    const articles = await getArticles();
+    const articles = await getArticles(true); // useDevEndpoints
     const ids = [
       "schema-request-notype",
       "schema-response-notype",

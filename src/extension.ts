@@ -130,7 +130,7 @@ export async function activate(context: vscode.ExtensionContext) {
     platformStore,
     logger
   );
-  const reportWebView = new AuditWebView(context.extensionPath, cache);
+  const reportWebView = new AuditWebView(context.extensionPath, cache, configuration);
   audit.activate(
     context,
     auditContext,
