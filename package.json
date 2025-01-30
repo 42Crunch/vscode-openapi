@@ -82,12 +82,12 @@
         {
           "id": "openapiOutline",
           "name": "Outline",
-          "when": "openapiThreeEnabled || openapiTwoEnabled"
+          "when": "openapiThreeEnabled || openapiTwoEnabled || openapiThreeOneEnabled"
         },
         {
           "id": "openapiNotSelectedOutline",
           "name": "",
-          "when": "!openapiTwoEnabled && !openapiThreeEnabled"
+          "when": "!openapiTwoEnabled && !openapiThreeEnabled && !openapiThreeOneEnabled"
         }
       ]
     },
@@ -104,7 +104,7 @@
     "menus": {
       "editor/title": [
         {
-          "when": "openapiTwoEnabled && resourceScheme =~ /^untitled$|^file$/ || openapiThreeEnabled && resourceScheme =~ /^untitled$|^file$/",
+          "when": "openapiTwoEnabled && resourceScheme =~ /^untitled$|^file$/ || openapiThreeEnabled && resourceScheme =~ /^untitled$|^file$/ || openapiThreeOneEnabled && resourceScheme =~ /^untitled$|^file$/",
           "command": "openapi.securityAudit",
           "group": "navigation"
         },
@@ -114,7 +114,7 @@
           "group": "navigation"
         },
         {
-          "when": "openapiTwoEnabled || openapiThreeEnabled",
+          "when": "openapiTwoEnabled || openapiThreeEnabled || openapiThreeOneEnabled",
           "command": "openapi.preview",
           "group": "navigation"
         },
@@ -627,12 +627,20 @@
         "title": "OpenAPI: Create new OpenAPI v3.0 file"
       },
       {
+        "command": "openapi.createNewThreeOne",
+        "title": "OpenAPI: Create new OpenAPI v3.1 file"
+      },
+      {
         "command": "openapi.createNewTwoYaml",
         "title": "OpenAPI: Create new OpenAPI v2.0 file (YAML)"
       },
       {
         "command": "openapi.createNewThreeYaml",
         "title": "OpenAPI: Create new OpenAPI v3.0 file (YAML)"
+      },
+      {
+        "command": "openapi.createNewThreeOneYaml",
+        "title": "OpenAPI: Create new OpenAPI v3.1 file (YAML)"
       },
       {
         "command": "openapi.addSecurity",
