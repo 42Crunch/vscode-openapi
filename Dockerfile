@@ -18,9 +18,3 @@ RUN echo "Issues per 1000 lines: `cat issues-per-1k-lines.txt`" >> stats.txt
 
 # Build the extension
 RUN vsce package `jq -r '.version' < package.json`-build-`date +"%Y%m%d%H%M%S"` --allow-star-activation --follow-symlinks --no-git-tag-version
-
-# Build the extension that uses the dev endpoints
-COPY packages/common/src/endpoints-dev.ts /build/packages/common/src/endpoints.ts
-COPY package.json /build/package.json
-RUN jq '.contributes.configuration.properties."openapi.platformRepository".default = "https://repo.42crunch.com/downloads/rc"' package.json > package.json.tmp && mv package.json.tmp package.json
-RUN vsce package `jq -r '.version' < package.json`-build-dev-`date +"%Y%m%d%H%M%S"` --allow-star-activation --follow-symlinks --no-git-tag-version
