@@ -22,19 +22,22 @@ export async function loadConfig(
   const scanRuntime = configuration.get<"docker" | "scand-manager" | "cli">(
     "platformConformanceScanRuntime"
   );
-  const scanImage = configuration.get<"string">("platformConformanceScanImage");
+  const scanImage = configuration.get<string>("platformConformanceScanImage");
   const scandManagerHeader = await secrets.get("platformScandManagerHeader");
-  const repository = configuration.get<"string">("platformRepository");
+  const repository = configuration.get<string>("platformRepository");
 
-  const platformTemporaryCollectionName = configuration.get<"string">(
+  const platformTemporaryCollectionName = configuration.get<string>(
     "platformTemporaryCollectionName"
   );
 
-  const platformMandatoryTags = configuration.get<"string">("platformMandatoryTags");
+  const platformMandatoryTags = configuration.get<string>("platformMandatoryTags");
 
   // derived auth type is api-token only if anondToken is not set and apiToken is set, otherwise it is anond-token
   const derivedAuthType = !anondToken && !!apiToken ? "api-token" : "anond-token";
   const approvedHosts = await getApprovedHostsConfiguration(configuration, secrets);
+
+  const internalFeatures = configuration.get<boolean>("internalFeatures");
+  const internalUseDevEndpoints = configuration.get<boolean>("internalUseDevEndpoints");
 
   return {
     platformUrl,
@@ -63,6 +66,8 @@ export async function loadConfig(
     platformTemporaryCollectionName,
     platformMandatoryTags,
     approvedHosts,
+    internalFeatures,
+    internalUseDevEndpoints,
   };
 }
 
@@ -142,6 +147,18 @@ export async function saveConfig(
   await configuration.update(
     "platformMandatoryTags",
     config.platformMandatoryTags,
+    vscode.ConfigurationTarget.Global
+  );
+
+  await configuration.update(
+    "internalFeatures",
+    config.internalFeatures,
+    vscode.ConfigurationTarget.Global
+  );
+
+  await configuration.update(
+    "internalUseDevEndpoints",
+    config.internalUseDevEndpoints,
     vscode.ConfigurationTarget.Global
   );
 

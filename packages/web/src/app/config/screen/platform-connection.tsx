@@ -20,6 +20,7 @@ function PlatformConnection() {
   const {
     platformConnectionTestResult: testResult,
     waitingForPlatformConnectionTest: waitingForTest,
+    data: { internalUseDevEndpoints: useDevEndpoints },
   } = useFeatureSelector((state) => state.config);
 
   const platformAuthType = useWatch({ name: "platformAuthType" });
@@ -41,7 +42,9 @@ function PlatformConnection() {
         {platformAuthType === "anond-token" && (
           <>
             <Textarea label="Freemium token" name="anondToken" />
-            {anondToken !== "" && <Subscription token={anondToken} />}
+            {anondToken !== "" && (
+              <Subscription token={anondToken} useDevEndpoints={useDevEndpoints} />
+            )}
           </>
         )}
 

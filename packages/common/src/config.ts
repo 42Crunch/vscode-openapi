@@ -31,6 +31,8 @@ export type Config = {
   cliDirectoryOverride: string;
   repository: string;
   approvedHosts: ApprovedHostConfiguration[];
+  internalFeatures: boolean;
+  internalUseDevEndpoints: boolean;
 };
 
 export type ConnectionTestResult = { success: true } | { success: false; message: string };

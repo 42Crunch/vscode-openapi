@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { upgradeUrl } from "@xliic/common/endpoints";
+import { getEndpoints } from "@xliic/common/endpoints";
 
 import { Banner, ErrorBanner } from "../../components/Banner";
 import { useGetSubscriptionQuery } from "../../features/http-client/freemiumd-api";
@@ -10,12 +10,21 @@ import Button from "../../new-components/Button";
 import { useAppDispatch } from "./store";
 import { openLink } from "../../features/config/slice";
 
-export default function Subscription({ token }: { token: string }) {
+export default function Subscription({
+  token,
+  useDevEndpoints,
+}: {
+  token: string;
+  useDevEndpoints: boolean;
+}) {
   const { data, error, isLoading } = useGetSubscriptionQuery(token.trim(), {
     refetchOnFocus: true,
     pollingInterval: 1000 * 60 * 10, // refresh every 10 minutes
   });
+
   const dispatch = useAppDispatch();
+
+  const { upgradeUrl } = getEndpoints(useDevEndpoints);
 
   if (error) {
     return (

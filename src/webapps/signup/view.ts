@@ -38,7 +38,7 @@ export class SignUpWebView extends WebView<Webapp> {
   hostHandlers: Webapp["hostHandlers"] = {
     requestAnondTokenByEmail: async (email: string) => {
       try {
-        await requestToken(email);
+        await requestToken(email, this.configuration.get<boolean>("internalUseDevEndpoints"));
         this.sendRequest({
           command: "showAnondTokenResponse",
           payload: {

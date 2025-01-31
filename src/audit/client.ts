@@ -6,18 +6,19 @@
 import * as vscode from "vscode";
 import got from "got";
 
-import { freemiumdUrl, kdbUrl } from "@xliic/common/endpoints";
+import { getEndpoints } from "@xliic/common/endpoints";
 
 let cachedArticles: Promise<any> | undefined = undefined;
 
-export async function getArticles(): Promise<any> {
+export async function getArticles(useDevEndpoints: boolean): Promise<any> {
   if (cachedArticles === undefined) {
-    cachedArticles = downloadArticles();
+    cachedArticles = downloadArticles(useDevEndpoints);
   }
   return cachedArticles;
 }
 
-async function downloadArticles(): Promise<any> {
+async function downloadArticles(useDevEndpoints: boolean): Promise<any> {
+  const { kdbUrl } = getEndpoints(useDevEndpoints);
   return vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Notification,
@@ -35,7 +36,8 @@ async function downloadArticles(): Promise<any> {
   );
 }
 
-export async function requestToken(email: string) {
+export async function requestToken(email: string, useDevEndpoints: boolean): Promise<any> {
+  const { freemiumdUrl } = getEndpoints(useDevEndpoints);
   const response = await got(`${freemiumdUrl}/api/v1/anon/token`, {
     method: "POST",
     form: { email },
