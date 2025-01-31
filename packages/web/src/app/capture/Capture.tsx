@@ -106,7 +106,7 @@ export function RootContainer() {
               <Grid>
                 <TableHeader>
                   <div>Selected Files</div>
-                  <div>Prepare Options</div>
+                  <div>Options</div>
                   <div>Log</div>
                 </TableHeader>
                 <Fields>
