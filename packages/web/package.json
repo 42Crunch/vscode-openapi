@@ -28,7 +28,7 @@
     "@types/react-dom": "^18.2.7",
     "@types/redux-logger": "^3.0.9",
     "@types/styled-components": "^5.1.0",
-    "@vitejs/plugin-react": "^4.2.1",
+    "@vitejs/plugin-react": "^4.3.4",
     "@xliic/preserving-json-yaml-parser": "^1.11.0",
     "buffer": "6.0.3",
     "downshift": "^8.2.2",
@@ -50,9 +50,9 @@
     "swagger-client": "^3.32.1",
     "tough-cookie": "^5.0.0",
     "typescript": "*",
-    "vite": "^5.4.8",
-    "vite-plugin-svgr": "^4.2.0",
-    "vitest": "^2.1.6",
+    "vite": "*",
+    "vite-plugin-svgr": "^4.3.0",
+    "vitest": "*",
     "zod": "^3.23.8"
   }
 }
