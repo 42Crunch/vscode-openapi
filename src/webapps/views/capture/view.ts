@@ -210,7 +210,7 @@ export class CaptureWebView extends WebView<Webapp> {
       quickgenId: undefined,
       prepareOptions: {
         basePath: "/",
-        servers: [],
+        servers: ["https://server.example.com"],
       },
       progressStatus: "New",
       pollingCounter: 0,
