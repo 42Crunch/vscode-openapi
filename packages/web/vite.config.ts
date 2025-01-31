@@ -50,6 +50,7 @@ export default defineConfig(({ command, mode }) => {
         host: "localhost",
       },
       port: 3000,
+      cors: true,
     },
     test: {},
   };
