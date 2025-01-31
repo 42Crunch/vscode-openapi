@@ -87,7 +87,9 @@ export default (
 });
 
 function extractAuditReport(report: any) {
-  if (report?.aid && report?.tid && report?.data?.assessmentVersion) {
+  if (report?.assessmentReportVersion && report?.assessmentVersion) {
+    return report;
+  } else if (report?.aid && report?.tid && report?.data?.assessmentVersion) {
     return report.data;
   } else if (report?.taskId && report?.report) {
     return report.report;
