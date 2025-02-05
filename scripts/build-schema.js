@@ -1,13 +1,120 @@
 #!/usr/bin/env node
 
 const fs = require("fs");
+const marked = require("marked");
 
 const x42Defs = JSON.parse(fs.readFileSync("schema/x42c.json", "utf8"));
 const x42Config = JSON.parse(fs.readFileSync("schema/x42c-config.json", "utf8"));
 
+const docsV3 = fs.readFileSync("schema/openapi-specification-3.0.0.md", "utf8");
+
+function augmentDefinitionTitles(schema) {
+  const objectsOfInterest = new Set(Object.keys(schema.definitions).map((key) => `${key} Object`));
+  let activatedObject = undefined;
+
+  const dictionary = {};
+
+  marked.use({
+    walkTokens: (token) => {
+      if (token.type === "heading" && token.depth === 4) {
+        const textToken = token.tokens.find((subtoken) => {
+          return subtoken.type === "text";
+        });
+
+        if (objectsOfInterest.has(textToken.text)) {
+          activatedObject = textToken.text;
+        }
+      }
+
+      if (activatedObject && token.type === "paragraph") {
+        if (!dictionary[activatedObject]) {
+          Object.assign(dictionary, { [activatedObject]: { object: token.text } });
+        }
+      }
+
+      if (
+        activatedObject &&
+        token.type === "table" &&
+        token.header &&
+        token.header[0] &&
+        token.header[0].text === "Field Name"
+      ) {
+        const fields = token.rows.reduce((acc, row) => {
+          const [fieldNameCell, , descriptionCell] = row;
+          const fieldNameTextToken = fieldNameCell.tokens.find((subtoken) => {
+            return subtoken.type === "text";
+          });
+
+          if (fieldNameTextToken) {
+            acc[fieldNameTextToken.text.trim()] = descriptionCell.text;
+          }
+
+          return acc;
+        }, {});
+        const objectDictionaryEntry = dictionary[activatedObject];
+
+        if (objectDictionaryEntry) {
+          Object.assign(objectDictionaryEntry, { fields });
+        }
+      }
+    },
+  });
+
+  marked.parse(docsV3);
+
+  const nextSchema = {
+    ...schema,
+    definitions: {
+      ...schema.definitions,
+      ...Object.fromEntries(
+        Object.entries(schema.definitions).map(([key, value]) => {
+          const dictionaryEntry = dictionary[`${key} Object`];
+
+          const isDictionaryEntryWithFields =
+            dictionaryEntry && dictionaryEntry.fields && value.type === "object";
+
+          const nextValue = {
+            ...value,
+            ...(dictionaryEntry
+              ? { description: `${key} Object\n\n${dictionaryEntry.object}` }
+              : undefined),
+            ...(isDictionaryEntryWithFields && value.properties
+              ? { properties: augmentProperties(value.properties, dictionaryEntry), }
+              : undefined),
+          };
+
+          return [key, nextValue];
+        })
+      ),
+    },
+  };
+
+  return nextSchema;
+}
+
+function augmentProperties(properties, dictionaryEntry) {
+  return Object.fromEntries(
+    Object.entries(properties).map(([propertyKey, propertyValue]) => {
+      const fields = dictionaryEntry.fields;
+
+      return [
+        propertyKey,
+        {
+          ...propertyValue,
+          ...(fields[propertyKey]
+            ? { description: dictionaryEntry.fields[propertyKey] }
+            : undefined),
+        },
+      ];
+    })
+  );
+}
+
 const schemasRoot = JSON.parse(fs.readFileSync("schema/openapi.json", "utf8"));
 const schemasV2 = JSON.parse(fs.readFileSync("schema/openapi-2.0.json", "utf8"));
-const schemasV3 = JSON.parse(fs.readFileSync("schema/openapi-3.0-2019-04-02.json", "utf8"));
+const schemasV3 = augmentDefinitionTitles(
+  JSON.parse(fs.readFileSync("schema/openapi-3.0-2019-04-02.json", "utf8"))
+);
 
 const refs = new Set();
 collectRefs("target", x42Config, refs);
