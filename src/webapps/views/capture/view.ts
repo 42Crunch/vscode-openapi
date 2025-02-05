@@ -13,7 +13,7 @@ import FormData from "form-data";
 import got from "got";
 import { Configuration } from "../../../configuration";
 import { getAnondCredentials } from "../../../credentials";
-import { freemiumdUrl } from "@xliic/common/endpoints-dev";
+import { getEndpoints } from "@xliic/common/endpoints";
 
 const pollingDelayMs = 5 * 1000; // 5s
 const pollingTimeMs = 5 * 60 * 1000; // 5min
@@ -71,6 +71,7 @@ export class CaptureWebView extends WebView<Webapp> {
     },
     convert: async (payload: { id: string; files: string[]; options: PrepareOptions }) => {
       const anondToken = getAnondCredentials(this.configuration);
+      const useDevEndpoints = this.configuration.get<boolean>("internalUseDevEndpoints");
       const id = payload.id;
       const item = this.items.filter((item) => item.id === id)[0];
       this.setPrepareOptions(item.prepareOptions, payload.options);
@@ -81,7 +82,7 @@ export class CaptureWebView extends WebView<Webapp> {
       // Handle the case when restart requested
       if (item.quickgenId && item.progressStatus === "Failed") {
         try {
-          await requestDelete(anondToken, item.quickgenId);
+          await requestDelete(anondToken, item.quickgenId, useDevEndpoints);
         } catch (error) {
           // Silent removal
         }
@@ -91,7 +92,7 @@ export class CaptureWebView extends WebView<Webapp> {
       // Prepare request -> capture server
       let quickgenId = "";
       try {
-        quickgenId = await requestPrepare(anondToken, item.prepareOptions);
+        quickgenId = await requestPrepare(anondToken, item.prepareOptions, useDevEndpoints);
         this.showPrepareResponse(item, quickgenId, true, "");
       } catch (error) {
         this.showPrepareResponse(item, quickgenId, false, getError(error));
@@ -100,11 +101,17 @@ export class CaptureWebView extends WebView<Webapp> {
 
       // Upload request -> capture server
       try {
-        await requestUpload(anondToken, quickgenId, item.files, (percent: number) => {
-          if (item.progressStatus != "Failed") {
-            this.showPrepareUploadFileResponse(item, true, "", percent === 1.0, percent);
-          }
-        });
+        await requestUpload(
+          anondToken,
+          quickgenId,
+          item.files,
+          (percent: number) => {
+            if (item.progressStatus != "Failed") {
+              this.showPrepareUploadFileResponse(item, true, "", percent === 1.0, percent);
+            }
+          },
+          useDevEndpoints
+        );
       } catch (error) {
         this.showPrepareUploadFileResponse(item, false, getError(error), false, 0.0);
         return;
@@ -112,7 +119,7 @@ export class CaptureWebView extends WebView<Webapp> {
 
       // Start request -> capture server
       try {
-        await requestStart(anondToken, quickgenId);
+        await requestStart(anondToken, quickgenId, useDevEndpoints);
         this.showExecutionStartResponse(item, true, "");
       } catch (error) {
         this.showExecutionStartResponse(item, false, getError(error));
@@ -121,7 +128,7 @@ export class CaptureWebView extends WebView<Webapp> {
 
       const refreshJobStatus = async (token: string, quickgenId: string) => {
         try {
-          const status = await requestStatus(anondToken, quickgenId);
+          const status = await requestStatus(anondToken, quickgenId, useDevEndpoints);
           item.pollingCounter += 1;
           this.showExecutionStatusResponse(item, status, true, "");
           const keepPolling = item.pollingCounter <= pollingLimit;
@@ -149,9 +156,10 @@ export class CaptureWebView extends WebView<Webapp> {
       if (uri) {
         const id = payload.id;
         const item = this.items.filter((item) => item.id === id)[0];
+        const useDevEndpoints = this.configuration.get<boolean>("internalUseDevEndpoints");
         try {
           const anondToken = getAnondCredentials(this.configuration);
-          const fileText = await requestDownload(anondToken, payload.quickgenId);
+          const fileText = await requestDownload(anondToken, payload.quickgenId, useDevEndpoints);
           const encoder = new TextEncoder();
           await vscode.workspace.fs.writeFile(
             uri,
@@ -179,7 +187,11 @@ export class CaptureWebView extends WebView<Webapp> {
       if (payload.quickgenId) {
         try {
           const anondToken = getAnondCredentials(this.configuration);
-          await requestDelete(anondToken, payload.quickgenId);
+          await requestDelete(
+            anondToken,
+            payload.quickgenId,
+            this.configuration.get<boolean>("internalUseDevEndpoints")
+          );
         } catch (error) {
           // Silent removal
         }
@@ -320,7 +332,12 @@ export class CaptureWebView extends WebView<Webapp> {
   }
 }
 
-export async function requestPrepare(token: string, prepareOptions: PrepareOptions) {
+export async function requestPrepare(
+  token: string,
+  prepareOptions: PrepareOptions,
+  useDevEndpoints: boolean
+) {
+  const { freemiumdUrl } = getEndpoints(useDevEndpoints);
   const response = await got(`${freemiumdUrl}/capture/api/1.0/quickgen/prepare`, {
     method: "POST",
     headers: {
@@ -339,13 +356,15 @@ export async function requestUpload(
   token: string,
   quickgenId: string,
   files: string[],
-  listener: (percent: number) => void
+  listener: (percent: number) => void,
+  useDevEndpoints: boolean
 ) {
   const form = new FormData();
   for (const file of files) {
     const fsPath = vscode.Uri.file(file).fsPath;
     form.append("file", fs.createReadStream(fsPath));
   }
+  const { freemiumdUrl } = getEndpoints(useDevEndpoints);
   const response = await got(
     `${freemiumdUrl}/capture/api/1.0/quickgen/${quickgenId}/prepare/upload-file`,
     {
@@ -361,7 +380,8 @@ export async function requestUpload(
   return JSON.parse(response.body);
 }
 
-export async function requestStart(token: string, quickgenId: string) {
+export async function requestStart(token: string, quickgenId: string, useDevEndpoints: boolean) {
+  const { freemiumdUrl } = getEndpoints(useDevEndpoints);
   const response = await got(
     `${freemiumdUrl}/capture/api/1.0/quickgen/${quickgenId}/execution/start`,
     {
@@ -375,7 +395,8 @@ export async function requestStart(token: string, quickgenId: string) {
   return JSON.parse(response.body);
 }
 
-export async function requestStatus(token: string, quickgenId: string) {
+export async function requestStatus(token: string, quickgenId: string, useDevEndpoints: boolean) {
+  const { freemiumdUrl } = getEndpoints(useDevEndpoints);
   const response = await got(
     `${freemiumdUrl}/capture/api/1.0/quickgen/${quickgenId}/execution/status`,
     {
@@ -389,7 +410,8 @@ export async function requestStatus(token: string, quickgenId: string) {
   return JSON.parse(response.body)["status"];
 }
 
-export async function requestDownload(token: string, quickgenId: string) {
+export async function requestDownload(token: string, quickgenId: string, useDevEndpoints: boolean) {
+  const { freemiumdUrl } = getEndpoints(useDevEndpoints);
   const response = await got(
     `${freemiumdUrl}/capture/api/1.0/quickgen/${quickgenId}/results/openapi`,
     {
@@ -403,7 +425,8 @@ export async function requestDownload(token: string, quickgenId: string) {
   return JSON.parse(response.body);
 }
 
-export async function requestDelete(token: string, quickgenId: string) {
+export async function requestDelete(token: string, quickgenId: string, useDevEndpoints: boolean) {
+  const { freemiumdUrl } = getEndpoints(useDevEndpoints);
   const response = await got(`${freemiumdUrl}/capture/api/1.0/quickgen/${quickgenId}/delete`, {
     method: "DELETE",
     headers: {
