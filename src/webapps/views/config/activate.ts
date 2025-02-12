@@ -8,6 +8,7 @@ import { Configuration } from "../../../configuration";
 import { ConfigWebView } from "./view";
 import { PlatformStore } from "../../../platform/stores/platform-store";
 import { Logger } from "../../../platform/types";
+import { BigFilesWebView } from "../bigfiles/view";
 
 export function activate(
   context: vscode.ExtensionContext,
@@ -16,13 +17,14 @@ export function activate(
   platform: PlatformStore,
   logger: Logger
 ) {
-  const view = new ConfigWebView(context.extensionPath, configuration, secrets, platform, logger);
+  //const view = new ConfigWebView(context.extensionPath, configuration, secrets, platform, logger);
+  const view = new BigFilesWebView(context.extensionPath, configuration);
 
   vscode.commands.registerCommand("openapi.showConfiguration", async () => {
-    await view.showConfig();
+    await view.showBigFilesWebView();
   });
 
   vscode.commands.registerCommand("openapi.showSettings", async () => {
-    await view.showConfig();
+    await view.showBigFilesWebView();
   });
 }
