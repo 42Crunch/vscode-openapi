@@ -1,20 +1,13 @@
 import * as vscode from "vscode";
 
-import {
-  OpenApi30,
-  Swagger,
-  BundledSwaggerOrOasSpec,
-  isOpenapi,
-  BundledSwaggerOrOas30Spec,
-  OpenApi3,
-} from "@xliic/openapi";
+import { Swagger, isOpenapi, BundledSwaggerOrOas30Spec, OpenApi3 } from "@xliic/openapi";
 import { getLocation } from "@xliic/preserving-json-yaml-parser";
 
 import { Cache } from "../../cache";
 import { getOpenApiVersion } from "../../parsers";
 import { OpenApiVersion } from "../../types";
 
-const supportedVersions = [OpenApiVersion.V2, OpenApiVersion.V3];
+const supportedVersions = [OpenApiVersion.V2, OpenApiVersion.V3, OpenApiVersion.V3_1];
 
 export class ScanCodelensProvider implements vscode.CodeLensProvider {
   private lenses: Record<string, vscode.CodeLens[]> = {};

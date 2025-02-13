@@ -2,7 +2,7 @@ import jsf from "json-schema-faker";
 import { FieldValues } from "react-hook-form";
 
 import { simpleClone } from "@xliic/preserving-json-yaml-parser";
-import { OpenApi30, HttpMethod, deref, OpenApi3 } from "@xliic/openapi";
+import { OpenApi30, HttpMethod, deref, OpenApi3, BundledOasSpec, OpenApi31 } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 import {
   TryitParameterValues,
@@ -10,20 +10,8 @@ import {
   TryitSecurityValue,
 } from "@xliic/common/tryit";
 
-export function getParameters(
-  oas: OpenApi30.BundledSpec,
-  path: string,
-  method: HttpMethod
-): OpenApi30.OperationParametersMap {
-  const pathParameters = OpenApi3.getPathItemParameters(oas, oas.paths[path]);
-  const operation = OpenApi3.getOperation(oas, path, method);
-  const operationParameters = OpenApi3.getOperationParameters(oas, operation);
-  const result = OpenApi3.getParametersMap(oas, pathParameters, operationParameters);
-  return result;
-}
-
 export function hasSecurityRequirements(
-  oas: OpenApi30.BundledSpec,
+  oas: OpenApi31.BundledSpec | OpenApi30.BundledSpec,
   path: string,
   method: HttpMethod
 ): boolean {
@@ -32,33 +20,9 @@ export function hasSecurityRequirements(
   return requirements.length > 0;
 }
 
-export function getSecurity(
-  oas: OpenApi30.BundledSpec,
-  path: string,
-  method: HttpMethod
-): OpenApi30.ResolvedOperationSecurity {
-  const operation = OpenApi3.getOperation(oas, path, method);
-  const requirements = operation?.security ?? oas.security ?? [];
-  const result: OpenApi30.ResolvedOperationSecurity = [];
-  for (const requirement of requirements) {
-    const resolved: Record<string, OpenApi30.SecurityScheme> = {};
-    for (const schemeName of Object.keys(requirement)) {
-      // check if the requsted security scheme is defined in the OAS
-      if (oas?.components?.securitySchemes?.[schemeName]) {
-        const derefed = deref(oas, oas?.components?.securitySchemes?.[schemeName]!);
-        if (derefed !== undefined) {
-          resolved[schemeName] = derefed;
-        }
-      }
-    }
-    result.push(resolved);
-  }
-  return result;
-}
-
-export function generateParameterValues(
-  oas: OpenApi30.BundledSpec,
-  parameters: OpenApi30.OperationParametersMap
+export function generateParameterValues<T extends BundledOasSpec>(
+  oas: T,
+  parameters: OpenApi3.OperationParametersMap<T>
 ): TryitParameterValues {
   const values: TryitParameterValues = {
     query: {},

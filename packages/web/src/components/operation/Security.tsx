@@ -2,17 +2,17 @@ import styled from "styled-components";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
 
-import { OpenApi30 } from "@xliic/openapi";
+import { BundledOasSpec, OpenApi3, OpenApi30, OpenApi31 } from "@xliic/openapi";
 
 import { useFormContext, useController, useFieldArray } from "react-hook-form";
 import SecurityRequirements from "./SecurityRequirements";
 
-export default function Security({
+export default function Security<T extends BundledOasSpec>({
   oas,
   security,
 }: {
-  oas: OpenApi30.BundledSpec;
-  security: OpenApi30.ResolvedOperationSecurity;
+  oas: T;
+  security: OpenApi3.ResolvedOperationSecurity<T>;
 }) {
   if (security === undefined) {
     return null;
@@ -49,7 +49,7 @@ export default function Security({
 }
 
 function securityRequirementOption(
-  requirement: Record<string, OpenApi30.SecurityScheme>,
+  requirement: Record<string, OpenApi30.SecurityScheme | OpenApi31.SecurityScheme>,
   index: number
 ) {
   const keys = Object.keys(requirement).join(", ");

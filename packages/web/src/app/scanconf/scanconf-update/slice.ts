@@ -1,12 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-import { BundledSwaggerOrOas30Spec } from "@xliic/openapi";
+import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Change } from "@xliic/scanconf-changes";
 
 export type State = {
   changes: Change[];
   scanconf: string;
-  oas: BundledSwaggerOrOas30Spec;
+  oas: BundledSwaggerOrOasSpec;
   updating: boolean;
 };
 
@@ -27,7 +27,7 @@ export const slice = createSlice({
   reducers: {
     showChanges: (
       state,
-      action: PayloadAction<{ oas: BundledSwaggerOrOas30Spec; scanconf: string; changes: Change[] }>
+      action: PayloadAction<{ oas: BundledSwaggerOrOasSpec; scanconf: string; changes: Change[] }>
     ) => {
       state.changes = action.payload.changes;
       state.scanconf = action.payload.scanconf;

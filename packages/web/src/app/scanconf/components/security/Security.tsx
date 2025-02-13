@@ -4,7 +4,7 @@ import { useState } from "react";
 
 import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { OpenApi30, Swagger } from "@xliic/openapi";
+import { BundledSwaggerOrOasSpec, OpenApi30, OpenApi31, Swagger } from "@xliic/openapi";
 
 import SecurityRequirement from "./SecurityRequirement";
 import SecurityRequirementsSelect from "./SecurityRequirementSelect";
@@ -15,8 +15,11 @@ export default function Security({
   security,
   credentials,
 }: {
-  oas: OpenApi30.BundledSpec | Swagger.BundledSpec;
-  security: OpenApi30.ResolvedOperationSecurity | Swagger.ResolvedOperationSecurity;
+  oas: BundledSwaggerOrOasSpec;
+  security:
+    | OpenApi31.ResolvedOperationSecurity
+    | OpenApi30.ResolvedOperationSecurity
+    | Swagger.ResolvedOperationSecurity;
   credentials: Playbook.Credentials;
 }) {
   const { field: authField } = useController({
@@ -100,7 +103,10 @@ const Fields = styled.div`
 `;
 
 function mapRequirementsToCredentials(
-  security: OpenApi30.ResolvedOperationSecurity | Swagger.ResolvedOperationSecurity,
+  security:
+    | OpenApi31.ResolvedOperationSecurity
+    | OpenApi30.ResolvedOperationSecurity
+    | Swagger.ResolvedOperationSecurity,
   credentials: Playbook.Credentials,
   auth: string[]
 ) {
@@ -149,7 +155,10 @@ function getCredentialByName(
 }
 
 function matchRequirementToAuth(
-  requirement: Record<string, OpenApi30.SecurityScheme | Swagger.SecurityScheme>,
+  requirement: Record<
+    string,
+    OpenApi31.SecurityScheme | OpenApi30.SecurityScheme | Swagger.SecurityScheme
+  >,
   auth: Record<string, Playbook.Credential>
 ) {
   const mutable = { ...auth };

@@ -4,7 +4,7 @@
 */
 
 import { parseJsonPointer, Path, simpleClone } from "@xliic/preserving-json-yaml-parser";
-import { BundledSwaggerOrOas30Spec, BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
+import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
 
 export function walk(current: any, parent: any, path: string[], visitor: any) {
   for (const key of Object.keys(current)) {
@@ -21,7 +21,7 @@ export function extractSingleOperation(
   method: HttpMethod,
   path: string,
   oas: any
-): BundledSwaggerOrOas30Spec {
+): BundledSwaggerOrOasSpec {
   const visited = new Set<string>();
   crawl(oas, oas["paths"][path][method], visited);
   if (oas["paths"][path]["parameters"]) {
@@ -42,7 +42,7 @@ export function extractSingleOperation(
     cloned["components"] = { securitySchemes: oas["components"]["securitySchemes"] };
   }
   copyByPointer(oas, cloned, Array.from(visited));
-  return cloned as BundledSwaggerOrOas30Spec;
+  return cloned as BundledSwaggerOrOasSpec;
 }
 
 function crawl(root: any, current: any, visited: Set<string>) {

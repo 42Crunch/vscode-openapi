@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import { OpenApi30, Swagger } from "@xliic/openapi";
+import { OpenApi30, OpenApi31, Swagger } from "@xliic/openapi";
 
 import DownshiftSelect from "../../../../new-components/DownshiftSelect";
 
@@ -9,7 +9,10 @@ export default function SecurityRequirementsSelect({
   value,
   setValue,
 }: {
-  security: OpenApi30.ResolvedOperationSecurity | Swagger.ResolvedOperationSecurity;
+  security:
+    | OpenApi31.ResolvedOperationSecurity
+    | OpenApi30.ResolvedOperationSecurity
+    | Swagger.ResolvedOperationSecurity;
   value: number;
   setValue: (value: number) => void;
 }) {

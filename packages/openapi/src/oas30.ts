@@ -8,7 +8,6 @@ export type Spec = {
   servers?: Server[];
   externalDocs?: ExternalDocumentation;
   paths: Record<string, PathItem>;
-  webhooks?: Record<string, PathItem>;
   components?: Components;
   security?: SecurityRequirement[];
 };
@@ -265,9 +264,8 @@ export type ParameterStyle =
   | "pipeDelimited"
   | "deepObject";
 
-export type BundledSpec = Spec & {
+export type BundledSpec = Omit<Spec, "paths" | "components"> & {
   paths: Record<string, ResolvedPathItem>;
-  webhooks?: Record<string, ResolvedPathItem>;
   components?: ResolvedComponents;
 };
 

@@ -1,11 +1,6 @@
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
 import { HttpClient } from "@xliic/common/http";
-import {
-  BundledSwaggerOrOasSpec,
-  getOperationById,
-  getHttpResponseRange,
-  BundledSwaggerOrOas30Spec,
-} from "@xliic/openapi";
+import { BundledSwaggerOrOasSpec, getOperationById, getHttpResponseRange } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 
 import { makeExternalHttpRequest, makeHttpRequest } from "./http";
@@ -25,7 +20,7 @@ export type PlaybookList = { name: string; requests: Playbook.Stage[] }[];
 
 export async function* executeAllPlaybooks(
   client: HttpClient | MockHttpClient,
-  oas: BundledSwaggerOrOas30Spec,
+  oas: BundledSwaggerOrOasSpec,
   server: string,
   file: Playbook.Bundle,
   playbooks: PlaybookList,
@@ -63,7 +58,7 @@ async function* executePlaybook(
   name: string,
   cache: AuthCache,
   client: HttpClient | MockHttpClient,
-  oas: BundledSwaggerOrOas30Spec,
+  oas: BundledSwaggerOrOasSpec,
   server: string,
   file: Playbook.Bundle,
   requests: Playbook.Stage[],
@@ -310,7 +305,7 @@ async function* executePlaybook(
 export async function* executeAuth(
   cache: AuthCache,
   client: HttpClient | MockHttpClient,
-  oas: BundledSwaggerOrOas30Spec,
+  oas: BundledSwaggerOrOasSpec,
   server: string,
   file: Playbook.Bundle,
   auth: string[] | undefined,
@@ -392,7 +387,7 @@ export async function* executeAuth(
 async function* executeGetCredentialValue(
   cache: AuthCache,
   client: HttpClient | MockHttpClient,
-  oas: BundledSwaggerOrOas30Spec,
+  oas: BundledSwaggerOrOasSpec,
   server: string,
   file: Playbook.Bundle,
   authName: string,
