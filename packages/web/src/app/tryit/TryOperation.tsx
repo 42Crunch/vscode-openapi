@@ -2,7 +2,7 @@ import { useForm, FormProvider } from "react-hook-form";
 
 import { TryitSecurityAllValues, TryitSecurityValue } from "@xliic/common/tryit";
 import { SecretsForSecurity } from "@xliic/common/prefs";
-import { BundledSwaggerOrOas30Spec, HttpMethod, getServerUrls } from "@xliic/openapi";
+import { BundledSwaggerOrOasSpec, HttpMethod, getServerUrls } from "@xliic/openapi";
 
 import { useAppDispatch, useAppSelector } from "./store";
 import { sendHttpRequest, showGeneralError } from "./slice";
@@ -45,7 +45,7 @@ function TryOperationForm({
   path,
   values,
 }: {
-  oas: BundledSwaggerOrOas30Spec;
+  oas: BundledSwaggerOrOasSpec;
   method: HttpMethod | undefined;
   path: string | undefined;
   values: Record<string, any>;
@@ -154,7 +154,7 @@ function updateSecurityWithPrefs(
 }
 
 function getPreferredServer(
-  oas: BundledSwaggerOrOas30Spec,
+  oas: BundledSwaggerOrOasSpec,
   preferredServer: string | undefined,
   defaultServer: string
 ): string {

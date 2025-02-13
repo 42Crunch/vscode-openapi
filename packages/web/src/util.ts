@@ -1,5 +1,5 @@
 import jsf from "json-schema-faker";
-import { OpenApi30, HttpMethod, deref, OpenApi3 } from "@xliic/openapi";
+import { OpenApi30, OpenApi31, HttpMethod, deref, OpenApi3, BundledOasSpec } from "@xliic/openapi";
 import {
   TryitOperationValues,
   TryItParameterLocation,
@@ -10,7 +10,7 @@ import {
 import { createDefaultBody } from "./core/form/body";
 
 export function createDefaultValues(
-  oas: OpenApi30.BundledSpec,
+  oas: BundledOasSpec,
   path: string,
   method: HttpMethod,
   preferredMediaType: string | undefined,
@@ -21,7 +21,7 @@ export function createDefaultValues(
   const parameters = getParameters(oas, path, method);
   const parameterValues = generateParameterValues(oas, parameters);
   // security
-  const security = getSecurity(oas, path, method);
+  const security = OpenApi3.getSecurity(oas, path, method);
   const securityValues = generateSecurityValues(security);
   // body
   const body = createDefaultBody(oas, operation, preferredMediaType, preferredBodyValue);
@@ -37,12 +37,12 @@ export function createDefaultValues(
   };
 }
 
-export function getParameters(
-  oas: OpenApi30.BundledSpec,
+export function getParameters<T extends OpenApi3.BundledSpec>(
+  oas: T,
   path: string,
   method: HttpMethod
-): OpenApi30.OperationParametersMap {
-  const pathParameters = OpenApi3.getPathItemParameters(oas, oas.paths[path]);
+): OpenApi3.OperationParametersMap<T> {
+  const pathParameters = oas.paths ? OpenApi3.getPathItemParameters(oas, oas.paths[path]) : [];
   const operation = OpenApi3.getOperation(oas, path, method);
   const operationParameters = OpenApi3.getOperationParameters(oas, operation);
   const result = OpenApi3.getParametersMap(oas, pathParameters, operationParameters);
@@ -50,7 +50,7 @@ export function getParameters(
 }
 
 export function hasSecurityRequirements(
-  oas: OpenApi30.BundledSpec,
+  oas: BundledOasSpec,
   path: string,
   method: HttpMethod
 ): boolean {
@@ -59,33 +59,9 @@ export function hasSecurityRequirements(
   return requirements.length > 0;
 }
 
-export function getSecurity(
-  oas: OpenApi30.BundledSpec,
-  path: string,
-  method: HttpMethod
-): OpenApi30.ResolvedOperationSecurity {
-  const operation = OpenApi3.getOperation(oas, path, method);
-  const requirements = operation?.security ?? oas.security ?? [];
-  const result: OpenApi30.ResolvedOperationSecurity = [];
-  for (const requirement of requirements) {
-    const resolved: Record<string, OpenApi30.SecurityScheme> = {};
-    for (const schemeName of Object.keys(requirement)) {
-      // check if the requsted security scheme is defined in the OAS
-      if (oas?.components?.securitySchemes?.[schemeName]) {
-        const scheme = deref(oas, oas.components.securitySchemes[schemeName]);
-        if (scheme) {
-          resolved[schemeName] = scheme;
-        }
-      }
-    }
-    result.push(resolved);
-  }
-  return result;
-}
-
 export function generateParameterValues(
-  oas: OpenApi30.BundledSpec,
-  parameters: OpenApi30.OperationParametersMap
+  oas: BundledOasSpec,
+  parameters: OpenApi31.OperationParametersMap | OpenApi30.OperationParametersMap
 ): TryitParameterValues {
   const values: TryitParameterValues = {
     query: {},
@@ -128,7 +104,7 @@ export function generateParameterValues(
 }
 
 export function generateSecurityValues(
-  security: OpenApi30.ResolvedOperationSecurity
+  security: OpenApi31.ResolvedOperationSecurity | OpenApi30.ResolvedOperationSecurity
 ): TryitSecurityAllValues {
   const result: TryitSecurityAllValues = [];
   for (const requirement of security) {

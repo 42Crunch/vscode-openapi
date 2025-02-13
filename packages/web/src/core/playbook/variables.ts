@@ -1,13 +1,7 @@
 import jsf from "json-schema-faker";
 
 import { LookupFailure, LookupResult, ReplacementResult } from "@xliic/common/env";
-import {
-  OpenApi30,
-  Swagger,
-  HttpMethod,
-  isOpenapi,
-  BundledSwaggerOrOas30Spec,
-} from "@xliic/openapi";
+import { OpenApi3, Swagger, HttpMethod, isOpenapi, BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Environment, VariableLocation } from "@xliic/common/env";
 import { Playbook } from "@xliic/scanconf";
 import { simpleClone } from "@xliic/preserving-json-yaml-parser";
@@ -47,9 +41,9 @@ export function replaceEnvironmentVariables(
 }
 
 export function replaceRequestVariables(
-  oas: BundledSwaggerOrOas30Spec,
+  oas: BundledSwaggerOrOasSpec,
   request: Playbook.CRequest | Playbook.ExternalCRequest,
-  operation: OpenApi30.Operation | Swagger.Operation | undefined,
+  operation: OpenApi3.Operation | Swagger.Operation | undefined,
   envStack: PlaybookEnvStack
 ): ReplacementResult<Playbook.CRequest | Playbook.ExternalCRequest> {
   let fake: { body: unknown; parameters: unknown };
@@ -187,8 +181,8 @@ function lookupOrDynamic(
 }
 
 function createFake(
-  oas: BundledSwaggerOrOas30Spec,
-  operation: OpenApi30.Operation | Swagger.Operation | undefined,
+  oas: BundledSwaggerOrOasSpec,
+  operation: OpenApi3.Operation | Swagger.Operation | undefined,
   path: string,
   method: HttpMethod
 ): { body: unknown; parameters: unknown } {
@@ -199,7 +193,7 @@ function createFake(
   }
 
   if (isOpenapi(oas)) {
-    const requestBody = deref(oas, (operation as OpenApi30.Operation).requestBody);
+    const requestBody = deref(oas, (operation as OpenApi3.Operation).requestBody);
     const schema = deref(oas, requestBody?.content["application/json"]?.schema);
     if (schema) {
       result.body = generateBody({ ...schema, components: (oas as any).components });

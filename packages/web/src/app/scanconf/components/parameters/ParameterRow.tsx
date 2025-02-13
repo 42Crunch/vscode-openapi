@@ -1,7 +1,7 @@
 import { useController } from "react-hook-form";
 import styled from "styled-components";
 
-import { OpenApi30, Swagger } from "@xliic/openapi";
+import { OpenApi30, OpenApi31, Swagger } from "@xliic/openapi";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { ENV_VAR_REGEX } from "../../../../core/playbook/variables";
@@ -9,8 +9,13 @@ import { TrashCan, TriangleExclamation } from "../../../../icons";
 import LineEditor from "../../../../new-components/fields/LineEditor";
 import DescriptionTooltip from "../../../../new-components/DescriptionTooltip";
 
-export type Parameter = OpenApi30.ResolvedParameter | Swagger.ResolvedParameter;
-export type Schema = { type?: string };
+export type Parameter =
+  | OpenApi31.ResolvedParameter
+  | OpenApi30.ResolvedParameter
+  | Swagger.ResolvedParameter;
+
+export type Schema = { type?: string | string[] };
+
 const DefaultSchema = { type: "string" };
 
 export default function ParameterRow({

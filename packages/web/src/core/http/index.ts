@@ -6,7 +6,9 @@ import {
   HttpMethod,
   isOpenapi,
   deref,
-  BundledSwaggerOrOas30Spec,
+  BundledSwaggerOrOasSpec,
+  BundledOasSpec,
+  OpenApi31,
 } from "@xliic/openapi";
 import { HttpConfig, HttpRequest } from "@xliic/common/http";
 import { Config } from "@xliic/common/config";
@@ -26,7 +28,7 @@ import { ENV_VAR_REGEX } from "../playbook/variables";
 
 export async function makeHttpRequest(
   config: Config,
-  oas: BundledSwaggerOrOas30Spec,
+  oas: BundledSwaggerOrOasSpec,
   method: HttpMethod,
   path: string,
   values: TryitOperationValues,
@@ -75,7 +77,7 @@ export async function makeHttpRequest(
 }
 
 async function buildOasSpec(
-  oas: OpenApi30.BundledSpec,
+  oas: BundledOasSpec,
   path: string,
   method: HttpMethod,
   values: TryitOperationValues,
@@ -167,7 +169,7 @@ function makeSwaggerSwaggerClientParameters(
 }
 
 function makeOasSecurities(
-  oas: OpenApi30.BundledSpec,
+  oas: BundledOasSpec,
   values: TryitSecurityAllValues,
   index: number,
   env: EnvData
@@ -193,9 +195,9 @@ function makeOasSecurities(
 }
 
 function getResolvedOasSecuritySchemes(
-  oas: OpenApi30.BundledSpec
-): Record<string, OpenApi30.SecurityScheme> {
-  const resolved: Record<string, OpenApi30.SecurityScheme> = {};
+  oas: BundledOasSpec
+): Record<string, OpenApi31.SecurityScheme | OpenApi30.SecurityScheme> {
+  const resolved: Record<string, OpenApi31.SecurityScheme | OpenApi30.SecurityScheme> = {};
   for (const [name, scheme] of Object.entries(oas.components?.securitySchemes || {})) {
     const result = deref(oas, scheme);
     if (result !== undefined) {

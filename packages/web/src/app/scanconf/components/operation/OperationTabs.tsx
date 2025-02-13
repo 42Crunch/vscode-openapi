@@ -6,8 +6,10 @@ import {
   isOpenapi,
   HttpMethod,
   deref,
-  BundledSwaggerOrOas30Spec,
+  BundledSwaggerOrOasSpec,
   OpenApi3,
+  BundledOasSpec,
+  OpenApi31,
 } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 
@@ -15,10 +17,13 @@ import { TabContainer } from "../../../../new-components/Tabs";
 import ParameterGroup from "../parameters/ParameterGroup";
 import Environment from "../environment/Environment";
 import {
-  getParameters as getOasParameters,
-  getSecurity as getOasSecurity,
+  // getParameters as getOasParameters,
+  // getSecurity as getOasSecurity,
   hasSecurityRequirements as hasOasSecurityRequirements,
 } from "../scenario/util";
+
+import { getParameters as getOasParameters } from "../../../../util";
+
 import {
   getParameters as getSwaggerParameters,
   getSecurity as getSwaggerSecurity,
@@ -37,7 +42,7 @@ export default function OperationTabs({
   settings,
   availableVariables,
 }: {
-  oas: BundledSwaggerOrOas30Spec;
+  oas: BundledSwaggerOrOasSpec;
   credentials: Playbook.Credentials;
   settings?: JSX.Element;
   path: string;
@@ -56,7 +61,7 @@ export default function OperationTabs({
 }
 
 function makeOasTabs(
-  oas: OpenApi30.BundledSpec,
+  oas: BundledOasSpec,
   credentials: Playbook.Credentials,
   path: string,
   method: HttpMethod,
@@ -65,7 +70,10 @@ function makeOasTabs(
 ) {
   const parameters = getOasParameters(oas, path, method);
   const operation = OpenApi3.getOperation(oas, path, method);
-  const requestBody = deref<OpenApi30.RequestBody>(oas, operation?.requestBody);
+  const requestBody = deref<OpenApi30.RequestBody | OpenApi31.RequestBody>(
+    oas,
+    operation?.requestBody
+  );
   const scanconfParameters = useWatch({ name: "parameters" });
 
   return [
@@ -82,7 +90,7 @@ function makeOasTabs(
         <Security
           oas={oas}
           credentials={credentials}
-          security={getOasSecurity(oas, path, method)}
+          security={OpenApi3.getSecurity(oas, path, method)}
         />
       ),
       disabled: !hasOasSecurityRequirements(oas, path, method),
