@@ -40,6 +40,21 @@ export function RootContainer() {
           />
         </>
       )}
+      <div id="security-issues-debug"></div>
+      <div id="security-issues"></div>
+      {/* {chunk &&
+        chunk.map((issue: any, index: number) => (
+          <div>
+            <h3>${issue.type}</h3>
+            <div>${issue.pointer}</div>
+            <div>${issue.description}</div>
+            <div>
+              <span>Score: ${issue.score}</span>
+              <span>Criticality: ${issue.criticality}</span>
+              <span>Fingerprint: ${issue.fingerprint.slice(0, 8)}</span>
+            </div>
+          </div>
+        ))} */}
     </Container>
   );
 }
