@@ -4,14 +4,15 @@ import {
   HttpMethod,
   isOpenapi,
   deref,
-  BundledSwaggerOrOas30Spec,
+  BundledSwaggerOrOasSpec,
   OpenApi3,
+  BundledOasSpec,
+  OpenApi31,
 } from "@xliic/openapi";
 
 import { Tab, TabContainer } from "../../new-components/Tabs";
 import {
   getParameters as getOasParameters,
-  getSecurity as getOasSecurity,
   hasSecurityRequirements as hasOasSecurityRequirements,
 } from "../../util";
 import {
@@ -31,7 +32,7 @@ export default function OperationTabs({
   method,
   settings,
 }: {
-  oas: BundledSwaggerOrOas30Spec;
+  oas: BundledSwaggerOrOasSpec;
   settings?: JSX.Element;
   path: string;
   method: HttpMethod;
@@ -51,10 +52,13 @@ export default function OperationTabs({
   return <TabContainer tabs={tabs} />;
 }
 
-function makeOasTabs(oas: OpenApi30.BundledSpec, path: string, method: HttpMethod) {
+function makeOasTabs(oas: BundledOasSpec, path: string, method: HttpMethod) {
   const parameters = getOasParameters(oas, path, method);
   const operation = OpenApi3.getOperation(oas, path, method);
-  const requestBody = deref<OpenApi30.RequestBody>(oas, operation?.requestBody);
+  const requestBody = deref<OpenApi30.RequestBody | OpenApi31.RequestBody>(
+    oas,
+    operation?.requestBody
+  );
 
   return [
     {
@@ -66,7 +70,7 @@ function makeOasTabs(oas: OpenApi30.BundledSpec, path: string, method: HttpMetho
     {
       id: "security",
       title: "Auth",
-      content: <Security oas={oas} security={getOasSecurity(oas, path, method)} />,
+      content: <Security oas={oas} security={OpenApi3.getSecurity(oas, path, method)} />,
       disabled: !hasOasSecurityRequirements(oas, path, method),
     },
     {

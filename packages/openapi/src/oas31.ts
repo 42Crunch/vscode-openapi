@@ -192,7 +192,7 @@ export type Discriminator = {
 };
 
 // Utility types and functions similar to oas30.ts
-export type BundledSpec = Spec & {
+export type BundledSpec = Omit<Spec, "paths" | "components" | "webhooks"> & {
   paths?: Record<string, ResolvedPathItem>;
   webhooks?: Record<string, ResolvedPathItem>;
   components?: ResolvedComponents;
