@@ -17,7 +17,9 @@ export type SecurityScheme<T> = T extends OpenApi30.BundledSpec
   ? OpenApi30.SecurityScheme
   : OpenApi31.SecurityScheme;
 
-export type Operation = OpenApi30.Operation | OpenApi31.Operation;
+export type Operation<T> = T extends OpenApi30.BundledSpec
+  ? OpenApi30.Operation
+  : OpenApi31.Operation;
 
 export type OperationParametersMap<T> = T extends OpenApi30.BundledSpec
   ? OpenApi30.OperationParametersMap
@@ -27,7 +29,7 @@ export function getOperation<T extends BundledSpec>(
   oas: T,
   path: string,
   method: HttpMethod
-): (T extends OpenApi30.BundledSpec ? OpenApi30.Operation : OpenApi31.Operation) | undefined {
+): Operation<T> | undefined {
   return deref(oas, oas.paths?.[path])?.[method] as any;
 }
 
@@ -41,26 +43,14 @@ export function getPathItemParameters<T extends BundledSpec>(
 
 export function getOperationParameters<T extends BundledSpec>(
   oas: T,
-  operation:
-    | (T extends OpenApi30.BundledSpec ? OpenApi30.Operation : OpenApi31.Operation)
-    | undefined
+  operation: Operation<T> | undefined
 ): OasParameter<T>[] {
   const params = operation?.parameters ?? [];
   return params.map((param) => deref(oas, param)!) as any;
 }
 
-export function getOperations<T extends BundledSpec>(
-  oas: T
-): [
-  string,
-  HttpMethod,
-  T extends OpenApi30.BundledSpec ? OpenApi30.Operation : OpenApi31.Operation
-][] {
-  const operations: [
-    string,
-    HttpMethod,
-    T extends OpenApi30.BundledSpec ? OpenApi30.Operation : OpenApi31.Operation
-  ][] = [];
+export function getOperations<T extends BundledSpec>(oas: T): [string, HttpMethod, Operation<T>][] {
+  const operations: [string, HttpMethod, Operation<T>][] = [];
   for (const path of Object.keys(oas.paths ?? {})) {
     for (const method of Object.keys(oas.paths?.[path] ?? {})) {
       if (HttpMethods.includes(method as HttpMethod)) {
@@ -72,7 +62,7 @@ export function getOperations<T extends BundledSpec>(
   return operations;
 }
 
-export function getServerUrls(oas: OpenApi30.Spec | OpenApi31.Spec): string[] {
+export function getServerUrls(oas: BundledSpec): string[] {
   const servers = (oas.servers ?? [])
     .filter((server) => server.url !== undefined && server.url !== "")
     .map((server) => server.url);
