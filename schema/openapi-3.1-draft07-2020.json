@@ -1197,16 +1197,16 @@
               "type": "string"
             },
             "items": {
-              "$ref": "#/definitions/schema"
+              "$ref": "#/definitions/schema-or-ref"
             },
             "prefixItems": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/schema"
+                "$ref": "#/definitions/schema-or-ref"
               }
             },
             "unevaluatedItems": {
-              "$ref": "#/definitions/schema"
+              "$ref": "#/definitions/schema-or-ref"
             },
             "maxItems": {
               "type": "integer",
@@ -1304,6 +1304,7 @@
             "examples": {
               "type": "array"
             },
+            "example": true,
             "contentMediaType": {
               "type": "string"
             },
