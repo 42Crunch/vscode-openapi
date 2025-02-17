@@ -5,6 +5,8 @@ import { Cache } from "./cache";
 import { OpenApiVersion } from "./types";
 import { Configuration } from "./configuration";
 
+type SchemaId = "openapi:v2" | "openapi:v3" | "openapi:v3_1_2020" | "openapi:v3_1_unknown";
+
 export function activate(
   context: vscode.ExtensionContext,
   cache: Cache,
@@ -35,7 +37,7 @@ export async function provideYamlSchemas(
     }
   });
 
-  function requestSchema(uri: string) {
+  function requestSchema(uri: string): SchemaId | null {
     if (disabled) {
       return null;
     }
@@ -47,6 +49,13 @@ export async function provideYamlSchemas(
           return "openapi:v2";
         } else if (version === OpenApiVersion.V3) {
           return "openapi:v3";
+        } else if (version === OpenApiVersion.V3_1) {
+          const parsed = cache.getParsedDocument(document);
+          if (parsed && (parsed as any)?.jsonSchemaDialect === undefined) {
+            return "openapi:v3_1_2020";
+          } else {
+            return "openapi:v3_1_unknown";
+          }
         }
         break;
       }
@@ -56,17 +65,22 @@ export async function provideYamlSchemas(
   }
 
   function requestSchemaContent(uri: string) {
-    if (!disabled && uri === "openapi:v2") {
-      const filename = path.join(context.extensionPath, "schema/generated", "openapi-2.0.json");
-      return fs.readFileSync(filename, { encoding: "utf8" });
-    } else if (!disabled && uri === "openapi:v3") {
+    const schemas: Record<SchemaId, string> = {
+      "openapi:v2": "openapi-2.0.json",
+      "openapi:v3": "openapi-3.0-2019-04-02.json",
+      "openapi:v3_1_2020": "openapi-3.1-draft07-2020.json",
+      "openapi:v3_1_unknown": "openapi-3.1-draft07-unknown.json",
+    };
+
+    if (!disabled && schemas[uri as SchemaId] !== undefined) {
       const filename = path.join(
         context.extensionPath,
         "schema/generated",
-        "openapi-3.0-2019-04-02.json"
+        schemas[uri as SchemaId]
       );
       return fs.readFileSync(filename, { encoding: "utf8" });
     }
+
     return null;
   }
 
