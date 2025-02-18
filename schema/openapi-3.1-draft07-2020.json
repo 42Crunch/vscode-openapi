@@ -1097,6 +1097,9 @@
         {
           "type": "object",
           "properties": {
+            "$comment": {
+              "type": "string"
+            },
             "allOf": {
               "type": "array",
               "items": {
@@ -1284,6 +1287,9 @@
             },
             "propertyNames": {
               "$ref": "#/definitions/schema"
+            },
+            "discriminator": {
+              "$ref": "#/definitions/discriminator"
             },
             "title": {
               "type": "string"
@@ -1820,6 +1826,28 @@
           }
         }
       }
+    },
+    "discriminator": {
+      "$comment": "https://spec.openapis.org/oas/v3.1#discriminator-object",
+      "type": "object",
+      "required": [
+        "propertyName"
+      ],
+      "properties": {
+        "propertyName": {
+          "type": "string"
+        },
+        "mapping": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "patternProperties": {
+        "^x-": {}
+      },
+      "additionalProperties": false
     }
   }
 }
