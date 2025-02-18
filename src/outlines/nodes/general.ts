@@ -17,7 +17,7 @@ export const targetsVer2 = [
   "externalDocs",
 ];
 
-const targetsVer3 = ["openapi", "info", "externalDocs"];
+const targetsVer3 = ["openapi", "info", "externalDocs", "jsonSchemaDialect"];
 
 const targetsByVersion: Record<OpenApiVersion, string[]> = {
   [OpenApiVersion.V2]: targetsVer2,
