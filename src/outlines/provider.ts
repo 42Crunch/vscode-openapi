@@ -85,6 +85,8 @@ export class OutlineProvider implements vscode.TreeDataProvider<OutlineNode> {
         this.search = {};
         vscode.commands.executeCommand("setContext", "openapiTwoEnabled", false);
         vscode.commands.executeCommand("setContext", "openapiThreeEnabled", false);
+        vscode.commands.executeCommand("setContext", "openapiThreeZeroEnabled", false);
+        vscode.commands.executeCommand("setContext", "openapiThreeOneEnabled", false);
       }
     });
 

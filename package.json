@@ -82,12 +82,12 @@
         {
           "id": "openapiOutline",
           "name": "Outline",
-          "when": "openapiThreeEnabled || openapiTwoEnabled || openapiThreeOneEnabled"
+          "when": "openapiThreeEnabled || openapiTwoEnabled"
         },
         {
           "id": "openapiNotSelectedOutline",
           "name": "",
-          "when": "!openapiTwoEnabled && !openapiThreeEnabled && !openapiThreeOneEnabled"
+          "when": "!openapiTwoEnabled && !openapiThreeEnabled"
         }
       ]
     },
@@ -104,17 +104,17 @@
     "menus": {
       "editor/title": [
         {
-          "when": "openapiTwoEnabled && resourceScheme =~ /^untitled$|^file$/ || openapiThreeEnabled && resourceScheme =~ /^untitled$|^file$/ || openapiThreeOneEnabled && resourceScheme =~ /^untitled$|^file$/",
+          "when": "openapiTwoEnabled && resourceScheme =~ /^untitled$|^file$/ || openapiThreeEnabled && resourceScheme =~ /^untitled$|^file$/",
           "command": "openapi.securityAudit",
           "group": "navigation"
         },
         {
-          "when": "openapiTwoEnabled && resourceScheme =~ /^file$/ || openapiThreeEnabled && resourceScheme =~ /^file$/",
+          "when": "openapiTwoEnabled && resourceScheme =~ /^file$/ || openapiThreeZeroEnabled && resourceScheme =~ /^file$/",
           "command": "openapi.platform.editorRunFirstOperationScan",
           "group": "navigation"
         },
         {
-          "when": "openapiTwoEnabled || openapiThreeEnabled || openapiThreeOneEnabled",
+          "when": "openapiTwoEnabled || openapiThreeEnabled",
           "command": "openapi.preview",
           "group": "navigation"
         },
