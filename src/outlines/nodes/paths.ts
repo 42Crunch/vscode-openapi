@@ -21,7 +21,9 @@ export class PathsNode extends AbstractOutlineNode {
   }
 
   getChildren(): OutlineNode[] {
-    return this.getChildrenByKey((key, pointer, node) => new PathNode(this, pointer, key, node));
+    return this.getChildrenByKey(
+      (key, pointer, node) => new PathNode(this, "path", pointer, key, node)
+    );
   }
 }
 
@@ -41,15 +43,23 @@ export class WebhooksNode extends AbstractOutlineNode {
   }
 
   getChildren(): OutlineNode[] {
-    return this.getChildrenByKey((key, pointer, node) => new PathNode(this, pointer, key, node));
+    return this.getChildrenByKey(
+      (key, pointer, node) => new PathNode(this, "webhook", pointer, key, node)
+    );
   }
 }
 
 export class PathNode extends AbstractOutlineNode {
   path: string;
-  constructor(parent: OutlineNode, pointer: string, key: string, node: any) {
+  constructor(
+    parent: OutlineNode,
+    contextValue: "path" | "webhook",
+    pointer: string,
+    key: string,
+    node: any
+  ) {
     super(parent, pointer, key, vscode.TreeItemCollapsibleState.Collapsed, node, parent.context);
-    this.contextValue = "path";
+    this.contextValue = contextValue;
     this.path = key;
   }
 
@@ -57,6 +67,8 @@ export class PathNode extends AbstractOutlineNode {
     return this.getChildrenByKey((key, pointer, node) => {
       if (HTTP_METHODS.includes(key)) {
         return new OperationNode(this, pointer, key, node);
+      } else if (key === "$ref") {
+        return new SimpleNode(this, pointer, key, node, 0);
       }
     });
   }
