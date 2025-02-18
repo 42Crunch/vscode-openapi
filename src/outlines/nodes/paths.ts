@@ -38,7 +38,7 @@ export class WebhooksNode extends AbstractOutlineNode {
       parent.context
     );
     this.icon = "webhook.svg";
-    this.contextValue = "paths";
+    this.contextValue = "webhooks";
     this.searchable = false;
   }
 
