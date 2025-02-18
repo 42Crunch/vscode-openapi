@@ -51,7 +51,12 @@ export async function provideYamlSchemas(
           return "openapi:v3";
         } else if (version === OpenApiVersion.V3_1) {
           const parsed = cache.getParsedDocument(document);
-          if (parsed && (parsed as any)?.jsonSchemaDialect === undefined) {
+          if (
+            parsed &&
+            ((parsed as any)?.jsonSchemaDialect === undefined ||
+              (parsed as any)?.jsonSchemaDialect ===
+                "https://spec.openapis.org/oas/3.1/dialect/base")
+          ) {
             return "openapi:v3_1_2020";
           } else {
             return "openapi:v3_1_unknown";
