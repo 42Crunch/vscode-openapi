@@ -73,8 +73,8 @@ export async function provideYamlSchemas(
     const schemas: Record<SchemaId, string> = {
       "openapi:v2": "openapi-2.0.json",
       "openapi:v3": "openapi-3.0-2019-04-02.json",
-      "openapi:v3_1_2020": "openapi-3.1-draft07-2020.json",
-      "openapi:v3_1_unknown": "openapi-3.1-draft07-unknown.json",
+      "openapi:v3_1_2020": "openapi-3.1-2020.json",
+      "openapi:v3_1_unknown": "openapi-3.1.json",
     };
 
     if (!disabled && schemas[uri as SchemaId] !== undefined) {

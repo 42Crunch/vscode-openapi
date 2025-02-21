@@ -3,12 +3,23 @@
     "paths": [
       "openapi-2.0.json#/definitions/pathItem/properties",
       "openapi-3.0-2019-04-02.json#/definitions/PathItem/properties",
+      "openapi-3.1.json#/definitions/path-item/properties",
+      "openapi-3.1-2020.json#/definitions/path-item/properties",
+
       "openapi-2.0.json#/definitions/operation/properties",
       "openapi-3.0-2019-04-02.json#/definitions/Operation/properties",
+      "openapi-3.1.json#/definitions/operation/properties",
+      "openapi-3.1-2020.json#/definitions/operation/properties",
+
       "openapi-2.0.json#/definitions/response/properties",
       "openapi-3.0-2019-04-02.json#/definitions/Response/properties",
+      "openapi-3.1.json#/definitions/response/properties",
+      "openapi-3.1-2020.json#/definitions/response/properties",
+
       "openapi-2.0.json#/definitions/responses",
-      "openapi-3.0-2019-04-02.json#/definitions/Responses/properties"
+      "openapi-3.0-2019-04-02.json#/definitions/Responses/properties",
+      "openapi-3.1.json#/definitions/responses/properties",
+      "openapi-3.1-2020.json#/definitions/responses/properties"
     ],
     "schemas": {
       "x-42c-local-strategy": {
@@ -20,8 +31,13 @@
     "paths": [
       "openapi-2.0.json#/definitions/paths",
       "openapi-3.0-2019-04-02.json#/definitions/Paths",
+      "openapi-3.1.json#/definitions/paths",
+      "openapi-3.1-2020.json#/definitions/paths",
+
       "openapi-2.0.json#/definitions/responses",
-      "openapi-3.0-2019-04-02.json#/definitions/Components/properties/responses"
+      "openapi-3.0-2019-04-02.json#/definitions/Components/properties/responses",
+      "openapi-3.1.json#/definitions/components/properties/responses",
+      "openapi-3.1-2020.json#/definitions/components/properties/responses"
     ],
     "schemas": {
       "properties": {
@@ -32,7 +48,12 @@
     }
   },
   {
-    "paths": ["openapi-2.0.json#/properties", "openapi-3.0-2019-04-02.json#/properties"],
+    "paths": [
+      "openapi-2.0.json#/properties",
+      "openapi-3.0-2019-04-02.json#/properties",
+      "openapi-3.1.json#/properties",
+      "openapi-3.1-2020.json#/properties"
+    ],
     "schemas": {
       "x-42c-request-strategies": {
         "target": "#/definitions/X42cRequestStrategies"
@@ -46,8 +67,13 @@
     "paths": [
       "openapi-2.0.json#/properties",
       "openapi-3.0-2019-04-02.json#/properties",
+      "openapi-3.1.json#/properties",
+      "openapi-3.1-2020.json#/properties",
+
       "openapi-2.0.json#/definitions/operation/properties",
-      "openapi-3.0-2019-04-02.json#/definitions/Operation/properties"
+      "openapi-3.0-2019-04-02.json#/definitions/Operation/properties",
+      "openapi-3.1.json#/definitions/operation/properties",
+      "openapi-3.1-2020.json#/definitions/operation/properties"
     ],
     "schemas": {
       "x-42c-no-authentication": {
@@ -59,8 +85,13 @@
     "paths": [
       "openapi-2.0.json#/properties",
       "openapi-3.0-2019-04-02.json#/properties",
+      "openapi-3.1.json#/properties",
+      "openapi-3.1-2020.json#/properties",
+
       "openapi-2.0.json#/definitions/operation/properties",
-      "openapi-3.0-2019-04-02.json#/definitions/Operation/properties"
+      "openapi-3.0-2019-04-02.json#/definitions/Operation/properties",
+      "openapi-3.1.json#/definitions/operation/properties",
+      "openapi-3.1-2020.json#/definitions/operation/properties"
     ],
     "schemas": {
       "x-42c-mtls": {
@@ -71,7 +102,9 @@
   {
     "paths": [
       "openapi-2.0.json#/definitions/operation/properties",
-      "openapi-3.0-2019-04-02.json#/definitions/Operation/properties"
+      "openapi-3.0-2019-04-02.json#/definitions/Operation/properties",
+      "openapi-3.1.json#/definitions/operation/properties",
+      "openapi-3.1-2020.json#/definitions/operation/properties"
     ],
     "schemas": {
       "x-42c-sensitivity": {
@@ -87,7 +120,7 @@
       "openapi-2.0.json#/definitions/formDataParameterSubSchema/properties",
       "openapi-2.0.json#/definitions/queryParameterSubSchema/properties",
       "openapi-2.0.json#/definitions/pathParameterSubSchema/properties",
-      "openapi-3.0-2019-04-02.json#/definitions/Schema/properties"
+      "openapi-3.1-2020.json#/definitions/schema/anyOf/0/properties"
     ],
     "schemas": {
       "x-42c-sensitivity-data": {
@@ -96,7 +129,12 @@
     }
   },
   {
-    "paths": ["openapi-2.0.json#/properties", "openapi-3.0-2019-04-02.json#/properties"],
+    "paths": [
+      "openapi-2.0.json#/properties",
+      "openapi-3.0-2019-04-02.json#/properties",
+      "openapi-3.1.json#/properties",
+      "openapi-3.1-2020.json#/properties"
+    ],
     "schemas": {
       "x-42c-skipIssues": {
         "target": "#/definitions/X42cSkipIssues"
@@ -106,7 +144,9 @@
   {
     "paths": [
       "openapi-2.0.json#/definitions/response/properties",
-      "openapi-3.0-2019-04-02.json#/definitions/Response/properties"
+      "openapi-3.0-2019-04-02.json#/definitions/Response/properties",
+      "openapi-3.1.json#/definitions/response/properties",
+      "openapi-3.1-2020.json#/definitions/response/properties"
     ],
     "schemas": {
       "x-42c-weight-content": {
@@ -126,7 +166,9 @@
   {
     "paths": [
       "openapi-2.0.json#/definitions/operation/properties",
-      "openapi-3.0-2019-04-02.json#/definitions/Operation/properties"
+      "openapi-3.0-2019-04-02.json#/definitions/Operation/properties",
+      "openapi-3.1.json#/definitions/operation/properties",
+      "openapi-3.1-2020.json#/definitions/operation/properties"
     ],
     "schemas": {
       "x-42c-weight-input": {

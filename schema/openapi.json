@@ -29,10 +29,10 @@
           ]
         },
         "then": {
-          "$ref": "openapi-3.1-draft07-2020.json"
+          "$ref": "openapi-3.1-2020.json"
         },
         "else": {
-          "$ref": "openapi-3.1-draft07-unknown.json"
+          "$ref": "openapi-3.1.json"
         }
       },
       "else": {
