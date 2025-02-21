@@ -245,7 +245,14 @@
           "additionalProperties": false,
           "patternProperties": {
             "^[a-zA-Z0-9\\.\\-_]+$": {
-              "$ref": "#/definitions/parameter-or-reference"
+              "oneOf": [
+                {
+                  "$ref": "#/definitions/parameter"
+                },
+                {
+                  "$ref": "#/definitions/reference"
+                }
+              ]
             }
           }
         },
@@ -352,7 +359,14 @@
         "parameters": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/parameter-or-reference"
+            "oneOf": [
+              {
+                "$ref": "#/definitions/parameter"
+              },
+              {
+                "$ref": "#/definitions/reference"
+              }
+            ]
           }
         },
         "get": {
@@ -410,7 +424,14 @@
         "parameters": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/parameter-or-reference"
+            "oneOf": [
+              {
+                "$ref": "#/definitions/parameter"
+              },
+              {
+                "$ref": "#/definitions/reference"
+              }
+            ]
           }
         },
         "requestBody": {
@@ -541,20 +562,9 @@
         },
         {
           "$ref": "#/definitions/SchemaXORContent"
-        }
-      ],
-      "oneOf": [
-        {
-          "$ref": "#/definitions/PathParameter"
         },
         {
-          "$ref": "#/definitions/QueryParameter"
-        },
-        {
-          "$ref": "#/definitions/HeaderParameter"
-        },
-        {
-          "$ref": "#/definitions/CookieParameter"
+          "$ref": "#/definitions/ParameterLocation"
         }
       ]
     },
@@ -626,90 +636,85 @@
         }
       ]
     },
-    "PathParameter": {
-      "description": "Parameter in path",
-      "required": [
-        "required"
-      ],
-      "properties": {
-        "in": {
-          "enum": [
-            "path"
-          ]
-        },
-        "style": {
-          "enum": [
-            "matrix",
-            "label",
-            "simple"
-          ],
-          "default": "simple"
-        },
-        "required": {
-          "enum": [
-            true
-          ]
-        }
-      }
-    },
-    "QueryParameter": {
-      "description": "Parameter in query",
-      "properties": {
-        "in": {
-          "enum": [
-            "query"
-          ]
-        },
-        "style": {
-          "enum": [
-            "form",
-            "spaceDelimited",
-            "pipeDelimited",
-            "deepObject"
-          ],
-          "default": "form"
-        }
-      }
-    },
-    "HeaderParameter": {
-      "description": "Parameter in header",
-      "properties": {
-        "in": {
-          "enum": [
-            "header"
-          ]
-        },
-        "style": {
-          "enum": [
-            "simple"
-          ],
-          "default": "simple"
-        }
-      }
-    },
-    "CookieParameter": {
-      "description": "Parameter in cookie",
-      "properties": {
-        "in": {
-          "enum": [
-            "cookie"
-          ]
-        },
-        "style": {
-          "enum": [
-            "form"
-          ],
-          "default": "form"
-        }
-      }
-    },
-    "parameter-or-reference": {
+    "ParameterLocation": {
+      "description": "Parameter location",
       "oneOf": [
         {
-          "$ref": "#/definitions/parameter"
+          "description": "Parameter in path",
+          "required": [
+            "required"
+          ],
+          "properties": {
+            "in": {
+              "enum": [
+                "path"
+              ]
+            },
+            "style": {
+              "enum": [
+                "matrix",
+                "label",
+                "simple"
+              ],
+              "default": "simple"
+            },
+            "required": {
+              "enum": [
+                true
+              ]
+            }
+          }
         },
         {
-          "$ref": "#/definitions/reference"
+          "description": "Parameter in query",
+          "properties": {
+            "in": {
+              "enum": [
+                "query"
+              ]
+            },
+            "style": {
+              "enum": [
+                "form",
+                "spaceDelimited",
+                "pipeDelimited",
+                "deepObject"
+              ],
+              "default": "form"
+            }
+          }
+        },
+        {
+          "description": "Parameter in header",
+          "properties": {
+            "in": {
+              "enum": [
+                "header"
+              ]
+            },
+            "style": {
+              "enum": [
+                "simple"
+              ],
+              "default": "simple"
+            }
+          }
+        },
+        {
+          "description": "Parameter in cookie",
+          "properties": {
+            "in": {
+              "enum": [
+                "cookie"
+              ]
+            },
+            "style": {
+              "enum": [
+                "form"
+              ],
+              "default": "form"
+            }
+          }
         }
       ]
     },
