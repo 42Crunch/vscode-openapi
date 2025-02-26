@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 
 import { ApiEntry, TagData } from "@xliic/common/tags";
@@ -36,6 +36,10 @@ export function ApiPanel({
   // Current manually selected options
   const [colOption, setColOption] = React.useState<SelectOptionState>(undefined);
   const [apiOption, setApiOption] = React.useState<SelectOptionState>(undefined);
+  useEffect(() => {
+    setColOption(undefined);
+    setApiOption(undefined);
+  }, [targetFileName]);
   const showApiSelector = colOption || apiEntry?.collectionId;
   return (
     <HeaderContainer>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 
 import { TagData, TagEntry } from "@xliic/common/tags";
@@ -57,6 +57,9 @@ export function TagsPanel({
   }
   const dispatch = useAppDispatch();
   const [selectedTagIds, setSelectedTagIds] = React.useState(initSelectedTagIds);
+  useEffect(() => {
+    setSelectedTagIds(initSelectedTagIds);
+  }, [targetFileName]);
 
   const onTagSelected = function (categoryId: string, tagId: string, selected: boolean): void {
     const newSelectedTagIds = new Set<string>(selectedTagIds);
