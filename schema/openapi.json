@@ -1,17 +1,46 @@
 {
- "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "dependencies": {
     "swagger": {
       "if": {
-         "properties": { "swagger": { "const": "2.0" } }
+        "properties": { "swagger": { "const": "2.0" } }
       },
-      "then":  {"$ref": "openapi-2.0.json" }
+      "then": { "$ref": "openapi-2.0.json" }
     },
     "openapi": {
       "if": {
-         "properties": { "openapi": { "pattern": "^3\\.0\\.\\d(-.+)?$" } }
+        "properties": { "openapi": { "pattern": "^3\\.1\\.\\d(-.+)?$" } }
       },
-      "then":  {"$ref": "openapi-3.0-2019-04-02.json" }
+      "then": {
+        "if": {
+          "anyOf": [
+            {
+              "not": {
+                "required": ["jsonSchemaDialect"]
+              }
+            },
+            {
+              "properties": {
+                "jsonSchemaDialect": {
+                  "const": "https://spec.openapis.org/oas/3.1/dialect/base"
+                }
+              }
+            }
+          ]
+        },
+        "then": {
+          "$ref": "openapi-3.1-2020.json"
+        },
+        "else": {
+          "$ref": "openapi-3.1.json"
+        }
+      },
+      "else": {
+        "if": {
+          "properties": { "openapi": { "pattern": "^3\\.0\\.\\d(-.+)?$" } }
+        },
+        "then": { "$ref": "openapi-3.0-2019-04-02.json" }
+      }
     }
   }
 }

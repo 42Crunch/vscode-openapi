@@ -8,6 +8,8 @@ const x42Config = JSON.parse(fs.readFileSync("schema/x42c-config.json", "utf8"))
 const schemasRoot = JSON.parse(fs.readFileSync("schema/openapi.json", "utf8"));
 const schemasV2 = JSON.parse(fs.readFileSync("schema/openapi-2.0.json", "utf8"));
 const schemasV3 = JSON.parse(fs.readFileSync("schema/openapi-3.0-2019-04-02.json", "utf8"));
+const schemasV31 = JSON.parse(fs.readFileSync("schema/openapi-3.1-2020.json", "utf8"));
+const schemasV31Unknown = JSON.parse(fs.readFileSync("schema/openapi-3.1.json", "utf8"));
 
 const refs = new Set();
 collectRefs("target", x42Config, refs);
@@ -45,14 +47,28 @@ function getLastPointerPart(jsonPath) {
   return items[items.length - 1];
 }
 
+function getSchema(path) {
+  if (path.startsWith("openapi-2.0.json")) {
+    return schemasV2;
+  } else if (path.startsWith("openapi-3.0-2019-04-02.json")) {
+    return schemasV3;
+  } else if (path.startsWith("openapi-3.1-2020.json")) {
+    return schemasV31;
+  } else if (path.startsWith("openapi-3.1.json")) {
+    return schemasV31Unknown;
+  }
+}
+
 Object.assign(schemasV2.definitions, x42Defs.definitions);
 Object.assign(schemasV3.definitions, x42Defs.definitions);
+Object.assign(schemasV31.definitions, x42Defs.definitions);
+Object.assign(schemasV31Unknown.definitions, x42Defs.definitions);
 
 for (const conf of x42Config) {
   for (const path of conf.paths) {
     const pointer = getPointer(path);
     if (pointer) {
-      const schema = path.startsWith("openapi-2.0.json") ? schemasV2 : schemasV3;
+      const schema = getSchema(path);
       const targetSchema = getJsonByPointer(schema, pointer);
       if (targetSchema) {
         unescapeRefKeys(conf.schemas);
@@ -129,3 +145,5 @@ function getType(value) {
 writeFileSync("openapi.json", schemasRoot);
 writeFileSync("openapi-2.0.json", schemasV2);
 writeFileSync("openapi-3.0-2019-04-02.json", schemasV3);
+writeFileSync("openapi-3.1-2020.json", schemasV31);
+writeFileSync("openapi-3.1.json", schemasV31Unknown);

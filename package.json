@@ -109,7 +109,7 @@
           "group": "navigation"
         },
         {
-          "when": "openapiTwoEnabled && resourceScheme =~ /^file$/ || openapiThreeEnabled && resourceScheme =~ /^file$/",
+          "when": "openapiTwoEnabled && resourceScheme =~ /^file$/ || openapiThreeZeroEnabled && resourceScheme =~ /^file$/",
           "command": "openapi.platform.editorRunFirstOperationScan",
           "group": "navigation"
         },
@@ -627,12 +627,20 @@
         "title": "OpenAPI: Create new OpenAPI v3.0 file"
       },
       {
+        "command": "openapi.createNewThreeOne",
+        "title": "OpenAPI: Create new OpenAPI v3.1 file"
+      },
+      {
         "command": "openapi.createNewTwoYaml",
         "title": "OpenAPI: Create new OpenAPI v2.0 file (YAML)"
       },
       {
         "command": "openapi.createNewThreeYaml",
         "title": "OpenAPI: Create new OpenAPI v3.0 file (YAML)"
+      },
+      {
+        "command": "openapi.createNewThreeOneYaml",
+        "title": "OpenAPI: Create new OpenAPI v3.1 file (YAML)"
       },
       {
         "command": "openapi.addSecurity",

@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 import { AbstractOutlineNode, OutlineContext, OutlineNode } from "./base";
 import { GeneralNode } from "./general";
 import { OpenApiVersion } from "../../types";
-import { PathsNode } from "./paths";
+import { PathsNode, WebhooksNode } from "./paths";
 import { OperationIdsNode } from "./operation-ids";
 import { ServersNode } from "./servers";
 import { ComponentsNode } from "./components";
@@ -24,14 +24,25 @@ export class RootNode extends AbstractOutlineNode {
         res.push(new SearchNode(this, this.context));
       }
       res.push(new GeneralNode(this, this.node));
-      if (this.context.version == OpenApiVersion.V3) {
+      if (
+        this.context.version == OpenApiVersion.V3 ||
+        this.context.version == OpenApiVersion.V3_1
+      ) {
         res.push(new ServersNode(this, this.node["servers"]));
       }
       res.push(new SecurityNode(this, this.node["security"]));
       res.push(new TagsNode(this, this.node["tags"], this.node["paths"]));
       res.push(new OperationIdsNode(this, this.node["paths"]));
-      res.push(new PathsNode(this, this.node["paths"]));
-      if (this.context.version == OpenApiVersion.V3) {
+      if (this.node["paths"] !== undefined) {
+        res.push(new PathsNode(this, this.node["paths"]));
+      }
+      if (this.context.version == OpenApiVersion.V3_1 && this.node["webhooks"] !== undefined) {
+        res.push(new WebhooksNode(this, this.node["webhooks"]));
+      }
+      if (
+        this.context.version == OpenApiVersion.V3 ||
+        this.context.version == OpenApiVersion.V3_1
+      ) {
         res.push(new ComponentsNode(this, this.node["components"]));
       } else {
         for (const key of panelsVer2) {

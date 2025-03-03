@@ -1,0 +1,15 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sample API",
+    "version": "1.0.0"
+  },
+  "components": {
+    "schemas": {
+      "Example": {
+        "type": "string",
+        "minLength": 5
+      }
+    }
+  }
+}

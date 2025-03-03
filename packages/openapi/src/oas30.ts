@@ -265,8 +265,6 @@ export type ParameterStyle =
   | "pipeDelimited"
   | "deepObject";
 
-// utility functions and types
-
 export type BundledSpec = Spec & {
   paths: Record<string, ResolvedPathItem>;
   webhooks?: Record<string, ResolvedPathItem>;
@@ -295,62 +293,6 @@ export type OperationParametersMap = Record<ParameterLocation, Record<string, Re
 
 export type ResolvedOperationSecurity = Record<string, SecurityScheme>[];
 
-export function getOperation(
-  oas: BundledSpec,
-  path: string,
-  method: HttpMethod
-): Operation | undefined {
-  return deref(oas, oas.paths[path])?.[method];
-}
-
-export function getPathItemParameters(oas: BundledSpec, pathItem: PathItem): Parameter[] {
-  const params = pathItem.parameters ?? [];
-  return params.map((param) => deref(oas, param)!);
-}
-
-export function getOperationParameters(
-  oas: BundledSpec,
-  operation: Operation | undefined
-): Parameter[] {
-  const params = operation?.parameters ?? [];
-  return params.map((param) => deref(oas, param)!);
-}
-
-export function getParametersMap(
-  oas: BundledSpec,
-  pathParameters: Parameter[],
-  operationParameters: Parameter[]
-): OperationParametersMap {
-  const result: OperationParametersMap = { query: {}, header: {}, path: {}, cookie: {} };
-
-  // path parameters first, to allow them to be overriden
-  for (const parameter of pathParameters) {
-    const schema = deref(oas, parameter.schema);
-    result[parameter.in][parameter.name] = { ...parameter, schema };
-  }
-
-  // potentially override path parameters using ones defined in the operation itself
-  for (const parameter of operationParameters) {
-    const schema = deref(oas, parameter.schema);
-    result[parameter.in][parameter.name] = { ...parameter, schema };
-  }
-
-  return result;
-}
-
-export function getOperations(oas: BundledSpec): [string, HttpMethod, Operation][] {
-  const operations: [string, HttpMethod, Operation][] = [];
-  for (const path of Object.keys(oas.paths)) {
-    for (const method of Object.keys(oas.paths[path])) {
-      if (HttpMethods.includes(method as HttpMethod)) {
-        const operation = getOperation(oas, path, method as HttpMethod)!;
-        operations.push([path, method as HttpMethod, operation]);
-      }
-    }
-  }
-  return operations;
-}
-
 export const PrimitiveTypes = ["string", "number", "integer", "boolean"] as const;
 export type PrimitiveType = (typeof PrimitiveTypes)[number];
 
@@ -358,14 +300,3 @@ export type VaueType =
   | { type: "primitive"; value: PrimitiveType }
   | { type: "array"; items: PrimitiveType | "unknown" }
   | { type: "object" };
-
-export function getServerUrls(oas: Spec): string[] {
-  const servers = (oas.servers ?? [])
-    .filter((server) => server.url !== undefined && server.url !== "")
-    .map((server) => server.url);
-
-  if (servers.length > 0) {
-    return servers;
-  }
-  return ["http://localhost/"];
-}

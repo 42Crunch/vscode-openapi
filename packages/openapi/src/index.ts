@@ -1,38 +1,72 @@
 import * as OpenApi30 from "./oas30";
+import * as OpenApi31 from "./oas31";
+import * as OpenApi3 from "./oas3";
 import * as Swagger from "./swagger";
-import { HttpMethod } from "./http";
+import { HttpMethod, HttpMethods } from "./http";
 import { deref } from "./ref";
 
 export * as OpenApi30 from "./oas30";
+export * as OpenApi31 from "./oas31";
+export * as OpenApi3 from "./oas3";
 export * as Swagger from "./swagger";
 export { deref } from "./ref";
 export type { RefOr } from "./ref";
 export type { HttpMethod } from "./http";
 export { HttpMethods } from "./http";
 
-export type BundledSwaggerOrOasSpec = OpenApi30.BundledSpec | Swagger.BundledSpec;
+export type BundledSwaggerOrOasSpec =
+  | OpenApi31.BundledSpec
+  | OpenApi30.BundledSpec
+  | Swagger.BundledSpec;
+
+export type BundledSwaggerOrOas30Spec = OpenApi30.BundledSpec | Swagger.BundledSpec;
 
 export function isSwagger(spec: BundledSwaggerOrOasSpec): spec is Swagger.BundledSpec {
   return "swagger" in spec;
 }
 
-export function isOpenapi(spec: BundledSwaggerOrOasSpec): spec is OpenApi30.BundledSpec {
+export function isOpenapi(
+  spec: BundledSwaggerOrOasSpec
+): spec is OpenApi30.BundledSpec | OpenApi31.BundledSpec {
   return "openapi" in spec;
 }
 
-export function getOperation(
-  oas: BundledSwaggerOrOasSpec,
+type OperationTypeForSpec<S extends BundledSwaggerOrOasSpec> = S extends OpenApi31.BundledSpec
+  ? OpenApi31.Operation
+  : S extends OpenApi30.BundledSpec
+  ? OpenApi30.Operation
+  : S extends Swagger.BundledSpec
+  ? Swagger.Operation
+  : never;
+
+export function getOperation<S extends BundledSwaggerOrOasSpec>(
+  oas: S,
   path: string,
   method: HttpMethod
-): OpenApi30.Operation | Swagger.Operation | undefined {
+): OperationTypeForSpec<S> | undefined {
   if (method === "trace") {
     if (isOpenapi(oas)) {
-      return deref(oas, oas.paths[path])?.[method];
+      return deref(oas, oas.paths?.[path])?.[method] as OperationTypeForSpec<S>;
     }
-    // swagger does no define 'trace' method
+    // swagger does not define 'trace' method
     return undefined;
   }
-  return deref(oas, oas.paths[path])?.[method];
+  return deref(oas, oas.paths?.[path])?.[method] as OperationTypeForSpec<S>;
+}
+
+export function getOperations<S extends BundledSwaggerOrOasSpec>(
+  oas: S
+): [string, HttpMethod, OperationTypeForSpec<S>][] {
+  const operations: [string, HttpMethod, OperationTypeForSpec<S>][] = [];
+  for (const path of Object.keys(oas.paths ?? {})) {
+    for (const method of Object.keys(oas.paths?.[path] ?? {})) {
+      if (HttpMethods.includes(method as HttpMethod)) {
+        const operation = getOperation(oas, path, method as HttpMethod)!;
+        operations.push([path, method as HttpMethod, operation]);
+      }
+    }
+  }
+  return operations;
 }
 
 export function makeOperationId(
@@ -46,13 +80,17 @@ export function makeOperationId(
   return oasOperationId;
 }
 
-export function getOperationById(
-  oas: BundledSwaggerOrOasSpec,
+export function getOperationById<S extends BundledSwaggerOrOasSpec>(
+  oas: S,
   operationId: string
 ):
-  | { path: string; method: HttpMethod; operation: OpenApi30.Operation | Swagger.Operation }
+  | {
+      path: string;
+      method: HttpMethod;
+      operation: OperationTypeForSpec<S>;
+    }
   | undefined {
-  const operations = isOpenapi(oas) ? OpenApi30.getOperations(oas) : Swagger.getOperations(oas);
+  const operations = getOperations(oas);
   for (const [path, method, operation] of operations) {
     if (makeOperationId(operation.operationId, path, method) === operationId) {
       return { path, method, operation };
@@ -61,7 +99,7 @@ export function getOperationById(
 }
 
 export function getServerUrls(oas: BundledSwaggerOrOasSpec): string[] {
-  return isOpenapi(oas) ? OpenApi30.getServerUrls(oas) : Swagger.getServerUrls(oas);
+  return isOpenapi(oas) ? OpenApi3.getServerUrls(oas) : Swagger.getServerUrls(oas);
 }
 
 export function getHttpResponseRange(httpStatus: number) {

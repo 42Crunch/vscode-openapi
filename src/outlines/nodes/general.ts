@@ -17,7 +17,14 @@ export const targetsVer2 = [
   "externalDocs",
 ];
 
-const targetsVer3 = ["openapi", "info", "externalDocs"];
+const targetsVer3 = ["openapi", "info", "externalDocs", "jsonSchemaDialect"];
+
+const targetsByVersion: Record<OpenApiVersion, string[]> = {
+  [OpenApiVersion.V2]: targetsVer2,
+  [OpenApiVersion.V3]: targetsVer3,
+  [OpenApiVersion.V3_1]: targetsVer3,
+  [OpenApiVersion.Unknown]: [],
+};
 
 export class GeneralNode extends AbstractOutlineNode {
   constructor(parent: OutlineNode, node: any) {
@@ -30,7 +37,7 @@ export class GeneralNode extends AbstractOutlineNode {
   getChildren(): OutlineNode[] {
     const res = [];
     if (this.node) {
-      const targets = this.context.version == OpenApiVersion.V2 ? targetsVer2 : targetsVer3;
+      const targets = targetsByVersion[this.context.version];
       for (const key of Object.keys(this.node)) {
         if (targets.includes(key)) {
           const childNode = new SimpleNode(this, this.nextPointer(key), key, this.node[key], 0);

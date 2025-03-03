@@ -30,8 +30,10 @@ const commands: { [key: string]: Function } = {
   copyJsonReference,
   createNewTwo,
   createNewThree,
+  createNewThreeOne,
   createNewTwoYaml,
   createNewThreeYaml,
+  createNewThreeOneYaml,
 
   addPath,
   addOperation,
@@ -168,6 +170,24 @@ async function createNewThree(cache: Cache) {
   );
 }
 
+async function createNewThreeOne(cache: Cache) {
+  await createNew(
+    `{
+    "openapi":"3.1.1",
+    "info": {
+      "title":"\${1:API Title}",
+      "version":"\${2:1.0}"
+    },
+    "servers": [
+      {"url":"\${3:https://api.server.test/v1}"}
+    ],
+    "paths": {
+    }
+  }`,
+    "json"
+  );
+}
+
 async function createNewTwoYaml(cache: Cache) {
   await createNew(
     `swagger: '2.0'
@@ -191,6 +211,25 @@ paths:
 async function createNewThreeYaml(cache: Cache) {
   await createNew(
     `openapi: '3.0.3'
+info:
+  title: \${1:API Title}
+  version: \${2:'1.0'}
+servers:
+  - url: \${3:https://api.server.test/v1}
+paths:
+  /test:
+    get:
+      responses:
+        '200':
+          description: OK
+`,
+    "yaml"
+  );
+}
+
+async function createNewThreeOneYaml(cache: Cache) {
+  await createNew(
+    `openapi: '3.1.1'
 info:
   title: \${1:API Title}
   version: \${2:'1.0'}

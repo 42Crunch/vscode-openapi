@@ -5,7 +5,18 @@ import { RootNode } from "./nodes/root";
 import { Cache } from "../cache";
 import { OpenApiVersion } from "../types";
 import { configuration } from "../configuration";
-import { OutlineContext, OutlineNode } from "./nodes/base";
+import { OutlineNode } from "./nodes/base";
+
+const panelsListVer3_1 = [
+  "general",
+  "tags",
+  "paths",
+  "operation id",
+  "servers",
+  "components",
+  "webhooks",
+  "security",
+];
 
 const panelsListVer3 = [
   "general",
@@ -28,6 +39,13 @@ const panelsListVer2 = [
   "security",
   "security definitions",
 ];
+
+const panelSortOrder: Record<OpenApiVersion, string[]> = {
+  [OpenApiVersion.V2]: panelsListVer2,
+  [OpenApiVersion.V3]: panelsListVer3,
+  [OpenApiVersion.V3_1]: panelsListVer3_1,
+  [OpenApiVersion.Unknown]: [],
+};
 
 export class OutlineProvider implements vscode.TreeDataProvider<OutlineNode> {
   private _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
@@ -67,6 +85,8 @@ export class OutlineProvider implements vscode.TreeDataProvider<OutlineNode> {
         this.search = {};
         vscode.commands.executeCommand("setContext", "openapiTwoEnabled", false);
         vscode.commands.executeCommand("setContext", "openapiThreeEnabled", false);
+        vscode.commands.executeCommand("setContext", "openapiThreeZeroEnabled", false);
+        vscode.commands.executeCommand("setContext", "openapiThreeOneEnabled", false);
       }
     });
 
@@ -145,7 +165,7 @@ export class OutlineProvider implements vscode.TreeDataProvider<OutlineNode> {
 
   sortRootChildren(children: OutlineNode[]) {
     return children.sort((a, b) => {
-      const order = a.context.version == OpenApiVersion.V2 ? panelsListVer2 : panelsListVer3;
+      const order = panelSortOrder[a.context.version];
       return order.indexOf(a.getLabel()) - order.indexOf(b.getLabel());
     });
   }

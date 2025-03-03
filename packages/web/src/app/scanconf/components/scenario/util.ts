@@ -2,7 +2,7 @@ import jsf from "json-schema-faker";
 import { FieldValues } from "react-hook-form";
 
 import { simpleClone } from "@xliic/preserving-json-yaml-parser";
-import { OpenApi30, HttpMethod, deref } from "@xliic/openapi";
+import { OpenApi30, HttpMethod, deref, OpenApi3 } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 import {
   TryitParameterValues,
@@ -15,10 +15,10 @@ export function getParameters(
   path: string,
   method: HttpMethod
 ): OpenApi30.OperationParametersMap {
-  const pathParameters = OpenApi30.getPathItemParameters(oas, oas.paths[path]);
-  const operation = OpenApi30.getOperation(oas, path, method);
-  const operationParameters = OpenApi30.getOperationParameters(oas, operation);
-  const result = OpenApi30.getParametersMap(oas, pathParameters, operationParameters);
+  const pathParameters = OpenApi3.getPathItemParameters(oas, oas.paths[path]);
+  const operation = OpenApi3.getOperation(oas, path, method);
+  const operationParameters = OpenApi3.getOperationParameters(oas, operation);
+  const result = OpenApi3.getParametersMap(oas, pathParameters, operationParameters);
   return result;
 }
 
@@ -27,7 +27,7 @@ export function hasSecurityRequirements(
   path: string,
   method: HttpMethod
 ): boolean {
-  const operation = OpenApi30.getOperation(oas, path, method);
+  const operation = OpenApi3.getOperation(oas, path, method);
   const requirements = operation?.security ?? oas.security ?? [];
   return requirements.length > 0;
 }
@@ -37,7 +37,7 @@ export function getSecurity(
   path: string,
   method: HttpMethod
 ): OpenApi30.ResolvedOperationSecurity {
-  const operation = OpenApi30.getOperation(oas, path, method);
+  const operation = OpenApi3.getOperation(oas, path, method);
   const requirements = operation?.security ?? oas.security ?? [];
   const result: OpenApi30.ResolvedOperationSecurity = [];
   for (const requirement of requirements) {

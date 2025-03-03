@@ -1,7 +1,7 @@
-import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
+import { BundledSwaggerOrOas30Spec, HttpMethod } from "@xliic/openapi";
 
 export interface OasWithOperation {
-  oas: BundledSwaggerOrOasSpec;
+  oas: BundledSwaggerOrOas30Spec;
   path: string;
   method: HttpMethod;
   preferredMediaType?: string;

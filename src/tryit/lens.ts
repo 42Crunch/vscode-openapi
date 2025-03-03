@@ -1,9 +1,19 @@
 import * as vscode from "vscode";
 import { Cache } from "../cache";
-import { OpenApi30, Swagger, BundledSwaggerOrOasSpec, isOpenapi, deref } from "@xliic/openapi";
+import {
+  OpenApi30,
+  Swagger,
+  BundledSwaggerOrOasSpec,
+  isOpenapi,
+  deref,
+  BundledSwaggerOrOas30Spec,
+  OpenApi3,
+} from "@xliic/openapi";
 import { getLocation } from "@xliic/preserving-json-yaml-parser";
 import { getOpenApiVersion } from "../parsers";
 import { OpenApiVersion } from "../types";
+
+const supportedVersions = [OpenApiVersion.V2, OpenApiVersion.V3];
 
 export class TryItCodelensProvider implements vscode.CodeLensProvider {
   private lenses: Record<string, vscode.CodeLens[]> = {};
@@ -15,11 +25,10 @@ export class TryItCodelensProvider implements vscode.CodeLensProvider {
     token: vscode.CancellationToken
   ): Promise<vscode.CodeLens[]> {
     const parsed = this.cache.getParsedDocument(document);
-    const version = getOpenApiVersion(parsed);
-    if (parsed && version !== OpenApiVersion.Unknown) {
+    if (supportedVersions.includes(getOpenApiVersion(parsed))) {
       const result: vscode.CodeLens[] = [];
-      const oas = parsed as unknown as BundledSwaggerOrOasSpec;
-      const operations = isOpenapi(oas) ? OpenApi30.getOperations(oas) : Swagger.getOperations(oas);
+      const oas = parsed as unknown as BundledSwaggerOrOas30Spec;
+      const operations = isOpenapi(oas) ? OpenApi3.getOperations(oas) : Swagger.getOperations(oas);
       for (const [path, method, operation] of operations) {
         const tryOperationLens = operationLens(document, oas, path, method);
         if (tryOperationLens) {
@@ -42,7 +51,7 @@ export class TryItCodelensProvider implements vscode.CodeLensProvider {
 
 function operationLens(
   document: vscode.TextDocument,
-  oas: BundledSwaggerOrOasSpec,
+  oas: BundledSwaggerOrOas30Spec,
   path: string,
   method: string
 ): vscode.CodeLens | undefined {

@@ -19,6 +19,8 @@ import { DataDictionaryFormat, PlatformStore } from "../stores/platform-store";
 import { DataDictionaryDiagnostic, OpenApiVersion } from "../../types";
 import { getOpenApiVersion } from "../../parsers";
 
+const supportedVersions = [OpenApiVersion.V2, OpenApiVersion.V3];
+
 export function activate(
   cache: Cache,
   platformContext: PlatformContext,
@@ -59,7 +61,7 @@ async function lintDocument(
     formatMap.set(format.name, format);
   }
   const parsed = cache.getParsedDocument(document);
-  if (parsed !== undefined && getOpenApiVersion(parsed) !== OpenApiVersion.Unknown) {
+  if (parsed && supportedVersions.includes(getOpenApiVersion(parsed))) {
     lint(collection, formatMap, document, parsed);
   }
 }
