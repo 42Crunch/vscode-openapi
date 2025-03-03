@@ -57,20 +57,18 @@ export function activate(
     }
   }
 
-  const selectors = {
-    json: { language: "json" },
-    jsonc: { language: "jsonc" },
-    yaml: { language: "yaml" },
-  };
+  const selectors = [
+    { scheme: "file", language: "json" },
+    { scheme: "file", language: "jsonc" },
+    { scheme: "file", language: "yaml" },
+  ];
 
   const auditCodelensProvider = new AuditCodelensProvider(cache);
 
   function activateLens(enabled: boolean) {
     disposables.forEach((disposable) => disposable.dispose());
     if (enabled) {
-      disposables = Object.values(selectors).map((selector) =>
-        vscode.languages.registerCodeLensProvider(selector, auditCodelensProvider)
-      );
+      disposables.push(vscode.languages.registerCodeLensProvider(selectors, auditCodelensProvider));
     } else {
       disposables = [];
     }
