@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 4.32.0 (March, 2023)
+
+- Adds support for OpenAPI 3.1 (beta)
+- Allow exporting Scan and Audit reports
+- Update SwaggerUI dependency to support OpenAPI 3.0.4 in preview
+
 ## Version 4.31.0 (December 23, 2024)
 
 - Implement support for SQGs in Audit when using CLI binary
