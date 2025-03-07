@@ -15,6 +15,12 @@ export async function updateContext(cache: Cache, document: vscode.TextDocument 
     return;
   }
 
+  if (document.fileName.endsWith(".graphql")) {
+    vscode.commands.executeCommand("setContext", "graphqlEnabled", true);
+  } else {
+    vscode.commands.executeCommand("setContext", "graphqlEnabled", false);
+  }
+
   const version = cache.getDocumentVersion(document);
 
   if (version !== OpenApiVersion.Unknown) {

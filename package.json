@@ -104,6 +104,11 @@
     "menus": {
       "editor/title": [
         {
+          "when": "graphqlEnabled && resourceScheme =~ /^untitled$|^file$/",
+          "command": "openapi.securityGqlAudit",
+          "group": "navigation"
+        },
+        {
           "when": "openapiTwoEnabled && resourceScheme =~ /^untitled$|^file$/ || openapiThreeEnabled && resourceScheme =~ /^untitled$|^file$/",
           "command": "openapi.securityAudit",
           "group": "navigation"
@@ -509,6 +514,15 @@
         "command": "openapi.securityAudit",
         "title": "OpenAPI: API Audit",
         "enablement": "!openapiErrors",
+        "icon": {
+          "light": "./resources/42crunch_icon_audit.svg",
+          "dark": "./resources/42crunch_icon_audit.svg"
+        }
+      },
+      {
+        "command": "openapi.securityGqlAudit",
+        "title": "GraphQl: GQL Audit",
+        "enablement": "graphqlEnabled",
         "icon": {
           "light": "./resources/42crunch_icon_audit.svg",
           "dark": "./resources/42crunch_icon_audit.svg"
@@ -967,7 +981,8 @@
     "js-yaml": "^4.1.0",
     "jsonc-parser": "^3.0.0",
     "semver": "^7.5.0",
-    "yaml-language-server-parser": "^0.1.2"
+    "yaml-language-server-parser": "^0.1.2",
+	"graphql": "^16.10.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",

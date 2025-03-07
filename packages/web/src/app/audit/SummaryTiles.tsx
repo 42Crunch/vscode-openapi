@@ -5,6 +5,7 @@ import { changeFilter, changeTab } from "./slice";
 
 export function SummaryTiles() {
   const summary = useAppSelector((state) => state.audit.audit.summary);
+  const type = useAppSelector((state) => state.audit.type);
   const dispatch = useAppDispatch();
 
   return (
@@ -22,34 +23,38 @@ export function SummaryTiles() {
           <div>{summary.all}/100</div>
           <div></div>
         </div>
-        <div
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            dispatch(changeTab("issues"));
-            dispatch(changeFilter({ domain: "security" }));
-          }}
-        >
-          <div>Security score</div>
-          <div>
-            {summary.security.value}/{summary.security.max}
-          </div>
-          <div></div>
-        </div>
-        <div
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            dispatch(changeTab("issues"));
-            dispatch(changeFilter({ domain: "datavalidation" }));
-          }}
-        >
-          <div>Data validation score</div>
-          <div>
-            {summary.datavalidation.value}/{summary.datavalidation.max}
-          </div>
-          <div></div>
-        </div>
+        {type !== "graphql" && (
+          <>
+            <div
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dispatch(changeTab("issues"));
+                dispatch(changeFilter({ domain: "security" }));
+              }}
+            >
+              <div>Security score</div>
+              <div>
+                {summary.security.value}/{summary.security.max}
+              </div>
+              <div></div>
+            </div>
+            <div
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dispatch(changeTab("issues"));
+                dispatch(changeFilter({ domain: "datavalidation" }));
+              }}
+            >
+              <div>Data validation score</div>
+              <div>
+                {summary.datavalidation.value}/{summary.datavalidation.max}
+              </div>
+              <div></div>
+            </div>
+          </>
+        )}
       </Tiles>
     </Container>
   );

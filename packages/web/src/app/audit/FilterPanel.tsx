@@ -12,7 +12,7 @@ import FilterGroup from "./FilterGroup";
 import { Xmark } from "../../icons";
 
 export default function FilterPanel() {
-  const { filtered, filter } = useAppSelector((state) => state.audit);
+  const { filtered, filter, type } = useAppSelector((state) => state.audit);
   const dispatch = useAppDispatch();
   const [collapsed, setCollapsed] = useState(true);
   const names = ["rule", "domain", "group", "severity"] as (keyof Filter)[];
@@ -42,8 +42,12 @@ export default function FilterPanel() {
       )}
       {!collapsed && (
         <Bottom>
-          <FilterDomain />
-          <FilterGroup />
+          {type === "openapi" && (
+            <>
+              <FilterDomain />
+              <FilterGroup />
+            </>
+          )}
           <FilterSeverity />
           <FilterRule />
           <FilterResetAll />

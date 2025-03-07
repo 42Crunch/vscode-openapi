@@ -177,9 +177,10 @@ async function copyCurl(curl: string) {
 }
 
 async function cleanupTempScanDirectory(dir: string) {
-  const oasFilename = join(dir as string, "openapi.json");
-  const scanconfFilename = join(dir as string, "scanconf.json");
-  const reportFilename = join(dir as string, "report.json");
+  const oasFilename = join(dir, "openapi.json");
+  const scanconfFilename = join(dir, "scanconf.json");
+  const reportFilename = join(dir, "report.json");
+  const graphqlFilename = join(dir, "schema.graphql");
 
   try {
     if (existsSync(oasFilename)) {
@@ -190,6 +191,9 @@ async function cleanupTempScanDirectory(dir: string) {
     }
     if (existsSync(reportFilename)) {
       unlinkSync(reportFilename);
+    }
+    if (existsSync(graphqlFilename)) {
+      unlinkSync(graphqlFilename);
     }
     rmdirSync(dir);
   } catch (ex) {
