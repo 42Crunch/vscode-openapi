@@ -1,12 +1,10 @@
 # What's New
 
-Version 4.30 of the OpenAPI Editor includes the following changes. Changes are for all users (Free and paid) unless specified.
+Version 4.32 of the OpenAPI Editor includes the following changes. Changes are for all users (Free and paid) unless specified.
 
-- Added ability to tag local API files or link them to the platform APIs (Team and Enterprise customers only).
-- Updated Scan configuration web UI to allow specifying reportMaxSize option.
-- Added extra check for the CLI binary updates when testeing in the Config web UI.
-- Added workaround for ENOMEM exceptions when invoking the platform APIs.
-- Fix issue with example background colors in SwaggerUI preview #295.
+- Adds support for OpenAPI 3.1 (beta)
+- Allow exporting Scan and Audit reports
+- Update SwaggerUI dependency to support OpenAPI 3.0.4 in preview
 
 Access the [full changelog](https://github.com/42Crunch/vscode-openapi/blob/master/CHANGELOG.md) of the OpenAPI editor
 

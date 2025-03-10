@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 4.32.0 (March, 2023)
+## Version 4.32.0 (March 10, 2023)
 
 - Adds support for OpenAPI 3.1 (beta)
 - Allow exporting Scan and Audit reports
