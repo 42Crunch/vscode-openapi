@@ -981,7 +981,8 @@
     "js-yaml": "^4.1.0",
     "jsonc-parser": "^3.0.0",
     "semver": "^7.5.0",
-    "yaml-language-server-parser": "^0.1.2"
+    "yaml-language-server-parser": "^0.1.2",
+	"graphql": "^16.10.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",

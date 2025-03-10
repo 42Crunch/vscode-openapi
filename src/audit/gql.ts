@@ -4,6 +4,7 @@
 */
 
 import * as vscode from "vscode";
+import { parse, visit } from "graphql";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { HttpMethod } from "@xliic/openapi";
@@ -35,7 +36,6 @@ import path, { basename } from "path";
 import { Audit, Issue, Grades, ReportedIssue } from "@xliic/common/audit";
 import { AuditContext, IssuesByDocument, MappingNode } from "../types";
 import { Parsed, find } from "@xliic/preserving-json-yaml-parser";
-import { getLocationByPointer } from "./util";
 
 const asyncExecFile = promisify(execFile);
 const execMaxBuffer = 1024 * 1024 * 20; // 20MB
@@ -308,6 +308,21 @@ async function runAuditWithCliBinary(
     const report = await readFile(reportFilename, { encoding: "utf8" });
     const parsed = JSON.parse(report);
 
+    /////////////////////////
+    /////////////////////////
+    const ast = parse(text);
+
+    const newAst = visit(ast, {
+      enter(node, key, parent, path, ancestors) {
+        console.info("key=" + key + ", path=" + path);
+      },
+      leave(node, key, parent, path, ancestors) {
+        console.info("key=" + key + ", path=" + path);
+      },
+    });
+    /////////////////////////
+    /////////////////////////
+
     //const cliResponse = JSON.parse(output.stdout);
     return [{ audit: parsed }, undefined];
   } catch (ex: any) {
@@ -415,13 +430,7 @@ async function splitReportByDocument(
     const [document, root] = files[uri];
     issues[uri] = reportedIssues.map((issue: ReportedIssue): Issue => {
       // TODO: implement here!!!
-      const [lineNo, range] = [
-        1,
-        {
-          start: { line: 1, character: 1 },
-          end: { line: 1, character: 2 },
-        },
-      ]; //getLocationByPointer(document, root, issue.pointer);
+      const [lineNo, range] = getLocationByPointer(document, root, issue.pointer);
       return {
         ...issue,
         documentUri: uri,
@@ -437,6 +446,36 @@ async function splitReportByDocument(
   }
 
   return [grades, issues, documents, badIssues];
+}
+
+function getLocationByPointer(
+  document: vscode.TextDocument,
+  root: any,
+  pointer: string
+): [number, vscode.Range] {
+  // let location: Location | undefined;
+  // if (pointer == "") {
+  //   if (root["openapi"]) {
+  //     location = findLocationForJsonPointer(root, "/openapi");
+  //   } else {
+  //     location = findLocationForJsonPointer(root, "/swagger");
+  //   }
+  // } else {
+  //   location = findLocationForJsonPointerResolvingRefs(root, pointer)[0];
+  // }
+
+  //if (location) {
+  const start = 1; //location.key ? location.key.start : location.value.start;
+  const position = document.positionAt(start);
+  const line = document.lineAt(position.line);
+  const range = new vscode.Range(
+    new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
+    new vscode.Position(position.line, line.range.end.character)
+  );
+  return [position.line, range];
+  // } else {
+  //   throw new Error(`Unable to locate node: ${pointer}`);
+  // }
 }
 
 function processIssues(
@@ -483,7 +522,7 @@ function processIssues(
 
 function readAssessment(assessment: any): ReportedIssue[] {
   let issues: ReportedIssue[] = [];
-  const jsonPointerIndex = assessment.index;
+  //const jsonPointerIndex = assessment.index;
 
   function transformScore(score: number): string {
     const rounded = Math.abs(Math.round(score));
@@ -499,15 +538,14 @@ function readAssessment(assessment: any): ReportedIssue[] {
     const result = [];
     for (const id of Object.keys(issues)) {
       const issue = issues[id];
-      for (const subIssue of issue.issues) {
+      const description = issue.description;
+      for (const occ of issue.occurrences) {
         result.push({
           id,
-          description: subIssue.specificDescription
-            ? subIssue.specificDescription
-            : issue.description,
-          pointer: jsonPointerIndex[subIssue.pointer],
-          score: subIssue.score ? Math.abs(subIssue.score) : 0,
-          displayScore: transformScore(subIssue.score ? subIssue.score : 0),
+          description,
+          pointer: occ.location,
+          score: occ.score ? Math.abs(occ.score) : 0,
+          displayScore: transformScore(occ.score ? occ.score : 0),
           criticality: issue.criticality ? issue.criticality : defaultCriticality,
         });
       }
@@ -516,39 +554,22 @@ function readAssessment(assessment: any): ReportedIssue[] {
     return result;
   }
 
-  if (assessment.data) {
-    issues = issues.concat(transformIssues(assessment.data.issues));
-  }
-
-  if (assessment.security) {
-    issues = issues.concat(transformIssues(assessment.security.issues));
-  }
-
-  if (assessment.warnings) {
-    issues = issues.concat(transformIssues(assessment.warnings.issues, 1));
-  }
-
-  if (assessment.semanticErrors) {
-    issues = issues.concat(transformIssues(assessment.semanticErrors.issues));
-  }
-
-  if (assessment.validationErrors) {
-    issues = issues.concat(transformIssues(assessment.validationErrors.issues));
+  if (assessment.issues) {
+    issues = issues.concat(transformIssues(assessment.issues));
   }
 
   issues.sort((a, b) => b.score - a.score);
-
   return issues;
 }
 
 function readSummary(assessment: any): Grades {
   const grades = {
     datavalidation: {
-      value: Math.round(assessment.data ? assessment.data.score : 0),
+      value: Math.round(assessment.score ? assessment.score : 0),
       max: 70,
     },
     security: {
-      value: Math.round(assessment.security ? assessment.security.score : 0),
+      value: Math.round(assessment.score ? assessment.score : 0),
       max: 30,
     },
     oasconformance: {
@@ -578,7 +599,7 @@ function findIssueLocation(
   root: Parsed,
   pointer: string
 ): [string, string] | undefined {
-  return [mainUri.toString(), "/not_used_pointer"];
+  return [mainUri.toString(), pointer];
 
   // const node = find(root, pointer);
   // if (node !== undefined) {
