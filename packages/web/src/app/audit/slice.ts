@@ -249,8 +249,8 @@ function flattenIssues(byDocument: IssuesByDocument, files: FilesMap, kdb: Kdb):
     .map(([uri, issues]) => {
       return issues.map((issue, idx) => ({
         ...issue,
-        domain: kdb[issue.id].group,
-        group: kdb[issue.id].subgroup,
+        domain: "kdb[issue.id].group", // todo
+        group: "kdb[issue.id].subgroup",
         filename: files[issue.documentUri].relative,
       }));
     })
@@ -269,8 +269,8 @@ function getStats(issues: FlatIssue[], kdb: Kdb): Stats {
 
   const byIssue = Object.keys(grouped).map((id) => ({
     id,
-    kdb: kdb[id] || fallbackArticle,
-    title: kdb[id].title.text.replace(/^<h1>|<\/h1>$/g, ""),
+    kdb: fallbackArticle as unknown as KdbArticle, // todo kdb[id] || fallbackArticle,
+    title: "todo_title", //kdb[id].title.text.replace(/^<h1>|<\/h1>$/g, ""),
     domain: grouped[id][0].domain,
     score: grouped[id].reduce((result, issue) => result + issue.score, 0),
     criticality: Math.max(...grouped[id].map((issue) => issue.criticality)) as CriticalityLevel,
