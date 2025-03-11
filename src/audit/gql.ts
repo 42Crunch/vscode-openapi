@@ -36,6 +36,8 @@ import path, { basename } from "path";
 import { Audit, Issue, Grades, ReportedIssue } from "@xliic/common/audit";
 import { AuditContext, IssuesByDocument, MappingNode } from "../types";
 import { Parsed, find } from "@xliic/preserving-json-yaml-parser";
+import { setDecorations } from "./decoration";
+import { setAudit } from "./service";
 
 const asyncExecFile = promisify(execFile);
 const execMaxBuffer = 1024 * 1024 * 20; // 20MB
@@ -143,8 +145,8 @@ async function securityAudit(
     );
 
     if (result) {
-      // setAudit(auditContext, uri, result.audit, result.tempAuditDirectory);
-      // setDecorations(editor, auditContext);
+      setAudit(auditContext, uri, result.audit, "result.tempAuditDirectory");
+      setDecorations(editor, auditContext);
       await reportWebView.showReport(result.audit);
     } else {
       await reportWebView.sendCancelAudit();
@@ -232,7 +234,7 @@ async function runCliAudit(
   //   warnOperationAudits(result.cli.remainingPerOperationAudit);
   // }
 
-  const audit = await parseGqlAuditReport(cache, document, result?.audit);
+  const audit = await parseGqlAuditReport(cache, document, result?.audit, result?.graphQlAst);
 
   // if (result.todo !== undefined) {
   //   const { issues: todo } = await parseAuditReport(cache, document, result.todo, mapping);
@@ -256,6 +258,7 @@ async function runAuditWithCliBinary(
   Result<
     {
       audit: unknown;
+      graphQlAst: unknown;
     },
     CliError
   >
@@ -312,19 +315,19 @@ async function runAuditWithCliBinary(
     /////////////////////////
     const ast = parse(text);
 
-    const newAst = visit(ast, {
-      enter(node, key, parent, path, ancestors) {
-        console.info("key=" + key + ", path=" + path);
-      },
-      leave(node, key, parent, path, ancestors) {
-        console.info("key=" + key + ", path=" + path);
-      },
-    });
+    // const newAst = visit(ast, {
+    //   enter(node, key, parent, path, ancestors) {
+    //     console.info("key=" + key + ", path=" + path);
+    //   },
+    //   leave(node, key, parent, path, ancestors) {
+    //     console.info("key=" + key + ", path=" + path);
+    //   },
+    // });
     /////////////////////////
     /////////////////////////
 
     //const cliResponse = JSON.parse(output.stdout);
-    return [{ audit: parsed }, undefined];
+    return [{ audit: parsed, graphQlAst: ast }, undefined];
   } catch (ex: any) {
     const error = readException(ex);
     throw new Error(formatException(error));
@@ -347,13 +350,15 @@ async function runAuditWithCliBinary(
 async function parseGqlAuditReport(
   cache: Cache,
   document: vscode.TextDocument,
-  report: any
+  report: any,
+  ast: any
 ): Promise<Audit> {
   const documentUri: string = document.uri.toString();
 
   const [grades, issues, documents, badIssues] = await splitReportByDocument(
     document,
     report,
+    ast,
     cache
   );
 
@@ -401,6 +406,7 @@ async function parseGqlAuditReport(
 async function splitReportByDocument(
   mainDocument: vscode.TextDocument,
   report: any,
+  ast: any,
   cache: Cache
 ): Promise<[Grades, IssuesByDocument, { [uri: string]: vscode.TextDocument }, ReportedIssue[]]> {
   const grades = readSummary(report);
@@ -420,7 +426,7 @@ async function splitReportByDocument(
   for (const uri of documentUris) {
     if (!files[uri]) {
       const document = await vscode.workspace.openTextDocument(vscode.Uri.parse(uri));
-      const root = cache.getLastGoodParsedDocument(document);
+      const root = undefined; //cache.getLastGoodParsedDocument(document);
       files[uri] = [document, root];
     }
   }
@@ -428,15 +434,19 @@ async function splitReportByDocument(
   const issues: IssuesByDocument = {};
   for (const [uri, reportedIssues] of Object.entries(issuesPerDocument)) {
     const [document, root] = files[uri];
-    issues[uri] = reportedIssues.map((issue: ReportedIssue): Issue => {
+    issues[uri] = [];
+    reportedIssues.forEach((issue: ReportedIssue) => {
       // TODO: implement here!!!
-      const [lineNo, range] = getLocationByPointer(document, root, issue.pointer);
-      return {
-        ...issue,
-        documentUri: uri,
-        lineNo,
-        range,
-      };
+      const loc = getLocationByPointer(document, ast, issue.pointer);
+      if (loc) {
+        const [lineNo, range] = loc;
+        issues[uri].push({
+          ...issue,
+          documentUri: uri,
+          lineNo,
+          range,
+        });
+      }
     });
   }
 
@@ -450,32 +460,84 @@ async function splitReportByDocument(
 
 function getLocationByPointer(
   document: vscode.TextDocument,
-  root: any,
+  ast: any,
   pointer: string
-): [number, vscode.Range] {
-  // let location: Location | undefined;
-  // if (pointer == "") {
-  //   if (root["openapi"]) {
-  //     location = findLocationForJsonPointer(root, "/openapi");
-  //   } else {
-  //     location = findLocationForJsonPointer(root, "/swagger");
-  //   }
-  // } else {
-  //   location = findLocationForJsonPointerResolvingRefs(root, pointer)[0];
+): [number, vscode.Range] | undefined {
+  // "location": "Mutation.createTweet().Tweet.Author.User.avatar_url: ID",
+  // "location": "Query.Tweets()[0].Tweet.Author.User.avatar_url: ID",
+  // "location": "Mutation.deleteTweet().Tweet.Stats.Stat.views: Int",
+  // "location": "Query.Tweet().Tweet.Author.User.full_name: String",
+  // "location": "Query.Tweet(id: ID!)",
+  // "location": "Query.Tweets(): [Tweet]",
+  // "location": "Query.Notifications(): [Notification]",
+  const path: string[] = [];
+  pointer.split(".").forEach((item) => {
+    const i = item.indexOf("(");
+    if (0 < i) {
+      //const j = Math.max(item.lastIndexOf(")"), item.lastIndexOf("]"));
+      path.push(item.substring(0, i));
+    } else {
+      const k = item.indexOf(":");
+      if (0 < k) {
+        path.push(item.substring(0, k));
+      } else {
+        path.push(item);
+      }
+    }
+  });
+
+  let objTypeDef = null;
+  let fieldDef = null;
+  for (const item of path) {
+    if (objTypeDef && fieldDef) {
+      objTypeDef = null;
+      fieldDef = null;
+    }
+    if (objTypeDef === null) {
+      for (const def of ast.definitions) {
+        if (def.name.value === item) {
+          objTypeDef = def;
+          fieldDef = null;
+          break;
+        }
+      }
+    } else {
+      if (fieldDef === null) {
+        for (const field of objTypeDef.fields) {
+          if (field.name.value === item) {
+            fieldDef = field;
+            break;
+          }
+        }
+      }
+    }
+  }
+  let myLoc = undefined;
+  if (fieldDef) {
+    myLoc = fieldDef.name.loc;
+  } else if (objTypeDef) {
+    myLoc = objTypeDef.name.loc;
+  }
+
+  // "loc": {
+  //   "start": 272,
+  //   "end": 274
   // }
 
-  //if (location) {
-  const start = 1; //location.key ? location.key.start : location.value.start;
-  const position = document.positionAt(start);
-  const line = document.lineAt(position.line);
-  const range = new vscode.Range(
-    new vscode.Position(position.line, line.firstNonWhitespaceCharacterIndex),
-    new vscode.Position(position.line, line.range.end.character)
-  );
-  return [position.line, range];
-  // } else {
-  //   throw new Error(`Unable to locate node: ${pointer}`);
-  // }
+  if (myLoc) {
+    const start = myLoc.start;
+    const end = myLoc.end;
+    const pos1 = document.positionAt(start);
+    //const line1 = document.lineAt(pos1.line);
+    const pos2 = document.positionAt(end);
+    //const line2 = document.lineAt(pos2.line);
+
+    const range = new vscode.Range(pos1, pos2);
+    return [pos1.line, range];
+  } else {
+    console.info(`Unable to locate node: ${pointer}`);
+    return undefined;
+  }
 }
 
 function processIssues(
