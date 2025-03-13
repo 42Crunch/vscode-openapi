@@ -773,6 +773,13 @@
           "additionalProperties": {
             "$ref": "#/definitions/encoding"
           }
+        },
+        "example": {},
+        "examples": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/example-or-reference"
+          }
         }
       },
       "patternProperties": {
@@ -1095,32 +1102,32 @@
             "allOf": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/schema"
+                "$ref": "#/definitions/schema-or-ref"
               }
             },
             "anyOf": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/schema"
+                "$ref": "#/definitions/schema-or-ref"
               }
             },
             "oneOf": {
               "type": "array",
               "items": {
-                "$ref": "#/definitions/schema"
+                "$ref": "#/definitions/schema-or-ref"
               }
             },
             "not": {
-              "$ref": "#/definitions/schema"
+              "$ref": "#/definitions/schema-or-ref"
             },
             "if": {
-              "$ref": "#/definitions/schema"
+              "$ref": "#/definitions/schema-or-ref"
             },
             "then": {
-              "$ref": "#/definitions/schema"
+              "$ref": "#/definitions/schema-or-ref"
             },
             "else": {
-              "$ref": "#/definitions/schema"
+              "$ref": "#/definitions/schema-or-ref"
             },
             "type": {
               "anyOf": [
@@ -1223,7 +1230,7 @@
               "minimum": 0
             },
             "contains": {
-              "$ref": "#/definitions/schema"
+              "$ref": "#/definitions/schema-or-ref"
             },
             "maxProperties": {
               "type": "integer",
@@ -1241,7 +1248,7 @@
               "uniqueItems": true
             },
             "unevaluatedProperties": {
-              "$ref": "#/definitions/schema"
+              "$ref": "#/definitions/schema-or-ref"
             },
             "dependentRequired": {
               "type": "object",
@@ -1256,29 +1263,29 @@
             "dependentSchemas": {
               "type": "object",
               "additionalProperties": {
-                "$ref": "#/definitions/schema"
+                "$ref": "#/definitions/schema-or-ref"
               }
             },
             "properties": {
               "type": "object",
               "additionalProperties": {
-                "$ref": "#/definitions/schema"
+                "$ref": "#/definitions/schema-or-ref"
               }
             },
             "patternProperties": {
               "type": "object",
               "additionalProperties": {
-                "$ref": "#/definitions/schema"
+                "$ref": "#/definitions/schema-or-ref"
               },
               "propertyNames": {
                 "format": "regex"
               }
             },
             "additionalProperties": {
-              "$ref": "#/definitions/schema"
+              "$ref": "#/definitions/schema-or-ref"
             },
             "propertyNames": {
-              "$ref": "#/definitions/schema"
+              "$ref": "#/definitions/schema-or-ref"
             },
             "discriminator": {
               "$ref": "#/definitions/discriminator"
