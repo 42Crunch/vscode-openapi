@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.32.1 (March 13, 2023)
+
+- Fix issues in implementation of OpenAPI 3.1 schema
+
 ## Version 4.32.0 (March 10, 2023)
 
 - Adds support for OpenAPI 3.1 (beta)
