@@ -470,20 +470,64 @@ function getLocationByPointer(
   // "location": "Query.Tweet(id: ID!)",
   // "location": "Query.Tweets(): [Tweet]",
   // "location": "Query.Notifications(): [Notification]",
+  // Query.viewerAnyAuth(accessToken.AccessTokenInput.apiKey: String)
+  // Mutation.mutationViewerAnyAuth(accessToken.AccessTokenInput.apiKey: String)
+  // Mutation.migrationsSetLfsPreference().Import.projectChoices[0].ProjectChoicesListItem.tfvcProject: String
+  // Query.reposHooks()[0].Hook.lastResponse.HookResponse.code: Int!
+  // Query.searchCode().SearchCode.items[0].CodeSearchResultItem.textMatches[0].SearchResultTextMatchesListItem.matches: [MatchesListItem]
+  // Query.searchCommits().SearchCommits.items[0].CommitSearchResultItem.parents: [ParentsListItem]!
+  // Query.appInstallations()[0].Installation.account.Account.avatarUrl: _
+  // Query.gists()[0].BaseGist.history[0]: _
+  // Mutation.pullsCreateReview(reposPullsReviewsInput.ReposPullsReviewsInput.comments: [CommentsListItemInput])
+  // Mutation.reposUpdateBranchProtection(reposBranchProtectionInput.ReposBranchProtectionInput.requiredStatusChecks.RequiredStatusChecks2Input.contexts: [String]!)
+  // Mutation.issuesUpdate(reposIssuesInput.ReposIssuesInput.labels[0]: _)
+  // Mutation.scimUpdateAttributeForUser(scimV2OrganizationsUser2Input.ScimV2OrganizationsUser2Input.operations[0].OperationsListItemInput.value: _)
+
+  const p1 = new RegExp(":\\s*\\[.*\\]$");
+  const p2 = new RegExp("\\(.*:.*\\)$");
+
+  //console.info(pointer);
+  // if (
+  //   pointer.startsWith(
+  //     "Mutation.pullsCreateReview(reposPullsReviewsInput.ReposPullsReviewsInput.comments: [CommentsListItemInput])"
+  //   )
+  // ) {
+  //   console.info("");
+  // }
   const path: string[] = [];
-  pointer.split(".").forEach((item) => {
-    const i = item.indexOf("(");
-    if (0 < i) {
-      //const j = Math.max(item.lastIndexOf(")"), item.lastIndexOf("]"));
-      path.push(item.substring(0, i));
-    } else {
-      const k = item.indexOf(":");
-      if (0 < k) {
-        path.push(item.substring(0, k));
-      } else {
-        path.push(item);
-      }
-    }
+  let items;
+  // Be carefull with dots inside () like Query.viewerAnyAuth(accessToken.AccessTokenInput.apiKey: String)
+  if (pointer.match(p2)) {
+    const mainPtr = pointer.substring(0, pointer.lastIndexOf("("));
+    const prefix = pointer.substring(pointer.lastIndexOf("("));
+    items = mainPtr.split(".");
+    items[items.length - 1] = items[items.length - 1] + prefix;
+  } else {
+    items = pointer.split(".");
+  }
+
+  const cleanValue = function (value: string, valueToRemove: string): string {
+    const i = value.indexOf(valueToRemove);
+    return 0 < i ? value.substring(0, i) : value;
+  };
+
+  items.forEach((item) => {
+    item = cleanValue(item, "(");
+    item = cleanValue(item, "[");
+    item = cleanValue(item, ":");
+    path.push(item);
+    // const i = item.indexOf("(");
+    // if (0 < i) {
+    //   //const j = Math.max(item.lastIndexOf(")"), item.lastIndexOf("]"));
+    //   path.push(item.substring(0, i));
+    // } else {
+    //   const k = item.indexOf(":");
+    //   if (0 < k) {
+    //     path.push(item.substring(0, k));
+    //   } else {
+    //     path.push(item);
+    //   }
+    // }
   });
 
   let objTypeDef = null;
@@ -515,6 +559,24 @@ function getLocationByPointer(
   let myLoc = undefined;
   if (fieldDef) {
     myLoc = fieldDef.name.loc;
+    // Try to find more precise location
+    const lastItem = items[items.length - 1];
+    if (!lastItem.includes("(") && lastItem.includes(":")) {
+      myLoc = fieldDef.type.loc;
+    } else if (lastItem.match(p1)) {
+      myLoc = fieldDef.type.type.loc;
+    } else if (lastItem.match(p2)) {
+      const listTarget = lastItem
+        .substring(lastItem.indexOf("(") + 1, lastItem.lastIndexOf(":"))
+        .trim();
+      for (const arg of fieldDef.arguments) {
+        // listTarget may be like accessToken.AccessTokenInput.apiKey or just accessToken
+        if (listTarget === arg.name.value || listTarget.startsWith(arg.name.value + ".")) {
+          myLoc = arg.type.loc;
+          break;
+        }
+      }
+    }
   } else if (objTypeDef) {
     myLoc = objTypeDef.name.loc;
   }
