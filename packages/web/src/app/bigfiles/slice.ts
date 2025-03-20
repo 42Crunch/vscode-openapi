@@ -3,6 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 //const { getNewParser } = require("./clarinet.js");
 import { getNewParser } from "./getNewParser";
 import { demo } from "./indexedDb";
+import { initProcessReport, processReport } from "./report-loader.worker";
 var exports = {};
 getNewParser(exports);
 const parser = (exports as any).parser();
@@ -53,6 +54,7 @@ export const slice = createSlice({
     },
     showBrowseFile: (state, action: PayloadAction<{ file: string }>) => {
       state.file = action.payload.file;
+      initProcessReport();
     },
     convert: (state, action: PayloadAction<{ file: string }>) => {
       // -> IDE
@@ -63,16 +65,18 @@ export const slice = createSlice({
     ) => {
       state.chunkSize = action.payload.textSegment.length;
       state.counter += 1;
-      state.text += action.payload.textSegment;
-      if (action.payload.progress === 1.0) {
-        // TEST INDEX DB
-        const parsed = JSON.parse(state.text);
-        if (parsed.data?.data) {
-          demo(parsed.data);
-        } else {
-          demo(parsed);
-        }
-      }
+      processReport(action.payload.progress === 1.0, action.payload.textSegment);
+
+      // state.text += action.payload.textSegment;
+      // if (action.payload.progress === 1.0) {
+      //   // TEST INDEX DB
+      //   const parsed = JSON.parse(state.text);
+      //   if (parsed.data?.data) {
+      //     demo(parsed.data);
+      //   } else {
+      //     demo(parsed);
+      //   }
+      // }
       // TEST PARSER
       //parser.write(action.payload.textSegment);
       //console.info("exports = " + exports);
