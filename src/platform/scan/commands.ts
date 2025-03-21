@@ -40,7 +40,7 @@ export default (
   store: PlatformStore,
   configuration: Configuration,
   secrets: vscode.SecretStorage,
-  getScanView: (uri: vscode.Uri) => ScanWebView,
+  getScanView: (uri: vscode.Uri) => Promise<ScanWebView>,
   getExistingReportView: (uri: vscode.Uri) => ScanReportWebView,
   signUpWebView: SignUpWebView
 ) => {
@@ -170,7 +170,7 @@ async function editorRunSingleOperationScan(
   store: PlatformStore,
   configuration: Configuration,
   secrets: vscode.SecretStorage,
-  getScanView: (uri: vscode.Uri) => ScanWebView,
+  getScanView: (uri: vscode.Uri) => Promise<ScanWebView>,
   path: string,
   method: HttpMethod
 ): Promise<void> {
@@ -203,7 +203,7 @@ async function editorRunSingleOperationScan(
   }
 
   const title = bundle?.value?.info?.title || "OpenAPI";
-  const scanconfUri = getOrCreateScanconfUri(editor.document.uri, title);
+  const scanconfUri = await getOrCreateScanconfUri(editor.document.uri, title);
 
   if (
     (scanconfUri === undefined || !(await existsUri(scanconfUri))) &&
@@ -222,7 +222,7 @@ async function editorRunSingleOperationScan(
     return;
   }
 
-  const view = getScanView(editor.document.uri);
+  const view = await getScanView(editor.document.uri);
   return view.sendScanOperation(bundle, editor.document, scanconfUri, path, method);
 }
 
@@ -302,8 +302,8 @@ async function createDefaultScanConfig(
 }
 
 async function editorOpenScanconfig(editor: vscode.TextEditor): Promise<void> {
-  const scanconfUri = getScanconfUri(editor.document.uri);
-  if (scanconfUri === undefined || !existsUri(scanconfUri)) {
+  const scanconfUri = await getScanconfUri(editor.document.uri);
+  if (scanconfUri === undefined || !(await existsUri(scanconfUri))) {
     await vscode.window.showErrorMessage(
       "No scan configuration found for the current document. Please create one first by running a scan.",
       { modal: true }

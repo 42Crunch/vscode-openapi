@@ -38,9 +38,9 @@ export function activate(
   const scanViews: Record<string, ScanWebView> = {};
   const reportViews: Record<string, ScanReportWebView> = {};
 
-  const getScanView = (uri: vscode.Uri): ScanWebView => {
+  const getScanView = async (uri: vscode.Uri): Promise<ScanWebView> => {
     const viewId = uri.toString();
-    const alias = getOpenapiAlias(uri) || "unknown";
+    const alias = (await getOpenapiAlias(uri)) || "unknown";
 
     if (scanViews[viewId] === undefined) {
       scanViews[viewId] = new ScanWebView(
@@ -61,9 +61,9 @@ export function activate(
     return scanViews[viewId];
   };
 
-  const getReportView = (uri: vscode.Uri): ScanReportWebView => {
+  const getReportView = async (uri: vscode.Uri): Promise<ScanReportWebView> => {
     const viewId = uri.toString();
-    const alias = getOpenapiAlias(uri) || "unknown";
+    const alias = (await getOpenapiAlias(uri)) || "unknown";
 
     if (reportViews[viewId] === undefined) {
       reportViews[viewId] = new ScanReportWebView(

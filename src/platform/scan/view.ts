@@ -67,7 +67,7 @@ export class ScanWebView extends WebView<Webapp> {
     private envStore: EnvStore,
     private prefs: Record<string, Preferences>,
     private auditView: AuditWebView,
-    private getReportView: () => ScanReportWebView,
+    private getReportView: () => Promise<ScanReportWebView>,
     private auditContext: AuditContext
   ) {
     super(extensionPath, "scanconf", title, vscode.ViewColumn.One, "eye");
@@ -111,7 +111,7 @@ export class ScanWebView extends WebView<Webapp> {
       try {
         const config = await loadConfig(this.configuration, this.secrets);
 
-        const reportView = this.getReportView();
+        const reportView = await this.getReportView();
         await reportView.sendStartScan(this.target!.document);
 
         return await runScan(
@@ -143,7 +143,7 @@ export class ScanWebView extends WebView<Webapp> {
       try {
         const config = await loadConfig(this.configuration, this.secrets);
 
-        const reportView = this.getReportView();
+        const reportView = await this.getReportView();
 
         await reportView.sendStartScan(this.target!.document);
 
