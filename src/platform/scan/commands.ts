@@ -102,7 +102,7 @@ export default (
     "openapi.platform.editorRunFirstOperationScan",
     async (editor: vscode.TextEditor, edit: vscode.TextEditorEdit): Promise<void> => {
       const parsed = cache.getParsedDocument(editor.document);
-      const supportedVersions = [OpenApiVersion.V2, OpenApiVersion.V3];
+      const supportedVersions = [OpenApiVersion.V2, OpenApiVersion.V3, OpenApiVersion.V3_1];
       if (supportedVersions.includes(getOpenApiVersion(parsed))) {
         const oas = parsed as unknown as BundledSwaggerOrOasSpec;
 
