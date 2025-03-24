@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.32.2 (March 24, 2023)
+
+- Fix fix regression breaking .42c folder creation in Scan
+
 ## Version 4.32.1 (March 13, 2023)
 
 - Fix issues in implementation of OpenAPI 3.1 schema
