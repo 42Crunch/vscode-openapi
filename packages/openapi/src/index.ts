@@ -21,13 +21,13 @@ export type BundledSwaggerOrOasSpec =
 
 export type BundledSwaggerOrOas30Spec = OpenApi30.BundledSpec | Swagger.BundledSpec;
 
+export type BundledOasSpec = OpenApi30.BundledSpec | OpenApi31.BundledSpec;
+
 export function isSwagger(spec: BundledSwaggerOrOasSpec): spec is Swagger.BundledSpec {
   return "swagger" in spec;
 }
 
-export function isOpenapi(
-  spec: BundledSwaggerOrOasSpec
-): spec is OpenApi30.BundledSpec | OpenApi31.BundledSpec {
+export function isOpenapi(spec: BundledSwaggerOrOasSpec): spec is OpenApi3.BundledSpec {
   return "openapi" in spec;
 }
 

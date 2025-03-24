@@ -109,7 +109,7 @@
           "group": "navigation"
         },
         {
-          "when": "openapiTwoEnabled && resourceScheme =~ /^file$/ || openapiThreeZeroEnabled && resourceScheme =~ /^file$/",
+          "when": "openapiTwoEnabled && resourceScheme =~ /^file$/ || openapiThreeEnabled && resourceScheme =~ /^file$/",
           "command": "openapi.platform.editorRunFirstOperationScan",
           "group": "navigation"
         },

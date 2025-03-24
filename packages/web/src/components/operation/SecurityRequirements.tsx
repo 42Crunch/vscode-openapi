@@ -1,4 +1,4 @@
-import { OpenApi30 } from "@xliic/openapi";
+import { OpenApi30, OpenApi31 } from "@xliic/openapi";
 
 import { escapeFieldName } from "../../util";
 import { SecurityHttpBasic } from "./SecurityHttpBasic";
@@ -10,7 +10,7 @@ export default function SecurityRequirements({
   schema,
 }: {
   name: string;
-  schema: Record<string, OpenApi30.SecurityScheme>;
+  schema: Record<string, OpenApi30.SecurityScheme | OpenApi31.SecurityScheme>;
 }) {
   if (!schema) {
     return null;
@@ -22,7 +22,11 @@ export default function SecurityRequirements({
         if (schema[key] === undefined) {
           return <ErrorMessage key={key} message={`Unable to find securitySchema '${key}'`} />;
         }
-        if (schema[key]?.type === "http" && /^basic$/i.test(schema[key]?.scheme)) {
+        if (
+          schema[key]?.type === "http" &&
+          schema[key]?.scheme !== undefined &&
+          /^basic$/i.test(schema[key]?.scheme)
+        ) {
           return <SecurityHttpBasic key={key} name={`${name}.${escapeFieldName(key)}`} />;
         }
         return (

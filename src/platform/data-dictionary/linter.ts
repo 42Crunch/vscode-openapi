@@ -19,7 +19,7 @@ import { DataDictionaryFormat, PlatformStore } from "../stores/platform-store";
 import { DataDictionaryDiagnostic, OpenApiVersion } from "../../types";
 import { getOpenApiVersion } from "../../parsers";
 
-const supportedVersions = [OpenApiVersion.V2, OpenApiVersion.V3];
+const supportedVersions = [OpenApiVersion.V2, OpenApiVersion.V3, OpenApiVersion.V3_1];
 
 export function activate(
   cache: Cache,

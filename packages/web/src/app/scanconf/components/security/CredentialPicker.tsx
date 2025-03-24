@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { OpenApi30, Swagger } from "@xliic/openapi";
+import { OpenApi30, OpenApi31, Swagger } from "@xliic/openapi";
 
 import { goTo } from "../../../../features/router/slice";
 import { ArrowUpRightFromSquare } from "../../../../icons";
@@ -18,7 +18,7 @@ export default function CredentialPicker({
   onChange,
 }: {
   schemeName: string;
-  scheme: OpenApi30.SecurityScheme | Swagger.SecurityScheme;
+  scheme: OpenApi31.SecurityScheme | OpenApi30.SecurityScheme | Swagger.SecurityScheme;
   credentials: Playbook.Credentials;
   value: string;
   onChange: (value: string | undefined) => void;
