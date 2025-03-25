@@ -5,7 +5,7 @@ RUN npm install -g @vscode/vsce
 WORKDIR /build
 COPY . /build
 RUN find . \( -name '*.ts' -o -name '*.tsx' \) -print0 | xargs -0 cat | wc -l > total-lines.txt
-RUN syft -o spdx-json . > spdx-report.json
+RUN syft --override-default-catalogers=javascript-lock-cataloger --output cyclonedx-json . > cyclonedx-sbom.json
 
 RUN npm ci
 RUN npm run lint || true

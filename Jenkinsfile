@@ -37,7 +37,7 @@ pipeline {
 
         stage('Archive Artifacts') {
             steps {
-                archiveArtifacts artifacts: '*.vsix, spdx-report.json, stats.txt'
+                archiveArtifacts artifacts: '*.vsix, cyclonedx-sbom.json, stats.txt'
             }
         }
     }
