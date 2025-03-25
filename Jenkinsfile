@@ -22,7 +22,7 @@ pipeline {
 
             steps {
                 sh 'cp /build/*.vsix .'
-                sh 'cp /build/spdx-report.json .'
+                sh 'cp /build/cyclonedx-sbom.json .'
                 sh 'cp /build/stats.txt .'
                 script {
                     def issues = sh(script: 'cat /build/total-issues.txt', returnStdout: true).trim().toInteger()
