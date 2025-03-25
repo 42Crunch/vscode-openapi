@@ -50,6 +50,7 @@ export interface ReportState {
   stats: Stats;
   issueTitles: { value: string; label: string }[];
   sqgTodo: boolean;
+  type: "openapi" | "graphql";
 }
 
 export type FlatIssue = Issue & {
@@ -126,6 +127,7 @@ const initialState: ReportState = {
   issueTitles: [],
   filter: {},
   sqgTodo: false,
+  type: "openapi",
 };
 
 export const slice = createSlice({
@@ -141,6 +143,7 @@ export const slice = createSlice({
         state.tab = "priority";
         state.filter = {};
         state.sqgTodo = false;
+        state.type = audit.filename.toLowerCase().endsWith(".graphql") ? "graphql" : "openapi";
       }
       // reset sqgTodo if no compliance or if compliant
       if (audit.compliance === undefined || audit.compliance.acceptance === "yes") {
@@ -160,6 +163,7 @@ export const slice = createSlice({
       state.filter = { ids };
       state.tab = "issues";
       state.sqgTodo = false;
+      state.type = audit.filename.toLowerCase().endsWith(".graphql") ? "graphql" : "openapi";
       updateAll(state);
     },
 
@@ -200,7 +204,8 @@ function updateAll(state: Draft<ReportState>) {
     state.sqgTodo ? state.audit.todo! : state.audit.issues,
     state.audit.files,
     state.kdb,
-    state.filter
+    state.filter,
+    state.type
   );
 
   state.issues = issues;
@@ -209,9 +214,15 @@ function updateAll(state: Draft<ReportState>) {
   state.issueTitles = titles;
 }
 
-function processAudit(byDocument: IssuesByDocument, files: FilesMap, kdb: Kdb, filter: Filter) {
-  const issues = flattenIssues(byDocument, files, kdb);
-  const stats = getStats(issues, kdb);
+function processAudit(
+  byDocument: IssuesByDocument,
+  files: FilesMap,
+  kdb: Kdb,
+  filter: Filter,
+  type: "openapi" | "graphql"
+) {
+  const issues = flattenIssues(byDocument, files, kdb, type);
+  const stats = getStats(issues, kdb, type);
   const titles = getIssueTitles(stats);
   const filtered = filterIssues(issues, filter);
   return { issues, filtered, stats, titles };
@@ -244,13 +255,18 @@ function filterIssues(issues: FlatIssue[], filter: Filter) {
   });
 }
 
-function flattenIssues(byDocument: IssuesByDocument, files: FilesMap, kdb: Kdb): FlatIssue[] {
+function flattenIssues(
+  byDocument: IssuesByDocument,
+  files: FilesMap,
+  kdb: Kdb,
+  type: "openapi" | "graphql"
+): FlatIssue[] {
   const issues = Object.entries(byDocument)
     .map(([uri, issues]) => {
       return issues.map((issue, idx) => ({
         ...issue,
-        domain: "kdb[issue.id].group", // todo
-        group: "kdb[issue.id].subgroup",
+        domain: type === "graphql" ? "datavalidation" : kdb[issue.id].group,
+        group: type === "graphql" ? "schema" : kdb[issue.id].subgroup,
         filename: files[issue.documentUri].relative,
       }));
     })
@@ -258,7 +274,7 @@ function flattenIssues(byDocument: IssuesByDocument, files: FilesMap, kdb: Kdb):
   return issues;
 }
 
-function getStats(issues: FlatIssue[], kdb: Kdb): Stats {
+function getStats(issues: FlatIssue[], kdb: Kdb, type: "openapi" | "graphql"): Stats {
   const grouped: Record<string, FlatIssue[]> = {};
   for (const issue of issues) {
     if (!grouped[issue.id]) {
@@ -269,8 +285,14 @@ function getStats(issues: FlatIssue[], kdb: Kdb): Stats {
 
   const byIssue = Object.keys(grouped).map((id) => ({
     id,
-    kdb: fallbackArticle as unknown as KdbArticle, // todo kdb[id] || fallbackArticle,
-    title: "todo_title", //kdb[id].title.text.replace(/^<h1>|<\/h1>$/g, ""),
+    kdb:
+      type === "graphql"
+        ? (grapqlFallbackArticle as unknown as KdbArticle)
+        : kdb[id] || fallbackArticle,
+    title:
+      type === "graphql"
+        ? grouped[id][0].description
+        : kdb[id].title.text.replace(/^<h1>|<\/h1>$/g, ""),
     domain: grouped[id][0].domain,
     score: grouped[id].reduce((result, issue) => result + issue.score, 0),
     criticality: Math.max(...grouped[id].map((issue) => issue.criticality)) as CriticalityLevel,
@@ -357,6 +379,15 @@ const fallbackArticle = {
   description: {
     text: `<p>Whoops! Looks like there has been an oversight and we are missing a page for this issue.</p>
            <p><a href="https://apisecurity.io/contact-us/">Let us know</a> the title of the issue, and we make sure to add it to the encyclopedia.</p>`,
+  },
+};
+
+const grapqlFallbackArticle = {
+  title: {
+    text: "",
+  },
+  description: {
+    text: "",
   },
 };
 

@@ -19,14 +19,6 @@ import { loadConfig } from "../util/config";
 import { SignUpWebView } from "../webapps/signup/view";
 import { Config } from "@xliic/common/config";
 import { createTempDirectory } from "../util/fs";
-import {
-  chmodSync,
-  createWriteStream,
-  mkdirSync,
-  mkdtempSync,
-  rmdirSync,
-  unlinkSync,
-} from "node:fs";
 import { writeFile, readFile, copyFile } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
 import { dirname, join } from "node:path";
@@ -78,17 +70,11 @@ async function securityAudit(
   pendingAudits: PendingAudits,
   reportWebView: AuditWebView,
   store: PlatformStore,
-  editor: vscode.TextEditor,
-  path?: string,
-  method?: HttpMethod
+  editor: vscode.TextEditor
 ) {
   if (!(await ensureHasCredentials(signUpWebView, configuration, secrets))) {
     return;
   }
-
-  // if (!(await offerDataDictionaryUpdateAndContinue(editor.document.uri))) {
-  //   return;
-  // }
 
   const uri = editor.document.uri.toString();
 
@@ -101,7 +87,6 @@ async function securityAudit(
   pendingAudits[uri] = true;
 
   try {
-    //reportWebView.prefetchKdb();
     await reportWebView.sendStartAudit();
     const result = await vscode.window.withProgress(
       {
@@ -110,29 +95,9 @@ async function securityAudit(
         cancellable: false,
       },
       async (progress, cancellationToken): Promise<{ audit: Audit } | undefined> => {
-        const isFullAudit = path === undefined || method === undefined;
         const text = editor.document.getText();
-        //const { value, mapping } = await bundleOrThrow(cache, editor.document);
-        // const oas = isFullAudit
-        //   ? stringify(value)
-        //   : stringify(extractSingleOperation(method, path as string, value));
-        // if ((await chooseAuditRuntime(configuration, secrets)) === "platform") {
-        //   return runPlatformAudit(editor.document, oas, mapping, cache, store, memento);
-        // } else {
-        // use CLI
         if (await ensureCliDownloaded(configuration, secrets)) {
-          // const tags = store.isConnected()
-          //   ? await store.getTagsForDocument(editor.document, memento)
-          //   : [];
-          return runCliAudit(
-            editor.document,
-            text,
-            cache,
-            secrets,
-            configuration,
-            progress,
-            isFullAudit
-          );
+          return runCliAudit(editor.document, text, cache, secrets, configuration, progress);
         } else {
           // cli is not available and user chose to cancel download
           vscode.window.showErrorMessage(
@@ -158,92 +123,19 @@ async function securityAudit(
   }
 }
 
-// async function bundleOrThrow(cache: Cache, document: vscode.TextDocument): Promise<Bundle> {
-//   const bundle = await cache.getDocumentBundle(document, { rebundle: true });
-
-//   if (!bundle || "errors" in bundle) {
-//     vscode.commands.executeCommand("workbench.action.problems.focus");
-//     throw new Error("Failed to bundle for audit, check OpenAPI file for errors.");
-//   }
-
-//   return bundle;
-// }
-
-// async function offerDataDictionaryUpdateAndContinue(documentUri: vscode.Uri): Promise<boolean> {
-//   const proceed = await vscode.commands.executeCommand(
-//     "openapi.platform.dataDictionaryPreAuditBulkUpdateProperties",
-//     documentUri
-//   );
-
-//   return proceed === true;
-// }
-
-// async function chooseAuditRuntime(
-//   configuration: Configuration,
-//   secrets: vscode.SecretStorage
-// ): Promise<"platform" | "cli"> {
-//   const config = await loadConfig(configuration, secrets);
-//   // paid users are allowed to choose the runtime, freemium users always use the cli
-//   if (config.platformAuthType === "api-token") {
-//     return config.auditRuntime;
-//   } else {
-//     return "cli";
-//   }
-// }
-
 async function runCliAudit(
   document: vscode.TextDocument,
   text: string,
   cache: Cache,
   secrets: vscode.SecretStorage,
   configuration: Configuration,
-  progress: vscode.Progress<any>,
-  isFullAudit: boolean
+  progress: vscode.Progress<any>
 ): Promise<{ audit: Audit } | undefined> {
-  // const logger: Logger = {
-  //   fatal: (message: string) => null,
-  //   error: (message: string) => null,
-  //   warning: (message: string) => null,
-  //   info: (message: string) => null,
-  //   debug: (message: string) => null,
-  // };
-
   const config = await loadConfig(configuration, secrets);
 
-  const [result, error] = await runAuditWithCliBinary(
-    secrets,
-    config,
-    text,
-    isFullAudit,
-    config.cliDirectoryOverride
-  );
-
-  // if (error !== undefined) {
-  //   if (error.statusCode === 3 && error.statusMessage === "limits_reached") {
-  //     await offerUpgrade(isFullAudit);
-  //     return;
-  //   } else {
-  //     throw new Error(`Unexpected error running Security Audit: ${JSON.stringify(error)}`);
-  //   }
-  // }
-
-  // if (
-  //   result.cli.remainingPerOperationAudit !== undefined &&
-  //   result.cli.remainingPerOperationAudit < UPGRADE_WARN_LIMIT
-  // ) {
-  //   warnOperationAudits(result.cli.remainingPerOperationAudit);
-  // }
+  const result = await runAuditWithCliBinary(secrets, config, text, config.cliDirectoryOverride);
 
   const audit = await parseGqlAuditReport(cache, document, result?.audit, result?.graphQlAst);
-
-  // if (result.todo !== undefined) {
-  //   const { issues: todo } = await parseAuditReport(cache, document, result.todo, mapping);
-  //   audit.todo = todo;
-  // }
-
-  // if (result.compliance !== undefined) {
-  //   audit.compliance = result.compliance as any;
-  // }
 
   return { audit };
 }
@@ -252,36 +144,19 @@ async function runAuditWithCliBinary(
   secrets: vscode.SecretStorage,
   config: Config,
   text: string,
-  isFullAudit: boolean,
   cliDirectoryOverride: string
-): Promise<
-  Result<
-    {
-      audit: unknown;
-      graphQlAst: unknown;
-    },
-    CliError
-  >
-> {
-  //42c-ast-windows-amd64 graphql audit example.graphql --output myGQL-ast-audit.json
-
+): Promise<{
+  audit: unknown;
+  graphQlAst: unknown;
+}> {
   const dir = createTempDirectory("audit-");
   await writeFile(join(dir as string, "openapi.graphql"), text, { encoding: "utf8" });
 
   const cli = join(getBinDirectory(cliDirectoryOverride), getCliFilename());
-  //const userAgent = getUserAgent();
 
   const env: Record<string, string> = {};
 
   const args = ["graphql", "audit", "openapi.graphql", "--output", "report.json"];
-
-  // if (!isFullAudit) {
-  //   args.push("--is-operation");
-  // }
-
-  // if (tags.length > 0) {
-  //   args.push("--tag", tags.join(","));
-  // }
 
   // if (config.platformAuthType === "anond-token") {
   //   const anondToken = getAnondCredentials(configuration);
@@ -311,39 +186,12 @@ async function runAuditWithCliBinary(
     const report = await readFile(reportFilename, { encoding: "utf8" });
     const parsed = JSON.parse(report);
 
-    /////////////////////////
-    /////////////////////////
     const ast = parse(text);
 
-    // const newAst = visit(ast, {
-    //   enter(node, key, parent, path, ancestors) {
-    //     console.info("key=" + key + ", path=" + path);
-    //   },
-    //   leave(node, key, parent, path, ancestors) {
-    //     console.info("key=" + key + ", path=" + path);
-    //   },
-    // });
-    /////////////////////////
-    /////////////////////////
-
-    //const cliResponse = JSON.parse(output.stdout);
-    return [{ audit: parsed, graphQlAst: ast }, undefined];
+    return { audit: parsed, graphQlAst: ast };
   } catch (ex: any) {
     const error = readException(ex);
     throw new Error(formatException(error));
-    // if (ex.code === 3) {
-    //   // limit reached
-    //   const cliError = JSON.parse(ex.stdout);
-    //   return [undefined, cliError];
-    // } else {
-    //   const error = readException(ex);
-    //   const json = parseCliJsonResponse(error.stdout);
-    //   if (json !== undefined) {
-    //     return [undefined, json];
-    //   } else {
-    //     throw new Error(formatException(error));
-    //   }
-    // }
   }
 }
 
@@ -355,22 +203,12 @@ async function parseGqlAuditReport(
 ): Promise<Audit> {
   const documentUri: string = document.uri.toString();
 
-  const [grades, issues, documents, badIssues] = await splitReportByDocument(
+  const [grades, issues, documents, _badIssues] = await splitReportByDocument(
     document,
     report,
     ast,
     cache
   );
-
-  // if (badIssues.length > 0) {
-  //   const messages = badIssues.map(
-  //     (issue: ReportedIssue) => `Unable to locate issue "${issue.id}" at "${issue.pointer}".`
-  //   );
-  //   messages.unshift(
-  //     "Some issues have not been displayed, please contact support at https://support.42crunch.com with the following information:"
-  //   );
-  //   vscode.window.showErrorMessage(messages.join(" "));
-  // }
 
   const filename = basename(document.fileName);
 
@@ -412,7 +250,7 @@ async function splitReportByDocument(
   const grades = readSummary(report);
   const reportedIssues = readAssessment(report);
 
-  const [mainRoot, documentUris, issuesPerDocument, badIssues] = await processIssues(
+  const [mainRoot, documentUris, issuesPerDocument, badIssues] = processIssues(
     mainDocument,
     cache,
     reportedIssues
@@ -421,15 +259,6 @@ async function splitReportByDocument(
   const files: { [uri: string]: [vscode.TextDocument, Parsed | undefined] } = {
     [mainDocument.uri.toString()]: [mainDocument, mainRoot],
   };
-
-  // load and parse all documents
-  for (const uri of documentUris) {
-    if (!files[uri]) {
-      const document = await vscode.workspace.openTextDocument(vscode.Uri.parse(uri));
-      const root = undefined; //cache.getLastGoodParsedDocument(document);
-      files[uri] = [document, root];
-    }
-  }
 
   const issues: IssuesByDocument = {};
   for (const [uri, reportedIssues] of Object.entries(issuesPerDocument)) {
@@ -646,7 +475,6 @@ function processIssues(
 
 function readAssessment(assessment: any): ReportedIssue[] {
   let issues: ReportedIssue[] = [];
-  //const jsonPointerIndex = assessment.index;
 
   function transformScore(score: number): string {
     const rounded = Math.abs(Math.round(score));
@@ -689,18 +517,18 @@ function readAssessment(assessment: any): ReportedIssue[] {
 function readSummary(assessment: any): Grades {
   const grades = {
     datavalidation: {
-      value: Math.round(assessment.score ? assessment.score : 0),
-      max: 70,
+      value: 0,
+      max: 0,
     },
     security: {
-      value: Math.round(assessment.score ? assessment.score : 0),
-      max: 30,
+      value: 0,
+      max: 0,
     },
     oasconformance: {
       value: 0,
       max: 0,
     },
-    all: 0,
+    all: Math.round(assessment.score ? assessment.score : 0),
     errors: false,
     invalid: false,
   };
@@ -712,8 +540,6 @@ function readSummary(assessment: any): Grades {
   if (assessment.openapiState === "fileInvalid") {
     grades.invalid = true;
   }
-
-  grades.all = Math.round(assessment.score ? assessment.score : 0);
 
   return grades;
 }
