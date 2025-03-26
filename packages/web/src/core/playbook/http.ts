@@ -275,6 +275,13 @@ function makeOasSecurities(oas: BundledOasSpec, security: AuthResult): any {
     const securityValue = matches[name];
     if (scheme?.type === "oauth2" || scheme?.type === "openIdConnect") {
       result[name] = { token: { access_token: securityValue } };
+    } else if (
+      scheme?.type === "http" &&
+      scheme.scheme !== undefined &&
+      /^basic$/i.test(scheme.scheme)
+    ) {
+      const [username, password] = securityValue!.split(":", 2);
+      result[name] = { username, password };
     } else {
       result[name] = securityValue;
     }
@@ -307,6 +314,9 @@ function makeSwaggerSecurities(
     const securityValue = matches[name];
     if (scheme?.type === "oauth") {
       result[name] = { token: { access_token: securityValue } };
+    } else if (scheme?.type === "basic") {
+      const [username, password] = securityValue!.split(":", 2);
+      result[name] = { username, password };
     } else {
       result[name] = securityValue;
     }
