@@ -94,7 +94,10 @@ async function securityAudit(
         title: "Running GQL Security Audit...",
         cancellable: false,
       },
-      async (progress, cancellationToken): Promise<{ audit: Audit } | undefined> => {
+      async (
+        progress,
+        cancellationToken
+      ): Promise<{ audit: Audit; tempAuditDirectory: string } | undefined> => {
         const text = editor.document.getText();
         if (await ensureCliDownloaded(configuration, secrets)) {
           return runCliAudit(editor.document, text, cache, secrets, configuration, progress);
@@ -110,7 +113,7 @@ async function securityAudit(
     );
 
     if (result) {
-      setAudit(auditContext, uri, result.audit, "result.tempAuditDirectory");
+      setAudit(auditContext, uri, result.audit, result.tempAuditDirectory);
       setDecorations(editor, auditContext);
       await reportWebView.showReport(result.audit);
     } else {
@@ -130,14 +133,14 @@ async function runCliAudit(
   secrets: vscode.SecretStorage,
   configuration: Configuration,
   progress: vscode.Progress<any>
-): Promise<{ audit: Audit } | undefined> {
+): Promise<{ audit: Audit; tempAuditDirectory: string } | undefined> {
   const config = await loadConfig(configuration, secrets);
 
   const result = await runAuditWithCliBinary(secrets, config, text, config.cliDirectoryOverride);
 
   const audit = await parseGqlAuditReport(cache, document, result?.audit, result?.graphQlAst);
 
-  return { audit };
+  return { audit, tempAuditDirectory: result.tempAuditDirectory };
 }
 
 async function runAuditWithCliBinary(
@@ -148,15 +151,16 @@ async function runAuditWithCliBinary(
 ): Promise<{
   audit: unknown;
   graphQlAst: unknown;
+  tempAuditDirectory: string;
 }> {
   const dir = createTempDirectory("audit-");
-  await writeFile(join(dir as string, "openapi.graphql"), text, { encoding: "utf8" });
+  await writeFile(join(dir, "schema.graphql"), text, { encoding: "utf8" });
 
   const cli = join(getBinDirectory(cliDirectoryOverride), getCliFilename());
 
   const env: Record<string, string> = {};
 
-  const args = ["graphql", "audit", "openapi.graphql", "--output", "report.json"];
+  const args = ["graphql", "audit", "schema.graphql", "--output", "report.json"];
 
   // if (config.platformAuthType === "anond-token") {
   //   const anondToken = getAnondCredentials(configuration);
@@ -188,7 +192,7 @@ async function runAuditWithCliBinary(
 
     const ast = parse(text);
 
-    return { audit: parsed, graphQlAst: ast };
+    return { audit: parsed, graphQlAst: ast, tempAuditDirectory: dir };
   } catch (ex: any) {
     const error = readException(ex);
     throw new Error(formatException(error));
@@ -486,7 +490,7 @@ function readAssessment(assessment: any): ReportedIssue[] {
     return "less than 1";
   }
 
-  function transformIssues(issues: any, defaultCriticality: number = 5): ReportedIssue[] {
+  function transformIssues(issues: any, defaultCriticality: number = 4): ReportedIssue[] {
     const result = [];
     for (const id of Object.keys(issues)) {
       const issue = issues[id];
