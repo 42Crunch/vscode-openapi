@@ -22,6 +22,7 @@ import { AuditCodelensProvider } from "./lens";
 import { Configuration } from "../configuration";
 import { SignUpWebView } from "../webapps/signup/view";
 import { clearAuditReportTempDirectories } from "./util";
+import { registerSecurityGqlAudit } from "./gql";
 
 export function activate(
   context: vscode.ExtensionContext,
@@ -83,6 +84,16 @@ export function activate(
   activateLens(configuration.get("codeLens"));
 
   vscode.window.onDidChangeActiveTextEditor((editor) => update(editor));
+
+  registerSecurityGqlAudit(
+    context,
+    cache,
+    auditContext,
+    pendingAudits,
+    reportWebView,
+    store,
+    signUpWebView
+  );
 
   registerSecurityAudit(
     context,

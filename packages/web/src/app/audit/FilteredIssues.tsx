@@ -18,8 +18,10 @@ export default function FilteredIssues() {
   const {
     kdb,
     filtered,
+    type,
     audit: { filename },
   } = useAppSelector((state) => state.audit);
+
   const dispatch = useAppDispatch();
 
   return (
@@ -70,13 +72,15 @@ export default function FilteredIssues() {
               </BottomItem>
             </BottomDescription>
           </BottomDescription>
-          <KdbArticle
-            lang={filename.toLowerCase().endsWith("json") ? "json" : "yaml"}
-            article={kdb[issue.id]}
-            openLink={(url) => {
-              dispatch(openLink(url));
-            }}
-          />
+          {type !== "graphql" && (
+            <KdbArticle
+              lang={filename.toLowerCase().endsWith("json") ? "json" : "yaml"}
+              article={kdb[issue.id]}
+              openLink={(url) => {
+                dispatch(openLink(url));
+              }}
+            />
+          )}
         </CollapsibleCard>
       ))}
     </Container>
