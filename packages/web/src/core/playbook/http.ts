@@ -386,8 +386,28 @@ function getSwaggerClientContentType(request: Playbook.CRequest): string | undef
   return request.body?.mediaType;
 }
 
+function isValidBase64(str: string): boolean {
+  try {
+    // A valid base64 string's length should be a multiple of 4
+    // It should only contain valid base64 characters: A-Z, a-z, 0-9, +, /, =
+    return /^[A-Za-z0-9+/=]*$/.test(str) && str.length % 4 === 0;
+  } catch (e) {
+    return false;
+  }
+}
+
 function decodeBasicAuthCredential(securityValue: string): { username: string; password: string } {
+  if (!isValidBase64(securityValue)) {
+    throw new Error("Credential must be a valid base64 string");
+  }
+
   const decoded = atob(securityValue);
+  if (!decoded.includes(":")) {
+    throw new Error(
+      "Basic auth credential must contain a username and password separated by a colon"
+    );
+  }
+
   const [username, password] = decoded.split(":", 2);
   return { username, password };
 }
