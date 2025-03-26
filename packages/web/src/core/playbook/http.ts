@@ -273,17 +273,18 @@ function makeOasSecurities(oas: BundledOasSpec, security: AuthResult): any {
   for (const name of Object.keys(matches)) {
     const scheme = deref(oas, schemes[name]);
     const securityValue = matches[name];
-    if (scheme?.type === "oauth2" || scheme?.type === "openIdConnect") {
-      result[name] = { token: { access_token: securityValue } };
-    } else if (
-      scheme?.type === "http" &&
-      scheme.scheme !== undefined &&
-      /^basic$/i.test(scheme.scheme)
-    ) {
-      const [username, password] = securityValue!.split(":", 2);
-      result[name] = { username, password };
-    } else {
-      result[name] = securityValue;
+    if (securityValue !== undefined) {
+      if (scheme?.type === "oauth2" || scheme?.type === "openIdConnect") {
+        result[name] = { token: { access_token: securityValue } };
+      } else if (
+        scheme?.type === "http" &&
+        scheme.scheme !== undefined &&
+        /^basic$/i.test(scheme.scheme)
+      ) {
+        result[name] = decodeBasicAuthCredential(securityValue);
+      } else {
+        result[name] = securityValue;
+      }
     }
   }
 
@@ -312,13 +313,14 @@ function makeSwaggerSecurities(
   for (const name of Object.keys(matches)) {
     const scheme = schemes[name];
     const securityValue = matches[name];
-    if (scheme?.type === "oauth") {
-      result[name] = { token: { access_token: securityValue } };
-    } else if (scheme?.type === "basic") {
-      const [username, password] = securityValue!.split(":", 2);
-      result[name] = { username, password };
-    } else {
-      result[name] = securityValue;
+    if (securityValue !== undefined) {
+      if (scheme?.type === "oauth") {
+        result[name] = { token: { access_token: securityValue } };
+      } else if (scheme?.type === "basic") {
+        result[name] = decodeBasicAuthCredential(securityValue);
+      } else {
+        result[name] = securityValue;
+      }
     }
   }
 
@@ -382,4 +384,10 @@ function getSwaggerClientContentType(request: Playbook.CRequest): string | undef
     return "text/plain";
   }
   return request.body?.mediaType;
+}
+
+function decodeBasicAuthCredential(securityValue: string): { username: string; password: string } {
+  const decoded = atob(securityValue);
+  const [username, password] = decoded.split(":", 2);
+  return { username, password };
 }
