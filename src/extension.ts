@@ -164,6 +164,7 @@ export async function activate(context: vscode.ExtensionContext) {
   statusBarItem.text = "$(xliic-icon)";
   statusBarItem.command = "openapi.showSettings";
   statusBarItem.tooltip = "42Crunch Settings";
+  statusBarItem.show();
 
   if (previousVersion!.major < currentVersion.major) {
     createWhatsNewPanel(context);
@@ -179,11 +180,6 @@ export async function activate(context: vscode.ExtensionContext) {
   const reloadCredentials = debounce(
     async () => {
       const credentials = await hasCredentials(configuration, context.secrets);
-      if (credentials === undefined) {
-        statusBarItem.hide();
-      } else {
-        statusBarItem.show();
-      }
       if (credentials === "api-token") {
         platformStore.setCredentials(await getPlatformCredentials(configuration, context.secrets));
       } else {
