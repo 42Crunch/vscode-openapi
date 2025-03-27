@@ -36,11 +36,15 @@ async function downloadArticles(useDevEndpoints: boolean): Promise<any> {
   );
 }
 
-export async function requestToken(email: string, useDevEndpoints: boolean): Promise<any> {
+export async function requestToken(
+  email: string,
+  optIn: boolean,
+  useDevEndpoints: boolean
+): Promise<any> {
   const { freemiumdUrl } = getEndpoints(useDevEndpoints);
   const response = await got(`${freemiumdUrl}/api/v1/anon/token`, {
     method: "POST",
-    form: { email },
+    form: { email, "opt-in": optIn },
     headers: {
       Accept: "application/json",
     },
