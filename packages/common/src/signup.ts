@@ -12,7 +12,7 @@ export type ShowAnondTokenResponseMessage = {
 
 export type RequestAnondTokenByEmail = {
   command: "requestAnondTokenByEmail";
-  payload: string;
+  payload: { email: string; optIn: boolean };
 };
 
 export type AnondSignUpComplete = {

@@ -10,6 +10,7 @@ import {
   saveAgreeToTermsAndConditions,
   openLink,
   showTermsAndConditionsError,
+  saveAgreeToEmailOptIn,
 } from "./slice";
 import * as z from "zod";
 import { NormalProgressButton } from "../../new-components/ProgressButton";
@@ -81,6 +82,9 @@ export function AnondSignUpEmailForm({
           {showTermsAndConditionsError && !agreeToTermsAndConditions && (
             <ErrorBanner message="Please accept Terms and Conditions to continue"></ErrorBanner>
           )}
+
+          <EmailOptInCheckbox />
+
           <div>
             Register for your free API security testing account to:
             <ul>
@@ -337,7 +341,7 @@ export function AgreeToTermsAndConditionsCheckbox() {
   const dispatch = useAppDispatch();
   const { agreeToTermsAndConditions } = useAppSelector((state) => state.signup);
   return (
-    <AgreeToTermsAndConditionsBar>
+    <CheckboxContainer>
       <Checkbox
         value={agreeToTermsAndConditions}
         onChange={(value: boolean) => {
@@ -360,7 +364,24 @@ export function AgreeToTermsAndConditionsCheckbox() {
         }
         size={"medium"}
       ></Checkbox>
-    </AgreeToTermsAndConditionsBar>
+    </CheckboxContainer>
+  );
+}
+
+export function EmailOptInCheckbox() {
+  const dispatch = useAppDispatch();
+  const { agreeToEmailOptIn } = useAppSelector((state) => state.signup);
+  return (
+    <CheckboxContainer>
+      <Checkbox
+        value={agreeToEmailOptIn}
+        onChange={(value: boolean) => {
+          dispatch(saveAgreeToEmailOptIn(value));
+        }}
+        label={"I want to receive news about 42Crunch and their other products and services."}
+        size={"medium"}
+      ></Checkbox>
+    </CheckboxContainer>
   );
 }
 
@@ -431,7 +452,7 @@ const ErrorBannerContainer = styled.div`
   }
 `;
 
-const AgreeToTermsAndConditionsBar = styled.div`
+const CheckboxContainer = styled.div`
   display: flex;
   gap: 5px;
   align-items: center;

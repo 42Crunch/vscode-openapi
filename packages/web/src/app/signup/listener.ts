@@ -23,9 +23,12 @@ export function createListener(host: Webapp["host"]) {
       startAppListening({
         actionCreator: requestAnondTokenByEmail,
         effect: async (action, listenerApi) => {
+          const {
+            signup: { agreeToEmailOptIn },
+          } = listenerApi.getState();
           host.postMessage({
             command: "requestAnondTokenByEmail",
-            payload: action.payload,
+            payload: { email: action.payload, optIn: agreeToEmailOptIn },
           });
         },
       }),
