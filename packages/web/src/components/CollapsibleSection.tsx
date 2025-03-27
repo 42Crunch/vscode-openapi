@@ -16,7 +16,7 @@ export default function CollapsibleSection({
 
   return (
     <Container>
-      <Title collapsed={collapsed} onClick={() => setCollapsed(!collapsed)}>
+      <Title $collapsed={collapsed} onClick={() => setCollapsed(!collapsed)}>
         <div>{collapsed ? <AngleDown /> : <AngleUp />}</div>
         <div>
           <TopDescription>{title}</TopDescription>
@@ -32,7 +32,7 @@ const Container = styled.div`
   border: 1px solid var(${ThemeColorVariables.border});
 `;
 
-const Title = styled.div`
+const Title = styled.div<{ $collapsed: boolean }>`
   display: flex;
   cursor: pointer;
   padding: 10px 10px 10px 0px;
@@ -45,8 +45,8 @@ const Title = styled.div`
     }
   }
   border-left: 5px solid transparent;
-  ${({ collapsed }: { collapsed: boolean }) =>
-    !collapsed &&
+  ${({ $collapsed }) =>
+    !$collapsed &&
     `border-bottom: 1px solid var(${ThemeColorVariables.border});
     border-left: 5px solid var(${ThemeColorVariables.badgeBackground});`}
 `;

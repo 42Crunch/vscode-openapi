@@ -91,7 +91,7 @@ const Overlay = styled(Dialog.Overlay)`
   inset: 0;
 `;
 
-const DialogContent = styled(Dialog.Content)`
+const DialogContent = styled(Dialog.Content)<{ $noOverflow?: boolean }>`
   position: fixed;
   top: 50%;
   left: 50%;
@@ -100,7 +100,7 @@ const DialogContent = styled(Dialog.Content)`
   max-width: 450px;
   max-height: 85vh;
   padding: 25px;
-  ${({ $noOverflow }: { $noOverflow?: boolean }) => !$noOverflow && "overflow-y: auto;"}
+  ${({ $noOverflow }) => !$noOverflow && "overflow-y: auto;"}
   background-color: var(${ThemeColorVariables.background});
   color: var(${ThemeColorVariables.foreground});
   border-radius: 6px;

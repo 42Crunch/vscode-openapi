@@ -153,7 +153,7 @@ function SelectionsContainer({
   return (
     <Container>
       {getSelectedTags(tagEntries, categories, selectedTagIds).map((item, index) => (
-        <HeaderOptionContainer key={`${item.tagId}${index}`} isLoaded={item.loaded}>
+        <HeaderOptionContainer key={`${item.tagId}${index}`} $isLoaded={item.loaded}>
           <HeaderOptionContainerInfo>
             <HeaderOptionSpan>
               {item.loaded

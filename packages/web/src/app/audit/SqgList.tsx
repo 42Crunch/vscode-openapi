@@ -16,7 +16,7 @@ export default function SqgList({
       {sqgs.map((sqg, index) => (
         <Button
           key={sqg.id}
-          selected={sqg.id === selected}
+          $selected={sqg.id === selected}
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -38,7 +38,7 @@ const Container = styled.div`
   gap: 4px;
 `;
 
-const Button = styled.div<{ selected: boolean }>`
+const Button = styled.div<{ $selected: boolean }>`
   display: flex;
   height: 28px;
   min-width: 100px;
@@ -53,8 +53,8 @@ const Button = styled.div<{ selected: boolean }>`
   align-items: center;
   justify-content: center;
 
-  ${({ selected }) =>
-    selected
+  ${({ $selected }) =>
+    $selected
       ? `background-color: var(${ThemeColorVariables.computedTwo});`
       : `background-color: var(${ThemeColorVariables.computedOne});`}
 `;

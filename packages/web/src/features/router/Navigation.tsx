@@ -42,7 +42,7 @@ function InnerNavigation({ routes }: { routes: Routes }) {
       {menuRoutes.map(({ id, title, link }) => (
         <NavigationTab
           key={id}
-          active={id === top[top.length - 1]}
+          $active={id === top[top.length - 1]}
           onClick={() => {
             if (link) {
               dispatch(openLink(link));
@@ -75,17 +75,17 @@ const TitleContent = styled.div`
   border-bottom: 1px solid var(${ThemeColorVariables.border});
 `;
 
-const NavigationTab = styled.div<{ active?: boolean }>`
+const NavigationTab = styled.div<{ $active?: boolean }>`
   padding: 0 1em;
   display: flex;
   align-items: center;
-  ${(props) =>
-    props.active
+  ${({ $active }) =>
+    $active
       ? `border-bottom: 3px solid var(${ThemeColorVariables.buttonBackground});`
       : `opacity: 0.7; border-bottom: 3px solid transparent; cursor: pointer;`};
   > div {
-    border: ${(props) =>
-      props.active && ThemeColorVariables.contrastActiveBorder
+    border: ${({ $active }) =>
+      $active && ThemeColorVariables.contrastActiveBorder
         ? `1px solid var(${ThemeColorVariables.contrastActiveBorder})`
         : "none"};
   }

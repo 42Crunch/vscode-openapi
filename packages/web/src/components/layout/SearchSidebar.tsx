@@ -135,7 +135,7 @@ export function SearchSidebarControlled({
           {renderButtons && <Buttons>{renderButtons()}</Buttons>}
         </Sidebar>
       )}
-      <Content expanded={expanded}>
+      <Content $expanded={expanded}>
         {selected !== undefined ? render(selected) : renderEmpty?.()}
       </Content>
     </>
@@ -171,9 +171,9 @@ const SidebarCollapsed = styled.div`
   background-color: var(${ThemeColorVariables.background});
 `;
 
-const Content = styled.div<{ expanded: boolean }>`
+const Content = styled.div<{ $expanded: boolean }>`
   position: absolute;
-  ${({ expanded }) => (expanded ? `left: 320px;` : `left: 40px;`)}
+  ${({ $expanded }) => ($expanded ? `left: 320px;` : `left: 40px;`)}
   top: 0;
   right: 0;
   bottom: 0;

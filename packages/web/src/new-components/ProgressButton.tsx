@@ -37,8 +37,8 @@ export function ProgressButton({
     <Button
       className={className}
       onClick={onClick}
-      disabled={disabled || isWaiting}
-      waiting={isWaiting}
+      $disabled={disabled || isWaiting}
+      $waiting={isWaiting}
     >
       <span>{label}</span>
       <Spinner />
@@ -55,7 +55,7 @@ const rotation = keyframes`
   }
 `;
 
-const Button = styled.button`
+const Button = styled.button<{ $disabled?: boolean; $waiting?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -63,7 +63,7 @@ const Button = styled.button`
   background-color: var(${ThemeColorVariables.buttonBackground});
   color: var(${ThemeColorVariables.buttonForeground});
   border: 1px solid var(${ThemeColorVariables.buttonBorder});
-  ${({ waiting }: { disabled?: boolean; waiting?: boolean }) => waiting && "gap: 8px;"}
+  ${({ $waiting }) => $waiting && "gap: 8px;"}
   > span {
     flex: 1;
   }
@@ -74,7 +74,7 @@ const Button = styled.button`
     ${({ waiting }: { disabled?: boolean; waiting?: boolean }) => !waiting && "width: 0;"}
   }
   &:disabled {
-    opacity: .4;
+    opacity: 0.4;
   }
 `;
 

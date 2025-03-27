@@ -19,8 +19,8 @@ export default function CollapsibleCard({
   return (
     <Container>
       <Title
-        thin={head.length === 1}
-        collapsed={collapsed}
+        $thin={head.length === 1}
+        $collapsed={collapsed}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -39,7 +39,7 @@ const Container = styled.div`
   border: 1px solid var(${ThemeColorVariables.border});
 `;
 
-const Title = styled.div`
+const Title = styled.div<{ $collapsed: boolean; $thin: boolean }>`
   display: flex;
   cursor: pointer;
   padding: 10px 10px 10px 0px;
@@ -50,8 +50,7 @@ const Title = styled.div`
     padding-right: 8px;
     display: flex;
     justify-content: center;
-    align-items: ${({ thin }: { collapsed: boolean; thin: boolean }) =>
-      thin ? "center" : "start"};
+    align-items: ${({ $thin }) => ($thin ? "center" : "start")};
     > svg {
       fill: var(${ThemeColorVariables.foreground});
     }
@@ -68,8 +67,8 @@ const Title = styled.div`
   }
 
   border-left: 5px solid transparent;
-  ${({ collapsed }: { collapsed: boolean; thin: boolean }) =>
-    !collapsed &&
+  ${({ $collapsed }) =>
+    !$collapsed &&
     `border-bottom: 1px solid var(${ThemeColorVariables.border});
     border-left: 5px solid var(${ThemeColorVariables.badgeBackground});`}
 `;

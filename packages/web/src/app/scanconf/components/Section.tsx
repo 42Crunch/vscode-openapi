@@ -15,7 +15,7 @@ export default function Section({
 }) {
   if (collapsed) {
     return (
-      <Container collapsed={collapsed} onClick={onExpand}>
+      <Container $collapsed={collapsed} onClick={onExpand}>
         <div>{title}</div>
         <div>
           <Pen />
@@ -23,12 +23,12 @@ export default function Section({
       </Container>
     );
   }
-  return <Container collapsed={collapsed}>{children}</Container>;
+  return <Container $collapsed={collapsed}>{children}</Container>;
 }
 
-const Container = styled.div`
-  ${({ collapsed }: { collapsed: boolean }) =>
-    collapsed &&
+const Container = styled.div<{ $collapsed: boolean }>`
+  ${({ $collapsed }) =>
+    $collapsed &&
     `
     display: flex;
     padding: 8px;

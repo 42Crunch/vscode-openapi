@@ -8,7 +8,7 @@ export default function ProgressBar({ progress, label }: { progress: number; lab
   return (
     <ProgressBarContainer>
       <ProgressBarBack>{actualLabel}</ProgressBarBack>
-      <ProgressBarFront progress={progress}>{actualLabel}</ProgressBarFront>
+      <ProgressBarFront $progress={progress}>{actualLabel}</ProgressBarFront>
     </ProgressBarContainer>
   );
 }
@@ -33,7 +33,7 @@ const ProgressBarBack = styled.div`
   border-radius: 6px;
 `;
 
-const ProgressBarFront = styled.div`
+const ProgressBarFront = styled.div<{ $progress: number }>`
   position: absolute;
   top: 0;
   left: 0;
@@ -44,6 +44,6 @@ const ProgressBarFront = styled.div`
   align-items: center;
   color: var(${ThemeColorVariables.buttonForeground});
   background-color: var(${ThemeColorVariables.buttonBackground});
-  clip-path: inset(0 ${({ progress }: { progress: number }) => 100 - progress * 100}% 0 0);
+  clip-path: inset(0 ${({ $progress }) => 100 - $progress * 100}% 0 0);
   transition: clip-path 0.3s linear;
 `;

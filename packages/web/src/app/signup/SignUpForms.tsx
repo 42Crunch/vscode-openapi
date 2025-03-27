@@ -113,7 +113,7 @@ export function LinkButton({
   return (
     <LinkRef
       href="#"
-      disabled={disabled}
+      $disabled={disabled}
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -423,11 +423,11 @@ const InputContainer = styled.div`
   padding: 16px;
 `;
 
-const LinkRef = styled.a`
+const LinkRef = styled.a<{ $disabled?: boolean }>`
   text-decoration: none;
-  ${({ disabled }: { disabled?: boolean }) => disabled && "opacity: 0.4;"}
-  ${({ disabled }: { disabled?: boolean }) => disabled && "cursor: default;"}
-  ${({ disabled }: { disabled?: boolean }) => disabled && "pointer-events: none;"}
+  ${({ $disabled }) => $disabled && "opacity: 0.4;"}
+  ${({ $disabled }) => $disabled && "cursor: default;"}
+  ${({ $disabled }) => $disabled && "pointer-events: none;"}
 `;
 
 const ButtonsBar = styled.div`

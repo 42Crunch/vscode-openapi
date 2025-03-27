@@ -105,7 +105,7 @@ function FormPlugin({ name }: { name: string }) {
     );
   } else {
     return (
-      <StatusLine error>
+      <StatusLine $error>
         {error}
         <ExclamationCircle
           style={{
@@ -142,7 +142,7 @@ const Container = styled.div`
   }
 `;
 
-const StatusLine = styled.div<{ error?: boolean }>`
+const StatusLine = styled.div<{ $error?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -150,11 +150,11 @@ const StatusLine = styled.div<{ error?: boolean }>`
   padding: 2px 4px;
   border-top: 1px solid var(${ThemeColorVariables.border});
   line-break: anywhere;
-  color: ${({ error }) =>
-    error
+  color: ${({ $error }) =>
+    $error
       ? `var(${ThemeColorVariables.errorForeground})`
       : `var(${ThemeColorVariables.foreground})`};
-  background-color: ${({ error }) =>
+  background-color: ${({ $error: error }) =>
     error
       ? `var(${ThemeColorVariables.errorBackground})`
       : `var(${ThemeColorVariables.background})`};

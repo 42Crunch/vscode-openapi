@@ -51,7 +51,7 @@ export default function Response({
   const active = tabs.filter((tab) => tab.id === activeId)[0];
 
   return (
-    <Container accented={accented}>
+    <Container $accented={accented}>
       <Header>
         {title && <div style={{ flex: 1 }}>{title}</div>}
         <div>Status: {response.statusCode}</div>
@@ -93,9 +93,9 @@ export default function Response({
   );
 }
 
-const Container = styled.div`
-  ${({ accented }: { accented: boolean | undefined }) =>
-    accented && `background-color: var(${ThemeColorVariables.computedOne}); padding: 4px;`}
+const Container = styled.div<{ $accented: boolean | undefined }>`
+  ${({ $accented }) =>
+    $accented && `background-color: var(${ThemeColorVariables.computedOne}); padding: 4px;`}
 `;
 
 const Content = styled.div``;

@@ -79,7 +79,7 @@ export function PlainSelect({
           <AngleDown />
         </Input>
       </SelectContainer>
-      <Dropdown {...getMenuProps()} isOpen={isOpen}>
+      <Dropdown {...getMenuProps()} $isOpen={isOpen}>
         {isOpen &&
           options.map((item, index) => (
             <li key={`${item.value}${index}`} {...getItemProps({ item, index })}>
@@ -139,7 +139,7 @@ const Input = styled.div`
   }
 `;
 
-const Dropdown = styled.ul`
+const Dropdown = styled.ul<{ $isOpen: boolean }>`
   max-height: 350px;
   overflow-y: auto;
   z-index: 1;
@@ -151,8 +151,8 @@ const Dropdown = styled.ul`
   list-style: none;
   background-color: var(${ThemeColorVariables.dropdownBackground});
   color: var(${ThemeColorVariables.dropdownForeground});
-  ${({ isOpen }: { isOpen: boolean }) =>
-    isOpen &&
+  ${({ $isOpen }) =>
+    $isOpen &&
     `
     border: 1px solid var(${ThemeColorVariables.dropdownBorder});
     padding: 4px;

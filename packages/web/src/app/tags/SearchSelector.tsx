@@ -85,7 +85,7 @@ export function SearchSelector<T>({
         />
         <AngleDown {...buttonProps} />
       </DownShiftContainer>
-      <DownShiftList {...getMenuProps()} isOpen={isOpen}>
+      <DownShiftList {...getMenuProps()} $isOpen={isOpen}>
         {isOpen &&
           items.map((item, index) => (
             <DropDownListElement key={`li-${index}`} {...getItemProps({ item, index })}>
@@ -158,7 +158,7 @@ const DownShiftInput = styled.input`
   cursor: pointer;
 `;
 
-const DropDownListDefault = styled.ul`
+const DropDownListDefault = styled.ul<{ $isOpen: boolean }>`
   position: absolute;
   z-index: 1;
   left: 0;
@@ -171,8 +171,8 @@ const DropDownListDefault = styled.ul`
   background-color: var(${ThemeColorVariables.dropdownBackground});
   color: var(${ThemeColorVariables.dropdownForeground});
 
-  ${({ isOpen }: { isOpen: boolean }) =>
-    isOpen &&
+  ${({ $isOpen }) =>
+    $isOpen &&
     `
     border: 1px solid var(${ThemeColorVariables.dropdownBorder});
     padding: 4px;

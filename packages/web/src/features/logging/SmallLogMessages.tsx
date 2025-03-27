@@ -54,7 +54,7 @@ export default function SmallLogMessages() {
 
 function Peg({ first, last }: { first: boolean; last: boolean }) {
   return (
-    <PegContainer first={first} last={last}>
+    <PegContainer $first={first} $last={last}>
       <div />
       <div />
       <div />
@@ -79,7 +79,7 @@ const LogText = styled.div`
   }
 `;
 
-const PegContainer = styled.div`
+const PegContainer = styled.div<{ $first: boolean; $last: boolean }>`
   display: flex;
   flex-flow: column;
   align-items: center;
@@ -87,8 +87,7 @@ const PegContainer = styled.div`
   > div:first-child {
     width: 1px;
     height: 8px;
-    ${({ first }: { first: boolean; last: boolean }) =>
-      !first && `background-color: var(${ThemeColorVariables.border});`}
+    ${({ $first }) => !$first && `background-color: var(${ThemeColorVariables.border});`}
   }
   > div:nth-child(2) {
     background-color: var(${ThemeColorVariables.border});
@@ -100,8 +99,7 @@ const PegContainer = styled.div`
   > div:last-child {
     flex: 1;
     width: 1px;
-    ${({ last }: { first: boolean; last: boolean }) =>
-      !last && `background-color: var(${ThemeColorVariables.border});`}
+    ${({ $last }) => !$last && `background-color: var(${ThemeColorVariables.border});`}
   }
 `;
 

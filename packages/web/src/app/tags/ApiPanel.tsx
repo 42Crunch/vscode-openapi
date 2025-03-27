@@ -200,7 +200,7 @@ function HeaderOptionPanel({
   onOptionRemoved: () => void;
 }) {
   return (
-    <HeaderOptionContainer isLoaded={isLoaded}>
+    <HeaderOptionContainer $isLoaded={isLoaded}>
       <HeaderOptionContainerInfo>
         <HeaderOptionSpan>{name}</HeaderOptionSpan>
         <HeaderOptionNoteSpan>UUID: {id}</HeaderOptionNoteSpan>
@@ -263,7 +263,7 @@ const Header = styled.div`
   padding: 16px;
 `;
 
-export const HeaderOptionContainer = styled.div`
+export const HeaderOptionContainer = styled.div<{ $isLoaded: boolean }>`
   display: flex;
   flex-direction: row;
   min-height: 50px;
@@ -272,8 +272,8 @@ export const HeaderOptionContainer = styled.div`
   border-width: 1px;
   border-style: solid;
   border-radius: 3px;
-  ${({ isLoaded }: { isLoaded: boolean }) =>
-    !isLoaded &&
+  ${({ $isLoaded }) =>
+    !$isLoaded &&
     `
      border-color: var(${ThemeColorVariables.errorBorder});
   `}

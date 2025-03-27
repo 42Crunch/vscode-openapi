@@ -16,7 +16,7 @@ export default function Help() {
         {headings.map((heading, index) => (
           <Title
             key={index}
-            level={heading.level}
+            $level={heading.level}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -27,7 +27,7 @@ export default function Help() {
           </Title>
         ))}
       </Sidebar>
-      <Content ref={documentRef} expanded>
+      <Content ref={documentRef} $expanded>
         <Scan components={{ Link }} />
       </Content>
     </>
@@ -100,7 +100,7 @@ const Sidebar = styled.div`
   background-color: var(${ThemeColorVariables.background});
 `;
 
-const Title = styled.div<{ level: 1 | 2 | 3 }>`
+const Title = styled.div<{ $level: 1 | 2 | 3 }>`
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -108,15 +108,15 @@ const Title = styled.div<{ level: 1 | 2 | 3 }>`
     background-color: var(${ThemeColorVariables.listHoverBackground});
   }
 
-  ${({ level }) =>
-    level === 1 &&
+  ${({ $level }) =>
+    $level === 1 &&
     `
     font-weight: 600;
     font-size: 16px;
     padding: 8px 8px;
   `}
 
-  ${({ level }) =>
+  ${({ $level: level }) =>
     level === 2 &&
     `
     font-weight: 500;
@@ -124,7 +124,7 @@ const Title = styled.div<{ level: 1 | 2 | 3 }>`
     padding: 4px 16px;
   `}
 
-  ${({ level }) =>
+  ${({ $level: level }) =>
     level === 3 &&
     `
     font-weight: 400;
@@ -133,9 +133,9 @@ const Title = styled.div<{ level: 1 | 2 | 3 }>`
   `}
 `;
 
-const Content = styled.div<{ expanded: boolean }>`
+const Content = styled.div<{ $expanded: boolean }>`
   position: absolute;
-  ${({ expanded }) => (expanded ? `left: 320px;` : `left: 40px;`)}
+  ${({ $expanded }) => ($expanded ? `left: 320px;` : `left: 40px;`)}
   top: 0;
   right: 0;
   bottom: 0;

@@ -25,7 +25,7 @@ export default function Textarea({
 
   return (
     <>
-      <Container invalid={invalid}>
+      <Container $invalid={invalid}>
         <Title>
           <div>
             <span>{label}</span> {disabled && <span>(read only)</span>}
@@ -39,7 +39,7 @@ export default function Textarea({
   );
 }
 
-const Container = styled.div`
+const Container = styled.div<{ $invalid?: boolean }>`
   height: 240px;
   background-color: var(${ThemeColorVariables.inputBackground});
   border-radius: 2px;
@@ -48,8 +48,8 @@ const Container = styled.div`
   padding: 4px 8px;
   gap: 4px;
 
-  ${({ invalid }: { invalid?: boolean }) =>
-    invalid
+  ${({ $invalid }) =>
+    $invalid
       ? `border: 1px solid var(${ThemeColorVariables.errorBorder});`
       : `border: 1px solid var(${ThemeColorVariables.border});
          &:focus-within {

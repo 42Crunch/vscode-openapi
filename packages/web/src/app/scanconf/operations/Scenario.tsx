@@ -90,7 +90,7 @@ function StageDropTarget({
       isOver: !!monitor.isOver(),
     }),
   }));
-  return <StageDropArea ref={drop} isOver={isOver}></StageDropArea>;
+  return <StageDropArea ref={drop} $isOver={isOver}></StageDropArea>;
 }
 
 const Container = styled.div`
@@ -99,10 +99,10 @@ const Container = styled.div`
   gap: 8px;
 `;
 
-const StageDropArea = styled.div`
+const StageDropArea = styled.div<{ $isOver: boolean }>`
   display: flex;
   border: 16px solid var(${ThemeColorVariables.border});
   opacity: 0.5;
   cursor: pointer;
-  ${({ isOver }: { isOver: boolean }) => isOver && "opacity: 1;"}
+  ${({ $isOver }) => $isOver && "opacity: 1;"}
 `;

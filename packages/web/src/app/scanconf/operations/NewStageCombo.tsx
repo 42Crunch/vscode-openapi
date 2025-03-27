@@ -72,7 +72,7 @@ export default function NewStageCombo({
         }}
       />
       <Dropdown>
-        <DropdownList {...getMenuProps()} isOpen={isOpen}>
+        <DropdownList {...getMenuProps()} $isOpen={isOpen}>
           {isOpen && (
             <>
               <Section>Operations</Section>
@@ -135,9 +135,8 @@ const Dropdown = styled.div`
   z-index: 1;
 `;
 
-const DropdownList = styled.ul`
-  ${({ isOpen }: { isOpen: boolean }) =>
-    isOpen && `border: 1px solid var(${ThemeColorVariables.dropdownBorder});`}
+const DropdownList = styled.ul<{ $isOpen: boolean }>`
+  ${({ $isOpen }) => $isOpen && `border: 1px solid var(${ThemeColorVariables.dropdownBorder});`}
   background-color: var(${ThemeColorVariables.dropdownBackground});
   color: var(${ThemeColorVariables.dropdownForeground});
   position: absolute;

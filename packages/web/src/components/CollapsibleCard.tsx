@@ -19,7 +19,7 @@ export default function CollapsibleCard({
   return (
     <Container>
       <Title
-        collapsed={collapsed}
+        $collapsed={collapsed}
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -41,7 +41,7 @@ const Container = styled.div`
   //background-color: var(${ThemeColorVariables.computedOne});
 `;
 
-const Title = styled.div`
+const Title = styled.div<{ $collapsed: boolean }>`
   display: flex;
   cursor: pointer;
   padding: 10px 10px 10px 0px;
@@ -68,8 +68,8 @@ const Title = styled.div`
   }
 
   border-left: 5px solid transparent;
-  ${({ collapsed }: { collapsed: boolean }) =>
-    !collapsed &&
+  ${({ $collapsed }) =>
+    !$collapsed &&
     `border-bottom: 1px solid var(${ThemeColorVariables.border});
     border-left: 5px solid var(${ThemeColorVariables.badgeBackground});`}
 `;

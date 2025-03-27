@@ -17,19 +17,19 @@ export default function SqgDetails({ sqg, summary }: { sqg: Sqg; summary: Summar
       </Header>
       <Content>
         <div>Global score</div>
-        <Score highlight={summary.all < minimum.global}>{summary.all}</Score>
+        <Score $highlight={summary.all < minimum.global}>{summary.all}</Score>
         <Score>{minimum.global}</Score>
       </Content>
       <Content>
         <div>Security score</div>
-        <Score highlight={summary.security.value < minimum.security}>
+        <Score $highlight={summary.security.value < minimum.security}>
           {summary.security.value}
         </Score>
         <Score>{minimum.security}</Score>
       </Content>
       <Content>
         <div>Data validation score</div>
-        <Score highlight={summary.datavalidation.value < minimum.dataValidation}>
+        <Score $highlight={summary.datavalidation.value < minimum.dataValidation}>
           {summary.datavalidation.value}
         </Score>
         <Score>{minimum.dataValidation}</Score>
@@ -61,6 +61,6 @@ const Content = styled.div`
   }
 `;
 
-const Score = styled.div<{ highlight?: boolean }>`
-  ${({ highlight }) => highlight && "font-weight: 700;"}
+const Score = styled.div<{ $highlight?: boolean }>`
+  ${({ $highlight: highlight }) => highlight && "font-weight: 700;"}
 `;

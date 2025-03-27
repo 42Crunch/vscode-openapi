@@ -57,7 +57,7 @@ export default function DownshiftComboNewItemMenu<T>({
         })}
         placeholder={placeholder}
       />
-      <Dropdown visible={isOpen && (filteredOptions.length > 0 || filter.length > 0)}>
+      <Dropdown $visible={isOpen && (filteredOptions.length > 0 || filter.length > 0)}>
         <DropdownList {...getMenuProps()}>
           {filteredOptions.map((item, index) => {
             return (
@@ -112,10 +112,10 @@ const Input = styled.input`
   }
 `;
 
-const Dropdown = styled.div`
+const Dropdown = styled.div<{ $visible: boolean }>`
   position: relative;
   z-index: 1;
-  visibility: ${({ visible }: { visible: boolean }) => (visible ? "visible" : "hidden")};
+  visibility: ${({ $visible }) => ($visible ? "visible" : "hidden")};
 `;
 
 const DropdownList = styled.ul`

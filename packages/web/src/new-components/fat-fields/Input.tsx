@@ -27,7 +27,7 @@ export default function Input({
   return (
     <>
       <Container>
-        <Inner invalid={invalid}>
+        <Inner $invalid={invalid}>
           <Title>
             <div>
               <span>{label}</span> {disabled && <span>(read only)</span>}
@@ -56,7 +56,7 @@ const Container = styled.div`
   }
 `;
 
-const Inner = styled.div`
+const Inner = styled.div<{ $invalid?: boolean }>`
   height: 40px;
   background-color: var(${ThemeColorVariables.inputBackground});
   border-radius: 2px;
@@ -65,8 +65,8 @@ const Inner = styled.div`
   padding: 4px 8px;
   gap: 4px;
 
-  ${({ invalid }: { invalid?: boolean }) =>
-    invalid
+  ${({ $invalid }) =>
+    $invalid
       ? `border: 1px solid var(${ThemeColorVariables.errorBorder});`
       : `border: 1px solid var(${ThemeColorVariables.border});
          &:focus-within {
