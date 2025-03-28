@@ -1009,6 +1009,20 @@
           "$ref": "#/definitions/content",
           "minProperties": 1,
           "maxProperties": 1
+        },
+        "example": {},
+        "examples": {
+          "type": "object",
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "$ref": "#/definitions/example"
+              },
+              {
+                "$ref": "#/definitions/reference"
+              }
+            ]
+          }
         }
       },
       "oneOf": [
