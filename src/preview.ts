@@ -148,6 +148,7 @@ function buildWebviewPanel(
     {
       enableScripts: true,
       retainContextWhenHidden: true,
+      enableFindWidget: true,
     }
   );
 
