@@ -6,10 +6,12 @@
   "scripts": {
     "build": "tsc -b && vite build"
   },
-  "devDependencies": {
+  "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "swagger-ui-react": "^5.20.1",
+    "swagger-ui-react": "^5.20.2"
+  },
+  "devDependencies": {
     "vite": "*"
   }
 }

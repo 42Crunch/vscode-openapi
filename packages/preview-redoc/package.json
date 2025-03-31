@@ -6,10 +6,13 @@
   "scripts": {
     "build": "tsc -b && vite build"
   },
-  "devDependencies": {
-    "redoc": "2.1.5",
+  "dependencies": {
+    "redoc": "2.4.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+
+  "devDependencies": {
     "vite": "*"
   }
 }
