@@ -24,6 +24,7 @@ pipeline {
                 sh 'cp /build/*.vsix .'
                 sh 'cp /build/cyclonedx-sbom.json .'
                 sh 'cp /build/stats.txt .'
+                sh 'cp /build/webapps.tar.gz .'
                 script {
                     def issues = sh(script: 'cat /build/total-issues.txt', returnStdout: true).trim().toInteger()
                     def lines = sh(script: 'cat /build/total-lines.txt', returnStdout: true).trim().toInteger()
@@ -37,7 +38,7 @@ pipeline {
 
         stage('Archive Artifacts') {
             steps {
-                archiveArtifacts artifacts: '*.vsix, cyclonedx-sbom.json, stats.txt'
+                archiveArtifacts artifacts: '*.vsix, webapps.tar.gz, cyclonedx-sbom.json, stats.txt'
             }
         }
     }

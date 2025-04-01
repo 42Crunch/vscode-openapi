@@ -18,3 +18,7 @@ RUN echo "Issues per 1000 lines: `cat issues-per-1k-lines.txt`" >> stats.txt
 
 # Build the extension
 RUN vsce package `jq -r '.version' < package.json`-build-`date +"%Y%m%d%H%M%S"` --allow-star-activation --follow-symlinks --no-git-tag-version
+
+# Package the webapps for IntelliJ/Eclipse
+RUN cp /build/packages/package-lock.json /build/webview/generated/web/package-lock.json
+RUN tar -czvf /build/webapps.tar.gz -C /build/webview/generated web
