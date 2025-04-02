@@ -1,14 +1,22 @@
 # Changelog
 
-## Version 4.32.2 (March 24, 2023)
+## Version 4.33.0 (April 2, 2025)
+
+- Add support for Scan for OpenAPI 3.1 files
+- Add support for Audit for GraphQL files (beta)
+- When signing up for freemium token allow to opt-in for email updates
+- Make status bar 42Crunch icon always visible
+- Update SwaggerUI preview to workaround issues rendeing 3.1 OpenAPI files
+
+## Version 4.32.2 (March 24, 2025)
 
 - Fix fix regression breaking .42c folder creation in Scan
 
-## Version 4.32.1 (March 13, 2023)
+## Version 4.32.1 (March 13, 2025)
 
 - Fix issues in implementation of OpenAPI 3.1 schema
 
-## Version 4.32.0 (March 10, 2023)
+## Version 4.32.0 (March 10, 2025)
 
 - Adds support for OpenAPI 3.1 (beta)
 - Allow exporting Scan and Audit reports

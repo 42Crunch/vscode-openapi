@@ -1,10 +1,12 @@
 # What's New
 
-Version 4.32 of the OpenAPI Editor includes the following changes. Changes are for all users (Free and paid) unless specified.
+Version 4.33 of the OpenAPI Editor includes the following changes. Changes are for all users (Free and paid) unless specified.
 
-- Adds support for OpenAPI 3.1 (beta)
-- Allow exporting Scan and Audit reports
-- Update SwaggerUI dependency to support OpenAPI 3.0.4 in preview
+- Add support for Scan for OpenAPI 3.1 files
+- Add support for Audit for GraphQL files (beta)
+- When signing up for freemium token allow to opt-in for email updates
+- Make status bar 42Crunch icon always visible
+- Update SwaggerUI preview to workaround issues rendeing 3.1 OpenAPI files
 
 Access the [full changelog](https://github.com/42Crunch/vscode-openapi/blob/master/CHANGELOG.md) of the OpenAPI editor
 
