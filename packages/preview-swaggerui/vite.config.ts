@@ -23,6 +23,7 @@ export default defineConfig(({ command, mode }) => {
           return `${name}.js`;
         },
         formats: ["es"],
+        cssFileName: "style",
       },
       rollupOptions: {
         output: {
