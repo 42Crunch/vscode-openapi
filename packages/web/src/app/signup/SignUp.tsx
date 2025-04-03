@@ -16,8 +16,8 @@ export function RightContainer() {
         </CrunchMainLogoContainer>
         {currentFormId === "AnondSignUpEmailForm" && (
           <Title>
-            Register to check your API for quality, conformance and security vulnerabilities,
-            including BOLA, BFLA & BOPLA
+            Check your API for quality, conformance and security vulnerabilities, including BOLA,
+            BFLA & BOPLA
           </Title>
         )}
         {currentFormId === "AnondSignUpTokenForm" && (

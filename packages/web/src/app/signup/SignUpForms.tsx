@@ -85,13 +85,7 @@ export function AnondSignUpEmailForm({
 
           <EmailOptInCheckbox />
 
-          <div>
-            Register for your free API security testing account to:
-            <ul>
-              <li>Audit your OpenAPI contracts for quality and conformance</li>
-              <li>Scan your APIs for conformance and security vulnerabilities</li>
-            </ul>
-          </div>
+          <PrivacyPolicy />
         </InputContainer>
         <ButtonsBar>
           <ButtonSendEmail />
@@ -355,16 +349,37 @@ export function AgreeToTermsAndConditionsCheckbox() {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                dispatch(openLink("https://42crunch.com/websales-customer-agreement"));
+                dispatch(openLink("https://42crunch.com/freemium-terms-and-conditions/"));
               }}
             >
               terms & conditions
             </a>
+            . 42Crunch will send you important freemium service notifications by email. You may
+            unsubscribe at any time.
           </>
         }
         size={"medium"}
       ></Checkbox>
     </CheckboxContainer>
+  );
+}
+
+export function PrivacyPolicy() {
+  const dispatch = useAppDispatch();
+  return (
+    <div>
+      42Crunch is committed to protecting and respecting your privacy.{" "}
+      <a
+        href="#"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dispatch(openLink("https://42crunch.com/privacy-policy/"));
+        }}
+      >
+        Privacy Policy
+      </a>
+    </div>
   );
 }
 
