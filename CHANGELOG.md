@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.33.1 (April 3, 2025)
+
+- Add privacy policy to the freemium signup page
+
 ## Version 4.33.0 (April 2, 2025)
 
 - Add support for Scan for OpenAPI 3.1 files
