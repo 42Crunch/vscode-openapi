@@ -97,37 +97,7 @@ export default function Operations() {
             dispatch(
               saveRequest({
                 ref: { id, type: "request" },
-                stage: {
-                  operationId: undefined,
-                  defaultResponse: "200",
-                  request: {
-                    url,
-                    method: method,
-                    parameters: {
-                      header: [],
-                      path: [],
-                      query: [],
-                      cookie: [],
-                    },
-                    body: hasBody(method)
-                      ? {
-                          mediaType:
-                            mode === "urlencoded"
-                              ? "application/x-www-form-urlencoded"
-                              : "application/json",
-                          value: {},
-                        }
-                      : undefined,
-                  },
-                  responses: {
-                    "200": {
-                      expectations: {
-                        httpStatus: 200,
-                      },
-                      variableAssignments: {},
-                    },
-                  },
-                },
+                stage: makeExternalStage(method, url, mode),
               })
             );
             dispatch(setRequestId({ type: "request", id }));
@@ -198,4 +168,59 @@ export default function Operations() {
 function hasBody(method: HttpMethod): boolean {
   const withBody: HttpMethod[] = ["post", "put", "patch"];
   return withBody.includes(method);
+}
+
+function makeBody(
+  method: HttpMethod,
+  mode: "json" | "urlencoded"
+): Playbook.OperationBody | undefined {
+  if (hasBody(method)) {
+    return {
+      mediaType: mode === "urlencoded" ? "application/x-www-form-urlencoded" : "application/json",
+      value: {},
+    };
+  }
+}
+
+function makeHeaders(method: HttpMethod, mode: "json" | "urlencoded"): Playbook.ParameterList {
+  if (hasBody(method)) {
+    return [
+      {
+        key: "Content-Type",
+        value: mode === "urlencoded" ? "application/x-www-form-urlencoded" : "application/json",
+      },
+    ];
+  }
+
+  return [];
+}
+
+function makeExternalStage(
+  method: HttpMethod,
+  url: string,
+  mode: "json" | "urlencoded"
+): Playbook.ExternalStageContent {
+  return {
+    operationId: undefined,
+    defaultResponse: "200",
+    request: {
+      url,
+      method: method,
+      parameters: {
+        header: makeHeaders(method, mode),
+        path: [],
+        query: [],
+        cookie: [],
+      },
+      body: makeBody(method, mode),
+    },
+    responses: {
+      "200": {
+        expectations: {
+          httpStatus: 200,
+        },
+        variableAssignments: {},
+      },
+    },
+  };
 }
