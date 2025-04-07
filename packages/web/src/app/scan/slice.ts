@@ -7,6 +7,7 @@ import {
   OasWithOperationAndConfig,
   SingleOperationScanReport,
   FullScanReport,
+  ScanReportSegment,
 } from "@xliic/common/scan";
 import { HttpRequest, HttpResponse, HttpError, HttpConfig } from "@xliic/common/http";
 import { GeneralError } from "@xliic/common/error";
@@ -17,6 +18,7 @@ import {
   TestLogReport,
 } from "@xliic/common/scan-report";
 import { SeverityLevel, SeverityLevels } from "@xliic/common/audit";
+import { initProcessReport, processReport } from "../../json-streaming-parser/report-loader.worker";
 
 export type Filter = {
   severity?: SeverityLevel;
@@ -58,6 +60,7 @@ export interface OasState {
   titles: string[];
   paths: string[];
   operationIds: string[];
+  chunkCounter: number;
 }
 
 const initialState: OasState = {
@@ -88,6 +91,7 @@ const initialState: OasState = {
   titles: [],
   paths: [],
   operationIds: [],
+  chunkCounter: 0,
 };
 
 export const slice = createSlice({
@@ -212,6 +216,21 @@ export const slice = createSlice({
     sendCurlRequest: (state, action: PayloadAction<string>) => {},
 
     showJsonPointer: (state, action: PayloadAction<string>) => {},
+
+    sendScanReportSegment: (state, action: PayloadAction<ScanReportSegment>) => {
+      if (state.chunkCounter === 0) {
+        initProcessReport();
+        console.info("Done initProcessReport()");
+      }
+      state.chunkCounter += 1;
+      processReport(action.payload.progress === 1.0, action.payload.textSegment);
+      console.info(
+        "chunkCounter = " +
+          state.chunkCounter +
+          ", segment = " +
+          action.payload.textSegment.substring(0, 10)
+      );
+    },
   },
 });
 
@@ -221,6 +240,7 @@ export const {
   runScan,
   showScanReport,
   showFullScanReport,
+  sendScanReportSegment,
   showGeneralError,
   showHttpError,
   sendHttpRequest,

@@ -41,6 +41,12 @@ export type FullScanReport = {
   oas: BundledSwaggerOrOasSpec;
 };
 
+export type ScanReportSegment = {
+  file: string;
+  textSegment: string;
+  progress: number;
+};
+
 // requests to scan web app
 export type ScanOperationMessage = { command: "scanOperation"; payload: OasWithOperationAndConfig };
 
@@ -52,6 +58,11 @@ export type ShowScanReportMessage = {
 export type ShowFullScanReportMessage = {
   command: "showFullScanReport";
   payload: FullScanReport;
+};
+
+export type SendScanReportSegmentMessage = {
+  command: "sendScanReportSegment";
+  payload: ScanReportSegment;
 };
 
 // responses sent from web app to the vs code extension
