@@ -3,7 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 //const { getNewParser } = require("./clarinet.js");
 import { getNewParser } from "./getNewParser";
 import { demo } from "./indexedDb";
-import { initProcessReport, processReport } from "./report-loader.worker";
+//import { initProcessReport, processReport } from "./report-loader.worker";
 var exports = {};
 getNewParser(exports);
 const parser = (exports as any).parser();
@@ -54,7 +54,7 @@ export const slice = createSlice({
     },
     showBrowseFile: (state, action: PayloadAction<{ file: string }>) => {
       state.file = action.payload.file;
-      initProcessReport();
+      //initProcessReport();
     },
     convert: (state, action: PayloadAction<{ file: string }>) => {
       // -> IDE
@@ -65,7 +65,13 @@ export const slice = createSlice({
     ) => {
       state.chunkSize = action.payload.textSegment.length;
       state.counter += 1;
-      processReport(action.payload.progress === 1.0, action.payload.textSegment);
+      // console.info(
+      //   "progress = " +
+      //     action.payload.progress +
+      //     ", textSegment = " +
+      //     action.payload.textSegment.substring(0, 10)
+      // );
+      //processReport(action.payload.progress === 1.0, action.payload.textSegment);
 
       // state.text += action.payload.textSegment;
       // if (action.payload.progress === 1.0) {
