@@ -1,4 +1,6 @@
 import * as ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
+
 import "./styles.css";
 
 import { Preview } from "./preview";
@@ -23,4 +25,6 @@ globalThis.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
   return originalFetch(input, init);
 };
 
-ReactDOM.render(<Preview />, document.getElementById("root"));
+const container = document.getElementById("root");
+const root = createRoot(container);
+root.render(<Preview />);
