@@ -1,23 +1,23 @@
-import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from "@reduxjs/toolkit";
-import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
-import { BundledSwaggerOrOasSpec, getOperation, HttpMethod, HttpMethods } from "@xliic/openapi";
-import { TryitOperationValues } from "@xliic/common/tryit";
-import {
-  ScanConfig,
-  OasWithOperationAndConfig,
-  SingleOperationScanReport,
-  FullScanReport,
-  ScanReportSegment,
-} from "@xliic/common/scan";
-import { HttpRequest, HttpResponse, HttpError, HttpConfig } from "@xliic/common/http";
+import { createSlice, Dispatch, PayloadAction, StateFromReducersMapObject } from "@reduxjs/toolkit";
+import { SeverityLevel, SeverityLevels } from "@xliic/common/audit";
 import { GeneralError } from "@xliic/common/error";
+import { HttpConfig, HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
+import { TextChunk } from "@xliic/common/index-db";
 import { Preferences } from "@xliic/common/prefs";
+import {
+  FullScanReport,
+  OasWithOperationAndConfig,
+  ScanConfig,
+  SingleOperationScanReport,
+} from "@xliic/common/scan";
 import {
   RuntimeOperationReport,
   ScanReportJSONSchema,
   TestLogReport,
 } from "@xliic/common/scan-report";
-import { SeverityLevel, SeverityLevels } from "@xliic/common/audit";
+import { TryitOperationValues } from "@xliic/common/tryit";
+import { BundledSwaggerOrOasSpec, getOperation, HttpMethod, HttpMethods } from "@xliic/openapi";
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { initProcessReport, processReport } from "../../json-streaming-parser/report-loader.worker";
 
 export type Filter = {
@@ -217,11 +217,19 @@ export const slice = createSlice({
 
     showJsonPointer: (state, action: PayloadAction<string>) => {},
 
-    sendScanReportSegment: (state, action: PayloadAction<ScanReportSegment>) => {
-      if (state.chunkCounter === 0) {
-        initProcessReport();
-        console.info("Done initProcessReport()");
-      }
+    startInitDb: (state, action: PayloadAction<undefined>) => {
+      initProcessReport();
+    },
+
+    sendInitDbComplete: (state, action: PayloadAction<{ status: boolean; message: string }>) => {
+      // hook for a listener
+    },
+
+    closeInitDb: (state, action: PayloadAction<undefined>) => {
+      // TODO
+    },
+
+    parseChunk: (state, action: PayloadAction<TextChunk>) => {
       state.chunkCounter += 1;
       processReport(action.payload.progress === 1.0, action.payload.textSegment);
       console.info(
@@ -240,7 +248,6 @@ export const {
   runScan,
   showScanReport,
   showFullScanReport,
-  sendScanReportSegment,
   showGeneralError,
   showHttpError,
   sendHttpRequest,
@@ -249,6 +256,10 @@ export const {
   showJsonPointer,
   changeTab,
   changeFilter,
+  startInitDb,
+  sendInitDbComplete,
+  closeInitDb,
+  parseChunk,
 } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<

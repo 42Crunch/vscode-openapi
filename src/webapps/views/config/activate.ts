@@ -3,20 +3,22 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
+import { Preferences } from "@xliic/common/prefs";
 import * as vscode from "vscode";
+import { Cache } from "../../../cache";
 import { Configuration } from "../../../configuration";
-import { ConfigWebView } from "./view";
-import { PlatformStore } from "../../../platform/stores/platform-store";
-import { Logger } from "../../../platform/types";
-import { BigFilesWebView } from "../bigfiles/view";
+import { EnvStore } from "../../../envstore";
 import { ScanReportWebView } from "../../../platform/scan/report-view";
+import { PlatformStore } from "../../../platform/stores/platform-store";
 
 export function activate(
   context: vscode.ExtensionContext,
   configuration: Configuration,
   secrets: vscode.SecretStorage,
-  platform: PlatformStore,
-  logger: Logger
+  cache: Cache,
+  store: PlatformStore,
+  envStore: EnvStore,
+  prefs: Record<string, Preferences>
 ) {
   //const view = new ConfigWebView(context.extensionPath, configuration, secrets, platform, logger);
   const view = new ScanReportWebView(
@@ -31,15 +33,15 @@ export function activate(
   );
 
   vscode.commands.registerCommand("openapi.showConfiguration", async () => {
-    await startScan();
+    await startScan(view);
   });
 
   vscode.commands.registerCommand("openapi.showSettings", async () => {
-    await startScan();
+    await startScan(view);
   });
 }
 
-async function startScan() {
+async function startScan(view: ScanReportWebView) {
   const uri = await vscode.window.showOpenDialog({
     title: "Select Scan Report",
     canSelectFiles: true,
@@ -47,21 +49,6 @@ async function startScan() {
     canSelectMany: false,
   });
   if (uri) {
-    const file = payload.file;
-    const report = await readFile(file, { encoding: "utf8" });
-    const n = 10;
-    let offset = 0;
-    let chunkSize = Math.ceil(report.length / n);
-    for (let i = 1; i <= n; i++) {
-      if (report.length - offset < chunkSize) {
-        chunkSize = report.length - offset;
-      }
-      const textSegment = report.substr(offset, chunkSize);
-      offset += chunkSize;
-      this.sendRequest({
-        command: "sendFileSegment",
-        payload: { file, textSegment, progress: i / n },
-      });
-    }
+    view.sendImportScan(uri[0].fsPath);
   }
 }
