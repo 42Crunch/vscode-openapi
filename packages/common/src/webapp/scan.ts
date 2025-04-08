@@ -5,7 +5,6 @@ import {
   ShowJsonPointerMessage,
   StartScanMessage,
   ShowFullScanReportMessage,
-  SendScanReportSegmentMessage,
 } from "../scan";
 import { LoadPreferencesMessage, SavePreferencesMessage } from "../prefs";
 import { LoadEnvMessage, ShowEnvWindow } from "../env";
@@ -19,6 +18,7 @@ import {
 } from "../http";
 import { LoadConfigMessage } from "../config";
 import { ShowLogMessage } from "../logging";
+import { ParseChunkMessage, SendInitDbCompleteMessage, StartInitDbMessage } from "../index-db";
 
 export type Webapp = App<
   // consumes
@@ -31,14 +31,17 @@ export type Webapp = App<
   | ChangeThemeMessage
   | ShowHttpErrorMessage
   | ShowScanReportMessage
-  | SendScanReportSegmentMessage
   | ShowFullScanReportMessage
   | ShowHttpResponseMessage
-  | ShowLogMessage,
+  | ShowLogMessage
+  | StartInitDbMessage
+  | ParseChunkMessage
+  | StartInitDbMessage,
   // produces
   | ShowEnvWindow
   | SavePreferencesMessage
   | SendHttpRequestMessage
   | SendCurlRequestMessage
   | ShowJsonPointerMessage
+  | SendInitDbCompleteMessage
 >;

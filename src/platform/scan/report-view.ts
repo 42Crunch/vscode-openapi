@@ -22,6 +22,7 @@ import { executeHttpRequest } from "../../webapps/http-handler";
 import { join } from "node:path";
 import { existsSync } from "../../util/fs";
 import { rmdirSync, unlinkSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 
 export class ScanReportWebView extends WebView<Webapp> {
   private document?: vscode.TextDocument;
@@ -114,6 +115,30 @@ export class ScanReportWebView extends WebView<Webapp> {
     this.document = document;
     await this.show();
     return this.sendRequest({ command: "startScan", payload: undefined });
+  }
+
+  async sendStartInitDb() {
+    await this.show();
+    return this.sendRequest({ command: "startInitDb", payload: undefined });
+  }
+
+  async sendImportScan(file: string) {
+    await this.show();
+    const report = await readFile(file, { encoding: "utf8" });
+    const n = 10;
+    let offset = 0;
+    let chunkSize = Math.ceil(report.length / n);
+    for (let i = 1; i <= n; i++) {
+      if (report.length - offset < chunkSize) {
+        chunkSize = report.length - offset;
+      }
+      const textSegment = report.substr(offset, chunkSize);
+      offset += chunkSize;
+      this.sendRequest({
+        command: "sendScanReportSegment",
+        payload: { file, textSegment, progress: i / n },
+      });
+    }
   }
 
   setTemporaryReportDirectory(dir: string) {
