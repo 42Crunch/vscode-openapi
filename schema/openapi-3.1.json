@@ -76,6 +76,9 @@
       ]
     }
   ],
+  "patternProperties": {
+    "^x-": {}
+  },
   "additionalProperties": false,
   "definitions": {
     "info": {
