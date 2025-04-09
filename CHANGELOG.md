@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.33.1 (April 9, 2025)
+
+- Fix broken refresh of SwaggerUI preview
+- Fix issue in OpenAPI 3.1 schema that would not allow custom extensions on the top level of the spec
+
 ## Version 4.33.1 (April 3, 2025)
 
 - Add privacy policy to the freemium signup page
