@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 4.33.1 (April 9, 2025)
+## Version 4.33.2 (April 9, 2025)
 
 - Fix broken refresh of SwaggerUI preview
 - Fix issue in OpenAPI 3.1 schema that would not allow custom extensions on the top level of the spec
