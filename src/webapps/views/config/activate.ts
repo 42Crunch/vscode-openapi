@@ -49,6 +49,6 @@ async function startScan(view: ScanReportWebView) {
     canSelectMany: false,
   });
   if (uri) {
-    view.sendImportScan(uri[0].fsPath);
+    view.sendStartInitDb(uri[0].fsPath);
   }
 }
