@@ -4,29 +4,27 @@
 */
 
 import { GeneralError } from "@xliic/common/error";
-import { HttpMethod, BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { LogLevel } from "@xliic/common/logging";
 import { Preferences } from "@xliic/common/prefs";
 import { Webapp } from "@xliic/common/webapp/scan";
+import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
+import { rmdirSync, unlinkSync } from "node:fs";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import * as vscode from "vscode";
-import { parseAuditReport } from "../../audit/audit";
 import { getLocationByPointer } from "../../audit/util";
-import { AuditWebView } from "../../audit/view";
 import { Cache } from "../../cache";
 import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
-import { AuditContext, MappingNode } from "../../types";
+import { existsSync } from "../../util/fs";
+import { executeHttpRequest } from "../../webapps/http-handler";
 import { WebView } from "../../webapps/web-view";
 import { PlatformStore } from "../stores/platform-store";
-import { executeHttpRequest } from "../../webapps/http-handler";
-import { join } from "node:path";
-import { existsSync } from "../../util/fs";
-import { rmdirSync, unlinkSync } from "node:fs";
-import { readFile } from "node:fs/promises";
 
 export class ScanReportWebView extends WebView<Webapp> {
   private document?: vscode.TextDocument;
   private temporaryReportDirectory?: string;
+  private file?: string;
 
   constructor(
     title: string,
@@ -76,6 +74,26 @@ export class ScanReportWebView extends WebView<Webapp> {
       vscode.commands.executeCommand("openapi.showEnvironment");
     },
 
+    sendInitDbComplete: async (payload: { status: boolean; message: string }) => {
+      console.info("GOT sendInitDbComplete!!! " + payload);
+
+      const report = await readFile(this.file as string, { encoding: "utf8" });
+      const n = 10;
+      let offset = 0;
+      let chunkSize = Math.ceil(report.length / n);
+      for (let i = 1; i <= n; i++) {
+        if (report.length - offset < chunkSize) {
+          chunkSize = report.length - offset;
+        }
+        const textSegment = report.substr(offset, chunkSize);
+        offset += chunkSize;
+        this.sendRequest({
+          command: "parseChunk",
+          payload: { file: this.file as string, textSegment, progress: i / n },
+        });
+      }
+    },
+
     showJsonPointer: async (payload: string) => {
       if (this.document) {
         let editor: vscode.TextEditor | undefined = undefined;
@@ -117,28 +135,10 @@ export class ScanReportWebView extends WebView<Webapp> {
     return this.sendRequest({ command: "startScan", payload: undefined });
   }
 
-  async sendStartInitDb() {
+  async sendStartInitDb(file: string) {
+    this.file = file;
     await this.show();
     return this.sendRequest({ command: "startInitDb", payload: undefined });
-  }
-
-  async sendImportScan(file: string) {
-    await this.show();
-    const report = await readFile(file, { encoding: "utf8" });
-    const n = 10;
-    let offset = 0;
-    let chunkSize = Math.ceil(report.length / n);
-    for (let i = 1; i <= n; i++) {
-      if (report.length - offset < chunkSize) {
-        chunkSize = report.length - offset;
-      }
-      const textSegment = report.substr(offset, chunkSize);
-      offset += chunkSize;
-      this.sendRequest({
-        command: "sendScanReportSegment",
-        payload: { file, textSegment, progress: i / n },
-      });
-    }
   }
 
   setTemporaryReportDirectory(dir: string) {

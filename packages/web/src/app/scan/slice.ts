@@ -19,6 +19,7 @@ import { TryitOperationValues } from "@xliic/common/tryit";
 import { BundledSwaggerOrOasSpec, getOperation, HttpMethod, HttpMethods } from "@xliic/openapi";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { initProcessReport, processReport } from "../../json-streaming-parser/report-loader.worker";
+import { useAppDispatch } from "./store";
 
 export type Filter = {
   severity?: SeverityLevel;
@@ -60,7 +61,11 @@ export interface OasState {
   titles: string[];
   paths: string[];
   operationIds: string[];
+  // TODO: move to seprate state
   chunkCounter: number;
+  initDbStarted: boolean;
+  initDbStatus: boolean | undefined;
+  initDbError: string;
 }
 
 const initialState: OasState = {
@@ -92,6 +97,9 @@ const initialState: OasState = {
   paths: [],
   operationIds: [],
   chunkCounter: 0,
+  initDbStarted: false,
+  initDbStatus: undefined,
+  initDbError: "",
 };
 
 export const slice = createSlice({
@@ -218,7 +226,15 @@ export const slice = createSlice({
     showJsonPointer: (state, action: PayloadAction<string>) => {},
 
     startInitDb: (state, action: PayloadAction<undefined>) => {
-      initProcessReport();
+      state.initDbStarted = true;
+      // initProcessReport()
+      //   .then(() => {
+      //     state.initDbStatus = true;
+      //   })
+      //   .catch((e: any) => {
+      //     state.initDbStatus = false;
+      //     state.initDbError = `Failed to connect to the database: ${e.message}`;
+      //   });
     },
 
     sendInitDbComplete: (state, action: PayloadAction<{ status: boolean; message: string }>) => {

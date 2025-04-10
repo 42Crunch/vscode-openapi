@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 
 import { Webapp } from "@xliic/common/webapp/scan";
 import { makeWebappMessageHandler } from "../webapp";
 
-import { initStore } from "./store";
+import { initStore, useAppDispatch, useAppSelector } from "./store";
 import { createListener } from "./listener";
 
 import ThemeStyles from "../../features/theme/ThemeStyles";
@@ -18,10 +18,12 @@ import {
   scanOperation,
   showScanReport,
   showFullScanReport,
-  sendScanReportSegment,
   showGeneralError,
   showHttpError,
   showHttpResponse,
+  parseChunk,
+  startInitDb,
+  sendInitDbComplete,
 } from "./slice";
 
 import { loadEnv } from "../../features/env/slice";
@@ -30,6 +32,7 @@ import { loadConfig } from "../../features/config/slice";
 import { showLogMessage } from "../../features/logging/slice";
 
 import ScanOperation from "./ScanOperation";
+import { initProcessReport } from "../../json-streaming-parser/report-loader.worker";
 
 const routes: Routes = [
   {
@@ -55,14 +58,41 @@ const messageHandlers: Webapp["webappHandlers"] = {
   showHttpResponse,
   showScanReport,
   showFullScanReport,
-  sendScanReportSegment,
   loadEnv,
   loadPrefs,
   loadConfig,
   showLogMessage,
+  startInitDb,
+  parseChunk,
 };
 
 function App() {
+  const dispatch = useAppDispatch();
+  const { initDbStarted, initDbStatus, initDbError } = useAppSelector((state) => state.scan);
+
+  useEffect(() => {
+    if (initDbStarted) {
+      initProcessReport()
+        .then(() => {
+          dispatch(sendInitDbComplete({ status: true, message: "" }));
+        })
+        .catch((e: any) => {
+          dispatch(
+            sendInitDbComplete({
+              status: false,
+              message: `Failed to connect to the database: ${e.message}`,
+            })
+          );
+        });
+    }
+  }, [initDbStarted]);
+
+  // useEffect(() => {
+  //   if (initDbStatus) {
+  //     dispatch(sendInitDbComplete({ status: initDbStatus, message: initDbError }));
+  //   }
+  // }, [initDbStatus]);
+
   return (
     <>
       <ThemeStyles />

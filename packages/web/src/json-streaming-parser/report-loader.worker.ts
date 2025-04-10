@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { DBService } from "./scan-processing/services/db.service";
+import { Parser } from "./scan-processing/clarinet/clarinet";
 import {
   apiConformanceScanApiConfig,
   ApiConformanceScanHappyPathDetailsV221,
@@ -23,7 +23,6 @@ import {
   MetadataItem,
   MetadataKey,
   metadataKeys,
-  methods,
   OperartionKey,
   operationKeyMap,
   operationKeys,
@@ -35,10 +34,10 @@ import {
   Severity,
   StatusCode,
 } from "./scan-processing/models";
+import { DBService } from "./scan-processing/services/db.service";
+import { ScanReportV221MappingService } from "./scan-processing/services/scan-report-v2-2-1-mapping.service";
 import { SemanticVersionUtils } from "./scan-processing/utils/semantic-version.utils";
 import { StringUtils } from "./scan-processing/utils/string-utils";
-import { ScanReportV221MappingService } from "./scan-processing/services/scan-report-v2-2-1-mapping.service";
-import { Parser } from "./scan-processing/clarinet/clarinet";
 
 let parser: Parser;
 let dbService: DBService;
@@ -57,12 +56,11 @@ let isPathParsing: boolean = false;
 
 async function initDb(): Promise<void> {
   dbService = new DBService();
-
   return await dbService
     .init()
-    .then(() =>
-      console.log("%c Connected to the database", "text-transform: uppercase; color: green")
-    )
+    .then(() => {
+      console.log("%c Connected to the database", "text-transform: uppercase; color: green");
+    })
     .catch((e: any) => {
       throwError(`Failed to connect to the database: ${e.message}`);
     });
@@ -74,8 +72,6 @@ async function initDb(): Promise<void> {
 // }
 
 export async function initProcessReport(): Promise<void> {
-  await initDb();
-
   parser = new Parser({
     onValue,
     onKey,
@@ -87,6 +83,7 @@ export async function initProcessReport(): Promise<void> {
     onError,
     onReady,
   });
+  return initDb();
 }
 
 export async function processReport(done: boolean, value: string): Promise<void> {
