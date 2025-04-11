@@ -74,7 +74,23 @@ function PlatformConnection() {
 
 const schema = z.object({
   platformAuthType: z.enum(["anond-token", "api-token"]),
-  platformUrl: z.string().url().startsWith("https://"),
+  platformUrl: z
+    .string()
+    .url()
+    .startsWith("https://")
+    .refine(
+      (url) => {
+        try {
+          const parsed = new URL(url);
+          return parsed.pathname === "/" || parsed.pathname === "";
+        } catch {
+          return false;
+        }
+      },
+      {
+        message: "Must be a valid HTTPS URL with empty path",
+      }
+    ),
   anondToken: z.string().trim(),
   platformApiToken: z
     .string()
