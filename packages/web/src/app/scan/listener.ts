@@ -8,7 +8,13 @@ import { Webapp } from "@xliic/common/webapp/scan";
 import { AppDispatch, RootState } from "./store";
 import { showEnvWindow } from "../../features/env/slice";
 import { setSecretForSecurity, setScanServer } from "../../features/prefs/slice";
-import { sendHttpRequest, sendCurlRequest, showJsonPointer, sendInitDbComplete } from "./slice";
+import {
+  sendHttpRequest,
+  sendCurlRequest,
+  showJsonPointer,
+  sendInitDbComplete,
+  sendParseChunkComplete,
+} from "./slice";
 
 import { startNavigationListening } from "../../features/router/listener";
 import { Routes } from "../../features/router/RouterContext";
@@ -79,6 +85,17 @@ export function createListener(host: Webapp["host"], routes: Routes) {
         effect: async (action, listenerApi) => {
           host.postMessage({
             command: "sendInitDbComplete",
+            payload: action.payload,
+          });
+        },
+      }),
+
+    sendParseChunkComplete: () =>
+      startAppListening({
+        actionCreator: sendParseChunkComplete,
+        effect: async (action, listenerApi) => {
+          host.postMessage({
+            command: "sendParseChunkComplete",
             payload: action.payload,
           });
         },

@@ -24,6 +24,7 @@ import {
   parseChunk,
   startInitDb,
   sendInitDbComplete,
+  sendParseChunkComplete,
 } from "./slice";
 
 import { loadEnv } from "../../features/env/slice";
@@ -32,7 +33,7 @@ import { loadConfig } from "../../features/config/slice";
 import { showLogMessage } from "../../features/logging/slice";
 
 import ScanOperation from "./ScanOperation";
-import { initProcessReport } from "../../json-streaming-parser/worker";
+import { initProcessReport, processReport } from "../../json-streaming-parser/worker";
 
 const routes: Routes = [
   {
@@ -68,7 +69,7 @@ const messageHandlers: Webapp["webappHandlers"] = {
 
 function App() {
   const dispatch = useAppDispatch();
-  const { initDbStarted } = useAppSelector((state) => state.scan);
+  const { initDbStarted, chunkId, chunkText, progress } = useAppSelector((state) => state.scan);
 
   useEffect(() => {
     if (initDbStarted) {
@@ -87,11 +88,14 @@ function App() {
     }
   }, [initDbStarted]);
 
-  // useEffect(() => {
-  //   if (initDbStatus) {
-  //     dispatch(sendInitDbComplete({ status: initDbStatus, message: initDbError }));
-  //   }
-  // }, [initDbStatus]);
+  useEffect(() => {
+    if (chunkId >= 0) {
+      console.info("chunkId = " + chunkId + ", progress = " + progress);
+      processReport(progress === 1.0, chunkText).then(() => {
+        dispatch(sendParseChunkComplete({ id: chunkId }));
+      });
+    }
+  }, [chunkId]);
 
   return (
     <>
