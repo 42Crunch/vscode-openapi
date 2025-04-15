@@ -25,6 +25,10 @@ export class ScanReportWebView extends WebView<Webapp> {
   private document?: vscode.TextDocument;
   private temporaryReportDirectory?: string;
   private file?: string;
+  private report = "";
+  private chunkId = 0;
+  private chunkOffset = 0;
+  private chunkSize = 0;
 
   constructor(
     title: string,
@@ -75,21 +79,40 @@ export class ScanReportWebView extends WebView<Webapp> {
     },
 
     sendInitDbComplete: async (payload: { status: boolean; message: string }) => {
-      console.info("GOT sendInitDbComplete!!! " + payload);
+      this.report = await readFile(this.file as string, { encoding: "utf8" });
+      this.chunkId = 0;
+      this.chunkOffset = 0;
+      this.chunkSize = Math.ceil(this.report.length / 10); // TODO: find out the best chunk size and hardoce it
+      const textSegment = this.report.substr(this.chunkOffset, this.chunkSize);
+      this.chunkOffset += this.chunkSize;
+      this.sendRequest({
+        command: "parseChunk",
+        payload: {
+          id: this.chunkId,
+          file: this.file as string,
+          textSegment,
+          progress: this.chunkOffset / this.report.length,
+        },
+      });
+    },
 
-      const report = await readFile(this.file as string, { encoding: "utf8" });
-      const n = 10;
-      let offset = 0;
-      let chunkSize = Math.ceil(report.length / n);
-      for (let i = 1; i <= n; i++) {
-        if (report.length - offset < chunkSize) {
-          chunkSize = report.length - offset;
+    sendParseChunkComplete: async (payload: { id: number }) => {
+      console.info("GOT sendParseChunkComplete id = " + payload.id);
+      if (this.chunkOffset < this.report.length && this.chunkId === payload.id && this.report) {
+        if (this.report.length - this.chunkOffset < this.chunkSize) {
+          this.chunkSize = this.report.length - this.chunkOffset;
         }
-        const textSegment = report.substr(offset, chunkSize);
-        offset += chunkSize;
+        const textSegment = this.report.substr(this.chunkOffset, this.chunkSize);
+        this.chunkOffset += this.chunkSize;
+        this.chunkId += 1;
         this.sendRequest({
           command: "parseChunk",
-          payload: { file: this.file as string, textSegment, progress: i / n },
+          payload: {
+            id: this.chunkId,
+            file: this.file as string,
+            textSegment,
+            progress: this.chunkOffset / this.report.length,
+          },
         });
       }
     },

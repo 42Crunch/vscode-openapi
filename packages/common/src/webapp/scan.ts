@@ -18,7 +18,12 @@ import {
 } from "../http";
 import { LoadConfigMessage } from "../config";
 import { ShowLogMessage } from "../logging";
-import { ParseChunkMessage, SendInitDbCompleteMessage, StartInitDbMessage } from "../index-db";
+import {
+  ParseChunkMessage,
+  SendInitDbCompleteMessage,
+  SendParseChunkCompleteMessage,
+  StartInitDbMessage,
+} from "../index-db";
 
 export type Webapp = App<
   // consumes
@@ -44,4 +49,5 @@ export type Webapp = App<
   | SendCurlRequestMessage
   | ShowJsonPointerMessage
   | SendInitDbCompleteMessage
+  | SendParseChunkCompleteMessage
 >;

@@ -62,7 +62,9 @@ export interface OasState {
   paths: string[];
   operationIds: string[];
   // TODO: move to seprate state
-  chunkCounter: number;
+  chunkId: number;
+  progress: number;
+  chunkText: string;
   initDbStarted: boolean;
   initDbStatus: boolean | undefined;
   initDbError: string;
@@ -96,7 +98,9 @@ const initialState: OasState = {
   titles: [],
   paths: [],
   operationIds: [],
-  chunkCounter: 0,
+  chunkId: -1,
+  progress: 0,
+  chunkText: "",
   initDbStarted: false,
   initDbStatus: undefined,
   initDbError: "",
@@ -227,17 +231,13 @@ export const slice = createSlice({
 
     startInitDb: (state, action: PayloadAction<undefined>) => {
       state.initDbStarted = true;
-      // initProcessReport()
-      //   .then(() => {
-      //     state.initDbStatus = true;
-      //   })
-      //   .catch((e: any) => {
-      //     state.initDbStatus = false;
-      //     state.initDbError = `Failed to connect to the database: ${e.message}`;
-      //   });
     },
 
     sendInitDbComplete: (state, action: PayloadAction<{ status: boolean; message: string }>) => {
+      // hook for a listener
+    },
+
+    sendParseChunkComplete: (state, action: PayloadAction<{ id: number }>) => {
       // hook for a listener
     },
 
@@ -246,14 +246,9 @@ export const slice = createSlice({
     },
 
     parseChunk: (state, action: PayloadAction<TextChunk>) => {
-      state.chunkCounter += 1;
-      processReport(action.payload.progress === 1.0, action.payload.textSegment);
-      console.info(
-        "chunkCounter = " +
-          state.chunkCounter +
-          ", segment = " +
-          action.payload.textSegment.substring(0, 10)
-      );
+      state.chunkId = action.payload.id;
+      state.chunkText = action.payload.textSegment;
+      state.progress = action.payload.progress;
     },
   },
 });
@@ -274,6 +269,7 @@ export const {
   changeFilter,
   startInitDb,
   sendInitDbComplete,
+  sendParseChunkComplete,
   closeInitDb,
   parseChunk,
 } = slice.actions;
