@@ -1,8 +1,7 @@
 export const stringTokenPatternValue: RegExp = /[\\"\n]/g;
-
 export const defaultMaxBufferLength: number = 256 * 1024;
 
-export const Char: { [key: string]: any } = {
+export const charMap: { [key: string]: any } = {
   tab: 0x09, // \t
   lineFeed: 0x0a, // \n
   carriageReturn: 0x0d, // \r

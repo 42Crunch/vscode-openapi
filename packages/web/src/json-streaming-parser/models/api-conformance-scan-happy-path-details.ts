@@ -24,7 +24,7 @@ export class ApiConformanceScanHappyPathDetailsV221 {
   }: Partial<ApiConformanceScanHappyPathDetailsV221> = {}) {
     this.happyPathKey = happyPathKey;
     this.curl = curl || '';
-    this.isCurlBodySkipped = isCurlBodySkipped || true;
+    this.isCurlBodySkipped = isCurlBodySkipped ?? true;
     this.responseHttpStatusCode = responseHttpStatusCode;
     this.responseContentType = responseContentType || '';
     this.responseBodyLength = responseBodyLength || 0;

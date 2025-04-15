@@ -2,8 +2,8 @@ import { ApiConformanceScanIssueV221 } from './api-conformance-scan-issue';
 import { ApiConformanceScanOperationSkipReasonKeyV221 } from './api-conformance-scan-operation-skip-reason-key';
 import { ApiConformanceScanHappyPathDetailsV221 } from './api-conformance-scan-happy-path-details';
 import { ApiConformanceScanHappyPathStatsV221 } from './api-conformance-scan-happy-path-stats';
-import {HttpMethod} from './http-method';
-import {ScanReportV300NextReason} from './api-conformance-scan-report-response';
+import { HttpMethod } from './http-method';
+import { ScanReportV300NextReason } from './api-conformance-scan-report-response';
 
 export class ApiConformanceScanOperationV221 {
   method: HttpMethod | null;

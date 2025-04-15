@@ -1,10 +1,4 @@
-// import { MathUtils } from '@ui/shared/util-math';
-// import { map } from 'lodash';
-//
-// import { Assert } from '../assert';
-// import { coreConfig } from '../core.config';
-
-import {coreConfig} from '../models';
+import { coreConfig } from '../models/core.config';
 
 export class StringUtils {
   /**
@@ -232,33 +226,33 @@ export class StringUtils {
   //   return result;
   // }
 
-  static covertToBase64(value: string): string {
-    const encoders = [(str: string) => btoa(str), (str: string) => btoa(unescape(encodeURIComponent(str)))];
+  // static covertToBase64(value: string): string {
+  //   const encoders = [(str: string) => btoa(str), (str: string) => btoa(unescape(encodeURIComponent(str)))];
+  //
+  //   for (let i = 0; i < encoders.length; i++) {
+  //     try {
+  //       const encoder = encoders[i];
+  //       const encodedValue = encoder(value);
+  //       return encodedValue;
+  //     } catch {
+  //       // ignore
+  //     }
+  //   }
+  //
+  //   throw new Error('Cannot encode value.');
+  // }
 
-    for (let i = 0; i < encoders.length; i++) {
-      try {
-        const encoder = encoders[i];
-        const encodedValue = encoder(value);
-        return encodedValue;
-      } catch {
-        // ignore
-      }
-    }
-
-    throw new Error('Cannot encode value.');
-  }
-
-  static covertUTFToBase64(value: string): string {
-    // first we use encodeURIComponent to get percent-encoded UTF-8,
-    // then we convert the percent encodings into raw bytes which
-    // can be fed into btoa.
-    const encodedValue = encodeURIComponent(value);
-    const replacedValue = encodedValue.replace(/%([0-9A-F]{2})/g, (match, char) => String.fromCharCode(+('0x' + char)));
-    const base64 = btoa(replacedValue);
-
-    return base64;
-  }
-
+  // static covertUTFToBase64(value: string): string {
+  //   // first we use encodeURIComponent to get percent-encoded UTF-8,
+  //   // then we convert the percent encodings into raw bytes which
+  //   // can be fed into btoa.
+  //   const encodedValue = encodeURIComponent(value);
+  //   const replacedValue = encodedValue.replace(/%([0-9A-F]{2})/g, (match, char) => String.fromCharCode(+('0x' + char)));
+  //   const base64 = btoa(replacedValue);
+  //
+  //   return base64;
+  // }
+  //
   static parseBase64ToUTF(value: string): string {
     const asciiValue = atob(value);
 

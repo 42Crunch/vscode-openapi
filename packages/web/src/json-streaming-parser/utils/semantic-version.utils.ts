@@ -1,4 +1,4 @@
-import { SemanticVersion} from '../models';
+import { SemanticVersion } from '../models/semantic-version';
 
 export class SemanticVersionUtils {
   static parse(value: string): SemanticVersion {
@@ -18,14 +18,6 @@ export class SemanticVersionUtils {
 
     return new SemanticVersion({ major: major, minor: minor, patch: patch });
   }
-
-  // static stringify(value: SemanticVersion): string {
-  //   if (!value) {
-  //     return ;
-  //   }
-  //
-  //   return `${value.major}.${value.minor}.${value.patch}`;
-  // }
 
   static compare(firstVersion: SemanticVersion, secondVersion: SemanticVersion, majorMinorOnly = false): number {
     const fullVersion = {
@@ -50,26 +42,4 @@ export class SemanticVersionUtils {
 
     return 0;
   }
-
-  /**
-   * Does not interrupt control flow to avoid breaking list mapping for some edge cases
-   * @param versionText version info in text format, like "1.27.0"
-   * @param errorText external error text to display in console if parser throws
-   * @param [exitText] text which indicates that the version data is intentionally invalid
-   */
-  // static parseGracefully(versionText: string, errorText: string, exitText?: string): SemanticVersion | null {
-  //   if (!versionText || (exitText && versionText.includes(exitText))) {
-  //     return null;
-  //   }
-  //
-  //   let version: SemanticVersion | null = null;
-  //
-  //   try {
-  //     version = SemanticVersionUtils.parse(versionText);
-  //   } catch (error) {
-  //     console.error(errorText + ', ' + error);
-  //   } finally {
-  //     return version;
-  //   }
-  // }
 }
