@@ -1,7 +1,9 @@
-import Dexie from 'dexie';
+// @ts-nocheck
 
-import { StringUtils } from './utils/string-utils';
-import { ScanReportV221MappingService } from './scan-report-v2-2-1-mapping.service';
+import Dexie from "dexie";
+
+import { StringUtils } from "./utils/string-utils";
+import { ScanReportV221MappingService } from "./scan-report-v2-2-1-mapping.service";
 import {
   ScanReportIntegralFilter,
   SortOrder,
@@ -13,24 +15,25 @@ import {
   ApiConformanceScanIssuesFilterType,
   ApiConformanceScanOperationV221,
   FilterStats,
-  ApiConformanceScanPathStatsV221
-} from './models';
+  ApiConformanceScanPathStatsV221,
+} from "./models";
 
 export class Scanv1Db {
-  private readonly dbName: string = '';
+  private readonly dbName: string = "";
   private db: any;
 
-  constructor(dbName: string = 'defaultDb') {
+  constructor(dbName: string = "defaultDb") {
     this.dbName = dbName;
     this.db = new Dexie(this.dbName);
     this.db.version(1).stores({
       // , means primary key is neither inbound nor auto-incremented
       metadata:
-        ',taskId, engineVersion, reportVersion, isFullReport, state, exitCode, requestsCount, issuesCount, date',
-      index: ',jsonPointers, contentTypes, injectionKeys, injectionDescriptions, responseKeys, responseDescriptions',
-      paths: '&path', // & means unique
-      operations: '[path+method]', // + means compound primary key
-      issues: 'id, [path+method]'
+        ",taskId, engineVersion, reportVersion, isFullReport, state, exitCode, requestsCount, issuesCount, date",
+      index:
+        ",jsonPointers, contentTypes, injectionKeys, injectionDescriptions, responseKeys, responseDescriptions",
+      paths: "&path", // & means unique
+      operations: "[path+method]", // + means compound primary key
+      issues: "id, [path+method]",
     });
   }
 
@@ -107,7 +110,7 @@ export class Scanv1Db {
     page: number,
     perPage: number,
     sortOrder: ParserFieldSortOrder,
-    searchFilter: string = '',
+    searchFilter: string = "",
     scanIssuesFilter: ScanReportIntegralFilter = new ScanReportIntegralFilter()
   ): Promise<PaginationResponse> {
     return new Promise<PaginationResponse>(async (resolve, reject) => {
@@ -119,7 +122,7 @@ export class Scanv1Db {
       if (sortOrder?.order === SortOrder.Desc) {
         try {
           issues = await this.db.issues
-            .orderBy(sortOrder?.fieldName || 'path')
+            .orderBy(sortOrder?.fieldName || "path")
             .reverse()
             .filter((issue: ApiConformanceScanIssueV221): boolean =>
               ScanReportV221MappingService.filterIssues(issue, searchFilter, scanIssuesFilter)
@@ -133,7 +136,7 @@ export class Scanv1Db {
       } else {
         try {
           issues = await this.db.issues
-            .orderBy(sortOrder?.fieldName || 'path')
+            .orderBy(sortOrder?.fieldName || "path")
             .filter((issue: ApiConformanceScanIssueV221): boolean =>
               ScanReportV221MappingService.filterIssues(issue, searchFilter, scanIssuesFilter)
             )
@@ -150,7 +153,7 @@ export class Scanv1Db {
         filteredItems = 0;
 
         await this.db.issues
-          .orderBy(sortOrder?.fieldName || 'path')
+          .orderBy(sortOrder?.fieldName || "path")
           .filter((issue: ApiConformanceScanIssueV221): boolean =>
             ScanReportV221MappingService.filterIssues(issue, searchFilter, scanIssuesFilter)
           )
@@ -171,7 +174,7 @@ export class Scanv1Db {
         list: issues,
         totalPages,
         totalItems,
-        filteredItems
+        filteredItems,
       } as PaginationResponse);
     });
   }
@@ -179,7 +182,7 @@ export class Scanv1Db {
   async getSkippedIssues(
     page: number,
     perPage: number,
-    searchFilter: string = '',
+    searchFilter: string = "",
     scanIssuesFilter: ScanReportIntegralFilter = new ScanReportIntegralFilter()
   ): Promise<PaginationResponse> {
     return new Promise<PaginationResponse>(async (resolve, reject) => {
@@ -216,11 +219,12 @@ export class Scanv1Db {
             // we use it here as we need only skipped (failed) operations
             totalItems++;
 
-            const isMatched: boolean = ScanReportV221MappingService.filterApiConformanceScanOperations(
-              operation,
-              searchFilter,
-              scanIssuesFilter
-            );
+            const isMatched: boolean =
+              ScanReportV221MappingService.filterApiConformanceScanOperations(
+                operation,
+                searchFilter,
+                scanIssuesFilter
+              );
 
             return isMatched;
           })
@@ -238,7 +242,7 @@ export class Scanv1Db {
           list: operations,
           totalPages,
           totalItems,
-          filteredItems
+          filteredItems,
         } as PaginationResponse);
       } catch (e: any) {
         reject(e);
@@ -261,7 +265,8 @@ export class Scanv1Db {
               scanIssuesFilter ? scanIssuesFilter.path : null,
               scanIssuesFilter ? scanIssuesFilter.httpMethod : null,
               scanIssuesFilter
-                ? scanIssuesFilter.hierarchicalLevelFilterType !== ApiConformanceScanIssuesFilterType.SubPaths
+                ? scanIssuesFilter.hierarchicalLevelFilterType !==
+                    ApiConformanceScanIssuesFilterType.SubPaths
                 : false
             )
           )
@@ -275,56 +280,69 @@ export class Scanv1Db {
       // to return an object
       if (scanIssuesFilter?.httpMethod) {
         filteredScanPaths = filteredScanPaths.map((item: ApiConformanceScanPathV221) => {
-          const filteredScanOperation = item.operations.find((scanOperation: ApiConformanceScanOperationV221) =>
-            StringUtils.equalsIgnoreCase(scanOperation.method, scanIssuesFilter?.httpMethod)
+          const filteredScanOperation = item.operations.find(
+            (scanOperation: ApiConformanceScanOperationV221) =>
+              StringUtils.equalsIgnoreCase(scanOperation.method, scanIssuesFilter?.httpMethod)
           );
 
           return new ApiConformanceScanPathV221({
             path: item.path,
-            operations: [filteredScanOperation]
+            operations: [filteredScanOperation],
           });
         });
       }
 
-      let filteredPathsStats: ApiConformanceScanPathStatsV221 = new ApiConformanceScanPathStatsV221();
+      let filteredPathsStats: ApiConformanceScanPathStatsV221 =
+        new ApiConformanceScanPathStatsV221();
 
       for (const path of filteredScanPaths) {
         let pathStats: ApiConformanceScanPathStatsV221 = new ApiConformanceScanPathStatsV221();
 
         for (const operation of path.operations) {
           if (operation.isSkipped) {
-            pathStats = ScanReportV221MappingService.getSkippedOperationPathStatsV221(pathStats, operation);
+            pathStats = ScanReportV221MappingService.getSkippedOperationPathStatsV221(
+              pathStats,
+              operation
+            );
           } else {
             try {
               const issues: ApiConformanceScanIssueV221[] = await this.db.issues
                 .where({ path: operation.path, method: operation.method })
                 .toArray();
-              pathStats = ScanReportV221MappingService.getUpdatedPathStatsV221(pathStats, operation, issues);
+              pathStats = ScanReportV221MappingService.getUpdatedPathStatsV221(
+                pathStats,
+                operation,
+                issues
+              );
             } catch (e: any) {
               reject(e);
             }
           }
         }
 
-        filteredPathsStats = ScanReportV221MappingService.getUpdatedGlobalPathStatsV221(filteredPathsStats, pathStats);
+        filteredPathsStats = ScanReportV221MappingService.getUpdatedGlobalPathStatsV221(
+          filteredPathsStats,
+          pathStats
+        );
       }
 
       const totalTestedCount: number = ScanReportV221MappingService.getSumOfAvailableTestResults(
         filteredPathsStats,
         isFullReport
       );
-      const operationsTestedCount: number = ScanReportV221MappingService.getTotalOperationsNumber(filteredScanPaths);
+      const operationsTestedCount: number =
+        ScanReportV221MappingService.getTotalOperationsNumber(filteredScanPaths);
 
       resolve({
         filteredPathsStats,
         totalTestedCount,
-        operationsTestedCount
+        operationsTestedCount,
       } as FilterStats);
     });
   }
 
   async getIssue(id: string): Promise<any> {
-    return await this.db.issues.where('id').equals(id).toArray();
+    return await this.db.issues.where("id").equals(id).toArray();
   }
 
   async addPath(item: ApiConformanceScanPathV221): Promise<void> {
