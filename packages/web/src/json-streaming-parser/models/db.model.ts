@@ -1,4 +1,5 @@
 import { HttpMethod } from './http-method';
+import { SemanticVersion } from './semantic-version';
 
 export enum ArrayKey {
   JSONPointers = 'jsonPointers',
@@ -21,6 +22,18 @@ export enum MetadataKey {
   TotalRequest = 'totalRequest',
   Issues = 'issues',
   StartDate = 'startDate'
+}
+
+export interface Metadata {
+  [MetadataKey.TaskId]: string;
+  [MetadataKey.ScanVersion]: SemanticVersion;
+  [MetadataKey.ScanReportVersion]: SemanticVersion;
+  [MetadataKey.ErrorsOnly]: boolean;
+  [MetadataKey.State]: MetadataKey.State;
+  [MetadataKey.ExitCode]: MetadataKey.ExitCode;
+  [MetadataKey.TotalRequest]: number;
+  [MetadataKey.Issues]: number;
+  [MetadataKey.StartDate]: 'date';
 }
 
 // Report properties named differently from BE response
@@ -48,10 +61,10 @@ export interface MetadataItem {
 export enum OperartionKey {
   Checked = 'checked',
   Reason = 'reason',
-  CurlHappyPath = 'curlHappyPath',
+  // CurlHappyPath = 'curlHappyPath',
   SkipReasonDetails = 'skipReasonDetails',
-  HappyPath = 'happyPath',
-  CurlBodySkipped = 'curlBodySkipped',
+  // HappyPath = 'happyPath',
+  // CurlBodySkipped = 'curlBodySkipped',
   TotalRequest = 'totalRequest',
   // Issues = 'issues',
   TotalExpected = 'totalExpected',

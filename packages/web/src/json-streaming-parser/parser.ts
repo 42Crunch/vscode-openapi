@@ -1,41 +1,40 @@
-// @ts-nocheck
 import {
-  Char,
+  charMap,
   defaultMaxBufferLength,
   events,
   Options,
   ParserEvent,
   STATE,
-  stringTokenPatternValue,
-} from "../models";
+  stringTokenPatternValue
+} from './parser.model';
 
 export class Parser {
   stringTokenPattern: any;
-  maxBufferLength: number;
-  events: string[];
-  line: number;
-  column: number;
-  position: number;
-  bufferCheckPosition: number;
-  q: string;
-  c: string;
-  p: any; // string;
+  maxBufferLength: number = 0;
+  events: string[] = [];
+  line: number = -1;
+  column: number = -1;
+  position: number = -1;
+  bufferCheckPosition: number = -1;
+  q: string = '';
+  c: string = '';
+  p: any = ''; // string;
   opt: Options;
-  closed: boolean;
-  closedRoot: boolean;
-  sawRoot: boolean;
-  error: any;
-  tag: any;
-  stack: any[];
-  slashed: boolean;
-  unicodeI: number;
-  unicodeS: string;
-  depth: number;
-  state: STATE;
+  closed: boolean = false;
+  closedRoot: boolean = false;
+  sawRoot: boolean = false;
+  error: any = null;
+  tag: any = null;
+  stack: any[] = [];
+  slashed: boolean = false;
+  unicodeI: number = 0;
+  unicodeS: string = '';
+  depth: number = 0;
+  state: STATE = {} as STATE;
   buffers: any;
   S: any;
-  textNode: string;
-  numberNode: string;
+  textNode: string = '';
+  numberNode: string = '';
 
   onValue: (value: string | boolean | null) => Promise<void>;
   onKey: (key: string) => Promise<void>;
@@ -45,7 +44,7 @@ export class Parser {
   onCloseArray: () => Promise<void>;
   onEnd: () => Promise<void>;
   onError: (e: Error) => Promise<void>;
-  onReady: () => void; // TODO MAKE THIS FUNCTION
+  onReady: () => unknown; // TODO MAKE THIS FUNCTION
 
   constructor({
     maxBufferLength,
@@ -59,27 +58,27 @@ export class Parser {
     onEnd,
     onError,
     onReady,
-    opt,
+    opt
   }: Partial<Parser> = {}) {
     this.stringTokenPattern = stringTokenPattern || stringTokenPatternValue;
     this.maxBufferLength = maxBufferLength || defaultMaxBufferLength;
     this.events = events;
     this.buffers = {
       textNode: undefined,
-      numberNode: "",
+      numberNode: ''
     };
 
     this.opt = opt || {};
     this.S = this.prepareState();
-    this.onReady = onReady! || function () {};
-    this.onValue = onValue!;
-    this.onKey = onKey!;
-    this.onOpenObject = onOpenObject!;
-    this.onCloseObject = onCloseObject!;
-    this.onOpenArray = onOpenArray!;
-    this.onCloseArray = onCloseArray!;
-    this.onEnd = onEnd!;
-    this.onError = onError!;
+    this.onReady = onReady || function () {};
+    this.onValue = onValue;
+    this.onKey = onKey;
+    this.onOpenObject = onOpenObject;
+    this.onCloseObject = onCloseObject;
+    this.onOpenArray = onOpenArray;
+    this.onCloseArray = onCloseArray;
+    this.onEnd = onEnd;
+    this.onError = onError;
     this.init();
   }
 
@@ -87,9 +86,9 @@ export class Parser {
   init(): void {
     this.clearBuffers();
     this.bufferCheckPosition = this.maxBufferLength;
-    this.q = "";
-    this.c = "";
-    this.p = "";
+    this.q = '';
+    this.c = '';
+    this.p = '';
     this.closed = false;
     this.closedRoot = false;
     this.sawRoot = false;
@@ -102,21 +101,23 @@ export class Parser {
     this.line = 1;
     this.slashed = false;
     this.unicodeI = 0;
-    this.unicodeS = "";
+    this.unicodeS = '';
     this.depth = 0;
-    this.textNode = "";
-    this.numberNode = "";
+    this.textNode = '';
+    this.numberNode = '';
     this.onReady();
   }
 
   clearBuffers(): void {
     for (let buffer in this.buffers) {
-      buffer = this.buffers[buffer];
+      if (this.buffers.hasOwnProperty(buffer)) {
+        buffer = this.buffers[buffer];
+      }
     }
   }
 
   async emit(event: ParserEvent, data: any = null): Promise<void> {
-    return new Promise(async (resolve) => {
+    return new Promise<void>(async (resolve) => {
       switch (event) {
         case ParserEvent.Value:
           await this.onValue(data);
@@ -167,32 +168,32 @@ export class Parser {
     await this.emit(event, data);
   }
 
-  async closeValue(event: ParserEvent = undefined): Promise<void> {
+  async closeValue(event: ParserEvent | undefined = undefined): Promise<void> {
     this.textNode = this.textOpts(this.opt, this.textNode);
 
     if (!!this.textNode) {
       await this.emit(event ? event : ParserEvent.Value, this.textNode);
     }
-    this.textNode = "";
+    this.textNode = '';
   }
 
   async closeNumber(): Promise<void> {
     if (this.numberNode) {
       await this.emit(ParserEvent.Value, parseFloat(this.numberNode));
     }
-    this.numberNode = "";
+    this.numberNode = '';
   }
 
   private textOpts(opt: Options, text: string | undefined): string {
     if (text === undefined) {
-      return "";
+      return '';
     }
     if (opt.trim) {
       text = text.trim();
     }
 
     if (opt.normalize) {
-      text = text.replace(/\s+/g, " ");
+      text = text.replace(/\s+/g, ' ');
     }
 
     return text;
@@ -208,42 +209,45 @@ export class Parser {
 
   async end(): Promise<void> {
     if (this.state !== this.S.VALUE || this.depth !== 0) {
-      await this.processError("Unexpected end");
+      await this.processError('Unexpected end');
     }
 
     await this.closeValue();
-    this.c = "";
+    this.c = '';
     this.closed = true;
     await this.emit(ParserEvent.End);
     this.init();
   }
 
-  isWhitespace(char: any): boolean {
+  isWhitespace(charItem: any): boolean {
     return (
-      char === Char.carriageReturn ||
-      char === Char.lineFeed ||
-      char === Char.space ||
-      char === Char.tab
+      charItem === charMap.carriageReturn ||
+      charItem === charMap.lineFeed ||
+      charItem === charMap.space ||
+      charItem === charMap.tab
     );
   }
 
   async checkBufferLength(): Promise<void> {
     const maxAllowed = Math.max(this.maxBufferLength, 10);
     let maxActual: number = 0;
-    for (var buffer in this.buffers) {
-      let len: number = buffer === undefined ? 0 : buffer.length;
 
-      if (len > maxAllowed) {
-        switch (buffer) {
-          case "text":
-            // closeText(parser); TODO CHECK THIS
-            break;
+    for (const buffer in this.buffers) {
+      if (this.buffers.hasOwnProperty(buffer)) {
+        const len: number = buffer === undefined ? 0 : buffer.length;
 
-          default:
-            await this.processError("Max buffer length exceeded: " + buffer);
+        if (len > maxAllowed) {
+          switch (buffer) {
+            case 'text':
+              // closeText(parser); TODO CHECK THIS
+              break;
+
+            default:
+              await this.processError('Max buffer length exceeded: ' + buffer);
+          }
         }
+        maxActual = Math.max(maxActual, len);
       }
-      maxActual = Math.max(maxActual, len);
     }
     this.bufferCheckPosition = this.maxBufferLength - maxActual + this.position;
   }
@@ -256,14 +260,14 @@ export class Parser {
     await this.write(null);
   }
 
-  async write(chunk): Promise<void> {
-    return new Promise(async (resolve, reject) => {
+  async write(chunk: any): Promise<void> {
+    return new Promise<void>(async (resolve, reject) => {
       if (this.error) {
         reject(this.error);
       }
 
       if (this.closed) {
-        await this.processError("Cannot write after close. Assign an onready handler.");
+        await this.processError('Cannot write after close. Assign an onready handler.');
         resolve();
       }
 
@@ -298,7 +302,7 @@ export class Parser {
         // if (clarinet.DEBUG) console.log(i, c, clarinet.STATE[parser.state]);
         if (!lockIncrements) {
           this.position++;
-          if (c === Char.lineFeed) {
+          if (c === charMap.lineFeed) {
             this.line++;
             this.column = 0;
           } else {
@@ -309,12 +313,12 @@ export class Parser {
         }
         switch (this.state) {
           case this.S.BEGIN:
-            if (c === Char.openBrace) {
+            if (c === charMap.openBrace) {
               this.state = this.S.OPEN_OBJECT;
-            } else if (c === Char.openBracket) {
+            } else if (c === charMap.openBracket) {
               this.state = this.S.OPEN_ARRAY;
             } else if (!this.isWhitespace(c)) {
-              await this.processError("Non-whitespace before {[.");
+              await this.processError('Non-whitespace before {[.');
             }
             continue;
 
@@ -326,7 +330,7 @@ export class Parser {
             if (this.state === this.S.OPEN_KEY) {
               this.stack.push(this.S.CLOSE_KEY);
             } else {
-              if (c === Char.closeBrace) {
+              if (c === charMap.closeBrace) {
                 await this.emit(ParserEvent.OpenObject);
                 this.depth++;
                 await this.emit(ParserEvent.CloseObject);
@@ -337,7 +341,7 @@ export class Parser {
                 this.stack.push(this.S.CLOSE_OBJECT);
               }
             }
-            if (c === Char.doubleQuote) {
+            if (c === charMap.doubleQuote) {
               this.state = this.S.STRING;
             } else {
               await this.processError('Malformed object key should start with "');
@@ -349,9 +353,9 @@ export class Parser {
             if (this.isWhitespace(c)) {
               continue;
             }
-            let event = this.state === this.S.CLOSE_KEY ? "key" : "object";
+            const event = this.state === this.S.CLOSE_KEY ? 'key' : 'object';
 
-            if (c === Char.colon) {
+            if (c === charMap.colon) {
               if (this.state === this.S.CLOSE_OBJECT) {
                 this.stack.push(this.S.CLOSE_OBJECT);
                 await this.closeValue(ParserEvent.OpenObject);
@@ -360,18 +364,18 @@ export class Parser {
                 await this.closeValue(ParserEvent.Key);
               }
               this.state = this.S.VALUE;
-            } else if (c === Char.closeBrace) {
+            } else if (c === charMap.closeBrace) {
               await this.emitNode(ParserEvent.CloseObject);
               this.depth--;
               this.state = this.stack.pop() || this.S.VALUE;
-            } else if (c === Char.comma) {
+            } else if (c === charMap.comma) {
               if (this.state === this.S.CLOSE_OBJECT) {
                 this.stack.push(this.S.CLOSE_OBJECT);
               }
               await this.closeValue();
               this.state = this.S.OPEN_KEY;
             } else {
-              await this.processError("Bad object");
+              await this.processError('Bad object');
             }
             continue;
 
@@ -384,7 +388,7 @@ export class Parser {
               await this.emit(ParserEvent.OpenArray);
               this.depth++;
               this.state = this.S.VALUE;
-              if (c === Char.closeBracket) {
+              if (c === charMap.closeBracket) {
                 await this.emit(ParserEvent.CloseArray);
                 this.depth--;
                 this.state = this.stack.pop() || this.S.VALUE;
@@ -393,48 +397,48 @@ export class Parser {
                 this.stack.push(this.S.CLOSE_ARRAY);
               }
             }
-            if (c === Char.doubleQuote) {
+            if (c === charMap.doubleQuote) {
               this.state = this.S.STRING;
-            } else if (c === Char.openBrace) {
+            } else if (c === charMap.openBrace) {
               this.state = this.S.OPEN_OBJECT;
-            } else if (c === Char.openBracket) {
+            } else if (c === charMap.openBracket) {
               this.state = this.S.OPEN_ARRAY;
-            } else if (c === Char.t) {
+            } else if (c === charMap.t) {
               this.state = this.S.TRUE;
-            } else if (c === Char.f) {
+            } else if (c === charMap.f) {
               this.state = this.S.FALSE;
-            } else if (c === Char.n) {
+            } else if (c === charMap.n) {
               this.state = this.S.NULL;
-            } else if (c === Char.minus) {
+            } else if (c === charMap.minus) {
               // keep and continue
-              this.numberNode += "-";
-            } else if (Char._0 <= c && c <= Char._9) {
+              this.numberNode += '-';
+            } else if (charMap._0 <= c && c <= charMap._9) {
               this.numberNode += String.fromCharCode(c);
               this.state = this.S.NUMBER_DIGIT;
             } else {
-              await this.processError("Bad value");
+              await this.processError('Bad value');
             }
             continue;
 
           case this.S.CLOSE_ARRAY:
-            if (c === Char.comma) {
+            if (c === charMap.comma) {
               this.stack.push(this.S.CLOSE_ARRAY);
               await this.closeValue(ParserEvent.Value);
               this.state = this.S.VALUE;
-            } else if (c === Char.closeBracket) {
+            } else if (c === charMap.closeBracket) {
               await this.emitNode(ParserEvent.CloseArray);
               this.depth--;
               this.state = this.stack.pop() || this.S.VALUE;
             } else if (this.isWhitespace(c)) {
               continue;
             } else {
-              await this.processError("Bad array");
+              await this.processError('Bad array');
             }
             continue;
 
           case this.S.STRING:
             if (this.textNode === undefined) {
-              this.textNode = "";
+              this.textNode = '';
             }
 
             // thanks thejh, this is an about 50% performance improvement.
@@ -461,13 +465,13 @@ export class Parser {
                   break STRING_BIGLOOP;
                 }
               }
-              if (c === Char.doubleQuote && !slashed) {
+              if (c === charMap.doubleQuote && !slashed) {
                 this.state = this.stack.pop() || this.S.VALUE;
                 this.textNode += chunk.substring(starti, i - 1);
                 this.position += i - 1 - starti;
                 break;
               }
-              if (c === Char.backslash && !slashed) {
+              if (c === charMap.backslash && !slashed) {
                 slashed = true;
                 this.textNode += chunk.substring(starti, i - 1);
                 this.position += i - 1 - starti;
@@ -479,20 +483,20 @@ export class Parser {
               }
               if (slashed) {
                 slashed = false;
-                if (c === Char.n) {
-                  this.textNode += "\n";
-                } else if (c === Char.r) {
-                  this.textNode += "\r";
-                } else if (c === Char.t) {
-                  this.textNode += "\t";
-                } else if (c === Char.f) {
-                  this.textNode += "\f";
-                } else if (c === Char.b) {
-                  this.textNode += "\b";
-                } else if (c === Char.u) {
+                if (c === charMap.n) {
+                  this.textNode += '\n';
+                } else if (c === charMap.r) {
+                  this.textNode += '\r';
+                } else if (c === charMap.t) {
+                  this.textNode += '\t';
+                } else if (c === charMap.f) {
+                  this.textNode += '\f';
+                } else if (c === charMap.b) {
+                  this.textNode += '\b';
+                } else if (c === charMap.u) {
                   // \uxxxx. meh!
                   unicodeI = 1;
-                  this.unicodeS = "";
+                  this.unicodeS = '';
                 } else {
                   this.textNode += String.fromCharCode(c);
                 }
@@ -527,113 +531,113 @@ export class Parser {
             continue;
 
           case this.S.TRUE:
-            if (c === Char.r) {
+            if (c === charMap.r) {
               this.state = this.S.TRUE2;
             } else {
-              await this.processError("Invalid true started with t" + c);
+              await this.processError('Invalid true started with t' + c);
             }
             continue;
 
           case this.S.TRUE2:
-            if (c === Char.u) {
+            if (c === charMap.u) {
               this.state = this.S.TRUE3;
             } else {
-              await this.processError("Invalid true started with tr" + c);
+              await this.processError('Invalid true started with tr' + c);
             }
             continue;
 
           case this.S.TRUE3:
-            if (c === Char.e) {
+            if (c === charMap.e) {
               await this.emit(ParserEvent.Value, true);
               this.state = this.stack.pop() || this.S.VALUE;
             } else {
-              await this.processError("Invalid true started with tru" + c);
+              await this.processError('Invalid true started with tru' + c);
             }
             continue;
 
           case this.S.FALSE:
-            if (c === Char.a) {
+            if (c === charMap.a) {
               this.state = this.S.FALSE2;
             } else {
-              await this.processError("Invalid false started with f" + c);
+              await this.processError('Invalid false started with f' + c);
             }
             continue;
 
           case this.S.FALSE2:
-            if (c === Char.l) {
+            if (c === charMap.l) {
               this.state = this.S.FALSE3;
             } else {
-              await this.processError("Invalid false started with fa" + c);
+              await this.processError('Invalid false started with fa' + c);
             }
             continue;
 
           case this.S.FALSE3:
-            if (c === Char.s) {
+            if (c === charMap.s) {
               this.state = this.S.FALSE4;
             } else {
-              await this.processError("Invalid false started with fal" + c);
+              await this.processError('Invalid false started with fal' + c);
             }
             continue;
 
           case this.S.FALSE4:
-            if (c === Char.e) {
+            if (c === charMap.e) {
               await this.emit(ParserEvent.Value, false);
               this.state = this.stack.pop() || this.S.VALUE;
             } else {
-              await this.processError("Invalid false started with fals" + c);
+              await this.processError('Invalid false started with fals' + c);
             }
             continue;
 
           case this.S.NULL:
-            if (c === Char.u) {
+            if (c === charMap.u) {
               this.state = this.S.NULL2;
             } else {
-              await this.processError("Invalid null started with n" + c);
+              await this.processError('Invalid null started with n' + c);
             }
             continue;
 
           case this.S.NULL2:
-            if (c === Char.l) {
+            if (c === charMap.l) {
               this.state = this.S.NULL3;
             } else {
-              await this.processError("Invalid null started with nu" + c);
+              await this.processError('Invalid null started with nu' + c);
             }
             continue;
 
           case this.S.NULL3:
-            if (c === Char.l) {
+            if (c === charMap.l) {
               await this.emit(ParserEvent.Value, null);
               this.state = this.stack.pop() || this.S.VALUE;
             } else {
-              await this.processError("Invalid null started with nul" + c);
+              await this.processError('Invalid null started with nul' + c);
             }
             continue;
 
           case this.S.NUMBER_DECIMAL_POINT:
-            if (c === Char.period) {
-              this.numberNode += ".";
+            if (c === charMap.period) {
+              this.numberNode += '.';
               this.state = this.S.NUMBER_DIGIT;
             } else {
-              await this.processError("Leading zero not followed by .");
+              await this.processError('Leading zero not followed by .');
             }
             continue;
 
           case this.S.NUMBER_DIGIT:
-            if (Char._0 <= c && c <= Char._9) {
+            if (charMap._0 <= c && c <= charMap._9) {
               this.numberNode += String.fromCharCode(c);
-            } else if (c === Char.period) {
-              if (this.numberNode.indexOf(".") !== -1) {
-                await this.processError("Invalid number has two dots");
+            } else if (c === charMap.period) {
+              if (this.numberNode.indexOf('.') !== -1) {
+                await this.processError('Invalid number has two dots');
               }
-              this.numberNode += ".";
-            } else if (c === Char.e || c === Char.E) {
-              if (this.numberNode.indexOf("e") !== -1 || this.numberNode.indexOf("E") !== -1) {
-                await this.processError("Invalid number has two exponential");
+              this.numberNode += '.';
+            } else if (c === charMap.e || c === charMap.E) {
+              if (this.numberNode.indexOf('e') !== -1 || this.numberNode.indexOf('E') !== -1) {
+                await this.processError('Invalid number has two exponential');
               }
-              this.numberNode += "e";
-            } else if (c === Char.plus || c === Char.minus) {
-              if (!(p === Char.e || p === Char.E)) {
-                await this.processError("Invalid symbol in number");
+              this.numberNode += 'e';
+            } else if (c === charMap.plus || c === charMap.minus) {
+              if (!(p === charMap.e || p === charMap.E)) {
+                await this.processError('Invalid symbol in number');
               }
               this.numberNode += String.fromCharCode(c);
             } else {
@@ -645,7 +649,7 @@ export class Parser {
             continue;
 
           default:
-            await this.processError("Unknown state: " + this.state);
+            await this.processError('Unknown state: ' + this.state);
         }
       }
 
@@ -660,7 +664,7 @@ export class Parser {
   private prepareState(): any {
     let S: number = 0;
 
-    const state = {
+    const state: any = {
       BEGIN: S++,
       VALUE: S++, // general stuff
       OPEN_OBJECT: S++, // {
@@ -684,11 +688,13 @@ export class Parser {
       NULL2: S++, // l
       NULL3: S++, // l
       NUMBER_DECIMAL_POINT: S++, // .
-      NUMBER_DIGIT: S++, // [0-9]
+      NUMBER_DIGIT: S++ // [0-9]
     };
 
-    for (let s_ in state) {
-      state[state[s_]] = s_;
+    for (const s in state) {
+      if (state.hasOwnProperty(s)) {
+        state[state[s]] = s;
+      }
     }
 
     return state;

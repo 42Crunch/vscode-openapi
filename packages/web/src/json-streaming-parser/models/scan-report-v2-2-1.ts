@@ -1,7 +1,7 @@
 import { ApiConformanceScanPathV221 } from './api-conformance-scan-path';
-import {SemanticVersion} from './semantic-version';
-import {ApiConformanceScanReportState} from './api-conformance-scan-report-state';
-import {ApiConformanceScanExitCode} from './api-conformance-scan-exit-code';
+import { SemanticVersion } from './semantic-version';
+import { ApiConformanceScanReportState } from './api-conformance-scan-report-state';
+import { ApiConformanceScanExitCode } from './api-conformance-scan-exit-code';
 
 export class ScanReportV221 {
   readonly taskId: string;

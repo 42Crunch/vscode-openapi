@@ -6,8 +6,8 @@
 
 import { ApiConformanceScanHappyPathKey } from './api-conformance-scan-happy-path-key';
 import { ApiConformanceScanResponseAnalysisKey } from './api-conformance-scan-response-analysis-key';
-import { ApiConformanceScanOwaspIssues } from './api-conformance-scan-owasp-issues';
 import { ScanReportExpectedCodeInfo } from './scan-report-expected-code-info';
+import { OwaspByVersionMappingResponse } from './api-conformance-scan-owasp-issues';
 
 export enum ScanReportV300NextReason {
   OperationUnsupported = 'operation-content-type-not-supported',
@@ -15,7 +15,6 @@ export enum ScanReportV300NextReason {
   OperationConfigurationInvalid = 'operation-configuration-invalid',
   OperationHappyPathFailed = 'operation-happy-path-failed'
 }
-
 
 /**
  * V2.1.0 scan report structure
@@ -175,19 +174,18 @@ export class ApiConformanceScanReportOperationResponse {
   [k: string]: any;
 
   constructor({
-      checked,
-      reason,
-      curlHappyPath,
-      skipReasonDetails,
-      happyPath,
-      curlBodySkipped,
-      totalRequest,
-      issues,
-      totalExpected,
-      totalUnexpected,
-      totalFailure
-    }: Partial<ApiConformanceScanReportOperationResponse> = {})
-  {
+    checked,
+    reason,
+    curlHappyPath,
+    skipReasonDetails,
+    happyPath,
+    curlBodySkipped,
+    totalRequest,
+    issues,
+    totalExpected,
+    totalUnexpected,
+    totalFailure
+  }: Partial<ApiConformanceScanReportOperationResponse> = {}) {
     this.checked = checked || false;
     this.reason = reason || '';
     this.curlHappyPath = curlHappyPath || '';
@@ -250,9 +248,16 @@ export interface ApiConformanceScanReportScanLogResponse {
    */
   criticality: number;
   /**
-   * OWASP Top 10 list map
+   * OWASP Top 10 list map (2019 version only, preserved for backward compatibility and the source of truth for older reports)
+   * the BE enum is numeric for v1 reports
    */
-  owaspMapping: ApiConformanceScanOwaspIssues;
+  owaspMapping: number;
+  /**
+   * OWASP Top 10 list map by standard year ("owasp2019", "owasp2023", etc.)
+   * set optional as may be absent for older reports
+   * the BE enum is numeric for v1 reports
+   */
+  owaspByVersionMapping?: OwaspByVersionMappingResponse<number>;
   /**
    * The JSON pointer of the scanned object in the OpenAPI definition file. Can be indexed.
    */

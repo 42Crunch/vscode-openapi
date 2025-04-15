@@ -32,7 +32,7 @@ import { loadConfig } from "../../features/config/slice";
 import { showLogMessage } from "../../features/logging/slice";
 
 import ScanOperation from "./ScanOperation";
-import { initProcessReport } from "../../json-streaming-parser/report-loader.worker";
+import { initProcessReport } from "../../json-streaming-parser/worker";
 
 const routes: Routes = [
   {
@@ -68,11 +68,11 @@ const messageHandlers: Webapp["webappHandlers"] = {
 
 function App() {
   const dispatch = useAppDispatch();
-  const { initDbStarted, initDbStatus, initDbError } = useAppSelector((state) => state.scan);
+  const { initDbStarted } = useAppSelector((state) => state.scan);
 
   useEffect(() => {
     if (initDbStarted) {
-      initProcessReport()
+      initProcessReport("vscode.scan.db")
         .then(() => {
           dispatch(sendInitDbComplete({ status: true, message: "" }));
         })
