@@ -1,11 +1,11 @@
 import { ScanReportExpectedCodeInfo } from './scan-report-expected-code-info';
-import {HttpMethod} from './http-method';
-import {Severity} from './severity';
-import {StatusCode} from './status-code';
-import {IntegralScanReportIssueStatus} from './integral-scan-report-issue-status';
-import {ApiConformanceScanResponseAnalysisKey} from './api-conformance-scan-response-analysis-key';
-import {ApiConformanceScanResponseAnalysisV221} from './api-conformance-scan-response-analysis';
-import {ApiConformanceScanOwaspIssues, OwaspIssueDetail} from './api-conformance-scan-owasp-issues';
+import { HttpMethod } from './http-method';
+import { Severity } from './severity';
+import { StatusCode } from './status-code';
+import { IntegralScanReportIssueStatus } from './integral-scan-report-issue-status';
+import { ApiConformanceScanResponseAnalysisKey } from './api-conformance-scan-response-analysis-key';
+import { ApiConformanceScanResponseAnalysisV221 } from './api-conformance-scan-response-analysis';
+import { SupportedOwaspTopTenIssueList, OwaspIssueDetail } from './api-conformance-scan-owasp-issues';
 
 export class ApiConformanceScanIssueV221 {
   readonly id: string;
@@ -21,8 +21,10 @@ export class ApiConformanceScanIssueV221 {
   /** @deprecated */
   readonly responseDescription: string;
   readonly criticality: Severity;
-  readonly owaspMapping: ApiConformanceScanOwaspIssues;
-  readonly owaspDetail: OwaspIssueDetail | null;
+  /** old property (standard 2019) for backward compatibility mapped to UI enum */
+  readonly owaspMapping: SupportedOwaspTopTenIssueList;
+  /** new property with details by different years (if present) */
+  readonly owaspIssuesFound: OwaspIssueDetail[];
   readonly isContractConforming: boolean;
   readonly integralStatus: IntegralScanReportIssueStatus | null;
   readonly jsonPointer: string;
@@ -50,7 +52,7 @@ export class ApiConformanceScanIssueV221 {
     responseKey,
     responseDescription,
     criticality,
-    owaspDetail,
+    owaspIssuesFound,
     owaspMapping,
     isContractConforming,
     integralStatus,
@@ -77,8 +79,8 @@ export class ApiConformanceScanIssueV221 {
     this.responseKey = responseKey || '';
     this.responseDescription = responseDescription || '';
     this.criticality = criticality || Severity.None;
-    this.owaspMapping = owaspMapping || ApiConformanceScanOwaspIssues.None;
-    this.owaspDetail = owaspDetail || null;
+    this.owaspMapping = owaspMapping || SupportedOwaspTopTenIssueList.None;
+    this.owaspIssuesFound = owaspIssuesFound || null;
     this.isContractConforming = isContractConforming || false;
     this.integralStatus = integralStatus || null;
     this.jsonPointer = jsonPointer || '';
