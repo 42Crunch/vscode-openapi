@@ -345,6 +345,10 @@ export class Scanv1Db {
     return await this.db.issues.where("id").equals(id).toArray();
   }
 
+  async getIssuesList(): Promise<any[]> {
+    return await this.db.issues.toArray();
+  }
+
   async addPath(item: ApiConformanceScanPathV221): Promise<void> {
     return await this.db.paths.add({ ...item });
   }
