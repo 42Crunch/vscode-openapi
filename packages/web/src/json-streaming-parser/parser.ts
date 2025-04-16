@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import {
   charMap,
   defaultMaxBufferLength,
@@ -5,8 +7,8 @@ import {
   Options,
   ParserEvent,
   STATE,
-  stringTokenPatternValue
-} from './parser.model';
+  stringTokenPatternValue,
+} from "./parser.model";
 
 export class Parser {
   stringTokenPattern: any;
@@ -16,9 +18,9 @@ export class Parser {
   column: number = -1;
   position: number = -1;
   bufferCheckPosition: number = -1;
-  q: string = '';
-  c: string = '';
-  p: any = ''; // string;
+  q: string = "";
+  c: string = "";
+  p: any = ""; // string;
   opt: Options;
   closed: boolean = false;
   closedRoot: boolean = false;
@@ -28,13 +30,13 @@ export class Parser {
   stack: any[] = [];
   slashed: boolean = false;
   unicodeI: number = 0;
-  unicodeS: string = '';
+  unicodeS: string = "";
   depth: number = 0;
   state: STATE = {} as STATE;
   buffers: any;
   S: any;
-  textNode: string = '';
-  numberNode: string = '';
+  textNode: string = "";
+  numberNode: string = "";
 
   onValue: (value: string | boolean | null) => Promise<void>;
   onKey: (key: string) => Promise<void>;
@@ -58,14 +60,14 @@ export class Parser {
     onEnd,
     onError,
     onReady,
-    opt
+    opt,
   }: Partial<Parser> = {}) {
     this.stringTokenPattern = stringTokenPattern || stringTokenPatternValue;
     this.maxBufferLength = maxBufferLength || defaultMaxBufferLength;
     this.events = events;
     this.buffers = {
       textNode: undefined,
-      numberNode: ''
+      numberNode: "",
     };
 
     this.opt = opt || {};
@@ -86,9 +88,9 @@ export class Parser {
   init(): void {
     this.clearBuffers();
     this.bufferCheckPosition = this.maxBufferLength;
-    this.q = '';
-    this.c = '';
-    this.p = '';
+    this.q = "";
+    this.c = "";
+    this.p = "";
     this.closed = false;
     this.closedRoot = false;
     this.sawRoot = false;
@@ -101,10 +103,10 @@ export class Parser {
     this.line = 1;
     this.slashed = false;
     this.unicodeI = 0;
-    this.unicodeS = '';
+    this.unicodeS = "";
     this.depth = 0;
-    this.textNode = '';
-    this.numberNode = '';
+    this.textNode = "";
+    this.numberNode = "";
     this.onReady();
   }
 
@@ -174,26 +176,26 @@ export class Parser {
     if (!!this.textNode) {
       await this.emit(event ? event : ParserEvent.Value, this.textNode);
     }
-    this.textNode = '';
+    this.textNode = "";
   }
 
   async closeNumber(): Promise<void> {
     if (this.numberNode) {
       await this.emit(ParserEvent.Value, parseFloat(this.numberNode));
     }
-    this.numberNode = '';
+    this.numberNode = "";
   }
 
   private textOpts(opt: Options, text: string | undefined): string {
     if (text === undefined) {
-      return '';
+      return "";
     }
     if (opt.trim) {
       text = text.trim();
     }
 
     if (opt.normalize) {
-      text = text.replace(/\s+/g, ' ');
+      text = text.replace(/\s+/g, " ");
     }
 
     return text;
@@ -209,11 +211,11 @@ export class Parser {
 
   async end(): Promise<void> {
     if (this.state !== this.S.VALUE || this.depth !== 0) {
-      await this.processError('Unexpected end');
+      await this.processError("Unexpected end");
     }
 
     await this.closeValue();
-    this.c = '';
+    this.c = "";
     this.closed = true;
     await this.emit(ParserEvent.End);
     this.init();
@@ -238,12 +240,12 @@ export class Parser {
 
         if (len > maxAllowed) {
           switch (buffer) {
-            case 'text':
+            case "text":
               // closeText(parser); TODO CHECK THIS
               break;
 
             default:
-              await this.processError('Max buffer length exceeded: ' + buffer);
+              await this.processError("Max buffer length exceeded: " + buffer);
           }
         }
         maxActual = Math.max(maxActual, len);
@@ -267,7 +269,7 @@ export class Parser {
       }
 
       if (this.closed) {
-        await this.processError('Cannot write after close. Assign an onready handler.');
+        await this.processError("Cannot write after close. Assign an onready handler.");
         resolve();
       }
 
@@ -318,7 +320,7 @@ export class Parser {
             } else if (c === charMap.openBracket) {
               this.state = this.S.OPEN_ARRAY;
             } else if (!this.isWhitespace(c)) {
-              await this.processError('Non-whitespace before {[.');
+              await this.processError("Non-whitespace before {[.");
             }
             continue;
 
@@ -353,7 +355,7 @@ export class Parser {
             if (this.isWhitespace(c)) {
               continue;
             }
-            const event = this.state === this.S.CLOSE_KEY ? 'key' : 'object';
+            const event = this.state === this.S.CLOSE_KEY ? "key" : "object";
 
             if (c === charMap.colon) {
               if (this.state === this.S.CLOSE_OBJECT) {
@@ -375,7 +377,7 @@ export class Parser {
               await this.closeValue();
               this.state = this.S.OPEN_KEY;
             } else {
-              await this.processError('Bad object');
+              await this.processError("Bad object");
             }
             continue;
 
@@ -411,12 +413,12 @@ export class Parser {
               this.state = this.S.NULL;
             } else if (c === charMap.minus) {
               // keep and continue
-              this.numberNode += '-';
+              this.numberNode += "-";
             } else if (charMap._0 <= c && c <= charMap._9) {
               this.numberNode += String.fromCharCode(c);
               this.state = this.S.NUMBER_DIGIT;
             } else {
-              await this.processError('Bad value');
+              await this.processError("Bad value");
             }
             continue;
 
@@ -432,13 +434,13 @@ export class Parser {
             } else if (this.isWhitespace(c)) {
               continue;
             } else {
-              await this.processError('Bad array');
+              await this.processError("Bad array");
             }
             continue;
 
           case this.S.STRING:
             if (this.textNode === undefined) {
-              this.textNode = '';
+              this.textNode = "";
             }
 
             // thanks thejh, this is an about 50% performance improvement.
@@ -484,19 +486,19 @@ export class Parser {
               if (slashed) {
                 slashed = false;
                 if (c === charMap.n) {
-                  this.textNode += '\n';
+                  this.textNode += "\n";
                 } else if (c === charMap.r) {
-                  this.textNode += '\r';
+                  this.textNode += "\r";
                 } else if (c === charMap.t) {
-                  this.textNode += '\t';
+                  this.textNode += "\t";
                 } else if (c === charMap.f) {
-                  this.textNode += '\f';
+                  this.textNode += "\f";
                 } else if (c === charMap.b) {
-                  this.textNode += '\b';
+                  this.textNode += "\b";
                 } else if (c === charMap.u) {
                   // \uxxxx. meh!
                   unicodeI = 1;
-                  this.unicodeS = '';
+                  this.unicodeS = "";
                 } else {
                   this.textNode += String.fromCharCode(c);
                 }
@@ -534,7 +536,7 @@ export class Parser {
             if (c === charMap.r) {
               this.state = this.S.TRUE2;
             } else {
-              await this.processError('Invalid true started with t' + c);
+              await this.processError("Invalid true started with t" + c);
             }
             continue;
 
@@ -542,7 +544,7 @@ export class Parser {
             if (c === charMap.u) {
               this.state = this.S.TRUE3;
             } else {
-              await this.processError('Invalid true started with tr' + c);
+              await this.processError("Invalid true started with tr" + c);
             }
             continue;
 
@@ -551,7 +553,7 @@ export class Parser {
               await this.emit(ParserEvent.Value, true);
               this.state = this.stack.pop() || this.S.VALUE;
             } else {
-              await this.processError('Invalid true started with tru' + c);
+              await this.processError("Invalid true started with tru" + c);
             }
             continue;
 
@@ -559,7 +561,7 @@ export class Parser {
             if (c === charMap.a) {
               this.state = this.S.FALSE2;
             } else {
-              await this.processError('Invalid false started with f' + c);
+              await this.processError("Invalid false started with f" + c);
             }
             continue;
 
@@ -567,7 +569,7 @@ export class Parser {
             if (c === charMap.l) {
               this.state = this.S.FALSE3;
             } else {
-              await this.processError('Invalid false started with fa' + c);
+              await this.processError("Invalid false started with fa" + c);
             }
             continue;
 
@@ -575,7 +577,7 @@ export class Parser {
             if (c === charMap.s) {
               this.state = this.S.FALSE4;
             } else {
-              await this.processError('Invalid false started with fal' + c);
+              await this.processError("Invalid false started with fal" + c);
             }
             continue;
 
@@ -584,7 +586,7 @@ export class Parser {
               await this.emit(ParserEvent.Value, false);
               this.state = this.stack.pop() || this.S.VALUE;
             } else {
-              await this.processError('Invalid false started with fals' + c);
+              await this.processError("Invalid false started with fals" + c);
             }
             continue;
 
@@ -592,7 +594,7 @@ export class Parser {
             if (c === charMap.u) {
               this.state = this.S.NULL2;
             } else {
-              await this.processError('Invalid null started with n' + c);
+              await this.processError("Invalid null started with n" + c);
             }
             continue;
 
@@ -600,7 +602,7 @@ export class Parser {
             if (c === charMap.l) {
               this.state = this.S.NULL3;
             } else {
-              await this.processError('Invalid null started with nu' + c);
+              await this.processError("Invalid null started with nu" + c);
             }
             continue;
 
@@ -609,16 +611,16 @@ export class Parser {
               await this.emit(ParserEvent.Value, null);
               this.state = this.stack.pop() || this.S.VALUE;
             } else {
-              await this.processError('Invalid null started with nul' + c);
+              await this.processError("Invalid null started with nul" + c);
             }
             continue;
 
           case this.S.NUMBER_DECIMAL_POINT:
             if (c === charMap.period) {
-              this.numberNode += '.';
+              this.numberNode += ".";
               this.state = this.S.NUMBER_DIGIT;
             } else {
-              await this.processError('Leading zero not followed by .');
+              await this.processError("Leading zero not followed by .");
             }
             continue;
 
@@ -626,18 +628,18 @@ export class Parser {
             if (charMap._0 <= c && c <= charMap._9) {
               this.numberNode += String.fromCharCode(c);
             } else if (c === charMap.period) {
-              if (this.numberNode.indexOf('.') !== -1) {
-                await this.processError('Invalid number has two dots');
+              if (this.numberNode.indexOf(".") !== -1) {
+                await this.processError("Invalid number has two dots");
               }
-              this.numberNode += '.';
+              this.numberNode += ".";
             } else if (c === charMap.e || c === charMap.E) {
-              if (this.numberNode.indexOf('e') !== -1 || this.numberNode.indexOf('E') !== -1) {
-                await this.processError('Invalid number has two exponential');
+              if (this.numberNode.indexOf("e") !== -1 || this.numberNode.indexOf("E") !== -1) {
+                await this.processError("Invalid number has two exponential");
               }
-              this.numberNode += 'e';
+              this.numberNode += "e";
             } else if (c === charMap.plus || c === charMap.minus) {
               if (!(p === charMap.e || p === charMap.E)) {
-                await this.processError('Invalid symbol in number');
+                await this.processError("Invalid symbol in number");
               }
               this.numberNode += String.fromCharCode(c);
             } else {
@@ -649,7 +651,7 @@ export class Parser {
             continue;
 
           default:
-            await this.processError('Unknown state: ' + this.state);
+            await this.processError("Unknown state: " + this.state);
         }
       }
 
@@ -688,7 +690,7 @@ export class Parser {
       NULL2: S++, // l
       NULL3: S++, // l
       NUMBER_DECIMAL_POINT: S++, // .
-      NUMBER_DIGIT: S++ // [0-9]
+      NUMBER_DIGIT: S++, // [0-9]
     };
 
     for (const s in state) {
