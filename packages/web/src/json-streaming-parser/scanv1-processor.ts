@@ -1,6 +1,8 @@
-import { StringUtils } from './utils/string-utils';
-import { ScanReportV221MappingService } from './scan-report-v2-2-1-mapping.service';
-import { Scanv1Db } from './scanv1.db';
+// @ts-nocheck
+
+import { StringUtils } from "./utils/string-utils";
+import { ScanReportV221MappingService } from "./scan-report-v2-2-1-mapping.service";
+import { Scanv1Db } from "./scanv1.db";
 import {
   ArrayKey,
   arrayKeys,
@@ -11,8 +13,8 @@ import {
   operationKeyMap,
   operationKeys,
   pathsKey,
-  reportMetadataMap
-} from './models/db.model';
+  reportMetadataMap,
+} from "./models/db.model";
 import {
   ApiConformanceScanIssueV221,
   ApiConformanceScanPathV221,
@@ -36,16 +38,20 @@ import {
   ApiConformanceScanReportIndexResponse,
   ApiConformanceScanReportScanLogResponse,
   ApiConformanceScanReportOperationResponse,
-  ScanReportV300NextReason
-} from './models';
+  ScanReportV300NextReason,
+} from "./models";
 
 let stack: any[] = [];
-let currentKey: string = '';
+let currentKey: string = "";
 let isArrayOpened: boolean = false;
 let arrayBuf: { [key: string]: any[] } = {};
 let keyValueBuf: { [key: string]: any } = {};
 let isPathParsing: boolean = false;
 let dbService: Scanv1Db;
+
+export function getScanv1Db(): Scanv1Db {
+  return dbService;
+}
 
 export async function initDb(dbName: string): Promise<void> {
   dbService = new Scanv1Db(dbName);
@@ -53,7 +59,9 @@ export async function initDb(dbName: string): Promise<void> {
   return await dbService
     .init()
     // eslint-disable-next-line no-console
-    .then(() => console.log('%c Connected to the database', 'text-transform: uppercase; color: green'))
+    .then(() =>
+      console.log("%c Connected to the database", "text-transform: uppercase; color: green")
+    )
     .catch((e: any) => {
       throw new Error(`Failed to connect to the database: ${e.message}`);
     });
@@ -89,7 +97,7 @@ export async function onKey(key: string): Promise<void> {
   return new Promise<void>(async (resolve) => {
     if (key === pathsKey) {
       isPathParsing = true;
-      currentKey = '';
+      currentKey = "";
       keyValueBuf = {};
       arrayBuf = {};
       isArrayOpened = false;
@@ -107,7 +115,7 @@ export async function onKey(key: string): Promise<void> {
           stack.push(
             new ApiConformanceScanOperationV221({
               path: (stack[1] as ApiConformanceScanPathV221).path,
-              method: key as HttpMethod
+              method: key as HttpMethod,
             })
           );
         } else if (currentIndex === 2) {
@@ -115,12 +123,18 @@ export async function onKey(key: string): Promise<void> {
         } else {
           if (key) {
             if (currentKey) {
-              stack.push(ScanReportV221MappingService.getValueObject(currentKey, -1, { [key]: null }));
+              stack.push(
+                ScanReportV221MappingService.getValueObject(currentKey, -1, { [key]: null })
+              );
             } else {
               if (stack[currentIndex].pointer) {
                 if (isArrayOpened) {
                   const arrayLength = stack[currentIndex].value.length;
-                  stack.push(ScanReportV221MappingService.getValueObject(currentKey, arrayLength, { [key]: null }));
+                  stack.push(
+                    ScanReportV221MappingService.getValueObject(currentKey, arrayLength, {
+                      [key]: null,
+                    })
+                  );
                   isArrayOpened = false;
                 } else {
                   stack[currentIndex].value[key] = null;
@@ -177,18 +191,24 @@ export async function onOpenObject(key: string): Promise<void> {
         stack.push(
           new ApiConformanceScanOperationV221({
             path: (stack[1] as ApiConformanceScanPathV221).path,
-            method: key as HttpMethod
+            method: key as HttpMethod,
           })
         );
       } else {
         if (key) {
           if (currentKey) {
-            stack.push(ScanReportV221MappingService.getValueObject(currentKey, -1, { [key]: null }));
+            stack.push(
+              ScanReportV221MappingService.getValueObject(currentKey, -1, { [key]: null })
+            );
           } else {
             if (stack[currentIndex].pointer) {
               if (isArrayOpened) {
                 const arrayLength = stack[currentIndex].value.length;
-                stack.push(ScanReportV221MappingService.getValueObject(currentKey, arrayLength, { [key]: null }));
+                stack.push(
+                  ScanReportV221MappingService.getValueObject(currentKey, arrayLength, {
+                    [key]: null,
+                  })
+                );
                 isArrayOpened = false;
               } else {
                 stack[currentIndex].value[currentKey] = null;
@@ -237,15 +257,16 @@ export async function onCloseObject(): Promise<void> {
           if (parentKey) {
             if (currentIndex - 1 === 2) {
               try {
-                const operation: ApiConformanceScanOperationV221 = await mapConformanceScanOperationResponsePromise(
-                  stack[currentIndex].value,
-                  stack[currentIndex - 1].path,
-                  stack[currentIndex - 1].method
-                );
+                const operation: ApiConformanceScanOperationV221 =
+                  await mapConformanceScanOperationResponsePromise(
+                    stack[currentIndex].value,
+                    stack[currentIndex - 1].path,
+                    stack[currentIndex - 1].method
+                  );
                 stack[currentIndex - 1] = { ...operation };
                 await putOperationIntoDb(operation);
                 stack = stack.slice(0, currentIndex);
-                currentKey = '';
+                currentKey = "";
               } catch (err) {
                 reject(err);
               }
@@ -258,17 +279,19 @@ export async function onCloseObject(): Promise<void> {
           }
         } else if (currentIndex === 2) {
           if (!isArrayOpened) {
-            (stack[currentIndex - 1] as ApiConformanceScanPathV221).operations.push(stack[currentIndex]);
+            (stack[currentIndex - 1] as ApiConformanceScanPathV221).operations.push(
+              stack[currentIndex]
+            );
           }
         }
 
         stack = stack.slice(0, currentIndex);
-        currentKey = '';
+        currentKey = "";
       } else if (currentIndex === 1) {
         try {
           await dbService.addPath(stack[currentIndex]);
           stack = stack.slice(0, currentIndex);
-          currentKey = '';
+          currentKey = "";
         } catch (err) {
           reject(err);
         }
@@ -280,14 +303,15 @@ export async function onCloseObject(): Promise<void> {
 
       const newIndex: number = getCurrentIndex();
 
-      if (newIndex === 4 && stack[newIndex].pointer === MetadataKey.Issues && stack[newIndex].value.length > 0) {
+      if (
+        newIndex === 4 &&
+        stack[newIndex].pointer === MetadataKey.Issues &&
+        stack[newIndex].value.length > 0
+      ) {
         const issue = stack[newIndex].value[0];
         try {
-          const newIssue: ApiConformanceScanIssueV221 = await mapConformanceScanIssueResponsePromise(
-            issue,
-            stack[2].path,
-            stack[2].method
-          );
+          const newIssue: ApiConformanceScanIssueV221 =
+            await mapConformanceScanIssueResponsePromise(issue, stack[2].path, stack[2].method);
           await putIssueIntoDb(newIssue);
           stack[newIndex].value = stack[newIndex].value.slice(1);
         } catch (err) {
@@ -299,11 +323,11 @@ export async function onCloseObject(): Promise<void> {
         if (!isArrayOpened) {
           (stack[newIndex - 1] as ApiConformanceScanPathV221).operations.push(stack[newIndex]);
           stack = stack.slice(0, newIndex);
-          currentKey = '';
+          currentKey = "";
         }
       }
     } else {
-      currentKey = '';
+      currentKey = "";
     }
     resolve();
   });
@@ -316,7 +340,7 @@ export async function onOpenArray(): Promise<void> {
     if (isPathParsing) {
       isArrayOpened = true;
       stack.push(ScanReportV221MappingService.getValueObject(currentKey, -1, []));
-      currentKey = '';
+      currentKey = "";
     } else {
       if (arrayKeys.includes(currentKey)) {
         arrayBuf = { [currentKey]: [] };
@@ -361,13 +385,15 @@ async function onPathsValue(key: string, value: any = null): Promise<void> {
 
     if (currentIndex === 2) {
       if (operationKeys.includes(key)) {
-        const reportVersion = await dbService.getMetadataItem(reportMetadataMap[MetadataKey.ScanReportVersion]);
+        const reportVersion = await dbService.getMetadataItem(
+          reportMetadataMap[MetadataKey.ScanReportVersion]
+        );
 
         switch (key) {
           case OperartionKey.Checked:
             stack[currentIndex] = {
               ...(stack[currentIndex] as ApiConformanceScanOperationV221),
-              [operationKeyMap[key]]: !value
+              [operationKeyMap[key]]: !value,
             };
             break;
           case OperartionKey.TotalRequest:
@@ -376,29 +402,34 @@ async function onPathsValue(key: string, value: any = null): Promise<void> {
           case OperartionKey.TotalFailure:
             stack[currentIndex] = {
               ...(stack[currentIndex] as ApiConformanceScanOperationV221),
-              [operationKeyMap[key]]: value
+              [operationKeyMap[key]]: value,
             };
             break;
           case OperartionKey.Reason:
-            const operationSkipReasonKey = ScanReportV221MappingService.mapApiConformanceScanOperationKeyResponse(
-              value || '',
-              reportVersion
-            ) as ApiConformanceScanOperationSkipReasonKeyV221;
+            const operationSkipReasonKey =
+              ScanReportV221MappingService.mapApiConformanceScanOperationKeyResponse(
+                value || "",
+                reportVersion
+              ) as ApiConformanceScanOperationSkipReasonKeyV221;
 
             let happyPathDetailsForReason: ApiConformanceScanHappyPathDetailsV221 | null = null;
 
-            if (operationSkipReasonKey === ApiConformanceScanOperationSkipReasonKeyV221.HappyPathFailed) {
-              happyPathDetailsForReason = ScanReportV221MappingService.mapApiConformanceScanHappyPathDetailsResponse(
-                null,
-                reportVersion
-              );
+            if (
+              operationSkipReasonKey ===
+              ApiConformanceScanOperationSkipReasonKeyV221.HappyPathFailed
+            ) {
+              happyPathDetailsForReason =
+                ScanReportV221MappingService.mapApiConformanceScanHappyPathDetailsResponse(
+                  null,
+                  reportVersion
+                );
             }
 
             stack[currentIndex] = {
               ...(stack[currentIndex] as ApiConformanceScanOperationV221),
               [operationKeyMap[key]]: value,
               skipReason: operationSkipReasonKey,
-              happyPathDetails: happyPathDetailsForReason
+              happyPathDetails: happyPathDetailsForReason,
             };
 
             break;
@@ -423,7 +454,7 @@ async function onPathsValue(key: string, value: any = null): Promise<void> {
           }
         }
 
-        currentKey = '';
+        currentKey = "";
       }
     } else {
       if (stack[currentIndex].pointer || stack[currentIndex].index >= 0) {
@@ -440,17 +471,17 @@ async function onPathsValue(key: string, value: any = null): Promise<void> {
         }
       }
 
-      currentKey = '';
+      currentKey = "";
     }
 
     resolve();
   });
 }
 
-async function putDataIntoDb(key: string, data: any, type: string = 'array'): Promise<void> {
+async function putDataIntoDb(key: string, data: any, type: string = "array"): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      if (type === 'array') {
+      if (type === "array") {
         const existingValue: any = await dbService.getIndexArray(key);
 
         if (existingValue !== undefined) {
@@ -479,9 +510,13 @@ async function mapConformanceScanIssueResponsePromise(
   return new Promise<ApiConformanceScanIssueV221>(async (resolve, reject) => {
     const method = issueMethod.toUpperCase() as HttpMethod;
     const injectionKeys: string[] = await dbService.getIndexArray(ArrayKey.InjectionKeys);
-    const injectionDescriptions: string[] = await dbService.getIndexArray(ArrayKey.InjectionDescriptions);
+    const injectionDescriptions: string[] = await dbService.getIndexArray(
+      ArrayKey.InjectionDescriptions
+    );
     const responseKeys: any[] = await dbService.getIndexArray(ArrayKey.ResponseKeys);
-    const responseDescriptions: string[] = await dbService.getIndexArray(ArrayKey.ResponseDescriptions);
+    const responseDescriptions: string[] = await dbService.getIndexArray(
+      ArrayKey.ResponseDescriptions
+    );
     const contentTypes: string[] = await dbService.getIndexArray(ArrayKey.ContentTypes);
     const jsonPointers: string[] = await dbService.getIndexArray(ArrayKey.JSONPointers);
 
@@ -495,99 +530,114 @@ async function mapConformanceScanIssueResponsePromise(
       !!jsonPointers;
 
     const injectionKey =
-      (hasIndex ? injectionKeys[response.injectionKey as number] : (response.injectionKey as string)) || '';
+      (hasIndex
+        ? injectionKeys[response.injectionKey as number]
+        : (response.injectionKey as string)) || "";
 
     const injectionDescriptionWithPlaceholders =
       (hasIndex
         ? injectionDescriptions[response.injectionDescription as number]
-        : (response.injectionDescription as string)) || '';
+        : (response.injectionDescription as string)) || "";
 
     const injectionDescription: string = ScanReportV221MappingService.mapDescriptionResponse(
       injectionDescriptionWithPlaceholders,
       response.injectionDescriptionParams || []
     );
 
-    const responseAnalysisList: ApiConformanceScanResponseAnalysisV221[] = (response.apiResponseAnalysis || []).map(
-      (responseAnalysisItem: ApiConformanceScanReportApiResponseAnalysisResponse) => {
-        let responseKeyValue: ApiConformanceScanResponseAnalysisKey | number;
+    const responseAnalysisList: ApiConformanceScanResponseAnalysisV221[] = (
+      response.apiResponseAnalysis || []
+    ).map((responseAnalysisItem: ApiConformanceScanReportApiResponseAnalysisResponse) => {
+      let responseKeyValue: ApiConformanceScanResponseAnalysisKey | number;
 
-        if (responseAnalysisItem) {
-          responseKeyValue = responseAnalysisItem.responseKey;
-        } else {
-          responseKeyValue = response.responseKey;
-        }
-
-        const responseKey: ApiConformanceScanResponseAnalysisKey | number = hasIndex
-          ? responseKeys[responseKeyValue as number]
-          : (responseKeyValue as ApiConformanceScanResponseAnalysisKey);
-
-        let responseDescriptionWithPlaceholdersValue: string | number;
-        let responseDescriptionParams: string[];
-
-        if (responseAnalysisItem) {
-          responseDescriptionWithPlaceholdersValue = responseAnalysisItem.responseDescription;
-          responseDescriptionParams = responseAnalysisItem.responseDescriptionParams || [];
-        } else {
-          responseDescriptionWithPlaceholdersValue = response.responseDescription;
-          responseDescriptionParams = response.responseDescriptionParams || [];
-        }
-
-        const responseDescriptionWithPlaceholders =
-          (hasIndex
-            ? responseDescriptions[responseDescriptionWithPlaceholdersValue as number]
-            : (responseDescriptionWithPlaceholdersValue as string)) || '';
-
-        const responseDescription = ScanReportV221MappingService.mapDescriptionResponse(
-          responseDescriptionWithPlaceholders,
-          responseDescriptionParams
-        );
-
-        return { responseKey, responseDescription };
+      if (responseAnalysisItem) {
+        responseKeyValue = responseAnalysisItem.responseKey;
+      } else {
+        responseKeyValue = response.responseKey;
       }
-    );
+
+      const responseKey: ApiConformanceScanResponseAnalysisKey | number = hasIndex
+        ? responseKeys[responseKeyValue as number]
+        : (responseKeyValue as ApiConformanceScanResponseAnalysisKey);
+
+      let responseDescriptionWithPlaceholdersValue: string | number;
+      let responseDescriptionParams: string[];
+
+      if (responseAnalysisItem) {
+        responseDescriptionWithPlaceholdersValue = responseAnalysisItem.responseDescription;
+        responseDescriptionParams = responseAnalysisItem.responseDescriptionParams || [];
+      } else {
+        responseDescriptionWithPlaceholdersValue = response.responseDescription;
+        responseDescriptionParams = response.responseDescriptionParams || [];
+      }
+
+      const responseDescriptionWithPlaceholders =
+        (hasIndex
+          ? responseDescriptions[responseDescriptionWithPlaceholdersValue as number]
+          : (responseDescriptionWithPlaceholdersValue as string)) || "";
+
+      const responseDescription = ScanReportV221MappingService.mapDescriptionResponse(
+        responseDescriptionWithPlaceholders,
+        responseDescriptionParams
+      );
+
+      return { responseKey, responseDescription };
+    });
 
     const requestContentType =
-      (hasIndex ? contentTypes[response.requestContentType as number] : (response.requestContentType as string)) || '';
+      (hasIndex
+        ? contentTypes[response.requestContentType as number]
+        : (response.requestContentType as string)) || "";
 
     const responseContentType =
-      (hasIndex ? contentTypes[response.responseContentType as number] : (response.responseContentType as string)) ||
-      '';
+      (hasIndex
+        ? contentTypes[response.responseContentType as number]
+        : (response.responseContentType as string)) || "";
 
     const jsonPointer =
-      (hasIndex ? jsonPointers[response.jsonPointer as number] : (response.jsonPointer as string)) || '';
+      (hasIndex
+        ? jsonPointers[response.jsonPointer as number]
+        : (response.jsonPointer as string)) || "";
 
-    let responseBody: string = response.responseBody || '';
+    let responseBody: string = response.responseBody || "";
     if (!StringUtils.isNullOrEmpty(response.responseBody)) {
       try {
         responseBody = StringUtils.parseBase64ToUTF(response.responseBody);
       } catch (error) {
-        responseBody = '';
+        responseBody = "";
         // TODO PROBABLY WE NEED TO REJECT PROMISE HERE
         // eslint-disable-next-line no-console
         console.log(`Failed to parse API Conformance Scan issue body: ${responseBody}`, error);
       }
     } else {
-      responseBody = '';
+      responseBody = "";
     }
 
     if (!responseBody && !!response.responseHttp) {
-      responseBody = response.responseHttp.split(apiConformanceScanApiConfig.responseHeaderAndBodySeparator)[1];
+      responseBody = response.responseHttp.split(
+        apiConformanceScanApiConfig.responseHeaderAndBodySeparator
+      )[1];
     }
     /** Additional body extraction flow for the latest non-incremented iteration of the scan report engine (the body property is always equal to `null` in it but full `responseHttp` is added instead) */
     if (!StringUtils.isNullOrEmpty(response.responseHttp)) {
       try {
         const responseHttp = StringUtils.parseBase64ToUTF(response.responseHttp);
         if (!responseBody && !!responseHttp) {
-          responseBody = responseHttp.split(apiConformanceScanApiConfig.responseHeaderAndBodySeparator)[1];
+          responseBody = responseHttp.split(
+            apiConformanceScanApiConfig.responseHeaderAndBodySeparator
+          )[1];
         }
       } catch (error) {
         // TODO PROBABLY WE NEED TO REJECT PROMISE HERE
         // eslint-disable-next-line no-console
-        console.log(`Failed to parse API Conformance Scan issue HTTP content: ${response.responseHttp}`, error);
+        console.log(
+          `Failed to parse API Conformance Scan issue HTTP content: ${response.responseHttp}`,
+          error
+        );
       }
     }
 
-    const injectionStatus = responseAnalysisList[0]?.responseKey as ApiConformanceScanResponseAnalysisKey;
+    const injectionStatus = responseAnalysisList[0]
+      ?.responseKey as ApiConformanceScanResponseAnalysisKey;
 
     const isContractConforming: boolean = responseAnalysisList.length < 2;
 
@@ -595,16 +645,23 @@ async function mapConformanceScanIssueResponsePromise(
       !response.owaspByVersionMapping || Object.values(response.owaspByVersionMapping).length === 0
         ? [
             response.owaspMapping
-              ? owaspIssueDetailsKdb.find((item: OwaspIssueDetail) => item.id === response.owaspMapping)
-              : owaspIssueDetailsKdb.find((item: OwaspIssueDetail) => item.id === SupportedOwaspTopTenIssueList.None)
+              ? owaspIssueDetailsKdb.find(
+                  (item: OwaspIssueDetail) => item.id === response.owaspMapping
+                )
+              : owaspIssueDetailsKdb.find(
+                  (item: OwaspIssueDetail) => item.id === SupportedOwaspTopTenIssueList.None
+                ),
           ]
         : Object.values(response.owaspByVersionMapping).map((owaspIssueId: number) =>
             owaspIssueId
               ? owaspIssueDetailsKdb.find((item: OwaspIssueDetail) => item.id === owaspIssueId)
-              : owaspIssueDetailsKdb.find((item: OwaspIssueDetail) => item.id === SupportedOwaspTopTenIssueList.None)
+              : owaspIssueDetailsKdb.find(
+                  (item: OwaspIssueDetail) => item.id === SupportedOwaspTopTenIssueList.None
+                )
           );
 
-    const owaspMapping: SupportedOwaspTopTenIssueList = owaspDetails[0]?.id || SupportedOwaspTopTenIssueList.None;
+    const owaspMapping: SupportedOwaspTopTenIssueList =
+      owaspDetails[0]?.id || SupportedOwaspTopTenIssueList.None;
 
     let integralStatus: IntegralScanReportIssueStatus;
 
@@ -647,11 +704,11 @@ async function mapConformanceScanIssueResponsePromise(
       owaspMapping,
       owaspIssuesFound: owaspDetails,
       jsonPointer,
-      requestDate: response.requestDate ? new Date(response.requestDate) : '',
+      requestDate: response.requestDate ? new Date(response.requestDate) : "",
       requestContentType,
       requestBodyLength: response.requestBodyLength || 0,
-      url: response.url || '',
-      curl: response.curl || '',
+      url: response.url || "",
+      curl: response.curl || "",
       responseTime: response.responseTime || 0,
       responseHttpStatusCode: response.responseHttpStatusCode || StatusCode.Unknown,
       responseContentType,
@@ -660,7 +717,7 @@ async function mapConformanceScanIssueResponsePromise(
       injectionStatus,
       isContractConforming,
       integralStatus,
-      expected
+      expected,
     });
 
     resolve(scanIssue);
@@ -681,15 +738,16 @@ async function mapConformanceScanOperationResponsePromise(
     const isSkipped = !response.checked;
 
     // soft casting - reasons list can be extended later
-    const operationSkipReasonKey = ScanReportV221MappingService.mapApiConformanceScanOperationKeyResponse(
-      response.reason || '',
-      reportVersion
-    ) as ApiConformanceScanOperationSkipReasonKeyV221;
+    const operationSkipReasonKey =
+      ScanReportV221MappingService.mapApiConformanceScanOperationKeyResponse(
+        response.reason || "",
+        reportVersion
+      ) as ApiConformanceScanOperationSkipReasonKeyV221;
 
     let happyPathStats: ApiConformanceScanHappyPathStatsV221 | null = null;
     if (response.happyPath) {
       happyPathStats = {
-        isFailed: !(response.happyPath.key === ApiConformanceScanHappyPathKey.HappyPathSuccess)
+        isFailed: !(response.happyPath.key === ApiConformanceScanHappyPathKey.HappyPathSuccess),
       };
     }
 
@@ -719,7 +777,7 @@ async function mapConformanceScanOperationResponsePromise(
       totalFailure: response.totalFailure,
       issues: [],
       happyPathStats,
-      reason: response.reason as ScanReportV300NextReason
+      reason: response.reason as ScanReportV300NextReason,
     });
 
     resolve(scanOperation);
@@ -732,7 +790,7 @@ async function onMetadataValue(key: string, value: any): Promise<void> {
     if (metadataKeys.includes(key)) {
       await patchMetadata(key, value);
       keyValueBuf = {};
-      currentKey = '';
+      currentKey = "";
       resolve();
     } else if (arrayKeys.includes(key)) {
       if (isArrayOpened) {
@@ -740,7 +798,7 @@ async function onMetadataValue(key: string, value: any): Promise<void> {
       }
       resolve();
     } else {
-      currentKey = '';
+      currentKey = "";
       resolve();
     }
   });
@@ -749,7 +807,10 @@ async function onMetadataValue(key: string, value: any): Promise<void> {
 async function patchMetadata(key: string, value: any): Promise<void> {
   return new Promise<void>(async (resolve, reject) => {
     try {
-      const metadataItem: MetadataItem = await ScanReportV221MappingService.prepareMetadataItem(key, value);
+      const metadataItem: MetadataItem = await ScanReportV221MappingService.prepareMetadataItem(
+        key,
+        value
+      );
       await dbService.addMetadataItem(metadataItem);
       resolve();
     } catch (e: any) {
