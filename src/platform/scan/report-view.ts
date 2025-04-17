@@ -82,7 +82,10 @@ export class ScanReportWebView extends WebView<Webapp> {
       this.report = await readFile(this.file as string, { encoding: "utf8" });
       this.chunkId = 0;
       this.chunkOffset = 0;
-      this.chunkSize = Math.ceil(this.report.length / 10); // TODO: find out the best chunk size and hardoce it
+      this.chunkSize = 512 * 1024; //1024 * 1024; // 1mb Math.ceil(this.report.length / 100); // TODO: find out the best chunk size and hardoce it
+      if (this.report.length <= this.chunkSize) {
+        this.chunkSize = this.report.length;
+      }
       const textSegment = this.report.substr(this.chunkOffset, this.chunkSize);
       this.chunkOffset += this.chunkSize;
       this.sendRequest({
@@ -97,7 +100,7 @@ export class ScanReportWebView extends WebView<Webapp> {
     },
 
     sendParseChunkComplete: async (payload: { id: number }) => {
-      console.info("GOT sendParseChunkComplete id = " + payload.id);
+      // console.info("GOT sendParseChunkComplete id = " + payload.id);
       if (this.chunkOffset < this.report.length && this.chunkId === payload.id && this.report) {
         if (this.report.length - this.chunkOffset < this.chunkSize) {
           this.chunkSize = this.report.length - this.chunkOffset;

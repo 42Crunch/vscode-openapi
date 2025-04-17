@@ -25,6 +25,7 @@ import {
   startInitDb,
   sendInitDbComplete,
   sendParseChunkComplete,
+  closeInitDb,
 } from "./slice";
 
 import { loadEnv } from "../../features/env/slice";
@@ -64,6 +65,7 @@ const messageHandlers: Webapp["webappHandlers"] = {
   loadPrefs,
   loadConfig,
   showLogMessage,
+  closeInitDb,
   startInitDb,
   parseChunk,
 };
@@ -73,6 +75,8 @@ function App() {
   const { initDbStarted, chunkId, chunkText, progress } = useAppSelector((state) => state.scan);
 
   const [issues, setIssues] = useState<any[]>([]);
+  const [timeDelta, setTimeDelta] = useState<number>(0);
+  const [chunkSize, setChunkSize] = useState<number>(0);
 
   useEffect(() => {
     if (initDbStarted) {
@@ -94,9 +98,15 @@ function App() {
   useEffect(() => {
     if (chunkId >= 0) {
       console.info("chunkId = " + chunkId + ", progress = " + progress);
+      if (chunkId === 0) {
+        // first chunk
+        setChunkSize(chunkText.length);
+        setTimeDelta(new Date().getTime());
+      }
       processReport(progress === 1.0, chunkText).then(() => {
         dispatch(sendParseChunkComplete({ id: chunkId }));
         if (progress === 1.0) {
+          setTimeDelta(new Date().getTime() - timeDelta);
           const dbService = getScanv1Db();
           //debugger;
           dbService.getIssuesList().then((issues) => {
@@ -112,7 +122,13 @@ function App() {
 
   return (
     <>
-      {issues.length > 0 && <ScanIssuesV2 issues={issues} />}
+      {chunkId >= 0 && <div>{"chunks = " + (chunkId + 1)}</div>}
+      {chunkSize && <div>{"chunkSize = " + chunkSize / 1024 + " KB"}</div>}
+      {issues && <div>{"issues  = " + issues.length}</div>}
+      {progress === 1.0 && timeDelta > 0 && (
+        <div>{"timeDelta  = " + timeDelta / 1000 + " seconds"}</div>
+      )}
+      {/* {issues.length > 0 && <ScanIssuesV2 issues={issues} />} */}
       <ThemeStyles />
       <Router />
     </>
