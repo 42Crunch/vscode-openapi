@@ -19,6 +19,7 @@ import {
 import { LoadConfigMessage } from "../config";
 import { ShowLogMessage } from "../logging";
 import {
+  CloseInitDbMessage,
   ParseChunkMessage,
   SendInitDbCompleteMessage,
   SendParseChunkCompleteMessage,
@@ -41,6 +42,7 @@ export type Webapp = App<
   | ShowLogMessage
   | StartInitDbMessage
   | ParseChunkMessage
+  | CloseInitDbMessage
   | StartInitDbMessage,
   // produces
   | ShowEnvWindow
