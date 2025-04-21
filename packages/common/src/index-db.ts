@@ -7,7 +7,7 @@ export type TextChunk = {
 
 export type StartInitDbMessage = {
   command: "startInitDb";
-  payload: undefined;
+  payload: undefined; // todo: pass dbName
 };
 
 export type ParseChunkMessage = {
@@ -16,6 +16,7 @@ export type ParseChunkMessage = {
 };
 
 export type SendParseChunkCompleteMessage = {
+  // todo: add parsing error handling
   command: "sendParseChunkComplete";
   payload: { id: number };
 };
