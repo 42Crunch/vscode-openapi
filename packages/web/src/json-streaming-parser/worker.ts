@@ -1,18 +1,29 @@
-// @ts-nocheck
+//// @ts-nocheck
 
 import { Parser } from "./parser";
 import {
   initDb,
-  onKey,
-  onValue,
-  onOpenArray,
   onCloseArray,
-  onOpenObject,
   onCloseObject,
-  onReady,
-  processMetadata,
+  onKey,
+  onOpenArray,
+  onOpenObject,
   onParsingEnd,
+  onReady,
+  onValue,
+  processMetadata,
 } from "./scanv1-processor";
+import {
+  initScanv2Db,
+  onCloseArrayForScanV2,
+  onCloseObjectForScanV2,
+  onKeyForScanV2,
+  onOpenArrayForScanV2,
+  onOpenObjectForScanV2,
+  onParsingEndForScanV2,
+  onReadyForScanV2,
+  onValueForScanV2,
+} from "./scanv2-processor";
 
 let parser: Parser;
 
@@ -23,19 +34,33 @@ const worker: Worker = self as any;
 // });
 
 export async function initProcessReport(dbName: string): Promise<void> {
-  parser = new Parser({
-    onValue,
-    onKey,
-    onOpenObject,
-    onCloseObject,
-    onOpenArray,
-    onCloseArray,
-    onEnd,
-    onError,
-    onReady,
-  });
+  if (dbName === "vscode.scan.v2.db") {
+    parser = new Parser({
+      onValue: onValueForScanV2,
+      onKey: onKeyForScanV2,
+      onOpenObject: onOpenObjectForScanV2,
+      onCloseObject: onCloseObjectForScanV2,
+      onOpenArray: onOpenArrayForScanV2,
+      onCloseArray: onCloseArrayForScanV2,
+      onEnd: onEndForScanV2,
+      onError: onError,
+      onReady: onReadyForScanV2,
+    });
+  } else {
+    parser = new Parser({
+      onValue,
+      onKey,
+      onOpenObject,
+      onCloseObject,
+      onOpenArray,
+      onCloseArray,
+      onEnd,
+      onError,
+      onReady,
+    });
+  }
   try {
-    return await initDb(dbName);
+    return dbName === "vscode.scan.v2.db" ? await initScanv2Db(dbName) : await initDb(dbName);
   } catch (err: any) {
     return await throwError(err.message);
   }
@@ -108,6 +133,14 @@ async function onEnd(): Promise<void> {
   return new Promise<void>(async (resolve) => {
     onParsingEnd();
     worker.postMessage({ data: "Report parsed" });
+    resolve();
+  });
+}
+
+async function onEndForScanV2(): Promise<void> {
+  return new Promise<void>(async (resolve) => {
+    onParsingEndForScanV2();
+    //worker.postMessage({ data: "Report parsed" });
     resolve();
   });
 }

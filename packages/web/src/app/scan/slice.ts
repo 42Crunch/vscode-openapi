@@ -33,6 +33,7 @@ export type TestLogReportWithLocation = TestLogReport & {
   path: string;
   method?: HttpMethod;
   operationId?: string;
+  testKey?: string;
 };
 
 export interface OasState {
