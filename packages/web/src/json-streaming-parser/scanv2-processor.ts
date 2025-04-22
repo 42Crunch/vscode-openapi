@@ -40,6 +40,7 @@ export async function onValueForScanV2(value: any): Promise<void> {
       if (!currentContext.expectKey) {
         currentContext.value[currentContext.key!] = value;
         currentContext.expectKey = true;
+        checkIfToSaveIntoDbOnValueInObject(currentContext);
       }
     } else if (currentContext.type === "array") {
       currentContext.value.push(value);
@@ -156,11 +157,40 @@ function addToParent(value: any): void {
   }
 }
 
+async function checkIfToSaveIntoDbOnValueInObject(current: StackEntry) {
+  if (
+    current.type === "object" &&
+    stack.length === 1 &&
+    current.key === "scanVersion" &&
+    current.expectKey &&
+    current.value?.scanVersion
+  ) {
+    await dbService.updateMetadataItem("scanVersion", current.value?.scanVersion);
+  }
+}
+
+// function isRequestsResults(key: string | undefined): boolean {
+//   return (
+//     key === "conformanceRequestsResults" ||
+//     key === "authorizationRequestsResults" ||
+//     key === "customRequestsResults"
+//   );
+// }
+
 async function checkIfToSaveIntoDb(completed: StackEntry) {
+  if (completed.type === "object" && stack.length === 2) {
+    const operations = stack[0];
+    if (operations.type === "object" && operations.key === "operations") {
+      const operationId = stack[stack.length - 1].key as string;
+      console.info("found operation = " + operationId);
+      await dbService.addOperation({
+        ...completed.value,
+        operationId,
+      });
+    }
+  }
+
   if (completed.type === "object" && stack.length === 5) {
-    // if (completed.value?.test?.key === "path-item-method-not-allowed-scan") {
-    //   console.info("found completed = " + completed);
-    // }
     if (stack[stack.length - 1].type === "array") {
       const confReqResults = stack[stack.length - 2];
       if (confReqResults.type === "object" && confReqResults.key === "conformanceRequestsResults") {
@@ -174,21 +204,17 @@ async function checkIfToSaveIntoDb(completed: StackEntry) {
             method,
             testKey: completed.value?.test?.key,
           };
-          console.info(
-            "found issue completed = " + issue.path + ", " + issue.method + ", key " + issue.testKey
-          );
           await dbService.addMethodNotAllowedIssue(issue);
         }
       }
     }
+  }
 
-    // for (const path of Object.keys(scanReport?.methodNotAllowed || {})) {
-    //   for (const method of HttpMethods) {
-    //     const results = scanReport?.methodNotAllowed?.[path]?.[method]?.conformanceRequestsResults;
-    //     for (const result of results || []) {
-    //       issues.push({ ...result, path });
-    //     }
-    //   }
-    // }
+  if (completed.type === "object" && stack.length === 1) {
+    const summary = stack[stack.length - 1];
+    if (summary.type === "object" && summary.key === "summary") {
+      console.info("found summary = " + summary);
+      await dbService.updateMetadataItem("summary", completed.value);
+    }
   }
 }
