@@ -26,13 +26,8 @@ export class Scanv2Db {
     this.dbName = dbName;
     this.db = new Dexie(this.dbName);
     this.db.version(1).stores({
-      // // , means primary key is neither inbound nor auto-incremented
-      // metadata:
-      //   ",taskId, engineVersion, reportVersion, isFullReport, state, exitCode, requestsCount, issuesCount, date",
-      // index:
-      //   ",jsonPointers, contentTypes, injectionKeys, injectionDescriptions, responseKeys, responseDescriptions",
-      // paths: "&path", // & means unique
-      // operations: "[path+method]", // + means compound primary key
+      metadata: ",summary, scanVersion",
+      operations: "[path+method]",
       methodNotAllowedIssues: "[path+method+testKey]",
     });
   }
@@ -62,10 +57,8 @@ export class Scanv2Db {
   async clearDb(): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
       try {
-        // await this.db.metadata.clear();
-        // await this.db.index.clear();
-        // await this.db.paths.clear();
-        // await this.db.operations.clear();
+        await this.db.metadata.clear();
+        await this.db.operations.clear();
         await this.db.methodNotAllowedIssues.clear();
         resolve();
       } catch (e: any) {
@@ -78,9 +71,9 @@ export class Scanv2Db {
     return await this.db.methodNotAllowedIssues.add({ ...issue });
   }
 
-  //   async updateMetadataItem(item: MetadataItem): Promise<void> {
-  //     return await this.db.metadata.put(item.value, [item.key]);
-  //   }
+  async updateMetadataItem(key: string, value: any): Promise<void> {
+    return await this.db.metadata.put(value, [key]);
+  }
 
   //   async getMetadataItem(key: string): Promise<any> {
   //     return await this.db.metadata.get([key]);
@@ -102,9 +95,9 @@ export class Scanv2Db {
   //     return await this.db.issues.add({ ...issue });
   //   }
 
-  //   async addOperation(operation: ApiConformanceScanOperationV221): Promise<any> {
-  //     return await this.db.operations.add({ ...operation });
-  //   }
+  async addOperation(operation: any): Promise<any> {
+    return await this.db.operations.add({ ...operation });
+  }
 
   //   async getIssues(
   //     page: number,
