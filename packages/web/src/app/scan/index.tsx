@@ -20,6 +20,7 @@ import {
   sendInitDbComplete,
   sendParseChunkComplete,
   showFullScanReport,
+  showFullScanReport2,
   showGeneralError,
   showHttpError,
   showHttpResponse,
@@ -74,12 +75,13 @@ function App() {
   const dispatch = useAppDispatch();
   const { initDbStarted, chunkId, chunkText, progress } = useAppSelector((state) => state.scan);
 
-  const [issues, setIssues] = useState<any[]>([]);
+  //const [issues, setIssues] = useState<any[]>([]);
   const [timeDelta, setTimeDelta] = useState<number>(0);
   const [chunkSize, setChunkSize] = useState<number>(0);
 
   useEffect(() => {
     if (initDbStarted) {
+      dispatch(startScan(undefined));
       initProcessReport("vscode.scan.v2.db")
         .then(() => {
           dispatch(sendInitDbComplete({ status: true, message: "" }));
@@ -108,13 +110,11 @@ function App() {
         if (progress === 1.0) {
           setTimeDelta(new Date().getTime() - timeDelta);
           const dbService = getScanv2Db();
-          //debugger;
-          // dbService.getIssuesList().then((issues) => {
-          //   setIssues(issues);
-          //   // for (const issue of issues) {
-          //   //   console.info("issue = " + issue);
-          //   // }
-          // });
+          dbService.getIssuesList().then((issues) => {
+            dbService.getReport().then((report) => {
+              dispatch(showFullScanReport2({ issues, report }));
+            });
+          });
         }
       });
     }
@@ -122,17 +122,28 @@ function App() {
 
   return (
     <>
-      {chunkId >= 0 && <div>{"chunks = " + (chunkId + 1)}</div>}
       {chunkSize && <div>{"chunkSize = " + chunkSize / 1024 + " KB"}</div>}
-      {issues && <div>{"issues  = " + issues.length}</div>}
       {progress === 1.0 && timeDelta > 0 && (
         <div>{"timeDelta  = " + timeDelta / 1000 + " seconds"}</div>
       )}
-      {/* {issues.length > 0 && <ScanIssuesV2 issues={issues} />} */}
       <ThemeStyles />
       <Router />
     </>
   );
+
+  // return (
+  //   <>
+  //     {chunkId >= 0 && <div>{"chunks = " + (chunkId + 1)}</div>}
+  //     {chunkSize && <div>{"chunkSize = " + chunkSize / 1024 + " KB"}</div>}
+  //     {issues && <div>{"issues  = " + issues.length}</div>}
+  //     {progress === 1.0 && timeDelta > 0 && (
+  //       <div>{"timeDelta  = " + timeDelta / 1000 + " seconds"}</div>
+  //     )}
+  //     {/* {issues.length > 0 && <ScanIssuesV2 issues={issues} />} */}
+  //     <ThemeStyles />
+  //     <Router />
+  //   </>
+  // );
 }
 
 function renderWebView(host: Webapp["host"], theme: ThemeState) {
@@ -152,24 +163,3 @@ function renderWebView(host: Webapp["host"], theme: ThemeState) {
 }
 
 (window as any).renderWebView = renderWebView;
-
-export default function ScanIssuesV2({ issues }: { issues: any[] }) {
-  if (issues.length === 0) {
-    return (
-      <div>
-        <div>No test results available</div>
-      </div>
-    );
-  }
-  return (
-    <div>
-      <div />
-      {issues.map((issue) => (
-        <div key={issue.id}>
-          <div>desc {issue.injectionDescription}</div>
-          <div>jsonPointer {issue.jsonPointer}</div>
-        </div>
-      ))}
-    </div>
-  );
-}

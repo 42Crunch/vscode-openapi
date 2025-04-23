@@ -67,6 +67,21 @@ export class Scanv2Db {
     });
   }
 
+  async getReport(): Promise<any[]> {
+    const operations = await this.getOperationsList();
+    const summary = await this.getMetadataItem("summary");
+    const scanVersion = await this.getMetadataItem("scanVersion");
+    return { operations, summary, scanVersion };
+  }
+
+  async getOperationsList(): Promise<any[]> {
+    return await this.db.operations.toArray();
+  }
+
+  async getIssuesList(): Promise<any[]> {
+    return await this.db.methodNotAllowedIssues.toArray();
+  }
+
   async addMethodNotAllowedIssue(issue: TestLogReportWithLocation): Promise<void> {
     return await this.db.methodNotAllowedIssues.add({ ...issue });
   }
@@ -75,9 +90,9 @@ export class Scanv2Db {
     return await this.db.metadata.put(value, [key]);
   }
 
-  //   async getMetadataItem(key: string): Promise<any> {
-  //     return await this.db.metadata.get([key]);
-  //   }
+  async getMetadataItem(key: string): Promise<any> {
+    return await this.db.metadata.get([key]);
+  }
 
   //   async addIndexArray(key: string, value: any): Promise<void> {
   //     return await this.db.index.add(value, [key]);
