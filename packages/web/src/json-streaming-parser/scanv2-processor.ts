@@ -182,7 +182,7 @@ async function checkIfToSaveIntoDb(completed: StackEntry) {
     const operations = stack[0];
     if (operations.type === "object" && operations.key === "operations") {
       const operationId = stack[stack.length - 1].key as string;
-      console.info("found operation = " + operationId);
+      //console.info("found operation = " + operationId);
       await dbService.addOperation({
         ...completed.value,
         operationId,

@@ -166,6 +166,31 @@ export const slice = createSlice({
       state.waiting = false;
     },
 
+    showFullScanReport2: (
+      state,
+      action: PayloadAction<{ issues: TestLogReportWithLocation[]; report: any }>
+    ) => {
+      //const { oas, report } = action.payload;
+
+      //const issues = action.payload.issues;
+      const report = action.payload.report;
+      const issues = flattenIssues2(report, action.payload.issues);
+
+      const filtered = filterIssues(issues, state.filter);
+      const { titles, paths, operationIds } = groupIssues(issues);
+      const { grouped } = groupIssues(filtered);
+
+      //state.oas = oas;
+      state.operations = { ...(report.operations || {}) };
+      state.issues = issues;
+      state.titles = titles;
+      state.paths = paths;
+      state.operationIds = operationIds;
+      state.grouped = grouped;
+      state.scanReport = report;
+      state.waiting = false;
+    },
+
     showFullScanReport: (state, action: PayloadAction<FullScanReport>) => {
       const { oas, report } = action.payload;
 
@@ -260,6 +285,7 @@ export const {
   runScan,
   showScanReport,
   showFullScanReport,
+  showFullScanReport2,
   showGeneralError,
   showHttpError,
   sendHttpRequest,
@@ -282,6 +308,28 @@ export const useFeatureDispatch: () => Dispatch<
 export const useFeatureSelector: TypedUseSelectorHook<
   StateFromReducersMapObject<Record<typeof slice.name, typeof slice.reducer>>
 > = useSelector;
+
+// todo: get rid of any
+function flattenIssues2(scanReport: any, issues2: TestLogReportWithLocation[]) {
+  const issues: TestLogReportWithLocation[] = [];
+
+  for (const [operationId, operationReport] of Object.entries(scanReport?.operations || {})) {
+    for (const kind of [
+      "conformanceRequestsResults",
+      "authorizationRequestsResults",
+      "customRequestsResults",
+    ] as const) {
+      const results = (operationReport as any)[kind];
+      const path = (operationReport as any).path;
+      const method = (operationReport as any).method.toLocaleLowerCase() as HttpMethod;
+      for (const result of results || []) {
+        issues.push({ ...result, path, method, operationId });
+      }
+    }
+  }
+
+  return issues2.concat(issues);
+}
 
 function flattenIssues(scanReport: ScanReportJSONSchema) {
   const issues: TestLogReportWithLocation[] = [];
