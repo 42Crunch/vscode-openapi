@@ -47,7 +47,7 @@ export default function DownshiftComboNewItemMenu<T>({
     <Container>
       <Input
         {...getInputProps({
-          onKeyDown: (event) => {
+          onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>): void => {
             if (event.key === "Enter" || event.key === "Tab") {
               onSelectedItemChange(filter);
               setFilter("");
