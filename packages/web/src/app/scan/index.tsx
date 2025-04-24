@@ -37,6 +37,8 @@ import { loadPrefs } from "../../features/prefs/slice";
 import { getScanv2Db } from "../../json-streaming-parser/scanv2-processor";
 import { initProcessReport, processReport } from "../../json-streaming-parser/worker";
 import ScanOperation from "./ScanOperation";
+import { PaginationResponse } from "../../json-streaming-parser/models/pagination.model";
+import Paginator from "./Paginator";
 
 const routes: Routes = [
   {
@@ -78,6 +80,9 @@ function App() {
   //const [issues, setIssues] = useState<any[]>([]);
   const [timeDelta, setTimeDelta] = useState<number>(0);
   const [chunkSize, setChunkSize] = useState<number>(0);
+  const [totalItems, setTotalItems] = useState<number>(-1);
+  const [page, setPage] = useState<number>(1);
+  const perPage = 10;
 
   useEffect(() => {
     if (initDbStarted) {
@@ -110,9 +115,16 @@ function App() {
         if (progress === 1.0) {
           setTimeDelta(new Date().getTime() - timeDelta);
           const dbService = getScanv2Db();
-          dbService.getIssuesList().then((issues) => {
+          // dbService.getIssuesList().then((issues) => {
+          //   dbService.getReport().then((report) => {
+          //     dispatch(showFullScanReport2({ issues, report }));
+          //   });
+          // });
+          dbService.getIssues(page, perPage).then((resp: PaginationResponse) => {
+            //list: any[], filteredItems: number, totalPages: number, totalItems: number
             dbService.getReport().then((report) => {
-              dispatch(showFullScanReport2({ issues, report }));
+              setTotalItems(resp.filteredItems);
+              dispatch(showFullScanReport2({ issues: resp.list, report }));
             });
           });
         }
@@ -125,6 +137,22 @@ function App() {
       {chunkSize && <div>{"chunkSize = " + chunkSize / 1024 + " KB"}</div>}
       {progress === 1.0 && timeDelta > 0 && (
         <div>{"timeDelta  = " + timeDelta / 1000 + " seconds"}</div>
+      )}
+      {totalItems > 0 && (
+        <Paginator
+          totalItems={totalItems}
+          itemsPerPage={perPage}
+          onPageChange={(pageIndex) => {
+            console.info("pageIndex = " + pageIndex);
+            const dbService = getScanv2Db();
+            dbService.getIssues(pageIndex, perPage).then((resp: PaginationResponse) => {
+              //list: any[], filteredItems: number, totalPages: number, totalItems: number
+              dbService.getReport().then((report) => {
+                dispatch(showFullScanReport2({ issues: resp.list, report }));
+              });
+            });
+          }}
+        />
       )}
       <ThemeStyles />
       <Router />

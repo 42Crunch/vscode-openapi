@@ -28,7 +28,7 @@ export class Scanv2Db {
     this.db.version(1).stores({
       metadata: ",summary, scanVersion",
       operations: "[path+method]",
-      methodNotAllowedIssues: "[path+method+testKey]",
+      methodNotAllowedIssues: "[path+method+testKey]", // rename to issues
     });
   }
 
@@ -114,78 +114,33 @@ export class Scanv2Db {
     return await this.db.operations.add({ ...operation });
   }
 
-  //   async getIssues(
-  //     page: number,
-  //     perPage: number,
-  //     sortOrder: ParserFieldSortOrder,
-  //     searchFilter: string = "",
-  //     scanIssuesFilter: ScanReportIntegralFilter = new ScanReportIntegralFilter()
-  //   ): Promise<PaginationResponse> {
-  //     return new Promise<PaginationResponse>(async (resolve, reject) => {
-  //       const offset: number = perPage * page - perPage;
-  //       let issues: ApiConformanceScanIssueV221[] = [];
-  //       let filteredItems: number = 0;
-  //       let totalItems: number = 0;
+  // page >= 1
+  async getIssues(page: number, perPage: number): Promise<PaginationResponse> {
+    return new Promise<PaginationResponse>(async (resolve, reject) => {
+      const offset: number = perPage * (page - 1);
+      let issues: TestLogReportWithLocation[] = [];
+      let filteredItems: number = 0;
+      let totalItems: number = 0;
 
-  //       if (sortOrder?.order === SortOrder.Desc) {
-  //         try {
-  //           issues = await this.db.issues
-  //             .orderBy(sortOrder?.fieldName || "path")
-  //             .reverse()
-  //             .filter((issue: ApiConformanceScanIssueV221): boolean =>
-  //               ScanReportV221MappingService.filterIssues(issue, searchFilter, scanIssuesFilter)
-  //             )
-  //             .offset(offset)
-  //             .limit(perPage)
-  //             .toArray();
-  //         } catch (e: any) {
-  //           reject(e);
-  //         }
-  //       } else {
-  //         try {
-  //           issues = await this.db.issues
-  //             .orderBy(sortOrder?.fieldName || "path")
-  //             .filter((issue: ApiConformanceScanIssueV221): boolean =>
-  //               ScanReportV221MappingService.filterIssues(issue, searchFilter, scanIssuesFilter)
-  //             )
-  //             .offset(offset)
-  //             .limit(perPage)
-  //             .toArray();
-  //         } catch (e: any) {
-  //           reject(e);
-  //         }
-  //       }
+      try {
+        totalItems = await this.db.methodNotAllowedIssues.count();
+        filteredItems = totalItems; // todo
+        // offset = Number of entries to skip. Must be >= 0.
+        issues = await this.db.methodNotAllowedIssues.offset(offset).limit(perPage).toArray();
+      } catch (e: any) {
+        reject(e);
+      }
 
-  //       try {
-  //         totalItems = await this.db.issues.count();
-  //         filteredItems = 0;
+      let totalPages: number = Math.ceil(totalItems / perPage);
 
-  //         await this.db.issues
-  //           .orderBy(sortOrder?.fieldName || "path")
-  //           .filter((issue: ApiConformanceScanIssueV221): boolean =>
-  //             ScanReportV221MappingService.filterIssues(issue, searchFilter, scanIssuesFilter)
-  //           )
-  //           .each(() => {
-  //             filteredItems++;
-  //           });
-  //       } catch (e: any) {
-  //         reject(e);
-  //       }
-
-  //       let totalPages: number = totalItems / perPage;
-
-  //       if (totalPages - Math.floor(totalPages) > 0) {
-  //         totalPages = Math.floor(totalPages) + 1;
-  //       }
-
-  //       resolve({
-  //         list: issues,
-  //         totalPages,
-  //         totalItems,
-  //         filteredItems,
-  //       } as PaginationResponse);
-  //     });
-  //   }
+      resolve({
+        list: issues,
+        totalPages,
+        totalItems,
+        filteredItems,
+      } as PaginationResponse);
+    });
+  }
 
   //   async getSkippedIssues(
   //     page: number,

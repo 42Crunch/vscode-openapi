@@ -169,13 +169,13 @@ async function checkIfToSaveIntoDbOnValueInObject(current: StackEntry) {
   }
 }
 
-// function isRequestsResults(key: string | undefined): boolean {
-//   return (
-//     key === "conformanceRequestsResults" ||
-//     key === "authorizationRequestsResults" ||
-//     key === "customRequestsResults"
-//   );
-// }
+function isRequestsResults(key: string | undefined): boolean {
+  return (
+    key === "conformanceRequestsResults" ||
+    key === "authorizationRequestsResults" ||
+    key === "customRequestsResults"
+  );
+}
 
 async function checkIfToSaveIntoDb(completed: StackEntry) {
   if (completed.type === "object" && stack.length === 2) {
@@ -183,13 +183,45 @@ async function checkIfToSaveIntoDb(completed: StackEntry) {
     if (operations.type === "object" && operations.key === "operations") {
       const operationId = stack[stack.length - 1].key as string;
       //console.info("found operation = " + operationId);
+      const op = completed.value;
+      if (op["conformanceRequestsResults"]) {
+        delete op["conformanceRequestsResults"];
+      }
+      if (op["authorizationRequestsResults"]) {
+        delete op["authorizationRequestsResults"];
+      }
+      if (op["customRequestsResults"]) {
+        delete op["customRequestsResults"];
+      }
       await dbService.addOperation({
-        ...completed.value,
+        ...op,
         operationId,
       });
     }
   }
 
+  // Save issues from operations
+  if (completed.type === "object" && stack.length === 4) {
+    if (stack[stack.length - 1].type === "array") {
+      const reqResults = stack[stack.length - 2];
+      if (reqResults.type === "object" && isRequestsResults(reqResults.key)) {
+        const operations = stack[0];
+        if (operations.type === "object" && operations.key === "operations") {
+          const path = stack[1].key as string;
+          const method = stack[2].key as string;
+          const issue: TestLogReportWithLocation = {
+            ...completed.value,
+            path,
+            method,
+            testKey: completed.value?.test?.key,
+          };
+          await dbService.addMethodNotAllowedIssue(issue);
+        }
+      }
+    }
+  }
+
+  // Save not allowed issues
   if (completed.type === "object" && stack.length === 5) {
     if (stack[stack.length - 1].type === "array") {
       const confReqResults = stack[stack.length - 2];
@@ -213,7 +245,7 @@ async function checkIfToSaveIntoDb(completed: StackEntry) {
   if (completed.type === "object" && stack.length === 1) {
     const summary = stack[stack.length - 1];
     if (summary.type === "object" && summary.key === "summary") {
-      console.info("found summary = " + summary);
+      //console.info("found summary = " + summary);
       await dbService.updateMetadataItem("summary", completed.value);
     }
   }
