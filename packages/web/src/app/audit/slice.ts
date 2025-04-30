@@ -143,7 +143,11 @@ export const slice = createSlice({
         state.tab = "priority";
         state.filter = {};
         state.sqgTodo = false;
-        state.type = audit.filename.toLowerCase().endsWith(".graphql") ? "graphql" : "openapi";
+        state.type =
+          audit.filename.toLowerCase().endsWith(".graphql") ||
+          audit.filename.toLowerCase().endsWith(".graphqls")
+            ? "graphql"
+            : "openapi";
       }
       // reset sqgTodo if no compliance or if compliant
       if (audit.compliance === undefined || audit.compliance.acceptance === "yes") {
@@ -163,7 +167,11 @@ export const slice = createSlice({
       state.filter = { ids };
       state.tab = "issues";
       state.sqgTodo = false;
-      state.type = audit.filename.toLowerCase().endsWith(".graphql") ? "graphql" : "openapi";
+      state.type =
+        audit.filename.toLowerCase().endsWith(".graphql") ||
+        audit.filename.toLowerCase().endsWith(".graphqls")
+          ? "graphql"
+          : "openapi";
       updateAll(state);
     },
 
