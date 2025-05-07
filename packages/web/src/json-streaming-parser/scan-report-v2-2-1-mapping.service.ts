@@ -1,5 +1,7 @@
-import { SemanticVersionUtils } from './utils/semantic-version.utils';
-import { StringUtils } from './utils/string-utils';
+// @ts-nocheck
+
+import { SemanticVersionUtils } from "./utils/semantic-version.utils";
+import { StringUtils } from "./utils/string-utils";
 import {
   apiConformanceScanApiConfig,
   SemanticVersion,
@@ -19,18 +21,18 @@ import {
   ApiConformanceScanPathStatsV221,
   MetadataItem,
   MetadataKey,
-  reportMetadataMap
-} from './models';
+  reportMetadataMap,
+} from "./models";
 
 export class ScanReportV221MappingService {
   static trimEnd(value: string, charToRemove: string): string {
-    const splittedString: string[] = value.split('');
+    const splittedString: string[] = value.split("");
 
     if (splittedString[splittedString.length - 1] === charToRemove) {
       splittedString.pop();
     }
 
-    return splittedString.join('');
+    return splittedString.join("");
   }
 
   static isNotEmpty(value: any): boolean {
@@ -38,9 +40,9 @@ export class ScanReportV221MappingService {
       return false;
     }
 
-    if (typeof value === 'string' || Array.isArray(value)) {
+    if (typeof value === "string" || Array.isArray(value)) {
       return value.length > 0;
-    } else if (typeof value === 'object') {
+    } else if (typeof value === "object") {
       return Object.keys(value).length > 0;
     } else {
       return true;
@@ -49,21 +51,21 @@ export class ScanReportV221MappingService {
 
   static filterIssues(
     issue: ApiConformanceScanIssueV221,
-    searchFilter: string = '',
+    searchFilter: string = "",
     scanIssuesFilter: ScanReportIntegralFilter = new ScanReportIntegralFilter()
   ): boolean {
     let isMatched: boolean = true;
 
     if (searchFilter) {
-      const reg: RegExp = new RegExp(`${searchFilter}`, 'i');
+      const reg: RegExp = new RegExp(`${searchFilter}`, "i");
 
       isMatched =
         reg.test(issue.method) ||
         reg.test(issue.path) ||
         reg.test(`${issue.owaspMapping}`) ||
         reg.test(issue.injectionStatus) ||
-        reg.test(`${issue.responseAnalysisList[0]?.responseKey || ''}`) ||
-        reg.test(`${issue.responseAnalysisList[0]?.responseDescription || ''}`) ||
+        reg.test(`${issue.responseAnalysisList[0]?.responseKey || ""}`) ||
+        reg.test(`${issue.responseAnalysisList[0]?.responseDescription || ""}`) ||
         reg.test(`${issue.isContractConforming}`) ||
         reg.test(`${issue.criticality}`);
     }
@@ -76,13 +78,20 @@ export class ScanReportV221MappingService {
       return true;
     }
 
-    const { path, httpMethod, hierarchicalLevelFilterType, statsFilter, owaspVulnerabilityFilter, severityFilter } =
-      scanIssuesFilter;
+    const {
+      path,
+      httpMethod,
+      hierarchicalLevelFilterType,
+      statsFilter,
+      owaspVulnerabilityFilter,
+      severityFilter,
+    } = scanIssuesFilter;
     // first level - hierarchical filter trimming (paths/operations)
 
-    const isStrictPathMatch = hierarchicalLevelFilterType !== ApiConformanceScanIssuesFilterType.SubPaths;
+    const isStrictPathMatch =
+      hierarchicalLevelFilterType !== ApiConformanceScanIssuesFilterType.SubPaths;
 
-    const trimmedPath = ScanReportV221MappingService.trimEnd(path, '/');
+    const trimmedPath = ScanReportV221MappingService.trimEnd(path, "/");
 
     const isEmptyPath = StringUtils.isNullOrEmpty(trimmedPath);
     const isEmptyHttpMethod = StringUtils.isNullOrEmpty(httpMethod);
@@ -91,8 +100,8 @@ export class ScanReportV221MappingService {
       isMatched = true;
     } else {
       const isPathMatched = ScanReportV221MappingService.checkIsPathMatched(
-        issue.path || '',
-        path || '',
+        issue.path || "",
+        path || "",
         isStrictPathMatch
       );
       const isHttpMethodMatched = isEmptyHttpMethod || issue.method === httpMethod;
@@ -116,22 +125,28 @@ export class ScanReportV221MappingService {
           isMatched = false;
           break;
         case ScanReportStatsFilterCriteria.CodeIncorrectConformityFailure:
-          isMatched = issue.integralStatus === IntegralScanReportIssueStatus.CodeIncorrectConformityFailure;
+          isMatched =
+            issue.integralStatus === IntegralScanReportIssueStatus.CodeIncorrectConformityFailure;
           break;
         case ScanReportStatsFilterCriteria.CodeUnexpectedConformityFailure:
-          isMatched = issue.integralStatus === IntegralScanReportIssueStatus.CodeUnexpectedConformityFailure;
+          isMatched =
+            issue.integralStatus === IntegralScanReportIssueStatus.CodeUnexpectedConformityFailure;
           break;
         case ScanReportStatsFilterCriteria.CodeUnexpectedConformitySuccess:
-          isMatched = issue.integralStatus === IntegralScanReportIssueStatus.CodeUnexpectedConformitySuccess;
+          isMatched =
+            issue.integralStatus === IntegralScanReportIssueStatus.CodeUnexpectedConformitySuccess;
           break;
         case ScanReportStatsFilterCriteria.CodeExpectedConformityFailure:
-          isMatched = issue.integralStatus === IntegralScanReportIssueStatus.CodeExpectedConformityFailure;
+          isMatched =
+            issue.integralStatus === IntegralScanReportIssueStatus.CodeExpectedConformityFailure;
           break;
         case ScanReportStatsFilterCriteria.CodeExpectedConformitySuccess:
-          isMatched = issue.integralStatus === IntegralScanReportIssueStatus.CodeExpectedConformitySuccess;
+          isMatched =
+            issue.integralStatus === IntegralScanReportIssueStatus.CodeExpectedConformitySuccess;
           break;
         case ScanReportStatsFilterCriteria.CodeIncorrectConformitySuccess:
-          isMatched = issue.integralStatus === IntegralScanReportIssueStatus.CodeIncorrectConformitySuccess;
+          isMatched =
+            issue.integralStatus === IntegralScanReportIssueStatus.CodeIncorrectConformitySuccess;
           break;
       }
     }
@@ -159,7 +174,7 @@ export class ScanReportV221MappingService {
 
   static filterApiConformanceScanOperations(
     operation: ApiConformanceScanOperationV221,
-    searchFilter: string = '',
+    searchFilter: string = "",
     scanIssuesFilter: ScanReportIntegralFilter = new ScanReportIntegralFilter()
   ): boolean {
     let isMatched: boolean = true;
@@ -168,7 +183,9 @@ export class ScanReportV221MappingService {
       isMatched =
         operation.method.toLowerCase().includes(searchFilter.toLowerCase()) ||
         operation.path.toLowerCase().includes(searchFilter.toLowerCase()) ||
-        operation.skipReasonDetails.some((reason: string) => reason.toLowerCase().includes(searchFilter.toLowerCase()));
+        operation.skipReasonDetails.some((reason: string) =>
+          reason.toLowerCase().includes(searchFilter.toLowerCase())
+        );
     }
 
     if (!isMatched) {
@@ -194,11 +211,11 @@ export class ScanReportV221MappingService {
 
   static filterApiConformanceScanPaths(
     scanPathToCheck: ApiConformanceScanPathV221,
-    path: string = '',
+    path: string = "",
     httpMethod?: HttpMethod,
     isStrictPathMatch: boolean = false
   ): boolean {
-    const trimmedPath = this.trimEnd(path, '/');
+    const trimmedPath = this.trimEnd(path, "/");
 
     const isEmptyPath = StringUtils.isNullOrEmpty(trimmedPath);
     const isEmptyHttpMethod = StringUtils.isNullOrEmpty(httpMethod);
@@ -207,7 +224,11 @@ export class ScanReportV221MappingService {
       return true;
     }
 
-    const isPathMatched = this.checkIsPathMatched(scanPathToCheck.path || '', path || '', isStrictPathMatch);
+    const isPathMatched = this.checkIsPathMatched(
+      scanPathToCheck.path || "",
+      path || "",
+      isStrictPathMatch
+    );
 
     if (!isPathMatched) {
       return false;
@@ -217,8 +238,9 @@ export class ScanReportV221MappingService {
       return true;
     }
 
-    const filteredScanOperation = scanPathToCheck.operations.find((scanOperation: ApiConformanceScanOperationV221) =>
-      StringUtils.equalsIgnoreCase(scanOperation.method, httpMethod)
+    const filteredScanOperation = scanPathToCheck.operations.find(
+      (scanOperation: ApiConformanceScanOperationV221) =>
+        StringUtils.equalsIgnoreCase(scanOperation.method, httpMethod)
     );
 
     if (!filteredScanOperation) {
@@ -235,7 +257,10 @@ export class ScanReportV221MappingService {
   /**
    * Count successful tests only if the corresponding `errorsOnly` parameter is not set to true
    */
-  static getSumOfAvailableTestResults(stats: ApiConformanceScanPathStatsV221, isFullReport: boolean): number {
+  static getSumOfAvailableTestResults(
+    stats: ApiConformanceScanPathStatsV221,
+    isFullReport: boolean
+  ): number {
     if (isFullReport) {
       return stats.totalRequestsCount;
     }
@@ -266,7 +291,10 @@ export class ScanReportV221MappingService {
   static getCodeIncorrectConformityFailureCount(issues: ApiConformanceScanIssueV221[]): number {
     let stats = 0;
     issues.forEach((issue: ApiConformanceScanIssueV221) => {
-      if (!issue.isContractConforming && issue.injectionStatus === ApiConformanceScanResponseAnalysisKey.Successful) {
+      if (
+        !issue.isContractConforming &&
+        issue.injectionStatus === ApiConformanceScanResponseAnalysisKey.Successful
+      ) {
         stats++;
       }
     });
@@ -276,7 +304,10 @@ export class ScanReportV221MappingService {
   static getCodeIncorrectConformitySuccessCount(issues: ApiConformanceScanIssueV221[]): number {
     let stats = 0;
     issues.forEach((issue: ApiConformanceScanIssueV221) => {
-      if (issue.isContractConforming && issue.injectionStatus === ApiConformanceScanResponseAnalysisKey.Successful) {
+      if (
+        issue.isContractConforming &&
+        issue.injectionStatus === ApiConformanceScanResponseAnalysisKey.Successful
+      ) {
         stats++;
       }
     });
@@ -286,7 +317,10 @@ export class ScanReportV221MappingService {
   static getCodeUnexpectedConformityFailureCount(issues: ApiConformanceScanIssueV221[]): number {
     let stats = 0;
     issues.forEach((issue: ApiConformanceScanIssueV221) => {
-      if (!issue.isContractConforming && issue.injectionStatus === ApiConformanceScanResponseAnalysisKey.Unexpected) {
+      if (
+        !issue.isContractConforming &&
+        issue.injectionStatus === ApiConformanceScanResponseAnalysisKey.Unexpected
+      ) {
         stats++;
       }
     });
@@ -296,7 +330,10 @@ export class ScanReportV221MappingService {
   static getCodeUnexpectedConformitySuccessCount(issues: ApiConformanceScanIssueV221[]): number {
     let stats = 0;
     issues.forEach((issue: ApiConformanceScanIssueV221) => {
-      if (issue.isContractConforming && issue.injectionStatus === ApiConformanceScanResponseAnalysisKey.Unexpected) {
+      if (
+        issue.isContractConforming &&
+        issue.injectionStatus === ApiConformanceScanResponseAnalysisKey.Unexpected
+      ) {
         stats++;
       }
     });
@@ -306,7 +343,10 @@ export class ScanReportV221MappingService {
   static getCodeExpectedConformityFailureCount(issues: ApiConformanceScanIssueV221[]): number {
     let stats = 0;
     issues.forEach((issue: ApiConformanceScanIssueV221) => {
-      if (!issue.isContractConforming && issue.injectionStatus === ApiConformanceScanResponseAnalysisKey.Expected) {
+      if (
+        !issue.isContractConforming &&
+        issue.injectionStatus === ApiConformanceScanResponseAnalysisKey.Expected
+      ) {
         stats++;
       }
     });
@@ -319,7 +359,10 @@ export class ScanReportV221MappingService {
   ): number {
     let stats = Number(isHappyPathSuccess); // if HP is successful, we get one more unlisted test, which is coerced from the boolean
     issues.forEach((issue: ApiConformanceScanIssueV221) => {
-      if (issue.isContractConforming && issue.injectionStatus === ApiConformanceScanResponseAnalysisKey.Expected) {
+      if (
+        issue.isContractConforming &&
+        issue.injectionStatus === ApiConformanceScanResponseAnalysisKey.Expected
+      ) {
         stats++;
       }
     });
@@ -327,8 +370,8 @@ export class ScanReportV221MappingService {
   }
 
   static checkIsPathMatched(scanPath: string, path: string, isStrictPathMatch: boolean): boolean {
-    const trimmedScanPath = this.trimEnd(scanPath, '/');
-    const trimmedPath = this.trimEnd(path, '/');
+    const trimmedScanPath = this.trimEnd(scanPath, "/");
+    const trimmedPath = this.trimEnd(path, "/");
 
     const isEmptyPath = StringUtils.isNullOrEmpty(trimmedPath);
 
@@ -355,25 +398,31 @@ export class ScanReportV221MappingService {
     return description;
   }
 
-  static mapApiConformanceScanOperationKeyResponse(response: string, reportVersion: SemanticVersion): string {
+  static mapApiConformanceScanOperationKeyResponse(
+    response: string,
+    reportVersion: SemanticVersion
+  ): string {
     if (StringUtils.isNullOrEmpty(response)) {
-      return '';
+      return "";
     }
 
     const minimumVersion = new SemanticVersion({
       major:
-        apiConformanceScanApiConfig.conformanceScanReport.reportVersions.operationKeyDashSeparatorMinimumVersion.major,
+        apiConformanceScanApiConfig.conformanceScanReport.reportVersions
+          .operationKeyDashSeparatorMinimumVersion.major,
       minor:
-        apiConformanceScanApiConfig.conformanceScanReport.reportVersions.operationKeyDashSeparatorMinimumVersion.minor,
+        apiConformanceScanApiConfig.conformanceScanReport.reportVersions
+          .operationKeyDashSeparatorMinimumVersion.minor,
       patch:
-        apiConformanceScanApiConfig.conformanceScanReport.reportVersions.operationKeyDashSeparatorMinimumVersion.patch
+        apiConformanceScanApiConfig.conformanceScanReport.reportVersions
+          .operationKeyDashSeparatorMinimumVersion.patch,
     });
 
     const isOldReport = SemanticVersionUtils.compare(reportVersion, minimumVersion) < 0;
 
     let key: string;
     if (isOldReport) {
-      key = response.replace(/\./g, '-').toLowerCase();
+      key = response.replace(/\./g, "-").toLowerCase();
     } else {
       key = response;
     }
@@ -394,10 +443,10 @@ export class ScanReportV221MappingService {
       try {
         happyPathResponseHttp = happyPathResponse.responseHttp; // StringUtils.parseBase64ToUTF(happyPathResponse.responseHttp);
       } catch (error) {
-        happyPathResponseHttp = '';
+        happyPathResponseHttp = "";
       }
     } else {
-      happyPathResponseHttp = '';
+      happyPathResponseHttp = "";
     }
 
     const happyPathKey = this.mapApiConformanceScanOperationKeyResponse(
@@ -417,7 +466,7 @@ export class ScanReportV221MappingService {
       // TODO: Use indexes + placeholders
       responseKey: happyPathResponse.responseKey as string,
       // TODO: Use indexes + placeholders
-      responseDescription: happyPathResponse.responseDescription as string
+      responseDescription: happyPathResponse.responseDescription as string,
     });
 
     return happyPathDetails;
@@ -431,9 +480,13 @@ export class ScanReportV221MappingService {
       ...pathStats,
       skippedOperationsCount: pathStats.skippedOperationsCount + 1,
       happyPathFailed:
-        operation.happyPathStats?.isFailed === true ? pathStats.happyPathFailed + 1 : pathStats.happyPathFailed,
+        operation.happyPathStats?.isFailed === true
+          ? pathStats.happyPathFailed + 1
+          : pathStats.happyPathFailed,
       happyPathSuccess:
-        operation.happyPathStats?.isFailed === false ? pathStats.happyPathSuccess + 1 : pathStats.happyPathSuccess
+        operation.happyPathStats?.isFailed === false
+          ? pathStats.happyPathSuccess + 1
+          : pathStats.happyPathSuccess,
     });
   }
 
@@ -450,10 +503,15 @@ export class ScanReportV221MappingService {
       totalUnexpected: pathStats.totalUnexpected + operation.totalUnexpected,
       totalFailure: pathStats.totalFailure + operation.totalFailure,
       happyPathFailed:
-        operation.happyPathStats?.isFailed === true ? pathStats.happyPathFailed + 1 : pathStats.happyPathFailed,
+        operation.happyPathStats?.isFailed === true
+          ? pathStats.happyPathFailed + 1
+          : pathStats.happyPathFailed,
       happyPathSuccess:
-        operation.happyPathStats?.isFailed === false ? pathStats.happyPathSuccess + 1 : pathStats.happyPathSuccess,
-      owaspIssuesCount: pathStats.owaspIssuesCount + ScanReportV221MappingService.getOperationOwaspStats(issues),
+        operation.happyPathStats?.isFailed === false
+          ? pathStats.happyPathSuccess + 1
+          : pathStats.happyPathSuccess,
+      owaspIssuesCount:
+        pathStats.owaspIssuesCount + ScanReportV221MappingService.getOperationOwaspStats(issues),
       codeIncorrectConformityFailureCount:
         pathStats.codeIncorrectConformityFailureCount +
         ScanReportV221MappingService.getCodeIncorrectConformityFailureCount(issues),
@@ -473,8 +531,9 @@ export class ScanReportV221MappingService {
         pathStats.codeExpectedConformitySuccessCount +
         ScanReportV221MappingService.getCodeExpectedConformitySuccessCount(
           issues,
-          operation.happyPathDetails?.happyPathKey === ApiConformanceScanHappyPathKey.HappyPathSuccess
-        )
+          operation.happyPathDetails?.happyPathKey ===
+            ApiConformanceScanHappyPathKey.HappyPathSuccess
+        ),
     });
   }
 
@@ -503,19 +562,19 @@ export class ScanReportV221MappingService {
       codeExpectedConformityFailureCount:
         stats.codeExpectedConformityFailureCount + pathStats.codeExpectedConformityFailureCount,
       codeExpectedConformitySuccessCount:
-        stats.codeExpectedConformitySuccessCount + pathStats.codeExpectedConformitySuccessCount
+        stats.codeExpectedConformitySuccessCount + pathStats.codeExpectedConformitySuccessCount,
     });
   }
 
   static async prepareMetadataItem(key: string, value: any): Promise<MetadataItem> {
     return new Promise<MetadataItem>(async (resolve, reject) => {
-      let dbItem: MetadataItem = { key: '', value: null };
+      let dbItem: MetadataItem = { key: "", value: null };
 
       switch (key) {
         case MetadataKey.TaskId:
           dbItem = {
             key: MetadataKey.TaskId,
-            value
+            value,
           };
           break;
         case MetadataKey.ScanVersion:
@@ -527,11 +586,11 @@ export class ScanReportV221MappingService {
               key: reportMetadataMap[MetadataKey.ScanVersion],
               value: value
                 ? // replace "x" with "0" for parsing older/misspelled scan versions, like 1.13.x
-                  SemanticVersionUtils.parse(value.replace('x', '0'))
-                : defaultMinEngineVersion
+                  SemanticVersionUtils.parse(value.replace("x", "0"))
+                : defaultMinEngineVersion,
             };
           } catch (error) {
-            reject('failed-to-parse-scan-report-engine-version ,' + error);
+            reject("failed-to-parse-scan-report-engine-version ," + error);
           }
           break;
         case MetadataKey.ScanReportVersion:
@@ -541,46 +600,46 @@ export class ScanReportV221MappingService {
           try {
             dbItem = {
               key: reportMetadataMap[MetadataKey.ScanReportVersion],
-              value: value ? SemanticVersionUtils.parse(value) : defaultMinReportVersion
+              value: value ? SemanticVersionUtils.parse(value) : defaultMinReportVersion,
             };
           } catch (error) {
-            reject('failed-to-parse-scan-report-schema-version,' + error);
+            reject("failed-to-parse-scan-report-schema-version," + error);
           }
           break;
         case MetadataKey.ErrorsOnly:
           dbItem = {
             key: reportMetadataMap[MetadataKey.ErrorsOnly],
-            value: !value
+            value: !value,
           };
           break;
         case MetadataKey.State:
           dbItem = {
             key: reportMetadataMap[MetadataKey.State],
-            value
+            value,
           };
           break;
         case MetadataKey.ExitCode:
           dbItem = {
             key: reportMetadataMap[MetadataKey.ExitCode],
-            value
+            value,
           };
           break;
         case MetadataKey.TotalRequest:
           dbItem = {
             key: reportMetadataMap[MetadataKey.TotalRequest],
-            value
+            value,
           };
           break;
         case MetadataKey.Issues:
           dbItem = {
             key: reportMetadataMap[MetadataKey.Issues],
-            value
+            value,
           };
           break;
         case MetadataKey.StartDate:
           dbItem = {
             key: reportMetadataMap[MetadataKey.StartDate],
-            value: value ? new Date(value) : null
+            value: value ? new Date(value) : null,
           };
           break;
       }
@@ -593,7 +652,7 @@ export class ScanReportV221MappingService {
     return {
       pointer: key,
       index,
-      value
+      value,
     };
   }
 }

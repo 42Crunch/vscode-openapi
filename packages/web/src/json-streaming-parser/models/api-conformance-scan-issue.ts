@@ -1,11 +1,16 @@
-import { ScanReportExpectedCodeInfo } from './scan-report-expected-code-info';
-import { HttpMethod } from './http-method';
-import { Severity } from './severity';
-import { StatusCode } from './status-code';
-import { IntegralScanReportIssueStatus } from './integral-scan-report-issue-status';
-import { ApiConformanceScanResponseAnalysisKey } from './api-conformance-scan-response-analysis-key';
-import { ApiConformanceScanResponseAnalysisV221 } from './api-conformance-scan-response-analysis';
-import { SupportedOwaspTopTenIssueList, OwaspIssueDetail } from './api-conformance-scan-owasp-issues';
+// @ts-nocheck
+
+import { ScanReportExpectedCodeInfo } from "./scan-report-expected-code-info";
+import { HttpMethod } from "./http-method";
+import { Severity } from "./severity";
+import { StatusCode } from "./status-code";
+import { IntegralScanReportIssueStatus } from "./integral-scan-report-issue-status";
+import { ApiConformanceScanResponseAnalysisKey } from "./api-conformance-scan-response-analysis-key";
+import { ApiConformanceScanResponseAnalysisV221 } from "./api-conformance-scan-response-analysis";
+import {
+  SupportedOwaspTopTenIssueList,
+  OwaspIssueDetail,
+} from "./api-conformance-scan-owasp-issues";
 
 export class ApiConformanceScanIssueV221 {
   readonly id: string;
@@ -67,33 +72,33 @@ export class ApiConformanceScanIssueV221 {
     responseContentType,
     responseBodyLength,
     responseBody,
-    expected
+    expected,
   }: Partial<ApiConformanceScanIssueV221> = {}) {
-    this.id = id || '';
-    this.path = path || '';
+    this.id = id || "";
+    this.path = path || "";
     this.method = method || undefined;
-    this.injectionKey = injectionKey || '';
-    this.injectionDescription = injectionDescription || '';
+    this.injectionKey = injectionKey || "";
+    this.injectionDescription = injectionDescription || "";
     this.injectionStatus = injectionStatus || null;
     this.responseAnalysisList = responseAnalysisList || [];
-    this.responseKey = responseKey || '';
-    this.responseDescription = responseDescription || '';
+    this.responseKey = responseKey || "";
+    this.responseDescription = responseDescription || "";
     this.criticality = criticality || Severity.None;
     this.owaspMapping = owaspMapping || SupportedOwaspTopTenIssueList.None;
     this.owaspIssuesFound = owaspIssuesFound || null;
     this.isContractConforming = isContractConforming || false;
     this.integralStatus = integralStatus || null;
-    this.jsonPointer = jsonPointer || '';
-    this.requestDate = requestDate || '';
-    this.requestContentType = requestContentType || '';
+    this.jsonPointer = jsonPointer || "";
+    this.requestDate = requestDate || "";
+    this.requestContentType = requestContentType || "";
     this.requestBodyLength = requestBodyLength || 0;
-    this.url = url || '';
-    this.curl = curl || '';
+    this.url = url || "";
+    this.curl = curl || "";
     this.responseTime = responseTime || 0;
     this.responseHttpStatusCode = responseHttpStatusCode || null;
-    this.responseContentType = responseContentType || '';
+    this.responseContentType = responseContentType || "";
     this.responseBodyLength = responseBodyLength || 0;
-    this.responseBody = responseBody || '';
+    this.responseBody = responseBody || "";
     this.expected = expected || null;
   }
 }
