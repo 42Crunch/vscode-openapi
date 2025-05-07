@@ -1,9 +1,11 @@
-import { ApiConformanceScanIssuesFilterType } from './api-conformance-scan-issues-filter-type';
-import { ApiConformanceScanOperationV221 } from './api-conformance-scan-operation';
-import { ScanReportStatsFilterCriteria } from './scan-report-stats-filter-criteria';
-import { HttpMethod } from './http-method';
-import { Severity } from './severity';
-import { SupportedOwaspTopTenIssueList } from './api-conformance-scan-owasp-issues';
+// @ts-nocheck
+
+import { ApiConformanceScanIssuesFilterType } from "./api-conformance-scan-issues-filter-type";
+import { ApiConformanceScanOperationV221 } from "./api-conformance-scan-operation";
+import { ScanReportStatsFilterCriteria } from "./scan-report-stats-filter-criteria";
+import { HttpMethod } from "./http-method";
+import { Severity } from "./severity";
+import { SupportedOwaspTopTenIssueList } from "./api-conformance-scan-owasp-issues";
 
 export class ScanReportIntegralFilter {
   readonly hierarchicalLevelFilterType: ApiConformanceScanIssuesFilterType;
@@ -21,10 +23,11 @@ export class ScanReportIntegralFilter {
     statsFilter,
     skippedOperation,
     owaspVulnerabilityFilter,
-    severityFilter
+    severityFilter,
   }: Partial<ScanReportIntegralFilter> = {}) {
-    this.hierarchicalLevelFilterType = hierarchicalLevelFilterType || ApiConformanceScanIssuesFilterType.SubPaths;
-    this.path = path || '';
+    this.hierarchicalLevelFilterType =
+      hierarchicalLevelFilterType || ApiConformanceScanIssuesFilterType.SubPaths;
+    this.path = path || "";
     this.httpMethod = httpMethod;
     this.statsFilter = statsFilter || null;
     this.skippedOperation = skippedOperation || null;

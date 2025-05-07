@@ -77,12 +77,12 @@ function App() {
   const dispatch = useAppDispatch();
   const { initDbStarted, chunkId, chunkText, progress } = useAppSelector((state) => state.scan);
 
-  //const [issues, setIssues] = useState<any[]>([]);
+  //const [dbTimeDelta, setDbTimeDelta] = useState<number>(0);
+
   const [timeDelta, setTimeDelta] = useState<number>(0);
   const [chunkSize, setChunkSize] = useState<number>(0);
   const [totalItems, setTotalItems] = useState<number>(-1);
   const [page, setPage] = useState<number>(1);
-  const perPage = 10;
 
   useEffect(() => {
     if (initDbStarted) {
@@ -102,6 +102,8 @@ function App() {
     }
   }, [initDbStarted]);
 
+  const perPage = 50;
+
   useEffect(() => {
     if (chunkId >= 0) {
       console.info("chunkId = " + chunkId + ", progress = " + progress);
@@ -120,11 +122,23 @@ function App() {
           //     dispatch(showFullScanReport2({ issues, report }));
           //   });
           // });
-          dbService.getIssues(page, perPage).then((resp: PaginationResponse) => {
-            //list: any[], filteredItems: number, totalPages: number, totalItems: number
-            dbService.getReport().then((report) => {
-              setTotalItems(resp.filteredItems);
-              dispatch(showFullScanReport2({ issues: resp.list, report }));
+
+          dbService.getReport().then((report) => {
+            const start = new Date().getTime();
+            //dbService.getIssues(page, perPage).then((resp: PaginationResponse) => {
+            dbService.getIssuesList().then((issues: any[]) => {
+              const end = new Date().getTime();
+              console.info("### db delay " + (end - start) / 1000 + ", issues = " + issues.length);
+              //setTotalItems(resp.filteredItems);
+              //dispatch(showFullScanReport2({ issues, report }));
+            });
+
+            const start2 = new Date().getTime();
+            dbService.getOperationsList().then((ops: any[]) => {
+              const end2 = new Date().getTime();
+              console.info("### db delay " + (end2 - start2) / 1000 + ", ops = " + ops.length);
+              //setTotalItems(resp.filteredItems);
+              //dispatch(showFullScanReport2({ issues: ops, report }));
             });
           });
         }
@@ -145,9 +159,11 @@ function App() {
           onPageChange={(pageIndex) => {
             console.info("pageIndex = " + pageIndex);
             const dbService = getScanv2Db();
-            dbService.getIssues(pageIndex, perPage).then((resp: PaginationResponse) => {
-              //list: any[], filteredItems: number, totalPages: number, totalItems: number
-              dbService.getReport().then((report) => {
+            dbService.getReport().then((report) => {
+              const start = new Date().getTime();
+              dbService.getIssues(pageIndex, perPage).then((resp: PaginationResponse) => {
+                const end = new Date().getTime();
+                console.info("### db delay " + (end - start) / 1000 + ", perPage = " + perPage);
                 dispatch(showFullScanReport2({ issues: resp.list, report }));
               });
             });
