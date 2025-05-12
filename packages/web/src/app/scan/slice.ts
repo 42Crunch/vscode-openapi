@@ -20,6 +20,7 @@ import { BundledSwaggerOrOasSpec, getOperation, HttpMethod, HttpMethods } from "
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { initProcessReport, processReport } from "../../json-streaming-parser/worker";
 import { useAppDispatch } from "./store";
+import { ac } from "vitest/dist/chunks/reporters.d.79o4mouw";
 
 export type Filter = {
   severity?: SeverityLevel;
@@ -66,9 +67,11 @@ export interface OasState {
   chunkId: number;
   progress: number;
   chunkText: string;
+  totalItems: number;
+  pageIndex: number;
   initDbStarted: boolean;
-  initDbStatus: boolean | undefined;
-  initDbError: string;
+  // initDbStatus: boolean | undefined;
+  // initDbError: string;
 }
 
 const initialState: OasState = {
@@ -102,9 +105,11 @@ const initialState: OasState = {
   chunkId: -1,
   progress: 0,
   chunkText: "",
+  totalItems: 0,
+  pageIndex: 0,
   initDbStarted: false,
-  initDbStatus: undefined,
-  initDbError: "",
+  // initDbStatus: undefined,
+  // initDbError: "",
 };
 
 export const slice = createSlice({
@@ -168,7 +173,7 @@ export const slice = createSlice({
 
     showFullScanReport2: (
       state,
-      action: PayloadAction<{ issues: TestLogReportWithLocation[]; report: any }>
+      action: PayloadAction<{ pageIndex: number; issues: TestLogReportWithLocation[]; report: any }>
     ) => {
       //const { oas, report } = action.payload;
 
@@ -181,7 +186,7 @@ export const slice = createSlice({
       const { grouped } = groupIssues(filtered);
 
       //state.oas = oas;
-      state.operations = { ...(report.operations || {}) };
+      state.operations = { ...(report.operations.slice(1, 10) || {}) }; // todo: temp limit operations
       state.issues = issues;
       state.titles = titles;
       state.paths = paths;
@@ -189,6 +194,7 @@ export const slice = createSlice({
       state.grouped = grouped;
       state.scanReport = report;
       state.waiting = false;
+      state.pageIndex = action.payload.pageIndex;
     },
 
     showFullScanReport: (state, action: PayloadAction<FullScanReport>) => {
@@ -276,6 +282,10 @@ export const slice = createSlice({
       state.chunkText = action.payload.textSegment;
       state.progress = action.payload.progress;
     },
+
+    setTotalItems: (state, action: PayloadAction<{ size: number }>) => {
+      state.totalItems = action.payload.size;
+    },
   },
 });
 
@@ -299,6 +309,7 @@ export const {
   sendParseChunkComplete,
   closeInitDb,
   parseChunk,
+  setTotalItems,
 } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<

@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 
 import { Webapp } from "@xliic/common/webapp/scan";
 import { makeWebappMessageHandler } from "../webapp";
 
-import { createListener } from "./listener";
+import { createListener, perPage } from "./listener";
 import { initStore, useAppDispatch, useAppSelector } from "./store";
 
 import Router from "../../features/router/Router";
@@ -17,8 +17,6 @@ import {
   closeInitDb,
   parseChunk,
   scanOperation,
-  sendInitDbComplete,
-  sendParseChunkComplete,
   showFullScanReport,
   showFullScanReport2,
   showGeneralError,
@@ -34,11 +32,10 @@ import { loadEnv } from "../../features/env/slice";
 import { showLogMessage } from "../../features/logging/slice";
 import { loadPrefs } from "../../features/prefs/slice";
 
-import { getScanv2Db } from "../../json-streaming-parser/scanv2-processor";
-import { initProcessReport, processReport } from "../../json-streaming-parser/worker";
-import ScanOperation from "./ScanOperation";
 import { PaginationResponse } from "../../json-streaming-parser/models/pagination.model";
+import { getScanv2Db } from "../../json-streaming-parser/scanv2-processor";
 import Paginator from "./Paginator";
+import ScanOperation from "./ScanOperation";
 
 const routes: Routes = [
   {
@@ -75,83 +72,11 @@ const messageHandlers: Webapp["webappHandlers"] = {
 
 function App() {
   const dispatch = useAppDispatch();
-  const { initDbStarted, chunkId, chunkText, progress } = useAppSelector((state) => state.scan);
-
+  const { totalItems, pageIndex } = useAppSelector((state) => state.scan);
   //const [dbTimeDelta, setDbTimeDelta] = useState<number>(0);
-
-  const [timeDelta, setTimeDelta] = useState<number>(0);
-  const [chunkSize, setChunkSize] = useState<number>(0);
-  const [totalItems, setTotalItems] = useState<number>(-1);
-  const [page, setPage] = useState<number>(1);
-
-  useEffect(() => {
-    if (initDbStarted) {
-      dispatch(startScan(undefined));
-      initProcessReport("vscode.scan.v2.db")
-        .then(() => {
-          dispatch(sendInitDbComplete({ status: true, message: "" }));
-        })
-        .catch((e: any) => {
-          dispatch(
-            sendInitDbComplete({
-              status: false,
-              message: `Failed to connect to the database: ${e.message}`,
-            })
-          );
-        });
-    }
-  }, [initDbStarted]);
-
-  const perPage = 50;
-
-  useEffect(() => {
-    if (chunkId >= 0) {
-      console.info("chunkId = " + chunkId + ", progress = " + progress);
-      if (chunkId === 0) {
-        // first chunk
-        setChunkSize(chunkText.length);
-        setTimeDelta(new Date().getTime());
-      }
-      processReport(progress === 1.0, chunkText).then(() => {
-        dispatch(sendParseChunkComplete({ id: chunkId }));
-        if (progress === 1.0) {
-          setTimeDelta(new Date().getTime() - timeDelta);
-          const dbService = getScanv2Db();
-          // dbService.getIssuesList().then((issues) => {
-          //   dbService.getReport().then((report) => {
-          //     dispatch(showFullScanReport2({ issues, report }));
-          //   });
-          // });
-
-          dbService.getReport().then((report) => {
-            const start = new Date().getTime();
-            //dbService.getIssues(page, perPage).then((resp: PaginationResponse) => {
-            dbService.getIssuesList().then((issues: any[]) => {
-              const end = new Date().getTime();
-              console.info("### db delay " + (end - start) / 1000 + ", issues = " + issues.length);
-              //setTotalItems(resp.filteredItems);
-              //dispatch(showFullScanReport2({ issues, report }));
-            });
-
-            const start2 = new Date().getTime();
-            dbService.getOperationsList().then((ops: any[]) => {
-              const end2 = new Date().getTime();
-              console.info("### db delay " + (end2 - start2) / 1000 + ", ops = " + ops.length);
-              //setTotalItems(resp.filteredItems);
-              //dispatch(showFullScanReport2({ issues: ops, report }));
-            });
-          });
-        }
-      });
-    }
-  }, [chunkId]);
 
   return (
     <>
-      {chunkSize && <div>{"chunkSize = " + chunkSize / 1024 + " KB"}</div>}
-      {progress === 1.0 && timeDelta > 0 && (
-        <div>{"timeDelta  = " + timeDelta / 1000 + " seconds"}</div>
-      )}
       {totalItems > 0 && (
         <Paginator
           totalItems={totalItems}
@@ -164,7 +89,7 @@ function App() {
               dbService.getIssues(pageIndex, perPage).then((resp: PaginationResponse) => {
                 const end = new Date().getTime();
                 console.info("### db delay " + (end - start) / 1000 + ", perPage = " + perPage);
-                dispatch(showFullScanReport2({ issues: resp.list, report }));
+                dispatch(showFullScanReport2({ pageIndex, issues: resp.list, report }));
               });
             });
           }}
