@@ -13,5 +13,8 @@
   },
   "devDependencies": {
     "vite": "*"
+  },
+  "overrides": {
+     "prismjs": "1.30.0"
   }
 }
