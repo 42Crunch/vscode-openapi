@@ -29,9 +29,34 @@ let parser: Parser;
 
 const worker: Worker = self as any;
 
-// worker.addEventListener("message", async ({ data: { url, dbName } }) => {
-//   await processReport(url, dbName);
-// });
+worker.addEventListener("message", async ({ data: { type, dbName, progress, chunkText } }) => {
+  if (type === "init") {
+    initProcessReport(dbName)
+      .then(() => {
+        worker.postMessage({
+          command: "sendInitDbComplete",
+          payload: { status: true, message: "" },
+        });
+      })
+      .catch((e: any) => {
+        worker.postMessage({
+          command: "sendInitDbComplete",
+          payload: {
+            status: false,
+            message: `Failed to connect to the database: ${e.message}`,
+          },
+        });
+      });
+  } else if (type === "parse") {
+    const done = progress === 1.0;
+    processReport(done, chunkText).then(() => {
+      worker.postMessage({
+        command: "sendParseChunkComplete",
+        payload: undefined,
+      });
+    });
+  }
+});
 
 export async function initProcessReport(dbName: string): Promise<void> {
   if (dbName === "vscode.scan.v2.db") {

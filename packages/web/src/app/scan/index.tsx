@@ -36,6 +36,7 @@ import { PaginationResponse } from "../../json-streaming-parser/models/paginatio
 import { getScanv2Db } from "../../json-streaming-parser/scanv2-processor";
 import Paginator from "./Paginator";
 import ScanOperation from "./ScanOperation";
+import ProgressBar from "../config/ProgressBar";
 
 const routes: Routes = [
   {
@@ -72,11 +73,12 @@ const messageHandlers: Webapp["webappHandlers"] = {
 
 function App() {
   const dispatch = useAppDispatch();
-  const { totalItems, pageIndex } = useAppSelector((state) => state.scan);
+  const { totalItems, pageIndex, progress } = useAppSelector((state) => state.scan);
   //const [dbTimeDelta, setDbTimeDelta] = useState<number>(0);
 
   return (
     <>
+      {progress !== 1 && <ProgressBar label="" progress={progress} />}
       {totalItems > 0 && (
         <Paginator
           totalItems={totalItems}

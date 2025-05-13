@@ -31,6 +31,46 @@ const listenerMiddleware = createListenerMiddleware();
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 const startAppListening = listenerMiddleware.startListening as AppStartListening;
 
+/////////////////
+
+// Solution 1
+// const workerUrl = "../../json-streaming-parser/worker.ts"; //"http://localhost:3000/src/json-streaming-parser/worker.ts"; // '../../json-streaming-parser/worker.ts';
+// const workerBlob = new Blob(["importScripts(" + JSON.stringify(workerUrl) + ")"], {
+//   type: "application/javascript",
+// });
+// const blobUrl = window.URL.createObjectURL(workerBlob);
+// const worker = new Worker(blobUrl);
+
+// Solution 2
+// const cross_origin_script_url = "http://localhost:3000/src/json-streaming-parser/worker.ts";
+
+// const worker_url = getWorkerURL(cross_origin_script_url);
+// const worker = new Worker(worker_url);
+// worker.onmessage = (evt) => console.log(evt.data);
+// URL.revokeObjectURL(worker_url);
+
+// // Returns a blob:// URL which points
+// // to a javascript file which will call
+// // importScripts with the given URL
+// function getWorkerURL(url: string) {
+//   const content = `importScripts( "${url}" );`;
+//   return URL.createObjectURL(new Blob([content], { type: "text/javascript" }));
+// }
+
+// Solution 3 (blob)
+
+// It's not possible to load a web worker from a different domain.
+// Similar to your suggestion, you could make a fetch call, then take that JS and base64 it. Doing so allows you to do:
+// const worker = new Worker(`data:text/javascript;base64,${btoa(workerJs)}`)
+
+// const worker: Worker = new Worker(
+//   new URL("../../json-streaming-parser/worker.ts", import.meta.url)
+// );
+
+const worker = undefined;
+
+/////////////////
+
 export function createListener(host: Webapp["host"], routes: Routes) {
   const listeners: Record<keyof Webapp["hostHandlers"], () => UnsubscribeListener> = {
     savePrefs: () =>
@@ -91,22 +131,39 @@ export function createListener(host: Webapp["host"], routes: Routes) {
         actionCreator: startInitDb,
         effect: async (action, listenerApi) => {
           listenerApi.dispatch(startScan(undefined));
-          initProcessReport("vscode.scan.v2.db")
-            .then(() => {
-              host.postMessage({
-                command: "sendInitDbComplete",
-                payload: { status: true, message: "" },
+          if (worker) {
+            // worker.postMessage({
+            //   type: "init",
+            //   dbName: "vscode.scan.v2.db",
+            //   progress: 0,
+            //   chunkText: "",
+            // });
+            // worker.onmessage = (message: MessageEvent) => {
+            //   if (message.data) {
+            //     host.postMessage(message.data);
+            //   }
+            // };
+            // worker.onerror = (err: ErrorEvent) => {
+            //   console.error(`Worker sendInitDbComplete failed: ${err.error}`);
+            // };
+          } else {
+            initProcessReport("vscode.scan.v2.db")
+              .then(() => {
+                host.postMessage({
+                  command: "sendInitDbComplete",
+                  payload: { status: true, message: "" },
+                });
+              })
+              .catch((e: any) => {
+                host.postMessage({
+                  command: "sendInitDbComplete",
+                  payload: {
+                    status: false,
+                    message: `Failed to connect to the database: ${e.message}`,
+                  },
+                });
               });
-            })
-            .catch((e: any) => {
-              host.postMessage({
-                command: "sendInitDbComplete",
-                payload: {
-                  status: false,
-                  message: `Failed to connect to the database: ${e.message}`,
-                },
-              });
-            });
+          }
         },
       }),
 
@@ -116,36 +173,80 @@ export function createListener(host: Webapp["host"], routes: Routes) {
         effect: async (action, listenerApi) => {
           const state = listenerApi.getState();
           const done = state.scan.progress === 1.0;
-          processReport(done, state.scan.chunkText).then(() => {
-            host.postMessage({
-              command: "sendParseChunkComplete",
-              payload: { id: state.scan.chunkId },
-            });
-            if (done) {
-              //setTimeDelta(new Date().getTime() - timeDelta);
-              const dbService = getScanv2Db();
-              dbService.getReport().then((report) => {
-                //const start = new Date().getTime();
-                dbService
-                  .getIssues(state.scan.pageIndex, perPage)
-                  .then((resp: PaginationResponse) => {
-                    //const end = new Date().getTime();
-                    // console.info(
-                    //   "### db delay " + (end - start) / 1000 + ", issues = " + issues.length
-                    // );
-                    //setTotalItems(resp.filteredItems);
-                    listenerApi.dispatch(setTotalItems({ size: resp.totalItems }));
-                    listenerApi.dispatch(
-                      showFullScanReport2({
-                        pageIndex: state.scan.pageIndex,
-                        issues: resp.list,
-                        report,
-                      })
-                    );
-                  });
+          if (worker) {
+            // worker.postMessage({
+            //   type: "parse",
+            //   dbName: "",
+            //   progress: state.scan.progress,
+            //   chunkText: state.scan.chunkText,
+            // });
+            // worker.onmessage = (message: MessageEvent) => {
+            //   if (message.data) {
+            //     host.postMessage({
+            //       command: "sendParseChunkComplete",
+            //       payload: { id: state.scan.chunkId },
+            //     });
+            //     if (done) {
+            //       //setTimeDelta(new Date().getTime() - timeDelta);
+            //       const dbService = getScanv2Db();
+            //       dbService.getReport().then((report) => {
+            //         //const start = new Date().getTime();
+            //         dbService
+            //           .getIssues(state.scan.pageIndex, perPage)
+            //           .then((resp: PaginationResponse) => {
+            //             //const end = new Date().getTime();
+            //             // console.info(
+            //             //   "### db delay " + (end - start) / 1000 + ", issues = " + issues.length
+            //             // );
+            //             //setTotalItems(resp.filteredItems);
+            //             listenerApi.dispatch(setTotalItems({ size: resp.totalItems }));
+            //             listenerApi.dispatch(
+            //               showFullScanReport2({
+            //                 pageIndex: state.scan.pageIndex,
+            //                 issues: resp.list,
+            //                 report,
+            //               })
+            //             );
+            //           });
+            //       });
+            //     }
+            //   }
+            // };
+            // worker.onerror = (err: ErrorEvent) => {
+            //   console.error(`Worker sendInitDbComplete failed: ${err.error}`);
+            // };
+          } else {
+            processReport(done, state.scan.chunkText).then(() => {
+              host.postMessage({
+                command: "sendParseChunkComplete",
+                payload: { id: state.scan.chunkId },
               });
-            }
-          });
+              if (done) {
+                //setTimeDelta(new Date().getTime() - timeDelta);
+                const dbService = getScanv2Db();
+                dbService.getReport().then((report) => {
+                  //const start = new Date().getTime();
+                  dbService
+                    .getIssues(state.scan.pageIndex, perPage)
+                    .then((resp: PaginationResponse) => {
+                      //const end = new Date().getTime();
+                      // console.info(
+                      //   "### db delay " + (end - start) / 1000 + ", issues = " + issues.length
+                      // );
+                      //setTotalItems(resp.filteredItems);
+                      listenerApi.dispatch(setTotalItems({ size: resp.totalItems }));
+                      listenerApi.dispatch(
+                        showFullScanReport2({
+                          pageIndex: state.scan.pageIndex,
+                          issues: resp.list,
+                          report,
+                        })
+                      );
+                    });
+                });
+              }
+            });
+          }
         },
       }),
   };
