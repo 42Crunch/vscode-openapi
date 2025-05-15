@@ -20,7 +20,6 @@ import { BundledSwaggerOrOasSpec, getOperation, HttpMethod, HttpMethods } from "
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { initProcessReport, processReport } from "../../json-streaming-parser/worker";
 import { useAppDispatch } from "./store";
-import { ac } from "vitest/dist/chunks/reporters.d.79o4mouw";
 
 export type Filter = {
   severity?: SeverityLevel;
