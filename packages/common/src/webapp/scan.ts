@@ -18,6 +18,13 @@ import {
 } from "../http";
 import { LoadConfigMessage } from "../config";
 import { ShowLogMessage } from "../logging";
+import {
+  CloseInitDbMessage,
+  ParseChunkMessage,
+  SendInitDbCompleteMessage,
+  SendParseChunkCompleteMessage,
+  StartInitDbMessage,
+} from "../index-db";
 
 export type Webapp = App<
   // consumes
@@ -32,11 +39,17 @@ export type Webapp = App<
   | ShowScanReportMessage
   | ShowFullScanReportMessage
   | ShowHttpResponseMessage
-  | ShowLogMessage,
+  | ShowLogMessage
+  | StartInitDbMessage
+  | ParseChunkMessage
+  | CloseInitDbMessage
+  | StartInitDbMessage,
   // produces
   | ShowEnvWindow
   | SavePreferencesMessage
   | SendHttpRequestMessage
   | SendCurlRequestMessage
   | ShowJsonPointerMessage
+  | SendInitDbCompleteMessage
+  | SendParseChunkCompleteMessage
 >;

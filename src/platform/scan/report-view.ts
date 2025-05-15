@@ -4,28 +4,31 @@
 */
 
 import { GeneralError } from "@xliic/common/error";
-import { HttpMethod, BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { LogLevel } from "@xliic/common/logging";
 import { Preferences } from "@xliic/common/prefs";
 import { Webapp } from "@xliic/common/webapp/scan";
+import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
+import { rmdirSync, unlinkSync } from "node:fs";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import * as vscode from "vscode";
-import { parseAuditReport } from "../../audit/audit";
 import { getLocationByPointer } from "../../audit/util";
-import { AuditWebView } from "../../audit/view";
 import { Cache } from "../../cache";
 import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
-import { AuditContext, MappingNode } from "../../types";
+import { existsSync } from "../../util/fs";
+import { executeHttpRequest } from "../../webapps/http-handler";
 import { WebView } from "../../webapps/web-view";
 import { PlatformStore } from "../stores/platform-store";
-import { executeHttpRequest } from "../../webapps/http-handler";
-import { join } from "node:path";
-import { existsSync } from "../../util/fs";
-import { rmdirSync, unlinkSync } from "node:fs";
 
 export class ScanReportWebView extends WebView<Webapp> {
   private document?: vscode.TextDocument;
   private temporaryReportDirectory?: string;
+  private file?: string;
+  private report = "";
+  private chunkId = 0;
+  private chunkOffset = 0;
+  private chunkSize = 0;
 
   constructor(
     title: string,
@@ -75,6 +78,48 @@ export class ScanReportWebView extends WebView<Webapp> {
       vscode.commands.executeCommand("openapi.showEnvironment");
     },
 
+    sendInitDbComplete: async (payload: { status: boolean; message: string }) => {
+      this.report = await readFile(this.file as string, { encoding: "utf8" });
+      this.chunkId = 0;
+      this.chunkOffset = 0;
+      this.chunkSize = 512 * 1024; //1024 * 1024; // 1mb Math.ceil(this.report.length / 100); // TODO: find out the best chunk size and hardoce it
+      if (this.report.length <= this.chunkSize) {
+        this.chunkSize = this.report.length;
+      }
+      const textSegment = this.report.substr(this.chunkOffset, this.chunkSize);
+      this.chunkOffset += this.chunkSize;
+      this.sendRequest({
+        command: "parseChunk",
+        payload: {
+          id: this.chunkId,
+          file: this.file as string,
+          textSegment,
+          progress: this.chunkOffset / this.report.length,
+        },
+      });
+    },
+
+    sendParseChunkComplete: async (payload: { id: number }) => {
+      // console.info("GOT sendParseChunkComplete id = " + payload.id);
+      if (this.chunkOffset < this.report.length && this.chunkId === payload.id && this.report) {
+        if (this.report.length - this.chunkOffset < this.chunkSize) {
+          this.chunkSize = this.report.length - this.chunkOffset;
+        }
+        const textSegment = this.report.substr(this.chunkOffset, this.chunkSize);
+        this.chunkOffset += this.chunkSize;
+        this.chunkId += 1;
+        this.sendRequest({
+          command: "parseChunk",
+          payload: {
+            id: this.chunkId,
+            file: this.file as string,
+            textSegment,
+            progress: this.chunkOffset / this.report.length,
+          },
+        });
+      }
+    },
+
     showJsonPointer: async (payload: string) => {
       if (this.document) {
         let editor: vscode.TextEditor | undefined = undefined;
@@ -114,6 +159,12 @@ export class ScanReportWebView extends WebView<Webapp> {
     this.document = document;
     await this.show();
     return this.sendRequest({ command: "startScan", payload: undefined });
+  }
+
+  async sendStartInitDb(file: string) {
+    this.file = file;
+    await this.show();
+    return this.sendRequest({ command: "startInitDb", payload: undefined });
   }
 
   setTemporaryReportDirectory(dir: string) {

@@ -29,7 +29,12 @@ export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme:
   configureStore({
     reducer,
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().prepend(listenerMiddleware.middleware).concat(logger),
+      getDefaultMiddleware({
+        immutableCheck: false,
+        serializableCheck: false,
+      })
+        .prepend(listenerMiddleware.middleware)
+        .concat(logger),
     preloadedState: {
       theme,
     },

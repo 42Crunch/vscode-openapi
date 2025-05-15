@@ -1,22 +1,25 @@
-import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from "@reduxjs/toolkit";
-import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
-import { BundledSwaggerOrOasSpec, getOperation, HttpMethod, HttpMethods } from "@xliic/openapi";
-import { TryitOperationValues } from "@xliic/common/tryit";
-import {
-  ScanConfig,
-  OasWithOperationAndConfig,
-  SingleOperationScanReport,
-  FullScanReport,
-} from "@xliic/common/scan";
-import { HttpRequest, HttpResponse, HttpError, HttpConfig } from "@xliic/common/http";
+import { createSlice, Dispatch, PayloadAction, StateFromReducersMapObject } from "@reduxjs/toolkit";
+import { SeverityLevel, SeverityLevels } from "@xliic/common/audit";
 import { GeneralError } from "@xliic/common/error";
+import { HttpConfig, HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
+import { TextChunk } from "@xliic/common/index-db";
 import { Preferences } from "@xliic/common/prefs";
+import {
+  FullScanReport,
+  OasWithOperationAndConfig,
+  ScanConfig,
+  SingleOperationScanReport,
+} from "@xliic/common/scan";
 import {
   RuntimeOperationReport,
   ScanReportJSONSchema,
   TestLogReport,
 } from "@xliic/common/scan-report";
-import { SeverityLevel, SeverityLevels } from "@xliic/common/audit";
+import { TryitOperationValues } from "@xliic/common/tryit";
+import { BundledSwaggerOrOasSpec, getOperation, HttpMethod, HttpMethods } from "@xliic/openapi";
+import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import { initProcessReport, processReport } from "../../json-streaming-parser/worker";
+import { useAppDispatch } from "./store";
 
 export type Filter = {
   severity?: SeverityLevel;
@@ -30,6 +33,7 @@ export type TestLogReportWithLocation = TestLogReport & {
   path: string;
   method?: HttpMethod;
   operationId?: string;
+  testKey?: string;
 };
 
 export interface OasState {
@@ -58,6 +62,15 @@ export interface OasState {
   titles: string[];
   paths: string[];
   operationIds: string[];
+  // TODO: move to seprate state
+  chunkId: number;
+  progress: number;
+  chunkText: string;
+  totalItems: number;
+  pageIndex: number;
+  initDbStarted: boolean;
+  // initDbStatus: boolean | undefined;
+  // initDbError: string;
 }
 
 const initialState: OasState = {
@@ -88,6 +101,14 @@ const initialState: OasState = {
   titles: [],
   paths: [],
   operationIds: [],
+  chunkId: -1,
+  progress: 0,
+  chunkText: "",
+  totalItems: 0,
+  pageIndex: 0,
+  initDbStarted: false,
+  // initDbStatus: undefined,
+  // initDbError: "",
 };
 
 export const slice = createSlice({
@@ -147,6 +168,32 @@ export const slice = createSlice({
       state.oas = oas;
       state.scanReport = report;
       state.waiting = false;
+    },
+
+    showFullScanReport2: (
+      state,
+      action: PayloadAction<{ pageIndex: number; issues: TestLogReportWithLocation[]; report: any }>
+    ) => {
+      //const { oas, report } = action.payload;
+
+      //const issues = action.payload.issues;
+      const report = action.payload.report;
+      const issues = flattenIssues2(report, action.payload.issues);
+
+      const filtered = filterIssues(issues, state.filter);
+      const { titles, paths, operationIds } = groupIssues(issues);
+      const { grouped } = groupIssues(filtered);
+
+      //state.oas = oas;
+      state.operations = { ...(report.operations.slice(1, 10) || {}) }; // todo: temp limit operations
+      state.issues = issues;
+      state.titles = titles;
+      state.paths = paths;
+      state.operationIds = operationIds;
+      state.grouped = grouped;
+      state.scanReport = report;
+      state.waiting = false;
+      state.pageIndex = action.payload.pageIndex;
     },
 
     showFullScanReport: (state, action: PayloadAction<FullScanReport>) => {
@@ -212,6 +259,32 @@ export const slice = createSlice({
     sendCurlRequest: (state, action: PayloadAction<string>) => {},
 
     showJsonPointer: (state, action: PayloadAction<string>) => {},
+
+    startInitDb: (state, action: PayloadAction<undefined>) => {
+      state.initDbStarted = true;
+    },
+
+    sendInitDbComplete: (state, action: PayloadAction<{ status: boolean; message: string }>) => {
+      // hook for a listener
+    },
+
+    sendParseChunkComplete: (state, action: PayloadAction<{ id: number }>) => {
+      // hook for a listener
+    },
+
+    closeInitDb: (state, action: PayloadAction<undefined>) => {
+      // TODO
+    },
+
+    parseChunk: (state, action: PayloadAction<TextChunk>) => {
+      state.chunkId = action.payload.id;
+      state.chunkText = action.payload.textSegment;
+      state.progress = action.payload.progress;
+    },
+
+    setTotalItems: (state, action: PayloadAction<{ size: number }>) => {
+      state.totalItems = action.payload.size;
+    },
   },
 });
 
@@ -221,6 +294,7 @@ export const {
   runScan,
   showScanReport,
   showFullScanReport,
+  showFullScanReport2,
   showGeneralError,
   showHttpError,
   sendHttpRequest,
@@ -229,6 +303,12 @@ export const {
   showJsonPointer,
   changeTab,
   changeFilter,
+  startInitDb,
+  sendInitDbComplete,
+  sendParseChunkComplete,
+  closeInitDb,
+  parseChunk,
+  setTotalItems,
 } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<
@@ -238,6 +318,28 @@ export const useFeatureDispatch: () => Dispatch<
 export const useFeatureSelector: TypedUseSelectorHook<
   StateFromReducersMapObject<Record<typeof slice.name, typeof slice.reducer>>
 > = useSelector;
+
+// todo: get rid of any
+function flattenIssues2(scanReport: any, issues2: TestLogReportWithLocation[]) {
+  const issues: TestLogReportWithLocation[] = [];
+
+  for (const [operationId, operationReport] of Object.entries(scanReport?.operations || {})) {
+    for (const kind of [
+      "conformanceRequestsResults",
+      "authorizationRequestsResults",
+      "customRequestsResults",
+    ] as const) {
+      const results = (operationReport as any)[kind];
+      const path = (operationReport as any).path;
+      const method = (operationReport as any).method.toLocaleLowerCase() as HttpMethod;
+      for (const result of results || []) {
+        issues.push({ ...result, path, method, operationId });
+      }
+    }
+  }
+
+  return issues2.concat(issues);
+}
 
 function flattenIssues(scanReport: ScanReportJSONSchema) {
   const issues: TestLogReportWithLocation[] = [];
