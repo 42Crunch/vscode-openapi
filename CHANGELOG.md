@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 4.34.0 (May 19, 2025)
+
+- Update dependencies, addressing misc CVEs
+- Add support for .graphqls and .sdl extensions for GraphQL Audit
+- Implement additional checks in Settings webapp
+
 ## Version 4.33.2 (April 9, 2025)
 
 - Fix broken refresh of SwaggerUI preview
