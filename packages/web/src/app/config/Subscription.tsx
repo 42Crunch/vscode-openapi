@@ -78,6 +78,11 @@ export default function Subscription({
       </Section>
 
       <Section>
+        <Title>Registered email</Title>
+        <Counters>{data.userEmail}</Counters>
+      </Section>
+
+      <Section>
         <Title>Subscription date</Title>
         <Subtitle>Date when your monthly allowance started</Subtitle>
         <Counters>{data.periodStart}</Counters>
