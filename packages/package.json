@@ -13,7 +13,7 @@
   "scripts": {
     "postinstall": "cd preview-redoc && npm install && cd ../preview-swaggerui && npm install",
     "build": "npm run build-webapps && npm run build-swaggerui && npm run build-redoc",
-    "build-webapps": "npm run build-result && npm run build-openapi && npm run build-common && npm run build build-streaming-parser && npm run build-scanconf && npm run build-scanconf-changes && npm run build-web",
+    "build-webapps": "npm run build-result && npm run build-openapi && npm run build-common && npm run build-streaming-parser && npm run build-scanconf && npm run build-scanconf-changes && npm run build-web",
     "build-openapi": "cd openapi && npm run build && cd .. && cd openapi-cjs && npm run build",
     "build-result": "cd result && npm run build && cd .. && cd result-cjs && npm run build",
     "build-streaming-parser": "cd streaming-parser && npm run build",
