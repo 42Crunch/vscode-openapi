@@ -1,0 +1,1875 @@
+{
+  "indexed": true,
+  "index": {
+    "jsonPointers": [
+      "/paths/~1api~1admin~1all_users",
+      "/paths/~1api~1admin~1users~1search",
+      "/paths/~1api~1login",
+      "/paths/~1api~1register",
+      "/paths/~1api~1register/post",
+      "/definitions/UserRegistrationData",
+      "/definitions/UserRegistrationData/properties/user",
+      "/definitions/UserRegistrationData/properties/pass",
+      "/definitions/UserRegistrationData/properties/name",
+      "/definitions/UserRegistrationData/properties/is_admin",
+      "/definitions/UserRegistrationData/properties/account_balance",
+      "/paths/~1api~1user~1edit_info",
+      "/paths/~1api~1user~1info"
+    ],
+    "contentTypes": ["application/random+content+type", "application/json"],
+    "injectionKeys": [
+      "path-item-method-not-allowed-scan",
+      "parameter-header-contenttype-wrong-scan",
+      "schema-type-wrong-bool-scan",
+      "schema-type-wrong-string-scan",
+      "schema-type-wrong-integer-scan",
+      "schema-type-wrong-number-scan",
+      "schema-type-wrong-array-scan",
+      "schema-required-scan",
+      "schema-additionalproperties-scan",
+      "schema-type-wrong-object-scan",
+      "schema-pattern-scan",
+      "schema-minlength-scan",
+      "schema-maxlength-scan",
+      "schema-minimum-scan",
+      "schema-maximum-scan"
+    ],
+    "injectionDescriptions": [
+      "The API accepts a call generated with the verb (method) '%s' that is not part of the OpenAPI definition",
+      "The API accepts a request with a 'Content-Type' header value of '%s' which is not consistent with the API definition where 'Content-Type' is set to '%s'",
+      "The API accepts a request with an unexpected data type (boolean) instead of '%s'",
+      "The API accepts a request with an unexpected data type (string) instead of '%s'",
+      "The API accepts a request with an unexpected data type (integer) instead of '%s'",
+      "The API accepts a request with an unexpected data type (number) instead of '%s'",
+      "The API accepts a request with an unexpected data type (array) instead of '%s'",
+      "The API does not validate that the required property '%s' is present in the request",
+      "The API accepts additional properties not specified or allowed in the request payload schema",
+      "The API accepts a request with an unexpected data type (object) instead of '%s'",
+      "The API accepts a request where a property does not follow the established regular expression pattern",
+      "The API accepts a generated string shorter than the allowed minimum for the tested string property",
+      "The API accepts a request containing a property that exceeds the 'maxLength' limit",
+      "The API accepts a generated value smaller than the minimum defined for it",
+      "The API accepts a property value greater than the allowed maximum for an integer or number"
+    ],
+    "responseKeys": ["response-expected-scan", "response-error-unexpected-scan"],
+    "responseDescriptions": [
+      "The received HTTP status code matches what is expected ('%s')",
+      "The received HTTP status code does not match what is expected for the sent test request but raises an error"
+    ]
+  },
+  "scanVersion": "1.22.27",
+  "scanReportVersion": "2.2.4",
+  "commit": "c21d317131626f86338463be4225a7fd6d4523a4-N",
+  "host": "https://pixigo.qa.42crunch.com",
+  "errorsOnly": false,
+  "summary": {
+    "startDate": "2025-03-20T15:30:26.245640312Z",
+    "endDate": "2025-03-20T15:30:35.514909005Z",
+    "openapiId": "82aa154c-1de1-4d6f-be2b-8023ced9337b",
+    "state": "finished",
+    "exitCode": 0,
+    "processingError": "",
+    "estimatedTotalRequest": 161,
+    "totalRequest": 92,
+    "criticality": 3,
+    "issues": 3,
+    "criticalIssues": 0,
+    "highIssues": 0,
+    "mediumIssues": 1,
+    "lowIssues": 2,
+    "infoIssues": 0
+  },
+  "paths": {
+    "/api/admin/all_users": {
+      "delete": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "b13a4620-68c1-4f86-ab15-dad747089461",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["delete"],
+            "curl": "curl -X 'DELETE' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/admin/all_users'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 0
+          }
+        ]
+      },
+      "get": {
+        "checked": false,
+        "reason": "operation-security-not-fullfilled",
+        "skipReasonDetails": ["local security requirement in the operation is not fulfilled"],
+        "estimatedTotalRequest": 2,
+        "totalRequest": 0,
+        "totalExpected": 0,
+        "totalUnexpected": 0,
+        "totalFailure": 0
+      },
+      "head": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "7030fcad-5d74-47cf-8e4d-60f712c3964d",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["head"],
+            "curl": "curl --head -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/admin/all_users'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 0
+          }
+        ]
+      },
+      "options": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "a11a7e0b-34ee-4fed-a972-d5dc04173f0f",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["options"],
+            "curl": "curl -X 'OPTIONS' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/admin/all_users'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 0
+          }
+        ]
+      },
+      "patch": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "a428855e-cd7f-4fd8-8d00-e4d2890bc2cf",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["patch"],
+            "curl": "curl -X 'PATCH' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/admin/all_users'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 0
+          }
+        ]
+      },
+      "post": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "784aef40-dc1c-48dd-9a06-c82024f4db07",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["post"],
+            "curl": "curl -X 'POST' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/admin/all_users'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 0
+          }
+        ]
+      },
+      "put": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "43932882-05d3-4b39-811a-866abbdd4c77",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["put"],
+            "curl": "curl -X 'PUT' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/admin/all_users'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 0
+          }
+        ]
+      },
+      "trace": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "8d2a02b9-b8de-4293-8dec-7d3e42cbe51f",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["trace"],
+            "curl": "curl -X 'TRACE' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/admin/all_users'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 0
+          }
+        ]
+      }
+    },
+    "/api/admin/users/search": {
+      "delete": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "9c0efdae-6610-4971-8f47-cf92c8b0acef",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["delete"],
+            "curl": "curl -X 'DELETE' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/admin/users/search?search=06zahKC%40vAryqt.PAhNH'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 1
+          }
+        ]
+      },
+      "get": {
+        "checked": false,
+        "reason": "operation-security-not-fullfilled",
+        "skipReasonDetails": ["local security requirement in the operation is not fulfilled"],
+        "estimatedTotalRequest": 6,
+        "totalRequest": 0,
+        "totalExpected": 0,
+        "totalUnexpected": 0,
+        "totalFailure": 0
+      },
+      "head": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "eea20c0a-a95b-4ac2-94a3-a4759c2ef6d6",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["head"],
+            "curl": "curl --head -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/admin/users/search?search=06zahKC%40vAryqt.PAhNH'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 1
+          }
+        ]
+      },
+      "options": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "270c49e7-e191-4608-99b5-de60a07ecfac",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["options"],
+            "curl": "curl -X 'OPTIONS' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/admin/users/search?search=06zahKC%40vAryqt.PAhNH'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 1
+          }
+        ]
+      },
+      "patch": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "1930f2d2-c473-4d0a-8ecf-e0cd1a9e0006",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["patch"],
+            "curl": "curl -X 'PATCH' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/admin/users/search?search=06zahKC%40vAryqt.PAhNH'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 1
+          }
+        ]
+      },
+      "post": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "171966ec-39f1-4209-b91e-b6680d7d0449",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["post"],
+            "curl": "curl -X 'POST' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/admin/users/search?search=06zahKC%40vAryqt.PAhNH'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 1
+          }
+        ]
+      },
+      "put": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "f47f39b5-0c65-4b5f-842b-4c3bc0b55eae",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["put"],
+            "curl": "curl -X 'PUT' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/admin/users/search?search=06zahKC%40vAryqt.PAhNH'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 1
+          }
+        ]
+      },
+      "trace": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "83a9ddf3-5eff-4900-a1be-577b2c103304",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["trace"],
+            "curl": "curl -X 'TRACE' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/admin/users/search?search=06zahKC%40vAryqt.PAhNH'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 1
+          }
+        ]
+      }
+    },
+    "/api/login": {
+      "delete": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "311837cd-9a29-43a9-a557-358783c734cb",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["delete"],
+            "curl": "curl -X 'DELETE' -H 'Accept: application/json' -H 'Content-Type: application/x-www-form-urlencoded' -H 'X-Scan-Transactionid: 311837cd-9a29-43a9-a557-358783c734cb' 'https://pixigo.qa.42crunch.com/api/login'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 2
+          }
+        ]
+      },
+      "get": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "c0729277-9a00-4def-8c4b-183168d03f56",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["get"],
+            "curl": "curl -X 'GET' -H 'Accept: application/json' -H 'Content-Type: application/x-www-form-urlencoded' -H 'X-Scan-Transactionid: c0729277-9a00-4def-8c4b-183168d03f56' 'https://pixigo.qa.42crunch.com/api/login'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 2
+          }
+        ]
+      },
+      "head": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "555d722e-0616-4058-a1e4-dce68f6ad6a1",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["head"],
+            "curl": "curl --head -H 'Accept: application/json' -H 'Content-Type: application/x-www-form-urlencoded' -H 'X-Scan-Transactionid: 555d722e-0616-4058-a1e4-dce68f6ad6a1' 'https://pixigo.qa.42crunch.com/api/login'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 2
+          }
+        ]
+      },
+      "options": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "8483d02e-8534-4a23-b9fd-00b2fffebf46",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["options"],
+            "curl": "curl -X 'OPTIONS' -H 'Accept: application/json' -H 'Content-Type: application/x-www-form-urlencoded' -H 'X-Scan-Transactionid: 8483d02e-8534-4a23-b9fd-00b2fffebf46' 'https://pixigo.qa.42crunch.com/api/login'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 2
+          }
+        ]
+      },
+      "patch": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "0051f20b-24af-4bb3-aebe-3111ca314144",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["patch"],
+            "curl": "curl -X 'PATCH' -H 'Accept: application/json' -H 'Content-Type: application/x-www-form-urlencoded' -H 'X-Scan-Transactionid: 0051f20b-24af-4bb3-aebe-3111ca314144' 'https://pixigo.qa.42crunch.com/api/login'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 2
+          }
+        ]
+      },
+      "post": {
+        "checked": false,
+        "reason": "operation-happy-path-failed",
+        "skipReasonDetails": [
+          "The API response code is incorrect. The received HTTP status code must be one of the expected codes (by default 2xx or 404, or as set in customizations)"
+        ],
+        "curlHappyPath": "curl -X 'POST' -d 'pass=I%23v5GBSOvz%23c&user=p590Ps0%404A0LmnDtM.WjwAS' -H 'Accept: application/json' -H 'Content-Type: application/x-www-form-urlencoded' 'https://pixigo.qa.42crunch.com/api/login'",
+        "happyPath": {
+          "key": "happy-path-response-not-successful",
+          "excessiveDataExposure": false,
+          "curl": "curl -X 'POST' -d 'pass=I%23v5GBSOvz%23c&user=p590Ps0%404A0LmnDtM.WjwAS' -H 'Accept: application/json' -H 'Content-Type: application/x-www-form-urlencoded' 'https://pixigo.qa.42crunch.com/api/login'",
+          "curlBodySkipped": false,
+          "responseHttpStatusCode": 406,
+          "responseContentType": "application/json",
+          "responseBodyLength": 35,
+          "responseHttp": "SFRUUC8xLjEgNDA2IE5vdCBBY2NlcHRhYmxlDQpDb250ZW50LUxlbmd0aDogMzUNCkNvbm5lY3Rpb246IGtlZXAtYWxpdmUNCkNvbnRlbnQtVHlwZTogYXBwbGljYXRpb24vanNvbg0KRGF0ZTogVGh1LCAyMCBNYXIgMjAyNSAxNTozMDoyNiBHTVQNClN0cmljdC1UcmFuc3BvcnQtU2VjdXJpdHk6IG1heC1hZ2U9MTU3MjQ4MDA7IGluY2x1ZGVTdWJEb21haW5zDQoNCnsibWVzc2FnZSI6ImVycm9yLCB1c2VyIG5vdCBmb3VuZCJ9"
+        },
+        "estimatedTotalRequest": 10,
+        "totalRequest": 1,
+        "totalExpected": 0,
+        "totalUnexpected": 1,
+        "totalFailure": 0
+      },
+      "put": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "621a1afd-6651-4da1-8528-682e6f06ab47",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["put"],
+            "curl": "curl -X 'PUT' -H 'Accept: application/json' -H 'Content-Type: application/x-www-form-urlencoded' -H 'X-Scan-Transactionid: 621a1afd-6651-4da1-8528-682e6f06ab47' 'https://pixigo.qa.42crunch.com/api/login'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 2
+          }
+        ]
+      },
+      "trace": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "554a1a4c-e50c-4754-96f9-10de10887ee3",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["trace"],
+            "curl": "curl -X 'TRACE' -H 'Accept: application/json' -H 'Content-Type: application/x-www-form-urlencoded' -H 'X-Scan-Transactionid: 554a1a4c-e50c-4754-96f9-10de10887ee3' 'https://pixigo.qa.42crunch.com/api/login'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 2
+          }
+        ]
+      }
+    },
+    "/api/register": {
+      "delete": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "b505bb22-ec9f-4496-b527-33f50be9fc10",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["delete"],
+            "curl": "curl -X 'DELETE' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: b505bb22-ec9f-4496-b527-33f50be9fc10' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 3
+          }
+        ]
+      },
+      "get": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "754edbae-96e9-47be-a509-6e0161834ead",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["get"],
+            "curl": "curl -X 'GET' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 754edbae-96e9-47be-a509-6e0161834ead' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 3
+          }
+        ]
+      },
+      "head": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "65dd974b-5cec-40b8-b501-0eab8b35285a",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["head"],
+            "curl": "curl --head -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 65dd974b-5cec-40b8-b501-0eab8b35285a' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 3
+          }
+        ]
+      },
+      "options": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "a7abadca-26fd-456d-9604-b642722441a9",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["options"],
+            "curl": "curl -X 'OPTIONS' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: a7abadca-26fd-456d-9604-b642722441a9' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 3
+          }
+        ]
+      },
+      "patch": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "ce011a57-46bf-43bd-99cc-26f514e8c618",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["patch"],
+            "curl": "curl -X 'PATCH' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: ce011a57-46bf-43bd-99cc-26f514e8c618' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 3
+          }
+        ]
+      },
+      "post": {
+        "checked": true,
+        "curlHappyPath": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' 'https://pixigo.qa.42crunch.com/api/register'",
+        "happyPath": {
+          "key": "happy-path-success",
+          "excessiveDataExposure": false,
+          "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' 'https://pixigo.qa.42crunch.com/api/register'",
+          "curlBodySkipped": false,
+          "responseHttpStatusCode": 200,
+          "responseContentType": "application/json",
+          "responseBodyLength": 195,
+          "responseHttp": "SFRUUC8xLjEgMjAwIE9LDQpDb250ZW50LUxlbmd0aDogMTk1DQpDb25uZWN0aW9uOiBrZWVwLWFsaXZlDQpDb250ZW50LVR5cGU6IGFwcGxpY2F0aW9uL2pzb24NCkRhdGU6IFRodSwgMjAgTWFyIDIwMjUgMTU6MzA6MjYgR01UDQpTZXQtQ29va2llOiB0b2tlbj1leUpoYkdjaU9pSklVekkxTmlJc0luUjVjQ0k2SWtwWFZDSjkuZXlKVmMyVnlJam9pYldWemNYTmxhbVZ3UUhKNE15MDJNbko1YXk1NWNHWWlMQ0psZUhBaU9qRTNOREkwT0RRNU1qWjkuY2M3YU1tYnVZbUNqZGh6LXloc0N1SEtBaG5Lb3BsaE4tMExUMm9nbXlsQTsgRXhwaXJlcz1UaHUsIDIwIE1hciAyMDI1IDE1OjM1OjI2IEdNVA0KU3RyaWN0LVRyYW5zcG9ydC1TZWN1cml0eTogbWF4LWFnZT0xNTcyNDgwMDsgaW5jbHVkZVN1YkRvbWFpbnMNCg0KeyJtZXNzYWdlIjoiVG9rZW4gaXMgYSBoZWFkZXIgSldUIiwidG9rZW4iOiJleUpoYkdjaU9pSklVekkxTmlJc0luUjVjQ0k2SWtwWFZDSjkuZXlKVmMyVnlJam9pYldWemNYTmxhbVZ3UUhKNE15MDJNbko1YXk1NWNHWWlMQ0psZUhBaU9qRTNOREkwT0RRNU1qWjkuY2M3YU1tYnVZbUNqZGh6LXloc0N1SEtBaG5Lb3BsaE4tMExUMm9nbXlsQSJ9"
+        },
+        "estimatedTotalRequest": 49,
+        "totalRequest": 49,
+        "totalExpected": 46,
+        "totalUnexpected": 3,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "95e9218a-5555-4105-ac63-40809dc350a7",
+            "injectionKey": 1,
+            "injectionDescription": 1,
+            "injectionDescriptionParams": ["application/random+content+type", "application/json"],
+            "apiResponseAnalysis": [{ "responseKey": 1, "responseDescription": 1 }],
+            "owaspMapping": 7,
+            "owaspByVersionMapping": { "owasp2019": 7, "owasp2023": 8 },
+            "criticality": 3,
+            "requestDate": "2025-03-20T15:30:29Z",
+            "requestContentType": 0,
+            "requestBodyLength": 112,
+            "url": "https://pixigo.qa.42crunch.com/api/register",
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/random+content+type' -H 'X-Scan-Transactionid: 95e9218a-5555-4105-ac63-40809dc350a7' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseTime": 29,
+            "responseHttpStatusCode": 409,
+            "responseContentType": 1,
+            "responseBodyLength": 37,
+            "responseBody": null,
+            "responseHttp": "SFRUUC8xLjEgNDA5IENvbmZsaWN0DQpDb250ZW50LUxlbmd0aDogMzcNCkNvbm5lY3Rpb246IGtlZXAtYWxpdmUNCkNvbnRlbnQtVHlwZTogYXBwbGljYXRpb24vanNvbg0KRGF0ZTogVGh1LCAyMCBNYXIgMjAyNSAxNTozMDoyOSBHTVQNClN0cmljdC1UcmFuc3BvcnQtU2VjdXJpdHk6IG1heC1hZ2U9MTU3MjQ4MDA7IGluY2x1ZGVTdWJEb21haW5zDQoNCnsibWVzc2FnZSI6InVzZXIgYWxyZWFkeSByZWdpc3RlcmVkIn0=",
+            "expected": { "httpStatusCodes": ["400", "415"], "source": "default" },
+            "jsonPointer": 4
+          },
+          {
+            "id": "9a60d656-002d-4806-acfd-4d05e79b723c",
+            "injectionKey": 2,
+            "injectionDescription": 2,
+            "injectionDescriptionParams": ["object"],
+            "curl": "curl -X 'POST' -d 'true' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 9a60d656-002d-4806-acfd-4d05e79b723c' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 5
+          },
+          {
+            "id": "142d68cf-6e13-457c-b9ef-17d7098a35ba",
+            "injectionKey": 3,
+            "injectionDescription": 3,
+            "injectionDescriptionParams": ["object"],
+            "curl": "curl -X 'POST' -d '\"HelloWorld\"' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 142d68cf-6e13-457c-b9ef-17d7098a35ba' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 5
+          },
+          {
+            "id": "45540ac7-702f-48c8-aa26-00f04520bb12",
+            "injectionKey": 4,
+            "injectionDescription": 4,
+            "injectionDescriptionParams": ["object"],
+            "curl": "curl -X 'POST' -d '1' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 45540ac7-702f-48c8-aa26-00f04520bb12' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 5
+          },
+          {
+            "id": "6b6835f2-17c8-41f6-a13b-9da5cdd13a8e",
+            "injectionKey": 5,
+            "injectionDescription": 5,
+            "injectionDescriptionParams": ["object"],
+            "curl": "curl -X 'POST' -d '3.14' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 6b6835f2-17c8-41f6-a13b-9da5cdd13a8e' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 5
+          },
+          {
+            "id": "1309b844-282c-465c-86f1-75f523ac5404",
+            "injectionKey": 6,
+            "injectionDescription": 6,
+            "injectionDescriptionParams": ["object"],
+            "curl": "curl -X 'POST' -d '[\"Hello\",\"World\",\"!\"]' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 1309b844-282c-465c-86f1-75f523ac5404' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 5
+          },
+          {
+            "id": "c77a5157-3328-4743-b680-f8fb009e1281",
+            "injectionKey": 7,
+            "injectionDescription": 7,
+            "injectionDescriptionParams": ["user"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: c77a5157-3328-4743-b680-f8fb009e1281' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 5
+          },
+          {
+            "id": "3f16c446-7026-46a8-849a-d6131653c646",
+            "injectionKey": 7,
+            "injectionDescription": 7,
+            "injectionDescriptionParams": ["pass"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 3f16c446-7026-46a8-849a-d6131653c646' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 5
+          },
+          {
+            "id": "b93d6ca9-fc28-404c-bc29-145b347c26c1",
+            "injectionKey": 7,
+            "injectionDescription": 7,
+            "injectionDescriptionParams": ["name"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: b93d6ca9-fc28-404c-bc29-145b347c26c1' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 5
+          },
+          {
+            "id": "7d51c85d-e1fc-4fe0-b35b-4f8ed447e1e6",
+            "injectionKey": 7,
+            "injectionDescription": 7,
+            "injectionDescriptionParams": ["is_admin"],
+            "apiResponseAnalysis": [{ "responseKey": 1, "responseDescription": 1 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": { "owasp2019": 0, "owasp2023": 0 },
+            "criticality": 2,
+            "requestDate": "2025-03-20T15:30:30Z",
+            "requestContentType": 1,
+            "requestBodyLength": 96,
+            "url": "https://pixigo.qa.42crunch.com/api/register",
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 7d51c85d-e1fc-4fe0-b35b-4f8ed447e1e6' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseTime": 7,
+            "responseHttpStatusCode": 409,
+            "responseContentType": 1,
+            "responseBodyLength": 37,
+            "responseBody": null,
+            "responseHttp": "SFRUUC8xLjEgNDA5IENvbmZsaWN0DQpDb250ZW50LUxlbmd0aDogMzcNCkNvbm5lY3Rpb246IGtlZXAtYWxpdmUNCkNvbnRlbnQtVHlwZTogYXBwbGljYXRpb24vanNvbg0KRGF0ZTogVGh1LCAyMCBNYXIgMjAyNSAxNTozMDozMCBHTVQNClN0cmljdC1UcmFuc3BvcnQtU2VjdXJpdHk6IG1heC1hZ2U9MTU3MjQ4MDA7IGluY2x1ZGVTdWJEb21haW5zDQoNCnsibWVzc2FnZSI6InVzZXIgYWxyZWFkeSByZWdpc3RlcmVkIn0=",
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 5
+          },
+          {
+            "id": "1c9bd15f-b77f-4951-9f2f-ea072531ac07",
+            "injectionKey": 7,
+            "injectionDescription": 7,
+            "injectionDescriptionParams": ["account_balance"],
+            "apiResponseAnalysis": [{ "responseKey": 1, "responseDescription": 1 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": { "owasp2019": 0, "owasp2023": 0 },
+            "criticality": 2,
+            "requestDate": "2025-03-20T15:30:30Z",
+            "requestContentType": 1,
+            "requestBodyLength": 90,
+            "url": "https://pixigo.qa.42crunch.com/api/register",
+            "curl": "curl -X 'POST' -d '{\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 1c9bd15f-b77f-4951-9f2f-ea072531ac07' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseTime": 6,
+            "responseHttpStatusCode": 409,
+            "responseContentType": 1,
+            "responseBodyLength": 37,
+            "responseBody": null,
+            "responseHttp": "SFRUUC8xLjEgNDA5IENvbmZsaWN0DQpDb250ZW50LUxlbmd0aDogMzcNCkNvbm5lY3Rpb246IGtlZXAtYWxpdmUNCkNvbnRlbnQtVHlwZTogYXBwbGljYXRpb24vanNvbg0KRGF0ZTogVGh1LCAyMCBNYXIgMjAyNSAxNTozMDozMCBHTVQNClN0cmljdC1UcmFuc3BvcnQtU2VjdXJpdHk6IG1heC1hZ2U9MTU3MjQ4MDA7IGluY2x1ZGVTdWJEb21haW5zDQoNCnsibWVzc2FnZSI6InVzZXIgYWxyZWFkeSByZWdpc3RlcmVkIn0=",
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 5
+          },
+          {
+            "id": "26261a1e-d2a7-4fd7-aa88-89d72a2fc204",
+            "injectionKey": 8,
+            "injectionDescription": 8,
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"additionalPropertiesScan\":\"HelloWorld\",\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 26261a1e-d2a7-4fd7-aa88-89d72a2fc204' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 5
+          },
+          {
+            "id": "ebd2caf6-6e6d-46ea-87be-ff82b8cef775",
+            "injectionKey": 2,
+            "injectionDescription": 2,
+            "injectionDescriptionParams": ["string"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":true}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: ebd2caf6-6e6d-46ea-87be-ff82b8cef775' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 6
+          },
+          {
+            "id": "b0ea992d-a858-45c4-b816-a8e53fa3579f",
+            "injectionKey": 4,
+            "injectionDescription": 4,
+            "injectionDescriptionParams": ["string"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":1}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: b0ea992d-a858-45c4-b816-a8e53fa3579f' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 6
+          },
+          {
+            "id": "6eed7a44-daba-450d-9d1e-8ca1dba6e586",
+            "injectionKey": 5,
+            "injectionDescription": 5,
+            "injectionDescriptionParams": ["string"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":3.14}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 6eed7a44-daba-450d-9d1e-8ca1dba6e586' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 6
+          },
+          {
+            "id": "2fcf5e8f-b3d0-4519-a4e9-2b92a0d4db83",
+            "injectionKey": 6,
+            "injectionDescription": 6,
+            "injectionDescriptionParams": ["string"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":[\"Hello\",\"World\",\"!\"]}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 2fcf5e8f-b3d0-4519-a4e9-2b92a0d4db83' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 6
+          },
+          {
+            "id": "12fc6c7d-fced-4677-a132-04d2a59e2380",
+            "injectionKey": 9,
+            "injectionDescription": 9,
+            "injectionDescriptionParams": ["string"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":{\"!\":\"...\",\"Hello\":\"World\"}}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 12fc6c7d-fced-4677-a132-04d2a59e2380' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 6
+          },
+          {
+            "id": "00fd972b-4625-49fd-9170-b27b5612b3d6",
+            "injectionKey": 10,
+            "injectionDescription": 10,
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\".x-6\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 00fd972b-4625-49fd-9170-b27b5612b3d6' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 6
+          },
+          {
+            "id": "a55dca62-3f1e-43e5-ab57-6c3598e2b44d",
+            "injectionKey": 11,
+            "injectionDescription": 11,
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"JPD\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: a55dca62-3f1e-43e5-ab57-6c3598e2b44d' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 6
+          },
+          {
+            "id": "0d5cd49a-14be-49a9-a227-cf462ceef230",
+            "injectionKey": 12,
+            "injectionDescription": 12,
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"DoBI6lpT5K2mvrJcw0pngBv0JrC8M0wyFwgMjbjPRUDwndnR40p\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 0d5cd49a-14be-49a9-a227-cf462ceef230' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 6
+          },
+          {
+            "id": "fdae2804-f9c6-4046-bb92-3818183e36fa",
+            "injectionKey": 2,
+            "injectionDescription": 2,
+            "injectionDescriptionParams": ["string"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":true,\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: fdae2804-f9c6-4046-bb92-3818183e36fa' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 7
+          },
+          {
+            "id": "b6593576-2293-41d5-bf80-a4a0af4702b0",
+            "injectionKey": 4,
+            "injectionDescription": 4,
+            "injectionDescriptionParams": ["string"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":1,\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: b6593576-2293-41d5-bf80-a4a0af4702b0' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 7
+          },
+          {
+            "id": "9d25b379-a044-4f92-8843-8401c6a5f26c",
+            "injectionKey": 5,
+            "injectionDescription": 5,
+            "injectionDescriptionParams": ["string"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":3.14,\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 9d25b379-a044-4f92-8843-8401c6a5f26c' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 7
+          },
+          {
+            "id": "da0cbd49-524f-4543-a133-32f51c6b2982",
+            "injectionKey": 6,
+            "injectionDescription": 6,
+            "injectionDescriptionParams": ["string"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":[\"Hello\",\"World\",\"!\"],\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: da0cbd49-524f-4543-a133-32f51c6b2982' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 7
+          },
+          {
+            "id": "e7791f00-735c-40f4-a155-3fd28854c862",
+            "injectionKey": 9,
+            "injectionDescription": 9,
+            "injectionDescriptionParams": ["string"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":{\"!\":\"...\",\"Hello\":\"World\"},\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: e7791f00-735c-40f4-a155-3fd28854c862' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 7
+          },
+          {
+            "id": "4e4dfbe5-5ea1-453c-8f28-d9c515638b4e",
+            "injectionKey": 10,
+            "injectionDescription": 10,
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\".0m~\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 4e4dfbe5-5ea1-453c-8f28-d9c515638b4e' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 7
+          },
+          {
+            "id": "4b21604e-ab5a-4c31-8b15-65beeb60ac9a",
+            "injectionKey": 11,
+            "injectionDescription": 11,
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"hbT\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 4b21604e-ab5a-4c31-8b15-65beeb60ac9a' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 7
+          },
+          {
+            "id": "2dd39a67-2fd1-431e-acc5-da13a3465f0a",
+            "injectionKey": 12,
+            "injectionDescription": 12,
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"JCsBoR1PlF39s\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 2dd39a67-2fd1-431e-acc5-da13a3465f0a' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 7
+          },
+          {
+            "id": "6c58543c-aefb-415d-91f4-ed175048d9ac",
+            "injectionKey": 4,
+            "injectionDescription": 4,
+            "injectionDescriptionParams": ["string"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":1,\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 6c58543c-aefb-415d-91f4-ed175048d9ac' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 8
+          },
+          {
+            "id": "d4c6aa8b-297a-4a64-9e61-c319e0111e02",
+            "injectionKey": 5,
+            "injectionDescription": 5,
+            "injectionDescriptionParams": ["string"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":3.14,\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: d4c6aa8b-297a-4a64-9e61-c319e0111e02' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 8
+          },
+          {
+            "id": "bf1437ea-e28b-40a3-9f08-35017071ba9b",
+            "injectionKey": 6,
+            "injectionDescription": 6,
+            "injectionDescriptionParams": ["string"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":[\"Hello\",\"World\",\"!\"],\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: bf1437ea-e28b-40a3-9f08-35017071ba9b' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 8
+          },
+          {
+            "id": "d576acbe-b3cb-4d77-9fa1-1f76111fcea1",
+            "injectionKey": 9,
+            "injectionDescription": 9,
+            "injectionDescriptionParams": ["string"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":{\"!\":\"...\",\"Hello\":\"World\"},\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: d576acbe-b3cb-4d77-9fa1-1f76111fcea1' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 8
+          },
+          {
+            "id": "a756a79e-4d4e-4428-9404-c8eccb6cf600",
+            "injectionKey": 2,
+            "injectionDescription": 2,
+            "injectionDescriptionParams": ["string"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":true,\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: a756a79e-4d4e-4428-9404-c8eccb6cf600' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 8
+          },
+          {
+            "id": "4022b795-41d0-4574-b37a-087f19e1e438",
+            "injectionKey": 10,
+            "injectionDescription": 10,
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"-ZI~l\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 4022b795-41d0-4574-b37a-087f19e1e438' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 8
+          },
+          {
+            "id": "1a557dff-669d-4370-ae33-78a4adc279b6",
+            "injectionKey": 11,
+            "injectionDescription": 11,
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"pSOk\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 1a557dff-669d-4370-ae33-78a4adc279b6' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 8
+          },
+          {
+            "id": "a20577a4-b6a6-441b-8fb0-56a6b96002f8",
+            "injectionKey": 12,
+            "injectionDescription": 12,
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":true,\"name\":\"c4AFkgUQZXmE3tkqOs5rs73Tn3ml9ZF\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: a20577a4-b6a6-441b-8fb0-56a6b96002f8' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 8
+          },
+          {
+            "id": "3893fd3e-610f-4b3c-b94b-2d524e29fa50",
+            "injectionKey": 6,
+            "injectionDescription": 6,
+            "injectionDescriptionParams": ["boolean"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":[\"Hello\",\"World\",\"!\"],\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 3893fd3e-610f-4b3c-b94b-2d524e29fa50' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 9
+          },
+          {
+            "id": "98702f17-a4dc-41e6-b417-0ee21cf7ba68",
+            "injectionKey": 9,
+            "injectionDescription": 9,
+            "injectionDescriptionParams": ["boolean"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":{\"!\":\"...\",\"Hello\":\"World\"},\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 98702f17-a4dc-41e6-b417-0ee21cf7ba68' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 9
+          },
+          {
+            "id": "1434b4a3-4bdd-4e77-8e46-93cb2c22efc0",
+            "injectionKey": 3,
+            "injectionDescription": 3,
+            "injectionDescriptionParams": ["boolean"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":\"HelloWorld\",\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 1434b4a3-4bdd-4e77-8e46-93cb2c22efc0' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 9
+          },
+          {
+            "id": "6ac843a2-4362-4257-8a70-266ada265ef4",
+            "injectionKey": 4,
+            "injectionDescription": 4,
+            "injectionDescriptionParams": ["boolean"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":1,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 6ac843a2-4362-4257-8a70-266ada265ef4' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 9
+          },
+          {
+            "id": "be3dfd0c-94ea-4750-865c-b9ab9c9c9483",
+            "injectionKey": 5,
+            "injectionDescription": 5,
+            "injectionDescriptionParams": ["boolean"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":846,\"is_admin\":3.14,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: be3dfd0c-94ea-4750-865c-b9ab9c9c9483' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 9
+          },
+          {
+            "id": "b27cf7fb-93eb-4f76-b941-a9a02126ab2f",
+            "injectionKey": 2,
+            "injectionDescription": 2,
+            "injectionDescriptionParams": ["integer"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":true,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: b27cf7fb-93eb-4f76-b941-a9a02126ab2f' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 10
+          },
+          {
+            "id": "c7f88672-b057-47bc-b8a5-0e16b02b4f42",
+            "injectionKey": 3,
+            "injectionDescription": 3,
+            "injectionDescriptionParams": ["integer"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":\"HelloWorld\",\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: c7f88672-b057-47bc-b8a5-0e16b02b4f42' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 10
+          },
+          {
+            "id": "da8f179d-0a90-4e9d-9ed1-c875d7b7f0ae",
+            "injectionKey": 5,
+            "injectionDescription": 5,
+            "injectionDescriptionParams": ["integer"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":3.14,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: da8f179d-0a90-4e9d-9ed1-c875d7b7f0ae' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 10
+          },
+          {
+            "id": "1ebaf285-1359-4e0c-b39a-d402eaf4f205",
+            "injectionKey": 6,
+            "injectionDescription": 6,
+            "injectionDescriptionParams": ["integer"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":[\"Hello\",\"World\",\"!\"],\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 1ebaf285-1359-4e0c-b39a-d402eaf4f205' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 10
+          },
+          {
+            "id": "0fad484e-2e8c-4768-a60a-3db88b05d6ba",
+            "injectionKey": 9,
+            "injectionDescription": 9,
+            "injectionDescriptionParams": ["integer"],
+            "curl": "curl -X 'POST' -d '{\"account_balance\":{\"!\":\"...\",\"Hello\":\"World\"},\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 0fad484e-2e8c-4768-a60a-3db88b05d6ba' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 10
+          },
+          {
+            "id": "24d58779-83d5-41d0-ad10-44cd72f2f68d",
+            "injectionKey": 13,
+            "injectionDescription": 13,
+            "curl": "curl -X 'POST' -d '{\"account_balance\":-1,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 24d58779-83d5-41d0-ad10-44cd72f2f68d' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 10
+          },
+          {
+            "id": "b67c4da6-1d0c-4a36-bba5-4aa50aebfa4a",
+            "injectionKey": 14,
+            "injectionDescription": 14,
+            "curl": "curl -X 'POST' -d '{\"account_balance\":1001,\"is_admin\":true,\"name\":\"\\r7JKPyvWLO\",\"pass\":\"c@EJvUe4c\",\"user\":\"MesQsejep@rX3-62rYk.YPf\"}' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: b67c4da6-1d0c-4a36-bba5-4aa50aebfa4a' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 400,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["400"], "source": "default" },
+            "jsonPointer": 10
+          }
+        ]
+      },
+      "put": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "0592e21f-0d67-418d-9416-6950e778366b",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["put"],
+            "curl": "curl -X 'PUT' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: 0592e21f-0d67-418d-9416-6950e778366b' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 3
+          }
+        ]
+      },
+      "trace": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "dc0e02a7-f013-404c-a69d-fb6f7b31df80",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["trace"],
+            "curl": "curl -X 'TRACE' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Scan-Transactionid: dc0e02a7-f013-404c-a69d-fb6f7b31df80' 'https://pixigo.qa.42crunch.com/api/register'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 3
+          }
+        ]
+      }
+    },
+    "/api/user/edit_info": {
+      "delete": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "b7a0caa8-c485-4c5f-8236-459b978b61fe",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["delete"],
+            "curl": "curl -X 'DELETE' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/user/edit_info'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 11
+          }
+        ]
+      },
+      "get": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "0be969b6-6d75-4639-85b9-815cc38e8e1e",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["get"],
+            "curl": "curl -X 'GET' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/user/edit_info'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 11
+          }
+        ]
+      },
+      "head": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "0bb93a9b-bd9b-40f0-8383-4bcc68e9c50c",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["head"],
+            "curl": "curl --head -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/user/edit_info'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 11
+          }
+        ]
+      },
+      "options": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "aff52009-d293-400f-ae65-0ed49f5ac071",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["options"],
+            "curl": "curl -X 'OPTIONS' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/user/edit_info'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 11
+          }
+        ]
+      },
+      "patch": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "bdf93566-98eb-412a-981f-86b2c7dfb6b0",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["patch"],
+            "curl": "curl -X 'PATCH' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/user/edit_info'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 11
+          }
+        ]
+      },
+      "post": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "24068a09-92b0-442b-96d8-88279683833b",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["post"],
+            "curl": "curl -X 'POST' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/user/edit_info'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 11
+          }
+        ]
+      },
+      "put": {
+        "checked": false,
+        "reason": "operation-security-not-fullfilled",
+        "skipReasonDetails": ["local security requirement in the operation is not fulfilled"],
+        "estimatedTotalRequest": 50,
+        "totalRequest": 0,
+        "totalExpected": 0,
+        "totalUnexpected": 0,
+        "totalFailure": 0
+      },
+      "trace": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "6d935739-b0ba-40b8-bbc1-47634197c462",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["trace"],
+            "curl": "curl -X 'TRACE' -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/user/edit_info'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 11
+          }
+        ]
+      }
+    },
+    "/api/user/info": {
+      "delete": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "6f9c364d-af28-4c1f-87bb-4c364660a368",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["delete"],
+            "curl": "curl -X 'DELETE' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/user/info'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 12
+          }
+        ]
+      },
+      "get": {
+        "checked": false,
+        "reason": "operation-security-not-fullfilled",
+        "skipReasonDetails": ["local security requirement in the operation is not fulfilled"],
+        "estimatedTotalRequest": 2,
+        "totalRequest": 0,
+        "totalExpected": 0,
+        "totalUnexpected": 0,
+        "totalFailure": 0
+      },
+      "head": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "ae58677e-9759-4097-9dd7-8daf04d66bd0",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["head"],
+            "curl": "curl --head -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/user/info'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 12
+          }
+        ]
+      },
+      "options": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "0e018a54-1f3a-4cee-abe5-f3c36e52154a",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["options"],
+            "curl": "curl -X 'OPTIONS' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/user/info'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 12
+          }
+        ]
+      },
+      "patch": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "60be39b6-426a-41a9-baae-e0f487b83176",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["patch"],
+            "curl": "curl -X 'PATCH' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/user/info'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 12
+          }
+        ]
+      },
+      "post": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "a41c7952-6b64-4fa1-96d5-a6c7cf17d405",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["post"],
+            "curl": "curl -X 'POST' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/user/info'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 12
+          }
+        ]
+      },
+      "put": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "8df37dbb-79a5-4c7b-983f-a3e3fccaaacd",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["put"],
+            "curl": "curl -X 'PUT' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/user/info'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 12
+          }
+        ]
+      },
+      "trace": {
+        "checked": true,
+        "estimatedTotalRequest": 1,
+        "totalRequest": 1,
+        "totalExpected": 1,
+        "totalUnexpected": 0,
+        "totalFailure": 0,
+        "issues": [
+          {
+            "id": "2baef875-d39a-47fc-81f7-cf9f4a96e80a",
+            "injectionKey": 0,
+            "injectionDescription": 0,
+            "injectionDescriptionParams": ["trace"],
+            "curl": "curl -X 'TRACE' -H 'Accept: application/json' -H 'X-Access-Token: ******' 'https://pixigo.qa.42crunch.com/api/user/info'",
+            "responseHttpStatusCode": 405,
+            "apiResponseAnalysis": [{ "responseKey": 0, "responseDescription": 0 }],
+            "owaspMapping": 0,
+            "owaspByVersionMapping": {},
+            "criticality": 0,
+            "expected": { "httpStatusCodes": ["405"], "source": "default" },
+            "jsonPointer": 12
+          }
+        ]
+      }
+    }
+  }
+}
