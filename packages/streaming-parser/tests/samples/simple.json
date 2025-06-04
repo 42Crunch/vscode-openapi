@@ -1,0 +1,15 @@
+{
+  "firfir": {
+    "ram": [{ "roo": [1, 2, 3] }],
+    "foo": "bar",
+    "baz": 123,
+    "qux": {
+      "nested": true,
+      "array": [1, 2, 3]
+    },
+    "rux": {
+      "nested": true,
+      "array": [1, 2, 3]
+    }
+  }
+}

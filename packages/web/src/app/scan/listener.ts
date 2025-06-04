@@ -30,6 +30,8 @@ export const perPage = 20;
 const listenerMiddleware = createListenerMiddleware();
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 const startAppListening = listenerMiddleware.startListening as AppStartListening;
+let times: number[] = [];
+let chunkSize = 0;
 
 /////////////////
 
@@ -216,12 +218,32 @@ export function createListener(host: Webapp["host"], routes: Routes) {
             //   console.error(`Worker sendInitDbComplete failed: ${err.error}`);
             // };
           } else {
+            chunkSize = Math.max(chunkSize, state.scan.chunkText.length);
+            const t1 = performance.now();
             processReport(done, state.scan.chunkText).then(() => {
+              const t2 = performance.now();
+              times.push(t2 - t1);
               host.postMessage({
                 command: "sendParseChunkComplete",
                 payload: { id: state.scan.chunkId },
               });
               if (done) {
+                const sum = times.reduce((x, a) => x + a, 0);
+                console.info(
+                  "Total = " +
+                    sum.toFixed(2) +
+                    ", avg = " +
+                    (sum / times.length).toFixed(2) +
+                    ", max = " +
+                    Math.max(...times).toFixed(2) +
+                    ", min = " +
+                    Math.min(...times).toFixed(2) +
+                    ", parsing calls = " +
+                    times.length +
+                    ", chunk length = " +
+                    chunkSize
+                );
+                times = [];
                 //setTimeDelta(new Date().getTime() - timeDelta);
                 const dbService = getScanv2Db();
                 dbService.getReport().then((report) => {
