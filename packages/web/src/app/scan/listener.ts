@@ -23,7 +23,11 @@ import { startNavigationListening } from "../../features/router/listener";
 import { Routes } from "../../features/router/RouterContext";
 import { PaginationResponse } from "../../json-streaming-parser/models/pagination.model";
 import { getScanv2Db } from "../../json-streaming-parser/scanv2-processor";
-import { initProcessReport, processReport } from "../../json-streaming-parser/worker";
+import {
+  initProcessReport,
+  processReport,
+  processReport2,
+} from "../../json-streaming-parser/worker";
 import { startListeners } from "../webapp";
 
 export const perPage = 20;
@@ -220,7 +224,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
           } else {
             chunkSize = Math.max(chunkSize, state.scan.chunkText.length);
             const t1 = performance.now();
-            processReport(done, state.scan.chunkText).then(() => {
+            processReport2(done, state.scan.chunkText).then(() => {
               const t2 = performance.now();
               times.push(t2 - t1);
               host.postMessage({
