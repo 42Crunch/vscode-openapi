@@ -173,11 +173,7 @@ export class IndexStore {
     }
   }
 
-  getBuckets(): string[] {
-    return Object.keys(this.contents);
-  }
-
-  onValue(bucket: string, value: string): number {
+  put(bucket: string, value: string): number {
     if (!this.contents[bucket].has(value)) {
       const index = this.contents[bucket].size;
       this.contents[bucket].set(value, index);
@@ -186,7 +182,11 @@ export class IndexStore {
     return this.contents[bucket].get(value)!;
   }
 
-  getObects(bucket: string): { id: number; value: string }[] {
+  getBuckets(): string[] {
+    return Object.keys(this.contents);
+  }
+
+  entries(bucket: string): { id: number; value: string }[] {
     const objs = new Array(this.contents[bucket].size);
     for (const [value, id] of this.contents[bucket].entries()) {
       objs[id] = { id, value };
