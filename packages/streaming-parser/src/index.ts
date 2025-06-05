@@ -2,6 +2,10 @@ import { JsonHigh } from "@xtao-org/jsonhilo";
 
 export type HandlerFunction = (value: any, matches: any) => void;
 export type ParserOptions = Record<string, HandlerFunction>;
+export type Parser = {
+  chunk(chunk: string): void;
+  end(): unknown;
+};
 
 type OptionPath = string[];
 
@@ -40,7 +44,7 @@ function parsePath(path: string): OptionPath {
   return parts;
 }
 
-export function makeParser(options: ParserOptions) {
+export function makeParser(options: ParserOptions): Parser {
   const parsedOptions = parseOptions(options);
   return makeParser2(parsedOptions, []);
 }
@@ -83,7 +87,7 @@ function getHandlers(options: ParsedOption[], path: Array<string | number>): Han
   }
 }
 
-function makeParser2(options: ParsedOption[], optionsStack: Array<ParsedOption | number>) {
+function makeParser2(options: ParsedOption[], optionsStack: Array<ParsedOption | number>): Parser {
   const ancestors: Array<Record<string, unknown> | Array<unknown>> = [{}];
   const path: Array<string | number> = ["$"];
 
@@ -158,4 +162,35 @@ function makeParser2(options: ParsedOption[], optionsStack: Array<ParsedOption |
     key,
     value,
   });
+}
+
+export class IndexStore {
+  private contents: Record<string, Map<string, number>> = {};
+
+  constructor(buckets: string[]) {
+    for (const bucket of buckets) {
+      this.contents[bucket] = new Map<string, number>();
+    }
+  }
+
+  getBuckets(): string[] {
+    return Object.keys(this.contents);
+  }
+
+  onValue(bucket: string, value: string): number {
+    if (!this.contents[bucket].has(value)) {
+      const index = this.contents[bucket].size;
+      this.contents[bucket].set(value, index);
+      return index;
+    }
+    return this.contents[bucket].get(value)!;
+  }
+
+  getObects(bucket: string): { id: number; value: string }[] {
+    const objs = new Array(this.contents[bucket].size);
+    for (const [value, id] of this.contents[bucket].entries()) {
+      objs[id] = { id, value };
+    }
+    return objs;
+  }
 }
