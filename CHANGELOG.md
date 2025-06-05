@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.35.0 (June 9, 2025)
+
+- Display email address of a freemium user in Settings
+- Fixes for GraphQL audit
+
 ## Version 4.34.0 (May 19, 2025)
 
 - Update dependencies, addressing misc CVEs
