@@ -3,36 +3,37 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import * as vscode from "vscode";
-import { parse, visit } from "graphql";
+import { Audit, Grades, ReportedIssue } from "@xliic/common/audit";
+import { Config } from "@xliic/common/config";
+import { Parsed } from "@xliic/preserving-json-yaml-parser";
+import { parse } from "graphql";
 import { execFile } from "node:child_process";
+import { readFile, writeFile } from "node:fs/promises";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { promisify } from "node:util";
-import { HttpMethod } from "@xliic/openapi";
-import { extensionQualifiedId, PendingAudits } from "../types";
+import path, { basename } from "path";
+import * as vscode from "vscode";
 import { Cache } from "../cache";
 import { Configuration, configuration } from "../configuration";
 import { ensureHasCredentials } from "../credentials";
-import { CliError, ensureCliDownloaded } from "../platform/cli-ast";
-import { PlatformStore } from "../platform/stores/platform-store";
-import { AuditWebView } from "./view";
-import { loadConfig } from "../util/config";
-import { SignUpWebView } from "../webapps/signup/view";
-import { Config } from "@xliic/common/config";
-import { createTempDirectory } from "../util/fs";
-import { writeFile, readFile, copyFile } from "node:fs/promises";
-import { homedir, tmpdir } from "node:os";
-import { dirname, join } from "node:path";
-import { Result } from "@xliic/result";
 import { fromInternalUri } from "../external-refs";
-import path, { basename } from "path";
-import { Audit, Issue, Grades, ReportedIssue } from "@xliic/common/audit";
-import { AuditContext, IssuesByDocument, MappingNode } from "../types";
-import { Parsed, find } from "@xliic/preserving-json-yaml-parser";
+import { ensureCliDownloaded } from "../platform/cli-ast";
+import { PlatformStore } from "../platform/stores/platform-store";
+import { AuditContext, IssuesByDocument, PendingAudits } from "../types";
+import { loadConfig } from "../util/config";
+import { createTempDirectory } from "../util/fs";
+import { SignUpWebView } from "../webapps/signup/view";
 import { setDecorations } from "./decoration";
 import { setAudit } from "./service";
+import { AuditWebView } from "./view";
 
 const asyncExecFile = promisify(execFile);
 const execMaxBuffer = 1024 * 1024 * 20; // 20MB
+
+const ARGUMENT_PATTERN = new RegExp("\\(.*:.*\\)$");
+const LIST_TYPE_PATTERN = new RegExp(":\\s*\\[.*]!?$");
+const SIMPLE_TYPE_PATTERN = new RegExp(":\\s*[^()\\[\\]]+$");
 
 export function registerSecurityGqlAudit(
   context: vscode.ExtensionContext,
@@ -108,7 +109,6 @@ async function securityAudit(
           );
           return;
         }
-        //}
       }
     );
 
@@ -161,22 +161,6 @@ async function runAuditWithCliBinary(
   const env: Record<string, string> = {};
 
   const args = ["graphql", "audit", "schema.graphql", "--output", "report.json"];
-
-  // if (config.platformAuthType === "anond-token") {
-  //   const anondToken = getAnondCredentials(configuration);
-  //   args.push("--token", String(anondToken));
-  // } else {
-  //   const platformConnection = await getPlatformCredentials(configuration, secrets);
-  //   if (platformConnection !== undefined) {
-  //     env["API_KEY"] = platformConnection.apiToken!;
-  //     env["PLATFORM_HOST"] = platformConnection.platformUrl;
-  //   }
-  // }
-
-  // const httpProxy = vscode.workspace.getConfiguration().get<string>("http.proxy");
-  // if (httpProxy !== undefined && httpProxy !== "") {
-  //   env["HTTPS_PROXY"] = httpProxy;
-  // }
 
   try {
     const output = await asyncExecFile(cli, args, {
@@ -269,7 +253,6 @@ async function splitReportByDocument(
     const [document, root] = files[uri];
     issues[uri] = [];
     reportedIssues.forEach((issue: ReportedIssue) => {
-      // TODO: implement here!!!
       const loc = getLocationByPointer(document, ast, issue.pointer);
       if (loc) {
         const [lineNo, range] = loc;
@@ -293,44 +276,13 @@ async function splitReportByDocument(
 
 function getLocationByPointer(
   document: vscode.TextDocument,
-  ast: any,
+  reg: any,
   pointer: string
 ): [number, vscode.Range] | undefined {
-  // "location": "Mutation.createTweet().Tweet.Author.User.avatar_url: ID",
-  // "location": "Query.Tweets()[0].Tweet.Author.User.avatar_url: ID",
-  // "location": "Mutation.deleteTweet().Tweet.Stats.Stat.views: Int",
-  // "location": "Query.Tweet().Tweet.Author.User.full_name: String",
-  // "location": "Query.Tweet(id: ID!)",
-  // "location": "Query.Tweets(): [Tweet]",
-  // "location": "Query.Notifications(): [Notification]",
-  // Query.viewerAnyAuth(accessToken.AccessTokenInput.apiKey: String)
-  // Mutation.mutationViewerAnyAuth(accessToken.AccessTokenInput.apiKey: String)
-  // Mutation.migrationsSetLfsPreference().Import.projectChoices[0].ProjectChoicesListItem.tfvcProject: String
-  // Query.reposHooks()[0].Hook.lastResponse.HookResponse.code: Int!
-  // Query.searchCode().SearchCode.items[0].CodeSearchResultItem.textMatches[0].SearchResultTextMatchesListItem.matches: [MatchesListItem]
-  // Query.searchCommits().SearchCommits.items[0].CommitSearchResultItem.parents: [ParentsListItem]!
-  // Query.appInstallations()[0].Installation.account.Account.avatarUrl: _
-  // Query.gists()[0].BaseGist.history[0]: _
-  // Mutation.pullsCreateReview(reposPullsReviewsInput.ReposPullsReviewsInput.comments: [CommentsListItemInput])
-  // Mutation.reposUpdateBranchProtection(reposBranchProtectionInput.ReposBranchProtectionInput.requiredStatusChecks.RequiredStatusChecks2Input.contexts: [String]!)
-  // Mutation.issuesUpdate(reposIssuesInput.ReposIssuesInput.labels[0]: _)
-  // Mutation.scimUpdateAttributeForUser(scimV2OrganizationsUser2Input.ScimV2OrganizationsUser2Input.operations[0].OperationsListItemInput.value: _)
-
-  const p1 = new RegExp(":\\s*\\[.*\\]$");
-  const p2 = new RegExp("\\(.*:.*\\)$");
-
-  //console.info(pointer);
-  // if (
-  //   pointer.startsWith(
-  //     "Mutation.pullsCreateReview(reposPullsReviewsInput.ReposPullsReviewsInput.comments: [CommentsListItemInput])"
-  //   )
-  // ) {
-  //   console.info("");
-  // }
-  const path: string[] = [];
   let items;
-  // Be carefull with dots inside () like Query.viewerAnyAuth(accessToken.AccessTokenInput.apiKey: String)
-  if (pointer.match(p2)) {
+
+  // Wisely split location into parts by .
+  if (pointer.match(ARGUMENT_PATTERN)) {
     const mainPtr = pointer.substring(0, pointer.lastIndexOf("("));
     const prefix = pointer.substring(pointer.lastIndexOf("("));
     items = mainPtr.split(".");
@@ -339,42 +291,20 @@ function getLocationByPointer(
     items = pointer.split(".");
   }
 
-  const cleanValue = function (value: string, valueToRemove: string): string {
-    const i = value.indexOf(valueToRemove);
-    return 0 < i ? value.substring(0, i) : value;
-  };
-
-  items.forEach((item) => {
-    item = cleanValue(item, "(");
-    item = cleanValue(item, "[");
-    item = cleanValue(item, ":");
-    path.push(item);
-    // const i = item.indexOf("(");
-    // if (0 < i) {
-    //   //const j = Math.max(item.lastIndexOf(")"), item.lastIndexOf("]"));
-    //   path.push(item.substring(0, i));
-    // } else {
-    //   const k = item.indexOf(":");
-    //   if (0 < k) {
-    //     path.push(item.substring(0, k));
-    //   } else {
-    //     path.push(item);
-    //   }
-    // }
-  });
-
+  // Find final field
   let objTypeDef = null;
   let fieldDef = null;
-  for (const item of path) {
-    if (objTypeDef && fieldDef) {
+  for (let item of items) {
+    item = cleanValue(item);
+    if (objTypeDef !== null && fieldDef !== null) {
       objTypeDef = null;
       fieldDef = null;
     }
     if (objTypeDef === null) {
-      for (const def of ast.definitions) {
-        if (def.name.value === item) {
+      for (const def of reg.definitions) {
+        // Not all definitions have name property
+        if (def.name?.value === item) {
           objTypeDef = def;
-          fieldDef = null;
           break;
         }
       }
@@ -389,50 +319,67 @@ function getLocationByPointer(
       }
     }
   }
-  let myLoc = undefined;
-  if (fieldDef) {
-    myLoc = fieldDef.name.loc;
+
+  let loc = undefined;
+  if (fieldDef !== null) {
     // Try to find more precise location
     const lastItem = items[items.length - 1];
-    if (!lastItem.includes("(") && lastItem.includes(":")) {
-      myLoc = fieldDef.type.loc;
-    } else if (lastItem.match(p1)) {
-      myLoc = fieldDef.type.type.loc;
-    } else if (lastItem.match(p2)) {
-      const listTarget = lastItem
-        .substring(lastItem.indexOf("(") + 1, lastItem.lastIndexOf(":"))
-        .trim();
-      for (const arg of fieldDef.arguments) {
-        // listTarget may be like accessToken.AccessTokenInput.apiKey or just accessToken
-        if (listTarget === arg.name.value || listTarget.startsWith(arg.name.value + ".")) {
-          myLoc = arg.type.loc;
+    if (lastItem.match(SIMPLE_TYPE_PATTERN) || lastItem.match(LIST_TYPE_PATTERN)) {
+      // id: ID or Mutation.usersAddEmailForAuthenticated()[0]: _
+      // Notifications(): [Notification] or Query.starship().Starship.coordinates: [[Float!]!]
+      loc = getTypeName(fieldDef.type).loc;
+    } else if (lastItem.match(ARGUMENT_PATTERN)) {
+      // Notifications(limit: Int) or Query.migration(exclude[0]: String)
+      let name = lastItem.substring(lastItem.indexOf("(") + 1, lastItem.lastIndexOf(":")).trim();
+      name = cleanValue2(name, "[");
+      let myValDef = null;
+      for (const valDef of fieldDef.arguments) {
+        if (name === valDef.name?.value || name.startsWith(valDef.name.value + ".")) {
+          myValDef = valDef;
           break;
         }
       }
+      if (myValDef != null) {
+        const typeName = getTypeName(myValDef.type);
+        loc = typeName.loc;
+      } else {
+        loc = fieldDef.type.loc;
+      }
+    } else {
+      loc = fieldDef.loc;
     }
-  } else if (objTypeDef) {
-    myLoc = objTypeDef.name.loc;
+  } else if (objTypeDef !== null) {
+    loc = objTypeDef.loc;
   }
 
-  // "loc": {
-  //   "start": 272,
-  //   "end": 274
-  // }
-
-  if (myLoc) {
-    const start = myLoc.start;
-    const end = myLoc.end;
-    const pos1 = document.positionAt(start);
-    //const line1 = document.lineAt(pos1.line);
-    const pos2 = document.positionAt(end);
-    //const line2 = document.lineAt(pos2.line);
-
+  if (loc) {
+    const pos1 = document.positionAt(loc.start);
+    const pos2 = document.positionAt(loc.end);
     const range = new vscode.Range(pos1, pos2);
     return [pos1.line, range];
   } else {
     console.info(`Unable to locate node: ${pointer}`);
     return undefined;
   }
+}
+
+function getTypeName(type: any) {
+  if (type.kind === "NonNullType" || type.kind === "ListType") {
+    return getTypeName(type.type);
+  } else {
+    return type;
+  }
+}
+
+function cleanValue(value: string): string {
+  value = cleanValue2(value, "(");
+  value = cleanValue2(value, "[");
+  return cleanValue2(value, ":");
+}
+
+function cleanValue2(value: string, valueToRemove: string): string {
+  const i = value.indexOf(valueToRemove);
+  return 0 < i ? value.substring(0, i) : value;
 }
 
 function processIssues(
@@ -554,19 +501,7 @@ function findIssueLocation(
   pointer: string
 ): [string, string] | undefined {
   return [mainUri.toString(), pointer];
-
-  // const node = find(root, pointer);
-  // if (node !== undefined) {
-  //   return [mainUri.toString(), pointer];
-  // } else {
-  //   const mapping = findMapping(mappings, pointer);
-  //   if (mapping && mapping.hash) {
-  //     return [mapping.uri, mapping.hash];
-  //   }
-  // }
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function getCrunchDirectory() {
   if (process.platform === "win32") {
@@ -590,11 +525,6 @@ function getCliFilename() {
   } else {
     return "42c-ast";
   }
-}
-
-function getUserAgent() {
-  const extension = vscode.extensions.getExtension(extensionQualifiedId)!;
-  return `42Crunch-VSCode/${extension.packageJSON.version}`;
 }
 
 function formatException({
