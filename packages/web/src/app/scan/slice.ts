@@ -103,7 +103,7 @@ const initialState: OasState = {
   progress: 0,
   chunkText: "",
   totalItems: 0,
-  pageIndex: 0,
+  pageIndex: 1,
   initDbStarted: false,
   // initDbStatus: undefined,
   // initDbError: "",

@@ -6,7 +6,6 @@ export function getScanv2Db(): Scanv2Db {
   return dbService;
 }
 
-// todo: fix to scanv2
 export async function initScanv2Db(dbName: string): Promise<void> {
   dbService = new Scanv2Db(dbName);
 
@@ -51,11 +50,15 @@ export function onIssue(path: number, method: string, issue: any) {
     issue,
   });
 
+  if (!issue.outcome) {
+    console.info();
+  }
+
   index.push({
     id: issueCount,
     path,
     method: methods[method],
-    criticality: issue.criticality,
+    criticality: issue.outcome.criticality,
   });
 
   issueCount++;
@@ -68,4 +71,13 @@ export async function saveIssues() {
   // Clear the issues array after saving, but keep issueCount to avoid reusing IDs
   issues.length = 0;
   index.length = 0;
+}
+
+export async function saveMetadata(scanVersion: string, summary: any) {
+  await dbService.updateMetadataItem("scanVersion", scanVersion);
+  await dbService.updateMetadataItem("summary", summary);
+}
+
+export async function addOperations(operations: any[]) {
+  await dbService.addOperations(operations);
 }

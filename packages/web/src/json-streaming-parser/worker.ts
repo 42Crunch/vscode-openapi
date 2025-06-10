@@ -1,26 +1,32 @@
 //// @ts-nocheck
 
 import { TestLogReportWithLocation } from "../app/scan/slice";
-import { makeParser } from "@xliic/streaming-parser/src/index";
-import { getScanv2Db, initScanv2Db } from "./scanv2-processor";
+import { IndexStore, makeParser, Parser } from "@xliic/streaming-parser/src/index";
+import {
+  addOperations,
+  getScanv2Db,
+  initScanv2Db,
+  onIssue,
+  onParsingEnd,
+  saveIndex,
+  saveIssues,
+  saveMetadata,
+} from "./scanv2-processor";
 
-let parser2: any;
+let parser2: Parser;
+const indexHandler = new IndexStore(["paths"]);
+let operations: any[] = [];
+let scanVersion: string;
+let summary: any;
 
 export async function initProcessReport(dbName: string): Promise<void> {
   parser2 = makeParser({
-    // "$.scanVersion.value()" do not work!!!
-    // "$.operations.*.conformanceRequestsResults.*.deep()" access to 2nd parent
-    // async todo: save into mem, bulk update
-
     "$.shallow()": (value: any) => {
-      const dbService = getScanv2Db();
-      dbService.updateMetadataItem("scanVersion", value.scanVersion);
-      //console.info("scanVersion = " + value);
+      scanVersion = value.scanVersion;
     },
 
     "$.summary.shallow()": (value: any) => {
-      const dbService = getScanv2Db();
-      dbService.updateMetadataItem("summary", value);
+      summary = value;
     },
 
     "$.operations.*.deep()": (value: any, [operationId]: [string]) => {
@@ -37,7 +43,8 @@ export async function initProcessReport(dbName: string): Promise<void> {
             method,
             testKey: res?.test?.key,
           };
-          dbService.addMethodNotAllowedIssue(issue);
+          const pathIndex = indexHandler.put("paths", path);
+          onIssue(pathIndex, method, issue);
         }
         delete op["conformanceRequestsResults"];
       }
@@ -49,7 +56,8 @@ export async function initProcessReport(dbName: string): Promise<void> {
             method,
             testKey: res?.test?.key,
           };
-          dbService.addMethodNotAllowedIssue(issue);
+          const pathIndex = indexHandler.put("paths", path);
+          onIssue(pathIndex, method, issue);
         }
         delete op["authorizationRequestsResults"];
       }
@@ -61,11 +69,12 @@ export async function initProcessReport(dbName: string): Promise<void> {
             method,
             testKey: res?.test?.key,
           };
-          dbService.addMethodNotAllowedIssue(issue);
+          const pathIndex = indexHandler.put("paths", path);
+          onIssue(pathIndex, method, issue);
         }
         delete op["customRequestsResults"];
       }
-      dbService.addOperation({
+      operations.push({
         ...op,
         operationId,
       });
@@ -90,15 +99,14 @@ export async function initProcessReport(dbName: string): Promise<void> {
       value: any,
       [path, method]: [string, string]
     ) => {
-      //console.info("mna = " + value + ", path " + path + ", method " + method);
-      const dbService = getScanv2Db();
       const issue: TestLogReportWithLocation = {
         ...value,
         path,
         method,
         testKey: value?.test?.key,
       };
-      dbService.addMethodNotAllowedIssue(issue);
+      const pathIndex = indexHandler.put("paths", path);
+      onIssue(pathIndex, method, issue);
     },
   });
 
@@ -109,10 +117,18 @@ export async function initProcessReport(dbName: string): Promise<void> {
   }
 }
 
-export function processReport2(done: boolean, value: string): void {
+export async function processReport2(done: boolean, value: string): Promise<void> {
   parser2.chunk(value as string);
   if (done) {
+    await saveIssues();
+    await saveMetadata(scanVersion, summary);
+    await addOperations(operations);
+    for (const bucket of indexHandler.getBuckets()) {
+      await saveIndex(bucket, indexHandler.entries(bucket));
+    }
     parser2.end();
+    onParsingEnd();
+    //await onEnd();
   }
 }
 

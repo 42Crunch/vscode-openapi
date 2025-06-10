@@ -19,7 +19,6 @@ export class Scanv2Db {
       pathsIndex: "id",
       metadata: ",summary, scanVersion", // tmp
       operations: "[path+method]", // tmp
-      methodNotAllowedIssues: "[path+method+testKey]", // tmp remove
     });
   }
 
@@ -45,11 +44,13 @@ export class Scanv2Db {
     await this.db.issues.clear();
     await this.db.issueIndex.clear();
     await this.db.pathsIndex.clear();
-    await this.db.responseKeysIndex.clear();
-    await this.db.responseDescriptionsIndex.clear();
-    await this.db.injectionDescriptionsIndex.clear();
-    await this.db.injectionKeysIndex.clear();
-    await this.db.jsonPointersIndex.clear();
+    await this.db.metadata.clear();
+    await this.db.operations.clear();
+    // await this.db.responseKeysIndex.clear();
+    // await this.db.responseDescriptionsIndex.clear();
+    // await this.db.injectionDescriptionsIndex.clear();
+    // await this.db.injectionKeysIndex.clear();
+    // await this.db.jsonPointersIndex.clear();
   }
 
   async bulkPutIssues(issues: { id: number; issue: any }[]): Promise<void> {
@@ -67,24 +68,24 @@ export class Scanv2Db {
       case "paths":
         await this.db.pathsIndex.bulkPut(index);
         break;
-      case "responseKeys":
-        await this.db.responseKeysIndex.bulkPut(index);
-        break;
-      case "responseDescriptions":
-        await this.db.responseDescriptionsIndex.bulkPut(index);
-        break;
-      case "injectionDescriptions":
-        await this.db.injectionDescriptionsIndex.bulkPut(index);
-        break;
-      case "injectionKeys":
-        await this.db.injectionKeysIndex.bulkPut(index);
-        break;
-      case "jsonPointers":
-        await this.db.jsonPointersIndex.bulkPut(index);
-        break;
-      case "contentTypes":
-        await this.db.contentTypesIndex.bulkPut(index);
-        break;
+      // case "responseKeys":
+      //   await this.db.responseKeysIndex.bulkPut(index);
+      //   break;
+      // case "responseDescriptions":
+      //   await this.db.responseDescriptionsIndex.bulkPut(index);
+      //   break;
+      // case "injectionDescriptions":
+      //   await this.db.injectionDescriptionsIndex.bulkPut(index);
+      //   break;
+      // case "injectionKeys":
+      //   await this.db.injectionKeysIndex.bulkPut(index);
+      //   break;
+      // case "jsonPointers":
+      //   await this.db.jsonPointersIndex.bulkPut(index);
+      //   break;
+      // case "contentTypes":
+      //   await this.db.contentTypesIndex.bulkPut(index);
+      //   break;
       default:
         throw new Error(`Unknown index name: ${indexName}`);
     }
@@ -222,10 +223,22 @@ export class Scanv2Db {
     };
   }
 
+  // todo: redesign me
   async getReport(): Promise<any> {
     const operations = await this.db.operations.toArray();
     const summary = await this.db.metadata.get(["summary"]);
     const scanVersion = await this.db.metadata.get(["scanVersion"]);
     return { operations, summary, scanVersion };
+  }
+
+  async updateMetadataItem(key: string, value: any): Promise<void> {
+    return await this.db.metadata.put(value, [key]);
+  }
+
+  // todo: use bulk later
+  async addOperations(operations: any[]): Promise<void> {
+    for (const operation of operations) {
+      await this.db.operations.add({ ...operation });
+    }
   }
 }
