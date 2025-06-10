@@ -32,7 +32,6 @@ import { loadEnv } from "../../features/env/slice";
 import { showLogMessage } from "../../features/logging/slice";
 import { loadPrefs } from "../../features/prefs/slice";
 
-import { PaginationResponse } from "../../json-streaming-parser/models/pagination.model";
 import { getScanv2Db } from "../../json-streaming-parser/scanv2-processor";
 import Paginator from "./Paginator";
 import ScanOperation from "./ScanOperation";
@@ -88,7 +87,7 @@ function App() {
             const dbService = getScanv2Db();
             dbService.getReport().then((report) => {
               const start = new Date().getTime();
-              dbService.getIssues(pageIndex, perPage).then((resp: PaginationResponse) => {
+              dbService.getIssues(pageIndex, perPage).then((resp: any) => {
                 const end = new Date().getTime();
                 console.info("### db delay " + (end - start) / 1000 + ", perPage = " + perPage);
                 dispatch(showFullScanReport2({ pageIndex, issues: resp.list, report }));

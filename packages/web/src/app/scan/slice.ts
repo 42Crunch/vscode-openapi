@@ -18,8 +18,6 @@ import {
 import { TryitOperationValues } from "@xliic/common/tryit";
 import { BundledSwaggerOrOasSpec, getOperation, HttpMethod, HttpMethods } from "@xliic/openapi";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import { initProcessReport, processReport } from "../../json-streaming-parser/worker";
-import { useAppDispatch } from "./store";
 
 export type Filter = {
   severity?: SeverityLevel;

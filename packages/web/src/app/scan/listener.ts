@@ -21,13 +21,8 @@ import { AppDispatch, RootState } from "./store";
 
 import { startNavigationListening } from "../../features/router/listener";
 import { Routes } from "../../features/router/RouterContext";
-import { PaginationResponse } from "../../json-streaming-parser/models/pagination.model";
 import { getScanv2Db } from "../../json-streaming-parser/scanv2-processor";
-import {
-  initProcessReport,
-  processReport,
-  processReport2,
-} from "../../json-streaming-parser/worker";
+import { initProcessReport, processReport2 } from "../../json-streaming-parser/worker";
 import { startListeners } from "../webapp";
 
 export const perPage = 20;
@@ -224,54 +219,51 @@ export function createListener(host: Webapp["host"], routes: Routes) {
           } else {
             chunkSize = Math.max(chunkSize, state.scan.chunkText.length);
             const t1 = performance.now();
-            processReport2(done, state.scan.chunkText).then(() => {
-              const t2 = performance.now();
-              times.push(t2 - t1);
-              host.postMessage({
-                command: "sendParseChunkComplete",
-                payload: { id: state.scan.chunkId },
-              });
-              if (done) {
-                const sum = times.reduce((x, a) => x + a, 0);
-                console.info(
-                  "Total = " +
-                    sum.toFixed(2) +
-                    ", avg = " +
-                    (sum / times.length).toFixed(2) +
-                    ", max = " +
-                    Math.max(...times).toFixed(2) +
-                    ", min = " +
-                    Math.min(...times).toFixed(2) +
-                    ", parsing calls = " +
-                    times.length +
-                    ", chunk length = " +
-                    chunkSize
-                );
-                times = [];
-                //setTimeDelta(new Date().getTime() - timeDelta);
-                const dbService = getScanv2Db();
-                dbService.getReport().then((report) => {
-                  //const start = new Date().getTime();
-                  dbService
-                    .getIssues(state.scan.pageIndex, perPage)
-                    .then((resp: PaginationResponse) => {
-                      //const end = new Date().getTime();
-                      // console.info(
-                      //   "### db delay " + (end - start) / 1000 + ", issues = " + issues.length
-                      // );
-                      //setTotalItems(resp.filteredItems);
-                      listenerApi.dispatch(setTotalItems({ size: resp.totalItems }));
-                      listenerApi.dispatch(
-                        showFullScanReport2({
-                          pageIndex: state.scan.pageIndex,
-                          issues: resp.list,
-                          report,
-                        })
-                      );
-                    });
-                });
-              }
+            processReport2(done, state.scan.chunkText);
+            const t2 = performance.now();
+            times.push(t2 - t1);
+            host.postMessage({
+              command: "sendParseChunkComplete",
+              payload: { id: state.scan.chunkId },
             });
+            if (done) {
+              const sum = times.reduce((x, a) => x + a, 0);
+              console.info(
+                "Total = " +
+                  sum.toFixed(2) +
+                  ", avg = " +
+                  (sum / times.length).toFixed(2) +
+                  ", max = " +
+                  Math.max(...times).toFixed(2) +
+                  ", min = " +
+                  Math.min(...times).toFixed(2) +
+                  ", parsing calls = " +
+                  times.length +
+                  ", chunk length = " +
+                  chunkSize
+              );
+              times = [];
+              //setTimeDelta(new Date().getTime() - timeDelta);
+              const dbService = getScanv2Db();
+              dbService.getReport().then((report) => {
+                //const start = new Date().getTime();
+                dbService.getIssues(state.scan.pageIndex, perPage).then((resp: any) => {
+                  //const end = new Date().getTime();
+                  // console.info(
+                  //   "### db delay " + (end - start) / 1000 + ", issues = " + issues.length
+                  // );
+                  //setTotalItems(resp.filteredItems);
+                  listenerApi.dispatch(setTotalItems({ size: resp.totalItems }));
+                  listenerApi.dispatch(
+                    showFullScanReport2({
+                      pageIndex: state.scan.pageIndex,
+                      issues: resp.list,
+                      report,
+                    })
+                  );
+                });
+              });
+            }
           }
         },
       }),
