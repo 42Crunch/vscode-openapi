@@ -36,6 +36,7 @@ import { getScanv2Db } from "../../json-streaming-parser/scanv2-processor";
 import Paginator from "./Paginator";
 import ScanOperation from "./ScanOperation";
 import ProgressBar from "../config/ProgressBar";
+import { ParserFieldSortOrder } from "../../json-streaming-parser/types";
 
 const routes: Routes = [
   {
@@ -87,11 +88,13 @@ function App() {
             const dbService = getScanv2Db();
             dbService.getReport().then((report) => {
               const start = new Date().getTime();
-              dbService.getIssues(pageIndex, perPage).then((resp: any) => {
-                const end = new Date().getTime();
-                console.info("### db delay " + (end - start) / 1000 + ", perPage = " + perPage);
-                dispatch(showFullScanReport2({ pageIndex, issues: resp.list, report }));
-              });
+              dbService
+                .getIssues(pageIndex, perPage, new ParserFieldSortOrder("path"))
+                .then((resp: any) => {
+                  const end = new Date().getTime();
+                  console.info("### db delay " + (end - start) / 1000 + ", perPage = " + perPage);
+                  dispatch(showFullScanReport2({ pageIndex, issues: resp.list, report }));
+                });
             });
           }}
         />

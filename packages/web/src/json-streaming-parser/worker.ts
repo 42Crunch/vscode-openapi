@@ -116,29 +116,6 @@ export function processReport2(done: boolean, value: string): void {
   }
 }
 
-// async function onEnd(): Promise<void> {
-//   return new Promise<void>(async (resolve) => {
-//     onParsingEnd();
-//     worker.postMessage({ data: "Report parsed" });
-//     resolve();
-//   });
-// }
-
-// async function onEndForScanV2(): Promise<void> {
-//   return new Promise<void>(async (resolve) => {
-//     onParsingEndForScanV2();
-//     //worker.postMessage({ data: "Report parsed" });
-//     resolve();
-//   });
-// }
-
-// async function onError(e: any): Promise<void> {
-//   return new Promise<void>(async (reject) => {
-//     await throwError(`JSON parser error: ${e.message}`);
-//     reject();
-//   });
-// }
-
 async function throwError(errorText: string): Promise<void> {
   return new Promise<void>((reject) => {
     //worker.postMessage({ error: errorText });
