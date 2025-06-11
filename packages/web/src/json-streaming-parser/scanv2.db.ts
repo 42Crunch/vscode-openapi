@@ -132,6 +132,8 @@ export class Scanv2Db {
 
     const index = await this.db.issueIndex.orderBy(orderBy).toArray();
 
+    console.log("Index length:", index.length);
+
     if (sortOrder?.order === SortOrder.Desc) {
       index.reverse();
     }

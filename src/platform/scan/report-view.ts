@@ -82,7 +82,7 @@ export class ScanReportWebView extends WebView<Webapp> {
       this.report = await readFile(this.file as string, { encoding: "utf8" });
       this.chunkId = 0;
       this.chunkOffset = 0;
-      this.chunkSize = 512 * 1024; //1024 * 1024; // 1mb Math.ceil(this.report.length / 100); // TODO: find out the best chunk size and hardoce it
+      this.chunkSize = 512 * 1024; //1024 * 1024; // 1mb Math.ceil(this.report.length / 100); // this.report.indexOf("J9Cg==") + 50;
       if (this.report.length <= this.chunkSize) {
         this.chunkSize = this.report.length;
       }

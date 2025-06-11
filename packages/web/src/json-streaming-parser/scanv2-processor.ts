@@ -22,10 +22,11 @@ export async function initScanv2Db(dbName: string): Promise<void> {
 }
 
 export function onParsingEnd(): void {
+  idsRecord = {};
+  opIdsRecord = {};
+  index.length = 0;
+  issues.length = 0;
   dbService.close();
-  Object.keys(operationIdsRecord).forEach((key) => {
-    delete operationIdsRecord[key];
-  });
 }
 
 export async function saveIndex(indexName: string, objs: { id: number; value: string }[]) {
@@ -34,7 +35,8 @@ export async function saveIndex(indexName: string, objs: { id: number; value: st
 
 const issues: { id: number; issue: any }[] = [];
 const index: { id: number; path: number; method: number; criticality: number }[] = [];
-const operationIdsRecord: Record<string, { path: string; method: string }> = {};
+
+let opIdsRecord: Record<string, { path: string; method: string }> = {};
 let idsRecord: Record<string, string> = {};
 
 const methods: Record<string, number> = {
@@ -84,27 +86,42 @@ export function onIssue(path: number, method: string, issue: any) {
 }
 
 export function onOperationId(operationId: string, path: string, method: string) {
-  operationIdsRecord[operationId] = { path, method };
+  opIdsRecord[operationId] = { path, method };
 }
 
 export async function saveIssues(indexHandler: IndexStore) {
-  for (const entry of index) {
-    // todo: use type prop in future
-    if (entry.path === -1 || entry.method === -1) {
-      const operationId = idsRecord[entry.id];
-      const { path, method } = operationIdsRecord[operationId];
-      entry.path = indexHandler.put("paths", path);
-      entry.method = methods[method];
-    }
+  if (issues.length > 0) {
+    await dbService.bulkPutIssues(issues);
+    // Clear the issues array after saving, but keep issueCount to avoid reusing IDs
+    issues.length = 0;
   }
 
-  await dbService.bulkPutIssues(issues);
-  await dbService.bulkPutIssueIndex(index);
-
-  // Clear the issues array after saving, but keep issueCount to avoid reusing IDs
-  issues.length = 0;
-  index.length = 0;
-  idsRecord = {};
+  const indexToSave: { id: number; path: number; method: number; criticality: number }[] = [];
+  for (const entry of index) {
+    if (entry.path >= 0 && entry.method >= 1) {
+      // index has all needed properties
+      indexToSave.push(entry);
+    } else {
+      // index doesn't have all needed properties, but we can find them via operationId
+      const opId = idsRecord[entry.id];
+      if (opId in opIdsRecord) {
+        const { path, method } = opIdsRecord[opId];
+        entry.path = indexHandler.put("paths", path);
+        entry.method = methods[method];
+        indexToSave.push(entry);
+      }
+    }
+  }
+  if (indexToSave.length > 0) {
+    // remove saved entries from index
+    for (const entry of indexToSave) {
+      const i = index.indexOf(entry);
+      if (i !== -1) {
+        index.splice(i, 1);
+      }
+    }
+    await dbService.bulkPutIssueIndex(indexToSave);
+  }
 }
 
 export async function saveMetadata(scanVersion: string, summary: any) {

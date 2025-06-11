@@ -73,10 +73,11 @@ export async function initProcessReport(dbName: string): Promise<void> {
 
 export async function processReport2(done: boolean, value: string): Promise<void> {
   parser.chunk(value as string);
+  await saveIssues(indexHandler);
+  await addOperations(operations);
   if (done) {
-    await saveIssues(indexHandler);
+    // metadata and buckets don't take much time to be saved in db
     await saveMetadata(scanVersion, summary);
-    await addOperations(operations);
     for (const bucket of indexHandler.getBuckets()) {
       await saveIndex(bucket, indexHandler.entries(bucket));
     }
