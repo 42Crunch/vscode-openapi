@@ -13,6 +13,7 @@ import {
   sendHttpRequest,
   setTotalItems,
   showFullScanReport2,
+  showIssuesTable,
   showJsonPointer,
   startInitDb,
   startScan,
@@ -25,8 +26,8 @@ import { getScanv2Db } from "../../json-streaming-parser/scanv2-processor";
 import { initProcessReport, processReport2 } from "../../json-streaming-parser/worker";
 import { startListeners } from "../webapp";
 import { ParserFieldSortOrder } from "../../json-streaming-parser/types";
+import { issuesPerPage } from "./table";
 
-export const perPage = 20;
 const listenerMiddleware = createListenerMiddleware();
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 const startAppListening = listenerMiddleware.startListening as AppStartListening;
@@ -244,28 +245,38 @@ export function createListener(host: Webapp["host"], routes: Routes) {
                     chunkSize
                 );
                 times = [];
-                //setTimeDelta(new Date().getTime() - timeDelta);
                 const dbService = getScanv2Db();
-                dbService.getReport().then((report) => {
-                  //const start = new Date().getTime();
-                  dbService
-                    .getIssues(state.scan.pageIndex, perPage, new ParserFieldSortOrder("path"))
-                    .then((resp: any) => {
-                      //const end = new Date().getTime();
-                      // console.info(
-                      //   "### db delay " + (end - start) / 1000 + ", issues = " + issues.length
-                      // );
-                      //setTotalItems(resp.filteredItems);
-                      listenerApi.dispatch(setTotalItems({ size: resp.totalItems }));
-                      listenerApi.dispatch(
-                        showFullScanReport2({
-                          pageIndex: state.scan.pageIndex,
-                          issues: resp.list,
-                          report,
-                        })
-                      );
-                    });
-                });
+                dbService
+                  .getIssues(1, issuesPerPage, new ParserFieldSortOrder("path"))
+                  .then((resp: any) => {
+                    listenerApi.dispatch(
+                      showIssuesTable({
+                        totalItems: resp.filteredItems,
+                        issues: resp.list,
+                      })
+                    );
+                  });
+
+                // dbService.getReport().then((report) => {
+                //   //const start = new Date().getTime();
+                //   dbService
+                //     .getIssues(state.scan.pageIndex, perPage, new ParserFieldSortOrder("path"))
+                //     .then((resp: any) => {
+                //       //const end = new Date().getTime();
+                //       // console.info(
+                //       //   "### db delay " + (end - start) / 1000 + ", issues = " + issues.length
+                //       // );
+                //       //setTotalItems(resp.filteredItems);
+                //       listenerApi.dispatch(setTotalItems({ size: resp.totalItems }));
+                //       listenerApi.dispatch(
+                //         showFullScanReport2({
+                //           pageIndex: state.scan.pageIndex,
+                //           issues: resp.list,
+                //           report,
+                //         })
+                //       );
+                //     });
+                // });
               }
             });
           }
