@@ -18,6 +18,7 @@ import {
 import { TryitOperationValues } from "@xliic/common/tryit";
 import { BundledSwaggerOrOasSpec, getOperation, HttpMethod, HttpMethods } from "@xliic/openapi";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import { ac } from "vitest/dist/chunks/reporters.d.DG9VKi4m";
 
 export type Filter = {
   severity?: SeverityLevel;
@@ -31,7 +32,8 @@ export type TestLogReportWithLocation = TestLogReport & {
   path: string;
   method?: HttpMethod;
   operationId?: string;
-  testKey?: string;
+  operation?: any;
+  type?: string;
 };
 
 export interface OasState {
@@ -103,7 +105,7 @@ const initialState: OasState = {
   progress: 0,
   chunkText: "",
   totalItems: 0,
-  pageIndex: 0,
+  pageIndex: 1,
   initDbStarted: false,
   // initDbStatus: undefined,
   // initDbError: "",
@@ -166,6 +168,14 @@ export const slice = createSlice({
       state.oas = oas;
       state.scanReport = report;
       state.waiting = false;
+    },
+
+    showIssuesTable: (
+      state,
+      action: PayloadAction<{ totalItems: number; issues: TestLogReportWithLocation[] }>
+    ) => {
+      state.issues = action.payload.issues;
+      state.totalItems = action.payload.totalItems;
     },
 
     showFullScanReport2: (
@@ -293,6 +303,7 @@ export const {
   showScanReport,
   showFullScanReport,
   showFullScanReport2,
+  showIssuesTable,
   showGeneralError,
   showHttpError,
   sendHttpRequest,

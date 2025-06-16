@@ -1,104 +1,60 @@
-//// @ts-nocheck
+import { IndexStore, makeParser, Parser } from "@xliic/streaming-parser/src/index";
+import {
+  initScanv2Db,
+  onIssue,
+  onOperation,
+  onOperationIssue,
+  onParsingEnd,
+  saveIndex,
+  saveIssueIndex,
+  saveIssues,
+  saveMetadata,
+  saveOperations,
+} from "./scanv2-processor";
 
-import { TestLogReportWithLocation } from "../app/scan/slice";
-import { makeParser } from "@xliic/streaming-parser/src/index";
-import { getScanv2Db, initScanv2Db } from "./scanv2-processor";
-
-let parser2: any;
+let parser: Parser;
+const indexHandler = new IndexStore(["paths"]);
+let scanVersion: string;
+let summary: any;
 
 export async function initProcessReport(dbName: string): Promise<void> {
-  parser2 = makeParser({
-    // "$.scanVersion.value()" do not work!!!
-    // "$.operations.*.conformanceRequestsResults.*.deep()" access to 2nd parent
-    // async todo: save into mem, bulk update
-
+  parser = makeParser({
     "$.shallow()": (value: any) => {
-      const dbService = getScanv2Db();
-      dbService.updateMetadataItem("scanVersion", value.scanVersion);
-      //console.info("scanVersion = " + value);
+      scanVersion = value.scanVersion;
     },
 
     "$.summary.shallow()": (value: any) => {
-      const dbService = getScanv2Db();
-      dbService.updateMetadataItem("summary", value);
+      summary = value;
     },
 
-    "$.operations.*.deep()": (value: any, [operationId]: [string]) => {
-      //console.info("op = " + value + ", id " + operationId);
-      const op = value;
-      const path = op.path;
-      const method = op.method;
-      const dbService = getScanv2Db();
-      if (op["conformanceRequestsResults"]) {
-        for (const res of op["conformanceRequestsResults"]) {
-          const issue: TestLogReportWithLocation = {
-            ...res,
-            path,
-            method,
-            testKey: res?.test?.key,
-          };
-          dbService.addMethodNotAllowedIssue(issue);
-        }
-        delete op["conformanceRequestsResults"];
-      }
-      if (op["authorizationRequestsResults"]) {
-        for (const res of op["authorizationRequestsResults"]) {
-          const issue: TestLogReportWithLocation = {
-            ...res,
-            path,
-            method,
-            testKey: res?.test?.key,
-          };
-          dbService.addMethodNotAllowedIssue(issue);
-        }
-        delete op["authorizationRequestsResults"];
-      }
-      if (op["customRequestsResults"]) {
-        for (const res of op["customRequestsResults"]) {
-          const issue: TestLogReportWithLocation = {
-            ...res,
-            path,
-            method,
-            testKey: res?.test?.key,
-          };
-          dbService.addMethodNotAllowedIssue(issue);
-        }
-        delete op["customRequestsResults"];
-      }
-      dbService.addOperation({
-        ...op,
-        operationId,
-      });
+    "$.operations.*.shallow()": (value: any, [operationId]: [string]) => {
+      onOperation(operationId, value);
     },
 
-    // "$.operations.*.conformanceRequestsResults.*.deep()": (
-    //   value: any,
-    //   [path, method]: [string, string]
-    // ) => {
-    //   console.info("mna = " + value + ", path " + path + ", method " + method);
-    //   // const dbService = getScanv2Db();
-    //   // const issue: TestLogReportWithLocation = {
-    //   //   ...value,
-    //   //   path,
-    //   //   method,
-    //   //   testKey: value?.test?.key,
-    //   // };
-    //   // dbService.addMethodNotAllowedIssue(issue);
-    // },
+    "$.operations.*.scenarios.*.deep()": (value: any, [operationId]: [string]) => {
+      onOperationIssue(operationId, "happyPath", value);
+    },
+
+    "$.operations.*.conformanceRequestsResults.*.deep()": (value: any, [operationId]: [string]) => {
+      onOperationIssue(operationId, "conformance", value);
+    },
+
+    "$.operations.*.authorizationRequestsResults.*.deep()": (
+      value: any,
+      [operationId]: [string]
+    ) => {
+      onOperationIssue(operationId, "authorization", value);
+    },
+
+    "$.operations.*.customRequestsResults.*.deep()": (value: any, [operationId]: [string]) => {
+      onOperationIssue(operationId, "custom", value);
+    },
 
     "$.methodNotAllowed.*.*.conformanceRequestsResults.*.deep()": (
       value: any,
       [path, method]: [string, string]
     ) => {
-      //console.info("mna = " + value + ", path " + path + ", method " + method);
-      const dbService = getScanv2Db();
-      const issue: TestLogReportWithLocation = {
-        ...value,
-        path,
-        method,
-        testKey: value?.test?.key,
-      };
-      dbService.addMethodNotAllowedIssue(issue);
+      onIssue(path, method, "methodNotAllowed", value);
     },
   });
 
@@ -109,10 +65,21 @@ export async function initProcessReport(dbName: string): Promise<void> {
   }
 }
 
-export function processReport2(done: boolean, value: string): void {
-  parser2.chunk(value as string);
+export async function processReport2(done: boolean, value: string): Promise<void> {
+  parser.chunk(value as string);
+  await saveIssues();
+  await saveOperations();
   if (done) {
-    parser2.end();
+    // Save index here as we can't assign correct path index without sorting all the paths
+    await saveIssueIndex(indexHandler);
+    // Metadata and buckets don't take much time to be saved in db
+    await saveMetadata(scanVersion, summary);
+    for (const bucket of indexHandler.getBuckets()) {
+      await saveIndex(bucket, indexHandler.entries(bucket));
+    }
+    parser.end();
+    onParsingEnd();
+    //await onEnd();
   }
 }
 

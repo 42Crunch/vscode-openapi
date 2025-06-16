@@ -16,7 +16,7 @@ export class ParserFieldSortOrder {
 export class ScanReportIntegralFilter {
   readonly path: string;
 
-  constructor({ path }: Partial<ScanReportIntegralFilter> = {}) {
+  constructor(path?: string) {
     this.path = path || "";
   }
 }

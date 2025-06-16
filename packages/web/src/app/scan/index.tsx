@@ -5,26 +5,25 @@ import { Provider } from "react-redux";
 import { Webapp } from "@xliic/common/webapp/scan";
 import { makeWebappMessageHandler } from "../webapp";
 
-import { createListener, perPage } from "./listener";
+import { createListener } from "./listener";
 import { initStore, useAppDispatch, useAppSelector } from "./store";
 
-import Router from "../../features/router/Router";
 import { RouterContext, Routes } from "../../features/router/RouterContext";
-import ThemeStyles from "../../features/theme/ThemeStyles";
-import { ThemeState, changeTheme } from "../../features/theme/slice";
+import { changeTheme, ThemeState } from "../../features/theme/slice";
 
 import {
   closeInitDb,
   parseChunk,
   scanOperation,
   showFullScanReport,
-  showFullScanReport2,
   showGeneralError,
   showHttpError,
   showHttpResponse,
+  showIssuesTable,
   showScanReport,
   startInitDb,
   startScan,
+  TestLogReportWithLocation,
 } from "./slice";
 
 import { loadConfig } from "../../features/config/slice";
@@ -33,10 +32,10 @@ import { showLogMessage } from "../../features/logging/slice";
 import { loadPrefs } from "../../features/prefs/slice";
 
 import { getScanv2Db } from "../../json-streaming-parser/scanv2-processor";
-import Paginator from "./Paginator";
+import { ParserFieldSortOrder, ScanReportIntegralFilter } from "../../json-streaming-parser/types";
 import ScanOperation from "./ScanOperation";
-import ProgressBar from "../config/ProgressBar";
-import { ParserFieldSortOrder } from "../../json-streaming-parser/types";
+import { issuesPerPage, Table, TableColumn } from "./table";
+import { SelectOption } from "../tags/SearchSelector";
 
 const routes: Routes = [
   {
@@ -73,46 +72,108 @@ const messageHandlers: Webapp["webappHandlers"] = {
 
 function App() {
   const dispatch = useAppDispatch();
-  const { totalItems, pageIndex, progress } = useAppSelector((state) => state.scan);
-  //const [dbTimeDelta, setDbTimeDelta] = useState<number>(0);
+  const { issues, totalItems } = useAppSelector((state) => state.scan);
+
+  const columns: TableColumn<TestLogReportWithLocation>[] = [
+    { header: "Method", accessor: "method", sortable: false },
+    { header: "Path", accessor: "path", sortable: true },
+    {
+      header: "Criticality",
+      accessor: "outcome",
+      render: (value) => <span className={`criticality`}>{value.criticality}</span>,
+      sortable: true,
+    },
+    {
+      header: "Type",
+      accessor: "type",
+      sortable: false,
+    },
+    {
+      header: "Operation",
+      accessor: "operation",
+      render: (value) => <span>{JSON.stringify(value)}</span>,
+      sortable: false,
+    },
+    {
+      header: "Key",
+      accessor: "test",
+      render: (value) => <span className={`testKey`}>{value.key}</span>,
+      sortable: false,
+    },
+    {
+      header: "Description",
+      accessor: "test",
+      render: (value) => <span className={`testDescription`}>{value.description}</span>,
+      sortable: false,
+    },
+  ];
+
+  const onPageChange = (
+    page: number,
+    pageSize: number,
+    sorter: ParserFieldSortOrder,
+    filter: ScanReportIntegralFilter
+  ) => {
+    const dbService = getScanv2Db();
+    dbService.getIssues(page, pageSize, sorter, "", filter).then((resp: any) => {
+      dispatch(
+        showIssuesTable({
+          totalItems: resp.filteredItems,
+          issues: resp.list,
+        })
+      );
+    });
+  };
+
+  const dbService = getScanv2Db();
+  const options: SelectOption<string>[] = [];
+  if (dbService) {
+    dbService.paths.forEach((path) => {
+      options.push({
+        id: path,
+        value: path,
+        label: path,
+      });
+    });
+  }
 
   return (
-    <>
-      {progress !== 1 && <ProgressBar label="" progress={progress} />}
-      {totalItems > 0 && (
-        <Paginator
-          totalItems={totalItems}
-          itemsPerPage={perPage}
-          onPageChange={(pageIndex) => {
-            console.info("pageIndex = " + pageIndex);
-            const dbService = getScanv2Db();
-            dbService.getReport().then((report) => {
-              const start = new Date().getTime();
-              dbService
-                .getIssues(pageIndex, perPage, new ParserFieldSortOrder("path"))
-                .then((resp: any) => {
-                  const end = new Date().getTime();
-                  console.info("### db delay " + (end - start) / 1000 + ", perPage = " + perPage);
-                  dispatch(showFullScanReport2({ pageIndex, issues: resp.list, report }));
-                });
-            });
-          }}
-        />
-      )}
-      <ThemeStyles />
-      <Router />
-    </>
+    <div className="app">
+      <Table
+        data={issues}
+        size={totalItems}
+        columns={columns}
+        onPageChange={onPageChange}
+        pageSize={issuesPerPage}
+        defaultSort={{ key: "path", direction: "asc" }}
+        options={options}
+      />
+    </div>
   );
 
   // return (
   //   <>
-  //     {chunkId >= 0 && <div>{"chunks = " + (chunkId + 1)}</div>}
-  //     {chunkSize && <div>{"chunkSize = " + chunkSize / 1024 + " KB"}</div>}
-  //     {issues && <div>{"issues  = " + issues.length}</div>}
-  //     {progress === 1.0 && timeDelta > 0 && (
-  //       <div>{"timeDelta  = " + timeDelta / 1000 + " seconds"}</div>
+  //     {progress !== 1 && <ProgressBar label="" progress={progress} />}
+  //     {totalItems > 0 && (
+  //       <Paginator
+  //         totalItems={totalItems}
+  //         itemsPerPage={perPage}
+  //         onPageChange={(pageIndex) => {
+  //           console.info("pageIndex = " + pageIndex);
+  //           const dbService = getScanv2Db();
+  //           dbService.getReport().then((report) => {
+  //             const start = new Date().getTime();
+  //             dbService
+  //               .getIssues(pageIndex, perPage, new ParserFieldSortOrder("path"))
+  //               .then((resp: any) => {
+  //                 const end = new Date().getTime();
+  //                 console.info("### db delay " + (end - start) / 1000 + ", perPage = " + perPage);
+  //                 dispatch(showFullScanReport2({ pageIndex, issues: resp.list, report }));
+  //               });
+  //           });
+  //         }}
+  //       />
   //     )}
-  //     {/* {issues.length > 0 && <ScanIssuesV2 issues={issues} />} */}
   //     <ThemeStyles />
   //     <Router />
   //   </>

@@ -9,6 +9,7 @@ import {
 export class Scanv2Db {
   private readonly dbName: string = "";
   private db: any;
+  public paths: string[];
 
   constructor(dbName: string) {
     this.dbName = dbName;
@@ -17,10 +18,10 @@ export class Scanv2Db {
       issues: "id",
       issueIndex: "id,path,criticality",
       pathsIndex: "id",
-      metadata: ",summary, scanVersion", // tmp
-      operations: "[path+method]", // tmp
-      methodNotAllowedIssues: "[path+method+testKey]", // tmp remove
+      metadata: ",summary, scanVersion",
+      operations: "id",
     });
+    this.paths = [];
   }
 
   async init(): Promise<void> {
@@ -45,11 +46,12 @@ export class Scanv2Db {
     await this.db.issues.clear();
     await this.db.issueIndex.clear();
     await this.db.pathsIndex.clear();
-    await this.db.responseKeysIndex.clear();
-    await this.db.responseDescriptionsIndex.clear();
-    await this.db.injectionDescriptionsIndex.clear();
-    await this.db.injectionKeysIndex.clear();
-    await this.db.jsonPointersIndex.clear();
+    await this.db.metadata.clear();
+    await this.db.operations.clear();
+  }
+
+  async bulkPutOperations(operation: { id: number; operation: any }[]): Promise<void> {
+    await this.db.operations.bulkPut(operation);
   }
 
   async bulkPutIssues(issues: { id: number; issue: any }[]): Promise<void> {
@@ -57,7 +59,14 @@ export class Scanv2Db {
   }
 
   async bulkPutIssueIndex(
-    index: { id: number; path: number; method: number; criticality: number }[]
+    index: {
+      id: number;
+      path: number;
+      method: number;
+      criticality: number;
+      issueType: number;
+      operation: number;
+    }[]
   ): Promise<void> {
     await this.db.issueIndex.bulkPut(index);
   }
@@ -65,25 +74,8 @@ export class Scanv2Db {
   async bulkPutIndex(indexName: string, index: { id: number; value: string }[]): Promise<void> {
     switch (indexName) {
       case "paths":
+        //index.forEach((entry) => this.paths.push(entry.value)); // this is used temp only in path dropdown ui
         await this.db.pathsIndex.bulkPut(index);
-        break;
-      case "responseKeys":
-        await this.db.responseKeysIndex.bulkPut(index);
-        break;
-      case "responseDescriptions":
-        await this.db.responseDescriptionsIndex.bulkPut(index);
-        break;
-      case "injectionDescriptions":
-        await this.db.injectionDescriptionsIndex.bulkPut(index);
-        break;
-      case "injectionKeys":
-        await this.db.injectionKeysIndex.bulkPut(index);
-        break;
-      case "jsonPointers":
-        await this.db.jsonPointersIndex.bulkPut(index);
-        break;
-      case "contentTypes":
-        await this.db.contentTypesIndex.bulkPut(index);
         break;
       default:
         throw new Error(`Unknown index name: ${indexName}`);
@@ -131,16 +123,39 @@ export class Scanv2Db {
 
     const index = await this.db.issueIndex.orderBy(orderBy).toArray();
 
+    console.log("Index length:", index.length);
+
     if (sortOrder?.order === SortOrder.Desc) {
       index.reverse();
     }
 
     console.timeEnd("Reading index");
 
+    // Test filter
+    let pathIx = undefined;
+    if (scanIssuesFilter && scanIssuesFilter.path) {
+      const pathsData = await this.db.pathsIndex.toArray();
+      for (const data of pathsData) {
+        if (data.value === scanIssuesFilter.path) {
+          pathIx = data.id;
+        }
+      }
+    }
+
     const found: any = [];
     console.time("Reading issues from index");
     for (const item of index) {
-      found.push(item);
+      // if (item.issueType === 5) {
+      //   // skip happy path issues
+      //   continue;
+      // }
+      if (pathIx === undefined) {
+        found.push(item);
+      } else {
+        if (pathIx === item.path) {
+          found.push(item);
+        }
+      }
     }
     console.timeEnd("Reading issues from index");
     console.log("found", found[0]);
@@ -202,6 +217,21 @@ export class Scanv2Db {
 
     issue.method = methods[index.method];
 
+    const issueTypes: Record<number, string> = {
+      1: "METHOD NOT ALLOWED",
+      2: "CONFORMANCE",
+      3: "AUTHORIZATION",
+      4: "CUSTOM",
+      5: "HAPPY PATH",
+    };
+
+    issue.type = issueTypes[index.issueType];
+
+    // Not sure if needed or not, but it's possible to map issue to operation and vice versa
+    // if (index.issueType === 5 && index.operation !== -1) {
+    //   issue.operation = (await this.db.operations.get(index.operation)).operation;
+    // }
+
     console.log("Issue:", issue);
 
     return issue;
@@ -222,10 +252,22 @@ export class Scanv2Db {
     };
   }
 
+  // todo: redesign me
   async getReport(): Promise<any> {
     const operations = await this.db.operations.toArray();
     const summary = await this.db.metadata.get(["summary"]);
     const scanVersion = await this.db.metadata.get(["scanVersion"]);
     return { operations, summary, scanVersion };
   }
+
+  async updateMetadataItem(key: string, value: any): Promise<void> {
+    return await this.db.metadata.put(value, [key]);
+  }
+
+  // // todo: use bulk later
+  // async addOperations(operations: any[]): Promise<void> {
+  //   for (const operation of operations) {
+  //     await this.db.operations.add({ ...operation });
+  //   }
+  // }
 }
