@@ -1,5 +1,5 @@
 import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
-import { ScanReportJSONSchema } from "./scan-report";
+// import { ScanReportJSONSchema } from "./scan-report";
 import { TryitSecurityValues } from "./tryit";
 
 export interface ScandConfiguration {
@@ -28,7 +28,6 @@ export type OasWithOperationAndConfig = {
 };
 
 export interface SingleOperationScanReport {
-  report: ScanReportJSONSchema;
   path: string;
   method: HttpMethod;
   security: TryitSecurityValues | undefined;
@@ -36,7 +35,6 @@ export interface SingleOperationScanReport {
 }
 
 export type FullScanReport = {
-  report: ScanReportJSONSchema;
   security: TryitSecurityValues | undefined;
   oas: BundledSwaggerOrOasSpec;
 };
@@ -58,11 +56,6 @@ export type ShowFullScanReportMessage = {
 export type ShowJsonPointerMessage = {
   command: "showJsonPointer";
   payload: string;
-};
-
-export type StartScanMessage = {
-  command: "startScan";
-  payload: undefined;
 };
 
 export type ScandManagerConnection = {

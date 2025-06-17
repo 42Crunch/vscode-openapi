@@ -112,7 +112,7 @@ export class ScanWebView extends WebView<Webapp> {
         const config = await loadConfig(this.configuration, this.secrets);
 
         const reportView = await this.getReportView();
-        await reportView.sendStartScan(this.target!.document);
+        await reportView.showReport(this.target!.document);
 
         return await runScan(
           this.secrets,
@@ -144,8 +144,7 @@ export class ScanWebView extends WebView<Webapp> {
         const config = await loadConfig(this.configuration, this.secrets);
 
         const reportView = await this.getReportView();
-
-        await reportView.sendStartScan(this.target!.document);
+        await reportView.showReport(this.target!.document);
 
         return await runScan(
           this.secrets,
@@ -362,9 +361,9 @@ async function runScan(
       }
 
       if (isFullScan) {
-        await reportView.showFullScanReport(result.scan, oas);
+        await reportView.showFullScanReport(result.reportFilename, oas);
       } else {
-        await reportView.showScanReport(path!, method!, result.scan, oas);
+        await reportView.showScanReport(path!, method!, result.reportFilename, oas);
       }
     } else {
       const { token, tmpApi } = await createScanconfToken(store, stringOas, scanconf, logger);

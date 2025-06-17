@@ -9,23 +9,22 @@ import { LogLevel } from "@xliic/common/logging";
 import { Preferences } from "@xliic/common/prefs";
 import { Webapp } from "@xliic/common/webapp/scan";
 import * as vscode from "vscode";
-import { parseAuditReport } from "../../audit/audit";
 import { getLocationByPointer } from "../../audit/util";
-import { AuditWebView } from "../../audit/view";
 import { Cache } from "../../cache";
 import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
-import { AuditContext, MappingNode } from "../../types";
 import { WebView } from "../../webapps/web-view";
 import { PlatformStore } from "../stores/platform-store";
 import { executeHttpRequest } from "../../webapps/http-handler";
 import { join } from "node:path";
 import { existsSync } from "../../util/fs";
-import { rmdirSync, unlinkSync } from "node:fs";
+import { rmdirSync, unlinkSync, createReadStream } from "node:fs";
 
 export class ScanReportWebView extends WebView<Webapp> {
   private document?: vscode.TextDocument;
   private temporaryReportDirectory?: string;
+  private chunksAbortController?: AbortController;
+  private chunks?: AsyncGenerator<string, void, unknown>;
 
   constructor(
     title: string,
@@ -96,6 +95,10 @@ export class ScanReportWebView extends WebView<Webapp> {
         editor.revealRange(textLine.range, vscode.TextEditorRevealType.AtTop);
       }
     },
+
+    parseChunkCompleted: async () => {
+      // TODO
+    },
   };
 
   async onStart() {
@@ -108,12 +111,6 @@ export class ScanReportWebView extends WebView<Webapp> {
       await cleanupTempScanDirectory(this.temporaryReportDirectory);
     }
     await super.onDispose();
-  }
-
-  async sendStartScan(document: vscode.TextDocument) {
-    this.document = document;
-    await this.show();
-    return this.sendRequest({ command: "startScan", payload: undefined });
   }
 
   setTemporaryReportDirectory(dir: string) {
@@ -134,33 +131,45 @@ export class ScanReportWebView extends WebView<Webapp> {
     });
   }
 
+  async showReport(document: vscode.TextDocument) {
+    this.document = document;
+    await this.show();
+  }
+
   async showScanReport(
     path: string,
     method: HttpMethod,
-    report: unknown,
+    reportFilename: string,
     oas: BundledSwaggerOrOasSpec
   ) {
+    console.log("showScanReport", path, method, reportFilename);
+    // await this.sendRequest({
+    //   command: "showScanReport",
+    //   // FIXME path and method are ignored by the UI, fix message to make 'em optionals
+    //   payload: {
+    //     path,
+    //     method,
+    //     //report: report as any,
+    //     security: undefined,
+    //     oas,
+    //   },
+    // });
+  }
+  async showFullScanReport(reportFilename: string, oas: BundledSwaggerOrOasSpec) {
     await this.sendRequest({
-      command: "showScanReport",
-      // FIXME path and method are ignored by the UI, fix message to make 'em optionals
+      command: "showFullScanReport",
       payload: {
-        path,
-        method,
-        report: report as any,
         security: undefined,
         oas,
       },
     });
-  }
-  async showFullScanReport(report: unknown, oas: BundledSwaggerOrOasSpec) {
+
+    this.chunksAbortController = new AbortController();
+    this.chunks = readFileChunks(reportFilename, 1024, this.chunksAbortController.signal);
+    const { value, done } = await this.chunks.next();
     await this.sendRequest({
-      command: "showFullScanReport",
-      // FIXME path and method are ignored by the UI, fix message to make 'em optionals
-      payload: {
-        report: report as any,
-        security: undefined,
-        oas,
-      },
+      command: "parseChunk",
+      payload: done ? null : value,
     });
   }
 
@@ -198,5 +207,34 @@ async function cleanupTempScanDirectory(dir: string) {
     rmdirSync(dir);
   } catch (ex) {
     // ignore
+  }
+}
+
+async function* readFileChunks(
+  filePath: string,
+  chunkSize = 1024,
+  signal: AbortSignal | null = null
+) {
+  const stream = createReadStream(filePath, {
+    highWaterMark: chunkSize,
+    encoding: "utf8",
+  });
+
+  // Optional: abort stream if signal is aborted
+  const abortHandler = () => {
+    stream.destroy(new Error("Aborted by user"));
+  };
+  signal?.addEventListener("abort", abortHandler);
+
+  try {
+    for await (const chunk of stream) {
+      if (signal?.aborted) {
+        break;
+      }
+      yield chunk;
+    }
+  } finally {
+    stream.destroy(); // Clean up the stream
+    signal?.removeEventListener("abort", abortHandler);
   }
 }
