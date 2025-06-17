@@ -14,13 +14,12 @@ import Router from "../../features/router/Router";
 import { RouterContext, Routes } from "../../features/router/RouterContext";
 
 import {
-  startScan,
-  scanOperation,
   showScanReport,
   showFullScanReport,
   showGeneralError,
   showHttpError,
   showHttpResponse,
+  parseChunk,
 } from "./slice";
 
 import { loadEnv } from "../../features/env/slice";
@@ -28,7 +27,7 @@ import { loadPrefs } from "../../features/prefs/slice";
 import { loadConfig } from "../../features/config/slice";
 import { showLogMessage } from "../../features/logging/slice";
 
-import ScanOperation from "./ScanOperation";
+//import ScanOperation from "./ScanOperation";
 
 const routes: Routes = [
   {
@@ -37,18 +36,16 @@ const routes: Routes = [
     navigation: false,
     element: <div />,
   },
-  {
-    id: "scan",
-    title: "Scan",
-    element: <ScanOperation />,
-    when: startScan,
-  },
+  // {
+  //   id: "scan",
+  //   title: "Scan",
+  //   element: <ScanOperation />,
+  //   when: startScan,
+  // },
 ];
 
 const messageHandlers: Webapp["webappHandlers"] = {
   changeTheme,
-  startScan,
-  scanOperation,
   showGeneralError,
   showHttpError,
   showHttpResponse,
@@ -58,6 +55,7 @@ const messageHandlers: Webapp["webappHandlers"] = {
   loadPrefs,
   loadConfig,
   showLogMessage,
+  parseChunk,
 };
 
 function App() {

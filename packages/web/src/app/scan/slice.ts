@@ -94,78 +94,50 @@ export const slice = createSlice({
   name: "scan",
   initialState,
   reducers: {
-    startScan: (state, action: PayloadAction<undefined>) => {
-      state.error = undefined;
-      state.scanReport = undefined;
-      state.waiting = true;
-      state.response = undefined;
-      state.responses = {};
-    },
-
-    scanOperation: (state, action: PayloadAction<OasWithOperationAndConfig>) => {},
-
-    runScan: (
-      state,
-      action: PayloadAction<{
-        defaultValues: TryitOperationValues;
-        scanConfigRaw: unknown;
-        env: Record<string, string>;
-        rawOas: string;
-      }>
-    ) => {
-      state.defaultValues = action.payload.defaultValues;
-      // clear potentially set scan report and the error
-      state.scanReport = undefined;
-      state.error = undefined;
-      state.waiting = true;
-      state.response = undefined;
-      state.responses = {};
-    },
-
     showScanReport: (state, action: PayloadAction<SingleOperationScanReport>) => {
-      const { oas, path, method, report } = action.payload;
+      const { oas, path, method } = action.payload;
 
-      const oasOperation = getOperation(oas, path, method);
-      const operationId =
-        oasOperation?.operationId === undefined ? `${path}:${method}` : oasOperation.operationId;
-      const operation = report.operations?.[operationId];
+      // const oasOperation = getOperation(oas, path, method);
+      // const operationId =
+      //   oasOperation?.operationId === undefined ? `${path}:${method}` : oasOperation.operationId;
+      // const operation = report.operations?.[operationId];
 
-      if (operation) {
-        state.operations[operationId] = operation;
-      }
+      // if (operation) {
+      //   state.operations[operationId] = operation;
+      // }
 
-      const issues = flattenIssues(report);
-      const filtered = filterIssues(issues, state.filter);
-      const { titles, paths, operationIds } = groupIssues(issues);
-      const { grouped } = groupIssues(filtered);
+      // const issues = flattenIssues(report);
+      // const filtered = filterIssues(issues, state.filter);
+      // const { titles, paths, operationIds } = groupIssues(issues);
+      // const { grouped } = groupIssues(filtered);
 
-      state.issues = issues;
-      state.titles = titles;
-      state.paths = paths;
-      state.operationIds = operationIds;
-      state.grouped = grouped;
-      state.oas = oas;
-      state.scanReport = report;
-      state.waiting = false;
+      // state.issues = issues;
+      // state.titles = titles;
+      // state.paths = paths;
+      // state.operationIds = operationIds;
+      // state.grouped = grouped;
+      // state.oas = oas;
+      // state.scanReport = report;
+      // state.waiting = false;
     },
 
     showFullScanReport: (state, action: PayloadAction<FullScanReport>) => {
-      const { oas, report } = action.payload;
+      const { oas } = action.payload;
 
-      const issues = flattenIssues(report);
-      const filtered = filterIssues(issues, state.filter);
-      const { titles, paths, operationIds } = groupIssues(issues);
-      const { grouped } = groupIssues(filtered);
+      // const issues = flattenIssues(report);
+      // const filtered = filterIssues(issues, state.filter);
+      // const { titles, paths, operationIds } = groupIssues(issues);
+      // const { grouped } = groupIssues(filtered);
 
-      state.oas = oas;
-      state.operations = { ...(report.operations || {}) };
-      state.issues = issues;
-      state.titles = titles;
-      state.paths = paths;
-      state.operationIds = operationIds;
-      state.grouped = grouped;
-      state.scanReport = report;
-      state.waiting = false;
+      // state.oas = oas;
+      // state.operations = { ...(report.operations || {}) };
+      // state.issues = issues;
+      // state.titles = titles;
+      // state.paths = paths;
+      // state.operationIds = operationIds;
+      // state.grouped = grouped;
+      // state.scanReport = report;
+      // state.waiting = false;
     },
 
     changeFilter: (state, action: PayloadAction<Filter>) => {
@@ -212,13 +184,12 @@ export const slice = createSlice({
     sendCurlRequest: (state, action: PayloadAction<string>) => {},
 
     showJsonPointer: (state, action: PayloadAction<string>) => {},
+    parseChunk: (state, action: PayloadAction<string | null>) => {},
+    parseChunkCompleted: (state, action: PayloadAction<{ id: number }>) => {},
   },
 });
 
 export const {
-  startScan,
-  scanOperation,
-  runScan,
   showScanReport,
   showFullScanReport,
   showGeneralError,
@@ -229,6 +200,8 @@ export const {
   showJsonPointer,
   changeTab,
   changeFilter,
+  parseChunk,
+  parseChunkCompleted,
 } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<

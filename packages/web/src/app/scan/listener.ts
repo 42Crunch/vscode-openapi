@@ -8,7 +8,7 @@ import { Webapp } from "@xliic/common/webapp/scan";
 import { AppDispatch, RootState } from "./store";
 import { showEnvWindow } from "../../features/env/slice";
 import { setSecretForSecurity, setScanServer } from "../../features/prefs/slice";
-import { sendHttpRequest, sendCurlRequest, showJsonPointer } from "./slice";
+import { sendHttpRequest, sendCurlRequest, showJsonPointer, parseChunkCompleted } from "./slice";
 
 import { startNavigationListening } from "../../features/router/listener";
 import { Routes } from "../../features/router/RouterContext";
@@ -70,6 +70,14 @@ export function createListener(host: Webapp["host"], routes: Routes) {
         actionCreator: showEnvWindow,
         effect: async (action, listenerApi) => {
           host.postMessage({ command: "showEnvWindow", payload: undefined });
+        },
+      }),
+
+    parseChunkCompleted: () =>
+      startAppListening({
+        actionCreator: parseChunkCompleted,
+        effect: async (action, listenerApi) => {
+          host.postMessage({ command: "parseChunkCompleted", payload: undefined });
         },
       }),
   };
