@@ -15,7 +15,6 @@ import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
 import { WebView } from "../../webapps/web-view";
 import { PlatformStore } from "../stores/platform-store";
-import { executeHttpRequest } from "../../webapps/http-handler";
 import { join } from "node:path";
 import { existsSync } from "../../util/fs";
 import { rmdirSync, unlinkSync, createReadStream } from "node:fs";
@@ -54,7 +53,7 @@ export class ScanReportWebView extends WebView<Webapp> {
   }
 
   hostHandlers: Webapp["hostHandlers"] = {
-    sendHttpRequest: ({ id, request, config }) => executeHttpRequest(id, request, config),
+    started: async () => {},
 
     sendCurlRequest: async (curl: string): Promise<void> => {
       return copyCurl(curl);
@@ -97,7 +96,19 @@ export class ScanReportWebView extends WebView<Webapp> {
     },
 
     parseChunkCompleted: async () => {
-      // TODO
+      if (this.chunks) {
+        const { value, done } = await this.chunks.next();
+        if (done) {
+          this.chunks = undefined;
+          this.chunksAbortController = undefined;
+        }
+        await this.sendRequest({
+          command: "parseChunk",
+          payload: done ? null : value,
+        });
+      } else {
+        console.log("last chunk");
+      }
     },
   };
 
@@ -143,18 +154,27 @@ export class ScanReportWebView extends WebView<Webapp> {
     oas: BundledSwaggerOrOasSpec
   ) {
     console.log("showScanReport", path, method, reportFilename);
-    // await this.sendRequest({
-    //   command: "showScanReport",
-    //   // FIXME path and method are ignored by the UI, fix message to make 'em optionals
-    //   payload: {
-    //     path,
-    //     method,
-    //     //report: report as any,
-    //     security: undefined,
-    //     oas,
-    //   },
-    // });
+    await this.sendRequest({
+      command: "showScanReport",
+      // FIXME path and method are ignored by the UI, fix message to make 'em optionals
+      payload: {
+        path,
+        method,
+        //report: report as any,
+        security: undefined,
+        oas,
+      },
+    });
+
+    this.chunksAbortController = new AbortController();
+    this.chunks = readFileChunks(reportFilename, 1024, this.chunksAbortController.signal);
+    const { value, done } = await this.chunks.next();
+    await this.sendRequest({
+      command: "parseChunk",
+      payload: done ? null : value,
+    });
   }
+
   async showFullScanReport(reportFilename: string, oas: BundledSwaggerOrOasSpec) {
     await this.sendRequest({
       command: "showFullScanReport",

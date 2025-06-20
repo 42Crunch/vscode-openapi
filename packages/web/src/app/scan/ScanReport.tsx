@@ -11,8 +11,7 @@ import { HappyPathCard } from "./HappyPathCard";
 export default function ScanReport() {
   const dispatch = useAppDispatch();
 
-  const { scanReport, operations, responses, errors, waitings, tab, issues, grouped } =
-    useAppSelector((state) => state.scan);
+  const { scanReport, operations, tab, happyPathsPage } = useAppSelector((state) => state.scan);
 
   if (scanReport === undefined) {
     return (
@@ -35,11 +34,12 @@ export default function ScanReport() {
           content: (
             <Summary>
               <ScanSummary
-                issues={issues as any}
+                issues={[]}
                 global={scanReport.summary}
                 scanVersion={scanReport.scanVersion}
               />
               <div style={{ fontWeight: 600, margin: "8px" }}>Happy Path Testing results</div>
+              <div>happy path results</div>
               {entries.map(([operationId, operation]) => (
                 <HappyPathCard
                   defaultCollapsed={entries.length > 1}
@@ -55,13 +55,14 @@ export default function ScanReport() {
           id: "tests",
           title: "Tests",
           content: (
-            <ScanIssues
-              issues={issues}
-              grouped={grouped}
-              responses={responses}
-              errors={errors}
-              waitings={waitings}
-            />
+            <div>scan issues</div>
+            // <ScanIssues
+            //   issues={issues}
+            //   grouped={grouped}
+            //   responses={responses}
+            //   errors={errors}
+            //   waitings={waitings}
+            // />
           ),
         },
         { id: "logs", title: "Logs", content: <LogMessages /> },

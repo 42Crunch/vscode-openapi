@@ -8,7 +8,7 @@ import {
   SingleOperationScanReport,
   FullScanReport,
 } from "@xliic/common/scan";
-import { HttpRequest, HttpResponse, HttpError, HttpConfig } from "@xliic/common/http";
+import { HttpResponse } from "@xliic/common/http";
 import { GeneralError } from "@xliic/common/error";
 import { Preferences } from "@xliic/common/prefs";
 import {
@@ -42,13 +42,10 @@ export interface OasState {
   defaultValues?: TryitOperationValues;
   scanConfig?: ScanConfig;
   scanConfigRaw?: unknown;
-  scanReport?: ScanReportJSONSchema;
+  scanReport?: { scanVersion: string; summary: ScanReportJSONSchema["summary"] };
   response?: HttpResponse;
   error?: GeneralError;
   prefs: Preferences;
-  responses: Record<string, HttpResponse>;
-  waitings: Record<string, boolean>;
-  errors: Record<string, HttpError>;
   waiting: boolean;
   filter: Filter;
   tab: "summary" | "tests" | "logs";
@@ -58,6 +55,7 @@ export interface OasState {
   titles: string[];
   paths: string[];
   operationIds: string[];
+  happyPathsPage: unknown[];
 }
 
 const initialState: OasState = {
@@ -76,9 +74,6 @@ const initialState: OasState = {
     rejectUnauthorized: true,
   },
   error: undefined,
-  responses: {},
-  waitings: {},
-  errors: {},
   waiting: true,
   filter: {},
   tab: "summary",
@@ -88,6 +83,7 @@ const initialState: OasState = {
   titles: [],
   paths: [],
   operationIds: [],
+  happyPathsPage: [],
 };
 
 export const slice = createSlice({
@@ -156,36 +152,25 @@ export const slice = createSlice({
       state.waiting = false;
     },
 
-    showHttpResponse: (
-      state,
-      { payload: { id, response } }: PayloadAction<{ id: string; response: HttpResponse }>
-    ) => {
-      state.responses[id] = response;
-      state.waitings[id] = false;
-      delete state.errors[id];
-    },
-
-    showHttpError: (
-      state,
-      { payload: { id, error } }: PayloadAction<{ id: string; error: HttpError }>
-    ) => {
-      state.errors[id] = error;
-      state.waitings[id] = false;
-      delete state.responses[id];
-    },
-
-    sendHttpRequest: (
-      state,
-      { payload: { id } }: PayloadAction<{ id: string; request: HttpRequest; config: HttpConfig }>
-    ) => {
-      state.waitings[id] = true;
-    },
-
     sendCurlRequest: (state, action: PayloadAction<string>) => {},
 
     showJsonPointer: (state, action: PayloadAction<string>) => {},
     parseChunk: (state, action: PayloadAction<string | null>) => {},
-    parseChunkCompleted: (state, action: PayloadAction<{ id: number }>) => {},
+    parseChunkCompleted: (state) => {},
+    started: (state) => {},
+    loadHappyPathPage: (state) => {},
+    happyPathPageLoaded: (state, action: PayloadAction<unknown[]>) => {
+      state.happyPathsPage = action.payload;
+      state.waiting = false;
+      state.error = undefined;
+      state.scanReport = {} as any;
+    },
+    reportLoaded: (
+      state,
+      action: PayloadAction<{ scanVersion: string; summary: ScanReportJSONSchema["summary"] }>
+    ) => {
+      state.scanReport = action.payload;
+    },
   },
 });
 
@@ -193,15 +178,16 @@ export const {
   showScanReport,
   showFullScanReport,
   showGeneralError,
-  showHttpError,
-  sendHttpRequest,
   sendCurlRequest,
-  showHttpResponse,
   showJsonPointer,
   changeTab,
   changeFilter,
   parseChunk,
   parseChunkCompleted,
+  started,
+  loadHappyPathPage,
+  happyPathPageLoaded,
+  reportLoaded,
 } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<

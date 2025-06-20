@@ -167,7 +167,7 @@ function makeParser2(options: ParsedOption[], optionsStack: Array<ParsedOption |
 export class IndexStore {
   private contents: Record<string, Map<string, number>> = {};
 
-  constructor(buckets: string[]) {
+  constructor(buckets: readonly string[]) {
     for (const bucket of buckets) {
       this.contents[bucket] = new Map<string, number>();
     }
@@ -182,6 +182,13 @@ export class IndexStore {
     return this.contents[bucket].get(value)!;
   }
 
+  get(bucket: string, value: string | undefined): number | undefined {
+    if (value === undefined) {
+      return undefined;
+    }
+    return this.contents[bucket].get(value);
+  }
+
   getBuckets(): string[] {
     return Object.keys(this.contents);
   }
@@ -192,5 +199,25 @@ export class IndexStore {
       objs[id] = { id, value };
     }
     return objs;
+  }
+}
+
+export class ObjectStore<T> {
+  private counter: number = 0;
+  private contents: { id: number; value: T }[] = [];
+
+  put(value: T): number {
+    const id = this.counter;
+    this.contents.push({ id, value });
+    this.counter++;
+    return id;
+  }
+
+  objects(): { id: number; value: T }[] {
+    return this.contents;
+  }
+
+  trim(): void {
+    this.contents.length = 0;
   }
 }
