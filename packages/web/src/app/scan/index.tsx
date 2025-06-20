@@ -8,26 +8,18 @@ import { makeWebappMessageHandler } from "../webapp";
 import { initStore } from "./store";
 import { createListener } from "./listener";
 
-import ThemeStyles from "../../features/theme/ThemeStyles";
 import { ThemeState, changeTheme } from "../../features/theme/slice";
-import Router from "../../features/router/Router";
 import { RouterContext, Routes } from "../../features/router/RouterContext";
 
-import {
-  showScanReport,
-  showFullScanReport,
-  showGeneralError,
-  showHttpError,
-  showHttpResponse,
-  parseChunk,
-} from "./slice";
+import { showScanReport, showFullScanReport, showGeneralError, parseChunk, started } from "./slice";
 
 import { loadEnv } from "../../features/env/slice";
 import { loadPrefs } from "../../features/prefs/slice";
 import { loadConfig } from "../../features/config/slice";
 import { showLogMessage } from "../../features/logging/slice";
 
-//import ScanOperation from "./ScanOperation";
+import { Application } from "./Application";
+import ScanOperation from "./ScanOperation";
 
 const routes: Routes = [
   {
@@ -36,19 +28,17 @@ const routes: Routes = [
     navigation: false,
     element: <div />,
   },
-  // {
-  //   id: "scan",
-  //   title: "Scan",
-  //   element: <ScanOperation />,
-  //   when: startScan,
-  // },
+  {
+    id: "scan",
+    title: "Scan",
+    element: <ScanOperation />,
+    when: started,
+  },
 ];
 
 const messageHandlers: Webapp["webappHandlers"] = {
   changeTheme,
   showGeneralError,
-  showHttpError,
-  showHttpResponse,
   showScanReport,
   showFullScanReport,
   loadEnv,
@@ -58,15 +48,6 @@ const messageHandlers: Webapp["webappHandlers"] = {
   parseChunk,
 };
 
-function App() {
-  return (
-    <>
-      <ThemeStyles />
-      <Router />
-    </>
-  );
-}
-
 function renderWebView(host: Webapp["host"], theme: ThemeState) {
   const store = initStore(createListener(host, routes), theme);
 
@@ -74,13 +55,15 @@ function renderWebView(host: Webapp["host"], theme: ThemeState) {
     <React.StrictMode>
       <Provider store={store}>
         <RouterContext.Provider value={routes}>
-          <App />
+          <Application />
         </RouterContext.Provider>
       </Provider>
     </React.StrictMode>
   );
 
   window.addEventListener("message", makeWebappMessageHandler(store, messageHandlers));
+
+  return { skipAutoStart: true };
 }
 
 (window as any).renderWebView = renderWebView;

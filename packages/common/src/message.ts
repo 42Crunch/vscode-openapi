@@ -11,6 +11,11 @@ export type NoopMessage = {
   payload: unknown;
 };
 
+export type StartedMessage = {
+  command: "started";
+  payload: string;
+};
+
 export type Webapp<C extends Message, P extends Message> = {
   consumes: C;
   produces: P;
