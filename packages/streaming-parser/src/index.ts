@@ -164,41 +164,46 @@ function makeParser2(options: ParsedOption[], optionsStack: Array<ParsedOption |
   });
 }
 
+export type IndexStoreIndex = { id: number };
 export class IndexStore {
-  private contents: Record<string, Map<string, number>> = {};
+  private contents: Record<string, Map<string, IndexStoreIndex>> = {};
 
   constructor(buckets: readonly string[]) {
     for (const bucket of buckets) {
-      this.contents[bucket] = new Map<string, number>();
+      this.contents[bucket] = new Map();
     }
   }
 
-  put(bucket: string, value: string): number {
+  put(bucket: string, value: string): IndexStoreIndex {
     if (!this.contents[bucket].has(value)) {
-      const index = this.contents[bucket].size;
+      const index = { id: this.contents[bucket].size };
       this.contents[bucket].set(value, index);
       return index;
     }
     return this.contents[bucket].get(value)!;
   }
 
-  get(bucket: string, value: string | undefined): number | undefined {
+  get(bucket: string, value: string | undefined): IndexStoreIndex | undefined {
     if (value === undefined) {
       return undefined;
     }
-    return this.contents[bucket].get(value);
-  }
-
-  getBuckets(): string[] {
-    return Object.keys(this.contents);
+    return this.contents[bucket].get(value)!;
   }
 
   entries(bucket: string): { id: number; value: string }[] {
     const objs = new Array(this.contents[bucket].size);
-    for (const [value, id] of this.contents[bucket].entries()) {
+    for (const [value, { id }] of this.contents[bucket].entries()) {
       objs[id] = { id, value };
     }
     return objs;
+  }
+
+  sort(name: string): void {
+    const bucket = this.contents[name];
+    const sorted = Array.from(bucket.keys()).sort();
+    for (const [index, key] of sorted.entries()) {
+      bucket.get(key)!.id = index;
+    }
   }
 }
 
@@ -218,6 +223,25 @@ export class ObjectStore<T> {
   }
 
   trim(): void {
+    this.contents.length = 0;
+  }
+}
+
+export class IndexedObjectStore<T> {
+  private contents: { index: IndexStoreIndex; value: T }[] = [];
+
+  put(value: T, index: IndexStoreIndex) {
+    this.contents.push({ index, value });
+  }
+
+  objects(): { id: number; value: T }[] {
+    return this.contents.map((item) => ({
+      id: item.index.id,
+      value: item.value,
+    }));
+  }
+
+  clear(): void {
     this.contents.length = 0;
   }
 }

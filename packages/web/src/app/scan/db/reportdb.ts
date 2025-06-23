@@ -64,8 +64,20 @@ export class ReportDb {
       issueType: number;
       operation: number;
     }[]
-  ): Promise<void> {
+  ) {
     await this.db.entryIndex.bulkPut(index);
+  }
+
+  async bulkPutOperationIndex(index: unknown[]) {
+    await this.db.operationIndex.bulkPut(index);
+  }
+
+  async bulkPutHappyPathIndex(index: unknown[]) {
+    await this.db.happyPathIndex.bulkPut(index);
+  }
+
+  async bulkPutTestIndex(index: unknown[]) {
+    await this.db.testIndex.bulkPut(index);
   }
 
   async bulkPutIndex(indexName: "path" | "operationId", index: { id: number; value: string }[]) {
