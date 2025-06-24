@@ -71,7 +71,7 @@ const Button = styled.button<{ $disabled?: boolean; $waiting?: boolean }>`
     fill: var(${ThemeColorVariables.buttonForeground});
     animation: ${rotation} 2s infinite linear;
     transition: width 0.2s linear;
-    ${({ waiting }: { disabled?: boolean; waiting?: boolean }) => !waiting && "width: 0;"}
+    ${({ $waiting }) => !$waiting && "width: 0;"}
   }
   &:disabled {
     opacity: 0.4;
