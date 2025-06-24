@@ -1,46 +1,56 @@
 import {
-  IndexStore,
   makeParser,
+  SortableIndexStore,
+  SortableIndexStoreIndex,
   ObjectStore,
   IndexedObjectStore,
   Parser,
-  IndexStoreIndex,
 } from "@xliic/streaming-parser";
 import { ReportDb } from "./reportdb";
-import { HappyPathReport, RuntimeOperationReport, TestLogReport } from "@xliic/common/scan-report";
+import {
+  GlobalSummary,
+  HappyPathReport,
+  RuntimeOperationReport,
+  TestLogReport,
+} from "@xliic/common/scan-report";
 
 export class ScanReportParser {
   private db: ReportDb;
   private parser: Parser;
 
-  private indexHandler: IndexStore;
+  private indexHandler: SortableIndexStore;
   private tests: ObjectStore<TestLogReport>;
   private happyPaths: ObjectStore<HappyPathReport>;
-  private operations: IndexedObjectStore<RuntimeOperationReport>;
+  private operations: IndexedObjectStore<RuntimeOperationReport> | null;
 
   private data: {
     scanVersion: string;
-    summary?: unknown;
+    summary: GlobalSummary | undefined;
+    stats: {
+      issues: number;
+      lowAndAbove: number;
+      criticalAndHigh: number;
+    };
 
     operationsMap: Map<
-      IndexStoreIndex,
+      SortableIndexStoreIndex,
       {
-        pathIndex: IndexStoreIndex;
+        pathIndex: SortableIndexStoreIndex;
         methodIndex: number;
       }
     >;
 
     happyPathIndex: {
       id: number;
-      operationIdIndex: IndexStoreIndex | undefined;
-      pathIndex: IndexStoreIndex | undefined;
+      operationIdIndex: SortableIndexStoreIndex;
+      pathIndex: SortableIndexStoreIndex | undefined;
       methodIndex: number | undefined;
     }[];
 
     testIndex: {
       id: number;
-      operationIdIndex: IndexStoreIndex | undefined;
-      pathIndex: IndexStoreIndex | undefined;
+      operationIdIndex: SortableIndexStoreIndex | undefined;
+      pathIndex: SortableIndexStoreIndex | undefined;
       methodIndex: number | undefined;
       criticality: number;
       testType: number;
@@ -51,17 +61,22 @@ export class ScanReportParser {
     this.db = db;
     this.parser = this.makeParser();
 
-    this.indexHandler = new IndexStore(IndexBuckets);
+    this.indexHandler = new SortableIndexStore(IndexBuckets);
     this.tests = new ObjectStore<TestLogReport>();
     this.happyPaths = new ObjectStore<HappyPathReport>();
     this.operations = new IndexedObjectStore<RuntimeOperationReport>();
 
     this.data = {
       scanVersion: "",
-      summary: {},
+      summary: undefined,
       testIndex: [],
       happyPathIndex: [],
       operationsMap: new Map(),
+      stats: {
+        issues: 0,
+        lowAndAbove: 0,
+        criticalAndHigh: 0,
+      },
     };
   }
 
@@ -77,7 +92,7 @@ export class ScanReportParser {
 
       return false;
     } else {
-      await this.db.saveOperations(this.operations.objects());
+      await this.db.saveOperations(this.operations!.objects());
 
       this.indexHandler.sort("operationId");
       this.indexHandler.sort("path");
@@ -86,44 +101,42 @@ export class ScanReportParser {
       await this.db.bulkPutIndex("path", this.indexHandler.entries("path"));
 
       // update test index with operationId and path
-      for (const entry of this.data.testIndex) {
-        if (entry.operationIdIndex !== undefined) {
-          const operation = this.data.operationsMap.get(entry.operationIdIndex)!;
-          entry.pathIndex = operation.pathIndex;
-          entry.methodIndex = operation.methodIndex;
+      for (const test of this.data.testIndex) {
+        if (test.operationIdIndex !== undefined) {
+          const operation = this.data.operationsMap.get(test.operationIdIndex)!;
+          test.pathIndex = operation.pathIndex;
+          test.methodIndex = operation.methodIndex;
         }
       }
 
       await this.db.bulkPutTestIndex(
-        this.data.testIndex.map((entry) => ({
-          id: entry.id,
-          operationIdIndex: entry.operationIdIndex?.id,
-          pathIndex: entry.pathIndex?.id,
-          methodIndex: entry.methodIndex,
-          criticality: entry.criticality,
-          testType: entry.testType,
+        this.data.testIndex.map((test) => ({
+          id: test.id,
+          operationIdIndex: test.operationIdIndex?.id,
+          pathIndex: test.pathIndex?.id,
+          methodIndex: test.methodIndex,
+          criticality: test.criticality,
+          testType: test.testType,
         }))
       );
 
       // update happy path index with path and method
-      for (const entry of this.data.happyPathIndex) {
-        if (entry.operationIdIndex !== undefined) {
-          const operation = this.data.operationsMap.get(entry.operationIdIndex)!;
-          entry.pathIndex = operation.pathIndex;
-          entry.methodIndex = operation.methodIndex;
-        }
+      for (const happyPath of this.data.happyPathIndex) {
+        const operation = this.data.operationsMap.get(happyPath.operationIdIndex)!;
+        happyPath.pathIndex = operation.pathIndex;
+        happyPath.methodIndex = operation.methodIndex;
       }
 
       await this.db.bulkPutHappyPathIndex(
-        this.data.happyPathIndex.map((entry) => ({
-          id: entry.id,
-          operationIdIndex: entry.operationIdIndex?.id,
-          pathIndex: entry.pathIndex?.id,
-          methodIndex: entry.methodIndex,
+        this.data.happyPathIndex.map((happyPath) => ({
+          id: happyPath.id,
+          operationIdIndex: happyPath.operationIdIndex.id,
+          pathIndex: happyPath.pathIndex?.id,
+          methodIndex: happyPath.methodIndex,
         }))
       );
 
-      this.operations.clear();
+      this.operations = null;
       this.data.operationsMap.clear();
       this.data.happyPathIndex.length = 0;
       this.data.testIndex.length = 0;
@@ -139,8 +152,12 @@ export class ScanReportParser {
     return this.data.scanVersion;
   }
 
-  getSummary(): unknown {
-    return this.data.summary;
+  getSummary(): GlobalSummary {
+    return this.data.summary!;
+  }
+
+  getStats() {
+    return this.data.stats;
   }
 
   makeParser(): Parser {
@@ -149,7 +166,7 @@ export class ScanReportParser {
         this.data.scanVersion = value.scanVersion;
       },
 
-      "$.summary.shallow()": (value: any) => {
+      "$.summary.deep()": (value: any) => {
         this.data.summary = value;
       },
 
@@ -165,35 +182,35 @@ export class ScanReportParser {
         value: TestLogReport,
         [operationId]: [string]
       ) => {
-        this.onTest(operationId, undefined, undefined, "conformance", value);
+        this.onTest(operationId, "conformance", value);
       },
 
       "$.operations.*.authorizationRequestsResults.*.deep()": (
         value: TestLogReport,
         [operationId]: [string]
       ) => {
-        this.onTest(operationId, undefined, undefined, "authorization", value);
+        this.onTest(operationId, "authorization", value);
       },
 
       "$.operations.*.customRequestsResults.*.deep()": (
         value: TestLogReport,
         [operationId]: [string]
       ) => {
-        this.onTest(operationId, undefined, undefined, "custom", value);
+        this.onTest(operationId, "custom", value);
       },
 
       "$.methodNotAllowed.*.*.conformanceRequestsResults.*.deep()": (
         value: TestLogReport,
         [path, method]: [string, string]
       ) => {
-        this.onTest(undefined, path, method, "methodNotAllowed", value);
+        this.onMethodNotAllowedTest(path, method, value);
       },
     });
   }
 
   onOperation(operationId: string, operation: RuntimeOperationReport) {
     const operationIdIndex = this.indexHandler.put("operationId", operationId);
-    this.operations.put(operation, operationIdIndex);
+    this.operations!.put(operation, operationIdIndex);
 
     this.data.operationsMap.set(operationIdIndex, {
       pathIndex: this.indexHandler.put("path", operation.path),
@@ -201,79 +218,50 @@ export class ScanReportParser {
     });
   }
 
-  onTest(
-    operationId: string | undefined,
-    path: string | undefined,
-    method: string | undefined,
-    testType: TestType,
-    test: TestLogReport
-  ) {
-    const operationIdIndex =
-      operationId !== undefined ? this.indexHandler.put("operationId", operationId) : undefined;
-    const pathIndex = path !== undefined ? this.indexHandler.put("path", path) : undefined;
-    const methodIndex = method !== undefined ? methods[method.toLowerCase()] : undefined;
-
-    this.data.testIndex.push({
-      id: this.tests.put(test),
-      operationIdIndex,
-      pathIndex: pathIndex,
-      methodIndex: methodIndex,
-      criticality: test.outcome?.criticality ?? -1,
-      testType: TestTypeIds[testType],
-    });
-  }
-
   onHappyPath(operationId: string, happyPath: HappyPathReport) {
-    const operationIdIndex = this.indexHandler.put("operationId", operationId);
     this.data.happyPathIndex.push({
       id: this.happyPaths.put(happyPath),
-      operationIdIndex,
+      operationIdIndex: this.indexHandler.put("operationId", operationId),
       pathIndex: undefined,
       methodIndex: undefined,
     });
   }
 
-  async saveTestIndex(indexHandler: IndexStore) {}
+  onTest(operationId: string, testType: TestType, test: TestLogReport) {
+    this.updateStats(test);
 
-  async saveEntryIndex(indexHandler: IndexStore) {
-    // // Some index contains only operationId but not path and method
-    // for (const entry of this.data.index) {
-    //   if (entry.operationId && this.data.operationsIdMap.has(entry.operationId)) {
-    //     const { path, method } = this.data.operationsIdMap.get(entry.operationId)!;
-    //     entry.path = path;
-    //     entry.method = method;
-    //   }
-    // }
-    // // Sort path ASC
-    // this.data.index.sort((a, b) => a.path.localeCompare(b.path));
-    // const indexToSave: {
-    //   id: number;
-    //   path: number;
-    //   method: number;
-    //   criticality: number;
-    //   issueType: number;
-    //   operation: number;
-    // }[] = [];
-    // for (const entry of this.data.index) {
-    //   const id = this.data.operationsIdMap.has(entry.operationId)
-    //     ? this.data.operationsIdMap.get(entry.operationId)!.id
-    //     : -1;
-    //   indexToSave.push({
-    //     id: entry.id,
-    //     path: this.indexHandler.put("paths", entry.path),
-    //     method: methods[entry.method],
-    //     criticality: entry.criticality,
-    //     issueType: entry.issueType,
-    //     operation: id,
-    //   });
-    // }
-    // await this.db.bulkPutEntryIndex(indexToSave);
-    // this.data.index.length = 0;
-    // this.data.operationsIdMap.clear();
+    this.data.testIndex.push({
+      id: this.tests.put(test),
+      operationIdIndex: this.indexHandler.put("operationId", operationId),
+      pathIndex: undefined,
+      methodIndex: undefined,
+      criticality: test.outcome?.criticality ?? -1,
+      testType: TestTypeIds[testType],
+    });
   }
 
-  async saveIndex(indexName: "path" | "operationId", objs: { id: number; value: string }[]) {
-    await this.db.bulkPutIndex(indexName, objs);
+  onMethodNotAllowedTest(path: string, method: string, test: TestLogReport) {
+    this.updateStats(test);
+
+    this.data.testIndex.push({
+      id: this.tests.put(test),
+      operationIdIndex: undefined,
+      pathIndex: this.indexHandler.put("path", path),
+      methodIndex: methods[method.toLowerCase()],
+      criticality: test.outcome?.criticality ?? -1,
+      testType: TestTypeIds["methodNotAllowed"],
+    });
+  }
+
+  updateStats(test: TestLogReport) {
+    this.data.stats.issues++;
+    const criticality = test.outcome?.criticality;
+    if (criticality !== undefined && criticality >= 1) {
+      this.data.stats.lowAndAbove++;
+    }
+    if (criticality !== undefined && criticality >= 4) {
+      this.data.stats.criticalAndHigh++;
+    }
   }
 }
 

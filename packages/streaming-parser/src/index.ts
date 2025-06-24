@@ -164,9 +164,43 @@ function makeParser2(options: ParsedOption[], optionsStack: Array<ParsedOption |
   });
 }
 
-export type IndexStoreIndex = { id: number };
+// For storing strings that arrive in a sorted order
 export class IndexStore {
-  private contents: Record<string, Map<string, IndexStoreIndex>> = {};
+  private contents: Record<string, Map<string, number>> = {};
+
+  constructor(buckets: string[]) {
+    for (const bucket of buckets) {
+      this.contents[bucket] = new Map<string, number>();
+    }
+  }
+
+  put(bucket: string, value: string): number {
+    if (!this.contents[bucket].has(value)) {
+      const index = this.contents[bucket].size;
+      this.contents[bucket].set(value, index);
+      return index;
+    }
+    return this.contents[bucket].get(value)!;
+  }
+
+  getBuckets(): string[] {
+    return Object.keys(this.contents);
+  }
+
+  entries(bucket: string): { id: number; value: string }[] {
+    const objs = new Array(this.contents[bucket].size);
+    for (const [value, id] of this.contents[bucket].entries()) {
+      objs[id] = { id, value };
+    }
+    return objs;
+  }
+}
+
+export type SortableIndexStoreIndex = { id: number };
+
+// For storing strings that arrive out of order and have to be sorted, before persisting
+export class SortableIndexStore {
+  private contents: Record<string, Map<string, SortableIndexStoreIndex>> = {};
 
   constructor(buckets: readonly string[]) {
     for (const bucket of buckets) {
@@ -174,7 +208,7 @@ export class IndexStore {
     }
   }
 
-  put(bucket: string, value: string): IndexStoreIndex {
+  put(bucket: string, value: string): SortableIndexStoreIndex {
     if (!this.contents[bucket].has(value)) {
       const index = { id: this.contents[bucket].size };
       this.contents[bucket].set(value, index);
@@ -183,7 +217,7 @@ export class IndexStore {
     return this.contents[bucket].get(value)!;
   }
 
-  get(bucket: string, value: string | undefined): IndexStoreIndex | undefined {
+  get(bucket: string, value: string | undefined): SortableIndexStoreIndex | undefined {
     if (value === undefined) {
       return undefined;
     }
@@ -207,6 +241,9 @@ export class IndexStore {
   }
 }
 
+// For storing objects with an auto-incrementing numeric IDs
+// Can be trimmed to free up memory, preserving ID sequence so that
+// new objects can continue to be added with the same ID sequence.
 export class ObjectStore<T> {
   private counter: number = 0;
   private contents: { id: number; value: T }[] = [];
@@ -227,10 +264,11 @@ export class ObjectStore<T> {
   }
 }
 
+// For storing objects string primary keys that are stored SortableIndexStore
 export class IndexedObjectStore<T> {
-  private contents: { index: IndexStoreIndex; value: T }[] = [];
+  private contents: { index: SortableIndexStoreIndex; value: T }[] = [];
 
-  put(value: T, index: IndexStoreIndex) {
+  put(value: T, index: SortableIndexStoreIndex) {
     this.contents.push({ index, value });
   }
 
@@ -239,9 +277,5 @@ export class IndexedObjectStore<T> {
       id: item.index.id,
       value: item.value,
     }));
-  }
-
-  clear(): void {
-    this.contents.length = 0;
   }
 }

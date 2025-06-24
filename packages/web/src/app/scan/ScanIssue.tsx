@@ -8,27 +8,15 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { ExclamationCircle, Check, AngleDown, AngleUp } from "../../icons";
 import CurlRequest from "./CurlRequest";
 import Response from "../../components/response/Response";
-import { showJsonPointer } from "./slice";
+import { showJsonPointer, State } from "./slice";
 import { safeParseResponse } from "../../http-parser";
 import { useAppDispatch } from "./store";
 
-export default function ScanIssue({
-  issue,
-  httpResponse,
-  error,
-  id,
-  waiting,
-}: {
-  issue: TestLogReport;
-  httpResponse: HttpResponse | undefined;
-  error: HttpError | undefined;
-  id: string;
-  waiting: boolean;
-}) {
+export default function ScanIssue({ issue }: { issue: State["testsPage"][number] }) {
   const dispatch = useAppDispatch();
 
   const [collapsed, setCollapsed] = useState(true);
-  const { request, response, test, outcome } = issue;
+  const { request, response, test, outcome } = issue.test;
 
   const responseCodeExpected = outcome?.status === "correct";
   const conformsToContract = outcome?.conformant;
@@ -207,28 +195,8 @@ export default function ScanIssue({
                 <Item>
                   <div>Request</div>
                   <div>
-                    <CurlRequest waiting={waiting} curl={request.curl} id={id} />
+                    <CurlRequest curl={request.curl} />
                   </div>
-                </Item>
-              )}
-              {error === undefined &&
-                (httpResponse !== undefined || response?.rawPayload !== undefined) && (
-                  <Item>
-                    <div>Response</div>
-                    <div>
-                      <Response
-                        accented
-                        response={
-                          httpResponse ? httpResponse : safeParseResponse(response?.rawPayload)
-                        }
-                      />
-                    </div>
-                  </Item>
-                )}
-              {error && (
-                <Item>
-                  <div>Error</div>
-                  <div>{error?.message}</div>
                 </Item>
               )}
             </>

@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 import { useAppDispatch, useAppSelector } from "./store";
 import LogMessages from "../../features/logging/LogMessages";
-import { OasState, changeTab } from "./slice";
+import { State, changeTab } from "./slice";
 import { ScanSummary } from "./ScanSummary";
 import ScanIssues from "./ScanIssues";
 import { TabContainer } from "../../new-components/Tabs";
@@ -11,7 +11,7 @@ import { HappyPathCard } from "./HappyPathCard";
 export default function ScanReport() {
   const dispatch = useAppDispatch();
 
-  const { scanReport, operations, tab, happyPathsPage } = useAppSelector((state) => state.scan);
+  const { scanReport, tab, happyPathPage } = useAppSelector((state) => state.scan);
 
   if (scanReport === undefined) {
     return (
@@ -21,32 +21,21 @@ export default function ScanReport() {
     );
   }
 
-  const entries = Object.entries(operations);
-
   return (
     <TabContainer
       activeTab={tab}
-      setActiveTab={(tab) => dispatch(changeTab(tab as OasState["tab"]))}
+      setActiveTab={(tab) => dispatch(changeTab(tab as State["tab"]))}
       tabs={[
         {
           id: "summary",
           title: "Summary",
           content: (
             <Summary>
-              <ScanSummary
-                issues={[]}
-                global={scanReport.summary}
-                scanVersion={scanReport.scanVersion}
-              />
+              <ScanSummary report={scanReport} />
               <div style={{ fontWeight: 600, margin: "8px" }}>Happy Path Testing results</div>
-              <div>happy path results</div>
-              {entries.map(([operationId, operation]) => (
-                <HappyPathCard
-                  defaultCollapsed={entries.length > 1}
-                  operationId={operationId}
-                  operation={operation}
-                  key={operationId}
-                />
+
+              {happyPathPage.map((entry, index) => (
+                <HappyPathCard defaultCollapsed={true} report={entry} key={index} />
               ))}
             </Summary>
           ),
@@ -54,16 +43,7 @@ export default function ScanReport() {
         {
           id: "tests",
           title: "Tests",
-          content: (
-            <div>scan issues</div>
-            // <ScanIssues
-            //   issues={issues}
-            //   grouped={grouped}
-            //   responses={responses}
-            //   errors={errors}
-            //   waitings={waitings}
-            // />
-          ),
+          content: <ScanIssues />,
         },
         { id: "logs", title: "Logs", content: <LogMessages /> },
       ]}

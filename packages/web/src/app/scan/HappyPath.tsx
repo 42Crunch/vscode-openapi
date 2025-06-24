@@ -4,17 +4,10 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import Response from "../../components/response/Response";
 import { safeParseResponse } from "../../http-parser";
 import CurlRequest from "./CurlRequest";
-import { RuntimeOperationReport } from "@xliic/common/scan-report";
+import { HappyPathReport } from "@xliic/common/scan-report";
 
-export function HappyPath({ operation }: { operation: RuntimeOperationReport }) {
-  const scenario = operation.scenarios?.[0];
-
-  if (scenario === undefined) {
-    const reason = operation.reason || "unknown";
-    return <Failed>Happy path failed, reason: {reason}</Failed>;
-  }
-
-  const { request, response, outcome, happyPath } = scenario;
+export function HappyPath({ report }: { report: HappyPathReport }) {
+  const { request, response, outcome, happyPath } = report;
 
   let responsePayloadMatchesContract = "N/A";
 
@@ -67,7 +60,7 @@ export function HappyPath({ operation }: { operation: RuntimeOperationReport }) 
         <Item>
           <div>Request</div>
           <div>
-            <CurlRequest curl={request?.curl} id={"happy-path"} waiting={false} />
+            <CurlRequest curl={request?.curl} />
           </div>
         </Item>
       )}

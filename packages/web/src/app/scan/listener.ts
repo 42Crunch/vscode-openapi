@@ -17,6 +17,8 @@ import {
   loadHappyPathPage,
   happyPathPageLoaded,
   reportLoaded,
+  loadTestsPage,
+  testsPageLoaded,
 } from "./slice";
 
 import { startNavigationListening } from "../../features/router/listener";
@@ -42,6 +44,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
         listenerApi.dispatch(parseChunkCompleted());
         if (completed) {
           listenerApi.dispatch(loadHappyPathPage());
+          listenerApi.dispatch(loadTestsPage());
         }
       },
     });
@@ -52,13 +55,24 @@ export function createListener(host: Webapp["host"], routes: Routes) {
       effect: async (action, listenerApi) => {
         console.log("loadHappyPathPage");
         const happyPaths = await reportDb.getHappyPaths(0, 10, undefined);
-        listenerApi.dispatch(happyPathPageLoaded(happyPaths.page));
+        listenerApi.dispatch(happyPathPageLoaded(happyPaths.page as any));
         listenerApi.dispatch(
           reportLoaded({
             scanVersion: parser.getScanVersion(),
-            summary: parser.getSummary() as any,
+            summary: parser.getSummary(),
+            stats: parser.getStats(),
           })
         );
+      },
+    });
+
+  const onLoadTestsPage = () =>
+    startAppListening({
+      actionCreator: loadTestsPage,
+      effect: async (action, listenerApi) => {
+        console.log("loadTestsPage");
+        const tests = await reportDb.getTests(0, 10, undefined);
+        listenerApi.dispatch(testsPageLoaded(tests.page as any));
       },
     });
 
@@ -124,7 +138,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
   };
 
   startNavigationListening(startAppListening, routes);
-  startListeners({ ...listeners, onParseChunk, onLoadHappyPathPage });
+  startListeners({ ...listeners, onParseChunk, onLoadHappyPathPage, onLoadTestsPage });
 
   return listenerMiddleware;
 }

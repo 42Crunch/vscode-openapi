@@ -12,8 +12,8 @@ export class ReportDb {
       test: "id",
       happyPath: "id",
       operation: "id",
-      testIndex: "id,path,criticality",
-      happyPathIndex: "id",
+      testIndex: "id,pathIndex,criticality",
+      happyPathIndex: "id,pathIndex",
       pathIndex: "id",
       operationIdIndex: "id",
     });
@@ -21,6 +21,11 @@ export class ReportDb {
   }
 
   async initDb() {
+    try {
+      await Dexie.delete(this.name);
+    } catch (error) {
+      console.error("Error deleting database:", error);
+    }
     await this.db.open();
 
     await this.db.test.clear();
@@ -105,13 +110,11 @@ export class ReportDb {
     pageSize: number,
     sort: { fieldName: string; order?: "asc" | "desc" } | undefined
   ): Promise<{ page: unknown[] }> {
-    const index = await this.readIndex(sort);
+    const index = await this.readHappyPathIndex(sort);
 
     const found: any = [];
     for (const item of index) {
-      if (item.issueType === 5) {
-        found.push(item);
-      }
+      found.push(item);
     }
 
     const indexPage = paginate(found, pageIndex, pageSize);
@@ -120,67 +123,86 @@ export class ReportDb {
     const page: unknown[] = [];
 
     for (const index of indexPage) {
-      const data = await this.db.entries.get(index.id);
-      const fullEntry = await this.makeFullEntry(data.entry, index);
-      page.push(fullEntry);
+      const data = await this.db.happyPath.get(index.id);
+      const operation = await this.db.operation.get(index.operationIdIndex);
+      const operationId = await this.db.operationIdIndex.get(index.operationIdIndex);
+      page.push({
+        operationId: operationId!.value,
+        operation: operation.value,
+        report: data.value,
+      });
     }
-
-    console.log("Full page:", page);
 
     return {
       page,
     };
   }
 
-  async getIssues(
+  async getTests(
     pageIndex: number,
     pageSize: number,
     sort: { fieldName: string; order?: "asc" | "desc" } | undefined
   ): Promise<{ page: unknown[] }> {
-    console.time("Reading index");
-
-    const index = await this.readIndex(sort);
-
-    console.timeEnd("Reading index");
+    const index = await this.readTestIndex(sort);
 
     const found: any = [];
-    console.time("Reading issues from index");
     for (const item of index) {
       found.push(item);
     }
-    console.timeEnd("Reading issues from index");
-    console.log("found", found[0]);
 
-    console.log("Paginating issues", pageIndex, pageSize);
+    console.log("found", found);
+
     const indexPage = paginate(found, pageIndex, pageSize);
     const pagesCount = Math.ceil(found.length / pageSize);
 
     const page: unknown[] = [];
 
-    console.log("Reading issues from index page", indexPage, found);
-
     for (const index of indexPage) {
-      try {
-        const data = await this.db.issues.get(index.id);
-        console.log("reading issue:", index.id, data);
-        const fullIssue = await this.makeFullEntry(data.issue, index);
-        page.push(fullIssue);
-      } catch (error) {
-        console.error("Error reading issue:", index.id, error);
-      }
-    }
+      const data = await this.db.test.get(index.id);
+      const operation =
+        index.operationIdIndex !== undefined
+          ? await this.db.operation.get(index.operationIdIndex)
+          : undefined;
+      const operationId =
+        index.operationIdIndex !== undefined
+          ? await this.db.operationIdIndex.get(index.operationIdIndex)
+          : undefined;
 
-    console.log("Full page:", page);
+      const path =
+        index.pathIndex !== undefined ? await this.db.pathIndex.get(index.pathIndex) : undefined;
+
+      page.push({
+        operationId: operationId?.value,
+        operation: operation?.value,
+        path: path?.value,
+        method: "FOO",
+        test: data.value,
+      });
+    }
 
     return {
       page,
     };
   }
 
-  private async readIndex(sort: { fieldName: string; order?: "asc" | "desc" } | undefined) {
-    const orderBy = sort?.fieldName || "path";
+  private async readHappyPathIndex(
+    sort: { fieldName: string; order?: "asc" | "desc" } | undefined
+  ) {
+    const orderBy = sort?.fieldName || "pathIndex";
 
-    const index = await this.db.issueIndex.orderBy(orderBy).toArray();
+    const index = await this.db.happyPathIndex.orderBy(orderBy).toArray();
+
+    if (sort?.order === "desc") {
+      index.reverse();
+    }
+
+    return index;
+  }
+
+  private async readTestIndex(sort: { fieldName: string; order?: "asc" | "desc" } | undefined) {
+    const orderBy = sort?.fieldName || "pathIndex";
+
+    const index = await this.db.testIndex.orderBy(orderBy).toArray();
 
     if (sort?.order === "desc") {
       index.reverse();

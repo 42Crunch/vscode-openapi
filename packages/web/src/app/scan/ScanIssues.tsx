@@ -7,20 +7,12 @@ import { TestLogReport } from "@xliic/common/scan-report";
 import ScanIssue from "./ScanIssue";
 import FilterPanel from "./FilterPanel";
 
-export default function ScanIssues({
-  issues,
-  responses,
-  errors,
-  waitings,
-  grouped,
-}: {
-  issues: TestLogReport[];
-  responses: Record<string, HttpResponse>;
-  errors: Record<string, HttpError>;
-  waitings: Record<string, boolean>;
-  grouped: Record<string, TestLogReport[]>;
-}) {
-  if (issues.length === 0) {
+import { useAppDispatch, useAppSelector } from "./store";
+
+export default function ScanIssues() {
+  const { testsPage } = useAppSelector((state) => state.scan);
+
+  if (testsPage.length === 0) {
     return (
       <Container>
         <NoTests>No test results available</NoTests>
@@ -28,26 +20,33 @@ export default function ScanIssues({
     );
   }
 
+  //   <Container>
+  //   <FilterPanel />
+  //   {Object.keys(grouped).map((key) => (
+  //     <div key={key}>
+  //       <GroupTitle>{kdbTitles[key] ?? "Unknown test type"}</GroupTitle>
+  //       {grouped[key].map((issue, index) => {
+  //         const id = `${key}-${index}`;
+  //         return (
+  //           <ScanIssue
+  //             issue={issue}
+  //             httpResponse={responses[id]}
+  //             error={errors[id]}
+  //             waiting={waitings[id]}
+  //             key={id}
+  //             id={id}
+  //           />
+  //         );
+  //       })}
+  //     </div>
+  //   ))}
+  // </Container>
+
   return (
     <Container>
       <FilterPanel />
-      {Object.keys(grouped).map((key) => (
-        <div key={key}>
-          <GroupTitle>{kdbTitles[key] ?? "Unknown test type"}</GroupTitle>
-          {grouped[key].map((issue, index) => {
-            const id = `${key}-${index}`;
-            return (
-              <ScanIssue
-                issue={issue}
-                httpResponse={responses[id]}
-                error={errors[id]}
-                waiting={waitings[id]}
-                key={id}
-                id={id}
-              />
-            );
-          })}
-        </div>
+      {testsPage.map((issue, index) => (
+        <ScanIssue issue={issue} key={index} />
       ))}
     </Container>
   );

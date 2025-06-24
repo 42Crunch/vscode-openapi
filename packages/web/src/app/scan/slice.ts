@@ -12,6 +12,7 @@ import { HttpResponse } from "@xliic/common/http";
 import { GeneralError } from "@xliic/common/error";
 import { Preferences } from "@xliic/common/prefs";
 import {
+  HappyPathReport,
   RuntimeOperationReport,
   ScanReportJSONSchema,
   TestLogReport,
@@ -32,7 +33,7 @@ export type TestLogReportWithLocation = TestLogReport & {
   operationId?: string;
 };
 
-export interface OasState {
+export interface State {
   oas: BundledSwaggerOrOasSpec;
   rawOas: string;
   example?: {
@@ -42,7 +43,15 @@ export interface OasState {
   defaultValues?: TryitOperationValues;
   scanConfig?: ScanConfig;
   scanConfigRaw?: unknown;
-  scanReport?: { scanVersion: string; summary: ScanReportJSONSchema["summary"] };
+  scanReport?: {
+    scanVersion: string;
+    summary: ScanReportJSONSchema["summary"];
+    stats: {
+      issues: number;
+      lowAndAbove: number;
+      criticalAndHigh: number;
+    };
+  };
   response?: HttpResponse;
   error?: GeneralError;
   prefs: Preferences;
@@ -55,10 +64,21 @@ export interface OasState {
   titles: string[];
   paths: string[];
   operationIds: string[];
-  happyPathsPage: unknown[];
+  happyPathPage: {
+    operationId: string;
+    operation: Pick<RuntimeOperationReport, "path" | "method" | "reason" | "fuzzed">;
+    report: HappyPathReport;
+  }[];
+  testsPage: {
+    operationId?: string;
+    operation?: Pick<RuntimeOperationReport, "path" | "method" | "reason" | "fuzzed">;
+    path: string;
+    method: string;
+    test: TestLogReport;
+  }[];
 }
 
-const initialState: OasState = {
+const initialState: State = {
   oas: {
     openapi: "3.0.0",
     info: { title: "", version: "0.0" },
@@ -83,7 +103,8 @@ const initialState: OasState = {
   titles: [],
   paths: [],
   operationIds: [],
-  happyPathsPage: [],
+  happyPathPage: [],
+  testsPage: [],
 };
 
 export const slice = createSlice({
@@ -137,13 +158,13 @@ export const slice = createSlice({
     },
 
     changeFilter: (state, action: PayloadAction<Filter>) => {
-      state.filter = action.payload;
-      const filtered = filterIssues(state.issues, state.filter);
-      const { grouped } = groupIssues(filtered);
-      state.grouped = grouped;
+      // state.filter = action.payload;
+      // const filtered = filterIssues(state.issues, state.filter);
+      // const { grouped } = groupIssues(filtered);
+      // state.grouped = grouped;
     },
 
-    changeTab: (state, action: PayloadAction<OasState["tab"]>) => {
+    changeTab: (state, action: PayloadAction<State["tab"]>) => {
       state.tab = action.payload;
     },
 
@@ -158,18 +179,18 @@ export const slice = createSlice({
     parseChunk: (state, action: PayloadAction<string | null>) => {},
     parseChunkCompleted: (state) => {},
     started: (state) => {},
-    loadHappyPathPage: (state) => {},
-    happyPathPageLoaded: (state, action: PayloadAction<unknown[]>) => {
-      state.happyPathsPage = action.payload;
-      state.waiting = false;
-      state.error = undefined;
-      state.scanReport = {} as any;
-    },
-    reportLoaded: (
-      state,
-      action: PayloadAction<{ scanVersion: string; summary: ScanReportJSONSchema["summary"] }>
-    ) => {
+    reportLoaded: (state, action: PayloadAction<State["scanReport"]>) => {
       state.scanReport = action.payload;
+      state.waiting = false;
+    },
+    loadHappyPathPage: (state) => {},
+    happyPathPageLoaded: (state, action: PayloadAction<State["happyPathPage"]>) => {
+      state.happyPathPage = action.payload;
+    },
+
+    loadTestsPage: (state) => {},
+    testsPageLoaded: (state, action: PayloadAction<State["testsPage"]>) => {
+      state.testsPage = action.payload;
     },
   },
 });
@@ -188,6 +209,8 @@ export const {
   loadHappyPathPage,
   happyPathPageLoaded,
   reportLoaded,
+  loadTestsPage,
+  testsPageLoaded,
 } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<
@@ -260,67 +283,67 @@ function filterIssues(issues: TestLogReportWithLocation[], filter: Filter) {
   });
 }
 
-function groupIssues(issues: TestLogReportWithLocation[]): {
-  grouped: OasState["grouped"];
-  titles: OasState["titles"];
-  paths: OasState["paths"];
-  operationIds: OasState["operationIds"];
-} {
-  const grouped: Record<string, TestLogReportWithLocation[]> = {};
-  const titles: Record<string, string> = {};
+// function groupIssues(issues: TestLogReportWithLocation[]): {
+//   grouped: OasState["grouped"];
+//   titles: OasState["titles"];
+//   paths: OasState["paths"];
+//   operationIds: OasState["operationIds"];
+// } {
+//   const grouped: Record<string, TestLogReportWithLocation[]> = {};
+//   const titles: Record<string, string> = {};
 
-  const paths: Set<string> = new Set();
-  const operationIds: Set<string> = new Set();
+//   const paths: Set<string> = new Set();
+//   const operationIds: Set<string> = new Set();
 
-  for (const issue of issues) {
-    const key = issue.test?.key;
-    if (key !== undefined) {
-      if (grouped[key] === undefined) {
-        grouped[key] = [];
-        titles[key] = issue.test?.description as string;
-      }
-      grouped[key].push(issue);
-    }
-    paths.add(issue.path);
-    if (issue.operationId) {
-      operationIds.add(issue.operationId);
-    }
-  }
+//   for (const issue of issues) {
+//     const key = issue.test?.key;
+//     if (key !== undefined) {
+//       if (grouped[key] === undefined) {
+//         grouped[key] = [];
+//         titles[key] = issue.test?.description as string;
+//       }
+//       grouped[key].push(issue);
+//     }
+//     paths.add(issue.path);
+//     if (issue.operationId) {
+//       operationIds.add(issue.operationId);
+//     }
+//   }
 
-  const keys = Object.keys(grouped);
+//   const keys = Object.keys(grouped);
 
-  for (const key of keys) {
-    // improve sorting
-    grouped[key].sort((a, b) => {
-      if (a.outcome?.status !== b.outcome?.status) {
-        if (a.outcome?.status === "error") {
-          return -1;
-        }
-        if (b.outcome?.status === "error") {
-          return 1;
-        }
-        if (a.outcome?.status === "defective") {
-          return -1;
-        }
-        if (b.outcome?.status === "defective") {
-          return 1;
-        }
-      }
+//   for (const key of keys) {
+//     // improve sorting
+//     grouped[key].sort((a, b) => {
+//       if (a.outcome?.status !== b.outcome?.status) {
+//         if (a.outcome?.status === "error") {
+//           return -1;
+//         }
+//         if (b.outcome?.status === "error") {
+//           return 1;
+//         }
+//         if (a.outcome?.status === "defective") {
+//           return -1;
+//         }
+//         if (b.outcome?.status === "defective") {
+//           return 1;
+//         }
+//       }
 
-      if (a.outcome?.criticality !== b.outcome?.criticality) {
-        return a.outcome?.criticality! - b.outcome?.criticality!;
-      }
+//       if (a.outcome?.criticality !== b.outcome?.criticality) {
+//         return a.outcome?.criticality! - b.outcome?.criticality!;
+//       }
 
-      return 0;
-    });
-  }
+//       return 0;
+//     });
+//   }
 
-  return {
-    grouped,
-    titles: Object.keys(titles),
-    paths: Array.from(paths),
-    operationIds: Array.from(operationIds),
-  };
-}
+//   return {
+//     grouped,
+//     titles: Object.keys(titles),
+//     paths: Array.from(paths),
+//     operationIds: Array.from(operationIds),
+//   };
+// }
 
 export default slice.reducer;

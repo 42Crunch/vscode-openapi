@@ -5,50 +5,25 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { ArrowUpRightFromSquare } from "../../icons";
 import { useAppDispatch } from "./store";
-import { changeFilter, changeTab } from "./slice";
-import { GlobalSummary, TestLogReport } from "@xliic/common/scan-report";
+import { changeFilter, changeTab, State } from "./slice";
 
-export function ScanSummary({
-  global,
-  issues,
-  scanVersion,
-}: {
-  global: GlobalSummary;
-  issues: TestLogReport[];
-  scanVersion: string;
-}) {
+export function ScanSummary({ report }: { report: NonNullable<State["scanReport"]> }) {
   const dispatch = useAppDispatch();
-
-  // const executed =
-  //   (global.conformanceTestRequests.executed.total ?? 0) +
-  //   (global.authorizationTestRequests.executed.total ?? 0) +
-  //   (global.customTestRequests.executed.total ?? 0) +
-  //   (global.methodNotAllowedTestRequests?.executed.total ?? 0);
-
-  // const issuesNumber = issues?.length | 0;
-
-  const lowAndAbove = issues.filter(
-    (issue) => issue?.outcome?.criticality && issue.outcome?.criticality >= 1
-  ).length;
-
-  const criticalAndHigh = issues.filter(
-    (issue) => issue?.outcome?.criticality && issue.outcome?.criticality >= 4
-  ).length;
 
   return (
     <Container>
       <Stats>
         <div>
-          Status: <b>{global.state}</b> (Exit code: {global.exitCode})
+          Status: <b>{report.summary.state}</b> (Exit code: {report.summary.exitCode})
         </div>
-        <div>{DateTime.fromISO(global.endDate).toLocaleString(DateTime.DATETIME_MED)}</div>
+        <div>{DateTime.fromISO(report.summary.endDate).toLocaleString(DateTime.DATETIME_MED)}</div>
         <div>
           Execution time:{" "}
-          {DateTime.fromISO(global.endDate)
-            .diff(DateTime.fromISO(global.startDate))
+          {DateTime.fromISO(report.summary.endDate)
+            .diff(DateTime.fromISO(report.summary.startDate))
             .toFormat("mm:ss.SSS")}
         </div>
-        <div>Scan version: {scanVersion}</div>
+        <div>Scan version: {report.scanVersion}</div>
       </Stats>
       <Tiles>
         <div
@@ -60,7 +35,7 @@ export function ScanSummary({
           }}
         >
           <div>
-            {issues.length} <ArrowUpRightFromSquare />
+            {report.stats.issues} <ArrowUpRightFromSquare />
           </div>
           <div>Executed</div>
         </div>
@@ -73,7 +48,7 @@ export function ScanSummary({
           }}
         >
           <div>
-            {lowAndAbove} <ArrowUpRightFromSquare />
+            {report.stats.lowAndAbove} <ArrowUpRightFromSquare />
           </div>
           <div>Issues Found</div>
         </div>
@@ -86,7 +61,7 @@ export function ScanSummary({
           }}
         >
           <div>
-            {criticalAndHigh} <ArrowUpRightFromSquare />
+            {report.stats.criticalAndHigh} <ArrowUpRightFromSquare />
           </div>
           <div>Critical/High</div>
         </div>
