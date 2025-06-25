@@ -6,6 +6,8 @@ export { default as ArrowRightToLine } from "./ArrowRightToLine";
 export { default as ArrowUpRightFromSquare } from "./ArrowUpRightFromSquare";
 export { default as BracketsCurly } from "./BracketsCurly";
 export { default as Check } from "./Check";
+export { default as ChevronLeft } from "./ChevronLeft";
+export { default as ChevronRight } from "./ChevronRight";
 export { default as CircleCheckLight } from "./CircleCheckLight";
 export { default as CircleCheck } from "./CircleCheck";
 export { default as CircleExclamationLight } from "./CircleExclamationLight";
