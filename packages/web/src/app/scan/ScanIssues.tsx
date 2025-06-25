@@ -53,13 +53,13 @@ export default function ScanIssues() {
     dispatch(loadTestsPage(pageIndex));
   };
 
-  if (testsPage.total === 0) {
-    return (
-      <Container>
-        <NoTests>No test results available</NoTests>
-      </Container>
-    );
-  }
+  // if (testsPage.total === 0) {
+  //   return (
+  //     <Container>
+  //       <NoTests>No test results available</NoTests>
+  //     </Container>
+  //   );
+  // }
 
   return (
     <Container>

@@ -4,12 +4,15 @@ import { useAppDispatch, useAppSelector } from "./store";
 
 import { PlainSelect } from "../../components/Select";
 import { changeFilter } from "./slice";
-import { HttpMethod, HttpMethods } from "@xliic/openapi";
+import { HttpMethods } from "@xliic/openapi";
 
 export default function FilterMethod() {
   const { filter } = useAppSelector((state) => state.scan);
   const dispatch = useAppDispatch();
-  const options = HttpMethods.map((method) => ({ value: method, label: method.toUpperCase() }));
+  const options = HttpMethods.map((method, index) => ({
+    value: index,
+    label: method.toUpperCase(),
+  }));
 
   return (
     <Container>

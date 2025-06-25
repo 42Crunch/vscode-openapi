@@ -181,10 +181,36 @@ export class ReportDb {
 
     const found: any = [];
     for (const item of index) {
-      found.push(item);
+      // Apply filtering
+      let includeItem = true;
+
+      if (filter.criticality !== undefined && item.criticality !== filter.criticality) {
+        includeItem = false;
+      }
+
+      if (filter.testKey !== undefined && item.testKeyIndex !== filter.testKey) {
+        includeItem = false;
+      }
+
+      if (filter.path !== undefined && item.pathIndex !== filter.path) {
+        includeItem = false;
+      }
+
+      if (filter.method !== undefined && item.methodIndex !== filter.method) {
+        includeItem = false;
+      }
+
+      if (filter.operationId !== undefined && item.operationIdIndex !== filter.operationId) {
+        includeItem = false;
+      }
+
+      if (includeItem) {
+        found.push(item);
+      }
     }
 
-    console.log("found", found);
+    console.log("index", index);
+    console.log("found", filter, found);
 
     const indexPage = paginate(found, pageIndex, pageSize);
     const pages = Math.ceil(found.length / pageSize);

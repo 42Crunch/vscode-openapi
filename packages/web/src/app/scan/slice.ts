@@ -17,11 +17,10 @@ import {
   ScanReportJSONSchema,
   TestLogReport,
 } from "@xliic/common/scan-report";
-import { SeverityLevel, SeverityLevels } from "@xliic/common/audit";
 import { HappyPathEntry, Page, TestEntry } from "./db/reportdb";
 
 export type Filter = {
-  severity?: SeverityLevel;
+  criticality?: number;
   testKey?: number;
   path?: number;
   method?: number;

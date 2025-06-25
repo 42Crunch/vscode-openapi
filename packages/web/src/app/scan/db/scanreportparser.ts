@@ -127,6 +127,7 @@ export class ScanReportParser {
           methodIndex: test.methodIndex,
           criticality: test.criticality,
           testType: test.testType,
+          testKeyIndex: test.testKeyIndex,
         }))
       );
 

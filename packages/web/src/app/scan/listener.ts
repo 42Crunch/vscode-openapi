@@ -78,7 +78,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
         const {
           scan: { filter },
         } = listenerApi.getState();
-        const tests = await reportDb.getTests(action.payload, 2, undefined, filter);
+        const tests = await reportDb.getTests(action.payload, 100, undefined, filter);
         listenerApi.dispatch(testsPageLoaded(tests));
       },
     });
@@ -91,7 +91,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
         const {
           scan: { filter },
         } = listenerApi.getState();
-        const tests = await reportDb.getTests(0, 2, undefined, filter);
+        const tests = await reportDb.getTests(0, 100, undefined, filter);
         listenerApi.dispatch(testsPageLoaded(tests));
       },
     });
