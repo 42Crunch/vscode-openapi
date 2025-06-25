@@ -6,12 +6,12 @@ import { PlainSelect } from "../../components/Select";
 import { changeFilter } from "./slice";
 
 export default function FilterTitle() {
-  const { filter, titles } = useAppSelector((state) => state.scan);
+  const { filter } = useAppSelector((state) => state.scan);
   const dispatch = useAppDispatch();
 
   const options = [];
 
-  for (const key of titles) {
+  for (const key of []) {
     if (kdbTitles[key]) {
       options.push({ label: kdbTitles[key], value: key });
     }

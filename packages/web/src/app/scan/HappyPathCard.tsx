@@ -6,13 +6,13 @@ import { HappyPath } from "./HappyPath";
 import CollapsibleCard from "../../new-components/CollapsibleCard";
 import { Check, TriangleExclamation } from "../../icons";
 
-import { State } from "./slice";
+import { HappyPathEntry } from "./db/reportdb";
 
 export function HappyPathCard({
   report,
   defaultCollapsed,
 }: {
-  report: State["happyPathPage"][number];
+  report: HappyPathEntry;
   defaultCollapsed: boolean;
 }) {
   const success = report.report.outcome?.testSuccessful;

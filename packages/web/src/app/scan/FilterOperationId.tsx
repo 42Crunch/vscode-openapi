@@ -6,16 +6,15 @@ import { PlainSelect } from "../../components/Select";
 import { changeFilter } from "./slice";
 
 export default function FilterOperationId() {
-  const { filter, operationIds } = useAppSelector((state) => state.scan);
+  const operationIds = useAppSelector((state) => state.scan.scanReport?.operationIds || []);
+  const filter = useAppSelector((state) => state.scan.filter);
   const dispatch = useAppDispatch();
-
-  const options = operationIds.map((operationId) => ({ label: operationId, value: operationId }));
 
   return (
     <Container>
       <PlainSelect
         label="Operation ID"
-        options={options}
+        options={operationIds}
         placeholder="All"
         onSelectedItemChange={(item) => {
           if (item && item.value !== "all") {

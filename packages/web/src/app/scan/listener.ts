@@ -43,8 +43,8 @@ export function createListener(host: Webapp["host"], routes: Routes) {
         const completed = await parser.parse(action.payload);
         listenerApi.dispatch(parseChunkCompleted());
         if (completed) {
-          listenerApi.dispatch(loadHappyPathPage());
-          listenerApi.dispatch(loadTestsPage());
+          listenerApi.dispatch(loadHappyPathPage(0));
+          listenerApi.dispatch(loadTestsPage(0));
         }
       },
     });
@@ -54,13 +54,15 @@ export function createListener(host: Webapp["host"], routes: Routes) {
       actionCreator: loadHappyPathPage,
       effect: async (action, listenerApi) => {
         console.log("loadHappyPathPage");
-        const happyPaths = await reportDb.getHappyPaths(0, 10, undefined);
-        listenerApi.dispatch(happyPathPageLoaded(happyPaths.page as any));
+        const happyPaths = await reportDb.getHappyPaths(action.payload, 100, undefined);
+        listenerApi.dispatch(happyPathPageLoaded(happyPaths));
         listenerApi.dispatch(
           reportLoaded({
             scanVersion: parser.getScanVersion(),
             summary: parser.getSummary(),
             stats: parser.getStats(),
+            paths: await parser.getPaths(),
+            operationIds: await parser.getOperationIds(),
           })
         );
       },
@@ -71,8 +73,8 @@ export function createListener(host: Webapp["host"], routes: Routes) {
       actionCreator: loadTestsPage,
       effect: async (action, listenerApi) => {
         console.log("loadTestsPage");
-        const tests = await reportDb.getTests(0, 10, undefined);
-        listenerApi.dispatch(testsPageLoaded(tests.page as any));
+        const tests = await reportDb.getTests(action.payload, 100, undefined);
+        listenerApi.dispatch(testsPageLoaded(tests));
       },
     });
 

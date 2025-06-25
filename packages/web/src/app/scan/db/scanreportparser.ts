@@ -160,6 +160,14 @@ export class ScanReportParser {
     return this.data.stats;
   }
 
+  async getPaths(): Promise<{ value: number; label: string }[]> {
+    return await this.db.getPaths();
+  }
+
+  async getOperationIds(): Promise<{ value: number; label: string }[]> {
+    return await this.db.getOperationIds();
+  }
+
   makeParser(): Parser {
     return makeParser({
       "$.shallow()": (value: any) => {

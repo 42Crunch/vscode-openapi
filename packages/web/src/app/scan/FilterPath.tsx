@@ -6,16 +6,15 @@ import { PlainSelect } from "../../components/Select";
 import { changeFilter } from "./slice";
 
 export default function FilterPath() {
-  const { filter, paths } = useAppSelector((state) => state.scan);
+  const paths = useAppSelector((state) => state.scan.scanReport?.paths || []);
+  const filter = useAppSelector((state) => state.scan.filter);
   const dispatch = useAppDispatch();
-
-  const options = paths.map((path) => ({ label: path, value: path }));
 
   return (
     <Container>
       <PlainSelect
         label="Path"
-        options={options}
+        options={paths}
         placeholder="All"
         onSelectedItemChange={(item) => {
           if (item && item.value !== "all") {

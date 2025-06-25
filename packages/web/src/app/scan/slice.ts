@@ -18,6 +18,7 @@ import {
   TestLogReport,
 } from "@xliic/common/scan-report";
 import { SeverityLevel, SeverityLevels } from "@xliic/common/audit";
+import { HappyPathEntry, Page, TestEntry } from "./db/reportdb";
 
 export type Filter = {
   severity?: SeverityLevel;
@@ -51,31 +52,18 @@ export interface State {
       lowAndAbove: number;
       criticalAndHigh: number;
     };
+    paths: { value: number; label: string }[];
+    operationIds: { value: number; label: string }[];
   };
-  response?: HttpResponse;
   error?: GeneralError;
   prefs: Preferences;
   waiting: boolean;
   filter: Filter;
   tab: "summary" | "tests" | "logs";
-  issues: TestLogReportWithLocation[];
-  grouped: Record<string, TestLogReportWithLocation[]>;
-  operations: Record<string, RuntimeOperationReport>;
-  titles: string[];
-  paths: string[];
-  operationIds: string[];
-  happyPathPage: {
-    operationId: string;
-    operation: Pick<RuntimeOperationReport, "path" | "method" | "reason" | "fuzzed">;
-    report: HappyPathReport;
-  }[];
-  testsPage: {
-    operationId?: string;
-    operation?: Pick<RuntimeOperationReport, "path" | "method" | "reason" | "fuzzed">;
-    path: string;
-    method: string;
-    test: TestLogReport;
-  }[];
+  happyPathPage: Page<HappyPathEntry>;
+  happyPathPageIndex: number;
+  testsPage: Page<TestEntry>;
+  testsPageIndex: number;
 }
 
 const initialState: State = {
@@ -97,14 +85,18 @@ const initialState: State = {
   waiting: true,
   filter: {},
   tab: "summary",
-  grouped: {},
-  issues: [],
-  operations: {},
-  titles: [],
-  paths: [],
-  operationIds: [],
-  happyPathPage: [],
-  testsPage: [],
+  happyPathPage: {
+    items: [],
+    pages: 0,
+    total: 0,
+  },
+  happyPathPageIndex: 0,
+  testsPage: {
+    items: [],
+    pages: 0,
+    total: 0,
+  },
+  testsPageIndex: 0,
 };
 
 export const slice = createSlice({
@@ -183,13 +175,13 @@ export const slice = createSlice({
       state.scanReport = action.payload;
       state.waiting = false;
     },
-    loadHappyPathPage: (state) => {},
-    happyPathPageLoaded: (state, action: PayloadAction<State["happyPathPage"]>) => {
+    loadHappyPathPage: (state, action: PayloadAction<number>) => {},
+    happyPathPageLoaded: (state, action: PayloadAction<Page<HappyPathEntry>>) => {
       state.happyPathPage = action.payload;
     },
 
-    loadTestsPage: (state) => {},
-    testsPageLoaded: (state, action: PayloadAction<State["testsPage"]>) => {
+    loadTestsPage: (state, action: PayloadAction<number>) => {},
+    testsPageLoaded: (state, action: PayloadAction<Page<TestEntry>>) => {
       state.testsPage = action.payload;
     },
   },

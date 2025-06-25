@@ -1,4 +1,25 @@
+import { HappyPathReport, RuntimeOperationReport, TestLogReport } from "@xliic/common/scan-report";
 import Dexie from "dexie";
+
+export type Page<T> = {
+  items: T[];
+  pages: number;
+  total: number;
+};
+
+export type HappyPathEntry = {
+  operationId: string;
+  operation: Pick<RuntimeOperationReport, "path" | "method" | "reason" | "fuzzed">;
+  report: HappyPathReport;
+};
+
+export type TestEntry = {
+  operationId?: string;
+  operation?: Pick<RuntimeOperationReport, "path" | "method" | "reason" | "fuzzed">;
+  path: string;
+  method: string;
+  test: TestLogReport;
+};
 
 export class ReportDb {
   private readonly name: string = "";
@@ -97,19 +118,11 @@ export class ReportDb {
     }
   }
 
-  async getIssue(id: string): Promise<any> {
-    return null as any;
-  }
-
-  async getPathsKeys(): Promise<any> {
-    // looks like this is not used
-  }
-
   async getHappyPaths(
     pageIndex: number,
     pageSize: number,
     sort: { fieldName: string; order?: "asc" | "desc" } | undefined
-  ): Promise<{ page: unknown[] }> {
+  ): Promise<Page<HappyPathEntry>> {
     const index = await this.readHappyPathIndex(sort);
 
     const found: any = [];
@@ -118,15 +131,15 @@ export class ReportDb {
     }
 
     const indexPage = paginate(found, pageIndex, pageSize);
-    const pagesCount = Math.ceil(found.length / pageSize);
+    const pages = Math.ceil(found.length / pageSize);
 
-    const page: unknown[] = [];
+    const items: HappyPathEntry[] = [];
 
     for (const index of indexPage) {
       const data = await this.db.happyPath.get(index.id);
       const operation = await this.db.operation.get(index.operationIdIndex);
       const operationId = await this.db.operationIdIndex.get(index.operationIdIndex);
-      page.push({
+      items.push({
         operationId: operationId!.value,
         operation: operation.value,
         report: data.value,
@@ -134,7 +147,9 @@ export class ReportDb {
     }
 
     return {
-      page,
+      items,
+      pages,
+      total: found.length,
     };
   }
 
@@ -142,7 +157,7 @@ export class ReportDb {
     pageIndex: number,
     pageSize: number,
     sort: { fieldName: string; order?: "asc" | "desc" } | undefined
-  ): Promise<{ page: unknown[] }> {
+  ): Promise<Page<TestEntry>> {
     const index = await this.readTestIndex(sort);
 
     const found: any = [];
@@ -153,9 +168,9 @@ export class ReportDb {
     console.log("found", found);
 
     const indexPage = paginate(found, pageIndex, pageSize);
-    const pagesCount = Math.ceil(found.length / pageSize);
+    const pages = Math.ceil(found.length / pageSize);
 
-    const page: unknown[] = [];
+    const items: TestEntry[] = [];
 
     for (const index of indexPage) {
       const data = await this.db.test.get(index.id);
@@ -171,7 +186,7 @@ export class ReportDb {
       const path =
         index.pathIndex !== undefined ? await this.db.pathIndex.get(index.pathIndex) : undefined;
 
-      page.push({
+      items.push({
         operationId: operationId?.value,
         operation: operation?.value,
         path: path?.value,
@@ -181,8 +196,28 @@ export class ReportDb {
     }
 
     return {
-      page,
+      items,
+      pages,
+      total: found.length,
     };
+  }
+
+  async getPaths(): Promise<{ value: number; label: string }[]> {
+    return this.db.pathIndex.toArray().then((paths: any) => {
+      return paths.map((path: any) => ({
+        value: path.id,
+        label: path.value,
+      }));
+    });
+  }
+
+  async getOperationIds(): Promise<{ value: number; label: string }[]> {
+    return this.db.operationIdIndex.toArray().then((operationIds: any) => {
+      return operationIds.map((operationId: any) => ({
+        value: operationId.id,
+        label: operationId.value,
+      }));
+    });
   }
 
   private async readHappyPathIndex(

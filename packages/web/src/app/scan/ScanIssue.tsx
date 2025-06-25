@@ -11,8 +11,9 @@ import Response from "../../components/response/Response";
 import { showJsonPointer, State } from "./slice";
 import { safeParseResponse } from "../../http-parser";
 import { useAppDispatch } from "./store";
+import { TestEntry } from "./db/reportdb";
 
-export default function ScanIssue({ issue }: { issue: State["testsPage"][number] }) {
+export default function ScanIssue({ issue }: { issue: TestEntry }) {
   const dispatch = useAppDispatch();
 
   const [collapsed, setCollapsed] = useState(true);

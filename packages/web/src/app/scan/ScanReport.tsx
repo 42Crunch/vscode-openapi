@@ -34,7 +34,7 @@ export default function ScanReport() {
               <ScanSummary report={scanReport} />
               <div style={{ fontWeight: 600, margin: "8px" }}>Happy Path Testing results</div>
 
-              {happyPathPage.map((entry, index) => (
+              {happyPathPage.items.map((entry, index) => (
                 <HappyPathCard defaultCollapsed={true} report={entry} key={index} />
               ))}
             </Summary>

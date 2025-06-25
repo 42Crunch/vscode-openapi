@@ -6,13 +6,15 @@ import { TestLogReport } from "@xliic/common/scan-report";
 
 import ScanIssue from "./ScanIssue";
 import FilterPanel from "./FilterPanel";
+import { ChevronLeft, ChevronRight } from "../../icons";
 
 import { useAppDispatch, useAppSelector } from "./store";
+import { loadTestsPage } from "./slice";
 
 export default function ScanIssues() {
-  const { testsPage } = useAppSelector((state) => state.scan);
+  const { testsPage, testsPageIndex } = useAppSelector((state) => state.scan);
 
-  if (testsPage.length === 0) {
+  if (testsPage.total === 0) {
     return (
       <Container>
         <NoTests>No test results available</NoTests>
@@ -45,12 +47,36 @@ export default function ScanIssues() {
   return (
     <Container>
       <FilterPanel />
-      {testsPage.map((issue, index) => (
+      {testsPage.items.map((issue, index) => (
         <ScanIssue issue={issue} key={index} />
       ))}
+      <Paginator>
+        <Arrow>
+          <ChevronLeft />
+        </Arrow>
+        Page {testsPageIndex + 1} of {testsPage.pages}
+        <Arrow>
+          <ChevronRight />
+        </Arrow>
+      </Paginator>
     </Container>
   );
 }
+
+const Paginator = styled.div`
+  margin: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const Arrow = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+}`;
 
 const Container = styled.div`
   margin-top: 8px;
