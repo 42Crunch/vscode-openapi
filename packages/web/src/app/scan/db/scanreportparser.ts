@@ -281,7 +281,7 @@ export class ScanReportParser {
   updateStats(test: TestLogReport) {
     this.data.stats.issues++;
     const criticality = test.outcome?.criticality;
-    if (criticality !== undefined && criticality >= 1) {
+    if (criticality !== undefined && criticality >= 2) {
       this.data.stats.lowAndAbove++;
     }
     if (criticality !== undefined && criticality >= 4) {

@@ -44,7 +44,7 @@ export function ScanSummary({ report }: { report: NonNullable<State["scanReport"
             e.preventDefault();
             e.stopPropagation();
             dispatch(changeTab("tests"));
-            dispatch(changeFilter({ severity: "low" }));
+            dispatch(changeFilter({ criticality: 2 }));
           }}
         >
           <div>
@@ -57,7 +57,7 @@ export function ScanSummary({ report }: { report: NonNullable<State["scanReport"
             e.preventDefault();
             e.stopPropagation();
             dispatch(changeTab("tests"));
-            dispatch(changeFilter({ severity: "high" }));
+            dispatch(changeFilter({ criticality: 4 }));
           }}
         >
           <div>

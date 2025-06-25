@@ -55,7 +55,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
       actionCreator: loadHappyPathPage,
       effect: async (action, listenerApi) => {
         console.log("loadHappyPathPage");
-        const happyPaths = await reportDb.getHappyPaths(action.payload, 2, undefined);
+        const happyPaths = await reportDb.getHappyPaths(action.payload, 100, undefined);
         listenerApi.dispatch(happyPathPageLoaded(happyPaths));
         listenerApi.dispatch(
           reportLoaded({

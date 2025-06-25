@@ -1,8 +1,6 @@
 import styled from "styled-components";
 
-import { HttpError, HttpResponse } from "@xliic/common/http";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { TestLogReport } from "@xliic/common/scan-report";
 
 import ScanIssue from "./ScanIssue";
 import FilterPanel from "./FilterPanel";

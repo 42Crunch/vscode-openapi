@@ -184,7 +184,7 @@ export class ReportDb {
       // Apply filtering
       let includeItem = true;
 
-      if (filter.criticality !== undefined && item.criticality !== filter.criticality) {
+      if (filter.criticality !== undefined && item.criticality < filter.criticality) {
         includeItem = false;
       }
 
