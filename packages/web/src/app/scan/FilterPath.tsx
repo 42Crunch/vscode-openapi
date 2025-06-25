@@ -19,13 +19,13 @@ export default function FilterPath() {
         onSelectedItemChange={(item) => {
           if (item && item.value !== "all") {
             dispatch(
-              changeFilter({ ...filter, path: item.value as string, operationId: undefined })
+              changeFilter({ ...filter, path: item.value as number, operationId: undefined })
             );
           } else {
             dispatch(changeFilter({ ...filter, path: undefined, operationId: undefined }));
           }
         }}
-        selected={filter.path || "all"}
+        selected={filter.path ?? "all"}
       />
     </Container>
   );

@@ -19,6 +19,7 @@ import {
   reportLoaded,
   loadTestsPage,
   testsPageLoaded,
+  changeFilter,
 } from "./slice";
 
 import { startNavigationListening } from "../../features/router/listener";
@@ -54,7 +55,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
       actionCreator: loadHappyPathPage,
       effect: async (action, listenerApi) => {
         console.log("loadHappyPathPage");
-        const happyPaths = await reportDb.getHappyPaths(action.payload, 100, undefined);
+        const happyPaths = await reportDb.getHappyPaths(action.payload, 2, undefined);
         listenerApi.dispatch(happyPathPageLoaded(happyPaths));
         listenerApi.dispatch(
           reportLoaded({
@@ -63,6 +64,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
             stats: parser.getStats(),
             paths: await parser.getPaths(),
             operationIds: await parser.getOperationIds(),
+            testKeys: await reportDb.getTestKeys(),
           })
         );
       },
@@ -73,7 +75,23 @@ export function createListener(host: Webapp["host"], routes: Routes) {
       actionCreator: loadTestsPage,
       effect: async (action, listenerApi) => {
         console.log("loadTestsPage");
-        const tests = await reportDb.getTests(action.payload, 100, undefined);
+        const {
+          scan: { filter },
+        } = listenerApi.getState();
+        const tests = await reportDb.getTests(action.payload, 2, undefined, filter);
+        listenerApi.dispatch(testsPageLoaded(tests));
+      },
+    });
+
+  const onChangeFilter = () =>
+    startAppListening({
+      actionCreator: changeFilter,
+      effect: async (action, listenerApi) => {
+        console.log("changeFilter");
+        const {
+          scan: { filter },
+        } = listenerApi.getState();
+        const tests = await reportDb.getTests(0, 2, undefined, filter);
         listenerApi.dispatch(testsPageLoaded(tests));
       },
     });
@@ -140,7 +158,13 @@ export function createListener(host: Webapp["host"], routes: Routes) {
   };
 
   startNavigationListening(startAppListening, routes);
-  startListeners({ ...listeners, onParseChunk, onLoadHappyPathPage, onLoadTestsPage });
+  startListeners({
+    ...listeners,
+    onParseChunk,
+    onLoadHappyPathPage,
+    onLoadTestsPage,
+    onChangeFilter,
+  });
 
   return listenerMiddleware;
 }

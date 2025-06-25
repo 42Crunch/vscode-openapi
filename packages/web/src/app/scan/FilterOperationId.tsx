@@ -18,12 +18,12 @@ export default function FilterOperationId() {
         placeholder="All"
         onSelectedItemChange={(item) => {
           if (item && item.value !== "all") {
-            dispatch(changeFilter({ ...filter, operationId: item.value as string }));
+            dispatch(changeFilter({ ...filter, operationId: item.value as number }));
           } else {
             dispatch(changeFilter({ ...filter, operationId: undefined }));
           }
         }}
-        selected={filter.operationId || "all"}
+        selected={filter.operationId ?? "all"}
       />
     </Container>
   );

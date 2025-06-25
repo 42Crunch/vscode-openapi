@@ -12,26 +12,26 @@ import FilterOperationId from "./FilterOperationId";
 import FilterMethod from "./FilterMethod";
 
 export default function FilterPanel() {
-  const { filter } = useAppSelector((state) => state.scan);
-  const [collapsed, setCollapsed] = useState(false);
-  const names = ["severity", "title"] as (keyof Filter)[];
-  const count = names.filter((name) => filter && filter[name] !== undefined).length;
+  // const { filter } = useAppSelector((state) => state.scan);
+  // const [collapsed, setCollapsed] = useState(false);
+  // const names = ["severity", "title"] as (keyof Filter)[];
+  // const count = names.filter((name) => filter && filter[name] !== undefined).length;
 
   return (
     <Container>
       {/* <Top>
         <FilterButton filters={count} onClick={() => setCollapsed(!collapsed)} />
       </Top> */}
-      {!collapsed && (
-        <Bottom>
-          <FilterCriticality />
-          <FilterTitle />
-          <FilterPath />
-          <FilterMethod />
-          <FilterOperationId />
-          {/* <FilterResetAll /> */}
-        </Bottom>
-      )}
+      {/* {!collapsed && ( */}
+      <Bottom>
+        <FilterCriticality />
+        <FilterTitle />
+        <FilterPath />
+        <FilterMethod />
+        <FilterOperationId />
+        <FilterResetAll />
+      </Bottom>
+      {/* )} */}
     </Container>
   );
 }

@@ -1,5 +1,6 @@
 import {
   makeParser,
+  Index,
   SortableIndexStore,
   SortableIndexStoreIndex,
   ObjectStore,
@@ -13,15 +14,18 @@ import {
   RuntimeOperationReport,
   TestLogReport,
 } from "@xliic/common/scan-report";
+import { HttpMethod, HttpMethods } from "@xliic/openapi";
 
 export class ScanReportParser {
   private db: ReportDb;
   private parser: Parser;
 
   private indexHandler: SortableIndexStore;
+  private testKeyIndexHandler: Index;
   private tests: ObjectStore<TestLogReport>;
   private happyPaths: ObjectStore<HappyPathReport>;
   private operations: IndexedObjectStore<RuntimeOperationReport> | null;
+  private readonly methods: Record<HttpMethod, number>;
 
   private data: {
     scanVersion: string;
@@ -52,6 +56,7 @@ export class ScanReportParser {
       operationIdIndex: SortableIndexStoreIndex | undefined;
       pathIndex: SortableIndexStoreIndex | undefined;
       methodIndex: number | undefined;
+      testKeyIndex: number;
       criticality: number;
       testType: number;
     }[];
@@ -62,9 +67,13 @@ export class ScanReportParser {
     this.parser = this.makeParser();
 
     this.indexHandler = new SortableIndexStore(IndexBuckets);
+    this.testKeyIndexHandler = new Index();
     this.tests = new ObjectStore<TestLogReport>();
     this.happyPaths = new ObjectStore<HappyPathReport>();
     this.operations = new IndexedObjectStore<RuntimeOperationReport>();
+    this.methods = Object.fromEntries(
+      HttpMethods.map((method, index) => [method, index])
+    ) as Record<HttpMethod, number>;
 
     this.data = {
       scanVersion: "",
@@ -99,6 +108,7 @@ export class ScanReportParser {
 
       await this.db.bulkPutIndex("operationId", this.indexHandler.entries("operationId"));
       await this.db.bulkPutIndex("path", this.indexHandler.entries("path"));
+      await this.db.bulkPutIndex("testKey", this.testKeyIndexHandler.entries());
 
       // update test index with operationId and path
       for (const test of this.data.testIndex) {
@@ -222,7 +232,7 @@ export class ScanReportParser {
 
     this.data.operationsMap.set(operationIdIndex, {
       pathIndex: this.indexHandler.put("path", operation.path),
-      methodIndex: methods[operation.method.toLowerCase()],
+      methodIndex: this.methods[operation.method.toLowerCase() as HttpMethod],
     });
   }
 
@@ -238,11 +248,14 @@ export class ScanReportParser {
   onTest(operationId: string, testType: TestType, test: TestLogReport) {
     this.updateStats(test);
 
+    const testKeyIndex = this.testKeyIndexHandler.put(test.test?.key!);
+
     this.data.testIndex.push({
       id: this.tests.put(test),
       operationIdIndex: this.indexHandler.put("operationId", operationId),
       pathIndex: undefined,
       methodIndex: undefined,
+      testKeyIndex,
       criticality: test.outcome?.criticality ?? -1,
       testType: TestTypeIds[testType],
     });
@@ -251,11 +264,14 @@ export class ScanReportParser {
   onMethodNotAllowedTest(path: string, method: string, test: TestLogReport) {
     this.updateStats(test);
 
+    const testKeyIndex = this.testKeyIndexHandler.put(test.test?.key!);
+
     this.data.testIndex.push({
       id: this.tests.put(test),
       operationIdIndex: undefined,
       pathIndex: this.indexHandler.put("path", path),
-      methodIndex: methods[method.toLowerCase()],
+      methodIndex: this.methods[method.toLowerCase() as HttpMethod],
+      testKeyIndex,
       criticality: test.outcome?.criticality ?? -1,
       testType: TestTypeIds["methodNotAllowed"],
     });
@@ -272,17 +288,6 @@ export class ScanReportParser {
     }
   }
 }
-
-const methods: Record<string, number> = {
-  get: 1,
-  post: 2,
-  put: 3,
-  delete: 4,
-  patch: 5,
-  head: 6,
-  options: 7,
-  trace: 8,
-};
 
 const TestTypes = ["methodNotAllowed", "conformance", "authorization", "custom"] as const;
 const IndexBuckets = ["path", "operationId"] as const;

@@ -22,10 +22,10 @@ import { HappyPathEntry, Page, TestEntry } from "./db/reportdb";
 
 export type Filter = {
   severity?: SeverityLevel;
-  title?: string;
-  path?: string;
-  method?: HttpMethod;
-  operationId?: string;
+  testKey?: number;
+  path?: number;
+  method?: number;
+  operationId?: number;
 };
 
 export type TestLogReportWithLocation = TestLogReport & {
@@ -54,6 +54,7 @@ export interface State {
     };
     paths: { value: number; label: string }[];
     operationIds: { value: number; label: string }[];
+    testKeys: { value: number; label: string }[];
   };
   error?: GeneralError;
   prefs: Preferences;
@@ -61,9 +62,7 @@ export interface State {
   filter: Filter;
   tab: "summary" | "tests" | "logs";
   happyPathPage: Page<HappyPathEntry>;
-  happyPathPageIndex: number;
   testsPage: Page<TestEntry>;
-  testsPageIndex: number;
 }
 
 const initialState: State = {
@@ -89,14 +88,14 @@ const initialState: State = {
     items: [],
     pages: 0,
     total: 0,
+    current: 0,
   },
-  happyPathPageIndex: 0,
   testsPage: {
     items: [],
     pages: 0,
     total: 0,
+    current: 0,
   },
-  testsPageIndex: 0,
 };
 
 export const slice = createSlice({
@@ -150,7 +149,7 @@ export const slice = createSlice({
     },
 
     changeFilter: (state, action: PayloadAction<Filter>) => {
-      // state.filter = action.payload;
+      state.filter = action.payload;
       // const filtered = filterIssues(state.issues, state.filter);
       // const { grouped } = groupIssues(filtered);
       // state.grouped = grouped;
@@ -244,35 +243,29 @@ function flattenIssues(scanReport: ScanReportJSONSchema) {
 }
 
 function filterIssues(issues: TestLogReportWithLocation[], filter: Filter) {
-  const byTitle = (issue: TestLogReportWithLocation) =>
-    filter?.title === undefined || issue.test?.key === filter.title;
-
-  const criticality =
-    filter.severity !== undefined ? SeverityLevels.indexOf(filter.severity) + 1 : 0;
-
-  const byCriticality = (issue: TestLogReportWithLocation) =>
-    filter.severity === undefined ||
-    issue.outcome?.criticality === undefined ||
-    issue.outcome?.criticality >= criticality;
-
-  const byPath = (issue: TestLogReportWithLocation) =>
-    filter?.path === undefined || issue.path === filter.path;
-
-  const byMethod = (issue: TestLogReportWithLocation) =>
-    filter?.method === undefined || issue.method === filter.method;
-
-  const byOperationId = (issue: TestLogReportWithLocation) =>
-    filter?.operationId === undefined || issue.operationId === filter.operationId;
-
-  return issues.filter((issue) => {
-    return (
-      byTitle(issue) &&
-      byCriticality(issue) &&
-      byPath(issue) &&
-      byMethod(issue) &&
-      byOperationId(issue)
-    );
-  });
+  // const byTitle = (issue: TestLogReportWithLocation) =>
+  //   filter?.title === undefined || issue.test?.key === filter.title;
+  // const criticality =
+  //   filter.severity !== undefined ? SeverityLevels.indexOf(filter.severity) + 1 : 0;
+  // const byCriticality = (issue: TestLogReportWithLocation) =>
+  //   filter.severity === undefined ||
+  //   issue.outcome?.criticality === undefined ||
+  //   issue.outcome?.criticality >= criticality;
+  // const byPath = (issue: TestLogReportWithLocation) =>
+  //   filter?.path === undefined || issue.path === filter.path;
+  // const byMethod = (issue: TestLogReportWithLocation) =>
+  //   filter?.method === undefined || issue.method === filter.method;
+  // const byOperationId = (issue: TestLogReportWithLocation) =>
+  //   filter?.operationId === undefined || issue.operationId === filter.operationId;
+  // return issues.filter((issue) => {
+  //   return (
+  //     byTitle(issue) &&
+  //     byCriticality(issue) &&
+  //     byPath(issue) &&
+  //     byMethod(issue) &&
+  //     byOperationId(issue)
+  //   );
+  // });
 }
 
 // function groupIssues(issues: TestLogReportWithLocation[]): {

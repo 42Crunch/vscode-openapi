@@ -5,6 +5,7 @@ export type Page<T> = {
   items: T[];
   pages: number;
   total: number;
+  current: number;
 };
 
 export type HappyPathEntry = {
@@ -19,6 +20,14 @@ export type TestEntry = {
   path: string;
   method: string;
   test: TestLogReport;
+};
+
+export type Filter = {
+  criticality?: number;
+  testKey?: number;
+  path?: number;
+  method?: number;
+  operationId?: number;
 };
 
 export class ReportDb {
@@ -37,6 +46,7 @@ export class ReportDb {
       happyPathIndex: "id,pathIndex",
       pathIndex: "id",
       operationIdIndex: "id",
+      testKeyIndex: "id",
     });
     this.paths = [];
   }
@@ -55,6 +65,7 @@ export class ReportDb {
     await this.db.happyPathIndex.clear();
     await this.db.pathIndex.clear();
     await this.db.operationIdIndex.clear();
+    await this.db.testKeyIndex.clear();
     await this.db.operation.clear();
   }
 
@@ -106,7 +117,10 @@ export class ReportDb {
     await this.db.testIndex.bulkPut(index);
   }
 
-  async bulkPutIndex(indexName: "path" | "operationId", index: { id: number; value: string }[]) {
+  async bulkPutIndex(
+    indexName: "path" | "operationId" | "testKey",
+    index: { id: number; value: string }[]
+  ) {
     switch (indexName) {
       case "path":
         //index.forEach((entry) => this.paths.push(entry.value)); // this is used temp only in path dropdown ui
@@ -114,6 +128,9 @@ export class ReportDb {
         break;
       case "operationId":
         await this.db.operationIdIndex.bulkPut(index);
+        break;
+      case "testKey":
+        await this.db.testKeyIndex.bulkPut(index);
         break;
     }
   }
@@ -149,6 +166,7 @@ export class ReportDb {
     return {
       items,
       pages,
+      current: pageIndex,
       total: found.length,
     };
   }
@@ -156,7 +174,8 @@ export class ReportDb {
   async getTests(
     pageIndex: number,
     pageSize: number,
-    sort: { fieldName: string; order?: "asc" | "desc" } | undefined
+    sort: { fieldName: string; order?: "asc" | "desc" } | undefined,
+    filter: Filter
   ): Promise<Page<TestEntry>> {
     const index = await this.readTestIndex(sort);
 
@@ -198,6 +217,7 @@ export class ReportDb {
     return {
       items,
       pages,
+      current: pageIndex,
       total: found.length,
     };
   }
@@ -216,6 +236,15 @@ export class ReportDb {
       return operationIds.map((operationId: any) => ({
         value: operationId.id,
         label: operationId.value,
+      }));
+    });
+  }
+
+  async getTestKeys(): Promise<{ value: number; label: string }[]> {
+    return this.db.testKeyIndex.toArray().then((testKeys: any) => {
+      return testKeys.map((testKey: any) => ({
+        value: testKey.id,
+        label: testKey.value,
       }));
     });
   }

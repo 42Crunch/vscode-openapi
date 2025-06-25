@@ -164,6 +164,31 @@ function makeParser2(options: ParsedOption[], optionsStack: Array<ParsedOption |
   });
 }
 
+export class Index {
+  private contents: Map<string, number>;
+
+  constructor() {
+    this.contents = new Map<string, number>();
+  }
+
+  put(value: string): number {
+    if (!this.contents.has(value)) {
+      const index = this.contents.size;
+      this.contents.set(value, index);
+      return index;
+    }
+    return this.contents.get(value)!;
+  }
+
+  entries(): { id: number; value: string }[] {
+    const objs = new Array(this.contents.size);
+    for (const [value, id] of this.contents.entries()) {
+      objs[id] = { id, value };
+    }
+    return objs;
+  }
+}
+
 // For storing strings that arrive in a sorted order
 export class IndexStore {
   private contents: Record<string, Map<string, number>> = {};

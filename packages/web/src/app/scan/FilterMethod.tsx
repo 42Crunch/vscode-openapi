@@ -20,13 +20,13 @@ export default function FilterMethod() {
         onSelectedItemChange={(item) => {
           if (item && item.value !== "all") {
             dispatch(
-              changeFilter({ ...filter, method: item.value as HttpMethod, operationId: undefined })
+              changeFilter({ ...filter, method: item.value as number, operationId: undefined })
             );
           } else {
             dispatch(changeFilter({ ...filter, method: undefined, operationId: undefined }));
           }
         }}
-        selected={filter.method || "all"}
+        selected={filter.method ?? "all"}
       />
     </Container>
   );
