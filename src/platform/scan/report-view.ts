@@ -99,6 +99,11 @@ export class ScanReportWebView extends WebView<Webapp> {
     if (this.temporaryReportDirectory !== undefined) {
       await cleanupTempScanDirectory(this.temporaryReportDirectory);
     }
+    if (this.chunksAbortController) {
+      this.chunksAbortController.abort();
+      this.chunksAbortController = undefined;
+      this.chunks = undefined;
+    }
     await super.onDispose();
   }
 
@@ -142,7 +147,7 @@ export class ScanReportWebView extends WebView<Webapp> {
     });
 
     this.chunksAbortController = new AbortController();
-    this.chunks = readFileChunks(reportFilename, 1024, this.chunksAbortController.signal);
+    this.chunks = readFileChunks(reportFilename, 1024 * 512, this.chunksAbortController.signal);
     const { value, done } = await this.chunks.next();
     await this.sendRequest({
       command: "parseChunk",
