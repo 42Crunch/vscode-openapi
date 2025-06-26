@@ -27,7 +27,6 @@ import { Routes } from "../../features/router/RouterContext";
 import { startListeners } from "../webapp";
 import { ReportDb } from "./db/reportdb";
 import { ScanReportParser } from "./db/scanreportparser";
-import { stores } from "./db/schema";
 import { getDexieStores } from "@xliic/streaming-parser";
 
 const listenerMiddleware = createListenerMiddleware();
@@ -35,9 +34,8 @@ type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 const startAppListening = listenerMiddleware.startListening as AppStartListening;
 
 export function createListener(host: Webapp["host"], routes: Routes) {
-  let schema = stores();
-  const reportDb = new ReportDb("scanv2-report", getDexieStores(schema));
-  let parser = new ScanReportParser(reportDb, schema);
+  const reportDb = new ReportDb("scanv2-report");
+  const parser = new ScanReportParser(reportDb);
 
   const onParseChunk = () =>
     startAppListening({

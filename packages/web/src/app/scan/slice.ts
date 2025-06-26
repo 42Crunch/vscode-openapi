@@ -8,15 +8,9 @@ import {
   SingleOperationScanReport,
   FullScanReport,
 } from "@xliic/common/scan";
-import { HttpResponse } from "@xliic/common/http";
 import { GeneralError } from "@xliic/common/error";
 import { Preferences } from "@xliic/common/prefs";
-import {
-  HappyPathReport,
-  RuntimeOperationReport,
-  ScanReportJSONSchema,
-  TestLogReport,
-} from "@xliic/common/scan-report";
+import { ScanReportJSONSchema, TestLogReport } from "@xliic/common/scan-report";
 import { HappyPathEntry, Page, TestEntry } from "./db/reportdb";
 
 export type Filter = {

@@ -1,5 +1,4 @@
 import { makeParser, MutableId, Parser } from "@xliic/streaming-parser";
-import { ReportDb } from "./reportdb";
 import {
   GlobalSummary,
   HappyPathReport,
@@ -7,13 +6,15 @@ import {
   TestLogReport,
 } from "@xliic/common/scan-report";
 import { HttpMethod, HttpMethods } from "@xliic/openapi";
-import { stores as schema } from "./schema";
+
+import { ReportDb } from "./reportdb";
+import { stores } from "./schema";
 
 export class ScanReportParser {
   private db: ReportDb;
   private parser: Parser;
   private readonly methods: Record<HttpMethod, number>;
-  private stores: ReturnType<typeof schema>;
+  private stores: ReturnType<typeof stores>;
 
   private scanVersion: string;
   private summary: GlobalSummary | undefined;
@@ -25,9 +26,9 @@ export class ScanReportParser {
 
   private operationsMap: Map<MutableId, { pathIndex: MutableId; methodIndex: number }>;
 
-  constructor(db: ReportDb, stores: ReturnType<typeof schema>) {
+  constructor(db: ReportDb) {
     this.db = db;
-    this.stores = stores;
+    this.stores = stores();
     this.parser = this.makeParser();
     this.methods = Object.fromEntries(
       HttpMethods.map((method, index) => [method, index])
@@ -88,8 +89,8 @@ export class ScanReportParser {
       );
 
       this.parser.end();
-
-      console.log("Parsed", this.scanVersion, this.summary);
+      this.stores = null as any;
+      this.operationsMap = null as any;
       return true;
     }
   }

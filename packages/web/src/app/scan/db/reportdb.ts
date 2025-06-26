@@ -2,6 +2,9 @@ import Dexie from "dexie";
 
 import { HappyPathReport, RuntimeOperationReport, TestLogReport } from "@xliic/common/scan-report";
 
+import { stores } from "./schema";
+import { getDexieStores } from "@xliic/streaming-parser";
+
 export type Page<T> = {
   items: T[];
   pages: number;
@@ -34,15 +37,13 @@ export type Filter = {
 export class ReportDb {
   private readonly name: string = "";
   private db: any;
-  private stores: Record<string, string>;
+  private stores: ReturnType<typeof getDexieStores>;
 
-  constructor(name: string, stores: Record<string, string>) {
+  constructor(name: string) {
     this.name = name;
-    this.stores = stores;
     this.db = new Dexie(this.name);
-    this.db.version(1).stores(stores);
-
-    console.log("created stores", this.stores);
+    this.stores = getDexieStores(stores());
+    this.db.version(1).stores(this.stores);
   }
 
   async initDb() {
@@ -51,6 +52,7 @@ export class ReportDb {
     } catch (error) {
       console.error("Error deleting database:", error);
     }
+
     await this.db.open();
 
     for (const storeName of Object.keys(this.stores)) {
@@ -59,7 +61,6 @@ export class ReportDb {
   }
 
   async save(storeName: string, items: unknown[]) {
-    console.log("saving", storeName, items);
     if (items.length > 0) {
       await this.db[storeName].bulkPut(items);
     }
