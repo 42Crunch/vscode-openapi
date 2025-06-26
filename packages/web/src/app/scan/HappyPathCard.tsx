@@ -1,38 +1,36 @@
 import styled from "styled-components";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { RuntimeOperationReport } from "@xliic/common/scan-report";
 
 import { HappyPath } from "./HappyPath";
 import CollapsibleCard from "../../new-components/CollapsibleCard";
 import { Check, TriangleExclamation } from "../../icons";
 
+import { HappyPathEntry } from "./db/reportdb";
+
 export function HappyPathCard({
-  operation,
-  operationId,
+  report,
   defaultCollapsed,
 }: {
-  operation: RuntimeOperationReport;
-  operationId: string;
+  report: HappyPathEntry;
   defaultCollapsed: boolean;
 }) {
-  const successes = operation.scenarios?.map((scenario) => scenario?.outcome?.testSuccessful);
-  const hasSuccess = successes !== undefined && successes.every((success) => success !== undefined);
-  const isSuccessOrFuzzed = hasSuccess ? successes.every((success) => success) : operation.fuzzed;
+  const success = report.report.outcome?.testSuccessful;
+  const isSuccessOrFuzzed = success !== undefined ? success : report.operation.fuzzed;
 
   return (
     <Container>
       <CollapsibleCard defaultCollapsed={defaultCollapsed}>
         <Top>
-          <span>{operationId}</span>
+          <span>{report.operationId}</span>
           <span>{isSuccessOrFuzzed ? "Passed" : "Failed"}</span>
         </Top>
         <Bottom>
-          <Method>{operation.method}</Method>
-          <Path>{operation.path}</Path>
+          <Method>{report.operation.method}</Method>
+          <Path>{report.operation.path}</Path>
           {isSuccessOrFuzzed ? <Check /> : <TriangleExclamation />}
         </Bottom>
-        <HappyPath operation={operation} />
+        <HappyPath report={report.report} />
       </CollapsibleCard>
     </Container>
   );

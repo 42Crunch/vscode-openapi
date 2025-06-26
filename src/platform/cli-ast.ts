@@ -245,7 +245,9 @@ export async function runScanWithCliBinary(
   oas: string,
   scanconf: string,
   isFullScan: boolean
-): Promise<Result<{ scan: unknown; cli: CliResponse; tempScanDirectory: string }, CliError>> {
+): Promise<
+  Result<{ reportFilename: string; cli: CliResponse; tempScanDirectory: string }, CliError>
+> {
   logger.info(`Running API Conformance Scan using 42Crunch API Security Testing Binary`);
 
   const { cliFreemiumdHost } = getEndpoints(config.internalUseDevEndpoints);
@@ -313,11 +315,9 @@ export async function runScanWithCliBinary(
       maxBuffer: execMaxBuffer,
     });
 
-    const report = await readFile(reportFilename, { encoding: "utf8" });
-    const parsed = JSON.parse(report);
     const cliResponse = parseCliJsonResponse(output.stdout);
 
-    return [{ scan: parsed, cli: cliResponse!, tempScanDirectory: dir }, undefined];
+    return [{ reportFilename, cli: cliResponse!, tempScanDirectory: dir }, undefined];
   } catch (ex: any) {
     const error = readException(ex);
     const json = parseCliJsonResponse(error.stdout);

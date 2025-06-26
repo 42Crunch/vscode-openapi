@@ -6,14 +6,15 @@ import { PlainSelect } from "../../components/Select";
 import { changeFilter } from "./slice";
 
 export default function FilterTitle() {
-  const { filter, titles } = useAppSelector((state) => state.scan);
   const dispatch = useAppDispatch();
+  const filter = useAppSelector((state) => state.scan.filter);
+  const testKeys = useAppSelector((state) => state.scan.scanReport?.testKeys || []);
 
   const options = [];
 
-  for (const key of titles) {
-    if (kdbTitles[key]) {
-      options.push({ label: kdbTitles[key], value: key });
+  for (const { value, label } of testKeys) {
+    if (kdbTitles[label]) {
+      options.push({ label: kdbTitles[label], value });
     }
   }
 
@@ -25,12 +26,12 @@ export default function FilterTitle() {
         placeholder="All"
         onSelectedItemChange={(item) => {
           if (item && item.value !== "all") {
-            dispatch(changeFilter({ ...filter, title: item.value as string }));
+            dispatch(changeFilter({ ...filter, testKey: item.value as number }));
           } else {
-            dispatch(changeFilter({ ...filter, title: undefined }));
+            dispatch(changeFilter({ ...filter, testKey: undefined }));
           }
         }}
-        selected={filter.title || "all"}
+        selected={filter.testKey ?? "all"}
       />
     </Container>
   );

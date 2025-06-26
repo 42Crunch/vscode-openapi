@@ -8,15 +8,7 @@ import { useAppDispatch } from "./store";
 
 import { sendCurlRequest } from "./slice";
 
-export default function CurlRequest({
-  curl,
-  id,
-  waiting,
-}: {
-  curl: string;
-  id: string;
-  waiting: boolean;
-}) {
+export default function CurlRequest({ curl }: { curl: string }) {
   const dispatch = useAppDispatch();
 
   return (

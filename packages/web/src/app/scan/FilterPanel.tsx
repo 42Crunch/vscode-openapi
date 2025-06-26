@@ -12,30 +12,26 @@ import FilterOperationId from "./FilterOperationId";
 import FilterMethod from "./FilterMethod";
 
 export default function FilterPanel() {
-  const { filter, grouped } = useAppSelector((state) => state.scan);
-  const [collapsed, setCollapsed] = useState(true);
-  const names = ["severity", "title"] as (keyof Filter)[];
-  const count = names.filter((name) => filter && filter[name] !== undefined).length;
-  const issues = Object.keys(grouped)
-    .map((key) => grouped[key].length)
-    .reduce((sum, current) => sum + current, 0);
+  // const { filter } = useAppSelector((state) => state.scan);
+  // const [collapsed, setCollapsed] = useState(false);
+  // const names = ["severity", "title"] as (keyof Filter)[];
+  // const count = names.filter((name) => filter && filter[name] !== undefined).length;
 
   return (
     <Container>
-      <Top>
-        <div>{issues} issues</div>
+      {/* <Top>
         <FilterButton filters={count} onClick={() => setCollapsed(!collapsed)} />
-      </Top>
-      {!collapsed && (
-        <Bottom>
-          <FilterCriticality />
-          <FilterTitle />
-          <FilterPath />
-          <FilterMethod />
-          <FilterOperationId />
-          <FilterResetAll />
-        </Bottom>
-      )}
+      </Top> */}
+      {/* {!collapsed && ( */}
+      <Bottom>
+        <FilterCriticality />
+        <FilterTitle />
+        <FilterPath />
+        <FilterMethod />
+        <FilterOperationId />
+        <FilterResetAll />
+      </Bottom>
+      {/* )} */}
     </Container>
   );
 }

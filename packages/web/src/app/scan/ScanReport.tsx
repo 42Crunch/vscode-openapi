@@ -1,18 +1,25 @@
 import styled from "styled-components";
 
-import { useAppDispatch, useAppSelector } from "./store";
 import LogMessages from "../../features/logging/LogMessages";
-import { OasState, changeTab } from "./slice";
+import { TabContainer } from "../../new-components/Tabs";
+
+import { useAppDispatch, useAppSelector } from "./store";
+import { State, changeTab } from "./slice";
+import { loadHappyPathPage } from "./slice";
+
+import { HappyPathCard } from "./HappyPathCard";
 import { ScanSummary } from "./ScanSummary";
 import ScanIssues from "./ScanIssues";
-import { TabContainer } from "../../new-components/Tabs";
-import { HappyPathCard } from "./HappyPathCard";
+import Paginator from "./Paginator";
 
 export default function ScanReport() {
   const dispatch = useAppDispatch();
 
-  const { scanReport, operations, responses, errors, waitings, tab, issues, grouped } =
-    useAppSelector((state) => state.scan);
+  const { scanReport, tab, happyPathPage } = useAppSelector((state) => state.scan);
+
+  const handlePageChange = (pageIndex: number) => {
+    dispatch(loadHappyPathPage(pageIndex));
+  };
 
   if (scanReport === undefined) {
     return (
@@ -22,47 +29,35 @@ export default function ScanReport() {
     );
   }
 
-  const entries = Object.entries(operations);
-
   return (
     <TabContainer
       activeTab={tab}
-      setActiveTab={(tab) => dispatch(changeTab(tab as OasState["tab"]))}
+      setActiveTab={(tab) => dispatch(changeTab(tab as State["tab"]))}
       tabs={[
         {
           id: "summary",
           title: "Summary",
           content: (
             <Summary>
-              <ScanSummary
-                issues={issues as any}
-                global={scanReport.summary}
-                scanVersion={scanReport.scanVersion}
-              />
+              <ScanSummary report={scanReport} />
               <div style={{ fontWeight: 600, margin: "8px" }}>Happy Path Testing results</div>
-              {entries.map(([operationId, operation]) => (
-                <HappyPathCard
-                  defaultCollapsed={entries.length > 1}
-                  operationId={operationId}
-                  operation={operation}
-                  key={operationId}
-                />
+
+              {happyPathPage.items.map((entry, index) => (
+                <HappyPathCard defaultCollapsed={true} report={entry} key={index} />
               ))}
+
+              <Paginator
+                current={happyPathPage.current}
+                total={happyPathPage.pages}
+                onPageChange={handlePageChange}
+              />
             </Summary>
           ),
         },
         {
           id: "tests",
           title: "Tests",
-          content: (
-            <ScanIssues
-              issues={issues}
-              grouped={grouped}
-              responses={responses}
-              errors={errors}
-              waitings={waitings}
-            />
-          ),
+          content: <ScanIssues />,
         },
         { id: "logs", title: "Logs", content: <LogMessages /> },
       ]}

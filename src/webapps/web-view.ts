@@ -85,13 +85,16 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
       }
       // create the panel
       const panel = this.createPanel();
+
       panel.onDidDispose(() => {
+        this.session = undefined;
         this.onDispose();
       });
+
       panel.webview.onDidReceiveMessage(async (message: any) => {
-        if (message.command === "started" && message.session) {
+        if (this.session === undefined && message.command === "started" && message.payload) {
           this.panel = panel;
-          this.session = message.session;
+          this.session = message.payload;
           await this.onStart();
           resolve();
         } else {
@@ -171,13 +174,15 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
     <script>
       window.addEventListener("DOMContentLoaded", (event) => {
         const vscode = acquireVsCodeApi();
-        window.renderWebView({
+        const result = window.renderWebView({
           postMessage: (message) => {
             console.log('sending message', message);
             vscode.postMessage(message);
           }
         });
-        vscode.postMessage({command: "started", session: crypto.randomUUID()});
+        if (!result?.skipAutoStart) {
+          vscode.postMessage({command: "started", payload: crypto.randomUUID()});
+        }
       });
     </script>
     </body>
@@ -208,8 +213,10 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
     <script>
       window.addEventListener("DOMContentLoaded", (event) => {
         const vscode = acquireVsCodeApi();
-        window.renderWebView(vscode);
-        vscode.postMessage({command: "started", session: crypto.randomUUID()});
+        const result = window.renderWebView(vscode);
+        if (!result?.skipAutoStart) {
+          vscode.postMessage({command: "started", payload: crypto.randomUUID()});
+        }
       });
     </script>
     </body>

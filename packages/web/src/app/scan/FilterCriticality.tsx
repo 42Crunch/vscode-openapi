@@ -10,13 +10,13 @@ export default function FilterCriticality() {
   const filter = useAppSelector((state) => state.scan.filter);
   const dispatch = useAppDispatch();
 
-  const options: { label: string; value: SeverityLevel | "all" }[] = [
+  const options: { label: string; value: number | "all" }[] = [
     { label: "All", value: "all" },
-    { label: "Critical", value: "critical" },
-    { label: "High", value: "high" },
-    { label: "Medium", value: "medium" },
-    { label: "Low", value: "low" },
-    { label: "Info", value: "info" },
+    { label: "Critical", value: 5 },
+    { label: "High", value: 4 },
+    { label: "Medium", value: 3 },
+    { label: "Low", value: 2 },
+    { label: "Info", value: 1 },
   ];
 
   return (
@@ -27,12 +27,12 @@ export default function FilterCriticality() {
         placeholder="All"
         onSelectedItemChange={(item) => {
           if (item && item.value !== "all") {
-            dispatch(changeFilter({ ...filter, severity: item?.value as SeverityLevel }));
+            dispatch(changeFilter({ ...filter, criticality: item?.value as number }));
           } else {
-            dispatch(changeFilter({ ...filter, severity: undefined }));
+            dispatch(changeFilter({ ...filter, criticality: undefined }));
           }
         }}
-        selected={filter?.severity || "all"}
+        selected={filter?.criticality || "all"}
       />
     </Container>
   );

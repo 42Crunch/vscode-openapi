@@ -22,6 +22,7 @@
     "@reduxjs/toolkit": "^2.1.1",
     "@xliic/preserving-json-yaml-parser": "^1.11.0",
     "buffer": "6.0.3",
+    "dexie": "^4.0.11",
     "downshift": "^9.0.9",
     "json-schema-faker": "0.5.8",
     "jsonpath-plus": "^10.3.0",
