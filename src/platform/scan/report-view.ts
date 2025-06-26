@@ -36,14 +36,6 @@ export class ScanReportWebView extends WebView<Webapp> {
     private prefs: Record<string, Preferences>
   ) {
     super(extensionPath, "scan", title, vscode.ViewColumn.One, "eye");
-    envStore.onEnvironmentDidChange((env) => {
-      if (this.isActive()) {
-        this.sendRequest({
-          command: "loadEnv",
-          payload: { default: undefined, secrets: undefined, [env.name]: env.environment },
-        });
-      }
-    });
 
     vscode.window.onDidChangeActiveColorTheme((e) => {
       if (this.isActive()) {
@@ -57,20 +49,6 @@ export class ScanReportWebView extends WebView<Webapp> {
 
     sendCurlRequest: async (curl: string): Promise<void> => {
       return copyCurl(curl);
-    },
-
-    savePrefs: async (prefs: Preferences) => {
-      if (this.document) {
-        const uri = this.document.uri.toString();
-        this.prefs[uri] = {
-          ...this.prefs[uri],
-          ...prefs,
-        };
-      }
-    },
-
-    showEnvWindow: async () => {
-      vscode.commands.executeCommand("openapi.showEnvironment");
     },
 
     showJsonPointer: async (payload: string) => {
@@ -160,9 +138,6 @@ export class ScanReportWebView extends WebView<Webapp> {
       payload: {
         path,
         method,
-        //report: report as any,
-        security: undefined,
-        oas,
       },
     });
 
@@ -178,14 +153,11 @@ export class ScanReportWebView extends WebView<Webapp> {
   async showFullScanReport(reportFilename: string, oas: BundledSwaggerOrOasSpec) {
     await this.sendRequest({
       command: "showFullScanReport",
-      payload: {
-        security: undefined,
-        oas,
-      },
+      payload: {},
     });
 
     this.chunksAbortController = new AbortController();
-    this.chunks = readFileChunks(reportFilename, 1024, this.chunksAbortController.signal);
+    this.chunks = readFileChunks(reportFilename, 1024 * 512, this.chunksAbortController.signal);
     const { value, done } = await this.chunks.next();
     await this.sendRequest({
       command: "parseChunk",

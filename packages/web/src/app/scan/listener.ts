@@ -1,13 +1,10 @@
 import {
   createListenerMiddleware,
-  isAnyOf,
   TypedStartListening,
   UnsubscribeListener,
 } from "@reduxjs/toolkit";
 import { Webapp } from "@xliic/common/webapp/scan";
 import { AppDispatch, RootState } from "./store";
-import { showEnvWindow } from "../../features/env/slice";
-import { setSecretForSecurity, setScanServer } from "../../features/prefs/slice";
 import {
   sendCurlRequest,
   showJsonPointer,
@@ -27,7 +24,6 @@ import { Routes } from "../../features/router/RouterContext";
 import { startListeners } from "../webapp";
 import { ReportDb } from "./db/reportdb";
 import { ScanReportParser } from "./db/scanreportparser";
-import { getDexieStores } from "@xliic/streaming-parser";
 
 const listenerMiddleware = createListenerMiddleware();
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
@@ -111,18 +107,6 @@ export function createListener(host: Webapp["host"], routes: Routes) {
         },
       }),
 
-    savePrefs: () =>
-      startAppListening({
-        matcher: isAnyOf(setScanServer, setSecretForSecurity),
-        effect: async (action, listenerApi) => {
-          const { prefs } = listenerApi.getState();
-          host.postMessage({
-            command: "savePrefs",
-            payload: prefs,
-          });
-        },
-      }),
-
     sendCurlRequest: () =>
       startAppListening({
         actionCreator: sendCurlRequest,
@@ -142,14 +126,6 @@ export function createListener(host: Webapp["host"], routes: Routes) {
             command: "showJsonPointer",
             payload: action.payload,
           });
-        },
-      }),
-
-    showEnvWindow: () =>
-      startAppListening({
-        actionCreator: showEnvWindow,
-        effect: async (action, listenerApi) => {
-          host.postMessage({ command: "showEnvWindow", payload: undefined });
         },
       }),
   };

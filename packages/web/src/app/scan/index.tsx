@@ -13,8 +13,6 @@ import { RouterContext, Routes } from "../../features/router/RouterContext";
 
 import { showScanReport, showFullScanReport, showGeneralError, parseChunk, started } from "./slice";
 
-import { loadEnv } from "../../features/env/slice";
-import { loadPrefs } from "../../features/prefs/slice";
 import { loadConfig } from "../../features/config/slice";
 import { showLogMessage } from "../../features/logging/slice";
 
@@ -41,8 +39,6 @@ const messageHandlers: Webapp["webappHandlers"] = {
   showGeneralError,
   showScanReport,
   showFullScanReport,
-  loadEnv,
-  loadPrefs,
   loadConfig,
   showLogMessage,
   parseChunk,
