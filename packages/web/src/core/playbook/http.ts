@@ -281,7 +281,7 @@ function makeOasSecurities(oas: BundledOasSpec, security: AuthResult): any {
         scheme.scheme !== undefined &&
         /^basic$/i.test(scheme.scheme)
       ) {
-        result[name] = decodeBasicAuthCredential(securityValue);
+        result[name] = explodeHttpBasic(securityValue);
       } else {
         result[name] = securityValue;
       }
@@ -317,7 +317,7 @@ function makeSwaggerSecurities(
       if (scheme?.type === "oauth") {
         result[name] = { token: { access_token: securityValue } };
       } else if (scheme?.type === "basic") {
-        result[name] = decodeBasicAuthCredential(securityValue);
+        result[name] = explodeHttpBasic(securityValue);
       } else {
         result[name] = securityValue;
       }
@@ -396,18 +396,13 @@ function isValidBase64(str: string): boolean {
   }
 }
 
-function decodeBasicAuthCredential(securityValue: string): { username: string; password: string } {
-  if (!isValidBase64(securityValue)) {
-    throw new Error("Credential must be a valid base64 string");
-  }
-
-  const decoded = atob(securityValue);
-  if (!decoded.includes(":")) {
+function explodeHttpBasic(securityValue: string): { username: string; password: string } {
+  if (!securityValue.includes(":")) {
     throw new Error(
       "Basic auth credential must contain a username and password separated by a colon"
     );
   }
 
-  const [username, password] = decoded.split(":", 2);
+  const [username, password] = securityValue.split(":", 2);
   return { username, password };
 }
