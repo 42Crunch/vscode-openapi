@@ -1,5 +1,6 @@
-import { HappyPathReport, RuntimeOperationReport, TestLogReport } from "@xliic/common/scan-report";
 import Dexie from "dexie";
+
+import { HappyPathReport, RuntimeOperationReport, TestLogReport } from "@xliic/common/scan-report";
 
 export type Page<T> = {
   items: T[];
@@ -33,22 +34,15 @@ export type Filter = {
 export class ReportDb {
   private readonly name: string = "";
   private db: any;
-  public paths: string[];
+  private stores: Record<string, string>;
 
-  constructor(name: string) {
+  constructor(name: string, stores: Record<string, string>) {
     this.name = name;
+    this.stores = stores;
     this.db = new Dexie(this.name);
-    this.db.version(1).stores({
-      test: "id",
-      happyPath: "id",
-      operation: "id",
-      testIndex: "id,pathIndex,criticality",
-      happyPathIndex: "id,pathIndex",
-      pathIndex: "id",
-      operationIdIndex: "id",
-      testKeyIndex: "id",
-    });
-    this.paths = [];
+    this.db.version(1).stores(stores);
+
+    console.log("created stores", this.stores);
   }
 
   async initDb() {
@@ -59,80 +53,25 @@ export class ReportDb {
     }
     await this.db.open();
 
-    await this.db.test.clear();
-    await this.db.happyPath.clear();
-    await this.db.testIndex.clear();
-    await this.db.happyPathIndex.clear();
-    await this.db.pathIndex.clear();
-    await this.db.operationIdIndex.clear();
-    await this.db.testKeyIndex.clear();
-    await this.db.operation.clear();
-  }
-
-  closeDb(): void {
-    // disableAutoOpen: false - allows us to open db instantly after closing
-    this.db.close({ disableAutoOpen: false });
-  }
-
-  async saveOperations(operations: { id: number; value: unknown }[]) {
-    if (operations.length > 0) {
-      await this.db.operation.bulkPut(operations);
+    for (const storeName of Object.keys(this.stores)) {
+      await this.db[storeName].clear();
     }
   }
 
-  async saveTests(tests: { id: number; value: unknown }[]) {
-    if (tests.length > 0) {
-      await this.db.test.bulkPut(tests);
+  async save(storeName: string, items: unknown[]) {
+    console.log("saving", storeName, items);
+    if (items.length > 0) {
+      await this.db[storeName].bulkPut(items);
     }
   }
 
-  async saveHappyPaths(happyPaths: { id: number; value: unknown }[]) {
-    if (happyPaths.length > 0) {
-      await this.db.happyPath.bulkPut(happyPaths);
-    }
-  }
-
-  async bulkPutEntryIndex(
-    index: {
-      id: number;
-      path: number;
-      method: number;
-      criticality: number;
-      issueType: number;
-      operation: number;
-    }[]
-  ) {
-    await this.db.entryIndex.bulkPut(index);
-  }
-
-  async bulkPutOperationIndex(index: unknown[]) {
-    await this.db.operationIndex.bulkPut(index);
-  }
-
-  async bulkPutHappyPathIndex(index: unknown[]) {
-    await this.db.happyPathIndex.bulkPut(index);
-  }
-
-  async bulkPutTestIndex(index: unknown[]) {
-    await this.db.testIndex.bulkPut(index);
-  }
-
-  async bulkPutIndex(
-    indexName: "path" | "operationId" | "testKey",
-    index: { id: number; value: string }[]
-  ) {
-    switch (indexName) {
-      case "path":
-        //index.forEach((entry) => this.paths.push(entry.value)); // this is used temp only in path dropdown ui
-        await this.db.pathIndex.bulkPut(index);
-        break;
-      case "operationId":
-        await this.db.operationIdIndex.bulkPut(index);
-        break;
-      case "testKey":
-        await this.db.testKeyIndex.bulkPut(index);
-        break;
-    }
+  async getStrings(storeName: string): Promise<{ value: number; label: string }[]> {
+    return this.db[storeName].toArray().then((entries: any) => {
+      return entries.map((entry: any) => ({
+        value: entry.id,
+        label: entry.value,
+      }));
+    });
   }
 
   async getHappyPaths(
@@ -209,9 +148,6 @@ export class ReportDb {
       }
     }
 
-    console.log("index", index);
-    console.log("found", filter, found);
-
     const indexPage = paginate(found, pageIndex, pageSize);
     const pages = Math.ceil(found.length / pageSize);
 
@@ -235,7 +171,7 @@ export class ReportDb {
         operationId: operationId?.value,
         operation: operation?.value,
         path: path?.value,
-        method: "FOO",
+        method: "FOO", // FIXME
         test: data.value,
       });
     }
@@ -246,33 +182,6 @@ export class ReportDb {
       current: pageIndex,
       total: found.length,
     };
-  }
-
-  async getPaths(): Promise<{ value: number; label: string }[]> {
-    return this.db.pathIndex.toArray().then((paths: any) => {
-      return paths.map((path: any) => ({
-        value: path.id,
-        label: path.value,
-      }));
-    });
-  }
-
-  async getOperationIds(): Promise<{ value: number; label: string }[]> {
-    return this.db.operationIdIndex.toArray().then((operationIds: any) => {
-      return operationIds.map((operationId: any) => ({
-        value: operationId.id,
-        label: operationId.value,
-      }));
-    });
-  }
-
-  async getTestKeys(): Promise<{ value: number; label: string }[]> {
-    return this.db.testKeyIndex.toArray().then((testKeys: any) => {
-      return testKeys.map((testKey: any) => ({
-        value: testKey.id,
-        label: testKey.value,
-      }));
-    });
   }
 
   private async readHappyPathIndex(
@@ -299,10 +208,6 @@ export class ReportDb {
     }
 
     return index;
-  }
-
-  async makeFullEntry(entry: any, index: any) {
-    return entry;
   }
 }
 

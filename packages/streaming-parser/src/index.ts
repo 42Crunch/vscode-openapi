@@ -164,7 +164,7 @@ function makeParser2(options: ParsedOption[], optionsStack: Array<ParsedOption |
   });
 }
 
-export class Index {
+export class StringIndex {
   private contents: Map<string, number>;
 
   constructor() {
@@ -186,6 +186,44 @@ export class Index {
       objs[id] = { id, value };
     }
     return objs;
+  }
+}
+
+export type MutableId = { id: number };
+
+export class SortableStringIndex {
+  private contents: Map<string, MutableId>;
+
+  constructor() {
+    this.contents = new Map();
+  }
+
+  put(value: string): MutableId {
+    if (!this.contents.has(value)) {
+      const index = { id: this.contents.size };
+      this.contents.set(value, index);
+      return index;
+    }
+    return this.contents.get(value)!;
+  }
+
+  get(value: string): MutableId | undefined {
+    return this.contents.get(value);
+  }
+
+  entries(): { id: number; value: string }[] {
+    const objs = new Array(this.contents.size);
+    for (const [value, { id }] of this.contents.entries()) {
+      objs[id] = { id, value };
+    }
+    return objs;
+  }
+
+  sort(): void {
+    const sorted = Array.from(this.contents.keys()).sort();
+    for (const [index, key] of sorted.entries()) {
+      this.contents.get(key)!.id = index;
+    }
   }
 }
 
@@ -221,11 +259,9 @@ export class IndexStore {
   }
 }
 
-export type SortableIndexStoreIndex = { id: number };
-
 // For storing strings that arrive out of order and have to be sorted, before persisting
 export class SortableIndexStore {
-  private contents: Record<string, Map<string, SortableIndexStoreIndex>> = {};
+  private contents: Record<string, Map<string, MutableId>> = {};
 
   constructor(buckets: readonly string[]) {
     for (const bucket of buckets) {
@@ -233,7 +269,7 @@ export class SortableIndexStore {
     }
   }
 
-  put(bucket: string, value: string): SortableIndexStoreIndex {
+  put(bucket: string, value: string): MutableId {
     if (!this.contents[bucket].has(value)) {
       const index = { id: this.contents[bucket].size };
       this.contents[bucket].set(value, index);
@@ -242,7 +278,7 @@ export class SortableIndexStore {
     return this.contents[bucket].get(value)!;
   }
 
-  get(bucket: string, value: string | undefined): SortableIndexStoreIndex | undefined {
+  get(bucket: string, value: string | undefined): MutableId | undefined {
     if (value === undefined) {
       return undefined;
     }
@@ -269,7 +305,7 @@ export class SortableIndexStore {
 // For storing objects with an auto-incrementing numeric IDs
 // Can be trimmed to free up memory, preserving ID sequence so that
 // new objects can continue to be added with the same ID sequence.
-export class ObjectStore<T> {
+export class Collection<T> {
   private counter: number = 0;
   private contents: { id: number; value: T }[] = [];
 
@@ -290,17 +326,56 @@ export class ObjectStore<T> {
 }
 
 // For storing objects string primary keys that are stored SortableIndexStore
-export class IndexedObjectStore<T> {
-  private contents: { index: SortableIndexStoreIndex; value: T }[] = [];
+export class CollectionWithMutableIndexes<T extends object> {
+  private contents: { index: MutableId | number; value: Omit<T, "id"> }[] = [];
+  private mutable: (keyof T | "id")[];
+  private sortable: (keyof T)[];
+  private flat: boolean = false;
 
-  put(value: T, index: SortableIndexStoreIndex) {
+  constructor(options: { flat?: boolean; mutable?: (keyof T | "id")[]; sortable?: (keyof T)[] }) {
+    this.contents = [];
+    this.mutable = options.mutable || [];
+    this.sortable = options.sortable || [];
+    this.flat = options.flat || false;
+  }
+
+  put(index: MutableId | number, value: Omit<T, "id">) {
     this.contents.push({ index, value });
   }
 
-  objects(): { id: number; value: T }[] {
-    return this.contents.map((item) => ({
-      id: item.index.id,
-      value: item.value,
-    }));
+  objects(patch?: (result: any) => any): { id: number; value: T }[] {
+    return this.contents.map(({ index, value }) => {
+      const id = this.mutable.includes("id") ? (index as MutableId).id : index;
+      const entries = Object.entries(patch ? patch({ ...value }) : value).map(([key, val]) => {
+        if (val !== undefined && this.mutable.includes(key as any)) {
+          return [key, (val as MutableId).id];
+        } else {
+          return [key, val];
+        }
+      });
+
+      //const result = patch ? patch(Object.fromEntries(entries)) : Object.fromEntries(entries);
+      const result = Object.fromEntries(entries);
+
+      return this.flat ? { id, ...result } : { id, value: result };
+    });
   }
+
+  getKeys(): string {
+    return ["id", ...this.sortable].join(",");
+  }
+}
+
+export function getDexieStores(schema: Record<string, unknown>): Record<string, string> {
+  const stores = Object.fromEntries(
+    Object.entries(schema).map(([key, value]) => {
+      if (value instanceof CollectionWithMutableIndexes) {
+        return [key, value.getKeys()];
+      } else {
+        return [key, "id"];
+      }
+    })
+  );
+
+  return stores as Record<string, string>;
 }

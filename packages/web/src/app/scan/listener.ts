@@ -27,20 +27,22 @@ import { Routes } from "../../features/router/RouterContext";
 import { startListeners } from "../webapp";
 import { ReportDb } from "./db/reportdb";
 import { ScanReportParser } from "./db/scanreportparser";
+import { stores } from "./db/schema";
+import { getDexieStores } from "@xliic/streaming-parser";
 
 const listenerMiddleware = createListenerMiddleware();
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 const startAppListening = listenerMiddleware.startListening as AppStartListening;
 
 export function createListener(host: Webapp["host"], routes: Routes) {
-  const reportDb = new ReportDb("scanv2-report");
-  const parser = new ScanReportParser(reportDb);
+  let schema = stores();
+  const reportDb = new ReportDb("scanv2-report", getDexieStores(schema));
+  let parser = new ScanReportParser(reportDb, schema);
 
   const onParseChunk = () =>
     startAppListening({
       actionCreator: parseChunk,
       effect: async (action, listenerApi) => {
-        console.log("parseChunk", action.payload);
         const completed = await parser.parse(action.payload);
         listenerApi.dispatch(parseChunkCompleted());
         if (completed) {
@@ -54,7 +56,6 @@ export function createListener(host: Webapp["host"], routes: Routes) {
     startAppListening({
       actionCreator: loadHappyPathPage,
       effect: async (action, listenerApi) => {
-        console.log("loadHappyPathPage");
         const happyPaths = await reportDb.getHappyPaths(action.payload, 100, undefined);
         listenerApi.dispatch(happyPathPageLoaded(happyPaths));
         listenerApi.dispatch(
@@ -62,9 +63,9 @@ export function createListener(host: Webapp["host"], routes: Routes) {
             scanVersion: parser.getScanVersion(),
             summary: parser.getSummary(),
             stats: parser.getStats(),
-            paths: await parser.getPaths(),
-            operationIds: await parser.getOperationIds(),
-            testKeys: await reportDb.getTestKeys(),
+            paths: await reportDb.getStrings("pathIndex"),
+            operationIds: await reportDb.getStrings("operationIdIndex"),
+            testKeys: await reportDb.getStrings("testKeyIndex"),
           })
         );
       },
@@ -74,7 +75,6 @@ export function createListener(host: Webapp["host"], routes: Routes) {
     startAppListening({
       actionCreator: loadTestsPage,
       effect: async (action, listenerApi) => {
-        console.log("loadTestsPage");
         const {
           scan: { filter },
         } = listenerApi.getState();
@@ -87,7 +87,6 @@ export function createListener(host: Webapp["host"], routes: Routes) {
     startAppListening({
       actionCreator: changeFilter,
       effect: async (action, listenerApi) => {
-        console.log("changeFilter");
         const {
           scan: { filter },
         } = listenerApi.getState();
