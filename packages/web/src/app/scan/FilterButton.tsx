@@ -18,24 +18,19 @@ export default function FilterButton({
       }}
     >
       <Button>
+        <span>Filter</span>
         <Filter />
-        {filters !== 0 && <Counter>{filters}</Counter>}
+        <Counter $visible={filters !== 0}>{filters}</Counter>
       </Button>
     </Container>
   );
 }
 
-const Container = styled.div`
-  width: 34px;
-  height: 26px;
-  position: relative;
-`;
+const Container = styled.div``;
 
-const Counter = styled.div`
-  position: absolute;
-  left: 18px;
-  top: 10px;
+const Counter = styled.div<{ $visible: boolean }>`
   display: flex;
+  visibility: ${({ $visible }) => ($visible ? "visible" : "hidden")};
   align-items: center;
   justify-content: center;
   border-radius: 16px;
@@ -48,16 +43,18 @@ const Counter = styled.div`
 
 const Button = styled.button`
   display: flex;
+  gap: 4px;
   align-items: center;
   cursor: pointer;
   background-color: transparent;
-  color: var(${ThemeColorVariables.buttonForeground});
+  color: var(${ThemeColorVariables.foreground});
   border: none;
-  ${({ waiting }: { disabled?: boolean; waiting?: boolean }) => waiting && "gap: 8px;"}
 
   > span {
     flex: 1;
+    font-weight: 700;
   }
+
   > svg {
     height: 16px;
     width: 16px;

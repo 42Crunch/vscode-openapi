@@ -5,7 +5,7 @@ import { Xmark } from "../../icons";
 
 import { changeFilter } from "./slice";
 
-export default function FilterResetAll() {
+export default function FilterResetAll({ onClick }: { onClick?: () => void }) {
   const dispatch = useAppDispatch();
 
   return (
@@ -14,6 +14,7 @@ export default function FilterResetAll() {
         dispatch(changeFilter({}));
         e.preventDefault();
         e.stopPropagation();
+        onClick?.();
       }}
     >
       <Xmark /> <span>Reset filters</span>

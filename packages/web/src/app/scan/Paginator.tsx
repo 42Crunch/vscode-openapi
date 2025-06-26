@@ -1,4 +1,7 @@
 import styled from "styled-components";
+
+import { ThemeColorVariables } from "@xliic/common/theme";
+
 import { ChevronLeft, ChevronRight } from "../../icons";
 
 export default function Paginator({
@@ -40,6 +43,11 @@ const PaginatorContainer = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  > svg {
+    fill: var(${ThemeColorVariables.foreground});
+    height: 16px;
+    width: 16px;
+  }
 `;
 
 const Arrow = styled.button`

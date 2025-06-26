@@ -27,7 +27,7 @@ export default function ScanIssues() {
 
   return (
     <Container>
-      <FilterPanel />
+      <FilterPanel total={testsPage.total} />
       {testsPage.items.map((issue, index) => (
         <ScanIssue issue={issue} key={`${testsPage.current}-${index}`} />
       ))}
