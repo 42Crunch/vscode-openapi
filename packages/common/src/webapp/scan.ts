@@ -1,7 +1,6 @@
 import { Webapp as App, StartedMessage } from "../message";
 import { ShowScanReportMessage, ShowJsonPointerMessage, ShowFullScanReportMessage } from "../scan";
-import { LoadPreferencesMessage, SavePreferencesMessage } from "../prefs";
-import { LoadEnvMessage, ShowEnvWindow } from "../env";
+import { ShowEnvWindow } from "../env";
 import { ChangeThemeMessage } from "../theme";
 import { ShowGeneralErrorMessage } from "../error";
 import { SendCurlRequestMessage } from "../http";
@@ -12,8 +11,6 @@ import { ParseChunkMessage, ParseChunkCompletedMessage } from "../index-db";
 export type Webapp = App<
   // consumes
   | ShowGeneralErrorMessage
-  | LoadEnvMessage
-  | LoadPreferencesMessage
   | LoadConfigMessage
   | ChangeThemeMessage
   | ShowScanReportMessage
@@ -21,10 +18,5 @@ export type Webapp = App<
   | ShowLogMessage
   | ParseChunkMessage,
   // produces
-  | StartedMessage
-  | ShowEnvWindow
-  | SavePreferencesMessage
-  | SendCurlRequestMessage
-  | ShowJsonPointerMessage
-  | ParseChunkCompletedMessage
+  StartedMessage | SendCurlRequestMessage | ShowJsonPointerMessage | ParseChunkCompletedMessage
 >;
