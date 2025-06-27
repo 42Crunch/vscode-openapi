@@ -254,30 +254,6 @@ async function createDefaultScanConfig(
           await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride);
         } else {
           if (scanRuntime === "cli") {
-            const [report, reportError] = await runAuditWithCliBinary(
-              secrets,
-              config,
-              emptyLogger,
-              oas,
-              [],
-              true,
-              cliDirectoryOverride
-            );
-
-            if (reportError !== undefined) {
-              throw new Error(
-                "Failed to run Audit for Conformance Scan: " + reportError.statusMessage
-                  ? reportError.statusMessage
-                  : JSON.stringify(reportError)
-              );
-            }
-
-            if ((report.audit as any).openapiState !== "valid") {
-              throw new Error(
-                "Your API has structural or semantic issues in its OpenAPI format. Run Security Audit on this file and fix these issues first."
-              );
-            }
-
             await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride);
           } else {
             // this will run audit on the platform as well
