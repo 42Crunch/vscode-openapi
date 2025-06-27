@@ -25,24 +25,14 @@ export type OasWithOperationAndConfig = {
   config: unknown;
 };
 
-export interface SingleOperationScanReport {
-  path: string;
-  method: HttpMethod;
-}
-
-export type FullScanReport = {};
-
 // requests to scan web app
 export type ScanOperationMessage = { command: "scanOperation"; payload: OasWithOperationAndConfig };
 
 export type ShowScanReportMessage = {
   command: "showScanReport";
-  payload: SingleOperationScanReport;
-};
-
-export type ShowFullScanReportMessage = {
-  command: "showFullScanReport";
-  payload: FullScanReport;
+  payload: {
+    apiAlias: string;
+  };
 };
 
 // responses sent from web app to the vs code extension

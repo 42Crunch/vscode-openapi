@@ -1,6 +1,5 @@
 import { Webapp as App, StartedMessage } from "../message";
-import { ShowScanReportMessage, ShowJsonPointerMessage, ShowFullScanReportMessage } from "../scan";
-import { ShowEnvWindow } from "../env";
+import { ShowScanReportMessage, ShowJsonPointerMessage } from "../scan";
 import { ChangeThemeMessage } from "../theme";
 import { ShowGeneralErrorMessage } from "../error";
 import { SendCurlRequestMessage } from "../http";
@@ -14,7 +13,6 @@ export type Webapp = App<
   | LoadConfigMessage
   | ChangeThemeMessage
   | ShowScanReportMessage
-  | ShowFullScanReportMessage
   | ShowLogMessage
   | ParseChunkMessage,
   // produces
