@@ -3,39 +3,29 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
-import { GeneralError } from "@xliic/common/error";
-import { HttpMethod, BundledSwaggerOrOasSpec } from "@xliic/openapi";
-import { LogLevel } from "@xliic/common/logging";
-import { Preferences } from "@xliic/common/prefs";
-import { Webapp } from "@xliic/common/webapp/scan";
 import * as vscode from "vscode";
+import { rmdirSync, unlinkSync, createReadStream } from "node:fs";
+
+import { GeneralError } from "@xliic/common/error";
+import { LogLevel } from "@xliic/common/logging";
+import { Webapp } from "@xliic/common/webapp/scan";
 import { getLocationByPointer } from "../../audit/util";
+
 import { Cache } from "../../cache";
-import { Configuration } from "../../configuration";
-import { EnvStore } from "../../envstore";
 import { WebView } from "../../webapps/web-view";
-import { PlatformStore } from "../stores/platform-store";
 import { join } from "node:path";
 import { existsSync } from "../../util/fs";
-import { rmdirSync, unlinkSync, createReadStream } from "node:fs";
 
 export class ScanReportWebView extends WebView<Webapp> {
   private document?: vscode.TextDocument;
   private temporaryReportDirectory?: string;
   private chunksAbortController?: AbortController;
   private chunks?: AsyncGenerator<string, void, unknown>;
+  private alias: string;
 
-  constructor(
-    title: string,
-    extensionPath: string,
-    private cache: Cache,
-    private configuration: Configuration,
-    private secrets: vscode.SecretStorage,
-    private store: PlatformStore,
-    private envStore: EnvStore,
-    private prefs: Record<string, Preferences>
-  ) {
-    super(extensionPath, "scan", title, vscode.ViewColumn.One, "eye");
+  constructor(alias: string, extensionPath: string, private cache: Cache) {
+    super(extensionPath, "scan", `Scan report ${alias}`, vscode.ViewColumn.One, "eye");
+    this.alias = alias;
 
     vscode.window.onDidChangeActiveColorTheme((e) => {
       if (this.isActive()) {
@@ -130,35 +120,13 @@ export class ScanReportWebView extends WebView<Webapp> {
     await this.show();
   }
 
-  async showScanReport(
-    path: string,
-    method: HttpMethod,
-    reportFilename: string,
-    oas: BundledSwaggerOrOasSpec
-  ) {
-    console.log("showScanReport", path, method, reportFilename);
+  async showScanReport(reportFilename: string) {
     await this.sendRequest({
       command: "showScanReport",
       // FIXME path and method are ignored by the UI, fix message to make 'em optionals
       payload: {
-        path,
-        method,
+        apiAlias: this.alias,
       },
-    });
-
-    this.chunksAbortController = new AbortController();
-    this.chunks = readFileChunks(reportFilename, 1024 * 512, this.chunksAbortController.signal);
-    const { value, done } = await this.chunks.next();
-    await this.sendRequest({
-      command: "parseChunk",
-      payload: done ? null : value,
-    });
-  }
-
-  async showFullScanReport(reportFilename: string, oas: BundledSwaggerOrOasSpec) {
-    await this.sendRequest({
-      command: "showFullScanReport",
-      payload: {},
     });
 
     this.chunksAbortController = new AbortController();

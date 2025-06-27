@@ -11,7 +11,7 @@ import { createListener } from "./listener";
 import { ThemeState, changeTheme } from "../../features/theme/slice";
 import { RouterContext, Routes } from "../../features/router/RouterContext";
 
-import { showScanReport, showFullScanReport, showGeneralError, parseChunk, started } from "./slice";
+import { showScanReport, showGeneralError, parseChunk, started } from "./slice";
 
 import { loadConfig } from "../../features/config/slice";
 import { showLogMessage } from "../../features/logging/slice";
@@ -38,7 +38,6 @@ const messageHandlers: Webapp["webappHandlers"] = {
   changeTheme,
   showGeneralError,
   showScanReport,
-  showFullScanReport,
   loadConfig,
   showLogMessage,
   parseChunk,

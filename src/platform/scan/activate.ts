@@ -66,16 +66,7 @@ export function activate(
     const alias = (await getOpenapiAlias(uri)) || "unknown";
 
     if (reportViews[viewId] === undefined) {
-      reportViews[viewId] = new ScanReportWebView(
-        `Scan report ${alias}`,
-        context.extensionPath,
-        cache,
-        configuration,
-        secrets,
-        store,
-        envStore,
-        prefs
-      );
+      reportViews[viewId] = new ScanReportWebView(alias, context.extensionPath, cache);
     }
 
     return reportViews[viewId];

@@ -6,6 +6,7 @@ import {
 import { Webapp } from "@xliic/common/webapp/scan";
 import { AppDispatch, RootState } from "./store";
 import {
+  showScanReport,
   sendCurlRequest,
   showJsonPointer,
   parseChunkCompleted,
@@ -30,13 +31,23 @@ type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 const startAppListening = listenerMiddleware.startListening as AppStartListening;
 
 export function createListener(host: Webapp["host"], routes: Routes) {
-  const reportDb = new ReportDb("scanv2-report");
+  const reportDb = new ReportDb();
   const parser = new ScanReportParser(reportDb);
+
+  const onShowScanReport = () =>
+    startAppListening({
+      actionCreator: showScanReport,
+      effect: async (action, listenerApi) => {
+        const { apiAlias } = action.payload;
+        await reportDb.initDb(`scanv2-report-${apiAlias}`);
+      },
+    });
 
   const onParseChunk = () =>
     startAppListening({
       actionCreator: parseChunk,
       effect: async (action, listenerApi) => {
+        await reportDb.started();
         const completed = await parser.parse(action.payload);
         listenerApi.dispatch(parseChunkCompleted());
         if (completed) {
@@ -94,7 +105,6 @@ export function createListener(host: Webapp["host"], routes: Routes) {
       startAppListening({
         actionCreator: started,
         effect: async (action, listenerApi) => {
-          await reportDb.initDb();
           host.postMessage({ command: "started", payload: crypto.randomUUID() });
         },
       }),
@@ -133,6 +143,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
   startNavigationListening(startAppListening, routes);
   startListeners({
     ...listeners,
+    onShowScanReport,
     onParseChunk,
     onLoadHappyPathPage,
     onLoadTestsPage,

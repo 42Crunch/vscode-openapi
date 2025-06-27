@@ -2,7 +2,7 @@ import Dexie from "dexie";
 
 import { HappyPathReport, RuntimeOperationReport, TestLogReport } from "@xliic/common/scan-report";
 
-import { stores } from "./schema";
+import { stores as schema } from "./schema";
 import { getDexieStores } from "@xliic/streaming-parser";
 
 export type Page<T> = {
@@ -35,29 +35,37 @@ export type Filter = {
 };
 
 export class ReportDb {
-  private readonly name: string = "";
   private db: any;
-  private stores: ReturnType<typeof getDexieStores>;
+  private readonly startedPromise: Promise<void>;
+  private successfullyStarted?: () => void;
 
-  constructor(name: string) {
-    this.name = name;
-    this.db = new Dexie(this.name);
-    this.stores = getDexieStores(stores());
-    this.db.version(1).stores(this.stores);
+  constructor() {
+    this.startedPromise = new Promise((resolve) => {
+      this.successfullyStarted = resolve;
+    });
   }
 
-  async initDb() {
+  async initDb(name: string) {
+    this.db = new Dexie(name);
+    const stores = getDexieStores(schema());
+    this.db.version(1).stores(stores);
+
     try {
-      await Dexie.delete(this.name);
+      await Dexie.delete(name);
     } catch (error) {
       console.error("Error deleting database:", error);
     }
 
     await this.db.open();
 
-    for (const storeName of Object.keys(this.stores)) {
+    for (const storeName of Object.keys(stores)) {
       await this.db[storeName].clear();
     }
+    this.successfullyStarted?.();
+  }
+
+  started(): Promise<void> {
+    return this.startedPromise;
   }
 
   async save(storeName: string, items: unknown[]) {

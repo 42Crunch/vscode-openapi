@@ -38,6 +38,7 @@ import { formatException } from "../util";
 import { createDefaultConfigWithPlatform } from "./runtime/platform";
 import { createTempDirectory } from "../../util/fs";
 import { writeFile } from "fs/promises";
+import { join } from "path";
 
 export type BundleDocumentVersions = Record<string, number>;
 
@@ -290,7 +291,6 @@ async function runScan(
 ): Promise<void> {
   logger.info(`Starting API Conformance Scan`);
 
-  const oas: BundledSwaggerOrOasSpec = bundle.value;
   const stringOas = stringify(bundle.value);
 
   try {
@@ -360,11 +360,7 @@ async function runScan(
         }
       }
 
-      if (isFullScan) {
-        await reportView.showFullScanReport(result.reportFilename, oas);
-      } else {
-        await reportView.showScanReport(path!, method!, result.reportFilename, oas);
-      }
+      await reportView.showScanReport(result.reportFilename);
     } else {
       const { token, tmpApi } = await createScanconfToken(store, stringOas, scanconf, logger);
 
@@ -396,14 +392,11 @@ async function runScan(
 
       // save report to a temporary directory
       const tempDir = createTempDirectory("scan-report");
-      await writeFile(`${tempDir}/report.json`, JSON.stringify(parsedReport));
+      const reportFilename = join(tempDir, "report.json");
+      await writeFile(reportFilename, JSON.stringify(parsedReport));
       reportView.setTemporaryReportDirectory(tempDir);
 
-      if (isFullScan) {
-        await reportView.showFullScanReport(parsedReport, oas);
-      } else {
-        await reportView.showScanReport(path!, method!, parsedReport, oas);
-      }
+      await reportView.showScanReport(reportFilename);
     }
   } catch (e: any) {
     await reportView.showGeneralError({ message: "Failed to execute scan: " + e.message });

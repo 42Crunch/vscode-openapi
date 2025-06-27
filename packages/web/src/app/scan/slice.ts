@@ -1,10 +1,7 @@
 import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
-import { BundledSwaggerOrOasSpec, getOperation, HttpMethod, HttpMethods } from "@xliic/openapi";
-import { TryitOperationValues } from "@xliic/common/tryit";
-import { SingleOperationScanReport, FullScanReport } from "@xliic/common/scan";
+import { HttpMethod } from "@xliic/openapi";
 import { GeneralError } from "@xliic/common/error";
-import { Preferences } from "@xliic/common/prefs";
 import { ScanReportJSONSchema, TestLogReport } from "@xliic/common/scan-report";
 import { HappyPathEntry, Page, TestEntry } from "./db/reportdb";
 
@@ -23,6 +20,7 @@ export type TestLogReportWithLocation = TestLogReport & {
 };
 
 export interface State {
+  apiAlias?: string;
   scanReport?: {
     scanVersion: string;
     summary: ScanReportJSONSchema["summary"];
@@ -67,9 +65,9 @@ export const slice = createSlice({
   name: "scan",
   initialState,
   reducers: {
-    showScanReport: (state, action: PayloadAction<SingleOperationScanReport>) => {},
-
-    showFullScanReport: (state, action: PayloadAction<FullScanReport>) => {},
+    showScanReport: (state, action: PayloadAction<{ apiAlias: string }>) => {
+      state.apiAlias = action.payload.apiAlias;
+    },
 
     changeFilter: (state, action: PayloadAction<Filter>) => {
       state.filter = action.payload;
@@ -107,7 +105,6 @@ export const slice = createSlice({
 
 export const {
   showScanReport,
-  showFullScanReport,
   showGeneralError,
   showJsonPointer,
   sendCurlRequest,
