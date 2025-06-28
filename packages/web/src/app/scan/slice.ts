@@ -67,6 +67,23 @@ export const slice = createSlice({
   reducers: {
     showScanReport: (state, action: PayloadAction<{ apiAlias: string }>) => {
       state.apiAlias = action.payload.apiAlias;
+      state.scanReport = undefined;
+      state.error = undefined;
+      state.waiting = true;
+      state.filter = {};
+      state.tab = "summary";
+      state.happyPathPage = {
+        items: [],
+        pages: 0,
+        total: 0,
+        current: 0,
+      };
+      state.testsPage = {
+        items: [],
+        pages: 0,
+        total: 0,
+        current: 0,
+      };
     },
 
     changeFilter: (state, action: PayloadAction<Filter>) => {

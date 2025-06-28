@@ -31,15 +31,23 @@ type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 const startAppListening = listenerMiddleware.startListening as AppStartListening;
 
 export function createListener(host: Webapp["host"], routes: Routes) {
-  const reportDb = new ReportDb();
-  const parser = new ScanReportParser(reportDb);
+  let reportDb: ReportDb | undefined = undefined;
+  let parser: ScanReportParser | undefined = undefined;
 
   const onShowScanReport = () =>
     startAppListening({
       actionCreator: showScanReport,
       effect: async (action, listenerApi) => {
         const { apiAlias } = action.payload;
-        await reportDb.initDb(`scanv2-report-${apiAlias}`);
+
+        if (reportDb !== undefined) {
+          reportDb.stop();
+        }
+
+        reportDb = new ReportDb();
+        parser = new ScanReportParser(reportDb);
+        // not awaiting this, as it will be awaited in the parseChunk effect
+        reportDb.start(`scanv2-report-${apiAlias}`);
       },
     });
 
@@ -47,8 +55,8 @@ export function createListener(host: Webapp["host"], routes: Routes) {
     startAppListening({
       actionCreator: parseChunk,
       effect: async (action, listenerApi) => {
-        await reportDb.started();
-        const completed = await parser.parse(action.payload);
+        await reportDb!.started();
+        const completed = await parser!.parse(action.payload);
         listenerApi.dispatch(parseChunkCompleted());
         if (completed) {
           listenerApi.dispatch(loadHappyPathPage(0));
@@ -61,16 +69,16 @@ export function createListener(host: Webapp["host"], routes: Routes) {
     startAppListening({
       actionCreator: loadHappyPathPage,
       effect: async (action, listenerApi) => {
-        const happyPaths = await reportDb.getHappyPaths(action.payload, 100, undefined);
+        const happyPaths = await reportDb!.getHappyPaths(action.payload, 100, undefined);
         listenerApi.dispatch(happyPathPageLoaded(happyPaths));
         listenerApi.dispatch(
           reportLoaded({
-            scanVersion: parser.getScanVersion(),
-            summary: parser.getSummary(),
-            stats: parser.getStats(),
-            paths: await reportDb.getStrings("pathIndex"),
-            operationIds: await reportDb.getStrings("operationIdIndex"),
-            testKeys: await reportDb.getStrings("testKeyIndex"),
+            scanVersion: parser!.getScanVersion(),
+            summary: parser!.getSummary(),
+            stats: parser!.getStats(),
+            paths: await reportDb!.getStrings("pathIndex"),
+            operationIds: await reportDb!.getStrings("operationIdIndex"),
+            testKeys: await reportDb!.getStrings("testKeyIndex"),
           })
         );
       },
@@ -83,7 +91,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
         const {
           scan: { filter },
         } = listenerApi.getState();
-        const tests = await reportDb.getTests(action.payload, 100, undefined, filter);
+        const tests = await reportDb!.getTests(action.payload, 100, undefined, filter);
         listenerApi.dispatch(testsPageLoaded(tests));
       },
     });
@@ -95,7 +103,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
         const {
           scan: { filter },
         } = listenerApi.getState();
-        const tests = await reportDb.getTests(0, 100, undefined, filter);
+        const tests = await reportDb!.getTests(0, 100, undefined, filter);
         listenerApi.dispatch(testsPageLoaded(tests));
       },
     });

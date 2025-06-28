@@ -36,36 +36,39 @@ export type Filter = {
 
 export class ReportDb {
   private db: any;
-  private readonly startedPromise: Promise<void>;
+  private startedPromise?: Promise<void>;
   private successfullyStarted?: () => void;
 
-  constructor() {
+  async start(name: string) {
     this.startedPromise = new Promise((resolve) => {
       this.successfullyStarted = resolve;
     });
-  }
-
-  async initDb(name: string) {
-    this.db = new Dexie(name);
-    const stores = getDexieStores(schema());
-    this.db.version(1).stores(stores);
 
     try {
       await Dexie.delete(name);
-    } catch (error) {
-      console.error("Error deleting database:", error);
-    }
+    } catch (error) {}
+
+    const stores = getDexieStores(schema());
+    this.db = new Dexie(name);
+    this.db.version(1).stores(stores);
 
     await this.db.open();
 
     for (const storeName of Object.keys(stores)) {
       await this.db[storeName].clear();
     }
+
     this.successfullyStarted?.();
   }
 
+  async stop() {
+    if (this.db) {
+      this.db.close({ disableAutoOpen: true });
+    }
+  }
+
   started(): Promise<void> {
-    return this.startedPromise;
+    return this.startedPromise!;
   }
 
   async save(storeName: string, items: unknown[]) {
