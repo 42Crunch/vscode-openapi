@@ -18,6 +18,7 @@ import {
   loadTestsPage,
   testsPageLoaded,
   changeFilter,
+  showGeneralError,
 } from "./slice";
 
 import { startNavigationListening } from "../../features/router/listener";
@@ -55,12 +56,18 @@ export function createListener(host: Webapp["host"], routes: Routes) {
     startAppListening({
       actionCreator: parseChunk,
       effect: async (action, listenerApi) => {
-        await reportDb!.started();
-        const completed = await parser!.parse(action.payload);
-        listenerApi.dispatch(parseChunkCompleted());
-        if (completed) {
-          listenerApi.dispatch(loadHappyPathPage(0));
-          listenerApi.dispatch(loadTestsPage(0));
+        try {
+          await reportDb!.started();
+          const completed = await parser!.parse(action.payload);
+          listenerApi.dispatch(parseChunkCompleted());
+          if (completed) {
+            listenerApi.dispatch(loadHappyPathPage(0));
+            listenerApi.dispatch(loadTestsPage(0));
+          }
+        } catch (error) {
+          listenerApi.dispatch(
+            showGeneralError({ message: `Error when processing the report: ${error}` })
+          );
         }
       },
     });

@@ -38,29 +38,36 @@ export class ReportDb {
   private db: any;
   private startedPromise?: Promise<void>;
   private successfullyStarted?: () => void;
+  private failedToStart?: (error: unknown) => void;
   private happyPathIndex: any;
   private testIndex: any;
 
   async start(name: string) {
-    this.startedPromise = new Promise((resolve) => {
+    this.startedPromise = new Promise((resolve, reject) => {
       this.successfullyStarted = resolve;
+      this.failedToStart = reject;
     });
 
     try {
-      await Dexie.delete(name);
-    } catch (error) {}
+      try {
+        await Dexie.delete(name);
+      } catch (error) {
+        // Ignore error if the database does not exist
+      }
 
-    const stores = getDexieStores(schema());
-    this.db = new Dexie(name);
-    this.db.version(1).stores(stores);
+      const stores = getDexieStores(schema());
+      this.db = new Dexie(name);
+      this.db.version(1).stores(stores);
 
-    await this.db.open();
+      await this.db.open();
 
-    for (const storeName of Object.keys(stores)) {
-      await this.db[storeName].clear();
+      for (const storeName of Object.keys(stores)) {
+        await this.db[storeName].clear();
+      }
+      this.successfullyStarted?.();
+    } catch (error) {
+      this.failedToStart?.(error);
     }
-
-    this.successfullyStarted?.();
   }
 
   async stop() {

@@ -10,7 +10,7 @@ export default function ScanOperation() {
     <>
       {scanReport && <ScanReport />}
       <GeneralError />
-      {(waiting || error) && <SmallLogMessages />}
+      {waiting && <SmallLogMessages />}
     </>
   );
 }
