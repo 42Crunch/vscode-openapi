@@ -38,6 +38,8 @@ export class ReportDb {
   private db: any;
   private startedPromise?: Promise<void>;
   private successfullyStarted?: () => void;
+  private happyPathIndex: any;
+  private testIndex: any;
 
   async start(name: string) {
     this.startedPromise = new Promise((resolve) => {
@@ -65,6 +67,11 @@ export class ReportDb {
     if (this.db) {
       this.db.close({ disableAutoOpen: true });
     }
+    this.happyPathIndex = undefined;
+    this.testIndex = undefined;
+    this.startedPromise = undefined;
+    this.successfullyStarted = undefined;
+    this.db = undefined;
   }
 
   started(): Promise<void> {
@@ -199,6 +206,11 @@ export class ReportDb {
   private async readHappyPathIndex(
     sort: { fieldName: string; order?: "asc" | "desc" } | undefined
   ) {
+    if (this.happyPathIndex !== undefined) {
+      // use cached happy path index, disregard sort for now as it is not being used
+      return this.happyPathIndex;
+    }
+
     const orderBy = sort?.fieldName || "pathIndex";
 
     const index = await this.db.happyPathIndex.orderBy(orderBy).toArray();
@@ -207,10 +219,17 @@ export class ReportDb {
       index.reverse();
     }
 
+    this.happyPathIndex = index;
+
     return index;
   }
 
   private async readTestIndex(sort: { fieldName: string; order?: "asc" | "desc" } | undefined) {
+    if (this.testIndex !== undefined) {
+      // use cached test index, disregard sort for now as it is not being used
+      return this.testIndex;
+    }
+
     const orderBy = sort?.fieldName || "pathIndex";
 
     const index = await this.db.testIndex.orderBy(orderBy).toArray();
@@ -218,6 +237,8 @@ export class ReportDb {
     if (sort?.order === "desc") {
       index.reverse();
     }
+
+    this.testIndex = index;
 
     return index;
   }
