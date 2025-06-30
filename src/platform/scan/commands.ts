@@ -268,7 +268,8 @@ async function createDefaultScanConfig(
         return true;
       } catch (e: any) {
         vscode.window.showErrorMessage(
-          "Failed to create default config: " + ("message" in e ? e.message : e.toString())
+          "Failed to create default config, please run Audit to check your OpenAPI for errors: " +
+            ("message" in e ? e.message : e.toString())
         );
         return false;
       }
