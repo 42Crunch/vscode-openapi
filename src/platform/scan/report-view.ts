@@ -74,8 +74,6 @@ export class ScanReportWebView extends WebView<Webapp> {
           command: "parseChunk",
           payload: done ? null : value,
         });
-      } else {
-        console.log("last chunk");
       }
     },
   };
