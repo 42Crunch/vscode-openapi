@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 4.35.1 (June 27, 2025)
+## Version 4.35.1 (June 30, 2025)
 
 - Fix issue where creation of Scan configuration would fall when using mandatory tags
 
