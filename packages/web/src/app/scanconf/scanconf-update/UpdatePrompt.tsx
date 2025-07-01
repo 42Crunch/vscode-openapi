@@ -80,11 +80,14 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+  height: 100%;
+  overflow: auto;
 `;
 
 const Buttons = styled.div`
   display: flex;
   gap: 8px;
+  padding-bottom: 32px;
 `;
 
 const Changes = styled.div`
