@@ -43,6 +43,8 @@ export const ThemeColorNames = [
   "notificationsBackground",
   "notificationsBorder",
   "fontSize",
+  "scrollbarTrackBackground",
+  "scrollbarThumbBackground",
 ] as const;
 
 export type ThemeColorName = (typeof ThemeColorNames)[number];
@@ -94,6 +96,8 @@ export const ThemeColorVariables: ThemeColorValues = {
   notificationsBackground: "--xliic-notificationsBackground",
   notificationsBorder: "--xliic-notificationsBorder",
   fontSize: "--xliic-fontSize",
+  scrollbarTrackBackground: "--xliic-scrollbarTrackBackground",
+  scrollbarThumbBackground: "--xliic-scrollbarThumbBackground",
 } as const;
 
 export type VsCodeColorMap = ThemeColorValues;
