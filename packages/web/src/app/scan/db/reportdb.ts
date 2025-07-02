@@ -57,13 +57,17 @@ export class ReportDb {
 
       const stores = getDexieStores(schema());
       this.db = new Dexie(name);
-      this.db.version(1).stores(stores);
+      this.db.version(1).stores({ __metadata: "id", ...stores });
 
       await this.db.open();
 
+      await this.db.__metadata.clear();
       for (const storeName of Object.keys(stores)) {
         await this.db[storeName].clear();
       }
+
+      await this.db.__metadata.put({ id: 0, created: new Date().toISOString() });
+
       this.successfullyStarted?.();
     } catch (error) {
       this.failedToStart?.(error);
