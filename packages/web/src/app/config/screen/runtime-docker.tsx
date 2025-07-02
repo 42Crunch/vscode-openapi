@@ -22,7 +22,13 @@ export function DockerRuntime() {
   );
 }
 
-const schema = z.object({});
+const schema = z.object({
+  scanImage: z.string(),
+  docker: z.object({
+    replaceLocalhost: z.boolean(),
+    useHostNetwork: z.boolean(),
+  }),
+});
 
 const screen: ConfigScreen = {
   id: "runtime-docker",
