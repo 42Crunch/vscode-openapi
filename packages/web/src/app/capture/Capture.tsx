@@ -147,7 +147,7 @@ export function RootContainer() {
                               Saved to{" "}
                               <LinkRef
                                 href="#"
-                                disabled={false}
+                                $disabled={false}
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
@@ -211,11 +211,11 @@ function ConvertButton({ item }: { item: CaptureItem }) {
   );
 }
 
-const LinkRef = styled.a`
+const LinkRef = styled.a<{ $disabled?: boolean }>`
   text-decoration: none;
-  ${({ disabled }: { disabled?: boolean }) => disabled && "opacity: 0.4;"}
-  ${({ disabled }: { disabled?: boolean }) => disabled && "cursor: default;"}
-  ${({ disabled }: { disabled?: boolean }) => disabled && "pointer-events: none;"}
+  ${({ $disabled }) => $disabled && "opacity: 0.4;"}
+  ${({ $disabled }) => $disabled && "cursor: default;"}
+  ${({ $disabled }) => $disabled && "pointer-events: none;"}
 `;
 
 const Container = styled.div`
