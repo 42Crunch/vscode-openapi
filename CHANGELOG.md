@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.35.1 (June 30, 2025)
+
+- Fix issue where creation of Scan configuration would fall when using mandatory tags
+
 ## Version 4.35.0 (June 9, 2025)
 
 - Display email address of a freemium user in Settings
