@@ -4,16 +4,16 @@
 */
 import * as fs from "fs";
 import * as vscode from "vscode";
-
-import { Webapp } from "@xliic/common/webapp/capture";
-import { WebView } from "../../web-view";
-
-import { CaptureItem, PrepareOptions } from "@xliic/common/capture";
 import FormData from "form-data";
 import got from "got";
-import { Configuration } from "../../../configuration";
-import { getAnondCredentials } from "../../../credentials";
+
+import { Webapp } from "@xliic/common/webapp/capture";
+import { CaptureItem, PrepareOptions } from "@xliic/common/capture";
 import { getEndpoints } from "@xliic/common/endpoints";
+
+import { WebView } from "../../web-view";
+import { Configuration } from "../../../configuration";
+import { getAnondCredentials, getPlatformCredentials, hasCredentials } from "../../../credentials";
 
 const pollingDelayMs = 5 * 1000; // 5s
 const pollingTimeMs = 5 * 60 * 1000; // 5min
@@ -23,10 +23,18 @@ export type Status = "pending" | "running" | "finished" | "failed";
 
 export class CaptureWebView extends WebView<Webapp> {
   private items: CaptureItem[];
+  private useDevEndpoints: boolean;
+  private captureConnection: CaptureConnection | undefined;
 
-  constructor(extensionPath: string, private configuration: Configuration) {
+  constructor(
+    extensionPath: string,
+    private configuration: Configuration,
+    private secrets: vscode.SecretStorage
+  ) {
     super(extensionPath, "capture", "Capture", vscode.ViewColumn.One);
     this.items = [];
+    this.useDevEndpoints = configuration.get<boolean>("internalUseDevEndpoints");
+
     //tempInitItems(this.items);
     vscode.window.onDidChangeActiveColorTheme((e) => {
       if (this.isActive()) {
@@ -69,9 +77,8 @@ export class CaptureWebView extends WebView<Webapp> {
         payload: item,
       });
     },
+
     convert: async (payload: { id: string; files: string[]; options: PrepareOptions }) => {
-      const anondToken = getAnondCredentials(this.configuration);
-      const useDevEndpoints = this.configuration.get<boolean>("internalUseDevEndpoints");
       const id = payload.id;
       const item = this.items.filter((item) => item.id === id)[0];
       this.setPrepareOptions(item.prepareOptions, payload.options);
@@ -79,10 +86,12 @@ export class CaptureWebView extends WebView<Webapp> {
       item.log = [];
       item.downloadedFile = undefined;
 
+      const captureConnection = await this.getCaptureConnection();
+
       // Handle the case when restart requested
       if (item.quickgenId && item.progressStatus === "Failed") {
         try {
-          await requestDelete(anondToken, item.quickgenId, useDevEndpoints);
+          await requestDelete(captureConnection, item.quickgenId);
         } catch (error) {
           // Silent removal
         }
@@ -92,7 +101,7 @@ export class CaptureWebView extends WebView<Webapp> {
       // Prepare request -> capture server
       let quickgenId = "";
       try {
-        quickgenId = await requestPrepare(anondToken, item.prepareOptions, useDevEndpoints);
+        quickgenId = await requestPrepare(captureConnection, item.prepareOptions);
         this.showPrepareResponse(item, quickgenId, true, "");
       } catch (error) {
         this.showPrepareResponse(item, quickgenId, false, getError(error));
@@ -101,17 +110,11 @@ export class CaptureWebView extends WebView<Webapp> {
 
       // Upload request -> capture server
       try {
-        await requestUpload(
-          anondToken,
-          quickgenId,
-          item.files,
-          (percent: number) => {
-            if (item.progressStatus != "Failed") {
-              this.showPrepareUploadFileResponse(item, true, "", percent === 1.0, percent);
-            }
-          },
-          useDevEndpoints
-        );
+        await requestUpload(captureConnection, quickgenId, item.files, (percent: number) => {
+          if (item.progressStatus != "Failed") {
+            this.showPrepareUploadFileResponse(item, true, "", percent === 1.0, percent);
+          }
+        });
       } catch (error) {
         this.showPrepareUploadFileResponse(item, false, getError(error), false, 0.0);
         return;
@@ -119,22 +122,22 @@ export class CaptureWebView extends WebView<Webapp> {
 
       // Start request -> capture server
       try {
-        await requestStart(anondToken, quickgenId, useDevEndpoints);
+        await requestStart(captureConnection, quickgenId);
         this.showExecutionStartResponse(item, true, "");
       } catch (error) {
         this.showExecutionStartResponse(item, false, getError(error));
         return;
       }
 
-      const refreshJobStatus = async (token: string, quickgenId: string) => {
+      const refreshJobStatus = async (quickgenId: string) => {
         try {
-          const status = await requestStatus(anondToken, quickgenId, useDevEndpoints);
+          const status = await requestStatus(captureConnection, quickgenId);
           item.pollingCounter += 1;
           this.showExecutionStatusResponse(item, status, true, "");
           const keepPolling = item.pollingCounter <= pollingLimit;
           if ((status === "pending" || status === "running") && keepPolling) {
             setTimeout(async () => {
-              refreshJobStatus(token, quickgenId);
+              refreshJobStatus(quickgenId);
             }, pollingDelayMs);
           }
         } catch (error) {
@@ -144,22 +147,24 @@ export class CaptureWebView extends WebView<Webapp> {
       };
 
       // Wait for correct status request -> capture server
-      refreshJobStatus(anondToken, quickgenId);
+      refreshJobStatus(quickgenId);
     },
+
     downloadFile: async (payload: { id: string; quickgenId: string }) => {
+      const captureConnection = await this.getCaptureConnection();
+
       const uri = await vscode.window.showSaveDialog({
         title: "Save OpenAPI file",
         filters: {
           OpenAPI: ["json", "yaml", "yml"],
         },
       });
+
       if (uri) {
         const id = payload.id;
         const item = this.items.filter((item) => item.id === id)[0];
-        const useDevEndpoints = this.configuration.get<boolean>("internalUseDevEndpoints");
         try {
-          const anondToken = getAnondCredentials(this.configuration);
-          const fileText = await requestDownload(anondToken, payload.quickgenId, useDevEndpoints);
+          const fileText = await requestDownload(captureConnection, payload.quickgenId);
           const encoder = new TextEncoder();
           await vscode.workspace.fs.writeFile(
             uri,
@@ -171,7 +176,10 @@ export class CaptureWebView extends WebView<Webapp> {
         }
       }
     },
+
     deleteJob: async (payload: { id: string; quickgenId: string }) => {
+      const captureConnection = await this.getCaptureConnection();
+
       let index = -1;
       const id = payload.id;
       for (let i = 0; i < this.items.length; i++) {
@@ -186,12 +194,7 @@ export class CaptureWebView extends WebView<Webapp> {
       // If prepare fails, there will be no quickgenId defined
       if (payload.quickgenId) {
         try {
-          const anondToken = getAnondCredentials(this.configuration);
-          await requestDelete(
-            anondToken,
-            payload.quickgenId,
-            this.configuration.get<boolean>("internalUseDevEndpoints")
-          );
+          await requestDelete(captureConnection, payload.quickgenId);
         } catch (error) {
           // Silent removal
         }
@@ -202,6 +205,21 @@ export class CaptureWebView extends WebView<Webapp> {
       await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
     },
   };
+
+  async getCaptureConnection(): Promise<CaptureConnection> {
+    if (this.captureConnection) {
+      return this.captureConnection;
+    }
+    this.captureConnection = await getCaptureConnection(
+      this.configuration,
+      this.secrets,
+      this.useDevEndpoints
+    );
+    if (!this.captureConnection) {
+      throw new Error("Failed to get capture connection");
+    }
+    return this.captureConnection;
+  }
 
   async onStart() {
     await this.sendColorTheme(vscode.window.activeColorTheme);
@@ -332,17 +350,61 @@ export class CaptureWebView extends WebView<Webapp> {
   }
 }
 
-export async function requestPrepare(
-  token: string,
-  prepareOptions: PrepareOptions,
+export async function getCaptureConnection(
+  configuration: Configuration,
+  secrets: vscode.SecretStorage,
   useDevEndpoints: boolean
-) {
+): Promise<CaptureConnection> {
+  const credentialType = await hasCredentials(configuration, secrets);
+
+  if (credentialType === "anond-token") {
+    const anondToken = getAnondCredentials(configuration);
+    return requestDiscover({ freemiumToken: anondToken }, useDevEndpoints);
+  } else if (credentialType === "api-token") {
+    const platformCredentials = await getPlatformCredentials(configuration, secrets);
+    return requestDiscover(
+      { platformUrl: platformCredentials?.platformUrl, apiKey: platformCredentials?.apiToken },
+      useDevEndpoints
+    );
+  }
+  return null as any;
+}
+
+export type CaptureConnection = {
+  token: string;
+  captureInstanceUrl: string;
+};
+
+export async function requestDiscover(
+  credentials: any,
+  useDevEndpoints: boolean
+): Promise<CaptureConnection> {
   const { freemiumdUrl } = getEndpoints(useDevEndpoints);
-  const response = await got(`${freemiumdUrl}/capture/api/1.0/quickgen/prepare`, {
+  try {
+    const response = await got(`${freemiumdUrl}/api/v1/anon/discover`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      json: credentials,
+      throwHttpErrors: false,
+    });
+    const body = JSON.parse(response.body);
+    console.log("Discover response:", body);
+  } catch (error) {
+    console.error("Error during discover request:", error);
+    throw new Error(`Failed to discover capture instance: ${error}`);
+  }
+
+  return null as any;
+}
+
+export async function requestPrepare(capture: CaptureConnection, prepareOptions: PrepareOptions) {
+  const response = await got(`${capture.captureInstanceUrl}/capture/api/1.0/quickgen/prepare`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `token ${token}`,
+      Authorization: `token ${capture.token}`,
     },
     json: {
       base_path: prepareOptions.basePath,
@@ -353,24 +415,22 @@ export async function requestPrepare(
 }
 
 export async function requestUpload(
-  token: string,
+  capture: CaptureConnection,
   quickgenId: string,
   files: string[],
-  listener: (percent: number) => void,
-  useDevEndpoints: boolean
+  listener: (percent: number) => void
 ) {
   const form = new FormData();
   for (const file of files) {
     const fsPath = vscode.Uri.file(file).fsPath;
     form.append("file", fs.createReadStream(fsPath));
   }
-  const { freemiumdUrl } = getEndpoints(useDevEndpoints);
   const response = await got(
-    `${freemiumdUrl}/capture/api/1.0/quickgen/${quickgenId}/prepare/upload-file`,
+    `${capture.captureInstanceUrl}/capture/api/1.0/quickgen/${quickgenId}/prepare/upload-file`,
     {
       method: "POST",
       headers: {
-        Authorization: `token ${token}`,
+        Authorization: `token ${capture.token}`,
       },
       body: form,
     }
@@ -380,59 +440,58 @@ export async function requestUpload(
   return JSON.parse(response.body);
 }
 
-export async function requestStart(token: string, quickgenId: string, useDevEndpoints: boolean) {
-  const { freemiumdUrl } = getEndpoints(useDevEndpoints);
+export async function requestStart(capture: CaptureConnection, quickgenId: string) {
   const response = await got(
-    `${freemiumdUrl}/capture/api/1.0/quickgen/${quickgenId}/execution/start`,
+    `${capture.captureInstanceUrl}/capture/api/1.0/quickgen/${quickgenId}/execution/start`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `token ${token}`,
+        Authorization: `token ${capture.token}`,
       },
     }
   );
   return JSON.parse(response.body);
 }
 
-export async function requestStatus(token: string, quickgenId: string, useDevEndpoints: boolean) {
-  const { freemiumdUrl } = getEndpoints(useDevEndpoints);
+export async function requestStatus(capture: CaptureConnection, quickgenId: string) {
   const response = await got(
-    `${freemiumdUrl}/capture/api/1.0/quickgen/${quickgenId}/execution/status`,
+    `${capture.captureInstanceUrl}/capture/api/1.0/quickgen/${quickgenId}/execution/status`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `token ${token}`,
+        Authorization: `token ${capture.token}`,
       },
     }
   );
   return JSON.parse(response.body)["status"];
 }
 
-export async function requestDownload(token: string, quickgenId: string, useDevEndpoints: boolean) {
-  const { freemiumdUrl } = getEndpoints(useDevEndpoints);
+export async function requestDownload(capture: CaptureConnection, quickgenId: string) {
   const response = await got(
-    `${freemiumdUrl}/capture/api/1.0/quickgen/${quickgenId}/results/openapi`,
+    `${capture.captureInstanceUrl}/capture/api/1.0/quickgen/${quickgenId}/results/openapi`,
     {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `token ${token}`,
+        Authorization: `token ${capture.token}`,
       },
     }
   );
   return JSON.parse(response.body);
 }
 
-export async function requestDelete(token: string, quickgenId: string, useDevEndpoints: boolean) {
-  const { freemiumdUrl } = getEndpoints(useDevEndpoints);
-  const response = await got(`${freemiumdUrl}/capture/api/1.0/quickgen/${quickgenId}/delete`, {
-    method: "DELETE",
-    headers: {
-      Authorization: `token ${token}`,
-    },
-  });
+export async function requestDelete(capture: CaptureConnection, quickgenId: string) {
+  const response = await got(
+    `${capture.captureInstanceUrl}/capture/api/1.0/quickgen/${quickgenId}/delete`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `token ${capture.token}`,
+      },
+    }
+  );
   return JSON.parse(response.body);
 }
 
