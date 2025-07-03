@@ -72,7 +72,7 @@ export function RootContainer() {
           <TopDescriptionMain>
             <TopDescriptionLeft>
               <TopDescriptionId>{item.quickgenId}</TopDescriptionId>
-              <TopDescriptionProgressStatus failed={item.progressStatus === "Failed"}>
+              <TopDescriptionProgressStatus $failed={item.progressStatus === "Failed"}>
                 {item.progressStatus}
               </TopDescriptionProgressStatus>
             </TopDescriptionLeft>
@@ -271,7 +271,7 @@ const TopDescriptionId = styled.div`
   width: 300px;
 `;
 
-const TopDescriptionProgressStatus = styled.div<{ failed: boolean }>`
+const TopDescriptionProgressStatus = styled.div<{ $failed: boolean }>`
   display: flex;
   width: 80px;
   padding: 3px;
@@ -281,12 +281,12 @@ const TopDescriptionProgressStatus = styled.div<{ failed: boolean }>`
   border-width: 1px;
   border-style: solid;
   border-radius: 3px;
-  ${({ failed }) =>
-    failed
+  ${({ $failed }) =>
+    $failed
       ? `background-color: var(${ThemeColorVariables.errorBackground});`
       : `background-color: var(${ThemeColorVariables.computedOne});`}
-  ${({ failed }) =>
-    failed
+  ${({ $failed }) =>
+    $failed
       ? `border-color: var(${ThemeColorVariables.errorBorder});`
       : `border-color: var(${ThemeColorVariables.border});`}
 `;
