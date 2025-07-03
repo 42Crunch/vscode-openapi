@@ -16,7 +16,7 @@ export function activate(
   platform: PlatformStore,
   logger: Logger
 ) {
-  const view = new CaptureWebView(context.extensionPath, configuration);
+  const view = new CaptureWebView(context.extensionPath, configuration, secrets);
 
   vscode.commands.registerCommand("openapi.showCapture", async () => {
     await view.showCaptureWebView();
