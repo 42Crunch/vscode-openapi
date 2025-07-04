@@ -314,7 +314,7 @@ function makeSwaggerSecurities(
     const scheme = schemes[name];
     const securityValue = matches[name];
     if (securityValue !== undefined) {
-      if (scheme?.type === "oauth") {
+      if (scheme?.type === "oauth2") {
         result[name] = { token: { access_token: securityValue } };
       } else if (scheme?.type === "basic") {
         result[name] = explodeHttpBasic(securityValue);
