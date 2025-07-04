@@ -64,7 +64,7 @@ const Container = styled.div`
 const Steps = styled.div`
   padding: 8px;
   display: flex;
-  flex-flow column;
+  flex-flow: column;
   gap: 8px;
 `;
 
