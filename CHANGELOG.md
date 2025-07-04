@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.36.0 (July 7, 2025)
+
+- Add support for displayig large Scan reports
+
 ## Version 4.35.1 (June 30, 2025)
 
 - Fix issue where creation of Scan configuration would fall when using mandatory tags
