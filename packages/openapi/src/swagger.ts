@@ -177,7 +177,7 @@ export type Header = {
 };
 
 export type SecurityScheme = {
-  type: "apiKey" | "basic" | "oauth";
+  type: "apiKey" | "basic" | "oauth2";
   description?: string;
   name: string;
   in: "query" | "header";

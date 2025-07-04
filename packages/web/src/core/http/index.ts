@@ -222,7 +222,7 @@ function makeSwaggerSecurities(
   for (const name of Object.keys(value)) {
     const scheme = schemes[name];
     const securityValue = maybeGetSecret(value[name], env);
-    if (scheme?.type === "oauth") {
+    if (scheme?.type === "oauth2") {
       result[name] = { token: { access_token: securityValue } };
     } else {
       result[name] = securityValue;
