@@ -1,9 +1,8 @@
 # What's New
 
-Version 4.35 of the OpenAPI Editor includes the following changes. Changes are for all users (Free and paid) unless specified.
+Version 4.36 of the OpenAPI Editor includes the following changes. Changes are for all users (Free and paid) unless specified.
 
-- Fixes for GraphQL Audit
-- Shows email address of freemium users in Settings
+- Support for viewing large Scan reports
 
 Access the [full changelog](https://github.com/42Crunch/vscode-openapi/blob/master/CHANGELOG.md) of the OpenAPI editor
 
