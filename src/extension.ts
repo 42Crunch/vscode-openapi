@@ -57,6 +57,19 @@ export async function activate(context: vscode.ExtensionContext) {
   context.globalState.update(versionProperty, currentVersion.toString());
   parserOptions.configure(yamlConfiguration);
 
+  const logOutputChannel = vscode.window.createOutputChannel(
+    openapiExtension.packageJSON.displayName,
+    { log: true }
+  );
+
+  const logger: Logger = {
+    fatal: (message: string) => logOutputChannel.error(message),
+    error: (message: string) => logOutputChannel.error(message),
+    warning: (message: string) => logOutputChannel.warn(message),
+    info: (message: string) => logOutputChannel.info(message),
+    debug: (message: string) => logOutputChannel.debug(message),
+  };
+
   const selectors = {
     json: { language: "json" },
     jsonc: { language: "jsonc" },
@@ -109,14 +122,6 @@ export async function activate(context: vscode.ExtensionContext) {
   auditContext.decorations = {};
   auditContext.diagnostics = vscode.languages.createDiagnosticCollection("audits");
   auditContext.auditTempDirectories = {};
-
-  const logger: Logger = {
-    fatal: (message: string) => null,
-    error: (message: string) => null,
-    warning: (message: string) => null,
-    info: (message: string) => null,
-    debug: (message: string) => null,
-  };
 
   const platformStore = new PlatformStore(configuration, logger);
 

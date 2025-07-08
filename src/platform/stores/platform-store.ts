@@ -162,8 +162,8 @@ export class PlatformStore {
     return this.connected;
   }
 
-  async testConnection(credentials: PlatformConnection) {
-    return testConnection(credentials, this.logger);
+  async testConnection(credentials: PlatformConnection, logger: Logger) {
+    return testConnection(credentials, logger);
   }
 
   getConnection(): PlatformConnection {
