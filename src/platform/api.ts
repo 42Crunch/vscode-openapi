@@ -475,6 +475,7 @@ export async function testConnection(
   options: PlatformConnection,
   logger: Logger
 ): Promise<{ success: true } | { success: false; message: string }> {
+  logger.info("Starting connection test to: " + options.platformUrl);
   try {
     await got("api/v2/collections?page=1&perPage=1", {
       ...gotOptions("GET", options, logger),
@@ -482,8 +483,10 @@ export async function testConnection(
         request: 5000,
       },
     });
+    logger.info("Connection test successful.");
     return { success: true };
   } catch (ex) {
+    logger.error("Connection test failed: " + ex);
     return { success: false, message: `${ex}` };
   }
 }

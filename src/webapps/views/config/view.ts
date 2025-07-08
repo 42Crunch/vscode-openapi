@@ -4,7 +4,7 @@
 */
 
 import * as vscode from "vscode";
-import * as http2 from "http2";
+import { Agent } from "undici";
 
 import { Webapp } from "@xliic/common/webapp/config";
 import {
@@ -65,7 +65,7 @@ export class ConfigWebView extends WebView<Webapp> {
         };
       }
 
-      const result = await http2Ping(`https://${services}`);
+      const result = await http2Ping(`https://${services}`, this.logger);
 
       return {
         command: "showOverlordConnectionTest",
@@ -87,7 +87,7 @@ export class ConfigWebView extends WebView<Webapp> {
         services: "",
       };
 
-      const result = await this.platform.testConnection(credentials);
+      const result = await this.platform.testConnection(credentials, this.logger);
 
       return { command: "showPlatformConnectionTest", payload: result };
     },
@@ -206,41 +206,72 @@ async function* downloadCliHandler(
   }
 }
 
-function http2Ping(url: string): Promise<ConnectionTestResult> {
+async function http2Ping(url: string, logger: Logger): Promise<ConnectionTestResult> {
   const timeout = 5000;
+  let hasTimedOut = false;
 
-  return new Promise((resolve, reject) => {
-    try {
-      const client = http2.connect(url);
-      client.setTimeout(timeout);
+  logger.info(`Starting connection test to ${url} with timeout of ${timeout}ms`);
 
-      client.on("error", (err) => {
-        client.close();
-        resolve({
-          success: false,
-          message: err.message,
-        });
-      });
+  const controller = new AbortController();
+  const timer = setTimeout(() => {
+    hasTimedOut = true;
+    logger.error(`Connection test timed out after ${timeout}ms`);
+    controller.abort();
+  }, timeout);
 
-      client.on("timeout", (err) => {
-        client.close();
-        resolve({
-          success: false,
-          message: `Timed out wating to connect after ${timeout}ms`,
-        });
-      });
+  try {
+    const agent = new Agent({ allowH2: true });
 
-      client.on("connect", () => {
-        client.close();
-        resolve({
-          success: true,
-        });
-      });
-    } catch (ex) {
-      resolve({
-        success: false,
-        message: `Failed to create connection: ${ex}`,
-      });
+    const response = await fetch(url, {
+      dispatcher: agent as any,
+      method: "GET",
+      signal: controller.signal,
+    });
+
+    logger.info(`Received response from ${url}, status code: ${response.status}`);
+    logger.debug(`Response headers: ${JSON.stringify(response.headers)}`);
+
+    if (response.status === 415) {
+      logger.info("Connection test succeeded");
+      return { success: true };
+    } else {
+      logger.error(`Connection test failed with unexpected status code: ${response.status}`);
+      return { success: false, message: `Unexpected response status: ${response.status}` };
     }
-  });
+  } catch (error: any) {
+    logger.error(`Failed to connect to ${url}: ${error.message}`);
+    clearTimeout(timer);
+    if (error.name === "AbortError" && hasTimedOut) {
+      return {
+        success: false,
+        message: `Timed out waiting to connect after ${timeout}ms`,
+      };
+    } else {
+      return {
+        success: false,
+        message: `Failed to connect to ${url}: ${formatError(error)}`,
+      };
+    }
+  }
+}
+
+function formatError(error: any, depth: number = 0): string {
+  if (depth > 5 || !error) return "Unknown error";
+  if (typeof error === "string") return error;
+
+  let message = error.message || error.name || String(error);
+
+  // Handle aggregate errors
+  if (error.errors?.length > 0) {
+    const nested = error.errors.map((e: any) => formatError(e, depth + 1)).join("; ");
+    message = message ? `${message}: ${nested}` : nested;
+  }
+
+  // Handle error cause
+  if (error.cause) {
+    const cause = formatError(error.cause, depth + 1);
+    if (cause) message += ` (caused by: ${cause})`;
+  }
+
+  return message || "Unknown error";
 }

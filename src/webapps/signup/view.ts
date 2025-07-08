@@ -80,7 +80,7 @@ export class SignUpWebView extends WebView<Webapp> {
         apiToken: platformCredentials.platformApiToken,
         services: "",
       };
-      const result = await this.platform.testConnection(credentials);
+      const result = await this.platform.testConnection(credentials, this.logger);
       if (result.success) {
         await this.configuration.update(
           "platformUrl",
