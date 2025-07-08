@@ -975,15 +975,14 @@
   ],
   "dependencies": {
     "@xliic/json-schema-ref-parser": "^9.3.0",
-    "@xliic/preserving-json-yaml-parser": "^1.9.3",
+    "@xliic/preserving-json-yaml-parser": "^2.1.0",
     "form-data": "^2.5.1",
     "got": "^11.8.6",
     "graphql": "^16.10.0",
     "js-yaml": "^4.1.0",
     "jsonc-parser": "^3.0.0",
     "semver": "^7.5.0",
-    "undici": "^7.11.0",
-    "yaml-language-server-parser": "^0.1.2"
+    "undici": "^7.11.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.16.0",
