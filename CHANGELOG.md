@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 4.37.2 (July 9, 2025)
+
+- Fix issue with incorrect handling of Oauth2 auth scheme in Swagger specs
+
+## Version 4.37.1 (July 8, 2025)
+
+- Fix issue proxy handling when testing 42Crunch platform services connection
+
 ## Version 4.36.0 (July 7, 2025)
 
 - Add support for displayig large Scan reports
