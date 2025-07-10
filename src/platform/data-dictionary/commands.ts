@@ -4,7 +4,7 @@
 */
 
 import * as vscode from "vscode";
-import * as yaml from "js-yaml";
+import * as yaml from "yaml";
 import { configuration } from "../../configuration";
 import { DataDictionaryWebView } from "./view";
 import { PlatformContext } from "../types";
@@ -75,7 +75,7 @@ export default (
 
       let text = "";
       if (editor.document.languageId === "yaml") {
-        text = yaml.dump(updated, { indent: 2 }).trimEnd();
+        text = yaml.stringify(updated, null, { indent: 2 }).trimEnd();
       } else {
         text = JSON.stringify(updated, null, 1);
       }
@@ -111,7 +111,7 @@ export default (
 
       let text = "";
       if (editor.document.languageId === "yaml") {
-        text = yaml.dump(updated, { indent: 2 }).trimEnd();
+        text = yaml.stringify(updated, null, { indent: 2 }).trimEnd();
       } else {
         text = JSON.stringify(updated, null, 1);
       }
@@ -258,7 +258,7 @@ async function documentBulkUpdate(
       updated["x-42c-format"] = format.id;
       let text = "";
       if (document.languageId === "yaml") {
-        text = yaml.dump(updated, { indent: 2 }).trimEnd();
+        text = yaml.stringify(updated, null, { indent: 2 }).trimEnd();
       } else {
         text = JSON.stringify(updated, null, 1);
       }

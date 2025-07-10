@@ -44,8 +44,8 @@
     "vscode:prepublish": "npm run build",
     "postinstall": "cd packages && npm install",
     "build": "npm run build-webapps && npm run build-quickfixes && npm run build-whatsnew && npm run build-snippets && npm run build-schema && npm run compile",
-    "build-snippets": "js-yaml snippets/snippets.yaml > src/generated/snippets.json",
-    "build-quickfixes": "js-yaml quickfixes/quickfixes.yaml > src/generated/quickfixes.json",
+    "build-snippets": "yaml --json --single < snippets/snippets.yaml > src/generated/snippets.json",
+    "build-quickfixes": "yaml --json --single < quickfixes/quickfixes.yaml > src/generated/quickfixes.json",
     "build-whatsnew": "node scripts/build-whatsnew.js",
     "build-schema": "node scripts/build-schema.js",
     "build-webapps": "cd packages && npm run build",
@@ -979,7 +979,7 @@
     "form-data": "^2.5.1",
     "got": "^11.8.6",
     "graphql": "^16.10.0",
-    "js-yaml": "^4.1.0",
+    "yaml": "^2.8.0",
     "jsonc-parser": "^3.0.0",
     "semver": "^7.5.0",
     "undici": "^7.11.0"
@@ -987,18 +987,17 @@
   "devDependencies": {
     "@eslint/js": "^9.16.0",
     "@types/glob": "^8.1.0",
-    "@types/js-yaml": "^4.0.3",
     "@types/mocha": "^10.0.7",
     "@types/node": "^20.14.10",
     "@types/semver": "^6.2.0",
     "@types/vscode": "1.80.0",
     "@vscode/test-electron": "^2.3.4",
-    "eslint": "^9.16.0",
-    "glob": "^8.1.0",
+    "eslint": "^9.30.1",
+    "glob": "^11.0.3",
     "globals": "^15.11.0",
     "marked": "^4.0.10",
-    "mocha": "^10.6.0",
+    "mocha": "^11.7.1",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.16.0"
+    "typescript-eslint": "^8.36.0"
   }
 }

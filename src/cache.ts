@@ -128,8 +128,6 @@ class ParsedDocumentCache implements vscode.Disposable {
       InvalidCommentToken: "Comment is not permitted",
     };
 
-    const additionalMessages = ["JS-YAML: Using tabs can lead to unpredictable results"];
-
     // do not show errors for non-openapi documents
     if (errors.length === 0 || version === OpenApiVersion.Unknown) {
       this.diagnostics.delete(document.uri);
@@ -140,12 +138,6 @@ class ParsedDocumentCache implements vscode.Disposable {
         .map((error) => {
           if (error.message in expectedMessages) {
             return { ...error, message: expectedMessages[error.message] };
-          } else {
-            for (const message of additionalMessages) {
-              if (error.message.startsWith(message)) {
-                return { ...error, message };
-              }
-            }
           }
         })
         .filter((error) => error !== undefined) as vscode.Diagnostic[];

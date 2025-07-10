@@ -4,7 +4,7 @@
 */
 
 import * as vscode from "vscode";
-import * as yaml from "js-yaml";
+import * as yaml from "yaml";
 import { findLocationForPath } from "@xliic/preserving-json-yaml-parser";
 
 import { insert } from "../edits/insert";
@@ -63,7 +63,7 @@ export async function executeCreateSchemaRequest(
 
   let text = "";
   if (document.languageId === "yaml") {
-    text = yaml.dump(schema, { indent: 1 }).trimEnd();
+    text = yaml.stringify(schema, null, { indent: 1 }).trimEnd();
   } else {
     text = JSON.stringify(schema, null, 1);
     text = text.substring(2, text.length - 2);

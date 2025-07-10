@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import * as yaml from "js-yaml";
+import * as yaml from "yaml";
 
-import { accessSync, constants, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirnameUri, relative } from "../../fs-util";
 import { exists, existsDir } from "../../util/fs";
 
@@ -105,11 +105,11 @@ export async function readConfigOrDefault(configUri: vscode.Uri): Promise<Config
     return { apis: {} };
   }
   // TODO check schema
-  return yaml.load(readFileSync(configUri.fsPath, "utf8")) as ConfigFile;
+  return yaml.parse(readFileSync(configUri.fsPath, "utf8")) as ConfigFile;
 }
 
 export function writeConfig(configUri: vscode.Uri, config: ConfigFile) {
-  const text = yaml.dump(config);
+  const text = yaml.stringify(config, null, { indent: 2 });
   writeFileSync(configUri.fsPath, text, { encoding: "utf8" });
 }
 
