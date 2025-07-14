@@ -435,7 +435,7 @@ export function getFixAsYamlString(context: FixContext): string {
   const snippet = context.snippet;
   const fix = <InsertReplaceRenameFix>context.fix;
   const type = fix.type;
-  let text = yaml.stringify(fix.fix, null, { indent: 2 }).trim();
+  let text = yaml.stringify(fix.fix, null, { indent: 2, singleQuote: true }).trim();
   if (fix.parameters) {
     text = handleParameters(context, text);
   }
