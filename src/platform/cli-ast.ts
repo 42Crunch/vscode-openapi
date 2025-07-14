@@ -450,7 +450,10 @@ export async function runAuditWithCliBinary(
   } else {
     const platformConnection = await getPlatformCredentials(configuration, secrets);
     if (platformConnection !== undefined) {
-      logger.debug("Setting API_KEY and PLATFORM_HOST environment variables");
+      logger.debug(
+        `Setting PLATFORM_HOST environment variable to: ${platformConnection.platformUrl}`
+      );
+      logger.debug("Setting API_KEY environment variable.");
       env["API_KEY"] = platformConnection.apiToken!;
       env["PLATFORM_HOST"] = platformConnection.platformUrl;
     }
@@ -458,7 +461,7 @@ export async function runAuditWithCliBinary(
 
   const httpProxy = vscode.workspace.getConfiguration().get<string>("http.proxy");
   if (httpProxy !== undefined && httpProxy !== "") {
-    logger.debug(`Setting HTTPS_PROXY environment variable to ${httpProxy}`);
+    logger.debug(`Setting HTTPS_PROXY environment variable to: ${httpProxy}`);
     env["HTTPS_PROXY"] = httpProxy;
   }
 
