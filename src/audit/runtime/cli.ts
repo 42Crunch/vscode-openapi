@@ -24,17 +24,10 @@ export async function runCliAudit(
   cache: Cache,
   secrets: vscode.SecretStorage,
   configuration: Configuration,
+  logger: Logger,
   progress: vscode.Progress<any>,
   isFullAudit: boolean
 ): Promise<{ audit: Audit; tempAuditDirectory: string } | undefined> {
-  const logger: Logger = {
-    fatal: (message: string) => null,
-    error: (message: string) => null,
-    warning: (message: string) => null,
-    info: (message: string) => null,
-    debug: (message: string) => null,
-  };
-
   const config = await loadConfig(configuration, secrets);
 
   const [result, error] = await runAuditWithCliBinary(

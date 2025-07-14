@@ -23,11 +23,13 @@ import { Configuration } from "../configuration";
 import { SignUpWebView } from "../webapps/signup/view";
 import { clearAuditReportTempDirectories } from "./util";
 import { registerSecurityGqlAudit } from "./gql";
+import { Logger } from "../platform/types";
 
 export function activate(
   context: vscode.ExtensionContext,
   auditContext: AuditContext,
   cache: Cache,
+  logger: Logger,
   configuration: Configuration,
   signUpWebView: SignUpWebView,
   reportWebView: AuditWebView,
@@ -98,6 +100,7 @@ export function activate(
   registerSecurityAudit(
     context,
     cache,
+    logger,
     auditContext,
     pendingAudits,
     reportWebView,
@@ -108,6 +111,7 @@ export function activate(
   registerSingleOperationAudit(
     context,
     cache,
+    logger,
     auditContext,
     pendingAudits,
     reportWebView,
@@ -118,6 +122,7 @@ export function activate(
   registerOutlineSingleOperationAudit(
     context,
     cache,
+    logger,
     auditContext,
     pendingAudits,
     reportWebView,

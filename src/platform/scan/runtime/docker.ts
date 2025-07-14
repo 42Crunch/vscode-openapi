@@ -31,6 +31,11 @@ export async function runScanWithDocker(
   env["SCAN_TOKEN"] = token.trim();
   env["PLATFORM_SERVICE"] = services!;
 
+  const httpProxy = vscode.workspace.getConfiguration().get<string>("http.proxy");
+  if (httpProxy !== undefined && httpProxy !== "") {
+    scanEnv["HTTPS_PROXY"] = httpProxy;
+  }
+
   const envString = Object.entries(env)
     .map(([key, value]) => `-e ${key}='${value}'`)
     .join(" ");

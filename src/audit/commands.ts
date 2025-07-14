@@ -29,10 +29,12 @@ import { loadConfig } from "../util/config";
 import { SignUpWebView } from "../webapps/signup/view";
 import { exists } from "../util/fs";
 import { join } from "node:path";
+import { Logger } from "../platform/types";
 
 export function registerSecurityAudit(
   context: vscode.ExtensionContext,
   cache: Cache,
+  logger: Logger,
   auditContext: AuditContext,
   pendingAudits: PendingAudits,
   reportWebView: AuditWebView,
@@ -47,6 +49,7 @@ export function registerSecurityAudit(
         context.workspaceState,
         context.secrets,
         cache,
+        logger,
         auditContext,
         pendingAudits,
         reportWebView,
@@ -60,6 +63,7 @@ export function registerSecurityAudit(
 export function registerSingleOperationAudit(
   context: vscode.ExtensionContext,
   cache: Cache,
+  logger: Logger,
   auditContext: AuditContext,
   pendingAudits: PendingAudits,
   reportWebView: AuditWebView,
@@ -74,6 +78,7 @@ export function registerSingleOperationAudit(
         context.workspaceState,
         context.secrets,
         cache,
+        logger,
         auditContext,
         pendingAudits,
         reportWebView,
@@ -89,6 +94,7 @@ export function registerSingleOperationAudit(
 export function registerOutlineSingleOperationAudit(
   context: vscode.ExtensionContext,
   cache: Cache,
+  logger: Logger,
   auditContext: AuditContext,
   pendingAudits: PendingAudits,
   reportWebView: AuditWebView,
@@ -110,6 +116,7 @@ export function registerOutlineSingleOperationAudit(
         context.workspaceState,
         context.secrets,
         cache,
+        logger,
         auditContext,
         pendingAudits,
         reportWebView,
@@ -194,6 +201,7 @@ async function securityAudit(
   memento: vscode.Memento,
   secrets: vscode.SecretStorage,
   cache: Cache,
+  logger: Logger,
   auditContext: AuditContext,
   pendingAudits: PendingAudits,
   reportWebView: AuditWebView,
@@ -254,6 +262,7 @@ async function securityAudit(
               cache,
               secrets,
               configuration,
+              logger,
               progress,
               isFullAudit
             );

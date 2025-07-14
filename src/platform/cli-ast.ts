@@ -450,6 +450,7 @@ export async function runAuditWithCliBinary(
   } else {
     const platformConnection = await getPlatformCredentials(configuration, secrets);
     if (platformConnection !== undefined) {
+      logger.debug("Setting API_KEY and PLATFORM_HOST environment variables");
       env["API_KEY"] = platformConnection.apiToken!;
       env["PLATFORM_HOST"] = platformConnection.platformUrl;
     }
@@ -457,10 +458,12 @@ export async function runAuditWithCliBinary(
 
   const httpProxy = vscode.workspace.getConfiguration().get<string>("http.proxy");
   if (httpProxy !== undefined && httpProxy !== "") {
+    logger.debug(`Setting HTTPS_PROXY environment variable to ${httpProxy}`);
     env["HTTPS_PROXY"] = httpProxy;
   }
 
   try {
+    logger.debug(`Running the binary: ${cli} ${args.join(" ")}`);
     const output = await asyncExecFile(cli, args, {
       cwd: dir as string,
       windowsHide: true,
@@ -479,17 +482,22 @@ export async function runAuditWithCliBinary(
     const compliance = await readSqgReport(sqgFilename);
 
     const cliResponse = JSON.parse(output.stdout);
+
+    logger.info(`Security Audit completed successfully`);
+
     return [
       { audit: parsed, todo, compliance, cli: cliResponse, tempAuditDirectory: dir },
       undefined,
     ];
   } catch (ex: any) {
+    logger.error(`Binary exited with error code ${ex.code}`);
     if (ex.code === 3) {
       // limit reached
       const cliError = JSON.parse(ex.stdout);
       return [undefined, cliError];
     } else {
       const error = readException(ex);
+      logger.error(`Error running Security Audit: ${JSON.stringify(error)}`);
       const json = parseCliJsonResponse(error.stdout);
       if (json !== undefined) {
         return [undefined, json];

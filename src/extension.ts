@@ -140,6 +140,7 @@ export async function activate(context: vscode.ExtensionContext) {
     context,
     auditContext,
     cache,
+    logger,
     configuration,
     signUpWebView,
     reportWebView,
