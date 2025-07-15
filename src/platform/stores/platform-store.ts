@@ -285,27 +285,50 @@ export class PlatformStore {
       this.getConnection(),
       this.logger
     );
+    this.logger.info(`Created temporary API: "${apiName}" ${api.desc.id}`);
     return { apiId: api.desc.id, collectionId };
   }
 
   async clearTempApi(tmp: { apiId: string; collectionId: string }): Promise<void> {
     // delete the api
+    this.logger.info(
+      `Clearing temporary API: "${tmp.apiId}" from collection "${tmp.collectionId}"`
+    );
     await deleteApi(tmp.apiId, this.getConnection(), this.logger);
     // check if any of the old apis have to be deleted
     const current = new Date().getTime();
     const response = await listApis(tmp.collectionId, this.getConnection(), this.logger);
     const convention = await this.getApiNamingConvention();
+    this.logger.debug(`Checking for old temporary APIs in collection "${tmp.collectionId}"`);
+    let deletedCount = 0;
     for (const api of response.list) {
+      this.logger.debug(`Checking API: "${api.desc.name}" (${api.desc.id})`);
       const name = api.desc.name;
       if (name.startsWith("tmp-")) {
         const timestamp = Number(name.split("-")[1]);
         if (current - timestamp > 600000) {
+          this.logger.debug(`Deleting old temporary API: "${name}" (${api.desc.id})`);
           await deleteApi(api.desc.id, this.getConnection(), this.logger);
+          deletedCount++;
         }
       } else if (convention.pattern !== "" && name === convention.example) {
         // if the api naming convention is configured, we don't have timestamps in the name
+        this.logger.debug(`Deleting old API with no timestamp: "${name}" (${api.desc.id})`);
         await deleteApi(api.desc.id, this.getConnection(), this.logger);
+        deletedCount++;
       }
+    }
+    if (response.list.length === deletedCount) {
+      this.logger.info(
+        `All temporary APIs in collection "${tmp.collectionId}" have been deleted, removing collection`
+      );
+      await deleteCollection(tmp.collectionId, this.getConnection(), this.logger);
+    } else {
+      this.logger.info(
+        `Temporary collection has been cleared, but not all APIs were deleted. Remaining APIs: ${
+          response.list.length - deletedCount
+        }`
+      );
     }
   }
 
@@ -596,6 +619,7 @@ export class PlatformStore {
   }
 
   async findOrCreateTempCollection(): Promise<string> {
+    this.logger.info("Finding or creating temporary collection");
     const namingConvention = await this.getCollectionNamingConvention();
     const collectionName = this.configuration.get<string>("platformTemporaryCollectionName");
 
@@ -617,9 +641,13 @@ export class PlatformStore {
       (cl) => cl.read && cl.write && cl.writeApis && cl.deleteApis
     );
     if (writable.length > 0) {
+      this.logger.info(`Using existing temporary collection: ${writable[0].id}`);
       return writable[0].id;
     } else {
       const collection = await this.createCollection(collectionName);
+      this.logger.info(
+        `Created new temporary collection: "${collectionName}" ${collection.desc.id}`
+      );
       return collection.desc.id;
     }
   }
