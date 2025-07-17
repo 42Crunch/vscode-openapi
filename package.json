@@ -71,17 +71,28 @@
           "icon": "resources/icons/icon_api.svg"
         },
         {
-          "id": "42crunch-platform",
+          "id": "42crunch-launchpad",
           "title": "42Crunch",
           "icon": "resources/icon_42crunch_platform.svg"
+        },
+        {
+          "id": "42crunch-collections",
+          "title": "Collections",
+          "icon": "resources/icon_42crunch_collections.svg"
         }
       ]
     },
     "views": {
-      "42crunch-platform": [
+      "42crunch-launchpad": [
+        {
+          "id": "platformLaunchpad",
+          "name": "42Crunch"
+        }
+      ],
+      "42crunch-collections": [
         {
           "id": "platformExplorer",
-          "name": "Platform",
+          "name": "Collections",
           "when": "openapi.platform.credentials == present"
         }
       ],
