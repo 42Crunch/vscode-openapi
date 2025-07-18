@@ -5,14 +5,19 @@ import {
 } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
+import logger from "redux-logger";
 
 import { Webapp } from "@xliic/common/webapp/capture";
 import theme, { changeTheme, ThemeState } from "../../features/theme/slice";
 import capture, { saveCapture, showCaptureWindow } from "./slice";
+import router from "../../features/router/slice";
+import confirmationDialog from "../../features/confirmation-dialog/slice";
 
 const reducer = {
   theme,
   capture,
+  router,
+  confirmationDialog,
 };
 
 export const messageHandlers: Webapp["webappHandlers"] = {
@@ -25,7 +30,8 @@ export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme:
   const store = configureStore({
     reducer,
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().prepend(listenerMiddleware.middleware),
+      getDefaultMiddleware().prepend(listenerMiddleware.middleware).concat(logger),
+
     preloadedState: {
       theme,
     },

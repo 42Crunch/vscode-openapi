@@ -1,12 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { CaptureItem, PrepareOptions } from "@xliic/common/capture";
+import { set } from "react-hook-form";
 
 export interface CaptureState {
   items: CaptureItem[];
+  selectedItemId: string | undefined;
 }
 
 const initialState: CaptureState = {
   items: [],
+  selectedItemId: undefined,
 };
 
 export const slice = createSlice({
@@ -15,6 +18,10 @@ export const slice = createSlice({
   reducers: {
     showCaptureWindow: (state, action: PayloadAction<CaptureItem[]>) => {
       state.items = action.payload;
+      state.selectedItemId = action.payload.length > 0 ? action.payload[0].id : undefined;
+    },
+    setSelectedItemId: (state, action: PayloadAction<string>) => {
+      state.selectedItemId = action.payload;
     },
     browseFiles: (
       state,
@@ -51,6 +58,7 @@ export const slice = createSlice({
       if (!found) {
         state.items.unshift(action.payload);
       }
+      state.selectedItemId = id;
     },
     downloadFile: (state, action: PayloadAction<{ id: string; quickgenId: string }>) => {
       // -> IDE
@@ -84,5 +92,6 @@ export const {
   downloadFile,
   deleteJob,
   openLink,
+  setSelectedItemId,
 } = slice.actions;
 export default slice.reducer;
