@@ -27,6 +27,7 @@ export default function SearchSidebar(props: {
   render: (selection: ItemId) => ReactNode;
   renderEmpty?: () => ReactNode;
   onSelected?: (selected: ItemId) => void;
+  hideEmptySidebar?: boolean;
 }) {
   const [selected, setSelected] = useState(
     props.defaultSelection || {
@@ -49,6 +50,7 @@ export function SearchSidebarControlled({
   onSelected,
   title,
   hideEmptySections,
+  hideEmptySidebar,
 }: {
   title?: string;
   sections: Section[];
@@ -61,15 +63,17 @@ export function SearchSidebarControlled({
   selected?: ItemId;
   onSelected?: (selected: ItemId) => void;
   hideEmptySections?: boolean;
+  hideEmptySidebar?: boolean;
 }) {
   const [search, setSearch] = useState("");
   const [expanded, setExpanded] = useState(true);
 
   const count = sections.map((section) => section.items).flat().length;
+  const shouldHideSidebar = hideEmptySidebar && count === 0;
 
   return (
     <>
-      {!expanded && (
+      {!expanded && !shouldHideSidebar && (
         <SidebarCollapsed>
           <ToggleButton
             onClick={(e) => {
@@ -82,7 +86,7 @@ export function SearchSidebarControlled({
           </ToggleButton>
         </SidebarCollapsed>
       )}
-      {expanded && (
+      {expanded && !shouldHideSidebar && (
         <Sidebar>
           <Title>
             <span>
@@ -120,7 +124,7 @@ export function SearchSidebarControlled({
                     </Subheader>
                   )}
                   <List
-                    selected={selected?.sectionId == section.id ? selected.itemId : undefined}
+                    selected={selected?.sectionId === section.id ? selected.itemId : undefined}
                     setSelected={(selected) =>
                       onSelected && onSelected({ sectionId: section.id, itemId: selected })
                     }
@@ -135,8 +139,8 @@ export function SearchSidebarControlled({
           {renderButtons && <Buttons>{renderButtons()}</Buttons>}
         </Sidebar>
       )}
-      <Content $expanded={expanded}>
-        {selected !== undefined ? render(selected) : renderEmpty?.()}
+      <Content $expanded={expanded} $hidingSidebar={shouldHideSidebar}>
+        {selected?.itemId !== undefined ? render(selected) : renderEmpty?.()}
       </Content>
     </>
   );
@@ -171,9 +175,10 @@ const SidebarCollapsed = styled.div`
   background-color: var(${ThemeColorVariables.background});
 `;
 
-const Content = styled.div<{ $expanded: boolean }>`
+const Content = styled.div<{ $expanded: boolean; $hidingSidebar?: boolean }>`
   position: absolute;
-  ${({ $expanded }) => ($expanded ? `left: 320px;` : `left: 40px;`)}
+  ${({ $expanded, $hidingSidebar }) =>
+    $hidingSidebar ? `left: 0;` : $expanded ? `left: 320px;` : `left: 40px;`}
   top: 0;
   right: 0;
   bottom: 0;
