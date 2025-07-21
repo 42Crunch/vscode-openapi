@@ -76,6 +76,9 @@ export const MenuItem = styled(DropdownMenu.Item)`
     background-color: var(${ThemeColorVariables.listActiveSelectionBackground});
     color: var(${ThemeColorVariables.listActiveSelectionForeground});
   }
+  &[data-disabled] {
+    opacity: 0.5;
+  }
   > svg {
     fill: var(${ThemeColorVariables.foreground});
   }
