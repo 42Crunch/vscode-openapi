@@ -1,9 +1,17 @@
 import styled from "styled-components";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
-export default function Separator({ title, icon }: { title: string; icon?: JSX.Element }) {
+export default function Separator({
+  title,
+  icon,
+  className,
+}: {
+  title: string;
+  icon?: JSX.Element;
+  className?: string;
+}) {
   return (
-    <Container>
+    <Container className={className}>
       {icon}
       <div>{title}</div>
       <hr />
