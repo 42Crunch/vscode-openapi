@@ -15,7 +15,12 @@ export async function updateContext(cache: Cache, document: vscode.TextDocument 
     return;
   }
 
-  if (document.fileName.endsWith(".graphql") || document.fileName.endsWith(".graphqls") || document.fileName.endsWith(".sdl")) {
+  if (
+    document.fileName.endsWith(".graphql") ||
+    document.fileName.endsWith(".gql") ||
+    document.fileName.endsWith(".graphqls") ||
+    document.fileName.endsWith(".sdl")
+  ) {
     vscode.commands.executeCommand("setContext", "graphqlEnabled", true);
   } else {
     vscode.commands.executeCommand("setContext", "graphqlEnabled", false);

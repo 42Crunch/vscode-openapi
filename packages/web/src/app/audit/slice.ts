@@ -145,6 +145,7 @@ export const slice = createSlice({
         state.sqgTodo = false;
         state.type =
           audit.filename.toLowerCase().endsWith(".graphql") ||
+          audit.filename.toLowerCase().endsWith(".gql") ||
           audit.filename.toLowerCase().endsWith(".graphqls") ||
           audit.filename.toLowerCase().endsWith(".sdl")
             ? "graphql"
