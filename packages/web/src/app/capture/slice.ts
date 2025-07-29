@@ -62,19 +62,9 @@ export const slice = createSlice({
     downloadFile: (state, action: PayloadAction<{ id: string; quickgenId: string }>) => {
       // -> IDE
     },
-    deleteJob: (state, action: PayloadAction<{ id: string; quickgenId: string }>) => {
-      let index = -1;
-      const id = action.payload.id;
-      for (let i = 0; i < state.items.length; i++) {
-        if (state.items[i].id === id) {
-          index = i;
-          break;
-        }
-      }
-      if (index > -1) {
-        state.items.splice(index, 1);
-      }
-      // -> IDE
+    deleteJob: (state, { payload: { id } }: PayloadAction<{ id: string; quickgenId: string }>) => {
+      state.items = state.items.filter((item) => item.id !== id);
+      state.selectedItem = state.items[0];
     },
     openLink: (state, action: PayloadAction<string>) => {
       // -> IDE

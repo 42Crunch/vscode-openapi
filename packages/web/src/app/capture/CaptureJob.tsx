@@ -2,15 +2,24 @@ import * as z from "zod";
 import styled from "styled-components";
 
 import { PrepareOptions } from "@xliic/common/capture";
+import { ProgressButton } from "../../new-components/ProgressButton";
 
 import Input from "../../components/Input";
 import Form from "../../new-components/Form";
 import Separator from "../../components/Separator";
-import { setPrepareOptions } from "./slice";
+import { setPrepareOptions, convert, deleteJob } from "./slice";
 import { useAppDispatch, useAppSelector } from "./store";
+import { useFormContext } from "react-hook-form";
+import Button from "../../new-components/Button";
 
 export default function CaptureJob() {
   const dispatch = useAppDispatch();
+
+  // const {
+  //   trigger,
+  //   formState: { isValid },
+  // } = useFormContext();
+
   const { selectedItem: item } = useAppSelector((state) => state.capture);
 
   if (!item) {
@@ -30,6 +39,30 @@ export default function CaptureJob() {
         )}
       </div>
 
+      <ProgressButton
+        label="Convert"
+        waiting={item.progressStatus === "In progress"}
+        onClick={(e) => {
+          //if (isValid) {
+          dispatch(convert({ id: item.id, files: item.files, options: item.prepareOptions }));
+          //} else {
+          //  trigger();
+          //}
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      />
+
+      <Button
+        onClick={(e) => {
+          dispatch(deleteJob({ id: item.id, quickgenId: item.quickgenId! }));
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
+        Delete
+      </Button>
+
       <BiggerSeparator title="Options" />
       <Form
         wrapFormData={wrapPrepareOptions}
@@ -44,12 +77,14 @@ export default function CaptureJob() {
         <Input label="Base Path" name="basePath" />
         <Input label="Servers" name="servers" />
       </Form>
+
+      <BiggerSeparator title="Logs" />
+
       {item.log.map((log, index) => (
         <div key={index}>
           <div>{log}</div>
         </div>
       ))}
-      <BiggerSeparator title="Logs" />
     </div>
   );
 }

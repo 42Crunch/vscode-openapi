@@ -54,10 +54,12 @@ export class CaptureWebView extends WebView<Webapp> {
         //   OpenAPI: ["json", "yaml", "yml"],
         // },
       });
-      const files: string[] = [];
-      if (uris && Array.isArray(uris)) {
-        uris.forEach((e) => files.push(e.fsPath));
+      if (uris === undefined || uris.length === 0) {
+        return;
       }
+
+      const files: string[] = uris.map((uri) => uri.fsPath);
+
       let item;
       const id = payload.id;
       if (id) {
@@ -387,10 +389,10 @@ export async function requestDiscover(
         "Content-Type": "application/json",
       },
       json: credentials,
-      throwHttpErrors: false,
     });
     const body = JSON.parse(response.body);
     console.log("Discover response:", body);
+    return body as CaptureConnection;
   } catch (error) {
     console.error("Error during discover request:", error);
     throw new Error(`Failed to discover capture instance: ${error}`);
