@@ -73,12 +73,12 @@
         {
           "id": "42crunch-launchpad",
           "title": "42Crunch",
-          "icon": "resources/icon_42crunch_platform.svg"
+          "icon": "resources/icon_42crunch_platform_outline.svg"
         },
         {
           "id": "42crunch-collections",
           "title": "Collections",
-          "icon": "resources/icon_42crunch_collections.svg"
+          "icon": "resources/icon_42crunch_collections_outline.svg"
         }
       ]
     },
