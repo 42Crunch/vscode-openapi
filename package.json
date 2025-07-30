@@ -983,7 +983,7 @@
   "dependencies": {
     "@xliic/json-schema-ref-parser": "^9.3.0",
     "@xliic/preserving-json-yaml-parser": "^2.1.0",
-    "form-data": "^2.5.1",
+    "form-data": "^4.0.4",
     "got": "^11.8.6",
     "graphql": "^16.10.0",
     "yaml": "^2.8.0",
@@ -992,7 +992,7 @@
     "undici": "^7.11.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.16.0",
+    "@eslint/js": "^9.32.0",
     "@types/glob": "^8.1.0",
     "@types/mocha": "^10.0.7",
     "@types/node": "^20.14.10",
@@ -1005,6 +1005,6 @@
     "marked": "^4.0.10",
     "mocha": "^11.7.1",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.36.0"
+    "typescript-eslint": "^8.38.0"
   }
 }
