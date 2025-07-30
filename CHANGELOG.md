@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 4.38.0 (August 5, 2025)
+
+- Remove IDE Temporary collection after running Audit using platform connection
+- Improved logging
+- Add .gql to the list of supported GraphQL extensions
+- Update tags and description in the extension manifest
+
 ## Version 4.37.2 (July 9, 2025)
 
 - Fix issue with incorrect handling of Oauth2 auth scheme in Swagger specs
