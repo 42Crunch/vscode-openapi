@@ -42,7 +42,7 @@ export default function Capture2() {
     <SearchSidebarControlled
       selected={selectedItem ? { sectionId: "capture", itemId: selectedItem.id } : undefined}
       onSelected={onSetItemId}
-      title="operations"
+      title="sessions"
       noSectionTitles
       hideEmptySidebar
       sections={sections}

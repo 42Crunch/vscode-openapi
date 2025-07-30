@@ -7,7 +7,7 @@ import { ProgressButton } from "../../new-components/ProgressButton";
 import Input from "../../components/Input";
 import Form from "../../new-components/Form";
 import Separator from "../../components/Separator";
-import { setPrepareOptions, convert, deleteJob } from "./slice";
+import { setPrepareOptions, convert, deleteJob, downloadFile, openLink } from "./slice";
 import { useAppDispatch, useAppSelector } from "./store";
 import { useFormContext } from "react-hook-form";
 import Button from "../../new-components/Button";
@@ -28,16 +28,9 @@ export default function CaptureJob() {
 
   return (
     <div>
-      <div>Selected files</div>
-      <div>
-        {item.files && (
-          <div>
-            {item.files.map((file, index) => (
-              <span key={`item-${item.id}-file-${index}`}>{file}</span>
-            ))}
-          </div>
-        )}
-      </div>
+      <h3>
+        Job ID: {item.id}, status: {item.progressStatus}
+      </h3>
 
       <ProgressButton
         label="Convert"
@@ -55,6 +48,16 @@ export default function CaptureJob() {
 
       <Button
         onClick={(e) => {
+          dispatch(downloadFile({ id: item.id, quickgenId: item.quickgenId! }));
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
+        Download
+      </Button>
+
+      <Button
+        onClick={(e) => {
           dispatch(deleteJob({ id: item.id, quickgenId: item.quickgenId! }));
           e.preventDefault();
           e.stopPropagation();
@@ -62,6 +65,17 @@ export default function CaptureJob() {
       >
         Delete
       </Button>
+
+      <BiggerSeparator title="Files" />
+      <div>
+        {item.files && (
+          <div>
+            {item.files.map((file, index) => (
+              <span key={`item-${item.id}-file-${index}`}>{file}</span>
+            ))}
+          </div>
+        )}
+      </div>
 
       <BiggerSeparator title="Options" />
       <Form
@@ -85,6 +99,22 @@ export default function CaptureJob() {
           <div>{log}</div>
         </div>
       ))}
+
+      {item.downloadedFile && (
+        <div key={`item-${item.id}-log-${item.log.length}`}>
+          Saved to{" "}
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              dispatch(openLink(item.downloadedFile || ""));
+            }}
+          >
+            {item.downloadedFile}
+          </a>
+        </div>
+      )}
     </div>
   );
 }
@@ -105,6 +135,13 @@ const BiggerSeparator = styled(Separator)`
     margin-bottom: 16px;
     margin-top: 16px;
   }
+`;
+
+const LinkRef = styled.a<{ $disabled?: boolean }>`
+  text-decoration: none;
+  ${({ $disabled }) => $disabled && "opacity: 0.4;"}
+  ${({ $disabled }) => $disabled && "cursor: default;"}
+  ${({ $disabled }) => $disabled && "pointer-events: none;"}
 `;
 
 const schema = z.object({
