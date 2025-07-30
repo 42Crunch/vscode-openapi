@@ -17,11 +17,12 @@
     "dist"
   ],
   "dependencies": {
-    "@xliic/preserving-json-yaml-parser": "^1.11.0",
-    "@xliic/openapi": "^2.1.0",
-    "@xliic/result": "^2.1.0"
+    "@xliic/preserving-json-yaml-parser": "^2.1.0",
+    "@xliic/openapi": "*",
+    "@xliic/result": "*"
   },
   "devDependencies": {
-    "typescript": "*"
+    "typescript": "*",
+    "vitest": "*"
   }
 }
