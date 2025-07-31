@@ -1,34 +1,34 @@
-export interface CaptureItem {
-  id: string;
-  files: string[];
-  quickgenId: string | undefined;
-  prepareOptions: PrepareOptions;
-  progressStatus: ProgressStatus;
-  pollingCounter: number;
-  log: string[];
-  downloadedFile: string | undefined;
-}
-
 export type PrepareOptions = {
   basePath: string;
   servers: string[];
 };
 
-export type ProgressStatus = "New" | "Finished" | "In progress" | "Failed";
+export type Status = "pending" | "running" | "finished" | "failed";
+
+export type CaptureItem = {
+  id: string;
+  files: string[];
+  quickgenId: string | undefined;
+  prepareOptions: PrepareOptions;
+  status: Status;
+  pollingCounter: number;
+  log: string[];
+  downloadedFile: string | undefined;
+};
 
 export type ShowCaptureWindow = {
   command: "showCaptureWindow";
   payload: CaptureItem[];
 };
 
-export type BrowseFiles = {
-  command: "browseFiles";
-  payload: { id: string; options: PrepareOptions | undefined };
+export type SelectFiles = {
+  command: "selectFiles";
+  payload: { id: string | undefined };
 };
 
 export type Convert = {
   command: "convert";
-  payload: { id: string; files: string[]; options: PrepareOptions };
+  payload: { id: string };
 };
 
 export type SaveCapture = {
@@ -38,10 +38,10 @@ export type SaveCapture = {
 
 export type DownloadFile = {
   command: "downloadFile";
-  payload: { id: string; quickgenId: string };
+  payload: { id: string };
 };
 
 export type DeleteJob = {
   command: "deleteJob";
-  payload: { id: string; quickgenId: string };
+  payload: { id: string };
 };
