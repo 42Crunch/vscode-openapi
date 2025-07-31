@@ -8,7 +8,7 @@ import FormData from "form-data";
 import got from "got";
 
 import { Webapp } from "@xliic/common/webapp/capture";
-import { CaptureItem, PrepareOptions } from "@xliic/common/capture";
+import { CaptureItem, PrepareOptions, Status } from "@xliic/common/capture";
 import { getEndpoints } from "@xliic/common/endpoints";
 
 import { WebView } from "../../web-view";
@@ -18,8 +18,6 @@ import { getAnondCredentials, getPlatformCredentials, hasCredentials } from "../
 const pollingDelayMs = 5 * 1000; // 5s
 const pollingTimeMs = 5 * 60 * 1000; // 5min
 const pollingLimit = Math.floor(pollingTimeMs / pollingDelayMs);
-
-export type Status = "pending" | "running" | "finished" | "failed";
 
 export class CaptureWebView extends WebView<Webapp> {
   private items: CaptureItem[];
@@ -44,7 +42,7 @@ export class CaptureWebView extends WebView<Webapp> {
   }
 
   hostHandlers: Webapp["hostHandlers"] = {
-    browseFiles: async (payload: { id: string; options: PrepareOptions | undefined }) => {
+    selectFiles: async (payload: { id: string | undefined }) => {
       const uris = await vscode.window.showOpenDialog({
         title: "Select HAR/Postman files",
         canSelectFiles: true,
@@ -58,47 +56,44 @@ export class CaptureWebView extends WebView<Webapp> {
         return;
       }
 
-      const files: string[] = uris.map((uri) => uri.fsPath);
+      const files: string[] = uris.map((uri) => uri.toString());
 
-      let item;
-      const id = payload.id;
-      if (id) {
-        item = this.items.filter((item) => item.id === id)[0];
-        if (files.length > 0) {
-          item.files = files;
-        }
-        if (payload.options) {
-          item.prepareOptions = payload.options;
-        }
+      if (payload.id) {
+        // update existing item
+        const item = this.items.filter((item) => item.id === payload.id)[0]!;
+        item.files = files;
+        this.sendRequest({
+          command: "saveCapture",
+          payload: item,
+        });
       } else {
-        item = this.getNewItem(files);
+        const item = this.getNewItem(files);
         this.items.unshift(item);
+        this.sendRequest({
+          command: "saveCapture",
+          payload: item,
+        });
       }
-      this.sendRequest({
-        command: "saveCapture",
-        payload: item,
-      });
     },
 
-    convert: async (payload: { id: string; files: string[]; options: PrepareOptions }) => {
+    convert: async (payload: { id: string }) => {
       const id = payload.id;
       const item = this.items.filter((item) => item.id === id)[0];
-      this.setPrepareOptions(item.prepareOptions, payload.options);
-      item.files = payload.files;
       item.log = [];
       item.downloadedFile = undefined;
 
       const captureConnection = await this.getCaptureConnection();
 
       // Handle the case when restart requested
-      if (item.quickgenId && item.progressStatus === "Failed") {
+      if (item.quickgenId && item.status === "failed") {
         try {
           await requestDelete(captureConnection, item.quickgenId);
         } catch (error) {
           // Silent removal
         }
       }
-      item.progressStatus = "In progress";
+
+      item.status = "running";
 
       // Prepare request -> capture server
       let quickgenId = "";
@@ -113,7 +108,7 @@ export class CaptureWebView extends WebView<Webapp> {
       // Upload request -> capture server
       try {
         await requestUpload(captureConnection, quickgenId, item.files, (percent: number) => {
-          if (item.progressStatus != "Failed") {
+          if (item.status !== "failed") {
             this.showPrepareUploadFileResponse(item, true, "", percent === 1.0, percent);
           }
         });
@@ -152,7 +147,7 @@ export class CaptureWebView extends WebView<Webapp> {
       refreshJobStatus(quickgenId);
     },
 
-    downloadFile: async (payload: { id: string; quickgenId: string }) => {
+    downloadFile: async (payload: { id: string }) => {
       const captureConnection = await this.getCaptureConnection();
 
       const uri = await vscode.window.showSaveDialog({
@@ -166,7 +161,7 @@ export class CaptureWebView extends WebView<Webapp> {
         const id = payload.id;
         const item = this.items.filter((item) => item.id === id)[0];
         try {
-          const fileText = await requestDownload(captureConnection, payload.quickgenId);
+          const fileText = await requestDownload(captureConnection, item.quickgenId!);
           const encoder = new TextEncoder();
           await vscode.workspace.fs.writeFile(
             uri,
@@ -179,29 +174,20 @@ export class CaptureWebView extends WebView<Webapp> {
       }
     },
 
-    deleteJob: async (payload: { id: string; quickgenId: string }) => {
-      const captureConnection = await this.getCaptureConnection();
-
-      let index = -1;
-      const id = payload.id;
-      for (let i = 0; i < this.items.length; i++) {
-        if (this.items[i].id === id) {
-          index = i;
-          break;
-        }
-      }
-      if (index > -1) {
-        this.items.splice(index, 1);
-      }
+    deleteJob: async (payload: { id: string }) => {
+      const item = this.items.filter((item) => item.id === payload.id)[0];
+      this.items = this.items.filter((item) => item.id !== payload.id);
       // If prepare fails, there will be no quickgenId defined
-      if (payload.quickgenId) {
+      if (item?.quickgenId) {
         try {
-          await requestDelete(captureConnection, payload.quickgenId);
+          const captureConnection = await this.getCaptureConnection();
+          await requestDelete(captureConnection, item.quickgenId);
         } catch (error) {
           // Silent removal
         }
       }
     },
+
     openLink: async (payload: string) => {
       const document = await vscode.workspace.openTextDocument(vscode.Uri.file(payload));
       await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
@@ -244,7 +230,7 @@ export class CaptureWebView extends WebView<Webapp> {
         basePath: "/",
         servers: ["https://server.example.com"],
       },
-      progressStatus: "New",
+      status: "pending",
       pollingCounter: 0,
       log: [],
       downloadedFile: undefined,
@@ -259,10 +245,10 @@ export class CaptureWebView extends WebView<Webapp> {
   showPrepareResponse(item: CaptureItem, quickgenId: string, success: boolean, error: string) {
     if (success) {
       item.quickgenId = quickgenId;
-      item.progressStatus = "In progress";
+      item.status = "running";
       item.log.push(`Job ${quickgenId} has been created`);
     } else {
-      item.progressStatus = "Failed";
+      item.status = "failed";
       item.log.push("Failed to prepare: " + error);
     }
     this.sendRequestSilently({
@@ -294,7 +280,7 @@ export class CaptureWebView extends WebView<Webapp> {
         }
       }
     } else {
-      item.progressStatus = "Failed";
+      item.status = "failed";
       item.log.push("Failed to upload: " + error);
     }
     this.sendRequestSilently({
@@ -307,7 +293,7 @@ export class CaptureWebView extends WebView<Webapp> {
     if (success) {
       item.log.push("Job has been started");
     } else {
-      item.progressStatus = "Failed";
+      item.status = "failed";
       item.log.push("Job failed to start: " + message);
     }
     this.sendRequestSilently({
@@ -325,12 +311,12 @@ export class CaptureWebView extends WebView<Webapp> {
         log.push(`Job status: ${status}`);
       }
       if (status === "finished") {
-        item.progressStatus = "Finished";
+        item.status = "finished";
       } else if (status === "failed") {
-        item.progressStatus = "Failed";
+        item.status = "failed";
       }
     } else {
-      item.progressStatus = "Failed";
+      item.status = "failed";
       item.log.push("Job execution failed: " + error);
     }
     this.sendRequestSilently({

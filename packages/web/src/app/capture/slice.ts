@@ -39,7 +39,7 @@ export const slice = createSlice({
     ) => {
       const id = action.payload.id;
       const item = state.items.filter((item) => item.id === id)[0];
-      item.progressStatus = "In progress";
+      item.status = "running";
       item.log = [];
       item.downloadedFile = undefined;
       // -> IDE
@@ -59,10 +59,10 @@ export const slice = createSlice({
       }
       state.selectedItem = state.items.find((item) => item.id === id);
     },
-    downloadFile: (state, action: PayloadAction<{ id: string; quickgenId: string }>) => {
+    downloadFile: (state, action: PayloadAction<{ id: string }>) => {
       // -> IDE
     },
-    deleteJob: (state, { payload: { id } }: PayloadAction<{ id: string; quickgenId: string }>) => {
+    deleteJob: (state, { payload: { id } }: PayloadAction<{ id: string }>) => {
       state.items = state.items.filter((item) => item.id !== id);
       state.selectedItem = state.items[0];
     },
