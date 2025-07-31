@@ -1,5 +1,5 @@
 import {
-  BrowseFiles,
+  SelectFiles,
   DownloadFile,
   Convert,
   ShowCaptureWindow,
@@ -14,5 +14,5 @@ export type Webapp = App<
   // consumes
   ChangeThemeMessage | ShowCaptureWindow | SaveCapture,
   // produces
-  BrowseFiles | Convert | DownloadFile | DeleteJob | OpenLinkMessage
+  SelectFiles | Convert | DownloadFile | DeleteJob | OpenLinkMessage
 >;
