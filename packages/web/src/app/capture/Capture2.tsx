@@ -26,8 +26,8 @@ export default function Capture2() {
           <Menu>
             <MenuItem
               onClick={(e) => e.stopPropagation()}
-              disabled={item.progressStatus === "In progress"}
-              onSelect={() => dispatch(deleteJob({ id: item.id, quickgenId: item.quickgenId! }))}
+              disabled={item.status === "running"}
+              onSelect={() => dispatch(deleteJob({ id: item.id }))}
             >
               <TrashCan />
               Delete

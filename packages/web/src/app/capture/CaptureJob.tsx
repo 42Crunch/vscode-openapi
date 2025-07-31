@@ -29,12 +29,12 @@ export default function CaptureJob() {
   return (
     <div>
       <h3>
-        Job ID: {item.id}, status: {item.progressStatus}
+        Job ID: {item.id}, status: {item.status}
       </h3>
 
       <ProgressButton
         label="Convert"
-        waiting={item.progressStatus === "In progress"}
+        waiting={item.status === "running"}
         onClick={(e) => {
           //if (isValid) {
           dispatch(convert({ id: item.id, files: item.files, options: item.prepareOptions }));
@@ -48,7 +48,7 @@ export default function CaptureJob() {
 
       <Button
         onClick={(e) => {
-          dispatch(downloadFile({ id: item.id, quickgenId: item.quickgenId! }));
+          dispatch(downloadFile({ id: item.id }));
           e.preventDefault();
           e.stopPropagation();
         }}
@@ -58,7 +58,7 @@ export default function CaptureJob() {
 
       <Button
         onClick={(e) => {
-          dispatch(deleteJob({ id: item.id, quickgenId: item.quickgenId! }));
+          dispatch(deleteJob({ id: item.id }));
           e.preventDefault();
           e.stopPropagation();
         }}

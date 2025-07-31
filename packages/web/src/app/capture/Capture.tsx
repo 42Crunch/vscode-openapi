@@ -55,7 +55,7 @@ export function RootContainer() {
           <Button
             disabled={false}
             onClick={(e) => {
-              const newIds = items.filter((item) => item.progressStatus === "New");
+              const newIds = items.filter((item) => item.status === "pending");
               const id = newIds.length === 1 ? newIds[0].id : "";
               const options = newIds.length === 1 ? newIds[0].prepareOptions : undefined;
               dispatch(browseFiles({ id, options }));
@@ -68,20 +68,20 @@ export function RootContainer() {
         </HeaderAction>
       </Header>
       {items.map((item, index) => (
-        <CollapsibleCard key={`item-${item.id}`} defaultCollapsed={item.progressStatus !== "New"}>
+        <CollapsibleCard key={`item-${item.id}`} defaultCollapsed={item.status !== "pending"}>
           <TopDescriptionMain>
             <TopDescriptionLeft>
               <TopDescriptionId>{item.quickgenId}</TopDescriptionId>
-              <TopDescriptionProgressStatus $failed={item.progressStatus === "Failed"}>
-                {item.progressStatus}
+              <TopDescriptionProgressStatus $failed={item.status === "failed"}>
+                {item.status}
               </TopDescriptionProgressStatus>
             </TopDescriptionLeft>
             <TopDescriptionRight>
-              {item.progressStatus !== "In progress" && (
+              {item.status !== "running" && (
                 <TopDescriptionAction>
                   <TopDescriptionRemoverSpan
                     onClick={(e) => {
-                      dispatch(deleteJob({ id: item.id, quickgenId: item.quickgenId as string }));
+                      dispatch(deleteJob({ id: item.id }));
                       e.preventDefault();
                       e.stopPropagation();
                     }}
@@ -121,13 +121,13 @@ export function RootContainer() {
                       )}
                     </CellContainer>
                     <CellContainer>
-                      {item.progressStatus !== "New" && item.prepareOptions.basePath && (
+                      {item.status !== "pending" && item.prepareOptions.basePath && (
                         <PrepareOptionsCell>
                           <div>Base Path = {item.prepareOptions?.basePath}</div>
                           <div>Servers = {item.prepareOptions.servers.join(", ")}</div>
                         </PrepareOptionsCell>
                       )}
-                      {item.progressStatus === "New" && (
+                      {item.status === "pending" && (
                         <PrepareOptionsCell>
                           <Input label="Base Path" name="basePath" />
                           <Input label="Servers" name="servers" />
@@ -164,16 +164,14 @@ export function RootContainer() {
                   </Row>
                 </Fields>
               </Grid>
-              {item.progressStatus !== "Finished" && <ConvertButton item={item} />}
-              {item.progressStatus === "Finished" && (
+              {item.status !== "finished" && <ConvertButton item={item} />}
+              {item.status === "finished" && (
                 <FileReadyContainer>
                   <BasicProgressButton
                     label="Download"
                     waiting={false}
                     onClick={(e) => {
-                      dispatch(
-                        downloadFile({ id: item.id, quickgenId: item.quickgenId as string })
-                      );
+                      dispatch(downloadFile({ id: item.id }));
                       e.preventDefault();
                       e.stopPropagation();
                     }}
@@ -197,7 +195,7 @@ function ConvertButton({ item }: { item: CaptureItem }) {
   return (
     <BasicProgressButton
       label="Convert"
-      waiting={item.progressStatus === "In progress"}
+      waiting={item.status === "running"}
       onClick={(e) => {
         if (isValid) {
           dispatch(convert({ id: item.id, files: item.files, options: item.prepareOptions }));

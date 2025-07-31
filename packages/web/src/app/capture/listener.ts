@@ -32,12 +32,12 @@ export function createListener(host: Webapp["host"], routes: Routes) {
     });
 
   const listeners: Record<keyof Webapp["hostHandlers"], () => UnsubscribeListener> = {
-    browseFiles: () =>
+    selectFiles: () =>
       startAppListening({
         actionCreator: browseFiles,
         effect: async (action, listenerApi) => {
           host.postMessage({
-            command: "browseFiles",
+            command: "selectFiles",
             payload: action.payload,
           });
         },
