@@ -1,7 +1,7 @@
 import styled from "styled-components";
 import Button from "../../new-components/Button";
 import { useAppDispatch, useAppSelector } from "./store";
-import { browseFiles } from "./slice";
+import { selectFiles } from "./slice";
 
 export default function Start() {
   const dispatch = useAppDispatch();
@@ -12,7 +12,7 @@ export default function Start() {
       <p>This is the starting point for capturing API requests.</p>
       <Button
         onClick={(e) => {
-          dispatch(browseFiles({ id: "", options: undefined }));
+          dispatch(selectFiles({ id: undefined }));
         }}
       >
         Upload

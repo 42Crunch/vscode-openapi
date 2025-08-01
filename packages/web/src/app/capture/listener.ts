@@ -7,7 +7,7 @@ import { Webapp } from "@xliic/common/webapp/capture";
 import { AppDispatch, RootState } from "./store";
 import { startListeners } from "../webapp";
 import {
-  browseFiles,
+  selectFiles,
   downloadFile,
   openLink,
   convert,
@@ -34,7 +34,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
   const listeners: Record<keyof Webapp["hostHandlers"], () => UnsubscribeListener> = {
     selectFiles: () =>
       startAppListening({
-        actionCreator: browseFiles,
+        actionCreator: selectFiles,
         effect: async (action, listenerApi) => {
           host.postMessage({
             command: "selectFiles",

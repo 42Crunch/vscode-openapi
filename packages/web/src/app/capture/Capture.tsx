@@ -10,7 +10,7 @@ import Button from "../../new-components/Button";
 import Form from "../../new-components/Form";
 import { ProgressButton } from "../../new-components/ProgressButton";
 import {
-  browseFiles,
+  selectFiles,
   convert,
   deleteJob,
   downloadFile,
@@ -57,8 +57,7 @@ export function RootContainer() {
             onClick={(e) => {
               const newIds = items.filter((item) => item.status === "pending");
               const id = newIds.length === 1 ? newIds[0].id : "";
-              const options = newIds.length === 1 ? newIds[0].prepareOptions : undefined;
-              dispatch(browseFiles({ id, options }));
+              dispatch(selectFiles({ id }));
               e.preventDefault();
               e.stopPropagation();
             }}

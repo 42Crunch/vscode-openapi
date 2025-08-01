@@ -22,10 +22,7 @@ export const slice = createSlice({
     setSelectedItemId: (state, action: PayloadAction<string>) => {
       state.selectedItem = state.items.find((item) => item.id === action.payload);
     },
-    browseFiles: (
-      state,
-      action: PayloadAction<{ id: string; options: PrepareOptions | undefined }>
-    ) => {
+    selectFiles: (state, action: PayloadAction<{ id: string | undefined }>) => {
       // -> IDE
     },
     setPrepareOptions: (state, action: PayloadAction<PrepareOptions & { id: string }>) => {
@@ -74,7 +71,7 @@ export const slice = createSlice({
 
 export const {
   showCaptureWindow,
-  browseFiles,
+  selectFiles,
   setPrepareOptions,
   convert,
   saveCapture,
