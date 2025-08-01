@@ -409,8 +409,8 @@ export async function requestUpload(
   listener: (percent: number) => void
 ) {
   const form = new FormData();
-  for (const file of files) {
-    const fsPath = vscode.Uri.file(file).fsPath;
+  for (const uri of files) {
+    const fsPath = vscode.Uri.parse(uri).fsPath;
     form.append("file", fs.createReadStream(fsPath));
   }
   const response = await got(

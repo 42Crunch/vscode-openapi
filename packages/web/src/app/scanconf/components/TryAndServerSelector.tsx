@@ -140,7 +140,6 @@ const Action = styled.div`
   gap: 4px;
   cursor: pointer;
   align-items: center;
-  cusror: pointer;
   color: var(${ThemeColorVariables.linkForeground});
   > svg {
     fill: var(${ThemeColorVariables.linkForeground});

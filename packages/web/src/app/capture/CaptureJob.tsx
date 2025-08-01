@@ -3,22 +3,26 @@ import styled from "styled-components";
 
 import { PrepareOptions } from "@xliic/common/capture";
 import { ProgressButton } from "../../new-components/ProgressButton";
+import { ThemeColorVariables } from "@xliic/common/theme";
 
 import Input from "../../components/Input";
 import Form from "../../new-components/Form";
-import Separator from "../../components/Separator";
-import { setPrepareOptions, convert, deleteJob, downloadFile, openLink } from "./slice";
+import { CloudArrowDown, FileCode, Link, TrashCan } from "../../icons";
+
+import {
+  setPrepareOptions,
+  convert,
+  deleteJob,
+  downloadFile,
+  openLink,
+  selectFiles,
+} from "./slice";
 import { useAppDispatch, useAppSelector } from "./store";
-import { useFormContext } from "react-hook-form";
 import Button from "../../new-components/Button";
+import { Menu, MenuItem } from "../../new-components/Menu";
 
 export default function CaptureJob() {
   const dispatch = useAppDispatch();
-
-  // const {
-  //   trigger,
-  //   formState: { isValid },
-  // } = useFormContext();
 
   const { selectedItem: item } = useAppSelector((state) => state.capture);
 
@@ -28,11 +32,7 @@ export default function CaptureJob() {
 
   return (
     <div>
-      <h3>
-        Job ID: {item.id}, status: {item.status}
-      </h3>
-
-      <ProgressButton
+      {/* <ProgressButton
         label="Convert"
         waiting={item.status === "running"}
         onClick={(e) => {
@@ -64,20 +64,51 @@ export default function CaptureJob() {
         }}
       >
         Delete
-      </Button>
+      </Button> */}
 
-      <BiggerSeparator title="Files" />
-      <div>
+      <Title>Selected files</Title>
+      <FilesList>
         {item.files && (
           <div>
-            {item.files.map((file, index) => (
-              <span key={`item-${item.id}-file-${index}`}>{file}</span>
+            {item.files.map((url, index) => (
+              <File key={`item-${item.id}-file-${index}`}>
+                <FileCode /> {getFilename(url)}
+                <Menu>
+                  <MenuItem onSelect={() => null}>
+                    <TrashCan />
+                    Delete
+                  </MenuItem>
+                </Menu>
+              </File>
             ))}
           </div>
         )}
-      </div>
 
-      <BiggerSeparator title="Options" />
+        <Action
+          onClick={(e) => {
+            dispatch(selectFiles({ id: item.id }));
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+        >
+          <Link />
+          Upload
+        </Action>
+
+        <Action
+          onClick={(e) => {
+            dispatch(downloadFile({ id: item.id }));
+            e.stopPropagation();
+            e.preventDefault();
+          }}
+        >
+          <CloudArrowDown />
+          Download
+        </Action>
+      </FilesList>
+
+      <Separator />
+      <Title>Options</Title>
       <Form
         wrapFormData={wrapPrepareOptions}
         unwrapFormData={unwrapPrepareOptions}
@@ -88,33 +119,36 @@ export default function CaptureJob() {
           dispatch(setPrepareOptions({ id: item.id, ...data }));
         }}
       >
-        <Input label="Base Path" name="basePath" />
-        <Input label="Servers" name="servers" />
+        <Options>
+          <Input label="Base Path" name="basePath" />
+          <Input label="Servers" name="servers" />
+        </Options>
       </Form>
 
-      <BiggerSeparator title="Logs" />
+      <Separator />
+      <Title>Logs</Title>
 
-      {item.log.map((log, index) => (
-        <div key={index}>
-          <div>{log}</div>
-        </div>
-      ))}
+      <Logs>
+        {item.log.map((log, index) => (
+          <div key={index}>{log}</div>
+        ))}
 
-      {item.downloadedFile && (
-        <div key={`item-${item.id}-log-${item.log.length}`}>
-          Saved to{" "}
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              dispatch(openLink(item.downloadedFile || ""));
-            }}
-          >
-            {item.downloadedFile}
-          </a>
-        </div>
-      )}
+        {item.downloadedFile && (
+          <div key={`item-${item.id}-log-${item.log.length}`}>
+            Saved to{" "}
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dispatch(openLink(item.downloadedFile || ""));
+              }}
+            >
+              {item.downloadedFile}
+            </a>
+          </div>
+        )}
+      </Logs>
     </div>
   );
 }
@@ -127,21 +161,67 @@ function unwrapPrepareOptions(data: any): PrepareOptions {
   return { basePath: data.basePath, servers: data.servers.split(",") };
 }
 
-const BiggerSeparator = styled(Separator)`
-  pointer-events: none;
-  > div {
-    font-weight: 600;
-    font-size: 12px;
-    margin-bottom: 16px;
-    margin-top: 16px;
+const Action = styled.div`
+  display: flex;
+  padding: 0 8px;
+  gap: 4px;
+  cursor: pointer;
+  align-items: center;
+  color: var(${ThemeColorVariables.linkForeground});
+  > svg {
+    fill: var(${ThemeColorVariables.linkForeground});
   }
 `;
 
-const LinkRef = styled.a<{ $disabled?: boolean }>`
-  text-decoration: none;
-  ${({ $disabled }) => $disabled && "opacity: 0.4;"}
-  ${({ $disabled }) => $disabled && "cursor: default;"}
-  ${({ $disabled }) => $disabled && "pointer-events: none;"}
+const File = styled.div`
+  display: flex;
+  padding: 0 8px;
+  gap: 4px;
+  align-items: center;
+  > svg {
+    fill: var(${ThemeColorVariables.foreground});
+  }
+  > span:last-child {
+    visibility: hidden;
+  }
+  &:hover > span:last-child {
+    visibility: visible;
+  }
+`;
+
+const Title = styled.div`
+  margin-top: 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(${ThemeColorVariables.foreground});
+`;
+
+const Options = styled.div`
+  margin-top: 16px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  max-width: 600px;
+  gap: 16px;
+`;
+
+const FilesList = styled.div`
+  display: flex;
+  flex-direction: row;
+  padding-bottom: 8px;
+`;
+
+const Logs = styled.div`
+  font-family: monospace;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const Separator = styled.hr`
+  border: none;
+  border-top: 1px solid var(${ThemeColorVariables.border});
 `;
 
 const schema = z.object({
@@ -161,3 +241,7 @@ const schema = z.object({
       }
     ),
 });
+
+function getFilename(url: string): string {
+  return url.substring(url.lastIndexOf("/") + 1);
+}

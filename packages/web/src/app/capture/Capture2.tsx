@@ -3,7 +3,7 @@ import { TrashCan } from "../../icons";
 import Button from "../../new-components/Button";
 import { Menu, MenuItem } from "../../new-components/Menu";
 import CaptureJob from "./CaptureJob";
-import { browseFiles, deleteJob, setSelectedItemId } from "./slice";
+import { selectFiles, deleteJob, setSelectedItemId } from "./slice";
 import Start from "./Start";
 import { useAppDispatch, useAppSelector } from "./store";
 
@@ -53,7 +53,7 @@ export default function Capture2() {
           <Button
             style={{ width: "100%" }}
             onClick={(e) => {
-              dispatch(browseFiles({ id: "", options: undefined }));
+              dispatch(selectFiles({ id: undefined }));
             }}
           >
             Upload
