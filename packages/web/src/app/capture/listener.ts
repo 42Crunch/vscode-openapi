@@ -30,7 +30,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
     startAppListening({
       actionCreator: showCaptureWindow,
       effect: async (action, listenerApi) => {
-        listenerApi.dispatch(goTo(["capture", "capture2"]));
+        listenerApi.dispatch(goTo(["main", "capture"]));
       },
     });
 
