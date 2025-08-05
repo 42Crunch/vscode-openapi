@@ -16,6 +16,11 @@ export type CaptureItem = {
   downloadedFile: string | undefined;
 };
 
+export type CaptureSettings = {
+  files: string[];
+  prepareOptions: PrepareOptions;
+};
+
 export type ShowCaptureWindow = {
   command: "showCaptureWindow";
   payload: CaptureItem[];
@@ -34,6 +39,11 @@ export type Convert = {
 export type SaveCapture = {
   command: "saveCapture";
   payload: CaptureItem;
+};
+
+export type SaveCaptureSettings = {
+  command: "saveCaptureSettings";
+  payload: { id: string; settings: CaptureSettings };
 };
 
 export type DownloadFile = {
