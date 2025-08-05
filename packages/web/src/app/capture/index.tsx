@@ -6,11 +6,10 @@ import { Webapp } from "@xliic/common/webapp/capture";
 
 import { ThemeState } from "../../features/theme/slice";
 import { RouterContext, Routes } from "../../features/router/RouterContext";
-import { makeWebappMessageHandler, NavigationRouterApp } from "../webapp";
+import { makeWebappMessageHandler, RouterApp } from "../webapp";
 import { createListener } from "./listener";
 import { initStore, messageHandlers } from "./store";
-import Capture2 from "./Capture2";
-import { RootContainer } from "./Capture";
+import Capture from "./Capture";
 
 const routes: Routes = [
   {
@@ -20,19 +19,18 @@ const routes: Routes = [
     element: <div />,
   },
   {
-    id: "capture",
-    title: "Capture",
+    id: "main",
+    title: "Main",
     element: <div>Main</div>,
     children: [
       {
-        id: "capture2",
-        title: "Capture 2",
-        element: <Capture2 />,
-      },
-      {
-        id: "capture1",
-        title: "Capture 1",
-        element: <RootContainer />,
+        id: "capture",
+        title: "Capture",
+        element: (
+          <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}>
+            <Capture />
+          </div>
+        ),
       },
     ],
   },
@@ -45,7 +43,7 @@ function renderWebView(host: Webapp["host"], theme: ThemeState) {
     <React.StrictMode>
       <Provider store={store}>
         <RouterContext.Provider value={routes}>
-          <NavigationRouterApp />
+          <RouterApp />
         </RouterContext.Provider>
       </Provider>
     </React.StrictMode>
