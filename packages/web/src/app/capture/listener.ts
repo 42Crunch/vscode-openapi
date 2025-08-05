@@ -1,5 +1,6 @@
 import {
   createListenerMiddleware,
+  isAnyOf,
   TypedStartListening,
   UnsubscribeListener,
 } from "@reduxjs/toolkit";
@@ -13,6 +14,8 @@ import {
   convert,
   deleteJob,
   showCaptureWindow,
+  deleteFile,
+  saveCaptureSettings,
 } from "./slice";
 import { Routes } from "../../features/router/RouterContext";
 import { startNavigationListening } from "../../features/router/listener";
@@ -39,6 +42,24 @@ export function createListener(host: Webapp["host"], routes: Routes) {
           host.postMessage({
             command: "selectFiles",
             payload: action.payload,
+          });
+        },
+      }),
+    saveCaptureSettings: () =>
+      startAppListening({
+        matcher: isAnyOf(saveCaptureSettings, deleteFile),
+        effect: async (action, listenerApi) => {
+          const id = (action as unknown as { payload: { id: string } }).payload.id;
+          const item = listenerApi.getState().capture.items.find((item) => item.id === id)!;
+          host.postMessage({
+            command: "saveCaptureSettings",
+            payload: {
+              id,
+              settings: {
+                files: item.files,
+                prepareOptions: item.prepareOptions,
+              },
+            },
           });
         },
       }),

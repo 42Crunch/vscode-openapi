@@ -1,8 +1,7 @@
 import * as z from "zod";
 import styled from "styled-components";
 
-import { PrepareOptions } from "@xliic/common/capture";
-import { ProgressButton } from "../../new-components/ProgressButton";
+import { CaptureItem, PrepareOptions } from "@xliic/common/capture";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import Input from "../../components/Input";
@@ -10,62 +9,56 @@ import Form from "../../new-components/Form";
 import { CloudArrowDown, FileCode, Link, TrashCan } from "../../icons";
 
 import {
-  setPrepareOptions,
+  saveCaptureSettings,
   convert,
-  deleteJob,
   downloadFile,
   openLink,
   selectFiles,
+  deleteFile,
 } from "./slice";
 import { useAppDispatch, useAppSelector } from "./store";
-import Button from "../../new-components/Button";
 import { Menu, MenuItem } from "../../new-components/Menu";
+import { useFormContext } from "react-hook-form";
 
 export default function CaptureJob() {
   const dispatch = useAppDispatch();
+  const { selectedId, items } = useAppSelector((state) => state.capture);
 
-  const { selectedItem: item } = useAppSelector((state) => state.capture);
+  const item = items.find((item) => item.id === selectedId);
 
   if (!item) {
     return <div>No job selected</div>;
   }
 
   return (
+    <Form
+      wrapFormData={wrapPrepareOptions}
+      unwrapFormData={unwrapPrepareOptions}
+      useFormMode={"onChange"}
+      data={item.prepareOptions}
+      schema={schema}
+      saveData={(data) => {
+        dispatch(
+          saveCaptureSettings({
+            id: item.id,
+            settings: { files: item.files, prepareOptions: data },
+          })
+        );
+      }}
+    >
+      <CaptureJobForm item={item} />
+    </Form>
+  );
+}
+
+function CaptureJobForm({ item }: { item: CaptureItem }) {
+  const dispatch = useAppDispatch();
+  const {
+    formState: { isValid },
+  } = useFormContext();
+
+  return (
     <div>
-      {/* <ProgressButton
-        label="Convert"
-        waiting={item.status === "running"}
-        onClick={(e) => {
-          //if (isValid) {
-          dispatch(convert({ id: item.id, files: item.files, options: item.prepareOptions }));
-          //} else {
-          //  trigger();
-          //}
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-      />
-
-      <Button
-        onClick={(e) => {
-          dispatch(downloadFile({ id: item.id }));
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-      >
-        Download
-      </Button>
-
-      <Button
-        onClick={(e) => {
-          dispatch(deleteJob({ id: item.id }));
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-      >
-        Delete
-      </Button> */}
-
       <Title>Selected files</Title>
       <FilesList>
         {item.files && (
@@ -74,7 +67,7 @@ export default function CaptureJob() {
               <File key={`item-${item.id}-file-${index}`}>
                 <FileCode /> {getFilename(url)}
                 <Menu>
-                  <MenuItem onSelect={() => null}>
+                  <MenuItem onSelect={() => dispatch(deleteFile({ id: item.id, file: url }))}>
                     <TrashCan />
                     Delete
                   </MenuItem>
@@ -84,46 +77,55 @@ export default function CaptureJob() {
           </div>
         )}
 
-        <Action
-          onClick={(e) => {
-            dispatch(selectFiles({ id: item.id }));
-            e.stopPropagation();
-            e.preventDefault();
-          }}
-        >
-          <Link />
-          Upload
-        </Action>
+        {(item.status === "pending" || item.status === "failed") && (
+          <Action
+            onClick={(e) => {
+              dispatch(selectFiles({ id: item.id }));
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+          >
+            <Link />
+            Upload
+          </Action>
+        )}
 
-        <Action
-          onClick={(e) => {
-            dispatch(downloadFile({ id: item.id }));
-            e.stopPropagation();
-            e.preventDefault();
-          }}
-        >
-          <CloudArrowDown />
-          Download
-        </Action>
+        {(item.status === "pending" || item.status === "failed") &&
+          item.files.length > 0 &&
+          isValid && (
+            <Action
+              onClick={(e) => {
+                dispatch(convert({ id: item.id }));
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+            >
+              <Link />
+              Convert
+            </Action>
+          )}
+
+        {item.status === "finished" && (
+          <Action
+            onClick={(e) => {
+              dispatch(downloadFile({ id: item.id }));
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+          >
+            <CloudArrowDown />
+            Download
+          </Action>
+        )}
       </FilesList>
 
       <Separator />
       <Title>Options</Title>
-      <Form
-        wrapFormData={wrapPrepareOptions}
-        unwrapFormData={unwrapPrepareOptions}
-        useFormMode={"onChange"}
-        data={item.prepareOptions}
-        schema={schema}
-        saveData={(data) => {
-          dispatch(setPrepareOptions({ id: item.id, ...data }));
-        }}
-      >
-        <Options>
-          <Input label="Base Path" name="basePath" />
-          <Input label="Servers" name="servers" />
-        </Options>
-      </Form>
+
+      <Options>
+        <Input label="Base Path" name="basePath" />
+        <Input label="Servers" name="servers" />
+      </Options>
 
       <Separator />
       <Title>Logs</Title>
@@ -243,5 +245,5 @@ const schema = z.object({
 });
 
 function getFilename(url: string): string {
-  return url.substring(url.lastIndexOf("/") + 1);
+  return decodeURIComponent(url.substring(url.lastIndexOf("/") + 1));
 }
