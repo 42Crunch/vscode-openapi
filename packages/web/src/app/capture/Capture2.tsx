@@ -1,3 +1,4 @@
+import { CaptureItem } from "@xliic/common/capture";
 import { SearchSidebarControlled } from "../../components/layout/SearchSidebar";
 import { TrashCan } from "../../icons";
 import Button from "../../new-components/Button";
@@ -10,7 +11,7 @@ import { useAppDispatch, useAppSelector } from "./store";
 export default function Capture2() {
   const dispatch = useAppDispatch();
 
-  const { items, selectedItem } = useAppSelector((state) => state.capture);
+  const { items, selectedId } = useAppSelector((state) => state.capture);
 
   const onSetItemId = ({ sectionId, itemId }: { sectionId: string; itemId: string }) =>
     dispatch(setSelectedItemId(itemId));
@@ -21,7 +22,7 @@ export default function Capture2() {
       title: "Capture",
       items: items.map((item) => ({
         id: item.id,
-        label: item.id,
+        label: makeLabel(item),
         menu: (
           <Menu>
             <MenuItem
@@ -40,7 +41,7 @@ export default function Capture2() {
 
   return (
     <SearchSidebarControlled
-      selected={selectedItem ? { sectionId: "capture", itemId: selectedItem.id } : undefined}
+      selected={selectedId ? { sectionId: "capture", itemId: selectedId } : undefined}
       onSelected={onSetItemId}
       title="sessions"
       noSectionTitles
@@ -62,4 +63,19 @@ export default function Capture2() {
       )}
     />
   );
+}
+
+function makeLabel(item: CaptureItem): string {
+  if (!item.files || item.files.length === 0) {
+    return "No files";
+  }
+
+  const firstFile = item.files[0];
+  return item.files.length > 1
+    ? `${getFilename(firstFile)}+(${item.files.length - 1})`
+    : getFilename(firstFile);
+}
+
+function getFilename(url: string): string {
+  return decodeURIComponent(url.substring(url.lastIndexOf("/") + 1));
 }

@@ -1,14 +1,14 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { CaptureItem, PrepareOptions } from "@xliic/common/capture";
+import { CaptureItem, Convert, PrepareOptions, SaveCaptureSettings } from "@xliic/common/capture";
 
 export interface CaptureState {
   items: CaptureItem[];
-  selectedItem: CaptureItem | undefined;
+  selectedId: string | undefined;
 }
 
 const initialState: CaptureState = {
   items: [],
-  selectedItem: undefined,
+  selectedId: undefined,
 };
 
 export const slice = createSlice({
@@ -17,23 +17,18 @@ export const slice = createSlice({
   reducers: {
     showCaptureWindow: (state, action: PayloadAction<CaptureItem[]>) => {
       state.items = action.payload;
-      state.selectedItem = action.payload.length > 0 ? action.payload[0] : undefined;
+      state.selectedId = action.payload.length > 0 ? action.payload[0].id : undefined;
     },
+
     setSelectedItemId: (state, action: PayloadAction<string>) => {
-      state.selectedItem = state.items.find((item) => item.id === action.payload);
+      state.selectedId = action.payload;
     },
+
     selectFiles: (state, action: PayloadAction<{ id: string | undefined }>) => {
       // -> IDE
     },
-    setPrepareOptions: (state, action: PayloadAction<PrepareOptions & { id: string }>) => {
-      const id = action.payload.id;
-      const item = state.items.filter((item) => item.id === id)[0];
-      item.prepareOptions = action.payload;
-    },
-    convert: (
-      state,
-      action: PayloadAction<{ id: string; files: string[]; options: PrepareOptions }>
-    ) => {
+
+    convert: (state, action: PayloadAction<Convert["payload"]>) => {
       const id = action.payload.id;
       const item = state.items.filter((item) => item.id === id)[0];
       item.status = "running";
@@ -41,28 +36,44 @@ export const slice = createSlice({
       item.downloadedFile = undefined;
       // -> IDE
     },
+
     saveCapture: (state, action: PayloadAction<CaptureItem>) => {
-      let found = false;
-      const id = action.payload.id;
-      for (let i = 0; i < state.items.length; i++) {
-        if (state.items[i].id === id) {
-          state.items[i] = action.payload;
-          found = true;
-          break;
+      const id = state.items.findIndex((item) => item.id === action.payload.id);
+      if (id !== -1) {
+        state.items[id] = action.payload;
+      } else {
+        state.items.unshift(action.payload);
+        if (state.selectedId === undefined) {
+          state.selectedId = action.payload.id;
         }
       }
-      if (!found) {
-        state.items.unshift(action.payload);
-      }
-      state.selectedItem = state.items.find((item) => item.id === id);
     },
+
+    saveCaptureSettings: (state, action: PayloadAction<SaveCaptureSettings["payload"]>) => {
+      const { id, settings } = action.payload;
+      const item = state.items.findIndex((item) => item.id === id);
+      if (item !== -1) {
+        state.items[item].prepareOptions = settings.prepareOptions;
+      }
+    },
+
     downloadFile: (state, action: PayloadAction<{ id: string }>) => {
       // -> IDE
     },
+
     deleteJob: (state, { payload: { id } }: PayloadAction<{ id: string }>) => {
       state.items = state.items.filter((item) => item.id !== id);
-      state.selectedItem = state.items[0];
+      state.selectedId = state.items[0]?.id;
     },
+
+    deleteFile: (state, action: PayloadAction<{ id: string; file: string }>) => {
+      const { id, file } = action.payload;
+      const item = state.items.find((item) => item.id === id);
+      if (item) {
+        item.files = item.files.filter((f) => f !== file);
+      }
+    },
+
     openLink: (state, action: PayloadAction<string>) => {
       // -> IDE
     },
@@ -72,11 +83,12 @@ export const slice = createSlice({
 export const {
   showCaptureWindow,
   selectFiles,
-  setPrepareOptions,
+  saveCaptureSettings,
   convert,
   saveCapture,
   downloadFile,
   deleteJob,
+  deleteFile,
   openLink,
   setSelectedItemId,
 } = slice.actions;

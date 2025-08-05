@@ -9,14 +9,7 @@ import { TrashCan } from "../../icons";
 import Button from "../../new-components/Button";
 import Form from "../../new-components/Form";
 import { ProgressButton } from "../../new-components/ProgressButton";
-import {
-  selectFiles,
-  convert,
-  deleteJob,
-  downloadFile,
-  openLink,
-  setPrepareOptions,
-} from "./slice";
+import { selectFiles, convert, deleteJob, downloadFile, openLink } from "./slice";
 import { useAppDispatch, useAppSelector } from "./store";
 
 function wrapPrepareOptions(env: PrepareOptions) {
@@ -99,7 +92,7 @@ export function RootContainer() {
               data={item.prepareOptions}
               schema={schema}
               saveData={(data) => {
-                dispatch(setPrepareOptions({ id: item.id, ...data }));
+                // dispatch(setPrepareOptions({ id: item.id, ...data }));
               }}
             >
               <Grid>
@@ -196,11 +189,11 @@ function ConvertButton({ item }: { item: CaptureItem }) {
       label="Convert"
       waiting={item.status === "running"}
       onClick={(e) => {
-        if (isValid) {
-          dispatch(convert({ id: item.id, files: item.files, options: item.prepareOptions }));
-        } else {
-          trigger();
-        }
+        // if (isValid) {
+        //   dispatch(convert({ id: item.id, files: item.files, options: item.prepareOptions }));
+        // } else {
+        //   trigger();
+        // }
         e.preventDefault();
         e.stopPropagation();
       }}

@@ -8,7 +8,7 @@ import FormData from "form-data";
 import got from "got";
 
 import { Webapp } from "@xliic/common/webapp/capture";
-import { CaptureItem, PrepareOptions, Status } from "@xliic/common/capture";
+import { CaptureItem, CaptureSettings, PrepareOptions, Status } from "@xliic/common/capture";
 import { getEndpoints } from "@xliic/common/endpoints";
 
 import { WebView } from "../../web-view";
@@ -145,6 +145,15 @@ export class CaptureWebView extends WebView<Webapp> {
 
       // Wait for correct status request -> capture server
       refreshJobStatus(quickgenId);
+    },
+
+    saveCaptureSettings: async (payload: { id: string; settings: CaptureSettings }) => {
+      const { id, settings } = payload;
+      const item = this.items.find((item) => item.id === id);
+      if (item) {
+        item.prepareOptions = settings.prepareOptions;
+        item.files = settings.files;
+      }
     },
 
     downloadFile: async (payload: { id: string }) => {
