@@ -43,7 +43,7 @@ export default function Capture() {
     <SearchSidebarControlled
       selected={selectedId ? { sectionId: "capture", itemId: selectedId } : undefined}
       onSelected={onSetItemId}
-      title="sessions"
+      title="Quickgen sessions"
       noSectionTitles
       hideEmptySidebar
       sections={sections}
@@ -57,7 +57,7 @@ export default function Capture() {
               dispatch(selectFiles({ id: undefined }));
             }}
           >
-            Upload
+            New session
           </Button>
         </div>
       )}
