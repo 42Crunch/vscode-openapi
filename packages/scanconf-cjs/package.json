@@ -22,7 +22,6 @@
     "@xliic/result": "*"
   },
   "devDependencies": {
-    "typescript": "*",
-    "vitest": "*"
+    "typescript": "*"
   }
 }
