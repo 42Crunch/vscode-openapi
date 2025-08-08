@@ -32,7 +32,7 @@ export default function List({
         .map((item) => {
           if (item.id === selected) {
             return (
-              <SelectedItem key={item.id}>
+              <SelectedItem key={item.id} className="selected">
                 <span className="label">{item.label}</span>
                 {errors?.[item.id] !== undefined && <ErrorMarker message={errors[item.id]} />}
                 {item.menu && <span className="menu">{item.menu}</span>}

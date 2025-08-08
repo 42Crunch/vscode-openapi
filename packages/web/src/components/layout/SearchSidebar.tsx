@@ -199,6 +199,17 @@ const Sections = styled.div`
     > li:hover {
       > .menu {
         opacity: 1;
+        svg {
+          fill: var(${ThemeColorVariables.foreground});
+        }
+      }
+    }
+    > li.selected:hover {
+      > .menu {
+        opacity: 1;
+        svg {
+          fill: var(${ThemeColorVariables.listActiveSelectionForeground});
+        }
       }
     }
   }
