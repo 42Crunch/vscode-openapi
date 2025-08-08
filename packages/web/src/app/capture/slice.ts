@@ -43,9 +43,7 @@ export const slice = createSlice({
         state.items[id] = action.payload;
       } else {
         state.items.unshift(action.payload);
-        if (state.selectedId === undefined) {
-          state.selectedId = action.payload.id;
-        }
+        state.selectedId = action.payload.id;
       }
     },
 
