@@ -86,7 +86,7 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
             }}
           >
             <Link />
-            Upload
+            Select files
           </Action>
         )}
 
@@ -101,7 +101,7 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
               }}
             >
               <Link />
-              Convert
+              Generate
             </Action>
           )}
 
@@ -114,7 +114,7 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
             }}
           >
             <CloudArrowDown />
-            Download
+            Save
           </Action>
         )}
       </FilesList>

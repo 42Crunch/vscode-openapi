@@ -15,7 +15,7 @@ export default function Start() {
           dispatch(selectFiles({ id: undefined }));
         }}
       >
-        Upload
+        Select files
       </Button>
     </div>
   );
