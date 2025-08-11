@@ -28,6 +28,14 @@ export default defineConfig(({ command, mode }) => {
         output: {
           entryFileNames: `[name].js`,
           chunkFileNames: `[name].[hash].js`,
+          assetFileNames: (assetInfo) => {
+            if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+              return 'style.css';
+            }
+
+            return 'main.js';
+          },
+          inlineDynamicImports: true,
         },
       },
     },
