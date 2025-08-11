@@ -31,6 +31,7 @@ export const Preview = () => {
       content: oas,
       hideSearch: true,
       hideDownloadButton: true,
+      hideClientButton: true,
     }}
   />
 };
