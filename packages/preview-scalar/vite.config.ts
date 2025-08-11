@@ -35,6 +35,7 @@ export default defineConfig(({ command, mode }) => {
 
             return 'main.js';
           },
+          // Make it all one big JS bundle
           inlineDynamicImports: true,
         },
       },
