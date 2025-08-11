@@ -3,6 +3,10 @@ body {
     padding: 0;
 }
 
+.loading-text {
+    padding: 0 20px;
+}
+
 /* Use VS Code theme variables */
 .light-mode {
     --scalar-color-1: var(--vscode-foreground, #121212);

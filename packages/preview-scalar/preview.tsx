@@ -23,7 +23,7 @@ export const Preview = () => {
   }, []);
 
   if (!oas) {
-    return <p>Loading...</p>;
+    return <p className="loading-text">Loading...</p>;
   }
 
   return <ApiReferenceReact
