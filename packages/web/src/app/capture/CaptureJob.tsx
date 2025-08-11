@@ -6,7 +6,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 
 import Input from "../../components/Input";
 import Form from "../../new-components/Form";
-import { CloudArrowDown, FileCode, Link, TrashCan } from "../../icons";
+import { CloudArrowDown, FileCode, FileExport, FileImport, Link, TrashCan } from "../../icons";
 
 import {
   saveCaptureSettings,
@@ -85,7 +85,7 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
               e.preventDefault();
             }}
           >
-            <Link />
+            <FileImport />
             Select files
           </Action>
         )}
@@ -100,7 +100,7 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
                 e.preventDefault();
               }}
             >
-              <Link />
+              <FileExport />
               Generate
             </Action>
           )}

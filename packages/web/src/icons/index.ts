@@ -28,6 +28,7 @@ export { default as ExclamationCircle } from "./ExclamationCircle";
 export { default as Eye } from "./Eye";
 export { default as FileCode } from "./FileCode";
 export { default as FileExport } from "./FileExport";
+export { default as FileImport } from "./FileImport";
 export { default as Filter } from "./Filter";
 export { default as Flag } from "./Flag";
 export { default as GripVertical } from "./GripVertical";
