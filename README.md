@@ -124,7 +124,7 @@ You can get a documentation-style preview of the API you are editing by clicking
 
 ![OpenAPI Preview Pane](./images/OASPreview.png)
 
-The extension supports two popular OpenAPI documentation generators: [SwaggerUI](https://swagger.io/tools/swagger-ui/) and [ReDoc](https://github.com/Redocly/redoc).
+The extension supports three popular OpenAPI documentation generators: [SwaggerUI](https://swagger.io/tools/swagger-ui/), [ReDoc](https://github.com/Redocly/redoc), and [Scalar](https://github.com/scalar/scalar).
 
 To change the default OpenAPI Preview rendering engine:
 

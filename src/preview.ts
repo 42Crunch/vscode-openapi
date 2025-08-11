@@ -19,6 +19,7 @@ type PreviewType = keyof Previews;
 type Previews = {
   redoc?: Preview;
   swaggerui?: Preview;
+  scalar?: Preview;
 };
 
 export function activate(
@@ -47,7 +48,7 @@ export function activate(
   const debouncedPreview = debounce(showPreview);
 
   cache.onDidChange(async (document: vscode.TextDocument) => {
-    const names: PreviewType[] = ["swaggerui", "redoc"];
+    const names: PreviewType[] = ["swaggerui", "redoc", "scalar"];
     for (const name of names) {
       const preview: Preview = previews[name]!;
       const uri = document.uri.toString();
@@ -70,6 +71,12 @@ export function activate(
     "openapi.previewSwaggerUI",
     async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit) =>
       startPreview(context, cache, previews, "swaggerui", textEditor.document)
+  );
+
+  vscode.commands.registerTextEditorCommand(
+    "openapi.previewScalar",
+    async (textEditor: vscode.TextEditor, edit: vscode.TextEditorEdit) =>
+      startPreview(context, cache, previews, "scalar", textEditor.document)
   );
 
   vscode.commands.registerTextEditorCommand(
@@ -120,7 +127,7 @@ async function showPreview(
     return;
   }
 
-  const title = name === "redoc" ? "OpenAPI ReDoc preview" : "OpenAPI SwaggerUI preview";
+  const title = name === "redoc" ? "OpenAPI ReDoc preview" : name === "scalar" ? "OpenAPI Scalar preview" : "OpenAPI SwaggerUI preview";
 
   const panel = await buildWebviewPanel(context, name, title);
 

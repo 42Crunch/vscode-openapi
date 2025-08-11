@@ -11,8 +11,8 @@
     "scanconf-changes"
   ],
   "scripts": {
-    "postinstall": "cd preview-redoc && npm install && cd ../preview-swaggerui && npm install",
-    "build": "npm run build-webapps && npm run build-swaggerui && npm run build-redoc",
+    "postinstall": "cd preview-redoc && npm install && cd ../preview-swaggerui && npm install && cd ../preview-scalar && npm install",
+    "build": "npm run build-webapps && npm run build-swaggerui && npm run build-redoc && npm run build-scalar",
     "build-webapps": "npm run build-result && npm run build-openapi && npm run build-common && npm run build-streaming-parser && npm run build-scanconf && npm run build-scanconf-changes && npm run build-web",
     "build-openapi": "cd openapi && npm run build && cd .. && cd openapi-cjs && npm run build",
     "build-result": "cd result && npm run build && cd .. && cd result-cjs && npm run build",
@@ -22,7 +22,8 @@
     "build-common": "cd common && npm run build",
     "build-web": "cd web && npm run build && mkdirp ../../webview/generated/web && ncp dist ../../webview/generated/web",
     "build-swaggerui": "cd preview-swaggerui && npm run build && mkdirp ../../webview/generated/preview/swaggerui && ncp dist ../../webview/generated/preview/swaggerui",
-    "build-redoc": "cd preview-redoc && npm run build && mkdirp ../../webview/generated/preview/redoc && ncp dist ../../webview/generated/preview/redoc"
+    "build-redoc": "cd preview-redoc && npm run build && mkdirp ../../webview/generated/preview/redoc && ncp dist ../../webview/generated/preview/redoc",
+    "build-scalar": "cd preview-scalar && npm run build && mkdirp ../../webview/generated/preview/scalar && ncp dist ../../webview/generated/preview/scalar"
   },
   "devDependencies": {
     "typescript": "^5.8.3",
