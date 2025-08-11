@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { ArrowLeftToLine, ArrowRightToLine, MagnifyingGlass } from "../../icons";
@@ -187,6 +187,15 @@ const Content = styled.div<{ $expanded: boolean; $hidingSidebar?: boolean }>`
   overflow-y: auto;
 `;
 
+const rotation = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+`;
+
 const Sections = styled.div`
   flex: 1;
   overflow-y: auto;
@@ -194,6 +203,24 @@ const Sections = styled.div`
     > li {
       > .menu {
         opacity: 0;
+      }
+      > .icon {
+        svg {
+          fill: var(${ThemeColorVariables.foreground});
+          height: 14px;
+          width: 14px;
+          padding: 4px;
+        }
+        svg.spinning {
+          animation: ${rotation} 2s infinite linear;
+        }
+      }
+    }
+    > li.selected {
+      > .icon {
+        svg {
+          fill: var(${ThemeColorVariables.listActiveSelectionForeground});
+        }
       }
     }
     > li:hover {

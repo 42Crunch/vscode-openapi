@@ -8,6 +8,7 @@ export type ListItem = {
   id: string;
   label: string;
   menu?: JSX.Element;
+  icon?: JSX.Element;
 };
 
 export default function List({
@@ -35,6 +36,7 @@ export default function List({
               <SelectedItem key={item.id} className="selected">
                 <span className="label">{item.label}</span>
                 {errors?.[item.id] !== undefined && <ErrorMarker message={errors[item.id]} />}
+                {item.icon && <span className="icon">{item.icon}</span>}
                 {item.menu && <span className="menu">{item.menu}</span>}
               </SelectedItem>
             );
@@ -43,6 +45,7 @@ export default function List({
             <Item onClick={() => setSelected(item.id)} key={item.id}>
               <span className="label">{item.label}</span>
               {errors?.[item.id] !== undefined && <ErrorMarker message={errors[item.id]} />}
+              {item.icon && <span className="icon">{item.icon}</span>}
               {item.menu && <span className="menu">{item.menu}</span>}
             </Item>
           );

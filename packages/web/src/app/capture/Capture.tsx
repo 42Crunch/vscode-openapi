@@ -1,6 +1,13 @@
-import { CaptureItem } from "@xliic/common/capture";
+import { CaptureItem, Status } from "@xliic/common/capture";
 import { SearchSidebarControlled } from "../../components/layout/SearchSidebar";
-import { TrashCan } from "../../icons";
+import {
+  CircleCheckLight,
+  CircleDashedLight,
+  CircleExclamation,
+  CircleExclamationLight,
+  CircleNotchLight,
+  TrashCan,
+} from "../../icons";
 import Button from "../../new-components/Button";
 import { Menu, MenuItem } from "../../new-components/Menu";
 import CaptureJob from "./CaptureJob";
@@ -23,6 +30,7 @@ export default function Capture() {
       items: items.map((item) => ({
         id: item.id,
         label: makeLabel(item),
+        icon: makeIcon(item.status),
         menu: (
           <Menu>
             <MenuItem
@@ -78,4 +86,17 @@ function makeLabel(item: CaptureItem): string {
 
 function getFilename(url: string): string {
   return decodeURIComponent(url.substring(url.lastIndexOf("/") + 1));
+}
+
+function makeIcon(status: Status): JSX.Element {
+  switch (status) {
+    case "pending":
+      return <CircleDashedLight />;
+    case "running":
+      return <CircleNotchLight className="spinning" />;
+    case "finished":
+      return <CircleCheckLight />;
+    case "failed":
+      return <CircleExclamationLight />;
+  }
 }
