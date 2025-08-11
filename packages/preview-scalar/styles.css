@@ -3,8 +3,19 @@ body {
     padding: 0;
 }
 
+/**
+* Gives the loading text a bit of padding.
+*/
 .loading-text {
     padding: 0 20px;
+}
+
+/**
+* This removes the horizontal scrollbars in smaller viewports.
+*/
+.references-mobile-header {
+    width: 100% !important;
+    max-width: 100dvw;
 }
 
 /* Use VS Code theme variables */
