@@ -32,6 +32,7 @@ export const Preview = () => {
       hideSearch: true,
       hideDownloadButton: true,
       hideClientButton: true,
+      hideTestRequestButton: true,
     }}
   />
 };
