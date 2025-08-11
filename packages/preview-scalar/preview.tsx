@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { ApiReferenceReact } from '@scalar/api-reference-react'
-import '@scalar/api-reference-react/style.css'
+import { ApiReferenceReact } from "@scalar/api-reference-react"
+import "@scalar/api-reference-react/style.css"
 
 declare var acquireVsCodeApi: any;
 
