@@ -6,7 +6,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 
 import Input from "../../components/Input";
 import Form from "../../new-components/Form";
-import { CloudArrowDown, FileCode, FileExport, FileImport, Link, TrashCan } from "../../icons";
+import { CloudArrowDown, FileCode, FileExport, FileImport, TrashCan } from "../../icons";
 
 import {
   saveCaptureSettings,
@@ -19,6 +19,7 @@ import {
 import { useAppDispatch, useAppSelector } from "./store";
 import { Menu, MenuItem } from "../../new-components/Menu";
 import { useFormContext } from "react-hook-form";
+import Button from "../../new-components/Button";
 
 export default function CaptureJob() {
   const dispatch = useAppDispatch();
@@ -90,20 +91,21 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
           </Action>
         )}
 
-        {(item.status === "pending" || item.status === "failed") &&
-          item.files.length > 0 &&
-          isValid && (
-            <Action
-              onClick={(e) => {
+        {(item.status === "pending" || item.status === "failed") && item.files.length > 0 && (
+          <Action
+            $disabled={!isValid}
+            onClick={(e) => {
+              if (isValid) {
                 dispatch(convert({ id: item.id }));
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-            >
-              <FileExport />
-              Generate
-            </Action>
-          )}
+              }
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+          >
+            <FileExport />
+            Generate
+          </Action>
+        )}
 
         {item.status === "finished" && (
           <Action
@@ -114,7 +116,7 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
             }}
           >
             <CloudArrowDown />
-            Save
+            Save OpenAPI file
           </Action>
         )}
       </FilesList>
@@ -137,7 +139,7 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
 
         {item.downloadedFile && (
           <div key={`item-${item.id}-log-${item.log.length}`}>
-            Saved to{" "}
+            OpenAPI file saved to{" "}
             <a
               href="#"
               onClick={(e) => {
@@ -163,15 +165,21 @@ function unwrapPrepareOptions(data: any): PrepareOptions {
   return { basePath: data.basePath, servers: data.servers.split(",") };
 }
 
-const Action = styled.div`
+const Action = styled.div<{ $disabled?: boolean }>`
   display: flex;
   padding: 0 8px;
   gap: 4px;
-  cursor: pointer;
   align-items: center;
-  color: var(${ThemeColorVariables.linkForeground});
+  cursor: pointer;
+  color: var(
+    ${({ $disabled }) =>
+      $disabled ? ThemeColorVariables.disabledForeground : ThemeColorVariables.linkForeground}
+  );
   > svg {
-    fill: var(${ThemeColorVariables.linkForeground});
+    fill: var(
+      ${({ $disabled }) =>
+        $disabled ? ThemeColorVariables.disabledForeground : ThemeColorVariables.linkForeground}
+    );
   }
 `;
 
@@ -212,6 +220,7 @@ const FilesList = styled.div`
   display: flex;
   flex-direction: row;
   padding-bottom: 8px;
+  align-items: start;
 `;
 
 const Logs = styled.div`
