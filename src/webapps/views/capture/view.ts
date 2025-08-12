@@ -60,8 +60,8 @@ export class CaptureWebView extends WebView<Webapp> {
 
       if (payload.id) {
         // update existing item
-        const item = this.items.filter((item) => item.id === payload.id)[0]!;
-        item.files = files;
+        const item = this.items.find((item) => item.id === payload.id)!;
+        item.files = [...new Set(item.files.concat(files))];
         this.sendRequest({
           command: "saveCapture",
           payload: item,
@@ -77,8 +77,7 @@ export class CaptureWebView extends WebView<Webapp> {
     },
 
     convert: async (payload: { id: string }) => {
-      const id = payload.id;
-      const item = this.items.filter((item) => item.id === id)[0];
+      const item = this.items.find((item) => item.id === payload.id)!;
       item.log = [];
       item.downloadedFile = undefined;
 
@@ -167,8 +166,7 @@ export class CaptureWebView extends WebView<Webapp> {
       });
 
       if (uri) {
-        const id = payload.id;
-        const item = this.items.filter((item) => item.id === id)[0];
+        const item = this.items.find((item) => item.id === payload.id)!;
         try {
           const fileText = await requestDownload(captureConnection, item.quickgenId!);
           const encoder = new TextEncoder();
@@ -184,7 +182,7 @@ export class CaptureWebView extends WebView<Webapp> {
     },
 
     deleteJob: async (payload: { id: string }) => {
-      const item = this.items.filter((item) => item.id === payload.id)[0];
+      const item = this.items.find((item) => item.id === payload.id)!;
       this.items = this.items.filter((item) => item.id !== payload.id);
       // If prepare fails, there will be no quickgenId defined
       if (item?.quickgenId) {
@@ -255,10 +253,10 @@ export class CaptureWebView extends WebView<Webapp> {
     if (success) {
       item.quickgenId = quickgenId;
       item.status = "running";
-      item.log.push(`Job ${quickgenId} has been created`);
+      item.log.push("Created quickgen job");
     } else {
       item.status = "failed";
-      item.log.push("Failed to prepare: " + error);
+      item.log.push("Failed to prepare quickgen job: " + error);
     }
     this.sendRequestSilently({
       command: "saveCapture",
@@ -279,7 +277,7 @@ export class CaptureWebView extends WebView<Webapp> {
         if (log[log.length - 1].startsWith("Uploading files")) {
           log[log.length - 1] = `Uploading files: 100%`;
         }
-        item.log.push("All files have been uploaded");
+        item.log.push("All files successfully uploaded");
       } else {
         percent = Math.ceil(100 * percent);
         if (log[log.length - 1].startsWith("Uploading files")) {
@@ -290,7 +288,7 @@ export class CaptureWebView extends WebView<Webapp> {
       }
     } else {
       item.status = "failed";
-      item.log.push("Failed to upload: " + error);
+      item.log.push("Failed to upload files: " + error);
     }
     this.sendRequestSilently({
       command: "saveCapture",
@@ -300,10 +298,10 @@ export class CaptureWebView extends WebView<Webapp> {
 
   showExecutionStartResponse(item: CaptureItem, success: boolean, message: string) {
     if (success) {
-      item.log.push("Job has been started");
+      item.log.push("Quickgen job started");
     } else {
       item.status = "failed";
-      item.log.push("Job failed to start: " + message);
+      item.log.push("Quickgen job failed to start: " + message);
     }
     this.sendRequestSilently({
       command: "saveCapture",
@@ -314,10 +312,10 @@ export class CaptureWebView extends WebView<Webapp> {
   showExecutionStatusResponse(item: CaptureItem, status: Status, success: boolean, error: string) {
     if (success) {
       const log = item.log;
-      if (log[log.length - 1].startsWith("Job status: ")) {
-        log[log.length - 1] = `Job status: ${status}`;
+      if (log[log.length - 1].startsWith("Quickgen job ")) {
+        log[log.length - 1] = `Quickgen job ${status}`;
       } else {
-        log.push(`Job status: ${status}`);
+        log.push(`Quickgen job ${status}`);
       }
       if (status === "finished") {
         item.status = "finished";
@@ -326,7 +324,7 @@ export class CaptureWebView extends WebView<Webapp> {
       }
     } else {
       item.status = "failed";
-      item.log.push("Job execution failed: " + error);
+      item.log.push("Quickgen job execution failed: " + error);
     }
     this.sendRequestSilently({
       command: "saveCapture",
