@@ -33,7 +33,6 @@ export class CaptureWebView extends WebView<Webapp> {
     this.items = [];
     this.useDevEndpoints = configuration.get<boolean>("internalUseDevEndpoints");
 
-    //tempInitItems(this.items);
     vscode.window.onDidChangeActiveColorTheme((e) => {
       if (this.isActive()) {
         this.sendColorTheme(e);
@@ -48,9 +47,6 @@ export class CaptureWebView extends WebView<Webapp> {
         canSelectFiles: true,
         canSelectFolders: false,
         canSelectMany: true,
-        // filters: {
-        //   OpenAPI: ["json", "yaml", "yml"],
-        // },
       });
       if (uris === undefined || uris.length === 0) {
         return;
@@ -161,7 +157,7 @@ export class CaptureWebView extends WebView<Webapp> {
       const uri = await vscode.window.showSaveDialog({
         title: "Save OpenAPI file",
         filters: {
-          OpenAPI: ["json", "yaml", "yml"],
+          OpenAPI: ["json"],
         },
       });
 
@@ -349,7 +345,7 @@ export async function getCaptureConnection(
   configuration: Configuration,
   secrets: vscode.SecretStorage,
   useDevEndpoints: boolean
-): Promise<CaptureConnection> {
+): Promise<CaptureConnection | undefined> {
   const credentialType = await hasCredentials(configuration, secrets);
 
   if (credentialType === "anond-token") {
@@ -362,7 +358,6 @@ export async function getCaptureConnection(
       useDevEndpoints
     );
   }
-  return null as any;
 }
 
 export type CaptureConnection = {
