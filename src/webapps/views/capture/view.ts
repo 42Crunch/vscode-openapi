@@ -22,7 +22,7 @@ const pollingLimit = Math.floor(pollingTimeMs / pollingDelayMs);
 export class CaptureWebView extends WebView<Webapp> {
   private items: CaptureItem[];
   private useDevEndpoints: boolean;
-  private captureConnection: CaptureConnection | undefined;
+  private captureConnections: Map<string, CaptureConnection>;
 
   constructor(
     extensionPath: string,
@@ -32,6 +32,7 @@ export class CaptureWebView extends WebView<Webapp> {
     super(extensionPath, "capture", "Capture", vscode.ViewColumn.One);
     this.items = [];
     this.useDevEndpoints = configuration.get<boolean>("internalUseDevEndpoints");
+    this.captureConnections = new Map<string, CaptureConnection>();
 
     vscode.window.onDidChangeActiveColorTheme((e) => {
       if (this.isActive()) {
@@ -77,7 +78,7 @@ export class CaptureWebView extends WebView<Webapp> {
       item.log = [];
       item.downloadedFile = undefined;
 
-      const captureConnection = await this.getCaptureConnection();
+      const captureConnection = await this.getCaptureConnection(item.quickgenId);
 
       // Handle the case when restart requested
       if (item.quickgenId && item.status === "failed") {
@@ -91,9 +92,10 @@ export class CaptureWebView extends WebView<Webapp> {
       item.status = "running";
 
       // Prepare request -> capture server
-      let quickgenId = "";
+      let quickgenId = undefined;
       try {
         quickgenId = await requestPrepare(captureConnection, item.prepareOptions);
+        this.captureConnections.set(quickgenId, captureConnection);
         this.showPrepareResponse(item, quickgenId, true, "");
       } catch (error) {
         this.showPrepareResponse(item, quickgenId, false, getError(error));
@@ -152,8 +154,6 @@ export class CaptureWebView extends WebView<Webapp> {
     },
 
     downloadFile: async (payload: { id: string }) => {
-      const captureConnection = await this.getCaptureConnection();
-
       const uri = await vscode.window.showSaveDialog({
         title: "Save OpenAPI file",
         filters: {
@@ -163,6 +163,8 @@ export class CaptureWebView extends WebView<Webapp> {
 
       if (uri) {
         const item = this.items.find((item) => item.id === payload.id)!;
+        const captureConnection = await this.getCaptureConnection(item.quickgenId);
+
         try {
           const fileText = await requestDownload(captureConnection, item.quickgenId!);
           const encoder = new TextEncoder();
@@ -183,8 +185,9 @@ export class CaptureWebView extends WebView<Webapp> {
       // If prepare fails, there will be no quickgenId defined
       if (item?.quickgenId) {
         try {
-          const captureConnection = await this.getCaptureConnection();
+          const captureConnection = await this.getCaptureConnection(item.quickgenId);
           await requestDelete(captureConnection, item.quickgenId);
+          this.captureConnections.delete(item.quickgenId);
         } catch (error) {
           // Silent removal
         }
@@ -197,19 +200,22 @@ export class CaptureWebView extends WebView<Webapp> {
     },
   };
 
-  async getCaptureConnection(): Promise<CaptureConnection> {
-    if (this.captureConnection) {
-      return this.captureConnection;
+  async getCaptureConnection(quickgenId: string | undefined): Promise<CaptureConnection> {
+    if (quickgenId !== undefined) {
+      return this.captureConnections.get(quickgenId)!;
+    } else {
+      const connection = await getCaptureConnection(
+        this.configuration,
+        this.secrets,
+        this.useDevEndpoints
+      );
+
+      if (!connection) {
+        throw new Error("Failed to get capture connection");
+      }
+
+      return connection;
     }
-    this.captureConnection = await getCaptureConnection(
-      this.configuration,
-      this.secrets,
-      this.useDevEndpoints
-    );
-    if (!this.captureConnection) {
-      throw new Error("Failed to get capture connection");
-    }
-    return this.captureConnection;
   }
 
   async onStart() {
