@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { CaptureItem, Convert, PrepareOptions, SaveCaptureSettings } from "@xliic/common/capture";
+import { CaptureItem, Convert, SaveCaptureSettings } from "@xliic/common/capture";
 
 export interface CaptureState {
   items: CaptureItem[];
@@ -39,6 +39,7 @@ export const slice = createSlice({
 
     saveCapture: (state, action: PayloadAction<CaptureItem>) => {
       const id = state.items.findIndex((item) => item.id === action.payload.id);
+      action.payload.files.sort();
       if (id !== -1) {
         state.items[id] = action.payload;
       } else {

@@ -1,5 +1,6 @@
 import * as z from "zod";
 import styled from "styled-components";
+import { useFormContext } from "react-hook-form";
 
 import { CaptureItem, PrepareOptions } from "@xliic/common/capture";
 import { ThemeColorVariables } from "@xliic/common/theme";
@@ -7,7 +8,6 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import Input from "../../components/Input";
 import Form from "../../new-components/Form";
 import { CloudArrowDown, FileCode, FileExport, FileImport, TrashCan } from "../../icons";
-
 import {
   saveCaptureSettings,
   convert,
@@ -18,8 +18,6 @@ import {
 } from "./slice";
 import { useAppDispatch, useAppSelector } from "./store";
 import { Menu, MenuItem } from "../../new-components/Menu";
-import { useFormContext } from "react-hook-form";
-import Button from "../../new-components/Button";
 
 export default function CaptureJob() {
   const dispatch = useAppDispatch();
