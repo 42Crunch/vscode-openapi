@@ -1,11 +1,22 @@
-import { test } from "vitest";
+import { afterAll, beforeAll, test } from "vitest";
+import { once } from "events";
+
 import oas from "./pixi-no-header.json";
 import scenarioAuth from "./scenario-auth";
 import { makeStepAssert, parseScenario, runScenario } from "./util";
+import { start, stop } from "./server";
+
+let port: number;
+
+beforeAll(async () => {
+  port = await start(undefined);
+});
+
+afterAll(stop);
 
 test("execute auth", async () => {
   const file = parseScenario(oas, scenarioAuth);
-  const steps = await runScenario(oas, file, "userinfo");
+  const steps = await runScenario(`http://localhost:${port}`, oas, file, "userinfo");
   const step = makeStepAssert(steps);
 
   step({

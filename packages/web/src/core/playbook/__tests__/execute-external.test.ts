@@ -1,11 +1,21 @@
-import { test } from "vitest";
+import { afterAll, beforeAll, test } from "vitest";
+
 import oas from "./pixi.json";
 import scenario from "./scenario-external";
 import { makeStepAssert, parseScenario, runScenario } from "./util";
+import { start, stop } from "./server";
+
+let port: number;
+
+beforeAll(async () => {
+  port = await start(undefined);
+});
+
+afterAll(stop);
 
 test("execute external", async () => {
-  const file = parseScenario(oas, scenario);
-  const steps = await runScenario(oas, file, "userinfo");
+  const file = parseScenario(oas, scenario(port));
+  const steps = await runScenario(`http://localhost:${port}`, oas, file, "userinfo");
   const step = makeStepAssert(steps);
 
   step({

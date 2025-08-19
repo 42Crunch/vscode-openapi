@@ -1,11 +1,21 @@
-import { expect, test } from "vitest";
+import { afterAll, beforeAll, expect, test } from "vitest";
+import { once } from "events";
 import oas from "./pixi.json";
 import scenarioSimple from "./scenario-simple";
 import { makeStepAssert, parseScenario, runScenario } from "./util";
+import { start, stop } from "./server";
+
+let port: number;
+
+beforeAll(async () => {
+  port = await start(undefined);
+});
+
+afterAll(stop);
 
 test("execute simple", async () => {
   const file = parseScenario(oas, scenarioSimple);
-  const steps = await runScenario(oas, file, "userinfo");
+  const steps = await runScenario(`http://localhost:${port}`, oas, file, "userinfo");
   const step = makeStepAssert(steps);
 
   step({
@@ -95,7 +105,7 @@ test("execute simple", async () => {
 
   step({
     event: "http-response-received",
-    response: { statusCode: 200, body: expect.stringContaining("Account_balance") },
+    response: { statusCode: 200, body: expect.stringContaining("account_balance") },
   });
 
   step({

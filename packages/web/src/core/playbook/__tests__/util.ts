@@ -22,6 +22,7 @@ export function parseScenario(oas: any, scenario: Scanconf.ConfigurationFileBund
 }
 
 export async function runScenario(
+  target: string,
   oas: any,
   file: Playbook.Bundle,
   name: string,
@@ -37,7 +38,7 @@ export async function runScenario(
   for await (const step of executeAllPlaybooks(
     httpClient,
     oas,
-    "http://localhost:8090",
+    target,
     file,
     [{ name: "test", requests: file.operations[name].scenarios[0].requests }],
     { default: {}, secrets: {} },
