@@ -54,7 +54,7 @@ export async function* executeAllPlaybooks(
   return result;
 }
 
-async function* executePlaybook(
+export async function* executePlaybook(
   name: string,
   cache: AuthCache,
   client: HttpClient | MockHttpClient,
@@ -191,11 +191,22 @@ async function* executePlaybook(
       return;
     }
 
-    yield {
-      event: "http-request-prepared",
-      request: httpRequest,
-      operationId: request.operationId,
-    };
+    if ("operationId" in replacements.value) {
+      yield {
+        event: "http-request-prepared",
+        request: httpRequest,
+        operationId: request.operationId!,
+        playbookRequest: replacements.value,
+        auth: security,
+      };
+    } else {
+      yield {
+        event: "external-http-request-prepared",
+        request: httpRequest,
+        playbookRequest: replacements.value,
+        auth: security,
+      };
+    }
 
     const [response, error2] = await client(httpRequest);
 

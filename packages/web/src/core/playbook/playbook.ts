@@ -78,7 +78,16 @@ export type PlaybookCredentialRetrievedFromCache = {
 export type PlaybookHttpRequestPrepared = {
   event: "http-request-prepared";
   request: HttpRequest;
-  operationId?: string;
+  operationId: string;
+  playbookRequest: Playbook.CRequest;
+  auth: AuthResult;
+};
+
+export type PlaybookExternalHttpRequestPrepared = {
+  event: "external-http-request-prepared";
+  request: HttpRequest;
+  playbookRequest: Playbook.ExternalCRequest;
+  auth: AuthResult;
 };
 
 export type PlaybookHttpRequestPrepareError = {
@@ -118,6 +127,7 @@ export type PlaybookExecutorStep =
   | PlaybookCredentialVariablesReplaced
   | PlaybookCredentialRetrievedFromCache
   | PlaybookHttpRequestPrepared
+  | PlaybookExternalHttpRequestPrepared
   | PlaybookHttpRequestPrepareError
   | PlaybookHttpResponseReceived
   | PlaybookHttpErrorReceived
