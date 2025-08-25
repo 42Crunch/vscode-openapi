@@ -16,6 +16,7 @@ import {
   PlaybookCredentialVariablesReplaced,
   AuthAborted,
   PlaybookCredentialRetrievedFromCache,
+  PlaybookExternalHttpRequestPrepared,
 } from "../../core/playbook/playbook";
 import { ExecutionResult, OperationResult, PlaybookResult } from "./components/scenario/types";
 
@@ -175,6 +176,15 @@ const PlaybookStepHandlers: PlaybookEventHandlers = {
     const operation = currentOperation(stateCurrent, stateResult);
     operation.httpRequest = event.request;
     operation.operationId = event.operationId;
+  },
+
+  "external-http-request-prepared": function (
+    stateCurrent: Current,
+    stateResult: ExecutionResult,
+    event: PlaybookExternalHttpRequestPrepared
+  ): void {
+    const operation = currentOperation(stateCurrent, stateResult);
+    operation.httpRequest = event.request;
   },
 
   "http-request-prepare-error": function (
