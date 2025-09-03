@@ -129,7 +129,7 @@ export interface FixParameter {
   values?: any[];
   type?: string;
   source?: string;
-  fixIndex?: number;
+  issuePointer?: string;
 }
 
 export interface FixParameterSource {
@@ -147,7 +147,6 @@ export interface FixParameterSource {
 export interface FixContext {
   editor: vscode.TextEditor;
   edit: vscode.WorkspaceEdit;
-  issues: Issue[];
   fix: Fix;
   bulk: boolean;
   snippet?: boolean;
@@ -158,6 +157,7 @@ export interface FixContext {
   bundle: BundleResult;
   root: Parsed;
   target: JsonNodeValue;
+  issuePointer?: string;
   anchor?: JsonNodeValue;
   document: vscode.TextDocument;
   dropBrackets?: number[];
