@@ -5,26 +5,28 @@
 
 // @ts-nocheck
 
+import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 import * as vscode from "vscode";
+import { Cache } from "../cache";
 import * as quickfixes from "../generated/quickfixes.json";
+import { findJsonNodeValue } from "../json-utils";
+import { DataDictionaryFormat, PlatformStore } from "../platform/stores/platform-store";
+import { joinJsonPointer } from "../pointer";
 import {
   AuditContext,
   AuditDiagnostic,
+  BundleResult,
   DeleteFix,
+  Fix,
   FixContext,
   FixParameter,
   FixSnippetParameters,
+  FixType,
   InsertReplaceRenameFix,
   Issue,
-  RegexReplaceFix,
-  Fix,
-  FixType,
   OpenApiVersion,
-  BundleResult,
+  RegexReplaceFix,
 } from "../types";
-import { updateDiagnostics } from "./diagnostic";
-import { updateDecorations, setDecorations } from "./decoration";
-import { AuditReportWebView } from "./report";
 import {
   deleteJsonNode,
   deleteYamlNode,
@@ -38,16 +40,13 @@ import {
   replaceJsonNode,
   replaceYamlNode,
 } from "../util";
-import { Cache } from "../cache";
-import parameterSources from "./quickfix-sources";
-import { getLocationByPointer } from "./util";
-import { generateSchemaFixCommand, createGenerateSchemaAction } from "./quickfix-schema";
-import { simpleClone } from "@xliic/preserving-json-yaml-parser";
-import { findJsonNodeValue } from "../json-utils";
-import { DataDictionaryFormat, PlatformStore } from "../platform/stores/platform-store";
-import { setAudit } from "./service";
 import { walk } from "../util/extract";
-import { encodeJsonPointerSegment, joinJsonPointer } from "../pointer";
+import { setDecorations, updateDecorations } from "./decoration";
+import { updateDiagnostics } from "./diagnostic";
+import { createGenerateSchemaAction, generateSchemaFixCommand } from "./quickfix-schema";
+import parameterSources from "./quickfix-sources";
+import { AuditReportWebView } from "./report";
+import { getLocationByPointer } from "./util";
 
 const registeredQuickFixes: { [key: string]: Fix } = {};
 
@@ -273,9 +272,11 @@ async function quickFixCommand(
   const version = cache.getDocumentVersion(auditDocument);
 
   const issuesByPointer = getIssuesByPointers(issues);
-  // Single fix has one issue in the array
-  // Assembled fix means all issues share same pointer, but have different ids
-  // Bulk means all issues share same id, but have different pointers
+  // Single fix usually has 1 issue, but in some cases
+  // may have a few issues with different ids and the same pointer
+  // Assembled fix means all issues share same pointer,
+  // have different ids and combined fix content
+  // Bulk means all issues share same id, same fix content but have different pointers
   const bulk = Object.keys(issuesByPointer).length > 1;
 
   const formatMap = new Map<string, DataDictionaryFormat>();
@@ -295,7 +296,6 @@ async function quickFixCommand(
     const context: FixContext = {
       editor: editor,
       edit: edit,
-      issues: bulk ? issuesByPointer[issuePointer] : issues,
       fix: simpleClone(fix),
       bulk: bulk,
       auditContext: auditContext,
@@ -303,6 +303,7 @@ async function quickFixCommand(
       bundle: bundle,
       root: root,
       target: target,
+      issuePointer: issuePointer,
       document: document,
       formatMap: formatMap,
     };
@@ -372,7 +373,7 @@ export function updateReport(
   const fixedIssueIdAndPointers: Set<string> = new Set();
   issues.forEach((issue: Issue) => {
     fixedIssueIds.add(issue.id);
-    fixedIssueIdAndPointers.add(issue.id + issue.pointer);
+    fixedIssueIdAndPointers.add(getIssueUniqueId(issue));
   });
 
   // update range for all issues (since the fix has potentially changed line numbering in the file)
@@ -413,10 +414,10 @@ export function registerQuickfixes(
 
   vscode.commands.registerTextEditorCommand(
     "openapi.generateSchemaQuickFix",
-    async (editor, edit, issue, fix, examples, inline) =>
+    async (editor, edit, issues, fix, examples, inline) =>
       generateSchemaFixCommand(
         editor,
-        issue,
+        issues,
         fix,
         examples,
         inline,
@@ -445,18 +446,14 @@ export function registerQuickfixes(
   }
 }
 
-function createSingleAction(
-  diagnostic: AuditDiagnostic,
-  issues: Issue[],
-  fix: Fix
-): vscode.CodeAction[] {
+function createSingleAction(issues: Issue[], fix: Fix): vscode.CodeAction[] {
   const action = new vscode.CodeAction(fix.title, vscode.CodeActionKind.QuickFix);
   action.command = {
     arguments: [issues, fix],
     command: "openapi.simpleQuickFix",
     title: fix.title,
   };
-  action.diagnostics = [diagnostic];
+  action.diagnostics = [];
   action.isPreferred = true;
   return [action];
 }
@@ -468,64 +465,62 @@ function createCombinedAction(
   parameters: FixParameter[],
   fixfix: object
 ): vscode.CodeAction[] {
-  if (issues.length > 1) {
-    const combinedFix: InsertReplaceRenameFix = {
-      problem,
-      title: titles.join(", "),
-      type: FixType.Insert,
-      fix: fixfix,
-      parameters: parameters,
-    };
-
-    const action = new vscode.CodeAction(combinedFix.title, vscode.CodeActionKind.QuickFix);
-    action.command = {
-      arguments: [issues, combinedFix],
-      command: "openapi.simpleQuickFix",
-      title: combinedFix.title,
-    };
-    action.diagnostics = [];
-    action.isPreferred = true;
-
-    return [action];
-  }
-  return [];
+  const combinedFix: InsertReplaceRenameFix = {
+    problem,
+    title: titles.join(", "),
+    type: FixType.Insert,
+    fix: fixfix,
+    parameters: parameters,
+  };
+  const action = new vscode.CodeAction(combinedFix.title, vscode.CodeActionKind.QuickFix);
+  action.command = {
+    arguments: [issues, combinedFix],
+    command: "openapi.simpleQuickFix",
+    title: combinedFix.title,
+  };
+  action.diagnostics = [];
+  action.isPreferred = true;
+  return [action];
 }
 
 function createBulkAction(
   document: vscode.TextDocument,
   version: OpenApiVersion,
   bundle: BundleResult,
-  diagnostic: AuditDiagnostic,
-  issue: Issue,
-  issues: Issue[],
+  fixIssues: Issue[],
+  allIssues: Issue[],
   fix: Fix
 ): vscode.CodeAction[] {
   // FIXME for offering the bulk action, make sure that current issue also has
   // parameter values from source
 
   // continue only if the current issue has non-default params
-  if (!hasNonDefaultParams(issue, fix, version, bundle, document)) {
+  // Array fixIssues always contains at least 1 issue
+  // If it contains > 1, then we can simply take the first issue, because they all have the same pointer
+  // Method hasNonDefaultParam and its internal calls is only interested in the pointer, not issue ids
+  if (!hasNonDefaultParams(fixIssues[0], fix, version, bundle, document)) {
     return [];
   }
 
   // all issues with same id and non-default params
-  const similarIssues = issues
-    .filter((issue: Issue) => issue.id === diagnostic.id)
+  const bulkIds = new Set<string>(fixIssues.map((issue) => issue.id));
+  const similarIssues = allIssues
+    .filter((issue) => bulkIds.has(issue.id))
     .filter((issue) => hasNonDefaultParams(issue, fix, version, bundle, document));
 
+  const locations = new Set<string>(similarIssues.map((issue) => issue.pointer)).size;
   if (similarIssues.length > 1) {
-    const bulkTitle = `Group fix: ${fix.title} in ${similarIssues.length} locations`;
+    const bulkTitle = `Group fix: ${fix.title} in ${locations} locations`;
     const bulkAction = new vscode.CodeAction(bulkTitle, vscode.CodeActionKind.QuickFix);
     bulkAction.command = {
       arguments: [similarIssues, fix],
       command: "openapi.simpleQuickFix",
       title: bulkTitle,
     };
-    bulkAction.diagnostics = [diagnostic];
+    bulkAction.diagnostics = [];
     bulkAction.isPreferred = false;
     return [bulkAction];
   }
-
   return [];
 }
 
@@ -592,19 +587,31 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
       );
     });
 
+    // Multiple diagnostic objects may refer to the same fix
+    // That is why we have to iterate through fixes and their issues
+    const diagnosticFixes = new Map<Fix, Issues[]>();
     for (const diagnostic of diagnostics) {
       const fix = registeredQuickFixes[diagnostic.id];
-      const issue = issuesByPointer[diagnostic.pointer].filter(
-        (issue: Issue) => issue.id === diagnostic.id
-      );
+      if (fix) {
+        const fixIssues = issuesByPointer[diagnostic.pointer].filter(
+          (issue: Issue) => issue.id === diagnostic.id
+        );
+        // Result is always a one element list because all diagnostics
+        // are generated from issues and all issues are unique by id + pointer properties
+        if (fixIssues.length === 1) {
+          const issues = diagnosticFixes.get(fix) ?? [];
+          issues.push(fixIssues[0]);
+          diagnosticFixes.set(fix, issues);
+        }
+      }
+    }
 
-      actions.push(...createSingleAction(diagnostic, issue, fix));
-      actions.push(
-        ...createBulkAction(document, version, bundle, diagnostic, issue[0], issues, fix)
-      );
-      actions.push(
-        ...createGenerateSchemaAction(document, version, root, diagnostic, issue[0], fix)
-      );
+    let combinedFixes = 0;
+    for (const [fix, fixIssues] of diagnosticFixes) {
+      // We have to pass all fixIssues everywhere, because they will be removed from issues list if the fix is applied
+      actions.push(...createSingleAction(fixIssues, fix));
+      actions.push(...createBulkAction(document, version, bundle, fixIssues, issues, fix));
+      actions.push(...createGenerateSchemaAction(document, version, root, fixIssues, fix));
 
       // Combined Fix
       if (fix.type == FixType.Insert && !fix.pointer && !Array.isArray(fix.fix)) {
@@ -613,17 +620,20 @@ export class AuditCodeActions implements vscode.CodeActionProvider {
         if (fix.parameters) {
           for (const parameter of fix.parameters) {
             const par = <FixParameter>simpleClone(parameter);
-            par.fixIndex = combinedIssues.length;
+            par.issuePointer = fixIssues[0].pointer;
             parameters.push(par);
           }
         }
         fixObject = { ...fixObject, ...fix.fix };
-        combinedIssues.push(issue[0]);
+        combinedIssues.push(...fixIssues);
+        combinedFixes += 1;
       }
     }
-
-    actions.push(...createCombinedAction(combinedIssues, titles, problems, parameters, fixObject));
-
+    if (combinedFixes > 1) {
+      actions.push(
+        ...createCombinedAction(combinedIssues, titles, problems, parameters, fixObject)
+      );
+    }
     return actions;
   }
 }
@@ -638,7 +648,7 @@ function getSourceValue(
 ): any[] {
   if (parameter.source && parameterSources[parameter.source]) {
     const source = parameterSources[parameter.source];
-    const value = source(issue, fix, parameter, version, bundle, document);
+    const value = source(issue.pointer, fix, parameter, version, bundle, document);
     return value;
   }
   return [];
