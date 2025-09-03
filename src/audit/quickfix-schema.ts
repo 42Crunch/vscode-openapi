@@ -21,7 +21,7 @@ import { processSnippetParameters } from "../util";
 
 export async function generateSchemaFixCommand(
   editor: vscode.TextEditor,
-  issue: Issue,
+  issues: Issue[],
   fix: InsertReplaceRenameFix | RegexReplaceFix | DeleteFix,
   genFrom: JsonNodeValue,
   inline: boolean,
@@ -43,8 +43,9 @@ export async function generateSchemaFixCommand(
   if (!genSchema) {
     return;
   }
+  const pointer = issues[0].pointer;
   if (inline) {
-    await insertSchemaInline(editor, issue, fix, genSchema, auditContext, cache);
+    await insertSchemaInline(editor, pointer, fix, genSchema, auditContext, cache);
   } else {
     const root = cache.getParsedDocument(document);
     const schemaNames = getSchemaNames(root, version);
@@ -55,18 +56,17 @@ export async function generateSchemaFixCommand(
         !schemaNames.has(value) ? null : "Please enter unique schema name",
     });
     if (schemaName) {
-      await insertSchemaByRef(schemaName, editor, issue, fix, genSchema, auditContext, cache);
+      await insertSchemaByRef(schemaName, editor, pointer, fix, genSchema, auditContext, cache);
     }
   }
-  updateReport(editor, [issue], auditContext, cache, reportWebView);
+  updateReport(editor, issues, auditContext, cache, reportWebView);
 }
 
 export function createGenerateSchemaAction(
   document: vscode.TextDocument,
   version: OpenApiVersion,
   root: Parsed,
-  diagnostic: AuditDiagnostic,
-  issue: Issue,
+  issues: Issue[],
   fix: Fix
 ): vscode.CodeAction[] {
   if (fix.type !== FixType.Insert) {
@@ -74,34 +74,35 @@ export function createGenerateSchemaAction(
   }
 
   let genFrom = null;
+  const pointer = issues[0].pointer;
   if (version === OpenApiVersion.V2) {
-    genFrom = getSchemaV2Examples(issue.pointer, fix.problem, root);
-    genFrom = genFrom || getSchemaV2Example(issue.pointer, fix.problem, root);
+    genFrom = getSchemaV2Examples(pointer, fix.problem, root);
+    genFrom = genFrom || getSchemaV2Example(pointer, fix.problem, root);
   } else {
-    genFrom = getSchemaV3Examples(issue.pointer, fix.problem, root);
-    genFrom = genFrom || getSchemaV3Example(issue.pointer, fix.problem, root);
+    genFrom = getSchemaV3Examples(pointer, fix.problem, root);
+    genFrom = genFrom || getSchemaV3Example(pointer, fix.problem, root);
   }
 
   if (genFrom) {
     const title = "Generate inline schema from examples";
     const action = new vscode.CodeAction(title, vscode.CodeActionKind.QuickFix);
     action.command = {
-      arguments: [issue, fix, genFrom, true],
+      arguments: [issues, fix, genFrom, true],
       command: "openapi.generateSchemaQuickFix",
       title: title,
     };
-    action.diagnostics = [diagnostic];
+    action.diagnostics = [];
     action.isPreferred = false;
 
     const place = version === OpenApiVersion.V2 ? "definitions" : "components";
     const title2 = "Generate schema from examples and place it in " + place;
     const action2 = new vscode.CodeAction(title2, vscode.CodeActionKind.QuickFix);
     action2.command = {
-      arguments: [issue, fix, genFrom, false],
+      arguments: [issues, fix, genFrom, false],
       command: "openapi.generateSchemaQuickFix",
       title: title2,
     };
-    action2.diagnostics = [diagnostic];
+    action2.diagnostics = [];
     action2.isPreferred = false;
 
     return [action, action2];
@@ -111,7 +112,7 @@ export function createGenerateSchemaAction(
 
 async function insertSchemaInline(
   editor: vscode.TextEditor,
-  issue: Issue,
+  insertPointer: string,
   fix: InsertReplaceRenameFix | RegexReplaceFix | DeleteFix,
   genSchema: any,
   auditContext: AuditContext,
@@ -129,7 +130,7 @@ async function insertSchemaInline(
   const bundle = await cache.getDocumentBundle(auditDocument);
   const version = cache.getDocumentVersion(auditDocument);
 
-  const pointer = fix.pointer ? `${issue.pointer}${fix.pointer}` : issue.pointer;
+  const pointer = fix.pointer ? `${insertPointer}${fix.pointer}` : insertPointer;
   const root = cache.getParsedDocument(document);
   const target = findJsonNodeValue(root, pointer);
 
@@ -140,7 +141,6 @@ async function insertSchemaInline(
   const context: FixContext = {
     editor: editor,
     edit: null,
-    issues: [issue],
     fix: newFix,
     bulk: false,
     auditContext: auditContext,
@@ -148,6 +148,7 @@ async function insertSchemaInline(
     bundle: bundle,
     root: root,
     target: target,
+    insertPointer: insertPointer,
     document: document,
     skipConfirmation: true,
   };
@@ -162,7 +163,7 @@ async function insertSchemaInline(
 async function insertSchemaByRef(
   schemaName: string,
   editor: vscode.TextEditor,
-  issue: Issue,
+  insertPointer: string,
   fix: InsertReplaceRenameFix | RegexReplaceFix | DeleteFix,
   genSchema: any,
   auditContext: AuditContext,
@@ -229,7 +230,6 @@ async function insertSchemaByRef(
   const context: FixContext = {
     editor: editor,
     edit: edit,
-    issues: [issue],
     fix: schemaFix,
     bulk: true,
     auditContext: auditContext,
@@ -237,12 +237,13 @@ async function insertSchemaByRef(
     bundle: bundle,
     root: root,
     target: target,
+    insertPointer: insertPointer,
     document: document,
     skipConfirmation: true,
   };
   fixInsert(context);
 
-  const pointer2 = fix.pointer ? `${issue.pointer}${fix.pointer}` : issue.pointer;
+  const pointer2 = fix.pointer ? `${insertPointer}${fix.pointer}` : insertPointer;
   const target2 = findJsonNodeValue(root, pointer2);
 
   const schemaRefFix = <InsertReplaceRenameFix>simpleClone(fix);
@@ -268,7 +269,6 @@ async function insertSchemaByRef(
   const context2: FixContext = {
     editor: editor,
     edit: edit,
-    issues: [issue],
     fix: schemaRefFix,
     bulk: true,
     auditContext: auditContext,

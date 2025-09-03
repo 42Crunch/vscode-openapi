@@ -16,7 +16,7 @@ import {
 } from "../types";
 
 function securitySchemes(
-  issue: Issue,
+  issuePointer: string,
   fix: Fix,
   parameter: FixParameter,
   version: OpenApiVersion,
@@ -40,7 +40,7 @@ function securitySchemes(
 }
 
 function mostUsedByName(
-  issue: Issue,
+  issuePointer: string,
   fix: Fix,
   parameter: FixParameter,
   version: OpenApiVersion,
@@ -48,7 +48,6 @@ function mostUsedByName(
   document: vscode.TextDocument,
   formatMap?: Map<string, DataDictionaryFormat>
 ): any[] {
-  const issuePointer = parseJsonPointer(issue.pointer);
   const parameterPointer = parseJsonPointer(parameter.path);
   const name = issuePointer[issuePointer.length - 1];
   const property = parameterPointer[parameterPointer.length - 1];
@@ -102,7 +101,7 @@ function relativeReference(base: vscode.Uri, mapping: Mapping) {
 }
 
 function schemaRefByResponseCode(
-  issue: Issue,
+  issuePointer: string,
   fix: Fix,
   parameter: FixParameter,
   version: OpenApiVersion,
@@ -112,7 +111,7 @@ function schemaRefByResponseCode(
 ): any[] {
   const schemaRefs = buildSchemaRefByResponseCode(version, bundle);
   // FIXME maybe should account for fix.path?
-  const path = [...parseJsonPointer(issue.pointer), ...parseJsonPointer(parameter.path)].reverse();
+  const path = [...parseJsonPointer(issuePointer), ...parseJsonPointer(parameter.path)].reverse();
   const code = version === OpenApiVersion.V2 ? path[2] : path[4];
   if (code && schemaRefs[code]) {
     const mapping = schemaRefs[code];

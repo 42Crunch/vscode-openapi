@@ -472,8 +472,8 @@ function handleParameters(context: FixContext, text: string): string {
 
     if (parameter.source && parameterSources[parameter.source]) {
       const source = parameterSources[parameter.source];
-      const issue = parameter.fixIndex ? issues[parameter.fixIndex] : issues[0];
-      cacheValues = source(issue, fix, parameter, version, bundle, document, formatMap);
+      const issuePointer = parameter.issuePointer ?? context.issuePointer;
+      cacheValues = source(issuePointer, fix, parameter, version, bundle, document, formatMap);
       if (cacheValues && (document.languageId === "json" || document.languageId === "jsonc")) {
         const safeValues = [];
         cacheValues.forEach((value: any) => {
