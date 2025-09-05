@@ -24,7 +24,7 @@ import {
 import { componentsTags, topTags } from "../audit/quickfix";
 import { safeParse } from "../util";
 import { getAllComponentPointers, getPointersByComponents, cmpSets } from "../commands";
-import { getDeadRefs, fixDelete, fixDeleteApplyIfNeeded } from "../audit/quickfix";
+import { getDeadRefs, fixDelete, fixDeleteApplyIfNeededFromContext } from "../audit/quickfix";
 
 export async function replaceKey(editor: vscode.TextEditor, pointer: string, key: string) {
   const root = safeParse(editor.document.getText(), editor.document.languageId);
@@ -62,7 +62,6 @@ export async function replaceValue(editor: vscode.TextEditor, pointer: string, v
   const context: FixContext = {
     editor: editor,
     edit: null,
-    issues: [],
     fix: {
       problem: ["x"],
       title: "x",
@@ -289,7 +288,7 @@ export async function testDeleteNode(
       context.target = findJsonNodeValue(root, pointer);
       fixDelete(context);
     }
-    fixDeleteApplyIfNeeded(context);
+    fixDeleteApplyIfNeededFromContext(context);
     return vscode.workspace.applyEdit(edit).then(() => {
       assert.ok(doc.isDirty);
       //console.info(doc.getText());

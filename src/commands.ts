@@ -17,7 +17,7 @@ import { findJsonNodeValue } from "./json-utils";
 import {
   fixInsert,
   fixDelete,
-  fixDeleteApplyIfNeeded,
+  fixDeleteApplyIfNeededFromContext,
   getDeadRefs,
   getDeadRefs,
 } from "./audit/quickfix";
@@ -379,7 +379,6 @@ export async function snippetCommand(fix: Fix, cache: Cache, useEdit?: boolean) 
   const context: FixContext = {
     editor: editor,
     edit: null,
-    issues: [],
     fix: simpleClone(fix),
     bulk: false,
     auditContext: null,
@@ -457,7 +456,6 @@ async function deleteSnippetCommand(cache: Cache, node: any) {
   const context: FixContext = {
     editor: editor,
     edit: new vscode.WorkspaceEdit(),
-    issues: [],
     fix: {
       problem: [],
       type: FixType.Delete,
@@ -495,7 +493,7 @@ async function deleteSnippetCommand(cache: Cache, node: any) {
   } else {
     fixDelete(context);
   }
-  fixDeleteApplyIfNeeded(context);
+  fixDeleteApplyIfNeededFromContext(context);
   await vscode.workspace.applyEdit(context.edit);
 }
 

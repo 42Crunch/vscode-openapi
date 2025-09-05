@@ -171,6 +171,8 @@ export function fixDelete(context: FixContext) {
   } else {
     range = deleteJsonNode(context);
   }
+  // Init ws edit inside context
+  getWorkspaceEdit(context);
   if (!range) {
     return;
   }
@@ -196,18 +198,30 @@ export function fixDelete(context: FixContext) {
   context["rangesToRemove"] = ranges;
 }
 
-export function fixDeleteApplyIfNeeded(context: FixContext) {
-  if (context.positionsToInsert) {
-    for (const range of context.positionsToInsert) {
-      context.edit.insert(context.document.uri, range[0], range[1]);
+export function fixDeleteApplyIfNeededFromContext(context: FixContext) {
+  fixDeleteApplyIfNeeded(
+    context.edit,
+    context.document,
+    context.rangesToRemove,
+    context.positionsToInsert
+  );
+}
+
+export function fixDeleteApplyIfNeeded(
+  edit: vscode.WorkspaceEdit,
+  document: vscode.TextDocument,
+  rangesToRemove?: vscode.Range[],
+  positionsToInsert?: [string, vscode.Position][]
+) {
+  if (positionsToInsert) {
+    for (const range of positionsToInsert) {
+      edit.insert(document.uri, range[0], range[1]);
     }
-    context.positionsToInsert = [];
   }
-  if (context.rangesToRemove) {
-    for (const range of context.rangesToRemove) {
-      context.edit.delete(context.document.uri, range);
+  if (rangesToRemove) {
+    for (const range of rangesToRemove) {
+      edit.delete(document.uri, range);
     }
-    context.rangesToRemove = [];
   }
 }
 
@@ -287,6 +301,9 @@ async function quickFixCommand(
     }
   }
 
+  const rangesToRemove: vscode.Range[] = [];
+  const positionsToInsert: [string, vscode.Position][] = [];
+
   for (const issuePointer of Object.keys(issuesByPointer)) {
     // if fix.pointer exists, append it to diagnostic.pointer
     const pointer = fix.pointer ? `${issuePointer}${fix.pointer}` : issuePointer;
@@ -339,11 +356,17 @@ async function quickFixCommand(
       dropBrackets = context["dropBrackets"];
       snippetParameters = context.snippetParameters;
     }
+    if (context.rangesToRemove) {
+      rangesToRemove.push(...context.rangesToRemove);
+    }
+    if (context.positionsToInsert) {
+      positionsToInsert.push(...context.positionsToInsert);
+    }
   }
 
   // Apply only if has anything to apply
   if (edit) {
-    fixDeleteApplyIfNeeded(context);
+    fixDeleteApplyIfNeeded(edit, document, rangesToRemove, positionsToInsert);
     await vscode.workspace.applyEdit(edit);
   } else if (snippetParameters) {
     await processSnippetParameters(editor, snippetParameters, dropBrackets);
