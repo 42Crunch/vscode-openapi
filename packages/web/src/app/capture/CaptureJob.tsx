@@ -85,7 +85,7 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
             }}
           >
             <FileImport />
-            Select files
+            Add files
           </Action>
         )}
 
