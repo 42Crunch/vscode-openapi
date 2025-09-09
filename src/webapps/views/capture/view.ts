@@ -78,6 +78,7 @@ export class CaptureWebView extends WebView<Webapp> {
       item.log = [];
       item.downloadedFile = undefined;
 
+      // FIXME, catch errors and display them
       const captureConnection = await this.getCaptureConnection(item.quickgenId);
 
       // Handle the case when restart requested
@@ -385,14 +386,10 @@ export async function requestDiscover(
       json: credentials,
     });
     const body = JSON.parse(response.body);
-    console.log("Discover response:", body);
     return body as CaptureConnection;
   } catch (error) {
-    console.error("Error during discover request:", error);
     throw new Error(`Failed to discover capture instance: ${error}`);
   }
-
-  return null as any;
 }
 
 export async function requestPrepare(capture: CaptureConnection, prepareOptions: PrepareOptions) {
