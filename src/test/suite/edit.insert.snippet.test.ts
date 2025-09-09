@@ -27,7 +27,6 @@ suite("Insert Node (Snippet)", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: <InsertReplaceRenameFix>fix,
         bulk: false,
         snippet: true,
@@ -53,8 +52,6 @@ suite("Insert Node (Snippet)", () => {
   test("Method insertJsonNode (array)", async () => {
     const text = '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1\n ]\n}';
     // Windows insert snippet doesn't format correctly
-    const expectedForWindows =
-      '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1,\n  {\n      "a2": "baz"\n  }\n ]\n}';
     const expected =
       '{\n "a": {\n  "a1": "foo"\n },\n "c": [\n  1,\n  {\n   "a2": "baz"\n  }\n ]\n}';
     const pointer = "/c";
@@ -73,7 +70,6 @@ suite("Insert Node (Snippet)", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: <InsertReplaceRenameFix>fix,
         bulk: false,
         snippet: true,
@@ -92,8 +88,9 @@ suite("Insert Node (Snippet)", () => {
         await processSnippetParameters(editor, parameters, context.dropBrackets);
         return editor.insertSnippet(parameters.snippet, parameters.location).then(() => {
           assert.ok(doc.isDirty);
-          const text = doc.getText();
-          assert.ok(text == expected || text == expectedForWindows);
+          assert.ok(
+            JSON.stringify(JSON.parse(doc.getText())) === JSON.stringify(JSON.parse(expected))
+          );
         });
       }
     });
@@ -118,7 +115,6 @@ suite("Insert Node (Snippet)", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: <InsertReplaceRenameFix>fix,
         bulk: false,
         snippet: true,
@@ -162,7 +158,6 @@ suite("Insert Node (Snippet)", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: <InsertReplaceRenameFix>fix,
         bulk: false,
         snippet: true,

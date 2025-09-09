@@ -31,7 +31,6 @@ suite("Replace Node", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: <InsertReplaceRenameFix>fix,
         bulk: false,
         snippet: false,
@@ -76,7 +75,6 @@ suite("Replace Node", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: <InsertReplaceRenameFix>fix,
         bulk: false,
         snippet: false,
@@ -119,7 +117,6 @@ suite("Replace Node", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: <InsertReplaceRenameFix>fix,
         bulk: false,
         snippet: false,
@@ -164,7 +161,6 @@ suite("Replace Node", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: <InsertReplaceRenameFix>fix,
         bulk: false,
         snippet: false,

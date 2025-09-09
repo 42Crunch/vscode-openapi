@@ -18,7 +18,6 @@ suite("Get Fix As String", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: null,
         bulk: false,
         auditContext: null,
@@ -82,7 +81,6 @@ suite("Get Fix As String", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: null,
         bulk: false,
         auditContext: null,

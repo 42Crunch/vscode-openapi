@@ -23,7 +23,12 @@ import {
 } from "../util";
 import { componentsTags, topTags } from "../audit/quickfix";
 import { safeParse } from "../util";
-import { getAllComponentPointers, getPointersByComponents, cmpSets } from "../commands";
+import {
+  getAllComponentPointers,
+  getPointersByComponents,
+  cmpSets,
+  deleteSnippetWithContext,
+} from "../commands";
 import { getDeadRefs, fixDelete, fixDeleteApplyIfNeededFromContext } from "../audit/quickfix";
 
 export async function replaceKey(editor: vscode.TextEditor, pointer: string, key: string) {
@@ -31,7 +36,6 @@ export async function replaceKey(editor: vscode.TextEditor, pointer: string, key
   const context: FixContext = {
     editor: editor,
     edit: null,
-    issues: [],
     fix: {
       problem: ["x"],
       title: "x",
@@ -185,6 +189,7 @@ export function withRandomFileEditor(
 
 export function getContextUpdatedByPointer(context: FixContext, pointer: string): FixContext {
   context.target = findJsonNodeValue(context.root, pointer);
+  context.issuePointer = pointer;
   return context;
 }
 
@@ -256,7 +261,6 @@ export async function testDeleteNode(
     const context: FixContext = {
       editor: editor,
       edit: edit,
-      issues: [],
       fix: {
         problem: [],
         type: FixType.Delete,
@@ -271,27 +275,9 @@ export async function testDeleteNode(
       target: findJsonNodeValue(root, pointer),
       document: editor.document,
     };
-    const deadRefs = getDeadRefs(pointer, context);
-    assert.ok(deadRefs.length > 0);
-    fixDelete(context);
-    let pointers = deadRefs.map((ref) => ref.replace("#/", "/"));
-    const compsToRemove = getPointersByComponents(pointers, version);
-    const allComps = getPointersByComponents(getAllComponentPointers(root, version), version);
-    for (const [c, cPointers] of Object.entries(compsToRemove)) {
-      if (c in allComps && cmpSets(allComps[c], cPointers)) {
-        pointers = pointers.filter((p) => !cPointers.has(p));
-        pointers.push(version === OpenApiVersion.V3 ? "/components/" + c : "/" + c);
-      }
-    }
-    context.pointersToRemove = new Set<string>(pointers);
-    for (const pointer of pointers) {
-      context.target = findJsonNodeValue(root, pointer);
-      fixDelete(context);
-    }
-    fixDeleteApplyIfNeededFromContext(context);
+    await deleteSnippetWithContext(pointer, context, false);
     return vscode.workspace.applyEdit(edit).then(() => {
       assert.ok(doc.isDirty);
-      //console.info(doc.getText());
       assert.strictEqual(wrap(doc.getText()), wrap(expected));
     });
   });

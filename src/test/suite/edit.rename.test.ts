@@ -24,7 +24,6 @@ suite("Rename Key Node", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: <InsertReplaceRenameFix>fix,
         bulk: false,
         snippet: false,
@@ -63,7 +62,6 @@ suite("Rename Key Node", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: <InsertReplaceRenameFix>fix,
         bulk: false,
         snippet: false,
