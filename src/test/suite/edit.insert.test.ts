@@ -33,7 +33,6 @@ suite("Insert Node", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: <InsertReplaceRenameFix>fix,
         bulk: false,
         snippet: false,
@@ -47,12 +46,10 @@ suite("Insert Node", () => {
 
       fixInsert(context);
 
-      if (context.edit) {
-        vscode.workspace.applyEdit(context.edit).then(() => {
-          assert.ok(doc.isDirty);
-          assert.strictEqual(doc.getText(), expected);
-        });
-      }
+      vscode.workspace.applyEdit(context.edit).then(() => {
+        assert.ok(doc.isDirty);
+        assert.strictEqual(doc.getText(), expected);
+      });
     });
   });
 
@@ -76,7 +73,6 @@ suite("Insert Node", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: <InsertReplaceRenameFix>fix,
         bulk: false,
         snippet: false,
@@ -90,12 +86,10 @@ suite("Insert Node", () => {
 
       fixInsert(context);
 
-      if (context.edit) {
-        vscode.workspace.applyEdit(context.edit).then(() => {
-          assert.ok(doc.isDirty);
-          assert.strictEqual(doc.getText(), expected);
-        });
-      }
+      vscode.workspace.applyEdit(context.edit).then(() => {
+        assert.ok(doc.isDirty);
+        assert.strictEqual(doc.getText(), expected);
+      });
     });
   });
 
@@ -118,7 +112,6 @@ suite("Insert Node", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: <InsertReplaceRenameFix>fix,
         bulk: false,
         snippet: false,
@@ -132,12 +125,10 @@ suite("Insert Node", () => {
 
       fixInsert(context);
 
-      if (context.edit) {
-        vscode.workspace.applyEdit(context.edit).then(() => {
-          assert.ok(doc.isDirty);
-          assert.strictEqual(doc.getText(), expected);
-        });
-      }
+      vscode.workspace.applyEdit(context.edit).then(() => {
+        assert.ok(doc.isDirty);
+        assert.strictEqual(doc.getText(), expected);
+      });
     });
   });
 
@@ -160,7 +151,6 @@ suite("Insert Node", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: <InsertReplaceRenameFix>fix,
         bulk: false,
         snippet: false,
@@ -174,12 +164,10 @@ suite("Insert Node", () => {
 
       fixInsert(context);
 
-      if (context.edit) {
-        vscode.workspace.applyEdit(context.edit).then(() => {
-          assert.ok(doc.isDirty);
-          assert.strictEqual(doc.getText(), expected);
-        });
-      }
+      vscode.workspace.applyEdit(context.edit).then(() => {
+        assert.ok(doc.isDirty);
+        assert.strictEqual(doc.getText(), expected);
+      });
     });
   });
 });

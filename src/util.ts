@@ -209,15 +209,15 @@ export function deleteYamlNode(context: FixContext): vscode.Range {
   const target = context.target;
   const [start, end] = target.getRange(root);
   let startPos = document.positionAt(start);
-  let endPos = document.positionAt(end);
+  let endPos = getSafeEndPosition(document, end);
   const parent = target.getParent(root);
   const children = parent.getChildren();
   const insertEmptyStub = children.length === 1 && children[0].value === target.value;
   const isArray = parent.isArray();
   const isObject = parent.isObject();
   if (isArray || isObject) {
-    startPos = new vscode.Position(getLineByOffset(document, start).lineNumber, 0);
-    endPos = new vscode.Position(getLineByOffset(document, end).lineNumber + 1, 0);
+    startPos = new vscode.Position(startPos.line, 0);
+    endPos = new vscode.Position(endPos.line + 1, 0);
     if (insertEmptyStub) {
       if (!context["positionsToInsert"]) {
         context["positionsToInsert"] = [];
@@ -337,7 +337,7 @@ export function insertYamlNode(context: FixContext, value: string): [string, vsc
   } else {
     [start, end] = anchor.getRange(root);
     const padding = getCurrentIndent(document, start);
-    const position = document.positionAt(end);
+    const position = getSafeEndPosition(document, end);
     if (target.isObject()) {
       value = shift(value, indent, padding);
       if (snippet) {
@@ -356,6 +356,25 @@ export function insertYamlNode(context: FixContext, value: string): [string, vsc
       return [value, position];
     }
   }
+}
+
+// Must be applied to get correct end position of YAML node value
+function getSafeEndPosition(document: vscode.TextDocument, offset: number): vscode.Position {
+  const pos = document.positionAt(offset);
+  const column = pos.character;
+  if (column === 0) {
+    return document.positionAt(offset - 1);
+  } else if (hasNoAlphabeticCharBeforeOffset(document, offset)) {
+    return document.positionAt(offset - column - 1);
+  }
+  return pos;
+}
+
+function hasNoAlphabeticCharBeforeOffset(document: vscode.TextDocument, offset: number): boolean {
+  const pos = document.positionAt(offset);
+  let text = document.getText(new vscode.Range(new vscode.Position(pos.line, 0), pos));
+  text = text.replace(" ", "").replace("\t", "");
+  return text.length === 0 || text === "-";
 }
 
 export function replaceJsonNode(context: FixContext, value: string): [string, vscode.Range] {
@@ -407,7 +426,7 @@ export function replaceYamlNode(context: FixContext, value: string): [string, vs
       value = shift("\n" + value, indent, index, indent.getIndent(), false);
     }
   }
-  return [value, new vscode.Range(document.positionAt(start), document.positionAt(end))];
+  return [value, new vscode.Range(document.positionAt(start), getSafeEndPosition(document, end))];
 }
 
 export function getFixAsJsonString(context: FixContext): string {
