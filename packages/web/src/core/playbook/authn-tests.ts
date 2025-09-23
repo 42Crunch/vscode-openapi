@@ -5,14 +5,13 @@ import {
   deref,
   getOperationById,
   isSwagger,
-  OpenApi3,
   OpenApi30,
   OpenApi31,
   Swagger,
 } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 
-import { PlaybookExecutorStep, PlaybookHttpRequestPrepared } from "./playbook";
+import { AuthResult, PlaybookExecutorStep, PlaybookHttpRequestPrepared } from "./playbook";
 import { PlaybookEnvStack } from "./playbook-env";
 
 import { createAuthCache } from "./auth-cache";
@@ -85,24 +84,52 @@ async function executeAuthTests(
 
   const auth = getOperationAuth(oas, event.operationId);
 
-  console.log("auth", auth);
+  console.log("auth", JSON.stringify(auth, null, 2));
+  console.log("event.auth", JSON.stringify(event.auth, null, 2));
 
-  const [request, error] = await makeHttpRequest(
-    oas,
-    server,
-    "userinfo",
-    event.playbookRequest,
-    {} //event.auth
-  );
+  const authMutations = makeAuthMutations(auth, event.auth);
 
-  if (error !== undefined) {
-    console.error("Failed to create request:", error);
-    return;
+  console.log("Generated auth mutations count:", authMutations.length);
+  for (const mutation of authMutations) {
+    console.log("mutation", JSON.stringify(mutation, null, 2));
+
+    const [request, error] = await makeHttpRequest(
+      oas,
+      server,
+      "userinfo",
+      event.playbookRequest,
+      mutation
+    );
+
+    if (error !== undefined) {
+      console.error("Failed to create request:", error);
+      return;
+    }
+
+    const [response, error2] = await client(request);
+
+    console.log("Executing auth test with request:", request, response);
+  }
+}
+
+function makeAuthMutations(auth: OperationAuth[], credentials: AuthResult): AuthResult[] {
+  const result: AuthResult[] = [];
+
+  console.log("make mutations for auth:", JSON.stringify(auth, null, 2));
+
+  if (auth.length === 1 && auth[0]["basic"] !== undefined) {
+    const basic = credentials["basic"];
+    result.push({}); // no auth
+    result.push({ basic: { ...basic, value: "zom:zog" } });
   }
 
-  const [response, error2] = await client(request);
+  return result;
+}
 
-  console.log("Executing auth test with request:", request, response);
+function mutateBasicCredential(value: string): string[] {
+  const result: string[] = [];
+
+  return result;
 }
 
 type OperationAuth = Record<
