@@ -29,7 +29,7 @@ export class CaptureWebView extends WebView<Webapp> {
     private configuration: Configuration,
     private secrets: vscode.SecretStorage
   ) {
-    super(extensionPath, "capture", "Capture", vscode.ViewColumn.One);
+    super(extensionPath, "capture", "API Contract Generator", vscode.ViewColumn.One);
     this.items = [];
     this.useDevEndpoints = configuration.get<boolean>("internalUseDevEndpoints");
     this.captureConnections = new Map<string, CaptureConnection>();
@@ -78,8 +78,14 @@ export class CaptureWebView extends WebView<Webapp> {
       item.log = [];
       item.downloadedFile = undefined;
 
-      // FIXME, catch errors and display them
-      const captureConnection = await this.getCaptureConnection(item.quickgenId);
+      let captureConnection: CaptureConnection;
+
+      try {
+        captureConnection = await this.getCaptureConnection(item.quickgenId);
+      } catch (error) {
+        this.showExecutionStatusResponse(item, "failed", false, (error as Error).message);
+        return;
+      }
 
       // Handle the case when restart requested
       if (item.quickgenId && item.status === "failed") {
@@ -173,9 +179,9 @@ export class CaptureWebView extends WebView<Webapp> {
             uri,
             encoder.encode(JSON.stringify(fileText, null, 2))
           );
-          this.showDownloadResult(item, uri.fsPath, true, "");
+          this.showDownloadResult(item, uri.toString(), true, "");
         } catch (error) {
-          this.showDownloadResult(item, uri.fsPath, false, getError(error));
+          this.showDownloadResult(item, uri.toString(), false, getError(error));
         }
       }
     },
@@ -196,8 +202,13 @@ export class CaptureWebView extends WebView<Webapp> {
     },
 
     openLink: async (payload: string) => {
-      const document = await vscode.workspace.openTextDocument(vscode.Uri.file(payload));
-      await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+      const url = vscode.Uri.parse(payload);
+      if (url.scheme === "file") {
+        const document = await vscode.workspace.openTextDocument(url);
+        await vscode.window.showTextDocument(document, vscode.ViewColumn.One);
+      } else {
+        vscode.env.openExternal(url);
+      }
     },
   };
 
@@ -242,7 +253,7 @@ export class CaptureWebView extends WebView<Webapp> {
       },
       status: "pending",
       pollingCounter: 0,
-      log: [],
+      log: ["Started new session"],
       downloadedFile: undefined,
     };
   }
