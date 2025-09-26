@@ -1,14 +1,17 @@
+import styled from "styled-components";
+
 import { CaptureItem, Status } from "@xliic/common/capture";
+import { ThemeColorVariables } from "@xliic/common/theme";
+
+import { FileImport } from "../../icons";
 import { SearchSidebarControlled } from "../../components/layout/SearchSidebar";
 import {
   CircleCheckLight,
   CircleDashedLight,
-  CircleExclamation,
   CircleExclamationLight,
   CircleNotchLight,
   TrashCan,
 } from "../../icons";
-import Button from "../../new-components/Button";
 import { Menu, MenuItem } from "../../new-components/Menu";
 import CaptureJob from "./CaptureJob";
 import { selectFiles, deleteJob, setSelectedItemId } from "./slice";
@@ -59,14 +62,16 @@ export default function Capture() {
       renderEmpty={() => <Start />}
       renderButtons={() => (
         <div>
-          <Button
-            style={{ width: "100%" }}
+          <Action
             onClick={(e) => {
               dispatch(selectFiles({ id: undefined }));
+              e.stopPropagation();
+              e.preventDefault();
             }}
           >
+            <FileImport />
             New session
-          </Button>
+          </Action>
         </div>
       )}
     />
@@ -100,3 +105,22 @@ function makeIcon(status: Status): JSX.Element {
       return <CircleExclamationLight />;
   }
 }
+
+const Action = styled.div<{ $disabled?: boolean }>`
+  display: flex;
+  padding: 0;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(
+    ${({ $disabled }) =>
+      $disabled ? ThemeColorVariables.disabledForeground : ThemeColorVariables.linkForeground}
+  );
+  > svg {
+    fill: var(
+      ${({ $disabled }) =>
+        $disabled ? ThemeColorVariables.disabledForeground : ThemeColorVariables.linkForeground}
+    );
+  }
+`;

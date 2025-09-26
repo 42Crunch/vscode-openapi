@@ -58,6 +58,14 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
 
   return (
     <div>
+      <Title>API Contract Generator</Title>
+      <ul>
+        <li>Add up to 10 files</li>
+        <li>Max size of combined files is 250MB</li>
+        <li>Supports Postman collections and HAR files</li>
+      </ul>
+      <Separator />
+
       <Title>Selected files</Title>
       <FilesList>
         {item.files && (
@@ -85,7 +93,7 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
             }}
           >
             <FileImport />
-            Add files
+            Add more files
           </Action>
         )}
 
@@ -146,7 +154,7 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
                 dispatch(openLink(item.downloadedFile || ""));
               }}
             >
-              {item.downloadedFile}
+              {getFilename(item.downloadedFile)}
             </a>
           </div>
         )}

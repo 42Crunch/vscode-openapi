@@ -120,7 +120,7 @@
       },
       {
         "view": "platformLaunchpadWelcome",
-        "contents": "Convert HAR/Postman files to OpenAPI.\n[Capture](command:openapi.showCapture)"
+        "contents": "API Contract Generator\nConvert HAR/Postman files to OpenAPI.\n[Generate](command:openapi.showCapture)"
       }
     ],
     "menus": {
