@@ -29,8 +29,8 @@
     "ncp": "^2.0.0",
     "mkdirp": "^1.0.4",
     "type-fest": "^4.40.0",
-    "vitest": "^3.1.2",
-    "vite": "^6.3.3"
+    "vitest": "^3.2.4",
+    "vite": "^7.1.7"
   },
   "overrides": {
     "json-schema-ref-parser": "9.0.9"
