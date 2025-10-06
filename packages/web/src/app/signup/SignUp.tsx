@@ -1,11 +1,13 @@
 import styled from "styled-components";
-import { resetAnondTokenRequestResult, setCurrentFormId } from "./slice";
+import { resetAnondTokenRequestResult, setCurrentFormId, openLink } from "./slice";
 import { useAppDispatch, useAppSelector } from "./store";
 import { CrunchLogoMain } from "../../icons";
 import { AnondSignUpEmailForm, AnondSignUpTokenForm, PlatformSignUpForm } from "./SignUpForms";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 export function LeftContainer() {
+  const dispatch = useAppDispatch();
+
   const { currentFormId, signupType } = useAppSelector((state) => state.signup);
 
   return (
@@ -27,9 +29,18 @@ export function LeftContainer() {
               Save time by reducing the manual creation of OpenAPI files. Automatically generate
               OpenAPI files from Postman collections or HAR files, directly in your IDE.
             </Text>
-            <Text>
-              <a href="#">Learn more</a>
-            </Text>
+            <SmallerText>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  dispatch(openLink("https://42crunch.com/api-contract-generator/"));
+                }}
+              >
+                Learn more
+              </a>
+            </SmallerText>
           </>
         )}
         {currentFormId === "AnondSignUpTokenForm" && (
@@ -138,4 +149,10 @@ const Text = styled.p`
   font-size: 26px;
   line-height: 36px;
   font-weight: 600;
+`;
+
+const SmallerText = styled.p`
+  font-size: 20px;
+  line-height: 30px;
+  font-weight: 500;
 `;
