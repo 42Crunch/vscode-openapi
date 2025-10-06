@@ -5,7 +5,7 @@ import { useFormContext } from "react-hook-form";
 import { CaptureItem, PrepareOptions } from "@xliic/common/capture";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
-import Input from "../../components/Input";
+import Input from "../../new-components/fat-fields/Input";
 import Form from "../../new-components/Form";
 import { CloudArrowDown, FileCode, FileExport, FileImport, TrashCan } from "../../icons";
 import {
@@ -58,7 +58,7 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
 
   return (
     <div>
-      <Title>API Contract Generator</Title>
+      <Title>API contract Generator</Title>
       <ul>
         <li>Add up to 10 files</li>
         <li>Max size of combined files is 250MB</li>
@@ -100,6 +100,7 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
         {(item.status === "pending" || item.status === "failed") && item.files.length > 0 && (
           <Action
             $disabled={!isValid}
+            $primary
             onClick={(e) => {
               if (isValid) {
                 dispatch(convert({ id: item.id }));
@@ -131,8 +132,12 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
       <Title>Options</Title>
 
       <Options>
-        <Input label="Base Path" name="basePath" />
-        <Input label="Servers" name="servers" />
+        <Input
+          label="Base Path"
+          name="basePath"
+          description="The URL prefix for all API paths, relative to the host root"
+        />
+        <Input label="Servers" name="servers" description="A list of servers to use for the API" />
       </Options>
 
       <Separator />
@@ -171,12 +176,13 @@ function unwrapPrepareOptions(data: any): PrepareOptions {
   return { basePath: data.basePath, servers: data.servers.split(",") };
 }
 
-const Action = styled.div<{ $disabled?: boolean }>`
+const Action = styled.div<{ $disabled?: boolean; $primary?: boolean }>`
   display: flex;
   padding: 0 8px;
   gap: 4px;
   align-items: center;
   cursor: pointer;
+  font-weight: ${({ $primary }) => ($primary ? "600" : "400")};
   color: var(
     ${({ $disabled }) =>
       $disabled ? ThemeColorVariables.disabledForeground : ThemeColorVariables.linkForeground}

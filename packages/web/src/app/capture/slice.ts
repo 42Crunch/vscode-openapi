@@ -4,20 +4,23 @@ import { CaptureItem, Convert, SaveCaptureSettings } from "@xliic/common/capture
 export interface CaptureState {
   items: CaptureItem[];
   selectedId: string | undefined;
+  token: string | undefined;
 }
 
 const initialState: CaptureState = {
   items: [],
   selectedId: undefined,
+  token: undefined,
 };
 
 export const slice = createSlice({
   name: "capture",
   initialState,
   reducers: {
-    showCaptureWindow: (state, action: PayloadAction<CaptureItem[]>) => {
-      state.items = action.payload;
-      state.selectedId = action.payload.length > 0 ? action.payload[0].id : undefined;
+    showCaptureWindow: (state, action: PayloadAction<{ items: CaptureItem[]; token: string }>) => {
+      state.items = action.payload.items;
+      state.selectedId = action.payload.items.length > 0 ? action.payload.items[0].id : undefined;
+      state.token = action.payload.token;
     },
 
     setSelectedItemId: (state, action: PayloadAction<string>) => {

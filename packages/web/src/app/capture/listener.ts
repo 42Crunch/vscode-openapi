@@ -20,6 +20,7 @@ import {
 import { Routes } from "../../features/router/RouterContext";
 import { startNavigationListening } from "../../features/router/listener";
 import { goTo } from "../../features/router/slice";
+import { onSendHttpRequest } from "../../features/http-client/listener";
 
 const listenerMiddleware = createListenerMiddleware();
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
@@ -103,6 +104,8 @@ export function createListener(host: Webapp["host"], routes: Routes) {
           });
         },
       }),
+
+    sendHttpRequest: onSendHttpRequest(startAppListening, host),
   };
 
   startNavigationListening(startAppListening, routes);

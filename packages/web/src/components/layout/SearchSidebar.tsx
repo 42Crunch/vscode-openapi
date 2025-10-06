@@ -45,6 +45,7 @@ export function SearchSidebarControlled({
   sections,
   errors,
   defaultSelection,
+  noControls,
   noSectionTitles,
   selected,
   onSelected,
@@ -54,6 +55,7 @@ export function SearchSidebarControlled({
 }: {
   title?: string;
   sections: Section[];
+  noControls?: boolean;
   noSectionTitles?: boolean;
   errors?: Record<string, string | undefined>;
   defaultSelection?: ItemId;
@@ -88,28 +90,34 @@ export function SearchSidebarControlled({
       )}
       {expanded && !shouldHideSidebar && (
         <Sidebar>
-          <Title>
-            <span>
-              {count} {title || "items"}
-            </span>
-            <ToggleButton
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setExpanded(!expanded);
-              }}
-            >
-              <ArrowLeftToLine />
-            </ToggleButton>
-          </Title>
-          <Search>
-            <input
-              placeholder="Search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <MagnifyingGlass />
-          </Search>
+          {!noControls && (
+            <>
+              <Title>
+                <span>
+                  {count} {title || "items"}
+                </span>
+                <ToggleButton
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setExpanded(!expanded);
+                  }}
+                >
+                  <ArrowLeftToLine />
+                </ToggleButton>
+              </Title>
+
+              <Search>
+                <input
+                  placeholder="Search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                <MagnifyingGlass />
+              </Search>
+            </>
+          )}
+
           <Sections>
             {sections.map((section: Section) => {
               if (section.items.length === 0 && hideEmptySections && section.menu === undefined) {

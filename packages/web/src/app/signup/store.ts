@@ -7,7 +7,11 @@ import { Webapp } from "@xliic/common/webapp/signup";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import logger from "redux-logger";
 import theme, { changeTheme, ThemeState } from "../../features/theme/slice";
-import signup, { showPlatformConnectionTestError, showAnondTokenResponse } from "./slice";
+import signup, {
+  showPlatformConnectionTestError,
+  showAnondTokenResponse,
+  setSignupType,
+} from "./slice";
 
 const reducer = {
   theme,
@@ -16,6 +20,7 @@ const reducer = {
 
 export const messageHandlers: Webapp["webappHandlers"] = {
   changeTheme,
+  setSignupType,
   showPlatformConnectionTestError,
   showAnondTokenResponse,
 };

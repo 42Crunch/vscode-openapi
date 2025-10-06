@@ -3,11 +3,20 @@ import styled from "styled-components";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { FileImport } from "../../icons";
 
-import { useAppDispatch } from "./store";
+import { useAppDispatch, useAppSelector } from "./store";
 import { openLink, selectFiles } from "./slice";
+import { Sub } from "@radix-ui/react-dropdown-menu";
+import Subscription from "./Subscription";
 
 export default function Start() {
   const dispatch = useAppDispatch();
+
+  const {
+    config: {
+      data: { internalUseDevEndpoints: useDevEndpoints },
+    },
+    capture: { token },
+  } = useAppSelector((state) => state);
 
   return (
     <Contents>
@@ -48,6 +57,8 @@ export default function Start() {
         <Bold>Step 3</Bold> - <Bold>Download</Bold> your new OpenAPI file, or <Bold>open</Bold> it
         in the IDE for further editing.
       </p>
+
+      {token !== undefined && <Subscription token={token} useDevEndpoints={useDevEndpoints} />}
     </Contents>
   );
 }

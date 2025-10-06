@@ -54,7 +54,7 @@ export default function Capture() {
     <SearchSidebarControlled
       selected={selectedId ? { sectionId: "capture", itemId: selectedId } : undefined}
       onSelected={onSetItemId}
-      title="Quickgen sessions"
+      noControls
       noSectionTitles
       hideEmptySidebar
       sections={sections}
@@ -70,7 +70,7 @@ export default function Capture() {
             }}
           >
             <FileImport />
-            New session
+            New API Contract
           </Action>
         </div>
       )}

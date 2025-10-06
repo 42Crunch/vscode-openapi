@@ -4,9 +4,10 @@ import { useAppDispatch, useAppSelector } from "./store";
 import { CrunchLogoMain } from "../../icons";
 import { AnondSignUpEmailForm, AnondSignUpTokenForm, PlatformSignUpForm } from "./SignUpForms";
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { T } from "vitest/dist/chunks/reporters.d.BFLkQcL6";
 
-export function RightContainer() {
-  const { currentFormId } = useAppSelector((state) => state.signup);
+export function LeftContainer() {
+  const { currentFormId, signupType } = useAppSelector((state) => state.signup);
 
   return (
     <ColoredContainer>
@@ -14,11 +15,23 @@ export function RightContainer() {
         <CrunchMainLogoContainer>
           <CrunchLogoMain />
         </CrunchMainLogoContainer>
-        {currentFormId === "AnondSignUpEmailForm" && (
+        {currentFormId === "AnondSignUpEmailForm" && signupType === "regular" && (
           <Title>
             Check your API for quality, conformance and security vulnerabilities, including BOLA,
             BFLA & BOPLA
           </Title>
+        )}
+        {currentFormId === "AnondSignUpEmailForm" && signupType === "capture" && (
+          <>
+            <Title>Welcome to API Contract Generator</Title>
+            <Text>
+              Save time by reducing the manual creation of OpenAPI files. Automatically generate
+              OpenAPI files from Postman collections or HAR files, directly in your IDE.
+            </Text>
+            <Text>
+              <a href="#">Learn more</a>
+            </Text>
+          </>
         )}
         {currentFormId === "AnondSignUpTokenForm" && (
           <>
@@ -38,7 +51,7 @@ export function RightContainer() {
   );
 }
 
-export function LeftContainer() {
+export function RightContainer() {
   const dispatch = useAppDispatch();
   const { platformCredentials, anondCredentials, currentFormId } = useAppSelector(
     (state) => state.signup
