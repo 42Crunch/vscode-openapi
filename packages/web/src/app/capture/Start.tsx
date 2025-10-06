@@ -5,7 +5,6 @@ import { FileImport } from "../../icons";
 
 import { useAppDispatch, useAppSelector } from "./store";
 import { openLink, selectFiles } from "./slice";
-import { Sub } from "@radix-ui/react-dropdown-menu";
 import Subscription from "./Subscription";
 
 export default function Start() {
