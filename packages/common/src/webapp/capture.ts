@@ -10,10 +10,23 @@ import {
 import { OpenLinkMessage } from "../link";
 import { Webapp as App } from "../message";
 import { ChangeThemeMessage } from "../theme";
+import { LoadConfigMessage } from "../config";
+import { SendHttpRequestMessage, ShowHttpErrorMessage, ShowHttpResponseMessage } from "../http";
 
 export type Webapp = App<
   // consumes
-  ChangeThemeMessage | ShowCaptureWindow | SaveCapture,
+  | ChangeThemeMessage
+  | LoadConfigMessage
+  | ShowCaptureWindow
+  | SaveCapture
+  | ShowHttpResponseMessage
+  | ShowHttpErrorMessage,
   // produces
-  SelectFiles | Convert | DownloadFile | DeleteJob | OpenLinkMessage | SaveCaptureSettings
+  | SelectFiles
+  | Convert
+  | DownloadFile
+  | DeleteJob
+  | OpenLinkMessage
+  | SaveCaptureSettings
+  | SendHttpRequestMessage
 >;

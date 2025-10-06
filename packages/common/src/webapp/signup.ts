@@ -7,11 +7,15 @@ import {
   RequestAnondTokenByEmail,
   ShowPlatformConnectionTestErrorMessage,
   ShowAnondTokenResponseMessage,
+  SetSignupType,
 } from "../signup";
 
 export type Webapp = App<
   // consumes
-  ChangeThemeMessage | ShowPlatformConnectionTestErrorMessage | ShowAnondTokenResponseMessage,
+  | ChangeThemeMessage
+  | SetSignupType
+  | ShowPlatformConnectionTestErrorMessage
+  | ShowAnondTokenResponseMessage,
   // produces
   RequestAnondTokenByEmail | OpenLinkMessage | AnondSignUpComplete | PlatformSignUpComplete
 >;

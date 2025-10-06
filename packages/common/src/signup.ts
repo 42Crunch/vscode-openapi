@@ -36,3 +36,8 @@ export type PlatformSignUpComplete = {
   command: "platformSignUpComplete";
   payload: PlatformCredentials;
 };
+
+export type SetSignupType = {
+  command: "setSignupType";
+  payload: "regular" | "capture";
+};

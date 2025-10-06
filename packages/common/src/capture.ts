@@ -23,7 +23,10 @@ export type CaptureSettings = {
 
 export type ShowCaptureWindow = {
   command: "showCaptureWindow";
-  payload: CaptureItem[];
+  payload: {
+    token: string;
+    items: CaptureItem[];
+  };
 };
 
 export type SelectFiles = {
