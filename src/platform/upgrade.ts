@@ -10,7 +10,7 @@ export async function offerUpgrade(isFull: boolean): Promise<unknown> {
   await delay(100); // workaround for #133073
 
   const message = isFull
-    ? "You have insufficient operations allowance left this month to run a full Audit or Scan. As an alternative you can run single-operation ones, upgrade to increase your allowance or wait until the monthly allowance resets."
+    ? "You have insufficient usage allowance left this month to run a full Audit or Scan. As an alternative you can run single-operation ones, upgrade to increase your allowance or wait until the monthly allowance resets."
     : "Thank you for using the 42Crunch API Security Testing services. You have reached the limit of your monthly Freemium allowance. You have the option to wait until your free monthly allowance resets or upgrade your 42Crunch subscription.";
   return vscode.window
     .showInformationMessage(message, { modal: true }, { title: "View subscription", id: "upgrade" })
