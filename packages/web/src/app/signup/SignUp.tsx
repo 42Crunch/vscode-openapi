@@ -4,7 +4,6 @@ import { useAppDispatch, useAppSelector } from "./store";
 import { CrunchLogoMain } from "../../icons";
 import { AnondSignUpEmailForm, AnondSignUpTokenForm, PlatformSignUpForm } from "./SignUpForms";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { T } from "vitest/dist/chunks/reporters.d.BFLkQcL6";
 
 export function LeftContainer() {
   const { currentFormId, signupType } = useAppSelector((state) => state.signup);
