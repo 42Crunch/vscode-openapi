@@ -7,7 +7,7 @@ import { Banner, ErrorBanner } from "../../components/Banner";
 import { useGetSubscriptionQuery } from "../../features/http-client/freemiumd-api";
 import ProgressBar from "./ProgressBar";
 import Button from "../../new-components/Button";
-import { useAppDispatch } from "./store";
+import { useAppDispatch, useAppSelector } from "./store";
 import { openLink } from "../../features/config/slice";
 
 export default function Subscription({
@@ -23,6 +23,8 @@ export default function Subscription({
   });
 
   const dispatch = useAppDispatch();
+
+  const authType = useAppSelector((state) => state.config.data.platformAuthType);
 
   const { upgradeUrl } = getEndpoints(useDevEndpoints);
 
@@ -46,14 +48,67 @@ export default function Subscription({
 
   return (
     <Container>
-      <Section>
-        <Title>Capture</Title>
-        <Subtitle>Monthly operation capture left</Subtitle>
-        <Counters>
-          {data.monthlyCapture - data.currentCaptureUsage} / {data.monthlyCapture}
-        </Counters>
-        <ProgressBar label="" progress={1 - data.currentScanUsage / data.monthlyScan} />
-      </Section>
+      {authType === "anond-token" && (
+        <>
+          <Section>
+            <Title>API Contract Generator</Title>
+            <Subtitle>Monthly operations left</Subtitle>
+            <Counters>
+              {data.monthlyCapture - data.currentCaptureUsage} / {data.monthlyCapture}
+            </Counters>
+            <ProgressBar label="" progress={1 - data.currentCaptureUsage / data.monthlyCapture} />
+          </Section>
+          <Section>
+            <Title>Subscription type: {data?.subscriptionKind}</Title>
+            <Subtitle>Upgrade or manage your subscription plan</Subtitle>
+            <Counters>
+              {data.subscriptionKind === "free" && (
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dispatch(openLink(`${upgradeUrl}?email=${encodeURIComponent(data.userEmail)}`));
+                  }}
+                >
+                  Upgrade
+                </Button>
+              )}
+              {data.subscriptionKind !== "free" && (
+                <Button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dispatch(
+                      openLink(
+                        `${upgradeUrl}?prefilled_email=${encodeURIComponent(data.userEmail)}`
+                      )
+                    );
+                  }}
+                >
+                  Manage
+                </Button>
+              )}
+            </Counters>
+          </Section>
+        </>
+      )}
+      {authType === "api-token" && (
+        <>
+          <Section>
+            <Title>Tenant Allowance</Title>
+            <Subtitle>Monthly operations left</Subtitle>
+            <Counters>
+              {data.monthlyCapture - data.currentCaptureUsage} / {data.monthlyCapture}
+            </Counters>
+            <ProgressBar label="" progress={1 - data.currentCaptureUsage / data.monthlyCapture} />
+          </Section>
+          <Section>
+            <Title>Subscription type: {data?.subscriptionKind}</Title>
+            <div></div>
+            To upgrade or change your subscription plan please contact your administrator
+          </Section>
+        </>
+      )}
     </Container>
   );
 }
