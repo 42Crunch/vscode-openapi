@@ -18,6 +18,7 @@ export type TokenType = "anond-token" | "api-token" | undefined;
 
 export class SignUpWebView extends WebView<Webapp> {
   private resolve: ((value: TokenType) => void) | undefined;
+  private signupType: "regular" | "capture" = "regular";
 
   constructor(
     extensionPath: string,
@@ -111,10 +112,15 @@ export class SignUpWebView extends WebView<Webapp> {
 
   async onStart() {
     await this.sendColorTheme(vscode.window.activeColorTheme);
+    await this.sendRequest({
+      command: "setSignupType",
+      payload: this.signupType,
+    });
   }
 
-  async showSignUp(resolve: (value: TokenType) => void) {
+  async showSignUp(resolve: (value: TokenType) => void, signupType: "regular" | "capture") {
     this.resolve = resolve;
+    this.signupType = signupType;
     await this.show();
   }
 

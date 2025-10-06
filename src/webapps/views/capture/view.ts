@@ -11,9 +11,12 @@ import { Webapp } from "@xliic/common/webapp/capture";
 import { CaptureItem, CaptureSettings, PrepareOptions, Status } from "@xliic/common/capture";
 import { getEndpoints } from "@xliic/common/endpoints";
 
+import { loadConfig } from "../../../util/config";
 import { WebView } from "../../web-view";
 import { Configuration } from "../../../configuration";
 import { getAnondCredentials, getPlatformCredentials, hasCredentials } from "../../../credentials";
+import { delay } from "../../../time-util";
+import { executeHttpRequest } from "../../http-handler";
 
 const pollingDelayMs = 5 * 1000; // 5s
 const pollingTimeMs = 5 * 60 * 1000; // 5min
@@ -123,6 +126,7 @@ export class CaptureWebView extends WebView<Webapp> {
 
       // Start request -> capture server
       try {
+        await delay(500); // FIXME: remove when capture api is updated
         await requestStart(captureConnection, quickgenId);
         this.showExecutionStartResponse(item, true, "");
       } catch (error) {
@@ -210,6 +214,8 @@ export class CaptureWebView extends WebView<Webapp> {
         vscode.env.openExternal(url);
       }
     },
+
+    sendHttpRequest: ({ id, request, config }) => executeHttpRequest(id, request, config),
   };
 
   async getCaptureConnection(quickgenId: string | undefined): Promise<CaptureConnection> {
@@ -232,9 +238,11 @@ export class CaptureWebView extends WebView<Webapp> {
 
   async onStart() {
     await this.sendColorTheme(vscode.window.activeColorTheme);
+    await this.sendLoadConfig();
+    const captureConnection = await this.getCaptureConnection(undefined);
     this.sendRequest({
       command: "showCaptureWindow",
-      payload: this.items,
+      payload: { items: this.items, token: captureConnection.token },
     });
   }
 
@@ -355,6 +363,14 @@ export class CaptureWebView extends WebView<Webapp> {
     this.sendRequestSilently({
       command: "saveCapture",
       payload: item,
+    });
+  }
+
+  async sendLoadConfig() {
+    const config = await loadConfig(this.configuration, this.secrets);
+    this.sendRequest({
+      command: "loadConfig",
+      payload: config,
     });
   }
 }

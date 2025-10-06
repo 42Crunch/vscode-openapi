@@ -32,12 +32,13 @@ export async function hasCredentials(
 export async function ensureHasCredentials(
   signUpWebView: SignUpWebView,
   configuration: Configuration,
-  secrets: vscode.SecretStorage
+  secrets: vscode.SecretStorage,
+  signupType: "regular" | "capture"
 ): Promise<boolean> {
   const credentials = await hasCredentials(configuration, secrets);
   if (credentials === undefined) {
     // try asking for credentials if not found
-    const configured = await configureCredentials(signUpWebView);
+    const configured = await configureCredentials(signUpWebView, signupType);
     if (configured === undefined) {
       // or don't do audit if no credentials been supplied
       return false;
@@ -78,8 +79,11 @@ export async function getPlatformCredentials(
   }
 }
 
-export async function configureCredentials(signUpWebView: SignUpWebView): Promise<TokenType> {
+export async function configureCredentials(
+  signUpWebView: SignUpWebView,
+  signupType: "regular" | "capture"
+): Promise<TokenType> {
   return new Promise<TokenType>((resolve, _reject) => {
-    signUpWebView.showSignUp(resolve);
+    signUpWebView.showSignUp(resolve, signupType);
   });
 }

@@ -73,7 +73,7 @@ async function securityAudit(
   store: PlatformStore,
   editor: vscode.TextEditor
 ) {
-  if (!(await ensureHasCredentials(signUpWebView, configuration, secrets))) {
+  if (!(await ensureHasCredentials(signUpWebView, configuration, secrets, "regular"))) {
     return;
   }
 
