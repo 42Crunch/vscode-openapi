@@ -10,7 +10,7 @@ import logger from "redux-logger";
 import { Webapp } from "@xliic/common/webapp/capture";
 
 import theme, { changeTheme, ThemeState } from "../../features/theme/slice";
-import capture, { saveCapture, showCaptureWindow } from "./slice";
+import capture, { saveCapture, setCaptureToken, showCaptureWindow } from "./slice";
 import router from "../../features/router/slice";
 import confirmationDialog from "../../features/confirmation-dialog/slice";
 import config, { loadConfig } from "../../features/config/slice";
@@ -32,6 +32,7 @@ const reducer = {
 export const messageHandlers: Webapp["webappHandlers"] = {
   changeTheme,
   showCaptureWindow,
+  setCaptureToken,
   saveCapture,
   loadConfig,
   showHttpError: () => null,

@@ -4,18 +4,14 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { FileImport } from "../../icons";
 
 import { useAppDispatch, useAppSelector } from "./store";
-import { openLink, selectFiles } from "./slice";
+import { selectFiles } from "./slice";
 import Subscription from "./Subscription";
 
 export default function Start() {
   const dispatch = useAppDispatch();
 
-  const {
-    config: {
-      data: { internalUseDevEndpoints: useDevEndpoints },
-    },
-    capture: { token },
-  } = useAppSelector((state) => state);
+  const useDevEndpoints = useAppSelector((state) => state.config.data.internalUseDevEndpoints);
+  const token = useAppSelector((state) => state.capture.token);
 
   return (
     <Contents>
@@ -80,6 +76,8 @@ const Bold = styled.span`
 `;
 
 const Action = styled.div<{ $disabled?: boolean }>`
+  margin-top: 2em;
+  margin-bottom: 2em;
   display: flex;
   padding: 0;
   gap: 4px;

@@ -240,11 +240,15 @@ export class CaptureWebView extends WebView<Webapp> {
   async onStart() {
     await this.sendColorTheme(vscode.window.activeColorTheme);
     await this.sendLoadConfig();
+    await this.sendRequest({
+      command: "showCaptureWindow",
+      payload: { items: this.items },
+    });
     try {
       const captureConnection = await this.getCaptureConnection(undefined);
-      this.sendRequest({
-        command: "showCaptureWindow",
-        payload: { items: this.items, token: captureConnection.token },
+      await this.sendRequest({
+        command: "setCaptureToken",
+        payload: captureConnection.token,
       });
     } catch (error) {
       this.showGeneralError({

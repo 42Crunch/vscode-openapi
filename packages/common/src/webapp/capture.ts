@@ -6,6 +6,7 @@ import {
   SaveCapture,
   DeleteJob,
   SaveCaptureSettings,
+  SetCaptureToken,
 } from "../capture";
 import { OpenLinkMessage } from "../link";
 import { Webapp as App } from "../message";
@@ -19,6 +20,7 @@ export type Webapp = App<
   | ChangeThemeMessage
   | LoadConfigMessage
   | ShowCaptureWindow
+  | SetCaptureToken
   | SaveCapture
   | ShowHttpResponseMessage
   | ShowHttpErrorMessage

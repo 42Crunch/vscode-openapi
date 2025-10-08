@@ -17,10 +17,13 @@ export const slice = createSlice({
   name: "capture",
   initialState,
   reducers: {
-    showCaptureWindow: (state, action: PayloadAction<{ items: CaptureItem[]; token: string }>) => {
+    showCaptureWindow: (state, action: PayloadAction<{ items: CaptureItem[] }>) => {
       state.items = action.payload.items;
       state.selectedId = action.payload.items.length > 0 ? action.payload.items[0].id : undefined;
-      state.token = action.payload.token;
+    },
+
+    setCaptureToken: (state, action: PayloadAction<string>) => {
+      state.token = action.payload;
     },
 
     setSelectedItemId: (state, action: PayloadAction<string>) => {
@@ -93,5 +96,6 @@ export const {
   deleteFile,
   openLink,
   setSelectedItemId,
+  setCaptureToken,
 } = slice.actions;
 export default slice.reducer;
