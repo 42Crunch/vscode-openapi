@@ -78,7 +78,7 @@ export class CaptureWebView extends WebView<Webapp> {
 
     convert: async (payload: { id: string }) => {
       const item = this.items.find((item) => item.id === payload.id)!;
-      item.log = [];
+      item.log = ["Started new session"];
       item.downloadedFile = undefined;
 
       let captureConnection: CaptureConnection;
