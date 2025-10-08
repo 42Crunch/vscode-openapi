@@ -1,13 +1,20 @@
-# What's New
+# What's New Version 5.0
 
-Version 4.38 of the OpenAPI Editor includes the following changes. Changes are for all users (Free and paid) unless specified.
+Welcome to version 5.0 of the industry’s favorite OpenAPI Editor tool to help improve the overall performance and security of your APIs.
 
-- Improvments to extension logging
-- Better cleanup for IDE Temporary collections if platform connection is used
+## Introducing API Contract Generator
+
+Speed up the creation of new OpenAPI files with our API Contract Generator auto-generation feature. Now, at the click of a button, you can automatically build OpenAPI files from your Postman Collections and HAR files, all within the IDE. This saves you time and effort creating new OpenAPI files from scratch.
+
+If you’re already a freemium or enterprise user then you can automatically avail of this feature (free limits apply). Otherwise register to avail of the API Contract Generator service and also get some of the other functional additions delivered in our recent prior versions.
+
+To access API Contract Generator in the IDE click on the 42C Icon on the Left Toolbar.
 
 Access the [full changelog](https://github.com/42Crunch/vscode-openapi/blob/master/CHANGELOG.md) of the OpenAPI editor
 
-# Major updates with Version 4.x.x
+![Screenshot](https://raw.githubusercontent.com/42Crunch/vscode-openapi/master/images/AuditIssuesList.png)
+
+# Some other major updates from prior versions 4.x.x
 
 We have added API security services to the OpenAPI Editor. These services enable you do much more than simply create and edit your OpenAPI definition, they allow you to test your APIs locally for quality, conformance and security directly in the IDE.
 
