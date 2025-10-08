@@ -85,7 +85,7 @@ export class CaptureWebView extends WebView<Webapp> {
       let captureConnection: CaptureConnection;
 
       try {
-        captureConnection = await this.getCaptureConnection(item.quickgenId);
+        captureConnection = await this.getCaptureConnection(undefined);
       } catch (error) {
         this.showExecutionStatusResponse(item, "failed", false, (error as Error).message);
         return;
