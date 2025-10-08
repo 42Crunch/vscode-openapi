@@ -57,13 +57,22 @@ export default function Start() {
         in the IDE for further editing.
       </p>
 
-      {token !== undefined && <Subscription token={token} useDevEndpoints={useDevEndpoints} />}
+      {token !== undefined && (
+        <SubscriptionDetails>
+          <Subscription token={token} useDevEndpoints={useDevEndpoints} />
+        </SubscriptionDetails>
+      )}
     </Contents>
   );
 }
 
 const Contents = styled.div`
   max-width: 600px;
+`;
+
+const SubscriptionDetails = styled.div`
+  margin-top: 2em;
+  margin-bottom: 2em;
 `;
 
 const Bold = styled.span`

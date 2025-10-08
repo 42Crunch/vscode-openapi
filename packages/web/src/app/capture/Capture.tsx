@@ -70,7 +70,7 @@ export default function Capture() {
             }}
           >
             <FileImport />
-            New API Contract
+            New API contract
           </Action>
         </div>
       )}
