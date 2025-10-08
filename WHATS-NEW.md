@@ -6,7 +6,7 @@ Welcome to version 5.0 of the industry’s favorite OpenAPI Editor tool to help 
 
 Speed up the creation of new OpenAPI files with our API Contract Generator auto-generation feature. Now, at the click of a button, you can automatically build OpenAPI files from your Postman Collections and HAR files, all within the IDE. This saves you time and effort creating new OpenAPI files from scratch.
 
-If you’re already a freemium or enterprise user then you can automatically avail of this feature (free limits apply). Otherwise register to avail of the API Contract Generator service and also get some of the other functional additions delivered in our recent prior versions.
+If you’re already a free or enterprise user then you can automatically avail of this feature (free limits apply). Otherwise register to avail of the API Contract Generator service and also get some of the other functional additions delivered in our recent prior versions.
 
 To access API Contract Generator in the IDE click on the 42C Icon on the Left Toolbar.
 
