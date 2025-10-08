@@ -75,6 +75,7 @@ const Action = styled.div<{ $disabled?: boolean }>`
   padding: 0;
   gap: 4px;
   align-items: center;
+  font-weight: 600;
   cursor: pointer;
   color: var(
     ${({ $disabled }) =>

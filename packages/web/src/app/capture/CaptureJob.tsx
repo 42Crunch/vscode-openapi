@@ -116,6 +116,7 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
 
         {item.status === "finished" && (
           <Action
+            $primary
             onClick={(e) => {
               dispatch(downloadFile({ id: item.id }));
               e.stopPropagation();
