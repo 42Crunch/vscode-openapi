@@ -58,7 +58,7 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
 
   return (
     <div>
-      <Title>API contract Generator</Title>
+      <Title>API Contract Generator</Title>
       <ul>
         <li>Add up to 10 files</li>
         <li>Max size of combined files is 250MB</li>
