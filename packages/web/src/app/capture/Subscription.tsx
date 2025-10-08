@@ -8,7 +8,7 @@ import { useGetSubscriptionQuery } from "../../features/http-client/freemiumd-ap
 import ProgressBar from "./ProgressBar";
 import Button from "../../new-components/Button";
 import { useAppDispatch, useAppSelector } from "./store";
-import { openLink } from "../../features/config/slice";
+import { openLink } from "./slice";
 
 export default function Subscription({
   token,
