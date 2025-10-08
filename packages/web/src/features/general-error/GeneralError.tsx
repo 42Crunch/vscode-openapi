@@ -5,9 +5,16 @@ import { useFeatureSelector } from "./slice";
 export default function GeneralError() {
   const error = useFeatureSelector((state) => state.generalError.error);
 
+  if (!error) {
+    return null;
+  }
+
   return (
     <Container>
-      <ErrorText>{error?.message}</ErrorText>
+      <ErrorText>
+        <div>{error.message}</div>
+        {error.details && <div>{error.details}</div>}
+      </ErrorText>{" "}
     </Container>
   );
 }
@@ -20,8 +27,10 @@ const ErrorText = styled.div`
   margin-bottom: 1rem;
   padding: 0.75rem;
   line-break: anywhere;
+  > div {
+    font-family: monospace;
+  }
 `;
-
 const Container = styled.div`
   padding: 8px;
 `;

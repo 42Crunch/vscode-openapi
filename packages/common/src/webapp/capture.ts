@@ -12,6 +12,7 @@ import { Webapp as App } from "../message";
 import { ChangeThemeMessage } from "../theme";
 import { LoadConfigMessage } from "../config";
 import { SendHttpRequestMessage, ShowHttpErrorMessage, ShowHttpResponseMessage } from "../http";
+import { ShowGeneralErrorMessage } from "../error";
 
 export type Webapp = App<
   // consumes
@@ -20,7 +21,8 @@ export type Webapp = App<
   | ShowCaptureWindow
   | SaveCapture
   | ShowHttpResponseMessage
-  | ShowHttpErrorMessage,
+  | ShowHttpErrorMessage
+  | ShowGeneralErrorMessage,
   // produces
   | SelectFiles
   | Convert

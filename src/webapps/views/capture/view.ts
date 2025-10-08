@@ -10,6 +10,7 @@ import got from "got";
 import { Webapp } from "@xliic/common/webapp/capture";
 import { CaptureItem, CaptureSettings, PrepareOptions, Status } from "@xliic/common/capture";
 import { getEndpoints } from "@xliic/common/endpoints";
+import { GeneralError } from "@xliic/common/error";
 
 import { loadConfig } from "../../../util/config";
 import { WebView } from "../../web-view";
@@ -239,11 +240,18 @@ export class CaptureWebView extends WebView<Webapp> {
   async onStart() {
     await this.sendColorTheme(vscode.window.activeColorTheme);
     await this.sendLoadConfig();
-    const captureConnection = await this.getCaptureConnection(undefined);
-    this.sendRequest({
-      command: "showCaptureWindow",
-      payload: { items: this.items, token: captureConnection.token },
-    });
+    try {
+      const captureConnection = await this.getCaptureConnection(undefined);
+      this.sendRequest({
+        command: "showCaptureWindow",
+        payload: { items: this.items, token: captureConnection.token },
+      });
+    } catch (error) {
+      this.showGeneralError({
+        message: "Failed to establish connection to capture server",
+        details: (error as Error).message,
+      });
+    }
   }
 
   async showCaptureWebView() {
@@ -363,6 +371,13 @@ export class CaptureWebView extends WebView<Webapp> {
     this.sendRequestSilently({
       command: "saveCapture",
       payload: item,
+    });
+  }
+
+  async showGeneralError(error: GeneralError) {
+    this.sendRequest({
+      command: "showGeneralError",
+      payload: error,
     });
   }
 

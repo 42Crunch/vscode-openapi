@@ -6,6 +6,8 @@ import { Webapp } from "@xliic/common/webapp/capture";
 
 import { ThemeState } from "../../features/theme/slice";
 import { RouterContext, Routes } from "../../features/router/RouterContext";
+import GeneralError from "../../features/general-error/GeneralError";
+import { showGeneralError } from "../../features/general-error/slice";
 import { makeWebappMessageHandler, RouterApp } from "../webapp";
 import { createListener } from "./listener";
 import { initStore, messageHandlers } from "./store";
@@ -17,6 +19,13 @@ const routes: Routes = [
     title: "",
     navigation: false,
     element: <div />,
+  },
+  {
+    id: "general-error",
+    title: "An error has occurred",
+    element: <GeneralError />,
+    navigation: false,
+    when: showGeneralError,
   },
   {
     id: "main",
