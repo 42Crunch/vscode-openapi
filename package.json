@@ -700,6 +700,10 @@
         "title": "OpenAPI: show preview using Swagger UI"
       },
       {
+        "command": "openapi.previewScalar",
+        "title": "OpenAPI: show preview using Scalar"
+      },
+      {
         "command": "openapi.preview",
         "title": "OpenAPI: show preview using the default renderer",
         "enablement": "!openapiErrors",
@@ -898,11 +902,13 @@
           "default": "swaggerui",
           "enum": [
             "swaggerui",
-            "redoc"
+            "redoc",
+            "scalar"
           ],
           "enumDescriptions": [
             "Use Swagger UI as a default renderer to preview OpenAPI files",
-            "Use ReDoc as a default renderer to preview OpenAPI files"
+            "Use ReDoc as a default renderer to preview OpenAPI files",
+            "Use Scalar as a default renderer to preview OpenAPI files"
           ]
         },
         "openapi.previewUpdateDelay": {
