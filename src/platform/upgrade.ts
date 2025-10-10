@@ -12,7 +12,7 @@ export async function offerUpgrade(): Promise<unknown> {
   const message =
     "You have insufficient usage allowance left to complete your request. As an alternative, upgrade to increase your allowances or wait until your monthly usage allowance renews.";
   return vscode.window
-    .showInformationMessage(message, { modal: true }, { title: "View subscription", id: "upgrade" })
+    .showInformationMessage(message, { modal: true }, { title: "View allowances", id: "upgrade" })
     .then((choice) => {
       if (choice?.id === "upgrade") {
         vscode.commands.executeCommand("openapi.showConfiguration");
