@@ -18,6 +18,7 @@ import { Configuration } from "../../../configuration";
 import { getAnondCredentials, getPlatformCredentials, hasCredentials } from "../../../credentials";
 import { delay } from "../../../time-util";
 import { executeHttpRequest } from "../../http-handler";
+import { offerUpgrade } from "../../../platform/upgrade";
 
 const pollingDelayMs = 5 * 1000; // 5s
 const pollingTimeMs = 5 * 60 * 1000; // 5min
@@ -110,6 +111,7 @@ export class CaptureWebView extends WebView<Webapp> {
         this.showPrepareResponse(item, quickgenId, true, "");
       } catch (error) {
         this.showPrepareResponse(item, quickgenId, false, getError(error));
+        await this.maybeOfferUpgrade(error);
         return;
       }
 
@@ -122,6 +124,7 @@ export class CaptureWebView extends WebView<Webapp> {
         });
       } catch (error) {
         this.showPrepareUploadFileResponse(item, false, getError(error), false, 0.0);
+        await this.maybeOfferUpgrade(error);
         return;
       }
 
@@ -132,6 +135,7 @@ export class CaptureWebView extends WebView<Webapp> {
         this.showExecutionStartResponse(item, true, "");
       } catch (error) {
         this.showExecutionStartResponse(item, false, getError(error));
+        await this.maybeOfferUpgrade(error);
         return;
       }
 
@@ -148,6 +152,7 @@ export class CaptureWebView extends WebView<Webapp> {
           }
         } catch (error) {
           this.showExecutionStatusResponse(item, "finished", false, getError(error));
+          await this.maybeOfferUpgrade(error);
           return;
         }
       };
@@ -260,6 +265,15 @@ export class CaptureWebView extends WebView<Webapp> {
 
   async showCaptureWebView() {
     await this.show();
+  }
+
+  async maybeOfferUpgrade(error: any) {
+    if (error?.response?.statusCode === 402) {
+      const config = await loadConfig(this.configuration, this.secrets);
+      if (config.platformAuthType === "anond-token") {
+        await offerUpgrade();
+      }
+    }
   }
 
   getNewItem(files: string[]): CaptureItem {

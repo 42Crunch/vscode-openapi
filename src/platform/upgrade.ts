@@ -6,12 +6,11 @@
 import * as vscode from "vscode";
 import { delay } from "../time-util";
 
-export async function offerUpgrade(isFull: boolean): Promise<unknown> {
+export async function offerUpgrade(): Promise<unknown> {
   await delay(100); // workaround for #133073
 
-  const message = isFull
-    ? "You have insufficient usage allowance left to complete your request. As an alternative, you can run single-operation tests, upgrade to increase your allowances or wait until your monthly usage allowance renews."
-    : "Thank you for using the 42Crunch API Security Testing services. You have reached the limit of your monthly Freemium allowance. You have the option to wait until your free monthly allowance resets or upgrade your 42Crunch subscription.";
+  const message =
+    "You have insufficient usage allowance left to complete your request. As an alternative, upgrade to increase your allowances or wait until your monthly usage allowance renews.";
   return vscode.window
     .showInformationMessage(message, { modal: true }, { title: "View subscription", id: "upgrade" })
     .then((choice) => {
