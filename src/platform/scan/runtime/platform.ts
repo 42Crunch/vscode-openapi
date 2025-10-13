@@ -14,7 +14,7 @@ export async function createScanConfigWithPlatform(
   if (report?.data.openapiState !== "valid") {
     await store.clearTempApi(tmpApi);
     throw new Error(
-      "Your API has structural or semantic issues in its OpenAPI format. Run Security Audit on this file and fix these issues first."
+      "Your API has structural or semantic issues. Run Security Audit on this file and fix these issues first."
     );
   }
 
@@ -47,7 +47,7 @@ export async function createDefaultConfigWithPlatform(
   if (report?.data.openapiState !== "valid") {
     await store.clearTempApi(tmpApi);
     throw new Error(
-      "Your API has structural or semantic issues in its OpenAPI format. Run Security Audit on this file and fix these issues first."
+      "Your API has structural or semantic issues. Run Security Audit on this file and fix these issues first."
     );
   }
   await store.createDefaultScanConfig(tmpApi.apiId);

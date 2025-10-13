@@ -15,9 +15,8 @@ export default function InvalidReport({ onShowIssues }: { onShowIssues: () => vo
       <Top>
         <ExclamationCircle />
         <div>
-          Your API has structural or semantic issues in its OpenAPI format. Fix these issues first
-          and run Security Audit again to get the full audit report. Click <a href="#">here</a> to
-          display the issues.
+          Your API has structural or semantic issues. Fix these first and run Security Audit again
+          to get the full audit report. Click <a href="#">here</a> to display the issues.
         </div>
       </Top>
     </Container>
