@@ -11,7 +11,7 @@
   "type": "module",
   "dependencies": {
     "@lexical/react": "^0.30.0",
-    "@hookform/resolvers": "3.9.1",
+    "@hookform/resolvers": "5.2.2",
     "@radix-ui/react-checkbox": "^1.2.3",
     "@radix-ui/react-context-menu": "^2.2.12",
     "@radix-ui/react-dialog": "^1.1.11",
@@ -34,7 +34,7 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.3.1",
     "react-error-boundary": "^4.0.13",
-    "react-hook-form": "7.54.2",
+    "react-hook-form": "7.65.0",
     "react-redux": "^9.1.0",
     "redux": "^5.0.1",
     "redux-logger": "^3.0.6",
