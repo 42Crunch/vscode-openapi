@@ -42,7 +42,7 @@ export default function Form<T extends FieldValues>({
 
   useEffect(() => {
     // call "setData" when the form has become dirty and is valid
-    const { isDirty, isValid, isValidating, dirtyFields } = formState;
+    const { isDirty, isValid, dirtyFields } = formState;
 
     // cancel pending update if the form value changes
     if (timeoutRef.current) {
@@ -50,7 +50,7 @@ export default function Form<T extends FieldValues>({
     }
 
     // schedule a new one if form is dirty and valid
-    if (isDirty && isValid && !isValidating && Object.keys(dirtyFields).length > 0) {
+    if (isDirty && isValid && Object.keys(dirtyFields).length > 0) {
       timeoutRef.current = setTimeout(() => {
         handleSubmit((data) => {
           const updated = unwrapFormData(data);
