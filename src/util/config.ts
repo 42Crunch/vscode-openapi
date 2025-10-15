@@ -23,6 +23,8 @@ export async function loadConfig(
     "platformConformanceScanRuntime"
   );
   const scanImage = configuration.get<string>("platformConformanceScanImage");
+  const scanProxy = configuration.get<string>("platformConformanceScanProxy");
+
   const scandManagerHeader = await secrets.get("platformScandManagerHeader");
   const repository = configuration.get<string>("platformRepository");
 
@@ -58,6 +60,7 @@ export async function loadConfig(
     auditRuntime,
     scanRuntime,
     scanImage,
+    scanProxy,
     docker,
     platform: process.platform,
     cli: getCliInfo(cliDirectoryOverride),
@@ -159,6 +162,12 @@ export async function saveConfig(
   await configuration.update(
     "internalUseDevEndpoints",
     config.internalUseDevEndpoints,
+    vscode.ConfigurationTarget.Global
+  );
+
+  await configuration.update(
+    "platformConformanceScanProxy",
+    config.scanProxy,
     vscode.ConfigurationTarget.Global
   );
 

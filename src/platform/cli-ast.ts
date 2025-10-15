@@ -36,6 +36,7 @@ import { delay } from "../time-util";
 import { CliAstManifestEntry, getCliUpdate } from "./cli-ast-update";
 import { extensionQualifiedId } from "../types";
 import { createTempDirectory, existsSync } from "../util/fs";
+import { getProxyEnv } from "../proxy";
 
 const asyncExecFile = promisify(execFile);
 
@@ -250,7 +251,7 @@ export async function runScanWithCliBinary(
 > {
   logger.info(`Running API Conformance Scan using 42Crunch API Security Testing Binary`);
 
-  const { cliFreemiumdHost } = getEndpoints(config.internalUseDevEndpoints);
+  const { cliFreemiumdHost, freemiumdUrl } = getEndpoints(config.internalUseDevEndpoints);
   const tmpDir = tmpdir();
   const dir = mkdtempSync(join(`${tmpDir}`, "scan-"));
   const oasFilename = join(dir as string, "openapi.json");
@@ -302,10 +303,7 @@ export async function runScanWithCliBinary(
     }
   }
 
-  const httpProxy = vscode.workspace.getConfiguration().get<string>("http.proxy");
-  if (httpProxy !== undefined && httpProxy !== "") {
-    scanEnv["HTTPS_PROXY"] = httpProxy;
-  }
+  Object.assign(scanEnv, await getProxyEnv(freemiumdUrl, scanEnv["SCAN42C_HOST"], config, logger));
 
   try {
     const output = await asyncExecFile(cli, args, {
@@ -401,7 +399,7 @@ export async function runAuditWithCliBinary(
     CliError
   >
 > {
-  const { cliFreemiumdHost } = getEndpoints(config.internalUseDevEndpoints);
+  const { cliFreemiumdHost, freemiumdUrl } = getEndpoints(config.internalUseDevEndpoints);
 
   logger.info(`Running Security Audit using 42Crunch API Security Testing Binary`);
 
@@ -459,11 +457,7 @@ export async function runAuditWithCliBinary(
     }
   }
 
-  const httpProxy = vscode.workspace.getConfiguration().get<string>("http.proxy");
-  if (httpProxy !== undefined && httpProxy !== "") {
-    logger.debug(`Setting HTTPS_PROXY environment variable to: ${httpProxy}`);
-    env["HTTPS_PROXY"] = httpProxy;
-  }
+  Object.assign(env, await getProxyEnv(freemiumdUrl, undefined, config, logger));
 
   try {
     logger.debug(`Running the binary: ${cli} ${args.join(" ")}`);

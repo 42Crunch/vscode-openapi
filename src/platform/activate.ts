@@ -104,6 +104,7 @@ export async function activate(
     context,
     platformContext,
     cache,
+    logger,
     configuration,
     secrets,
     store,

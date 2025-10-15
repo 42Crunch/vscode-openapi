@@ -23,6 +23,7 @@ export type Config = {
   scanRuntime: "docker" | "scand-manager" | "cli";
   auditRuntime: "platform" | "cli";
   scanImage: string;
+  scanProxy: string;
   platform: string;
   cli: {
     location: string;

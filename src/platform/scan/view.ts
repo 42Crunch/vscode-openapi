@@ -62,6 +62,7 @@ export class ScanWebView extends WebView<Webapp> {
     title: string,
     extensionPath: string,
     private cache: Cache,
+    private logger: Logger,
     private configuration: Configuration,
     private secrets: vscode.SecretStorage,
     private store: PlatformStore,
@@ -125,7 +126,7 @@ export class ScanWebView extends WebView<Webapp> {
           method,
           scanconf,
           config,
-          makeLogger(reportView),
+          makeAggregateLogger(this.logger, reportView),
           reportView,
           false
         );
@@ -157,7 +158,7 @@ export class ScanWebView extends WebView<Webapp> {
           undefined,
           scanconf,
           config,
-          makeLogger(reportView),
+          makeAggregateLogger(this.logger, reportView),
           reportView,
           true
         );
@@ -265,13 +266,33 @@ export class ScanWebView extends WebView<Webapp> {
   async sendLogMessage(message: string, level: LogLevel) {}
 }
 
-function makeLogger(view: { sendLogMessage: (message: string, level: LogLevel) => void }): Logger {
+function makeAggregateLogger(
+  logger: Logger,
+  view: {
+    sendLogMessage: (message: string, level: LogLevel) => void;
+  }
+): Logger {
   return {
-    debug: (message: string) => view.sendLogMessage(message, "debug"),
-    info: (message: string) => view.sendLogMessage(message, "info"),
-    warning: (message: string) => view.sendLogMessage(message, "warning"),
-    error: (message: string) => view.sendLogMessage(message, "error"),
-    fatal: (message: string) => view.sendLogMessage(message, "fatal"),
+    debug: (message: string) => {
+      logger.debug(message);
+      view.sendLogMessage(message, "debug");
+    },
+    info: (message: string) => {
+      logger.info(message);
+      view.sendLogMessage(message, "info");
+    },
+    warning: (message: string) => {
+      logger.warning(message);
+      view.sendLogMessage(message, "warning");
+    },
+    error: (message: string) => {
+      logger.error(message);
+      view.sendLogMessage(message, "error");
+    },
+    fatal: (message: string) => {
+      logger.fatal(message);
+      view.sendLogMessage(message, "fatal");
+    },
   };
 }
 
