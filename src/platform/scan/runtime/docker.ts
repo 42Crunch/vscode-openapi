@@ -10,7 +10,6 @@ import { EnvStore } from "../../../envstore";
 import { Logger } from "../../types";
 import { delay } from "../../../time-util";
 import { getProxyEnv } from "../../../proxy";
-import { getEndpoints } from "@xliic/common/endpoints";
 
 export async function runScanWithDocker(
   envStore: EnvStore,
