@@ -2,6 +2,7 @@ import { useWatch } from "react-hook-form";
 import * as z from "zod";
 
 import { Banner } from "../../../components/Banner";
+import Input from "../../../new-components/fat-fields/Input";
 import Select from "../../../components/Select";
 import { ConfigScreen } from "../../../features/config/slice";
 import { Container, Title } from "../layout";
@@ -29,6 +30,14 @@ export function ScanRuntime() {
         {platformAuthType === "anond-token" && (
           <Banner message="API Scan runtime is configured to use 42Crunch API Security Testing Binary" />
         )}
+
+        <Container>
+          <Input
+            label="Proxy URL"
+            name="scanProxy"
+            description="The proxy URL for target API calls during the scan."
+          />{" "}
+        </Container>
       </Container>
     </>
   );
@@ -36,6 +45,7 @@ export function ScanRuntime() {
 
 const schema = z.object({
   scanRuntime: z.enum(["docker", "scand-manager", "cli"]),
+  scanProxy: z.string().url().optional().or(z.literal("")),
 });
 
 const screen: ConfigScreen = {

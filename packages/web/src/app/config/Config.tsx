@@ -20,7 +20,6 @@ import runtimeDocker from "./screen/runtime-docker";
 import auditRuntime from "./screen/audit-runtime";
 
 import scanRuntime from "./screen/scan-runtime";
-import scanProxy from "./screen/scan-proxy";
 import openapiExternalRefs from "./screen/openapi-external-refs";
 import devEndpoints from "./screen/dev-endpoints";
 
@@ -44,7 +43,6 @@ export default function Config() {
         mandatoryTags,
         auditRuntime,
         scanRuntime,
-        scanProxy,
       ],
     },
     {
@@ -72,7 +70,6 @@ export default function Config() {
     [platformServices.id]: platformServices,
     [auditRuntime.id]: auditRuntime,
     [scanRuntime.id]: scanRuntime,
-    [scanProxy.id]: scanProxy,
     [temporaryCollection.id]: temporaryCollection,
     [mandatoryTags.id]: mandatoryTags,
     [runtimeBinary.id]: runtimeBinary,

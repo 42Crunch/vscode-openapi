@@ -37,7 +37,6 @@ export type ConfigScreenId =
   | "runtime-docker"
   | "audit-runtime"
   | "scan-runtime"
-  | "scan-proxy"
   | "openapi-external-refs"
   | "dev-endpoints";
 
@@ -108,7 +107,6 @@ const initialState: ConfigState = {
     "runtime-scand-manager": undefined,
     "audit-runtime": undefined,
     "scan-runtime": undefined,
-    "scan-proxy": undefined,
     "openapi-external-refs": undefined,
     "dev-endpoints": undefined,
   },
