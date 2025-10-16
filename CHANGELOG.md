@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 4.39.0 (October 20, 2025)
+
+- Improved configuration of proxy servers for API Scan
+
 ## Version 4.38.0 (August 5, 2025)
 
 - Remove IDE Temporary collection after running Audit using platform connection

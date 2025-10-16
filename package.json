@@ -4,7 +4,7 @@
   "displayName": "OpenAPI (Swagger) Editor",
   "description": "OpenAPI creation, editing and preview, as well as static and dynamic API security testing. Identifies OWASP API vulnerabilities in both the design and implementation of the API",
   "license": "AGPL-3.0-only",
-  "version": "4.38.0",
+  "version": "4.39.0",
   "publisher": "42Crunch",
   "repository": {
     "type": "git",
