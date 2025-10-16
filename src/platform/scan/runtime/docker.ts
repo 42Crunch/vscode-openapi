@@ -33,8 +33,15 @@ export async function runScanWithDocker(
   env["SCAN_TOKEN"] = token.trim();
   env["PLATFORM_SERVICE"] = services!;
 
-  const { freemiumdUrl } = getEndpoints(config.internalUseDevEndpoints);
-  Object.assign(env, await getProxyEnv(freemiumdUrl, scanEnv["SCAN42C_HOST"], config, logger));
+  Object.assign(
+    env,
+    await getProxyEnv(
+      `https://${scanEnv["PLATFORM_SERVICE"]}`,
+      scanEnv["SCAN42C_HOST"],
+      config,
+      logger
+    )
+  );
 
   const envString = Object.entries(env)
     .map(([key, value]) => `-e ${key}='${value}'`)
