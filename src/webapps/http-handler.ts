@@ -4,6 +4,7 @@
 */
 
 import got, { RequestError } from "got";
+import { HttpProxyAgent, HttpsProxyAgent } from "hpagent";
 import FormData from "form-data";
 
 import { HttpRequest, HttpResponse, HttpError, HttpConfig } from "@xliic/common/http";
@@ -47,21 +48,24 @@ export async function executeHttpRequestRaw(
     }
   }
 
+  const options = {
+    throwHttpErrors: false,
+    method,
+    body: restoredBody,
+    headers: {
+      ...headers,
+    },
+    https: {
+      rejectUnauthorized: config?.https?.rejectUnauthorized ?? true,
+    },
+    retry: {
+      limit: 0,
+    },
+    agent: makeAgent(config.https?.proxy),
+  };
+
   try {
-    const response = await got(url, {
-      throwHttpErrors: false,
-      method,
-      body: restoredBody,
-      headers: {
-        ...headers,
-      },
-      https: {
-        rejectUnauthorized: config?.https?.rejectUnauthorized ?? true,
-      },
-      retry: {
-        limit: 0,
-      },
-    });
+    const response = await got(url, options);
 
     const responseHeaders: [string, string][] = [];
     for (let i = 0; i < response.rawHeaders.length; i += 2) {
@@ -143,4 +147,13 @@ function isSslError(code: string): boolean {
   ];
 
   return codes.includes(code);
+}
+
+function makeAgent(proxy: string | undefined) {
+  if (proxy && proxy.trim() !== "") {
+    return {
+      http: new HttpProxyAgent({ proxy }),
+      https: new HttpsProxyAgent({ proxy }),
+    };
+  }
 }

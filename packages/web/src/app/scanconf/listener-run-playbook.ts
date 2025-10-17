@@ -308,6 +308,9 @@ export function onTryExecuteScenario(
           },
           operations: { scenarioId, operationId },
           prefs: { useGlobalBlocks, rejectUnauthorized },
+          config: {
+            data: { scanProxy },
+          },
         } = listenerApi.getState();
 
         const operation = operations[operationId!];
@@ -323,7 +326,7 @@ export function onTryExecuteScenario(
         await execute(
           listenerApi.getState(),
           webappHttpClient(
-            { https: { rejectUnauthorized } },
+            { https: { rejectUnauthorized, proxy: scanProxy } },
             (id: string, request: HttpRequest, config: HttpConfig) =>
               listenerApi.dispatch(sendHttpRequest({ id, request, config }))
           ),
@@ -349,6 +352,9 @@ export function onExecuteAuthentication(
           scanconf: { oas, playbook, selectedCredential, selectedSubcredential },
           env: { data: envenv },
           prefs: { rejectUnauthorized },
+          config: {
+            data: { scanProxy },
+          },
         } = listenerApi.getState();
 
         if (selectedCredential === undefined || selectedSubcredential === undefined) {
@@ -363,7 +369,7 @@ export function onExecuteAuthentication(
         for await (const step of executeAuth(
           createAuthCache(),
           webappHttpClient(
-            { https: { rejectUnauthorized } },
+            { https: { rejectUnauthorized, proxy: scanProxy } },
             (id: string, request: HttpRequest, config: HttpConfig) =>
               listenerApi.dispatch(sendHttpRequest({ id, request, config }))
           ),
@@ -394,6 +400,9 @@ export function onExecuteRequest(
             playbook: { before, after },
           },
           prefs: { useGlobalBlocks, rejectUnauthorized },
+          config: {
+            data: { scanProxy },
+          },
         } = listenerApi.getState();
 
         const playbooks: PlaybookList = [
@@ -405,7 +414,7 @@ export function onExecuteRequest(
         await execute(
           listenerApi.getState(),
           webappHttpClient(
-            { https: { rejectUnauthorized } },
+            { https: { rejectUnauthorized, proxy: scanProxy } },
             (id: string, request: HttpRequest, config: HttpConfig) =>
               listenerApi.dispatch(sendHttpRequest({ id, request, config }))
           ),
@@ -431,6 +440,9 @@ export function onExecuteGlobal(startAppListening: AppStartListening, host: Http
           },
           global: { selected },
           prefs: { rejectUnauthorized },
+          config: {
+            data: { scanProxy },
+          },
         } = listenerApi.getState();
 
         const playbooks =
@@ -441,7 +453,7 @@ export function onExecuteGlobal(startAppListening: AppStartListening, host: Http
         await execute(
           listenerApi.getState(),
           webappHttpClient(
-            { https: { rejectUnauthorized } },
+            { https: { rejectUnauthorized, proxy: scanProxy } },
             (id: string, request: HttpRequest, config: HttpConfig) =>
               listenerApi.dispatch(sendHttpRequest({ id, request, config }))
           ),

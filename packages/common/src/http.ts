@@ -19,6 +19,7 @@ export type HttpResponse = {
 export type HttpConfig = {
   https: {
     rejectUnauthorized: boolean;
+    proxy?: string;
   };
 };
 
