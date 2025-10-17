@@ -21,13 +21,6 @@ const routes: Routes = [
     element: <div />,
   },
   {
-    id: "general-error",
-    title: "An error has occurred",
-    element: <GeneralError />,
-    navigation: false,
-    when: showGeneralError,
-  },
-  {
     id: "main",
     title: "Main",
     element: <div>Main</div>,

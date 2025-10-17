@@ -6,6 +6,7 @@ import { FileImport } from "../../icons";
 import { useAppDispatch, useAppSelector } from "./store";
 import { selectFiles } from "./slice";
 import Subscription from "./Subscription";
+import GeneralError from "../../features/general-error/GeneralError";
 
 export default function Start() {
   const dispatch = useAppDispatch();
@@ -58,6 +59,7 @@ export default function Start() {
           <Subscription token={token} useDevEndpoints={useDevEndpoints} />
         </SubscriptionDetails>
       )}
+      <GeneralError />
     </Contents>
   );
 }

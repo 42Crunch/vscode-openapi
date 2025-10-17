@@ -257,7 +257,7 @@ export class CaptureWebView extends WebView<Webapp> {
       });
     } catch (error) {
       this.showGeneralError({
-        message: "Failed to establish connection to capture server",
+        message: "Failed to establish connection to capture server, please check your credentials.",
         details: (error as Error).message,
       });
     }
