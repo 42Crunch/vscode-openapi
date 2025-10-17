@@ -33,10 +33,10 @@ export async function getProxyEnv(
 ): Promise<Record<string, string>> {
   const env: Record<string, string> = {};
 
-  const freemiumdProxy = await getProxyURL(backendUrl);
-  if (freemiumdProxy) {
-    env["HTTPS_PROXY"] = freemiumdProxy;
-    logger.debug(`Set HTTPS_PROXY environment variable to: ${freemiumdProxy}`);
+  const proxy = await getProxyURL(backendUrl);
+  if (proxy) {
+    env["HTTPS_PROXY"] = proxy;
+    logger.debug(`Set HTTPS_PROXY environment variable to: ${proxy}`);
   }
 
   if (apiUrl !== undefined) {

@@ -295,15 +295,21 @@ export async function runScanWithCliBinary(
   if (config.platformAuthType === "anond-token") {
     const anondToken = getAnondCredentials(configuration);
     args.push("--token", String(anondToken));
+    Object.assign(
+      scanEnv,
+      await getProxyEnv(freemiumdUrl, scanEnv["SCAN42C_HOST"], config, logger)
+    );
   } else {
     const platformConnection = await getPlatformCredentials(configuration, secrets);
     if (platformConnection !== undefined) {
       scanEnv["API_KEY"] = platformConnection.apiToken!;
       scanEnv["PLATFORM_HOST"] = platformConnection.platformUrl;
+      Object.assign(
+        scanEnv,
+        await getProxyEnv(platformConnection.platformUrl, scanEnv["SCAN42C_HOST"], config, logger)
+      );
     }
   }
-
-  Object.assign(scanEnv, await getProxyEnv(freemiumdUrl, scanEnv["SCAN42C_HOST"], config, logger));
 
   try {
     const output = await asyncExecFile(cli, args, {
@@ -445,6 +451,7 @@ export async function runAuditWithCliBinary(
   if (config.platformAuthType === "anond-token") {
     const anondToken = getAnondCredentials(configuration);
     args.push("--token", String(anondToken));
+    Object.assign(env, await getProxyEnv(freemiumdUrl, undefined, config, logger));
   } else {
     const platformConnection = await getPlatformCredentials(configuration, secrets);
     if (platformConnection !== undefined) {
@@ -454,10 +461,12 @@ export async function runAuditWithCliBinary(
       logger.debug("Setting API_KEY environment variable.");
       env["API_KEY"] = platformConnection.apiToken!;
       env["PLATFORM_HOST"] = platformConnection.platformUrl;
+      Object.assign(
+        env,
+        await getProxyEnv(platformConnection.platformUrl, undefined, config, logger)
+      );
     }
   }
-
-  Object.assign(env, await getProxyEnv(freemiumdUrl, undefined, config, logger));
 
   try {
     logger.debug(`Running the binary: ${cli} ${args.join(" ")}`);
