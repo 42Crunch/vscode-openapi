@@ -33,7 +33,7 @@ export function ScanRuntime() {
 
         <Container>
           <Input
-            label="Proxy URL"
+            label="API Proxy URL"
             name="scanProxy"
             description="The proxy URL for target API calls during the scan."
           />{" "}
