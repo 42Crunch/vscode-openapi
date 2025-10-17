@@ -312,6 +312,7 @@ export async function runScanWithCliBinary(
   }
 
   try {
+    logger.debug(`Running the binary: ${cli} ${args.join(" ")}`);
     const output = await asyncExecFile(cli, args, {
       cwd: dir as string,
       windowsHide: true,

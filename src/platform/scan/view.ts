@@ -275,7 +275,7 @@ function makeAggregateLogger(
   return {
     debug: (message: string) => {
       logger.debug(message);
-      view.sendLogMessage(message, "debug");
+      // do not send debug messages to the view
     },
     info: (message: string) => {
       logger.info(message);
