@@ -1,10 +1,15 @@
-import { Config } from "@xliic/common/config";
+import { URL } from "url";
 import * as vscode from "vscode";
+
+import { Config } from "@xliic/common/config";
+
 import { Logger } from "./platform/types";
 
-const proxyAgent: any | undefined = loadVSCodeModule<any>("@vscode/proxy-agent");
+const proxyAgentModule: any | undefined = loadProxyAgent();
+const pacProxyAgentModule: any | undefined = loadPacProxyAgent();
 
-function loadVSCodeModule<T>(moduleName: string): T | undefined {
+function loadProxyAgent(): any | undefined {
+  const moduleName = "@vscode/proxy-agent";
   const appRoot = vscode.env.appRoot;
   try {
     return require(`${appRoot}/node_modules.asar/${moduleName}`);
@@ -19,9 +24,46 @@ function loadVSCodeModule<T>(moduleName: string): T | undefined {
   return undefined;
 }
 
+function loadPacProxyAgent(): any | undefined {
+  const moduleName = "@vscode/proxy-agent";
+  const appRoot = vscode.env.appRoot;
+  try {
+    return require(`${appRoot}/node_modules.asar/${moduleName}/out/agent.js`);
+  } catch (err) {
+    // Not in ASAR.
+  }
+  try {
+    return require(`${appRoot}/node_modules/${moduleName}/out/agent.js`);
+  } catch (err) {
+    // Not available.
+  }
+  return undefined;
+}
+
 async function getProxyURL(targetUrl: string): Promise<string | undefined> {
-  if (proxyAgent && proxyAgent.resolveProxyURL) {
-    return await proxyAgent.resolveProxyURL(targetUrl);
+  if (proxyAgentModule && proxyAgentModule.resolveProxyURL) {
+    return await proxyAgentModule.resolveProxyURL(targetUrl);
+  }
+}
+
+export async function createProxyAgent(proxy: string): Promise<any> {
+  const resolver = () => {
+    const parsed = URL.parse(proxy);
+    if (parsed !== null) {
+      if (parsed.protocol === "https:") {
+        return `HTTPS ${parsed.hostname}:${parsed.port}`;
+      } else {
+        return `HTTP ${parsed.hostname}:${parsed.port}`;
+      }
+    }
+  };
+
+  const certs = await proxyAgentModule.loadSystemCertificates({ log: vsLogSink });
+
+  if (pacProxyAgentModule && pacProxyAgentModule.createPacProxyAgent) {
+    return pacProxyAgentModule.createPacProxyAgent(resolver, undefined, async (opts: unknown) => {
+      (opts as any).ca = certs;
+    });
   }
 }
 
@@ -61,4 +103,20 @@ export async function getProxyEnv(
   }
 
   return env;
+}
+
+const vsLogSink: VsLog = {
+  trace: () => {},
+  debug: () => {},
+  info: () => {},
+  warn: () => {},
+  error: () => {},
+};
+
+interface VsLog {
+  trace(message: string, ...args: any[]): void;
+  debug(message: string, ...args: any[]): void;
+  info(message: string, ...args: any[]): void;
+  warn(message: string, ...args: any[]): void;
+  error(message: string | Error, ...args: any[]): void;
 }

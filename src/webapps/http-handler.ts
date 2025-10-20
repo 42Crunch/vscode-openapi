@@ -5,11 +5,12 @@
 
 import http from "http";
 import got, { RequestError } from "got";
-import { HttpProxyAgent, HttpsProxyAgent } from "hpagent";
 import FormData from "form-data";
 
 import { HttpRequest, HttpResponse, HttpError, HttpConfig } from "@xliic/common/http";
 import { ShowHttpResponseMessage, ShowHttpErrorMessage } from "@xliic/common/http";
+
+import { createProxyAgent } from "../proxy";
 
 export async function executeHttpRequest(
   id: string,
@@ -49,7 +50,7 @@ export async function executeHttpRequestRaw(
     }
   }
 
-  const agent = makeAgent(config.https?.proxy);
+  const agent = await makeAgent(config.https?.proxy);
   const requestFn = agent !== undefined ? (http as any).__vscodeOriginal?.request : undefined;
 
   const options = {
@@ -154,11 +155,12 @@ function isSslError(code: string): boolean {
   return codes.includes(code);
 }
 
-function makeAgent(proxy: string | undefined) {
+async function makeAgent(proxy: string | undefined) {
   if (proxy && proxy.trim() !== "") {
+    const agent = await createProxyAgent(proxy);
     return {
-      http: new HttpProxyAgent({ proxy }),
-      https: new HttpsProxyAgent({ proxy }),
+      http: agent,
+      https: agent,
     };
   }
 }
