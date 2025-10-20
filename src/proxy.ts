@@ -36,7 +36,8 @@ export async function getProxyEnv(
   const proxy = await getProxyURL(backendUrl);
   if (proxy) {
     env["HTTPS_PROXY"] = proxy;
-    logger.debug(`Set HTTPS_PROXY environment variable to: ${proxy}`);
+    env["HTTP_PROXY"] = proxy;
+    logger.debug(`Set HTTPS_PROXY and HTTP_PROXY environment variables to: ${proxy}`);
   }
 
   if (apiUrl !== undefined) {
