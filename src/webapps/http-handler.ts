@@ -3,6 +3,7 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
+import http from "http";
 import got, { RequestError } from "got";
 import { HttpProxyAgent, HttpsProxyAgent } from "hpagent";
 import FormData from "form-data";
@@ -48,6 +49,9 @@ export async function executeHttpRequestRaw(
     }
   }
 
+  const agent = makeAgent(config.https?.proxy);
+  const requestFn = agent !== undefined ? (http as any).__vscodeOriginal?.request : undefined;
+
   const options = {
     throwHttpErrors: false,
     method,
@@ -61,7 +65,8 @@ export async function executeHttpRequestRaw(
     retry: {
       limit: 0,
     },
-    agent: makeAgent(config.https?.proxy),
+    request: requestFn,
+    agent,
   };
 
   try {
