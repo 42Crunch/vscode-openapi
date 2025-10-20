@@ -47,29 +47,29 @@ const execMaxBuffer = 1024 * 1024 * 20; // 20MB
 export async function createScanConfigWithCliBinary(
   scanconfUri: vscode.Uri,
   oas: string,
-  cliDirectoryOverride: string
+  cliDirectoryOverride: string,
+  logger: Logger
 ): Promise<void> {
   const tmpdir = createTempDirectory("scan-");
   const oasFilename = join(tmpdir, "openapi.json");
   const cli = join(getBinDirectory(cliDirectoryOverride), getCliFilename());
+  const args = [
+    "scan",
+    "conf",
+    "generate",
+    "--output-format",
+    "json",
+    "--output",
+    "scanconfig.json",
+    "openapi.json",
+  ];
 
   await writeFile(oasFilename, oas, { encoding: "utf8" });
 
   try {
-    await asyncExecFile(
-      cli,
-      [
-        "scan",
-        "conf",
-        "generate",
-        "--output-format",
-        "json",
-        "--output",
-        "scanconfig.json",
-        "openapi.json",
-      ],
-      { cwd: tmpdir, windowsHide: true, maxBuffer: execMaxBuffer }
-    );
+    logger.debug(`Running the binary: ${cli} ${args.join(" ")}`);
+
+    await asyncExecFile(cli, args, { cwd: tmpdir, windowsHide: true, maxBuffer: execMaxBuffer });
 
     // create scan config directory if does not exist
     const scanconfDir = dirname(scanconfUri.fsPath);
@@ -92,12 +92,13 @@ export async function createScanConfigWithCliBinary(
 
 export async function createDefaultConfigWithCliBinary(
   oas: string,
-  cliDirectoryOverride: string
+  cliDirectoryOverride: string,
+  logger: Logger
 ): Promise<string> {
   const tmpdir = createTempDirectory("scanconf-update-");
   const scanconfFilename = join(tmpdir, "scanconf.json");
   const scanconfUri = vscode.Uri.file(scanconfFilename);
-  await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride);
+  await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride, logger);
   const scanconf = await readFile(scanconfFilename, { encoding: "utf8" });
   unlinkSync(scanconfFilename);
   rmdirSync(tmpdir);
@@ -357,15 +358,18 @@ export async function runValidateScanConfigWithCliBinary(
   logger.info(`Wrote scan configuration to: ${dir}`);
 
   const cli = join(getBinDirectory(cliDirectoryOverride), getCliFilename());
+  const args = ["scan", "conf", "validate", "openapi.json", "--conf-file", "scanconf.json"];
 
   logger.info(`Running validate using: ${cli}`);
 
   try {
-    const output = await asyncExecFile(
-      cli,
-      ["scan", "conf", "validate", "openapi.json", "--conf-file", "scanconf.json"],
-      { cwd: dir as string, windowsHide: true, env: scanEnv, maxBuffer: execMaxBuffer }
-    );
+    logger.debug(`Running the binary: ${cli} ${args.join(" ")}`);
+    const output = await asyncExecFile(cli, args, {
+      cwd: dir as string,
+      windowsHide: true,
+      env: scanEnv,
+      maxBuffer: execMaxBuffer,
+    });
 
     const cliResponse = JSON.parse(output.stdout);
 
