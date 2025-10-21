@@ -1,9 +1,8 @@
 # What's New
 
-Version 4.38 of the OpenAPI Editor includes the following changes. Changes are for all users (Free and paid) unless specified.
+Version 4.40 of the OpenAPI Editor includes the following changes. Changes are for all users (Free and paid) unless specified.
 
-- Improvments to extension logging
-- Better cleanup for IDE Temporary collections if platform connection is used
+- Improvements in proxy configuration
 
 Access the [full changelog](https://github.com/42Crunch/vscode-openapi/blob/master/CHANGELOG.md) of the OpenAPI editor
 
