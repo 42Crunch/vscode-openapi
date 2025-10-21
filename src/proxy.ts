@@ -1,4 +1,6 @@
 import { URL } from "url";
+import http from "http";
+import https from "https";
 import * as vscode from "vscode";
 
 import { Config } from "@xliic/common/config";
@@ -46,24 +48,46 @@ async function getProxyURL(targetUrl: string): Promise<string | undefined> {
   }
 }
 
-export async function createProxyAgent(proxy: string): Promise<any> {
-  const resolver = () => {
-    const parsed = URL.parse(proxy);
-    if (parsed !== null) {
-      if (parsed.protocol === "https:") {
-        return `HTTPS ${parsed.hostname}:${parsed.port}`;
-      } else {
-        return `HTTP ${parsed.hostname}:${parsed.port}`;
+export async function createProxyAgentsAndCerts(
+  proxy: string | undefined
+): Promise<{ agents: { http: http.Agent; https: https.Agent }; certs: any } | undefined> {
+  if (
+    proxy &&
+    proxy.trim() !== "" &&
+    pacProxyAgentModule &&
+    pacProxyAgentModule.createPacProxyAgent &&
+    proxyAgentModule.loadSystemCertificates
+  ) {
+    const resolver = () => {
+      const parsed = URL.parse(proxy);
+      if (parsed !== null) {
+        if (parsed.protocol === "https:") {
+          return `HTTPS ${parsed.hostname}:${parsed.port}`;
+        } else {
+          return `HTTP ${parsed.hostname}:${parsed.port}`;
+        }
       }
-    }
-  };
+    };
 
-  const certs = await proxyAgentModule.loadSystemCertificates({ log: vsLogSink });
+    const certs = await proxyAgentModule.loadSystemCertificates({ log: vsLogSink });
 
-  if (pacProxyAgentModule && pacProxyAgentModule.createPacProxyAgent) {
-    return pacProxyAgentModule.createPacProxyAgent(resolver, undefined, async (opts: unknown) => {
-      (opts as any).ca = certs;
-    });
+    const httpsAgent = pacProxyAgentModule.createPacProxyAgent(
+      resolver,
+      //      { secureEndpoint: true },
+      async (opts: unknown) => {
+        (opts as any).ca = certs;
+      }
+    );
+
+    const httpAgent = pacProxyAgentModule.createPacProxyAgent(resolver);
+
+    return {
+      agents: {
+        http: httpAgent,
+        https: httpsAgent,
+      },
+      certs,
+    };
   }
 }
 

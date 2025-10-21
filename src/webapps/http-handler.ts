@@ -4,13 +4,14 @@
 */
 
 import http from "http";
+import https from "https";
 import got, { RequestError } from "got";
 import FormData from "form-data";
 
 import { HttpRequest, HttpResponse, HttpError, HttpConfig } from "@xliic/common/http";
 import { ShowHttpResponseMessage, ShowHttpErrorMessage } from "@xliic/common/http";
 
-import { createProxyAgent } from "../proxy";
+import { createProxyAgentsAndCerts } from "../proxy";
 
 export async function executeHttpRequest(
   id: string,
@@ -50,8 +51,16 @@ export async function executeHttpRequestRaw(
     }
   }
 
-  const agent = await makeAgent(config.https?.proxy);
-  const requestFn = agent !== undefined ? (http as any).__vscodeOriginal?.request : undefined;
+  const isHttpsUrl = url.toLowerCase().startsWith("https://");
+
+  const proxy = await createProxyAgentsAndCerts(config.https?.proxy);
+
+  const requestFn =
+    proxy !== undefined
+      ? isHttpsUrl
+        ? (https as any).__vscodeOriginal?.request
+        : (http as any).__vscodeOriginal?.request
+      : undefined;
 
   const options = {
     throwHttpErrors: false,
@@ -62,12 +71,13 @@ export async function executeHttpRequestRaw(
     },
     https: {
       rejectUnauthorized: config?.https?.rejectUnauthorized ?? true,
+      certificateAuthority: proxy !== undefined ? proxy.certs : undefined,
     },
     retry: {
       limit: 0,
     },
     request: requestFn,
-    agent,
+    agent: proxy?.agents,
   };
 
   try {
@@ -153,14 +163,4 @@ function isSslError(code: string): boolean {
   ];
 
   return codes.includes(code);
-}
-
-async function makeAgent(proxy: string | undefined) {
-  if (proxy && proxy.trim() !== "") {
-    const agent = await createProxyAgent(proxy);
-    return {
-      http: agent,
-      https: agent,
-    };
-  }
 }
