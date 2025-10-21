@@ -72,6 +72,7 @@ const initialState: ConfigState = {
     auditRuntime: "platform",
     scanRuntime: "docker",
     scanImage: "",
+    scanProxy: "",
     docker: {
       replaceLocalhost: true,
       useHostNetwork: true,

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 
 import { Cache } from "../cache";
-import { PlatformContext } from "./types";
+import { Logger, PlatformContext } from "./types";
 import { PlatformStore } from "./stores/platform-store";
 import { FavoritesStore } from "./stores/favorites-store";
 import { ImportedUrlStore } from "./stores/imported-url-store";
@@ -30,6 +30,7 @@ export function registerCommands(
   favorites: FavoritesStore,
   importedUrls: ImportedUrlStore,
   cache: Cache,
+  logger: Logger,
   provider: CollectionsProvider,
   tree: vscode.TreeView<ExplorerNode>,
   reportWebView: AuditWebView,

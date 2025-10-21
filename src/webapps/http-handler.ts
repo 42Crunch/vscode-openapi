@@ -3,11 +3,15 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
+import http from "http";
+import https from "https";
 import got, { RequestError } from "got";
 import FormData from "form-data";
 
 import { HttpRequest, HttpResponse, HttpError, HttpConfig } from "@xliic/common/http";
 import { ShowHttpResponseMessage, ShowHttpErrorMessage } from "@xliic/common/http";
+
+import { createProxyAgentsAndCerts } from "../proxy";
 
 export async function executeHttpRequest(
   id: string,
@@ -47,21 +51,37 @@ export async function executeHttpRequestRaw(
     }
   }
 
+  const isHttpsUrl = url.toLowerCase().startsWith("https://");
+
+  const proxy = await createProxyAgentsAndCerts(config.https?.proxy);
+
+  const requestFn =
+    proxy !== undefined
+      ? isHttpsUrl
+        ? (https as any).__vscodeOriginal?.request
+        : (http as any).__vscodeOriginal?.request
+      : undefined;
+
+  const options = {
+    throwHttpErrors: false,
+    method,
+    body: restoredBody,
+    headers: {
+      ...headers,
+    },
+    https: {
+      rejectUnauthorized: config?.https?.rejectUnauthorized ?? true,
+      certificateAuthority: proxy !== undefined ? proxy.certs : undefined,
+    },
+    retry: {
+      limit: 0,
+    },
+    request: requestFn,
+    agent: proxy?.agents,
+  };
+
   try {
-    const response = await got(url, {
-      throwHttpErrors: false,
-      method,
-      body: restoredBody,
-      headers: {
-        ...headers,
-      },
-      https: {
-        rejectUnauthorized: config?.https?.rejectUnauthorized ?? true,
-      },
-      retry: {
-        limit: 0,
-      },
-    });
+    const response = await got(url, options);
 
     const responseHeaders: [string, string][] = [];
     for (let i = 0; i < response.rawHeaders.length; i += 2) {

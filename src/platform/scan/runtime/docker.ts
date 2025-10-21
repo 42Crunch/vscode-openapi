@@ -9,6 +9,7 @@ import * as vscode from "vscode";
 import { EnvStore } from "../../../envstore";
 import { Logger } from "../../types";
 import { delay } from "../../../time-util";
+import { getProxyEnv } from "../../../proxy";
 
 export async function runScanWithDocker(
   envStore: EnvStore,
@@ -31,10 +32,15 @@ export async function runScanWithDocker(
   env["SCAN_TOKEN"] = token.trim();
   env["PLATFORM_SERVICE"] = services!;
 
-  const httpProxy = vscode.workspace.getConfiguration().get<string>("http.proxy");
-  if (httpProxy !== undefined && httpProxy !== "") {
-    scanEnv["HTTPS_PROXY"] = httpProxy;
-  }
+  Object.assign(
+    env,
+    await getProxyEnv(
+      `https://${scanEnv["PLATFORM_SERVICE"]}`,
+      scanEnv["SCAN42C_HOST"],
+      config,
+      logger
+    )
+  );
 
   const envString = Object.entries(env)
     .map(([key, value]) => `-e ${key}='${value}'`)

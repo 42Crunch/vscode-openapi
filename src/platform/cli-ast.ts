@@ -36,6 +36,7 @@ import { delay } from "../time-util";
 import { CliAstManifestEntry, getCliUpdate } from "./cli-ast-update";
 import { extensionQualifiedId } from "../types";
 import { createTempDirectory, existsSync } from "../util/fs";
+import { getProxyEnv } from "../proxy";
 
 const asyncExecFile = promisify(execFile);
 
@@ -46,29 +47,29 @@ const execMaxBuffer = 1024 * 1024 * 20; // 20MB
 export async function createScanConfigWithCliBinary(
   scanconfUri: vscode.Uri,
   oas: string,
-  cliDirectoryOverride: string
+  cliDirectoryOverride: string,
+  logger: Logger
 ): Promise<void> {
   const tmpdir = createTempDirectory("scan-");
   const oasFilename = join(tmpdir, "openapi.json");
   const cli = join(getBinDirectory(cliDirectoryOverride), getCliFilename());
+  const args = [
+    "scan",
+    "conf",
+    "generate",
+    "--output-format",
+    "json",
+    "--output",
+    "scanconfig.json",
+    "openapi.json",
+  ];
 
   await writeFile(oasFilename, oas, { encoding: "utf8" });
 
   try {
-    await asyncExecFile(
-      cli,
-      [
-        "scan",
-        "conf",
-        "generate",
-        "--output-format",
-        "json",
-        "--output",
-        "scanconfig.json",
-        "openapi.json",
-      ],
-      { cwd: tmpdir, windowsHide: true, maxBuffer: execMaxBuffer }
-    );
+    logger.debug(`Running the binary: ${cli} ${args.join(" ")}`);
+
+    await asyncExecFile(cli, args, { cwd: tmpdir, windowsHide: true, maxBuffer: execMaxBuffer });
 
     // create scan config directory if does not exist
     const scanconfDir = dirname(scanconfUri.fsPath);
@@ -91,12 +92,13 @@ export async function createScanConfigWithCliBinary(
 
 export async function createDefaultConfigWithCliBinary(
   oas: string,
-  cliDirectoryOverride: string
+  cliDirectoryOverride: string,
+  logger: Logger
 ): Promise<string> {
   const tmpdir = createTempDirectory("scanconf-update-");
   const scanconfFilename = join(tmpdir, "scanconf.json");
   const scanconfUri = vscode.Uri.file(scanconfFilename);
-  await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride);
+  await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride, logger);
   const scanconf = await readFile(scanconfFilename, { encoding: "utf8" });
   unlinkSync(scanconfFilename);
   rmdirSync(tmpdir);
@@ -250,7 +252,7 @@ export async function runScanWithCliBinary(
 > {
   logger.info(`Running API Conformance Scan using 42Crunch API Security Testing Binary`);
 
-  const { cliFreemiumdHost } = getEndpoints(config.internalUseDevEndpoints);
+  const { cliFreemiumdHost, freemiumdUrl } = getEndpoints(config.internalUseDevEndpoints);
   const tmpDir = tmpdir();
   const dir = mkdtempSync(join(`${tmpDir}`, "scan-"));
   const oasFilename = join(dir as string, "openapi.json");
@@ -294,20 +296,24 @@ export async function runScanWithCliBinary(
   if (config.platformAuthType === "anond-token") {
     const anondToken = getAnondCredentials(configuration);
     args.push("--token", String(anondToken));
+    Object.assign(
+      scanEnv,
+      await getProxyEnv(freemiumdUrl, scanEnv["SCAN42C_HOST"], config, logger)
+    );
   } else {
     const platformConnection = await getPlatformCredentials(configuration, secrets);
     if (platformConnection !== undefined) {
       scanEnv["API_KEY"] = platformConnection.apiToken!;
       scanEnv["PLATFORM_HOST"] = platformConnection.platformUrl;
+      Object.assign(
+        scanEnv,
+        await getProxyEnv(platformConnection.platformUrl, scanEnv["SCAN42C_HOST"], config, logger)
+      );
     }
   }
 
-  const httpProxy = vscode.workspace.getConfiguration().get<string>("http.proxy");
-  if (httpProxy !== undefined && httpProxy !== "") {
-    scanEnv["HTTPS_PROXY"] = httpProxy;
-  }
-
   try {
+    logger.debug(`Running the binary: ${cli} ${args.join(" ")}`);
     const output = await asyncExecFile(cli, args, {
       cwd: dir as string,
       windowsHide: true,
@@ -352,15 +358,18 @@ export async function runValidateScanConfigWithCliBinary(
   logger.info(`Wrote scan configuration to: ${dir}`);
 
   const cli = join(getBinDirectory(cliDirectoryOverride), getCliFilename());
+  const args = ["scan", "conf", "validate", "openapi.json", "--conf-file", "scanconf.json"];
 
   logger.info(`Running validate using: ${cli}`);
 
   try {
-    const output = await asyncExecFile(
-      cli,
-      ["scan", "conf", "validate", "openapi.json", "--conf-file", "scanconf.json"],
-      { cwd: dir as string, windowsHide: true, env: scanEnv, maxBuffer: execMaxBuffer }
-    );
+    logger.debug(`Running the binary: ${cli} ${args.join(" ")}`);
+    const output = await asyncExecFile(cli, args, {
+      cwd: dir as string,
+      windowsHide: true,
+      env: scanEnv,
+      maxBuffer: execMaxBuffer,
+    });
 
     const cliResponse = JSON.parse(output.stdout);
 
@@ -401,7 +410,7 @@ export async function runAuditWithCliBinary(
     CliError
   >
 > {
-  const { cliFreemiumdHost } = getEndpoints(config.internalUseDevEndpoints);
+  const { cliFreemiumdHost, freemiumdUrl } = getEndpoints(config.internalUseDevEndpoints);
 
   logger.info(`Running Security Audit using 42Crunch API Security Testing Binary`);
 
@@ -447,6 +456,7 @@ export async function runAuditWithCliBinary(
   if (config.platformAuthType === "anond-token") {
     const anondToken = getAnondCredentials(configuration);
     args.push("--token", String(anondToken));
+    Object.assign(env, await getProxyEnv(freemiumdUrl, undefined, config, logger));
   } else {
     const platformConnection = await getPlatformCredentials(configuration, secrets);
     if (platformConnection !== undefined) {
@@ -456,13 +466,11 @@ export async function runAuditWithCliBinary(
       logger.debug("Setting API_KEY environment variable.");
       env["API_KEY"] = platformConnection.apiToken!;
       env["PLATFORM_HOST"] = platformConnection.platformUrl;
+      Object.assign(
+        env,
+        await getProxyEnv(platformConnection.platformUrl, undefined, config, logger)
+      );
     }
-  }
-
-  const httpProxy = vscode.workspace.getConfiguration().get<string>("http.proxy");
-  if (httpProxy !== undefined && httpProxy !== "") {
-    logger.debug(`Setting HTTPS_PROXY environment variable to: ${httpProxy}`);
-    env["HTTPS_PROXY"] = httpProxy;
   }
 
   try {

@@ -39,6 +39,7 @@ export default (
   store: PlatformStore,
   configuration: Configuration,
   secrets: vscode.SecretStorage,
+  logger: Logger,
   getScanView: (uri: vscode.Uri) => Promise<ScanWebView>,
   getExistingReportView: (uri: vscode.Uri) => ScanReportWebView,
   signUpWebView: SignUpWebView
@@ -60,6 +61,7 @@ export default (
           store,
           configuration,
           secrets,
+          logger,
           getScanView,
           path,
           method
@@ -88,6 +90,7 @@ export default (
           store,
           configuration,
           secrets,
+          logger,
           getScanView,
           path,
           method
@@ -124,6 +127,7 @@ export default (
             store,
             configuration,
             secrets,
+            logger,
             getScanView,
             firstPath,
             firstMethod as HttpMethod
@@ -169,6 +173,7 @@ async function editorRunSingleOperationScan(
   store: PlatformStore,
   configuration: Configuration,
   secrets: vscode.SecretStorage,
+  logger: Logger,
   getScanView: (uri: vscode.Uri) => Promise<ScanWebView>,
   path: string,
   method: HttpMethod
@@ -211,6 +216,7 @@ async function editorRunSingleOperationScan(
       store,
       cache,
       secrets,
+      logger,
       config.platformAuthType,
       config.scanRuntime,
       config.cliDirectoryOverride,
@@ -230,6 +236,7 @@ async function createDefaultScanConfig(
   store: PlatformStore,
   cache: Cache,
   secrets: vscode.SecretStorage,
+  logger: Logger,
   platformAuthType: "api-token" | "anond-token",
   scanRuntime: "docker" | "scand-manager" | "cli",
   cliDirectoryOverride: string,
@@ -251,10 +258,10 @@ async function createDefaultScanConfig(
         if (platformAuthType === "anond-token") {
           // free users must use CLI for scan, there is no need to fallback to anond for initial audit
           // if there is no CLI available, they will not be able to run scan or create a scan config in any case
-          await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride);
+          await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride, logger);
         } else {
           if (scanRuntime === "cli") {
-            await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride);
+            await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride, logger);
           } else {
             // this will run audit on the platform as well
             await createScanConfigWithPlatform(store, scanconfUri, oas);
@@ -289,11 +296,3 @@ async function editorOpenScanconfig(editor: vscode.TextEditor): Promise<void> {
 
   await vscode.window.showTextDocument(scanconfUri);
 }
-
-const emptyLogger: Logger = {
-  fatal: function (message: string): void {},
-  error: function (message: string): void {},
-  warning: function (message: string): void {},
-  info: function (message: string): void {},
-  debug: function (message: string): void {},
-};

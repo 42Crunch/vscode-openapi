@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { Preferences } from "@xliic/common/prefs";
 import { Cache } from "../../cache";
 import { PlatformStore } from "../stores/platform-store";
-import { PlatformContext } from "../types";
+import { Logger, PlatformContext } from "../types";
 
 import { ScanCodelensProvider } from "./lens";
 import commands from "./commands";
@@ -25,6 +25,7 @@ export function activate(
   context: vscode.ExtensionContext,
   platformContext: PlatformContext,
   cache: Cache,
+  logger: Logger,
   configuration: Configuration,
   secrets: vscode.SecretStorage,
   store: PlatformStore,
@@ -47,6 +48,7 @@ export function activate(
         alias,
         context.extensionPath,
         cache,
+        logger,
         configuration,
         secrets,
         store,
@@ -104,6 +106,7 @@ export function activate(
     store,
     configuration,
     secrets,
+    logger,
     getScanView,
     getExistingReportView,
     signUpWebView
