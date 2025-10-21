@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 4.39.0 (October 20, 2025)
+## Version 4.40.0 (October 21, 2025)
 
 - Improved configuration of proxy servers for API Scan
 
