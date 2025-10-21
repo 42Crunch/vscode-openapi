@@ -122,6 +122,12 @@ export async function getProxyEnv(
         logger.debug(
           `Set HTTPS_PROXY_API and HTTP_PROXY_API environment variables to: ${apiProxy}`
         );
+      } else {
+        const parsedApiUrl = URL.parse(apiUrl);
+        if (parsedApiUrl !== null && parsedApiUrl.hostname) {
+          env["NO_PROXY"] = parsedApiUrl.hostname;
+          logger.debug(`Setting NO_PROXY for API host: ${parsedApiUrl.hostname}`);
+        }
       }
     }
   }
