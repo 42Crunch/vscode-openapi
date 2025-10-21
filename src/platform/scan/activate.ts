@@ -106,6 +106,7 @@ export function activate(
     store,
     configuration,
     secrets,
+    logger,
     getScanView,
     getExistingReportView,
     signUpWebView

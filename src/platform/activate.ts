@@ -150,6 +150,7 @@ export async function activate(
     favoriteCollections,
     importedUrls,
     cache,
+    logger,
     provider,
     tree,
     reportWebView,
