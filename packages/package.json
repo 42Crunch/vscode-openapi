@@ -30,7 +30,7 @@
     "mkdirp": "^1.0.4",
     "type-fest": "^4.40.0",
     "vitest": "^3.2.4",
-    "vite": "^7.1.7"
+    "vite": "^7.1.11"
   },
   "overrides": {
     "json-schema-ref-parser": "9.0.9"
