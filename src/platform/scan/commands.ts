@@ -22,7 +22,7 @@ import {
 } from "../cli-ast";
 import { PlatformStore } from "../stores/platform-store";
 import { Logger, PlatformContext } from "../types";
-import { getOrCreateScanconfUri, getScanconfUri } from "./config";
+import { getOrCreateScanconfUri, getScanconfUri, getVaultUri } from "./config";
 import { createScanConfigWithPlatform } from "./runtime/platform";
 import { ScanWebView } from "./view";
 import { formatException } from "../util";
@@ -213,6 +213,7 @@ async function editorRunSingleOperationScan(
 
   const title = bundle?.value?.info?.title || "OpenAPI";
   const scanconfUri = await getOrCreateScanconfUri(editor.document.uri, title);
+  const vaultUri = await getVaultUri(editor.document.uri);
 
   const tags = store.isConnected() ? await store.getTagsForDocument(editor.document, memento) : [];
 
@@ -236,7 +237,7 @@ async function editorRunSingleOperationScan(
   }
 
   const view = await getScanView(editor.document.uri);
-  return view.sendScanOperation(bundle, editor.document, scanconfUri, path, method);
+  return view.sendScanOperation(bundle, editor.document, scanconfUri, vaultUri, path, method);
 }
 
 async function createDefaultScanConfig(

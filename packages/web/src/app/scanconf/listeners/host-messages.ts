@@ -15,7 +15,7 @@ export function onShowScanconf(startAppListening: TypedStartListening<RootState,
   return () =>
     startAppListening({
       actionCreator: showScanconfOperation,
-      effect: async ({ payload: { oas, scanconf } }, listenerApi) => {
+      effect: async ({ payload: { oas, scanconf, vault } }, listenerApi) => {
         const [parsed, parseError] = jsonParse(scanconf);
         if (parseError !== undefined) {
           listenerApi.dispatch(
@@ -25,10 +25,26 @@ export function onShowScanconf(startAppListening: TypedStartListening<RootState,
           return;
         }
 
+        const [parsedVault, parseVaultError] = jsonParse(vault ?? '{"schemes": {}}');
+        if (parseVaultError !== undefined) {
+          listenerApi.dispatch(
+            showGeneralError({ message: `Failed to parse vault: ${parseVaultError}` })
+          );
+          listenerApi.dispatch(goTo(["general-error"]));
+          return;
+        }
+
         const changes = compare(oas, parsed);
 
         if (changes.length > 0) {
-          listenerApi.dispatch(showChanges({ scanconf, oas, changes }));
+          listenerApi.dispatch(
+            showChanges({
+              scanconf,
+              oas,
+              changes,
+              vault: parsedVault,
+            })
+          );
           listenerApi.dispatch(goTo(["scanconf-update"]));
           return;
         }
@@ -41,7 +57,7 @@ export function onShowScanconf(startAppListening: TypedStartListening<RootState,
           return;
         }
 
-        listenerApi.dispatch(loadPlaybook({ playbook, oas }));
+        listenerApi.dispatch(loadPlaybook({ playbook, oas, vault: parsedVault }));
         listenerApi.dispatch(goTo(["scanconf", "requests"]));
       },
     });
@@ -94,7 +110,7 @@ export function onLoadUpdatedScanconf(
           payload: JSON.stringify(patched, null, 2),
         });
 
-        listenerApi.dispatch(loadPlaybook({ playbook, oas }));
+        listenerApi.dispatch(loadPlaybook({ playbook, oas, vault: { schemes: {} } }));
         listenerApi.dispatch(goTo(["scanconf", "requests"]));
       },
     });

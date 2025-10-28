@@ -48,6 +48,7 @@ export type Target = {
   documentUri: string;
   documentVersion: number;
   scanconfUri: vscode.Uri;
+  vaultUri: vscode.Uri;
   //scanconfVersion: number;
   versions: BundleDocumentVersions;
   path: string;
@@ -208,7 +209,7 @@ export class ScanWebView extends WebView<Webapp> {
 
         this.sendRequest({
           command: "loadUpdatedScanconf",
-          payload: { oas: this.target!.bundle.value, scanconf },
+          payload: { oas: this.target!.bundle.value, scanconf, vault: undefined },
         });
       } catch (error: any) {
         this.sendRequest({
@@ -229,7 +230,9 @@ export class ScanWebView extends WebView<Webapp> {
         await this.sendRequest({ command: "loadPrefs", payload: prefs });
       }
       const content = await vscode.workspace.fs.readFile(this.target.scanconfUri);
+      const vaultContent = await vscode.workspace.fs.readFile(this.target.vaultUri);
       const scanconf = new TextDecoder("utf-8").decode(content);
+      const vault = new TextDecoder("utf-8").decode(vaultContent);
       await this.sendRequest({
         command: "showScanconfOperation",
         payload: {
@@ -237,6 +240,7 @@ export class ScanWebView extends WebView<Webapp> {
           path: this.target.path,
           method: this.target.method,
           scanconf,
+          vault,
         },
       });
     }
@@ -250,6 +254,7 @@ export class ScanWebView extends WebView<Webapp> {
     bundle: Bundle,
     document: vscode.TextDocument,
     scanconfUri: vscode.Uri,
+    vaultUri: vscode.Uri,
     path: string,
     method: HttpMethod
   ) {
@@ -260,6 +265,7 @@ export class ScanWebView extends WebView<Webapp> {
       documentVersion: document.version,
       versions: getBundleVersions(bundle),
       scanconfUri,
+      vaultUri,
       method,
       path,
     };

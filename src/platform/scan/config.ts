@@ -9,6 +9,12 @@ export type ConfigFile = {
   apis: Record<string, { alias: string }>;
 };
 
+export async function getVaultUri(openapiUri: vscode.Uri): Promise<vscode.Uri> {
+  const rootUri = getRootUri(openapiUri);
+  const vaultUri = vscode.Uri.joinPath(rootUri, ".42c", "vault.json");
+  return vaultUri;
+}
+
 export async function getOrCreateScanconfUri(
   openapiUri: vscode.Uri,
   title: string
