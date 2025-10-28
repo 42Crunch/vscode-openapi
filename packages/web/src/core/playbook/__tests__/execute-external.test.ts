@@ -33,7 +33,7 @@ test("execute external", async () => {
   });
 
   step({
-    event: "http-request-prepared",
+    event: "external-http-request-prepared",
   });
 
   step({
