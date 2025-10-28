@@ -2,18 +2,24 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import { BundledSwaggerOrOasSpec, getHttpResponseRange, getServerUrls } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
+import { Vault } from "@xliic/common/vault";
 
 import { loadPlaybook } from "./actions";
+import { check, CheckResult } from "../../core/playbook/identity-tests";
 
 export type State = {
   oas: BundledSwaggerOrOasSpec;
   playbook: Playbook.Bundle;
+  vault: Vault;
   servers: string[];
 
   selectedCredentialGroup: number;
   selectedCredential?: string;
   selectedSubcredential?: string;
   selectedAuthorizationTest?: string;
+  selectedTest?: string;
+
+  identityTestsConfiguration: CheckResult;
 };
 
 const initialState: State = {
@@ -31,8 +37,10 @@ const initialState: State = {
     environments: {},
     authorizationTests: {},
   },
+  vault: { schemes: {} },
   servers: [],
   selectedCredentialGroup: 0,
+  identityTestsConfiguration: {},
 };
 
 export const slice = createSlice({
@@ -181,6 +189,10 @@ export const slice = createSlice({
       state.selectedAuthorizationTest = id;
     },
 
+    selectTest: (state, { payload: { id } }: PayloadAction<{ id: string }>) => {
+      state.selectedTest = id;
+    },
+
     saveOperationReference: (
       state,
       {
@@ -297,9 +309,10 @@ export const slice = createSlice({
   },
 
   extraReducers: (builder) => {
-    builder.addCase(loadPlaybook, (state, { payload: { oas, playbook } }) => {
+    builder.addCase(loadPlaybook, (state, { payload: { oas, playbook, vault } }) => {
       state.oas = oas;
       state.playbook = playbook;
+      state.vault = vault;
       state.servers = getServerUrls(oas);
 
       // select first credential
@@ -313,6 +326,9 @@ export const slice = createSlice({
 
       // select first authorization test
       state.selectedAuthorizationTest = Object.keys(playbook?.authorizationTests || {})?.[0];
+
+      // check for applicable identity tests
+      state.identityTestsConfiguration = check(oas, vault);
     });
   },
 });
@@ -362,6 +378,7 @@ export const {
   customizeOperation,
   removeCustomizationForOperation,
   createVariable,
+  selectTest,
 } = slice.actions;
 
 export default slice.reducer;
