@@ -17,6 +17,7 @@ import Global from "./global/Global";
 import Settings from "./settings/Settings";
 import EnvironmentsNavigationTab from "./environment/EnvironmentsNavigationTab";
 import AuthorizationTests from "./authorizationTests/AuthorizationTests";
+import Tests from "./tests/Tests";
 import UpdatePrompt from "./scanconf-update/UpdatePrompt";
 import GeneralError from "../../features/general-error/GeneralError";
 import { showGeneralError } from "../../features/general-error/slice";
@@ -70,7 +71,7 @@ const routes: Routes = [
       {
         id: "authorizationTests",
         title: "Tests",
-        element: <AuthorizationTests />,
+        element: <Tests />,
       },
       {
         id: "environments",

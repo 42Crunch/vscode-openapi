@@ -16,7 +16,7 @@ export function onScanconfSkipUpdate(
     startAppListening({
       actionCreator: skipScanconfUpdate,
       effect: async (payload, listenerApi) => {
-        const { oas, scanconf } = listenerApi.getState().scanconfUpdate;
+        const { oas, scanconf, vault } = listenerApi.getState().scanconfUpdate;
 
         const [parsed, parseError] = jsonParse(scanconf);
         if (parseError !== undefined) {
@@ -35,7 +35,7 @@ export function onScanconfSkipUpdate(
           return;
         }
 
-        listenerApi.dispatch(loadPlaybook({ playbook, oas }));
+        listenerApi.dispatch(loadPlaybook({ playbook, oas, vault }));
         listenerApi.dispatch(goTo(["scanconf", "operations"]));
       },
     });
