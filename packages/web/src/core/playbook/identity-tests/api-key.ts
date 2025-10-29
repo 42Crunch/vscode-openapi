@@ -8,6 +8,7 @@ import {
 } from "@xliic/openapi";
 import { Result } from "@xliic/result";
 import {
+  ApiKeySecurityScheme,
   BasicSecurityScheme,
   Vault,
   SecurityScheme as VaultSecurityScheme,
@@ -89,47 +90,47 @@ function checkVaultSchemeType(
   vaultScheme: VaultSecurityScheme,
   scheme: Swagger.SecurityScheme | OpenApi30.SecurityScheme | OpenApi31.SecurityScheme
 ): boolean {
-  if (scheme.type === "http" && scheme.scheme === "basic" && vaultScheme.type === "basic") {
+  if (scheme.type === "apiKey" && vaultScheme.type === "apiKey") {
     return true;
   }
   return false;
 }
 
-function usesBasicAuth(spec: BundledSwaggerOrOasSpec, vault: Vault): string[] {
+function usesApiKeyAuth(spec: BundledSwaggerOrOasSpec, vault: Vault): string[] {
   const activeSchemes = getActiveSecuritySchemes(spec);
   for (const scheme of Object.values(activeSchemes)) {
-    if (scheme?.type === "http" && scheme?.scheme === "basic") {
+    if (scheme.type === "apiKey") {
       return [];
     }
   }
-  return ["No operations using Basic Auth schemes found"];
+  return ["No operations using API Key schemes found"];
 }
 
-function hasValidBasicAuthCredentials(spec: BundledSwaggerOrOasSpec, vault: Vault): string[] {
+function hasValidApiKeyAuthCredentials(spec: BundledSwaggerOrOasSpec, vault: Vault): string[] {
   const [schemes, errors] = matchActiveSchemesToVault(spec, vault);
   if (errors !== undefined) {
     return errors;
   }
 
-  const basicSchemes: Record<string, BasicSecurityScheme> = {};
+  const apiKeySchemes: Record<string, ApiKeySecurityScheme> = {};
 
   for (const name of Object.keys(schemes)) {
     const vaultScheme = schemes[name];
-    if (vaultScheme?.type === "basic") {
-      basicSchemes[name] = vaultScheme;
+    if (vaultScheme?.type === "apiKey") {
+      apiKeySchemes[name] = vaultScheme;
     }
   }
 
-  if (Object.keys(basicSchemes).length === 0) {
-    return ["No matching Vault Basic Auth schemes found"];
+  if (Object.keys(apiKeySchemes).length === 0) {
+    return ["No matching Vault API Key Auth schemes found"];
   }
 
   const schemesWithNoCredentials: string[] = [];
-  for (const name of Object.keys(basicSchemes)) {
-    const vaultScheme = basicSchemes[name];
+  for (const name of Object.keys(apiKeySchemes)) {
+    const vaultScheme = apiKeySchemes[name];
     if (Object.keys(vaultScheme.credentials).length === 0) {
       schemesWithNoCredentials.push(
-        `No credentials found in vault for Basic Auth scheme "${name}"`
+        `No credentials found in vault for API Key Auth scheme "${name}"`
       );
     }
   }
@@ -137,63 +138,9 @@ function hasValidBasicAuthCredentials(spec: BundledSwaggerOrOasSpec, vault: Vaul
   return schemesWithNoCredentials;
 }
 
-// const skipBasicAuth: AuthenticationTest = {
-//   id: "skip-basic-auth",
-//   description: "A test that skips Basic Authentication.",
-//   requirements: [],
-//   generate(value: string): string[] {
-//     return [""];
-//   },
-// };
-
-// A test that modifies valid basic credential by replacing username:password with username and no password.
-
-// const noPassword: AuthenticationTest = {
-//   id: "no-password",
-//   //requirements: ["OpenAPI must use Basic Auth", "Vault must have valid Basic Auth credentials"],
-//   requirements: [
-//     // ["oas", "usesBasicAuth"],
-//     // ["vault", "hasBasicAuthCredentials"],
-//   ],
-//   generate(value: string): string[] {
-//     const { username } = parseBasicAuth(value);
-//     return [`${username}:`];
-//   },
-// };
-
-const weakPasswords: AuthenticationTest = {
-  id: "weak-passwords",
-  requirements: [["must-have-valid-basic-auth-credentials", hasValidBasicAuthCredentials]],
-  // output: returns username: with "password" as password and username: with $username as password
-  generate(value: string): string[] {
-    const { username } = parseBasicAuth(value);
-    return [`${username}:password`, `${username}:$username`];
-  },
-};
-
-const changeUsernameCase: AuthenticationTest = {
-  id: "change-username-case",
-  requirements: [["must-have-valid-basic-auth-credentials", hasValidBasicAuthCredentials]],
-  generate: (value: string): string[] => {
-    const { username, password } = parseBasicAuth(value);
-
-    const upcased = `${username.toUpperCase()}:${password}`;
-    if (upcased !== value) {
-      return [upcased];
-    }
-
-    const downcased = `${username.toLowerCase()}:${password}`;
-    if (downcased !== value) {
-      return [downcased];
-    }
-
-    return [];
-  },
-};
-
-const changePasswordCase: AuthenticationTest = {
-  id: "change-password-case",
-  requirements: [["must-have-valid-basic-auth-credentials", hasValidBasicAuthCredentials]],
+const changeApiKeyCase: AuthenticationTest = {
+  id: "change-api-key-case",
+  requirements: [["must-have-valid-api-key-auth-credentials", hasValidApiKeyAuthCredentials]],
 
   generate: (value: string): string[] => {
     const { username, password } = parseBasicAuth(value);
@@ -212,9 +159,9 @@ const changePasswordCase: AuthenticationTest = {
   },
 };
 
-const truncatePassword: AuthenticationTest = {
-  id: "truncate-password",
-  requirements: [["must-have-valid-basic-auth-credentials", hasValidBasicAuthCredentials]],
+const truncateApiKey: AuthenticationTest = {
+  id: "truncate-api-key",
+  requirements: [["must-have-valid-api-key-auth-credentials", hasValidApiKeyAuthCredentials]],
 
   generate: (value: string): string[] => {
     // TODO: truncate password
@@ -228,11 +175,11 @@ function parseBasicAuth(value: string): { username: string; password: string } {
 }
 
 const suite: AuthenticationTestSuite = {
-  id: "basic-authentication-test-suite",
-  description: "A suite of tests for Basic Authentication.",
-  requirements: [["must-use-basic-auth", usesBasicAuth]],
+  id: "api-key-test-suite",
+  description: "A suite of tests for API Key Authentication.",
+  requirements: [["must-use-api-key", usesApiKeyAuth]],
 
-  tests: [weakPasswords, changeUsernameCase, changePasswordCase, truncatePassword],
+  tests: [changeApiKeyCase, truncateApiKey],
 };
 
 export default suite;
