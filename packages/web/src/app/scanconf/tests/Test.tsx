@@ -23,11 +23,13 @@ export default function Test({ suite, suiteId }: { suite: TestSuitCheckResult; s
 
   const { servers } = useAppSelector((state) => state.scanconf);
 
+  const suiteHasFailures = Object.values(suite.failures).some((failures) => failures.length > 0);
+
   return (
     <Container>
       <h3></h3>
       <TryAndServerSelector servers={servers} onTry={(server: string) => {}} />
-      <CollapsibleSection title={suiteId} defaultOpen={false}>
+      <CollapsibleSection title={suiteId} defaultOpen={suiteHasFailures}>
         {Object.entries(suite.failures).map(([requirementId, failures]) => (
           <div key={requirementId}>
             {failures.length > 0 ? (
