@@ -51,7 +51,6 @@ export default function AuthorizationTests() {
       errors={Object.fromEntries(errors)}
       render={(selected) => <Test suite={config[selected.itemId]} suiteId={selected.itemId} />}
       // renderEmpty={Overview}
-      noSectionTitles
       onSelected={(selected) => {
         dispatch(selectTest({ id: selected.itemId }));
       }}
