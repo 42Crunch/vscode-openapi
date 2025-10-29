@@ -2,8 +2,9 @@ import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Vault } from "@xliic/common/vault";
 
 import basic from "./basic";
+import apiKey from "./api-key";
 
-const suites = { basic };
+const suites = { basic, "api-key": apiKey };
 
 export type TestCheckResult = {
   failures: string[];
