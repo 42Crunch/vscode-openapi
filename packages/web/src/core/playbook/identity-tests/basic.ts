@@ -131,7 +131,9 @@ function hasValidBasicAuthCredentials(spec: BundledSwaggerOrOasSpec, vault: Vaul
   for (const name of Object.keys(basicSchemes)) {
     const vaultScheme = basicSchemes[name];
     if (Object.keys(vaultScheme.credentials).length === 0) {
-      schemesWithNoCredentials.push(`No credentials found in vault for Basic Auth scheme ${name}`);
+      schemesWithNoCredentials.push(
+        `No credentials found in vault for Basic Auth scheme "${name}"`
+      );
     }
   }
 
@@ -199,11 +201,7 @@ const changeUsernameCase: AuthenticationTest = {
 
 const changePasswordCase: AuthenticationTest = {
   id: "change-password-case",
-  requirements: [
-    // "OpenAPI must use Basic Auth",
-    // "Vault must have valid Basic Auth credentials",
-    // "Basic auth password must have letters which case can be changed",
-  ],
+  requirements: [["must-have-valid-basic-auth-credentials", hasValidBasicAuthCredentials]],
 
   generate: (value: string): string[] => {
     const { username, password } = parseBasicAuth(value);
@@ -235,7 +233,7 @@ const suite: AuthenticationTestSuite = {
     //["vault-must-match", matchSchemesToVault],
   ],
 
-  tests: [weakPasswords],
+  tests: [weakPasswords, changePasswordCase],
 };
 
 export default suite;
