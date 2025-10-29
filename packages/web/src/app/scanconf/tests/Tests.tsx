@@ -34,6 +34,10 @@ export default function AuthorizationTests() {
           id: "basic",
           label: "HTTP Basic Tests",
         },
+        {
+          id: "api-key",
+          label: "API Key Tests",
+        },
       ],
     },
   ];
