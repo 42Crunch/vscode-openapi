@@ -22,7 +22,7 @@ export default function List({
   selected: string | undefined;
   setSelected: (selected: string) => void;
   filter?: string;
-  errors?: Record<string, string | undefined>;
+  errors?: Record<ListItem["id"], string | undefined>;
 }) {
   return (
     <Body>
