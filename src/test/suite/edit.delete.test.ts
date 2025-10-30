@@ -17,7 +17,6 @@ suite("Delete Node", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: null,
         bulk: false,
         snippet: false,
@@ -58,7 +57,6 @@ suite("Delete Node", () => {
       const context: FixContext = {
         editor: editor,
         edit: null,
-        issues: [],
         fix: null,
         bulk: false,
         snippet: false,

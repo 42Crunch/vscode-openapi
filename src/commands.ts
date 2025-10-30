@@ -3,27 +3,26 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 // @ts-nocheck
-import * as vscode from "vscode";
 import {
   find,
   findNodeAtOffset,
   joinJsonPointer,
   simpleClone,
 } from "@xliic/preserving-json-yaml-parser";
-import * as snippets from "./generated/snippets.json";
-import { Cache } from "./cache";
-import { Fix, FixContext, FixType, OpenApiVersion } from "./types";
-import { findJsonNodeValue } from "./json-utils";
+import * as vscode from "vscode";
 import {
-  fixInsert,
   fixDelete,
-  fixDeleteApplyIfNeeded,
-  getDeadRefs,
+  fixDeleteApplyIfNeededFromContext,
+  fixInsert,
   getDeadRefs,
 } from "./audit/quickfix";
-import { getPointerLastSegment, getPointerParent } from "./pointer";
-import { processSnippetParameters } from "./util";
+import { Cache } from "./cache";
+import * as snippets from "./generated/snippets.json";
+import { findJsonNodeValue } from "./json-utils";
 import { OutlineNode } from "./outlines/nodes/base";
+import { getPointerLastSegment, getPointerParent } from "./pointer";
+import { Fix, FixContext, FixType, OpenApiVersion } from "./types";
+import { processSnippetParameters } from "./util";
 
 const commands: { [key: string]: Function } = {
   goToLine,
@@ -379,7 +378,6 @@ export async function snippetCommand(fix: Fix, cache: Cache, useEdit?: boolean) 
   const context: FixContext = {
     editor: editor,
     edit: null,
-    issues: [],
     fix: simpleClone(fix),
     bulk: false,
     auditContext: null,
@@ -457,7 +455,6 @@ async function deleteSnippetCommand(cache: Cache, node: any) {
   const context: FixContext = {
     editor: editor,
     edit: new vscode.WorkspaceEdit(),
-    issues: [],
     fix: {
       problem: [],
       type: FixType.Delete,
@@ -471,11 +468,20 @@ async function deleteSnippetCommand(cache: Cache, node: any) {
     target: target,
     document: document,
   };
+  await deleteSnippetWithContext(pointer, context, true);
+  await vscode.workspace.applyEdit(context.edit);
+}
+
+export async function deleteSnippetWithContext(pointer: strong, context: FixContext, ask: boolean) {
+  const root = context.root;
+  const version = context.version;
   const deadRefs = getDeadRefs(pointer, context);
   if (deadRefs.length > 0) {
     fixDelete(context);
     const prompt = "Are you sure you want to delete unused schemas?";
-    const confirmation = await vscode.window.showInformationMessage(prompt, "Yes", "No");
+    const confirmation = ask
+      ? await vscode.window.showInformationMessage(prompt, "Yes", "No")
+      : "Yes";
     if (confirmation && confirmation === "Yes") {
       let pointers = deadRefs.map((ref) => ref.replace("#/", "/"));
       const compsToRemove = getPointersByComponents(pointers, version);
@@ -495,8 +501,7 @@ async function deleteSnippetCommand(cache: Cache, node: any) {
   } else {
     fixDelete(context);
   }
-  fixDeleteApplyIfNeeded(context);
-  await vscode.workspace.applyEdit(context.edit);
+  fixDeleteApplyIfNeededFromContext(context);
 }
 
 function isArray(key: string): boolean {
