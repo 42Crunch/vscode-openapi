@@ -12,8 +12,7 @@ import {
   Vault,
   SecurityScheme as VaultSecurityScheme,
 } from "@xliic/common/vault";
-
-import { AuthenticationTest, AuthenticationTestSuite, TestSuiteConfigurationResult } from "./types";
+import { Test, TestExecutor, TestSuite } from "./types";
 
 function getSecuritySchemes(spec: BundledSwaggerOrOasSpec) {
   return ("swagger" in spec ? spec.securityDefinitions : spec.components?.securitySchemes) ?? {};
@@ -161,7 +160,13 @@ function hasValidBasicAuthCredentials(spec: BundledSwaggerOrOasSpec, vault: Vaul
 //   },
 // };
 
-const weakPasswords: AuthenticationTest = {
+const dummyExecutor: TestExecutor = async function* (client, oas, playbook, vault, test, config) {
+  yield { event: "playbook-started", name: `${test.id}` };
+  yield { event: "playbook-message", message: "zomg!" };
+  yield { event: "playbook-finished" };
+};
+
+const weakPasswords: Test = {
   id: "weak-passwords",
   requirements: [["must-have-valid-basic-auth-credentials", hasValidBasicAuthCredentials]],
   // output: returns username: with "password" as password and username: with $username as password
@@ -169,9 +174,10 @@ const weakPasswords: AuthenticationTest = {
     const { username } = parseBasicAuth(value);
     return [`${username}:password`, `${username}:$username`];
   },
+  execute: dummyExecutor,
 };
 
-const changeUsernameCase: AuthenticationTest = {
+const changeUsernameCase: Test = {
   id: "change-username-case",
   requirements: [["must-have-valid-basic-auth-credentials", hasValidBasicAuthCredentials]],
   generate: (value: string): string[] => {
@@ -189,9 +195,10 @@ const changeUsernameCase: AuthenticationTest = {
 
     return [];
   },
+  execute: dummyExecutor,
 };
 
-const changePasswordCase: AuthenticationTest = {
+const changePasswordCase: Test = {
   id: "change-password-case",
   requirements: [["must-have-valid-basic-auth-credentials", hasValidBasicAuthCredentials]],
 
@@ -210,9 +217,10 @@ const changePasswordCase: AuthenticationTest = {
 
     return [];
   },
+  execute: dummyExecutor,
 };
 
-const truncatePassword: AuthenticationTest = {
+const truncatePassword: Test = {
   id: "truncate-password",
   requirements: [["must-have-valid-basic-auth-credentials", hasValidBasicAuthCredentials]],
 
@@ -220,6 +228,7 @@ const truncatePassword: AuthenticationTest = {
     // TODO: truncate password
     return [];
   },
+  execute: dummyExecutor,
 };
 
 function parseBasicAuth(value: string): { username: string; password: string } {
@@ -227,7 +236,7 @@ function parseBasicAuth(value: string): { username: string; password: string } {
   return { username, password };
 }
 
-const suite: AuthenticationTestSuite = {
+const suite: TestSuite = {
   id: "basic-authentication-test-suite",
   description: "A suite of tests for Basic Authentication.",
   requirements: [["must-use-basic-auth", usesBasicAuth]],

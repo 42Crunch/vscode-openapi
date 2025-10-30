@@ -13,8 +13,13 @@ import {
   Vault,
   SecurityScheme as VaultSecurityScheme,
 } from "@xliic/common/vault";
+import { Test, TestExecutor, TestSuite } from "./types";
 
-import { AuthenticationTest, AuthenticationTestSuite, TestSuiteConfigurationResult } from "./types";
+const dummyExecutor: TestExecutor = async function* (client, oas, playbook, vault, test, config) {
+  yield { event: "playbook-started", name: `${test.id}` };
+  yield { event: "playbook-message", message: "zomg!" };
+  yield { event: "playbook-finished" };
+};
 
 function getSecuritySchemes(spec: BundledSwaggerOrOasSpec) {
   return ("swagger" in spec ? spec.securityDefinitions : spec.components?.securitySchemes) ?? {};
@@ -138,7 +143,7 @@ function hasValidApiKeyAuthCredentials(spec: BundledSwaggerOrOasSpec, vault: Vau
   return schemesWithNoCredentials;
 }
 
-const changeApiKeyCase: AuthenticationTest = {
+const changeApiKeyCase: Test = {
   id: "change-api-key-case",
   requirements: [["must-have-valid-api-key-auth-credentials", hasValidApiKeyAuthCredentials]],
 
@@ -157,9 +162,10 @@ const changeApiKeyCase: AuthenticationTest = {
 
     return [];
   },
+  execute: dummyExecutor,
 };
 
-const truncateApiKey: AuthenticationTest = {
+const truncateApiKey: Test = {
   id: "truncate-api-key",
   requirements: [["must-have-valid-api-key-auth-credentials", hasValidApiKeyAuthCredentials]],
 
@@ -167,6 +173,7 @@ const truncateApiKey: AuthenticationTest = {
     // TODO: truncate password
     return [];
   },
+  execute: dummyExecutor,
 };
 
 function parseBasicAuth(value: string): { username: string; password: string } {
@@ -174,7 +181,7 @@ function parseBasicAuth(value: string): { username: string; password: string } {
   return { username, password };
 }
 
-const suite: AuthenticationTestSuite = {
+const suite: TestSuite = {
   id: "api-key-test-suite",
   description: "A suite of tests for API Key Authentication.",
   requirements: [["must-use-api-key", usesApiKeyAuth]],
