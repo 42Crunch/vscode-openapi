@@ -843,17 +843,41 @@
                 "none",
                 "header"
               ]
+            },
+            "httpProxy": {
+              "type": "string",
+              "format": "uri"
+            },
+            "httpsProxy": {
+              "type": "string",
+              "format": "uri"
+            },
+            "httpProxyApi": {
+              "type": "string",
+              "format": "uri"
+            },
+            "httpsProxyApi": {
+              "type": "string",
+              "format": "uri"
             }
           },
           "required": [
             "url",
             "auth",
-            "timeout"
+            "timeout",
+            "httpProxy",
+            "httpsProxy",
+            "httpProxyApi",
+            "httpsProxyApi"
           ],
           "default": {
             "url": "",
             "auth": "none",
-            "timeout": 300
+            "timeout": 300,
+            "httpProxy": "",
+            "httpsProxy": "",
+            "httpProxyApi": "",
+            "httpsProxyApi": ""
           }
         },
         "openapi.platformServices": {

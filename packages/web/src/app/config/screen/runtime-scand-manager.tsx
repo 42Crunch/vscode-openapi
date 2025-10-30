@@ -51,6 +51,12 @@ export function RuntimeScandManager() {
             name="scandManager.timeout"
           />
 
+          <p>Environment variables for proxy configuration</p>
+          <Input label="HTTP_PROXY" name="scandManager.httpProxy" />
+          <Input label="HTTPS_PROXY" name="scandManager.httpsProxy" />
+          <Input label="HTTP_PROXY_API" name="scandManager.httpProxyApi" />
+          <Input label="HTTPS_PROXY_API" name="scandManager.httpsProxyApi" />
+
           <Test>
             <ValidProgressButton
               label="Test connection"
@@ -77,6 +83,10 @@ const schema = z.object({
         .int()
         .min(1)
         .max(60 * 60 * 24), // 1 day
+      httpProxy: z.string().url().optional().or(z.literal("")),
+      httpsProxy: z.string().url().optional().or(z.literal("")),
+      httpProxyApi: z.string().url().optional().or(z.literal("")),
+      httpsProxyApi: z.string().url().optional().or(z.literal("")),
     })
     .catchall(z.unknown()),
 });

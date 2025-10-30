@@ -9,6 +9,7 @@ import { Container, Title } from "../layout";
 
 export function ScanRuntime() {
   const platformAuthType = useWatch({ name: "platformAuthType" });
+  const runtime = useWatch({ name: "scanRuntime" });
 
   return (
     <>
@@ -31,13 +32,15 @@ export function ScanRuntime() {
           <Banner message="API Scan runtime is configured to use 42Crunch API Security Testing Binary" />
         )}
 
-        <Container>
-          <Input
-            label="API proxy URL"
-            name="scanProxy"
-            description="The proxy URL for target API calls during the scan."
-          />{" "}
-        </Container>
+        {(runtime === "docker" || runtime === "cli") && (
+          <Container>
+            <Input
+              label="API proxy URL"
+              name="scanProxy"
+              description="The proxy URL for target API calls during the scan."
+            />{" "}
+          </Container>
+        )}
       </Container>
     </>
   );

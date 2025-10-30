@@ -17,7 +17,7 @@ export async function createJob(
   token: string,
   platformService: string,
   scandImage: string,
-  env: any,
+  env: Record<string, string>,
   connection: ScandManagerConnection,
   logger: Logger
 ): Promise<ScandManagerJobStatus> {

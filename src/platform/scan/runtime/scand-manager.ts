@@ -22,6 +22,31 @@ export async function runScanWithScandManager(
     env[name] = replaceEnvOld(value, await envStore.all());
   }
 
+  if (config.scandManager.httpProxy !== undefined && config.scandManager.httpProxy.trim() !== "") {
+    env["HTTP_PROXY"] = config.scandManager.httpProxy.trim();
+  }
+
+  if (
+    config.scandManager.httpsProxy !== undefined &&
+    config.scandManager.httpsProxy.trim() !== ""
+  ) {
+    env["HTTPS_PROXY"] = config.scandManager.httpsProxy.trim();
+  }
+
+  if (
+    config.scandManager.httpProxyApi !== undefined &&
+    config.scandManager.httpProxyApi.trim() !== ""
+  ) {
+    env["HTTP_PROXY_API"] = config.scandManager.httpProxyApi.trim();
+  }
+
+  if (
+    config.scandManager.httpsProxyApi !== undefined &&
+    config.scandManager.httpsProxyApi.trim() !== ""
+  ) {
+    env["HTTPS_PROXY_API"] = config.scandManager.httpsProxyApi.trim();
+  }
+
   let job: ScandManagerJobStatus | undefined = undefined;
 
   const services =
@@ -30,6 +55,7 @@ export async function runScanWithScandManager(
       : config.platformServices.manual;
 
   try {
+    logger.debug(`Creating scand-manager job with env: ${JSON.stringify(env)}`);
     job = await managerApi.createJob(
       token,
       services!,

@@ -49,6 +49,10 @@ export type ScandManagerConnection = {
     name: string;
     value: string;
   };
+  httpProxy: string;
+  httpsProxy: string;
+  httpProxyApi: string;
+  httpsProxyApi: string;
 };
 
 export type ScanRuntime = {
