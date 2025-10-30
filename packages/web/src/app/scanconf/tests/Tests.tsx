@@ -4,7 +4,6 @@ import { selectTest } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import { Menu, MenuItem } from "../../../new-components/Menu";
 import Test from "./Test";
-import Overview from "./Overview";
 
 import { TrashCan } from "../../../icons";
 import Button from "../../../new-components/Button";

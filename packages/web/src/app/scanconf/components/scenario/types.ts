@@ -32,6 +32,7 @@ export type OperationResult = {
   variablesAssigned: PlaybookEnvStack;
   responseProcessingError?: string;
   status: ProgressState;
+  playbookMessage?: string;
 };
 
 export type PlaybookResult = {

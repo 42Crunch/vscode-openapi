@@ -1,26 +1,19 @@
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Vault } from "@xliic/common/vault";
+import { Playbook } from "@xliic/scanconf";
 
 import basic from "./basic";
 import apiKey from "./api-key";
+import { SuiteConfiguration, Test, TestConfiguration } from "./types";
 
 const suites = { basic, "api-key": apiKey };
 
-export type TestCheckResult = {
-  failures: string[];
-};
+export type Configuration = Record<string, SuiteConfiguration>;
 
-export type TestSuitCheckResult = {
-  failures: Record<string, string[]>;
-  tests: Record<string, TestCheckResult>;
-};
-
-export type CheckResult = Record<string, TestSuitCheckResult>;
-
-export function check(spec: BundledSwaggerOrOasSpec, vault: Vault) {
-  const result: CheckResult = {};
+export function configure(spec: BundledSwaggerOrOasSpec, vault: Vault) {
+  const result: Configuration = {};
   for (const [id, suite] of Object.entries(suites)) {
-    const suiteResult: TestSuitCheckResult = { failures: {}, tests: {} };
+    const suiteResult: SuiteConfiguration = { failures: {}, tests: {} };
     for (const [checkId, checker] of suite.requirements) {
       suiteResult.failures[checkId] = [];
       suiteResult.failures[checkId].push(...checker(spec, vault));
@@ -41,7 +34,15 @@ export function check(spec: BundledSwaggerOrOasSpec, vault: Vault) {
   return result;
 }
 
-function noSuiteLevelFailures(suiteResult: TestSuitCheckResult): boolean {
+export function execute(
+  oas: BundledSwaggerOrOasSpec,
+  playbook: Playbook.Bundle,
+  vault: Vault,
+  test: Test,
+  config: TestConfiguration
+) {}
+
+function noSuiteLevelFailures(suiteResult: SuiteConfiguration): boolean {
   for (const failures of Object.values(suiteResult.failures)) {
     if (failures.length > 0) {
       return false;

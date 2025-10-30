@@ -12,9 +12,9 @@ import TryAndServerSelector from "../components/TryAndServerSelector";
 
 import { saveAuthorizationTest } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
-import { TestSuitCheckResult } from "../../../core/playbook/identity-tests";
+import { SuiteConfiguration } from "../../../core/playbook/identity-tests/types";
 
-export default function Test({ suite, suiteId }: { suite: TestSuitCheckResult; suiteId: string }) {
+export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; suiteId: string }) {
   // const dispatch = useAppDispatch();
 
   // const {
