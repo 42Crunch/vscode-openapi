@@ -55,7 +55,6 @@ export async function runScanWithScandManager(
       : config.platformServices.manual;
 
   try {
-    logger.debug(`Creating scand-manager job with env: ${JSON.stringify(env)}`);
     job = await managerApi.createJob(
       token,
       services!,

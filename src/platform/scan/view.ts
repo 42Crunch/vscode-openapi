@@ -277,6 +277,10 @@ function makeAggregateLogger(
   }
 ): Logger {
   return {
+    trace: (message: string) => {
+      logger.trace(message);
+      // do not send trace messages to the view
+    },
     debug: (message: string) => {
       logger.debug(message);
       // do not send debug messages to the view

@@ -99,6 +99,7 @@ export interface Logger {
   warning(message: string): void;
   info(message: string): void;
   debug(message: string): void;
+  trace(message: string): void;
 }
 
 export type ApiAuditReport = {

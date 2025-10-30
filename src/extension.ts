@@ -69,6 +69,7 @@ export async function activate(context: vscode.ExtensionContext) {
     warning: (message: string) => logOutputChannel.warn(message),
     info: (message: string) => logOutputChannel.info(message),
     debug: (message: string) => logOutputChannel.debug(message),
+    trace: (message: string) => logOutputChannel.trace(message),
   };
 
   const selectors = {

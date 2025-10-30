@@ -115,12 +115,19 @@ function gotOptionsText(
 }
 
 function getHooks(method: Method, logger: Logger) {
-  const logRequest = (response: any, retryWithMergedOptions: Function) => {
+  const logResponse = (response: any, retryWithMergedOptions: Function) => {
     logger.debug(`${method} ${response.url} ${response.statusCode}`);
     return response;
   };
+
+  const logRequest = (options: any) => {
+    const body = options.json ? JSON.stringify(options.json) : "";
+    logger.trace(`${method} ${options.prefixUrl}${options.url} ${body}`);
+  };
+
   return {
-    afterResponse: [logRequest],
+    beforeRequest: [logRequest],
+    afterResponse: [logResponse],
   };
 }
 
