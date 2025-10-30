@@ -5,7 +5,7 @@ import { Playbook } from "@xliic/scanconf";
 import { Vault } from "@xliic/common/vault";
 
 import { loadPlaybook } from "./actions";
-import { check, CheckResult } from "../../core/playbook/identity-tests";
+import { configure, Configuration } from "../../core/playbook/identity-tests";
 
 export type State = {
   oas: BundledSwaggerOrOasSpec;
@@ -19,7 +19,7 @@ export type State = {
   selectedAuthorizationTest?: string;
   selectedTest?: string;
 
-  identityTestsConfiguration: CheckResult;
+  identityTestsConfiguration: Configuration;
 };
 
 const initialState: State = {
@@ -328,7 +328,7 @@ export const slice = createSlice({
       state.selectedAuthorizationTest = Object.keys(playbook?.authorizationTests || {})?.[0];
 
       // check for applicable identity tests
-      state.identityTestsConfiguration = check(oas, vault);
+      state.identityTestsConfiguration = configure(oas, vault);
     });
   },
 });
