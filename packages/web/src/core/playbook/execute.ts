@@ -77,9 +77,7 @@ export async function* executePlaybook(
     return;
   }
 
-  for (let i = 0; i < requests.length; i++) {
-    const step = requests[i];
-
+  for await (const { stepId, step } of iteratePlaybook(requests)) {
     if (step.ref === undefined) {
       yield {
         event: "playbook-aborted",
@@ -246,7 +244,7 @@ export async function* executePlaybook(
     }
 
     const [requestAssignments, requestAssignmentsError] = assignVariables(
-      { type: "playbook-request", name, step: i, responseCode: "default" },
+      { type: "playbook-request", name, stepId, responseCode: "default" },
       request.responses,
       httpRequest,
       response,
@@ -277,7 +275,7 @@ export async function* executePlaybook(
     }
 
     const [stepAssignments, stepAssignmentsError] = assignVariables(
-      { type: "playbook-stage", name, step: i, responseCode: "default" },
+      { type: "playbook-stage", name, stepId, responseCode: "default" },
       step.responses,
       httpRequest,
       response,
@@ -496,4 +494,15 @@ export function getExternalEnvironment(file: Playbook.Bundle, envenv: EnvData): 
 
 function getRequestByRef(file: Playbook.Bundle, ref: Playbook.RequestRef) {
   return ref.type === "operation" ? file.operations[ref.id]?.request : file.requests?.[ref.id];
+}
+
+async function* iteratePlaybook(
+  requests: Playbook.Stage[]
+): AsyncGenerator<{ stepId: string; step: Playbook.Stage }, void> {
+  for (let i = 0; i < requests.length; i++) {
+    const step = requests[i];
+    const stepId = `step-${i + 1}`;
+
+    yield { stepId, step };
+  }
 }
