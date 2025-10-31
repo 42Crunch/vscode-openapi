@@ -16,7 +16,14 @@ import {
 } from "./variables";
 import { createAuthCache, getAuthEntry, setAuthEntry, AuthCache } from "./auth-cache";
 
-export type PlaybookList = { name: string; requests: Playbook.Stage[] }[];
+export type StageGenerator = AsyncGenerator<{ stepId: string; step: Playbook.Stage }, void>;
+
+export type DynamicRequestList = (Playbook.Stage | StageGenerator)[];
+
+export type PlaybookList = {
+  name: string;
+  requests: DynamicRequestList;
+}[];
 
 export async function* executeAllPlaybooks(
   client: HttpClient | MockHttpClient,
@@ -61,7 +68,7 @@ export async function* executePlaybook(
   oas: BundledSwaggerOrOasSpec,
   server: string,
   file: Playbook.Bundle,
-  requests: Playbook.Stage[],
+  requests: DynamicRequestList,
   env: PlaybookEnvStack,
   depth: number
 ): AsyncGenerator<PlaybookExecutorStep, PlaybookEnvStack | undefined> {
@@ -496,13 +503,13 @@ function getRequestByRef(file: Playbook.Bundle, ref: Playbook.RequestRef) {
   return ref.type === "operation" ? file.operations[ref.id]?.request : file.requests?.[ref.id];
 }
 
-async function* iteratePlaybook(
-  requests: Playbook.Stage[]
-): AsyncGenerator<{ stepId: string; step: Playbook.Stage }, void> {
+async function* iteratePlaybook(requests: DynamicRequestList): StageGenerator {
   for (let i = 0; i < requests.length; i++) {
-    const step = requests[i];
-    const stepId = `step-${i + 1}`;
-
-    yield { stepId, step };
+    const request = requests[i];
+    if ("ref" in request) {
+      yield { stepId: `step-${i + 1}`, step: request };
+    } else {
+      yield* request;
+    }
   }
 }
