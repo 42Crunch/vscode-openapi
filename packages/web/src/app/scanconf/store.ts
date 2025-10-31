@@ -25,6 +25,7 @@ import auth from "./auth/slice";
 import global from "./global/slice";
 import operations from "./operations/slice";
 import requests from "./requests/slice";
+import tests from "./tests/slice";
 import scanconf from "./slice";
 import scanconfUpdate from "./scanconf-update/slice";
 import confirmationDialog from "../../features/confirmation-dialog/slice";
@@ -44,6 +45,7 @@ const reducer = {
   global,
   generalError,
   confirmationDialog,
+  tests,
 };
 
 export const messageHandlers: Webapp["webappHandlers"] = {

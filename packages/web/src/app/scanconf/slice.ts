@@ -5,7 +5,6 @@ import { Playbook } from "@xliic/scanconf";
 import { Vault } from "@xliic/common/vault";
 
 import { loadPlaybook } from "./actions";
-import { configure, Configuration } from "../../core/playbook/identity-tests";
 
 export type State = {
   oas: BundledSwaggerOrOasSpec;
@@ -17,9 +16,6 @@ export type State = {
   selectedCredential?: string;
   selectedSubcredential?: string;
   selectedAuthorizationTest?: string;
-  selectedTest?: string;
-
-  identityTestsConfiguration: Configuration;
 };
 
 const initialState: State = {
@@ -40,7 +36,6 @@ const initialState: State = {
   vault: { schemes: {} },
   servers: [],
   selectedCredentialGroup: 0,
-  identityTestsConfiguration: {},
 };
 
 export const slice = createSlice({
@@ -189,10 +184,6 @@ export const slice = createSlice({
       state.selectedAuthorizationTest = id;
     },
 
-    selectTest: (state, { payload: { id } }: PayloadAction<{ id: string }>) => {
-      state.selectedTest = id;
-    },
-
     saveOperationReference: (
       state,
       {
@@ -326,9 +317,6 @@ export const slice = createSlice({
 
       // select first authorization test
       state.selectedAuthorizationTest = Object.keys(playbook?.authorizationTests || {})?.[0];
-
-      // check for applicable identity tests
-      state.identityTestsConfiguration = configure(oas, vault);
     });
   },
 });
@@ -378,7 +366,6 @@ export const {
   customizeOperation,
   removeCustomizationForOperation,
   createVariable,
-  selectTest,
 } = slice.actions;
 
 export default slice.reducer;

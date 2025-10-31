@@ -13,9 +13,10 @@ import TryAndServerSelector from "../components/TryAndServerSelector";
 import { saveAuthorizationTest } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import { SuiteConfiguration } from "../../../core/playbook/identity-tests/types";
+import { startTryExecution } from "./slice";
 
 export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; suiteId: string }) {
-  // const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch();
 
   // const {
   //   playbook: { authorizationTests },
@@ -28,7 +29,12 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; su
   return (
     <Container>
       <h3></h3>
-      <TryAndServerSelector servers={servers} onTry={(server: string) => {}} />
+      <TryAndServerSelector
+        servers={servers}
+        onTry={(server: string) => {
+          dispatch(startTryExecution(server));
+        }}
+      />
       <CollapsibleSection title={suiteId} defaultOpen={suiteHasFailures}>
         {Object.entries(suite.failures).map(([requirementId, failures]) => (
           <div key={requirementId}>

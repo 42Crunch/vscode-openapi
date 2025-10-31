@@ -1,19 +1,15 @@
-import { Playbook } from "@xliic/scanconf";
 import { SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
-import { selectTest } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
-import { Menu, MenuItem } from "../../../new-components/Menu";
 import Test from "./Test";
 
-import { TrashCan } from "../../../icons";
+import { setTestSuiteId } from "./slice";
+
 import Button from "../../../new-components/Button";
 
 export default function AuthorizationTests() {
   const dispatch = useAppDispatch();
 
-  const { selectedTest, identityTestsConfiguration: config } = useAppSelector(
-    (state) => state.scanconf
-  );
+  const { config, suiteId } = useAppSelector((state) => state.tests);
 
   const errors = Object.keys(config)
     .map((key) => {
@@ -41,23 +37,16 @@ export default function AuthorizationTests() {
     },
   ];
 
-  // return <Overview />;
-
   return (
     <SearchSidebarControlled
       title="test suites"
       sections={sections}
       errors={Object.fromEntries(errors)}
       render={(selected) => <Test suite={config[selected.itemId]} suiteId={selected.itemId} />}
-      // renderEmpty={Overview}
       onSelected={(selected) => {
-        dispatch(selectTest({ id: selected.itemId }));
+        dispatch(setTestSuiteId(selected.itemId));
       }}
-      selected={
-        selectedTest !== undefined
-          ? { sectionId: "identityTests", itemId: selectedTest }
-          : undefined
-      }
+      selected={suiteId !== undefined ? { sectionId: "identityTests", itemId: suiteId } : undefined}
       renderButtons={() => (
         <Button
           style={{ width: "100%" }}
