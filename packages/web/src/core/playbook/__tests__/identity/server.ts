@@ -1,9 +1,8 @@
 import http, { IncomingMessage, ServerResponse } from "http";
-import url from "url";
+import { URL } from "url";
 import { StringDecoder } from "string_decoder";
 import { createSecretKey } from "crypto";
 import { SignJWT, jwtVerify } from "jose";
-import type { ParsedUrlQuery } from "node:querystring";
 import { AddressInfo } from "node:net";
 
 type UserInfo = {
@@ -17,7 +16,7 @@ type UserInfo = {
 type Handler = (
   req: IncomingMessage,
   res: ServerResponse,
-  bodyOrQuery?: string | ParsedUrlQuery
+  bodyOrQuery?: string | URLSearchParams
 ) => void;
 
 const data: Record<string, UserInfo> = {
@@ -41,17 +40,16 @@ const basicToUser: Record<string, string> = {
 let server: http.Server | undefined = undefined;
 
 const routes: Record<string, Handler> = {
-  "api/user/info-token GET": (req, res) => handleGetUserInfoToken(req, res),
-  "api/user/info-basic GET": (req, res) => handleGetUserInfoBasic(req, res),
+  "/api/user/info-token GET": (req, res) => handleGetUserInfoToken(req, res),
+  "/api/user/info-basic GET": (req, res) => handleGetUserInfoBasic(req, res),
 };
 
 export function start(port: number | undefined): Promise<number> {
   server = http.createServer((req, res) => {
-    const parsedUrl = url.parse(req.url || "", true);
-    const path = parsedUrl.pathname?.replace(/^\/+|\/+$/g, "") || "";
+    const url = URL.parse(`http://localhost${req.url}`)!;
     const method = req.method?.toUpperCase() || "";
 
-    const routeKey = `${path} ${method}`;
+    const routeKey = `${url.pathname} ${method}`;
     const decoder = new StringDecoder("utf-8");
     let buffer = "";
 
@@ -65,7 +63,7 @@ export function start(port: number | undefined): Promise<number> {
       const handler = routes[routeKey];
       if (handler) {
         if (method === "GET" || method === "DELETE") {
-          handler(req, res, parsedUrl.query);
+          handler(req, res, url.searchParams);
         } else {
           handler(req, res, buffer);
         }
