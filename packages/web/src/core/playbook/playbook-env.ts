@@ -34,8 +34,8 @@ export type EnvStackLookupResult = {
 };
 
 export type PlaybookStageVariableLocation =
-  | { type: "playbook-request"; name: string; step: number; responseCode: string }
-  | { type: "playbook-stage"; name: string; step: number; responseCode: string };
+  | { type: "playbook-request"; name: string; stepId: string; responseCode: string }
+  | { type: "playbook-stage"; name: string; stepId: string; responseCode: string };
 
 export type PlaybookVariableDefinitionLocation =
   | { type: "global-environment" }
