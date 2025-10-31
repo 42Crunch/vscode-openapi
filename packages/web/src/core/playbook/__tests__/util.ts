@@ -2,7 +2,7 @@ import { Playbook } from "@xliic/scanconf";
 import { Scanconf, parse } from "@xliic/scanconf";
 
 import { assert, expect } from "vitest";
-import { executeAllPlaybooks } from "../execute";
+import { executeAllPlaybooks, PlaybookList } from "../execute";
 import { PlaybookExecutorStep } from "../playbook";
 import { PlaybookEnv } from "../playbook-env";
 import { httpClient } from "./httpclient";
@@ -41,6 +41,35 @@ export async function runScenario(
     target,
     file,
     [{ name: "test", requests: file.operations[name].scenarios[0].requests }],
+    { default: {}, secrets: {} },
+    env
+  )) {
+    steps.push(step);
+  }
+
+  return steps;
+}
+
+export async function runPlaybooks(
+  target: string,
+  oas: any,
+  file: Playbook.Bundle,
+  playbooks: PlaybookList,
+  vars?: PlaybookEnv
+): Promise<PlaybookExecutorStep[]> {
+  const steps = [];
+  const env = [];
+
+  if (vars) {
+    env.push(vars);
+  }
+
+  for await (const step of executeAllPlaybooks(
+    httpClient,
+    oas,
+    target,
+    file,
+    playbooks,
     { default: {}, secrets: {} },
     env
   )) {
