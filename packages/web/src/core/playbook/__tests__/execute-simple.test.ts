@@ -86,7 +86,7 @@ test("execute simple", async () => {
         context: {
           name: "test",
           responseCode: "200",
-          step: 0,
+          stepId: "step-1",
           type: "playbook-request",
         },
         location: {
