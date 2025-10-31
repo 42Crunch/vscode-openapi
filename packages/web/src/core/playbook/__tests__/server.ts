@@ -1,9 +1,8 @@
 import http, { IncomingMessage, ServerResponse } from "http";
-import url from "url";
+import { URL } from "url";
 import { StringDecoder } from "string_decoder";
 import { createSecretKey } from "crypto";
 import { SignJWT, jwtVerify } from "jose";
-import type { ParsedUrlQuery } from "node:querystring";
 import { AddressInfo } from "node:net";
 
 type UserInfo = {
@@ -22,7 +21,7 @@ type Claims = {
 type Handler = (
   req: IncomingMessage,
   res: ServerResponse,
-  bodyOrQuery?: string | ParsedUrlQuery
+  bodyOrQuery?: string | URLSearchParams
 ) => void;
 
 const jwtKey = createSecretKey(Buffer.from("my_secret_key", "utf-8"));
@@ -31,24 +30,23 @@ const data: Record<string, UserInfo> = {}; // email -> userInfo
 let server: http.Server | undefined = undefined;
 
 const routes: Record<string, Handler> = {
-  "api/login POST": (req, res, body) => handleLogin(req, res, body as string),
-  "api/register POST": (req, res, body) => handleRegister(req, res, body as string),
-  "api/user/info GET": (req, res) => handleGetUserInfo(req, res),
-  "api/user/edit_info PUT": (req, res, body) => handleEditUserInfo(req, res, body as string),
-  "api/user/delete DELETE": (req, res, query) =>
-    handleDeleteUser(req, res, query as ParsedUrlQuery),
-  "api/admin/users/search GET": (req, res, query) =>
-    handleAdminSearch(req, res, query as ParsedUrlQuery),
-  "api/admin/all_users GET": (req, res) => handleAdminAllUsers(req, res),
+  "/api/login POST": (req, res, body) => handleLogin(req, res, body as string),
+  "/api/register POST": (req, res, body) => handleRegister(req, res, body as string),
+  "/api/user/info GET": (req, res) => handleGetUserInfo(req, res),
+  "/api/user/edit_info PUT": (req, res, body) => handleEditUserInfo(req, res, body as string),
+  "/api/user/delete DELETE": (req, res, query) =>
+    handleDeleteUser(req, res, query as URLSearchParams),
+  "/api/admin/users/search GET": (req, res, query) =>
+    handleAdminSearch(req, res, query as URLSearchParams),
+  "/api/admin/all_users GET": (req, res) => handleAdminAllUsers(req, res),
 };
 
 export function start(port: number | undefined): Promise<number> {
   server = http.createServer((req, res) => {
-    const parsedUrl = url.parse(req.url || "", true);
-    const path = parsedUrl.pathname?.replace(/^\/+|\/+$/g, "") || "";
+    const url = URL.parse(`http://localhost${req.url}`)!;
     const method = req.method?.toUpperCase() || "";
 
-    const routeKey = `${path} ${method}`;
+    const routeKey = `${url.pathname} ${method}`;
     const decoder = new StringDecoder("utf-8");
     let buffer = "";
 
@@ -62,7 +60,7 @@ export function start(port: number | undefined): Promise<number> {
       const handler = routes[routeKey];
       if (handler) {
         if (method === "GET" || method === "DELETE") {
-          handler(req, res, parsedUrl.query);
+          handler(req, res, url.searchParams);
         } else {
           handler(req, res, buffer);
         }
@@ -165,8 +163,8 @@ async function handleEditUserInfo(req: IncomingMessage, res: ServerResponse, bod
   return respond(res, 200, { message: "information updated" });
 }
 
-async function handleDeleteUser(req: IncomingMessage, res: ServerResponse, query: ParsedUrlQuery) {
-  const token = query.token as string;
+async function handleDeleteUser(req: IncomingMessage, res: ServerResponse, query: URLSearchParams) {
+  const token = query.get("token")!;
   const user = await tokenParse(token);
 
   if (data[user]) {
@@ -177,7 +175,11 @@ async function handleDeleteUser(req: IncomingMessage, res: ServerResponse, query
   }
 }
 
-async function handleAdminSearch(req: IncomingMessage, res: ServerResponse, query: ParsedUrlQuery) {
+async function handleAdminSearch(
+  req: IncomingMessage,
+  res: ServerResponse,
+  query: URLSearchParams
+) {
   const user = await tokenCheck(req);
   if (!user) {
     return respond(res, 403, { message: "no token provided or invalid token" });
@@ -187,7 +189,7 @@ async function handleAdminSearch(req: IncomingMessage, res: ServerResponse, quer
     return respond(res, 403, { message: "you are not an admin" });
   }
 
-  const search = query.search as string;
+  const search = query.get("search")!;
   if (!search || !testUserStructure(search)) {
     return respond(res, 400, { message: "bad request" });
   }
