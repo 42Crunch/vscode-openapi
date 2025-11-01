@@ -16,7 +16,7 @@ import {
 } from "./variables";
 import { createAuthCache, getAuthEntry, setAuthEntry, AuthCache } from "./auth-cache";
 
-export type StageGenerator = AsyncGenerator<{ stageId: string; stage: Playbook.Stage }, void>;
+export type StageGenerator = AsyncGenerator<Playbook.Stage, void>;
 
 export type DynamicRequestList = (Playbook.Stage | StageGenerator)[];
 
@@ -86,10 +86,11 @@ export async function* executePlaybook(
 
   const steps = iteratePlaybook(requests);
 
+  let stepId = 0;
   let step = await steps.next();
 
   while (!step.done) {
-    const { stageId, stage } = step.value;
+    const stage = step.value;
     if (stage.ref === undefined) {
       yield {
         event: "playbook-aborted",
@@ -256,7 +257,7 @@ export async function* executePlaybook(
     }
 
     const [requestAssignments, requestAssignmentsError] = assignVariables(
-      { type: "playbook-request", name, stepId: stageId, responseCode: "default" },
+      { type: "playbook-request", name, step: stepId, responseCode: "default" },
       request.responses,
       httpRequest,
       response,
@@ -287,7 +288,7 @@ export async function* executePlaybook(
     }
 
     const [stepAssignments, stepAssignmentsError] = assignVariables(
-      { type: "playbook-stage", name, stepId: stageId, responseCode: "default" },
+      { type: "playbook-stage", name, step: stepId, responseCode: "default" },
       stage.responses,
       httpRequest,
       response,
@@ -318,6 +319,7 @@ export async function* executePlaybook(
     result.push(...stepAssignments);
 
     step = await steps.next();
+    stepId++;
   }
 
   yield { event: "playbook-finished" };
@@ -511,10 +513,9 @@ function getRequestByRef(file: Playbook.Bundle, ref: Playbook.RequestRef) {
 }
 
 async function* iteratePlaybook(requests: DynamicRequestList): StageGenerator {
-  for (let i = 0; i < requests.length; i++) {
-    const request = requests[i];
+  for (const request of requests) {
     if ("ref" in request) {
-      yield { stageId: `stage-${i + 1}`, stage: request };
+      yield request;
     } else {
       yield* request;
     }
