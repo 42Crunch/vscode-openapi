@@ -80,10 +80,10 @@ function formatLocation(location: PlaybookVariableDefinitionLocation, currentSte
     return `Scenario / Step ${currentStep + 1} / Operation / Environment`;
   } else if (location.type === "playbook-request") {
     return `${formatScenarioName(location.name)} / Step ${
-      location.stepId
+      location.step + 1
     } / Operation / Response processing`;
   } else if (location.type === "playbook-stage") {
-    return `${formatScenarioName(location.name)} / Step ${location.stepId} / Response processing`;
+    return `${formatScenarioName(location.name)} / Step ${location.step + 1} / Response processing`;
   }
 }
 
