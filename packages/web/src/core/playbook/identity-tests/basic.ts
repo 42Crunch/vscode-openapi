@@ -162,7 +162,6 @@ function hasValidBasicAuthCredentials(spec: BundledSwaggerOrOasSpec, vault: Vaul
 
 const dummyExecutor: TestExecutor = async function* (client, oas, playbook, vault, test, config) {
   yield { event: "playbook-started", name: `${test.id}` };
-  yield { event: "playbook-message", message: "zomg!" };
   yield { event: "playbook-finished" };
 };
 

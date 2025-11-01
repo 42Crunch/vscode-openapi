@@ -17,7 +17,6 @@ import {
   AuthAborted,
   PlaybookCredentialRetrievedFromCache,
   PlaybookExternalHttpRequestPrepared,
-  PlaybookMessage,
 } from "../../core/playbook/playbook";
 import { ExecutionResult, OperationResult, PlaybookResult } from "./components/scenario/types";
 
@@ -237,15 +236,6 @@ const PlaybookStepHandlers: PlaybookEventHandlers = {
     operation.responseProcessingError = event.error;
     operation.status = "failure";
     currentPlaybook(stateCurrent, stateResult).status = "failure";
-  },
-
-  "playbook-message": function (
-    stateCurrent: Current,
-    stateResult: ExecutionResult,
-    event: PlaybookMessage
-  ): void {
-    const operation = currentOperation(stateCurrent, stateResult);
-    operation.playbookMessage = event.message;
   },
 };
 
