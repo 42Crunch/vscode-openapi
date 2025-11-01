@@ -16,7 +16,7 @@ import {
 } from "./variables";
 import { createAuthCache, getAuthEntry, setAuthEntry, AuthCache } from "./auth-cache";
 
-export type StageGenerator = AsyncGenerator<{ stepId: string; step: Playbook.Stage }, void>;
+export type StageGenerator = AsyncGenerator<{ stageId: string; stage: Playbook.Stage }, void>;
 
 export type DynamicRequestList = (Playbook.Stage | StageGenerator)[];
 
@@ -84,8 +84,13 @@ export async function* executePlaybook(
     return;
   }
 
-  for await (const { stepId, step } of iteratePlaybook(requests)) {
-    if (step.ref === undefined) {
+  const steps = iteratePlaybook(requests);
+
+  let step = await steps.next();
+
+  while (!step.done) {
+    const { stageId, stage } = step.value;
+    if (stage.ref === undefined) {
       yield {
         event: "playbook-aborted",
         error: "non-reference requests are not supported",
@@ -93,17 +98,17 @@ export async function* executePlaybook(
       return;
     }
 
-    const request = getRequestByRef(file, step.ref);
+    const request = getRequestByRef(file, stage.ref);
 
     if (request === undefined) {
       yield {
         event: "playbook-aborted",
-        error: `request not found: ${step.ref.type}/${step.ref.id}`,
+        error: `request not found: ${stage.ref.type}/${stage.ref.id}`,
       };
       return;
     }
 
-    yield { event: "request-started", ref: step.ref };
+    yield { event: "request-started", ref: stage.ref };
 
     // skip auth for external requests
     const auth = request.operationId === undefined ? undefined : request.auth;
@@ -128,7 +133,7 @@ export async function* executePlaybook(
 
     const replacedStageEnv = replaceEnvironmentVariables(
       "stage-environment",
-      step.environment || {},
+      stage.environment || {},
       [...env, ...result]
     );
 
@@ -223,15 +228,15 @@ export async function* executePlaybook(
     yield { event: "http-response-received", response };
 
     if (response !== MockHttpResponse) {
-      if (step.expectedResponse !== undefined) {
+      if (stage.expectedResponse !== undefined) {
         if (
-          String(response?.statusCode) !== step.expectedResponse &&
-          getHttpResponseRange(response!.statusCode) !== step.expectedResponse &&
+          String(response?.statusCode) !== stage.expectedResponse &&
+          getHttpResponseRange(response!.statusCode) !== stage.expectedResponse &&
           request.defaultResponse !== "default"
         ) {
           yield {
             event: "response-processing-error",
-            error: `HTTP response code "${response?.statusCode}" does not match expected stage response code "${step.expectedResponse}"`,
+            error: `HTTP response code "${response?.statusCode}" does not match expected stage response code "${stage.expectedResponse}"`,
           };
           return;
         }
@@ -251,7 +256,7 @@ export async function* executePlaybook(
     }
 
     const [requestAssignments, requestAssignmentsError] = assignVariables(
-      { type: "playbook-request", name, stepId, responseCode: "default" },
+      { type: "playbook-request", name, stepId: stageId, responseCode: "default" },
       request.responses,
       httpRequest,
       response,
@@ -282,8 +287,8 @@ export async function* executePlaybook(
     }
 
     const [stepAssignments, stepAssignmentsError] = assignVariables(
-      { type: "playbook-stage", name, stepId, responseCode: "default" },
-      step.responses,
+      { type: "playbook-stage", name, stepId: stageId, responseCode: "default" },
+      stage.responses,
       httpRequest,
       response,
       replacements.value.parameters
@@ -311,6 +316,8 @@ export async function* executePlaybook(
     }
 
     result.push(...stepAssignments);
+
+    step = await steps.next();
   }
 
   yield { event: "playbook-finished" };
@@ -507,7 +514,7 @@ async function* iteratePlaybook(requests: DynamicRequestList): StageGenerator {
   for (let i = 0; i < requests.length; i++) {
     const request = requests[i];
     if ("ref" in request) {
-      yield { stepId: `step-${i + 1}`, step: request };
+      yield { stageId: `stage-${i + 1}`, stage: request };
     } else {
       yield* request;
     }

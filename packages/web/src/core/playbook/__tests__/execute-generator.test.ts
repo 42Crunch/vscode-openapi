@@ -18,14 +18,14 @@ test("execute generator", async () => {
 
   const generator = async function* (): StageGenerator {
     yield {
-      stepId: "step-1",
-      step: {
+      stageId: "step-1",
+      stage: {
         ref: { type: "operation", id: "register" },
       },
     };
     yield {
-      stepId: "step-2",
-      step: {
+      stageId: "step-2",
+      stage: {
         ref: { type: "operation", id: "userinfo" },
       },
     };

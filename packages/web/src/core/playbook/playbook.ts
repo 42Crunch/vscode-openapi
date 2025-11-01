@@ -115,11 +115,6 @@ export type PlaybookResponseProcessingError = {
   error: string;
 };
 
-export type PlaybookMessage = {
-  event: "playbook-message";
-  message: string;
-};
-
 export type PlaybookExecutorStep =
   | PlaybookStarted
   | AuthStarted
@@ -137,8 +132,7 @@ export type PlaybookExecutorStep =
   | PlaybookHttpResponseReceived
   | PlaybookHttpErrorReceived
   | PlaybookVariablesAssigned
-  | PlaybookResponseProcessingError
-  | PlaybookMessage;
+  | PlaybookResponseProcessingError;
 
 export type Executor = (
   client: HttpClient,
