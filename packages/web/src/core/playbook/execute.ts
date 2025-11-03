@@ -17,10 +17,12 @@ import {
 import { createAuthCache, getAuthEntry, setAuthEntry, AuthCache } from "./auth-cache";
 
 export type Hooks = {
-  security?: (auth: AuthResult) => AuthResult;
-  request?: (request: HttpRequest) => HttpRequest;
-  response?: (response: HttpResponse | MockHttpResponseType) => HttpResponse | MockHttpResponseType;
-  error?: (error: HttpError) => HttpError;
+  security?: (auth: AuthResult) => AsyncGenerator<"foo", AuthResult, void>;
+  request?: (request: HttpRequest) => AsyncGenerator<"bar", HttpRequest, void>;
+  response?: (
+    response: HttpResponse | MockHttpResponseType
+  ) => AsyncGenerator<"baz", HttpResponse | MockHttpResponseType, void>;
+  error?: (error: HttpError) => AsyncGenerator<"qux", HttpError, void>;
 };
 
 export type StageGenerator = AsyncGenerator<{ stage: Playbook.Stage; hooks: Hooks }, void>;
@@ -140,7 +142,7 @@ export async function* executePlaybook(
     }
 
     if (hooks.security !== undefined) {
-      security = hooks.security(security);
+      //security = yield* hooks.security(security);
     }
 
     const replacedStageEnv = replaceEnvironmentVariables(
@@ -213,10 +215,14 @@ export async function* executePlaybook(
       return;
     }
 
+    if (hooks.request !== undefined) {
+      //httpRequest = yield* hooks.request(httpRequest);
+    }
+
     if ("operationId" in replacements.value) {
       yield {
         event: "http-request-prepared",
-        request: hookHttpRequest(httpRequest, hooks),
+        request: httpRequest,
         operationId: request.operationId!,
         playbookRequest: replacements.value,
         auth: security,
@@ -224,7 +230,7 @@ export async function* executePlaybook(
     } else {
       yield {
         event: "external-http-request-prepared",
-        request: hookHttpRequest(httpRequest, hooks),
+        request: httpRequest,
         playbookRequest: replacements.value,
         auth: security,
       };
@@ -233,12 +239,16 @@ export async function* executePlaybook(
     const [response, error2] = await client(httpRequest);
 
     if (error2 !== undefined) {
-      hookHttpError(error2, hooks);
+      if (hooks.error !== undefined) {
+        //error2 = yield* hooks.error(error2);
+      }
       yield { event: "http-error-received", error: error2 };
       return;
     }
 
-    hookHttpResponse(response, hooks);
+    if (hooks.response !== undefined) {
+      //response = yield* hooks.response(response);
+    }
 
     yield { event: "http-response-received", response };
 
@@ -534,28 +544,4 @@ async function* iteratePlaybook(requests: DynamicRequestList): StageGenerator {
       yield* request;
     }
   }
-}
-
-function hookHttpRequest(request: HttpRequest, hooks: Hooks | undefined): HttpRequest {
-  if (hooks?.request !== undefined) {
-    return hooks.request(request);
-  }
-  return request;
-}
-
-function hookHttpResponse(
-  response: HttpResponse | MockHttpResponseType,
-  hooks: Hooks | undefined
-): HttpResponse | MockHttpResponseType {
-  if (hooks?.response !== undefined) {
-    return hooks.response(response);
-  }
-  return response;
-}
-
-function hookHttpError(error: HttpError, hooks: Hooks | undefined): HttpError {
-  if (hooks?.error !== undefined) {
-    return hooks.error(error);
-  }
-  return error;
 }
