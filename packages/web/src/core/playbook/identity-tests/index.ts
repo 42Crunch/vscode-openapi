@@ -3,10 +3,10 @@ import { Vault } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
 
 import basic from "./basic";
-import apiKey from "./api-key";
+//import apiKey from "./api-key";
 import { SuiteConfiguration, Test, TestConfiguration } from "./types";
 
-const suites = { basic, "api-key": apiKey };
+const suites = { basic /*"api-key": apiKey*/ };
 
 export type Configuration = Record<string, SuiteConfiguration>;
 

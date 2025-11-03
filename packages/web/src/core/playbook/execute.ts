@@ -1,10 +1,10 @@
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
-import { HttpClient } from "@xliic/common/http";
+import { HttpClient, HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
 import { BundledSwaggerOrOasSpec, getOperationById, getHttpResponseRange } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 
 import { makeExternalHttpRequest, makeHttpRequest } from "./http";
-import { MockHttpClient, MockHttpResponse } from "../http-client/mock-client";
+import { MockHttpClient, MockHttpResponse, MockHttpResponseType } from "../http-client/mock-client";
 import { AuthResult, PlaybookExecutorStep } from "./playbook";
 import { PlaybookEnv, PlaybookEnvStack } from "./playbook-env";
 import { assignVariables, failedAssigments } from "./variable-assignments";
@@ -16,7 +16,14 @@ import {
 } from "./variables";
 import { createAuthCache, getAuthEntry, setAuthEntry, AuthCache } from "./auth-cache";
 
-export type StageGenerator = AsyncGenerator<Playbook.Stage, void>;
+export type Hooks = {
+  security?: (auth: AuthResult) => AuthResult;
+  request?: (request: HttpRequest) => HttpRequest;
+  response?: (response: HttpResponse | MockHttpResponseType) => HttpResponse | MockHttpResponseType;
+  error?: (error: HttpError) => HttpError;
+};
+
+export type StageGenerator = AsyncGenerator<{ stage: Playbook.Stage; hooks: Hooks }, void>;
 
 export type DynamicRequestList = (Playbook.Stage | StageGenerator)[];
 
@@ -90,7 +97,7 @@ export async function* executePlaybook(
   let step = await steps.next();
 
   while (!step.done) {
-    const stage = step.value;
+    const { stage, hooks } = step.value;
     if (stage.ref === undefined) {
       yield {
         event: "playbook-aborted",
@@ -113,7 +120,7 @@ export async function* executePlaybook(
 
     // skip auth for external requests
     const auth = request.operationId === undefined ? undefined : request.auth;
-    const security = yield* executeAuth(
+    let security = yield* executeAuth(
       cache,
       client,
       oas,
@@ -130,6 +137,10 @@ export async function* executePlaybook(
         error: `Failed to retrieve credentials`,
       };
       return;
+    }
+
+    if (hooks.security !== undefined) {
+      security = hooks.security(security);
     }
 
     const replacedStageEnv = replaceEnvironmentVariables(
@@ -205,7 +216,7 @@ export async function* executePlaybook(
     if ("operationId" in replacements.value) {
       yield {
         event: "http-request-prepared",
-        request: httpRequest,
+        request: hookHttpRequest(httpRequest, hooks),
         operationId: request.operationId!,
         playbookRequest: replacements.value,
         auth: security,
@@ -213,7 +224,7 @@ export async function* executePlaybook(
     } else {
       yield {
         event: "external-http-request-prepared",
-        request: httpRequest,
+        request: hookHttpRequest(httpRequest, hooks),
         playbookRequest: replacements.value,
         auth: security,
       };
@@ -222,9 +233,12 @@ export async function* executePlaybook(
     const [response, error2] = await client(httpRequest);
 
     if (error2 !== undefined) {
+      hookHttpError(error2, hooks);
       yield { event: "http-error-received", error: error2 };
       return;
     }
+
+    hookHttpResponse(response, hooks);
 
     yield { event: "http-response-received", response };
 
@@ -515,9 +529,33 @@ function getRequestByRef(file: Playbook.Bundle, ref: Playbook.RequestRef) {
 async function* iteratePlaybook(requests: DynamicRequestList): StageGenerator {
   for (const request of requests) {
     if ("ref" in request) {
-      yield request;
+      yield { stage: request, hooks: {} };
     } else {
       yield* request;
     }
   }
+}
+
+function hookHttpRequest(request: HttpRequest, hooks: Hooks | undefined): HttpRequest {
+  if (hooks?.request !== undefined) {
+    return hooks.request(request);
+  }
+  return request;
+}
+
+function hookHttpResponse(
+  response: HttpResponse | MockHttpResponseType,
+  hooks: Hooks | undefined
+): HttpResponse | MockHttpResponseType {
+  if (hooks?.response !== undefined) {
+    return hooks.response(response);
+  }
+  return response;
+}
+
+function hookHttpError(error: HttpError, hooks: Hooks | undefined): HttpError {
+  if (hooks?.error !== undefined) {
+    return hooks.error(error);
+  }
+  return error;
 }
