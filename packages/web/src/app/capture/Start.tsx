@@ -32,7 +32,7 @@ export default function Start() {
         }}
       >
         <FileImport />
-        Add files
+        Select Postman/HAR files
       </Action>
 
       <p>
