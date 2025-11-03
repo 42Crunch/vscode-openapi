@@ -18,10 +18,17 @@ test("execute generator", async () => {
 
   const generator = async function* (): StageGenerator {
     yield {
-      ref: { type: "operation", id: "register" },
+      stage: { ref: { type: "operation", id: "register" } },
+      hooks: {
+        request: (request) => {
+          console.log("Hooking request", request);
+          return request;
+        },
+      },
     };
     yield {
-      ref: { type: "operation", id: "userinfo" },
+      stage: { ref: { type: "operation", id: "userinfo" } },
+      hooks: {},
     };
   };
 

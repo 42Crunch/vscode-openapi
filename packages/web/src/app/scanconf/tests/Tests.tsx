@@ -13,7 +13,6 @@ export default function AuthorizationTests() {
 
   const errors = Object.keys(config)
     .map((key) => {
-      console.log("checking", key, config[key]);
       if (Object.keys(config[key].failures).some((k) => config[key].failures[k].length > 0)) {
         return [key, `${key} has failures`];
       }

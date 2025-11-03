@@ -33,6 +33,9 @@ import { addTryExecutionStep, resetTryExecution, startTryExecution } from "./tes
 
 import { AppDispatch, RootState } from "./store";
 import { webappHttpClient } from "../../core/http-client/webapp-client";
+import { testPlaybook } from "../../core/playbook/test";
+import { SuiteConfiguration } from "../../core/playbook/identity-tests/types";
+import basic from "../../core/playbook/identity-tests/basic";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 
@@ -50,23 +53,15 @@ export function onTryExecuteTestSuite(
       actionCreator: startTryExecution,
       effect: async ({ payload: server }, listenerApi) => {
         const {
-          scanconf: {
-            playbook: { before, after, operations },
-          },
-          operations: { scenarioId, operationId },
+          scanconf: { playbook, oas },
           prefs: { useGlobalBlocks, rejectUnauthorized },
+          tests: { suiteId, config },
           config: {
             data: { scanProxy },
           },
         } = listenerApi.getState();
 
-        const playbooks: PlaybookList = [
-          { name: "Global Before", requests: useGlobalBlocks ? before : [] },
-          //{ name: "Before", requests: operation.before },
-          //{ name: "Scenario", requests: operation.scenarios[scenarioId].requests },
-          //{ name: "After", requests: operation.after },
-          { name: "Global After", requests: useGlobalBlocks ? after : [] },
-        ].filter((playbook) => playbook.requests.length > 0);
+        const suiteConfig = config[suiteId!];
 
         await execute(
           listenerApi.getState(),
@@ -78,8 +73,8 @@ export function onTryExecuteTestSuite(
           listenerApi.dispatch,
           resetTryExecution,
           addTryExecutionStep,
-          playbooks,
-          server
+          server,
+          suiteConfig
         );
       },
     });
@@ -90,23 +85,25 @@ async function execute(
     scanconf: { oas: BundledSwaggerOrOasSpec; playbook: Playbook.Bundle };
     env: { data: EnvData };
   },
-  httpClient: HttpClient | MockHttpClient,
+  httpClient: HttpClient,
   dispatch: (action: Action) => void,
   resetAction: () => Action,
   addExecutionStepAction: (action: PlaybookExecutorStep) => Action,
-  playbooks: PlaybookList,
   server: string,
+  suiteConfig: SuiteConfiguration,
   extraEnv: PlaybookEnvStack = []
 ) {
   dispatch(resetAction());
-  for await (const step of executeAllPlaybooks(
+
+  for await (const step of testPlaybook(
     httpClient,
     state.scanconf.oas,
     server,
     state.scanconf.playbook,
-    playbooks,
     state.env.data,
-    extraEnv
+    extraEnv,
+    basic,
+    suiteConfig
   )) {
     dispatch(addExecutionStepAction(step));
   }

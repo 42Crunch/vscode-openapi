@@ -12,7 +12,9 @@ import {
   Vault,
   SecurityScheme as VaultSecurityScheme,
 } from "@xliic/common/vault";
-import { Test, TestExecutor, TestSuite } from "./types";
+import { Test, TestConfiguration, TestExecutor, TestSuite } from "./types";
+import { StageGenerator } from "../execute";
+import { AuthResult } from "../playbook";
 
 function getSecuritySchemes(spec: BundledSwaggerOrOasSpec) {
   return ("swagger" in spec ? spec.securityDefinitions : spec.components?.securitySchemes) ?? {};
@@ -174,8 +176,29 @@ const weakPasswords: Test = {
     return [`${username}:password`, `${username}:$username`];
   },
   execute: dummyExecutor,
+
+  foo: (config: TestConfiguration): StageGenerator => {
+    const generator = async function* (): StageGenerator {
+      yield {
+        stage: { ref: { type: "operation", id: "userinfo" } },
+        hooks: {
+          security: (auth: AuthResult) => {
+            return {
+              basic: { credential: { type: "basic", default: "", methods: {} }, value: "foo:bar" },
+            };
+          },
+          response: (response) => {
+            console.log("Response in weakPasswords test:", response);
+            return response;
+          },
+        },
+      };
+    };
+    return generator();
+  },
 };
 
+/*
 const changeUsernameCase: Test = {
   id: "change-username-case",
   requirements: [["must-have-valid-basic-auth-credentials", hasValidBasicAuthCredentials]],
@@ -230,6 +253,8 @@ const truncatePassword: Test = {
   execute: dummyExecutor,
 };
 
+*/
+
 function parseBasicAuth(value: string): { username: string; password: string } {
   const [username, password] = value.split(":");
   return { username, password };
@@ -240,7 +265,7 @@ const suite: TestSuite = {
   description: "A suite of tests for Basic Authentication.",
   requirements: [["must-use-basic-auth", usesBasicAuth]],
 
-  tests: [weakPasswords, changeUsernameCase, changePasswordCase, truncatePassword],
+  tests: [weakPasswords /*changeUsernameCase, changePasswordCase, truncatePassword*/],
 };
 
 export default suite;

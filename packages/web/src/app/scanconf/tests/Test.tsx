@@ -28,7 +28,6 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; su
 
   return (
     <Container>
-      <h3></h3>
       <TryAndServerSelector
         servers={servers}
         onTry={(server: string) => {
