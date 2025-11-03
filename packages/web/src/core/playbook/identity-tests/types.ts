@@ -3,6 +3,7 @@ import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 import { PlaybookExecutorStep } from "../playbook";
 import { HttpClient } from "@xliic/common/http";
+import { StageGenerator } from "../execute";
 
 export type TestSuite = {
   id: string;
@@ -24,6 +25,7 @@ export type Test = {
   id: string;
   requirements: [string, (spec: BundledSwaggerOrOasSpec, vault: Vault) => string[]][];
   generate: (value: string) => string[];
+  foo: (config: TestConfiguration) => StageGenerator;
   execute: TestExecutor;
 };
 
