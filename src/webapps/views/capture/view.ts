@@ -130,7 +130,7 @@ export class CaptureWebView extends WebView<Webapp> {
 
       // Start request -> capture server
       try {
-        await delay(500); // FIXME: remove when capture api is updated
+        await delay(3000); // FIXME: remove when capture api is updated
         await requestStart(captureConnection, quickgenId);
         this.showExecutionStartResponse(item, true, "");
       } catch (error) {
