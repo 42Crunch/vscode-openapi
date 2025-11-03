@@ -541,9 +541,8 @@ export async function requestDelete(
 }
 
 function getError(error: any): string {
-  if (error?.response?.body && error?.response?.body.includes("detail")) {
-    const detail = JSON.parse(error?.response?.body)["detail"];
-    return `${error}, ${detail}`;
+  if (error?.response?.body?.detail) {
+    return `${error}, ${error.response.body.detail}`;
   }
   return `${error}`;
 }

@@ -64,16 +64,19 @@ export async function getPlatformCredentials(
   if (platformUrl && apiToken) {
     // favour services specified in the configuration, else try
     // to derive services from the platformUrl
+    const parsedUrl = vscode.Uri.parse(platformUrl);
+    const cleanUrl = `${parsedUrl.scheme}://${parsedUrl.authority}`;
+
     if (services) {
       return {
-        platformUrl,
+        platformUrl: cleanUrl,
         services,
         apiToken,
       };
     }
     return {
-      platformUrl,
-      services: deriveServices(platformUrl),
+      platformUrl: cleanUrl,
+      services: deriveServices(cleanUrl),
       apiToken,
     };
   }
