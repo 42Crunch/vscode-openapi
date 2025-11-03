@@ -37,7 +37,7 @@ export function ProgressButton({
     <Button
       className={className}
       onClick={onClick}
-      $disabled={disabled || isWaiting}
+      disabled={disabled || isWaiting}
       $waiting={isWaiting}
     >
       <span>{label}</span>
