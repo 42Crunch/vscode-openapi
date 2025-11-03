@@ -19,7 +19,7 @@ export function activate(
   logger: Logger,
   signUpWebView: SignUpWebView
 ) {
-  const view = new CaptureWebView(context.extensionPath, configuration, secrets);
+  const view = new CaptureWebView(context.extensionPath, configuration, secrets, logger);
 
   vscode.commands.registerCommand("openapi.showCapture", async () => {
     if (!(await ensureHasCredentials(signUpWebView, configuration, secrets, "capture"))) {

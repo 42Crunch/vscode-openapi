@@ -39,7 +39,7 @@ export class TagsWebView extends WebView<Webapp> {
   hostHandlers: Webapp["hostHandlers"] = {
     sendHttpRequest: async (payload: { id: string; request: HttpRequest; config: HttpConfig }) => {
       try {
-        const response = await executeHttpRequestRaw(payload.request, payload.config);
+        const response = await executeHttpRequestRaw(payload.request, payload.config, this.logger);
         this.sendRequest({
           command: "showHttpResponse",
           payload: { id: payload.id, response },

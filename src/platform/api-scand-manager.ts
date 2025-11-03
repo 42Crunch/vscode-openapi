@@ -7,6 +7,7 @@ import got, { Method, OptionsOfJSONResponseBody, OptionsOfTextResponseBody } fro
 
 import { ScandManagerConnection } from "@xliic/common/scan";
 import { Logger } from "./types";
+import { getHooks } from "../webapps/http-handler";
 
 export type ScandManagerJobStatus = {
   name: string;
@@ -111,23 +112,6 @@ function gotOptionsText(
     responseType: "text",
     hooks: getHooks(method, logger),
     headers,
-  };
-}
-
-function getHooks(method: Method, logger: Logger) {
-  const logResponse = (response: any, retryWithMergedOptions: Function) => {
-    logger.debug(`${method} ${response.url} ${response.statusCode}`);
-    return response;
-  };
-
-  const logRequest = (options: any) => {
-    const body = options.json ? JSON.stringify(options.json) : "";
-    logger.trace(`${method} ${options.prefixUrl}${options.url} ${body}`);
-  };
-
-  return {
-    beforeRequest: [logRequest],
-    afterResponse: [logResponse],
   };
 }
 

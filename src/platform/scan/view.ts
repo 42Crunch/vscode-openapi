@@ -173,7 +173,8 @@ export class ScanWebView extends WebView<Webapp> {
       }
     },
 
-    sendHttpRequest: ({ id, request, config }) => executeHttpRequest(id, request, config),
+    sendHttpRequest: ({ id, request, config }) =>
+      executeHttpRequest(id, request, config, this.logger),
 
     showEnvWindow: async () => {
       vscode.commands.executeCommand("openapi.showEnvironment");

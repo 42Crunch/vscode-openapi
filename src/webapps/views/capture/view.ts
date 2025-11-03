@@ -5,7 +5,7 @@
 import * as fs from "fs";
 import * as vscode from "vscode";
 import FormData from "form-data";
-import got from "got";
+import got, { Method, OptionsOfJSONResponseBody } from "got";
 
 import { Webapp } from "@xliic/common/webapp/capture";
 import { CaptureItem, CaptureSettings, PrepareOptions, Status } from "@xliic/common/capture";
@@ -17,8 +17,9 @@ import { WebView } from "../../web-view";
 import { Configuration } from "../../../configuration";
 import { getAnondCredentials, getPlatformCredentials, hasCredentials } from "../../../credentials";
 import { delay } from "../../../time-util";
-import { executeHttpRequest } from "../../http-handler";
+import { executeHttpRequest, getHooks } from "../../http-handler";
 import { offerUpgrade } from "../../../platform/upgrade";
+import { Logger } from "../../../platform/types";
 
 const pollingDelayMs = 5 * 1000; // 5s
 const pollingTimeMs = 5 * 60 * 1000; // 5min
@@ -32,7 +33,8 @@ export class CaptureWebView extends WebView<Webapp> {
   constructor(
     extensionPath: string,
     private configuration: Configuration,
-    private secrets: vscode.SecretStorage
+    private secrets: vscode.SecretStorage,
+    private logger: Logger
   ) {
     super(extensionPath, "capture", "API Contract Generator", vscode.ViewColumn.One);
     this.items = [];
@@ -95,7 +97,7 @@ export class CaptureWebView extends WebView<Webapp> {
       // Handle the case when restart requested
       if (item.quickgenId && item.status === "failed") {
         try {
-          await requestDelete(captureConnection, item.quickgenId);
+          await requestDelete(captureConnection, item.quickgenId, this.logger);
         } catch (error) {
           // Silent removal
         }
@@ -106,7 +108,7 @@ export class CaptureWebView extends WebView<Webapp> {
       // Prepare request -> capture server
       let quickgenId = undefined;
       try {
-        quickgenId = await requestPrepare(captureConnection, item.prepareOptions);
+        quickgenId = await requestPrepare(captureConnection, item.prepareOptions, this.logger);
         this.captureConnections.set(quickgenId, captureConnection);
         this.showPrepareResponse(item, quickgenId, true, "");
       } catch (error) {
@@ -117,11 +119,17 @@ export class CaptureWebView extends WebView<Webapp> {
 
       // Upload request -> capture server
       try {
-        await requestUpload(captureConnection, quickgenId, item.files, (percent: number) => {
-          if (item.status !== "failed") {
-            this.showPrepareUploadFileResponse(item, true, "", percent === 1.0, percent);
-          }
-        });
+        await requestUpload(
+          captureConnection,
+          quickgenId,
+          item.files,
+          (percent: number) => {
+            if (item.status !== "failed") {
+              this.showPrepareUploadFileResponse(item, true, "", percent === 1.0, percent);
+            }
+          },
+          this.logger
+        );
       } catch (error) {
         this.showPrepareUploadFileResponse(item, false, getError(error), false, 0.0);
         await this.maybeOfferUpgrade(error);
@@ -131,7 +139,7 @@ export class CaptureWebView extends WebView<Webapp> {
       // Start request -> capture server
       try {
         await delay(3000); // FIXME: remove when capture api is updated
-        await requestStart(captureConnection, quickgenId);
+        await requestStart(captureConnection, quickgenId, this.logger);
         this.showExecutionStartResponse(item, true, "");
       } catch (error) {
         this.showExecutionStartResponse(item, false, getError(error));
@@ -141,7 +149,7 @@ export class CaptureWebView extends WebView<Webapp> {
 
       const refreshJobStatus = async (quickgenId: string) => {
         try {
-          const status = await requestStatus(captureConnection, quickgenId);
+          const status = await requestStatus(captureConnection, quickgenId, this.logger);
           item.pollingCounter += 1;
           this.showExecutionStatusResponse(item, status, true, "");
           const keepPolling = item.pollingCounter <= pollingLimit;
@@ -183,7 +191,7 @@ export class CaptureWebView extends WebView<Webapp> {
         const captureConnection = await this.getCaptureConnection(item.quickgenId);
 
         try {
-          const fileText = await requestDownload(captureConnection, item.quickgenId!);
+          const fileText = await requestDownload(captureConnection, item.quickgenId!, this.logger);
           const encoder = new TextEncoder();
           await vscode.workspace.fs.writeFile(
             uri,
@@ -203,7 +211,7 @@ export class CaptureWebView extends WebView<Webapp> {
       if (item?.quickgenId) {
         try {
           const captureConnection = await this.getCaptureConnection(item.quickgenId);
-          await requestDelete(captureConnection, item.quickgenId);
+          await requestDelete(captureConnection, item.quickgenId, this.logger);
           this.captureConnections.delete(item.quickgenId);
         } catch (error) {
           // Silent removal
@@ -221,7 +229,8 @@ export class CaptureWebView extends WebView<Webapp> {
       }
     },
 
-    sendHttpRequest: ({ id, request, config }) => executeHttpRequest(id, request, config),
+    sendHttpRequest: ({ id, request, config }) =>
+      executeHttpRequest(id, request, config, this.logger),
   };
 
   async getCaptureConnection(quickgenId: string | undefined): Promise<CaptureConnection> {
@@ -231,7 +240,8 @@ export class CaptureWebView extends WebView<Webapp> {
       const connection = await getCaptureConnection(
         this.configuration,
         this.secrets,
-        this.useDevEndpoints
+        this.useDevEndpoints,
+        this.logger
       );
 
       if (!connection) {
@@ -411,18 +421,20 @@ export class CaptureWebView extends WebView<Webapp> {
 export async function getCaptureConnection(
   configuration: Configuration,
   secrets: vscode.SecretStorage,
-  useDevEndpoints: boolean
+  useDevEndpoints: boolean,
+  logger: Logger
 ): Promise<CaptureConnection | undefined> {
   const credentialType = await hasCredentials(configuration, secrets);
 
   if (credentialType === "anond-token") {
     const anondToken = getAnondCredentials(configuration);
-    return requestDiscover({ freemiumToken: anondToken }, useDevEndpoints);
+    return requestDiscover({ freemiumToken: anondToken }, useDevEndpoints, logger);
   } else if (credentialType === "api-token") {
     const platformCredentials = await getPlatformCredentials(configuration, secrets);
     return requestDiscover(
       { platformUrl: platformCredentials?.platformUrl, apiKey: platformCredentials?.apiToken },
-      useDevEndpoints
+      useDevEndpoints,
+      logger
     );
   }
 }
@@ -434,118 +446,98 @@ export type CaptureConnection = {
 
 export async function requestDiscover(
   credentials: any,
-  useDevEndpoints: boolean
+  useDevEndpoints: boolean,
+  logger: Logger
 ): Promise<CaptureConnection> {
   const { freemiumdUrl } = getEndpoints(useDevEndpoints);
   try {
-    const response = await got(`${freemiumdUrl}/api/v1/anon/discover`, {
+    const response = await got("api/v1/anon/discover", {
+      prefixUrl: vscode.Uri.parse(freemiumdUrl).with({ path: "" }).toString(),
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      responseType: "json",
       json: credentials,
+      hooks: getHooks("POST", logger),
     });
-    const body = JSON.parse(response.body);
-    return body as CaptureConnection;
+    return response.body as unknown as CaptureConnection;
   } catch (error) {
     throw new Error(`Failed to discover capture instance: ${error}`);
   }
 }
 
-export async function requestPrepare(capture: CaptureConnection, prepareOptions: PrepareOptions) {
-  const response = await got(`${capture.captureInstanceUrl}/capture/api/1.0/quickgen/prepare`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `token ${capture.token}`,
-    },
+export async function requestPrepare(
+  capture: CaptureConnection,
+  prepareOptions: PrepareOptions,
+  logger: Logger
+) {
+  const response = await got("capture/api/1.0/quickgen/prepare", {
+    ...gotOptions(capture, "POST", logger),
     json: {
       base_path: prepareOptions.basePath,
       servers: prepareOptions.servers,
     },
   });
-  return JSON.parse(response.body)["quickgen_id"];
+  return (response.body as any)["quickgen_id"];
 }
 
 export async function requestUpload(
   capture: CaptureConnection,
   quickgenId: string,
   files: string[],
-  listener: (percent: number) => void
+  listener: (percent: number) => void,
+  logger: Logger
 ) {
   const form = new FormData();
   for (const uri of files) {
     const fsPath = vscode.Uri.parse(uri).fsPath;
     form.append("file", fs.createReadStream(fsPath));
   }
-  const response = await got(
-    `${capture.captureInstanceUrl}/capture/api/1.0/quickgen/${quickgenId}/prepare/upload-file`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `token ${capture.token}`,
-      },
-      body: form,
-    }
-  ).on("uploadProgress", (progress) => {
+  const response = await got(`capture/api/1.0/quickgen/${quickgenId}/prepare/upload-file`, {
+    ...gotOptions(capture, "POST", logger),
+    body: form,
+  }).on("uploadProgress", (progress) => {
     listener(progress.percent);
   });
-  return JSON.parse(response.body);
+  return response.body;
 }
 
-export async function requestStart(capture: CaptureConnection, quickgenId: string) {
-  const response = await got(
-    `${capture.captureInstanceUrl}/capture/api/1.0/quickgen/${quickgenId}/execution/start`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `token ${capture.token}`,
-      },
-    }
-  );
-  return JSON.parse(response.body);
+export async function requestStart(capture: CaptureConnection, quickgenId: string, logger: Logger) {
+  const response = await got(`capture/api/1.0/quickgen/${quickgenId}/execution/start`, {
+    ...gotOptions(capture, "POST", logger),
+  });
+  return response.body;
 }
 
-export async function requestStatus(capture: CaptureConnection, quickgenId: string) {
-  const response = await got(
-    `${capture.captureInstanceUrl}/capture/api/1.0/quickgen/${quickgenId}/execution/status`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `token ${capture.token}`,
-      },
-    }
-  );
-  return JSON.parse(response.body)["status"];
+export async function requestStatus(
+  capture: CaptureConnection,
+  quickgenId: string,
+  logger: Logger
+) {
+  const response = await got(`capture/api/1.0/quickgen/${quickgenId}/execution/status`, {
+    ...gotOptions(capture, "GET", logger),
+  });
+  return (response.body as any)["status"];
 }
 
-export async function requestDownload(capture: CaptureConnection, quickgenId: string) {
-  const response = await got(
-    `${capture.captureInstanceUrl}/capture/api/1.0/quickgen/${quickgenId}/results/openapi`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `token ${capture.token}`,
-      },
-    }
-  );
-  return JSON.parse(response.body);
+export async function requestDownload(
+  capture: CaptureConnection,
+  quickgenId: string,
+  logger: Logger
+) {
+  const response = await got(`capture/api/1.0/quickgen/${quickgenId}/results/openapi`, {
+    ...gotOptions(capture, "GET", logger),
+  });
+  return response.body;
 }
 
-export async function requestDelete(capture: CaptureConnection, quickgenId: string) {
-  const response = await got(
-    `${capture.captureInstanceUrl}/capture/api/1.0/quickgen/${quickgenId}/delete`,
-    {
-      method: "DELETE",
-      headers: {
-        Authorization: `token ${capture.token}`,
-      },
-    }
-  );
-  return JSON.parse(response.body);
+export async function requestDelete(
+  capture: CaptureConnection,
+  quickgenId: string,
+  logger: Logger
+) {
+  const response = await got(`capture/api/1.0/quickgen/${quickgenId}/delete`, {
+    ...gotOptions(capture, "DELETE", logger),
+  });
+  return response.body;
 }
 
 function getError(error: any): string {
@@ -554,4 +546,21 @@ function getError(error: any): string {
     return `${error}, ${detail}`;
   }
   return `${error}`;
+}
+
+function gotOptions(
+  capture: CaptureConnection,
+  method: Method,
+  logger: Logger
+): OptionsOfJSONResponseBody {
+  const prefixUrl = vscode.Uri.parse(capture.captureInstanceUrl).with({ path: "" }).toString();
+  return {
+    method,
+    prefixUrl,
+    headers: {
+      Authorization: `Token ${capture.token}`,
+    },
+    responseType: "json",
+    hooks: getHooks(method, logger),
+  };
 }

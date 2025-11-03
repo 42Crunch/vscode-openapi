@@ -12,14 +12,16 @@ import { HttpRequest, HttpResponse, HttpError, HttpConfig } from "@xliic/common/
 import { ShowHttpResponseMessage, ShowHttpErrorMessage } from "@xliic/common/http";
 
 import { createProxyAgentsAndCerts } from "../proxy";
+import { Logger } from "../platform/types";
 
 export async function executeHttpRequest(
   id: string,
   request: HttpRequest,
-  config: HttpConfig
+  config: HttpConfig,
+  logger: Logger
 ): Promise<ShowHttpResponseMessage | ShowHttpErrorMessage> {
   try {
-    const response = await executeHttpRequestRaw(request, config);
+    const response = await executeHttpRequestRaw(request, config, logger);
     return {
       command: "showHttpResponse",
       payload: { id, response },
@@ -34,7 +36,8 @@ export async function executeHttpRequest(
 
 export async function executeHttpRequestRaw(
   request: HttpRequest,
-  config: HttpConfig
+  config: HttpConfig,
+  logger: Logger
 ): Promise<HttpResponse> {
   const { url, method, headers, body } = request;
 
@@ -78,6 +81,7 @@ export async function executeHttpRequestRaw(
     },
     request: requestFn,
     agent: proxy?.agents,
+    hooks: getHooks(method, logger),
   };
 
   try {
@@ -163,4 +167,21 @@ function isSslError(code: string): boolean {
   ];
 
   return codes.includes(code);
+}
+
+export function getHooks(method: string, logger: Logger) {
+  const logResponse = (response: any, retryWithMergedOptions: Function) => {
+    logger.debug(`${method} ${response.url} ${response.statusCode}`);
+    return response;
+  };
+
+  const logRequest = (options: any) => {
+    const body = options.json ? JSON.stringify(options.json) : "";
+    logger.trace(`${method} ${options.prefixUrl}${options.url} ${body}`);
+  };
+
+  return {
+    beforeRequest: [logRequest],
+    afterResponse: [logResponse],
+  };
 }

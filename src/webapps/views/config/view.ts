@@ -133,7 +133,8 @@ export class ConfigWebView extends WebView<Webapp> {
       vscode.env.openExternal(url);
     },
 
-    sendHttpRequest: ({ id, request, config }) => executeHttpRequest(id, request, config),
+    sendHttpRequest: ({ id, request, config }) =>
+      executeHttpRequest(id, request, config, this.logger),
   };
 
   async onStart() {
