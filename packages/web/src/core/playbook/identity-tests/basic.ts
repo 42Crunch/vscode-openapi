@@ -182,12 +182,12 @@ const weakPasswords: Test = {
       yield {
         stage: { ref: { type: "operation", id: "userinfo" } },
         hooks: {
-          security: (auth: AuthResult) => {
+          security: async function* (auth) {
             return {
               basic: { credential: { type: "basic", default: "", methods: {} }, value: "foo:bar" },
             };
           },
-          response: (response) => {
+          response: async function* (response) {
             console.log("Response in weakPasswords test:", response);
             return response;
           },

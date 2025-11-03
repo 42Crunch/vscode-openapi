@@ -20,7 +20,7 @@ test("execute generator", async () => {
     yield {
       stage: { ref: { type: "operation", id: "register" } },
       hooks: {
-        request: (request) => {
+        request: async function* (request) {
           console.log("Hooking request", request);
           return request;
         },
