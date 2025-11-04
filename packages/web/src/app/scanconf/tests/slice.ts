@@ -1,23 +1,21 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
-import { loadPlaybook, showScanconfOperation } from "../actions";
+import { loadPlaybook } from "../actions";
 import { ExecutionResult } from "../components/scenario/types";
-import { Current, handleMockStep, handleTryItStep } from "../playbook-execution-handler";
+import { Current, handleTryItStep } from "../playbook-execution-handler";
 import { Configuration, configure } from "../../../core/playbook/identity-tests";
 import { HookExecutorStep, isHookExecutorStep } from "../../../core/playbook/playbook-tests";
 
 export type State = {
   suiteId?: string;
-  tryCurrent: Current;
-  tryResult: ExecutionResult;
+  try: Record<string, Record<string, { current: Current; result: ExecutionResult }>>;
   config: Configuration;
   failed: string[];
 };
 
 const initialState: State = {
-  tryCurrent: { auth: [] },
-  tryResult: [],
+  try: {},
   failed: [],
   config: {},
 };
@@ -28,27 +26,38 @@ export const slice = createSlice({
   reducers: {
     setTestSuiteId: (state, { payload: suiteId }: PayloadAction<string | undefined>) => {
       state.suiteId = suiteId;
-      state.tryCurrent = { auth: [] };
-      state.tryResult = [];
     },
 
-    startTryExecution: (state, { payload: server }: PayloadAction<string>) => {},
+    startTryExecution: (
+      state,
+      { payload: { server, suiteId } }: PayloadAction<{ server: string; suiteId: string }>
+    ) => {},
 
-    resetTryExecution: (state) => {
-      state.tryCurrent = { auth: [] };
-      state.tryResult = [];
+    resetTryExecution: (state, { payload: { suiteId } }: PayloadAction<{ suiteId: string }>) => {
+      state.try[suiteId] = {};
     },
 
     addTryExecutionStep: (
       state,
-      { payload: step }: PayloadAction<PlaybookExecutorStep | HookExecutorStep>
+      {
+        payload: { testId, step },
+      }: PayloadAction<{ testId: string; step: PlaybookExecutorStep | HookExecutorStep }>
     ) => {
       if (isHookExecutorStep(step)) {
         if (step.event === "test-failed") {
           state.failed.push(step.message);
         }
       } else {
-        handleTryItStep(state, step);
+        if (!state.try[state.suiteId!][testId]) {
+          state.try[state.suiteId!][testId] = { current: { auth: [] }, result: [] };
+        }
+        handleTryItStep(
+          {
+            tryCurrent: state.try[state.suiteId!][testId].current,
+            tryResult: state.try[state.suiteId!][testId].result,
+          },
+          step
+        );
       }
     },
   },

@@ -25,7 +25,7 @@ export type Test = {
   id: string;
   requirements: [string, (spec: BundledSwaggerOrOasSpec, vault: Vault) => string[]][];
   generate: (value: string) => string[];
-  foo: (config: TestConfiguration) => StageGenerator;
+  foo: (config: TestConfiguration) => { id: string; stages: () => StageGenerator }[];
   execute: TestExecutor;
 };
 

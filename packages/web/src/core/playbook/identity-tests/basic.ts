@@ -177,22 +177,55 @@ const weakPasswords: Test = {
   },
   execute: dummyExecutor,
 
-  foo: async function* (config: TestConfiguration): StageGenerator {
-    yield {
-      stage: { ref: { type: "operation", id: "userinfo" } },
-      hooks: {
-        security: async function* (auth) {
-          return {
-            basic: { credential: { type: "basic", default: "", methods: {} }, value: "foo:bar" },
+  foo: function (config: TestConfiguration): { id: string; stages: () => StageGenerator }[] {
+    return [
+      {
+        id: "foo1",
+        stages: async function* (): StageGenerator {
+          yield {
+            stage: { ref: { type: "operation", id: "userinfo" } },
+            hooks: {
+              security: async function* (auth) {
+                return {
+                  basic: {
+                    credential: { type: "basic", default: "", methods: {} },
+                    value: "foo:bar",
+                  },
+                };
+              },
+              response: async function* (response) {
+                console.log("Response in weakPasswords test:", response);
+                yield { event: "test-failed", message: "Test failed as expected" };
+                return response;
+              },
+            },
           };
         },
-        response: async function* (response) {
-          console.log("Response in weakPasswords test:", response);
-          yield { event: "test-failed", message: "Test failed as expected" };
-          return response;
+      },
+      {
+        id: "foo2",
+        stages: async function* (): StageGenerator {
+          yield {
+            stage: { ref: { type: "operation", id: "userinfo" } },
+            hooks: {
+              security: async function* (auth) {
+                return {
+                  basic: {
+                    credential: { type: "basic", default: "", methods: {} },
+                    value: "foo:bar",
+                  },
+                };
+              },
+              response: async function* (response) {
+                console.log("Response in weakPasswords test:", response);
+                yield { event: "test-failed", message: "Test failed as expected" };
+                return response;
+              },
+            },
+          };
         },
       },
-    };
+    ];
   },
 };
 
