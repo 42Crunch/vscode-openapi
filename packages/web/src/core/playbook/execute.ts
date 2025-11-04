@@ -1,10 +1,10 @@
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
-import { HttpClient, HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
+import { HttpClient } from "@xliic/common/http";
 import { BundledSwaggerOrOasSpec, getOperationById, getHttpResponseRange } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 
 import { makeExternalHttpRequest, makeHttpRequest } from "./http";
-import { MockHttpClient, MockHttpResponse, MockHttpResponseType } from "../http-client/mock-client";
+import { MockHttpClient, MockHttpResponse } from "../http-client/mock-client";
 import { AuthResult, PlaybookExecutorStep } from "./playbook";
 import { PlaybookEnv, PlaybookEnvStack } from "./playbook-env";
 import { assignVariables, failedAssigments } from "./variable-assignments";
@@ -15,23 +15,16 @@ import {
   replaceRequestVariables,
 } from "./variables";
 import { createAuthCache, getAuthEntry, setAuthEntry, AuthCache } from "./auth-cache";
-
-export type Hooks = {
-  security?: (auth: AuthResult) => AsyncGenerator<"foo", AuthResult, void>;
-  request?: (request: HttpRequest) => AsyncGenerator<"bar", HttpRequest, void>;
-  response?: (
-    response: HttpResponse | MockHttpResponseType
-  ) => AsyncGenerator<"baz", HttpResponse | MockHttpResponseType, void>;
-  error?: (error: HttpError) => AsyncGenerator<"qux", HttpError, void>;
-};
+import { HookExecutorStep, Hooks } from "./playbook-tests";
 
 export type StageGenerator = AsyncGenerator<{ stage: Playbook.Stage; hooks: Hooks }, void>;
 
-export type DynamicRequestList = (Playbook.Stage | StageGenerator)[];
+export type DynamicRequestList = StageGenerator;
+export type StaticRequestList = Playbook.Stage[];
 
 export type PlaybookList = {
   name: string;
-  requests: DynamicRequestList;
+  requests: StaticRequestList;
 }[];
 
 export async function* executeAllPlaybooks(
@@ -70,17 +63,20 @@ export async function* executeAllPlaybooks(
   return result;
 }
 
-export async function* executePlaybook(
+export async function* executePlaybook<T extends StaticRequestList | DynamicRequestList>(
   name: string,
   cache: AuthCache,
   client: HttpClient | MockHttpClient,
   oas: BundledSwaggerOrOasSpec,
   server: string,
   file: Playbook.Bundle,
-  requests: DynamicRequestList,
+  requests: T,
   env: PlaybookEnvStack,
   depth: number
-): AsyncGenerator<PlaybookExecutorStep, PlaybookEnvStack | undefined> {
+): AsyncGenerator<
+  T extends StaticRequestList ? PlaybookExecutorStep : PlaybookExecutorStep | HookExecutorStep,
+  PlaybookEnvStack | undefined
+> {
   const result: PlaybookEnvStack = [];
 
   yield { event: "playbook-started", name };
@@ -122,7 +118,7 @@ export async function* executePlaybook(
 
     // skip auth for external requests
     const auth = request.operationId === undefined ? undefined : request.auth;
-    let security = yield* executeAuth(
+    const security = yield* executeAuth(
       cache,
       client,
       oas,
@@ -141,8 +137,9 @@ export async function* executePlaybook(
       return;
     }
 
+    let hookedSecurity = security;
     if (hooks.security !== undefined) {
-      //security = yield* hooks.security(security);
+      hookedSecurity = yield* hooks.security(security) as any;
     }
 
     const replacedStageEnv = replaceEnvironmentVariables(
@@ -207,7 +204,13 @@ export async function* executePlaybook(
 
     const [httpRequest, requestError] =
       "operationId" in replacements.value
-        ? await makeHttpRequest(oas, server, request.operationId, replacements.value, security)
+        ? await makeHttpRequest(
+            oas,
+            server,
+            request.operationId,
+            replacements.value,
+            hookedSecurity
+          )
         : await makeExternalHttpRequest(replacements.value);
 
     if (requestError !== undefined) {
@@ -215,65 +218,68 @@ export async function* executePlaybook(
       return;
     }
 
+    let hookedRequest = httpRequest;
     if (hooks.request !== undefined) {
-      //httpRequest = yield* hooks.request(httpRequest);
+      hookedRequest = yield* hooks.request(httpRequest) as any;
     }
 
     if ("operationId" in replacements.value) {
       yield {
         event: "http-request-prepared",
-        request: httpRequest,
+        request: hookedRequest,
         operationId: request.operationId!,
         playbookRequest: replacements.value,
-        auth: security,
+        auth: hookedSecurity,
       };
     } else {
       yield {
         event: "external-http-request-prepared",
-        request: httpRequest,
+        request: hookedRequest,
         playbookRequest: replacements.value,
-        auth: security,
+        auth: hookedSecurity,
       };
     }
 
-    const [response, error2] = await client(httpRequest);
+    const [response, error2] = await client(hookedRequest);
 
     if (error2 !== undefined) {
+      let hookedError2 = error2;
       if (hooks.error !== undefined) {
-        //error2 = yield* hooks.error(error2);
+        hookedError2 = yield* hooks.error(error2) as any;
       }
-      yield { event: "http-error-received", error: error2 };
+      yield { event: "http-error-received", error: hookedError2 };
       return;
     }
 
+    let hookedResponse = response;
     if (hooks.response !== undefined) {
-      //response = yield* hooks.response(response);
+      hookedResponse = yield* hooks.response(response) as any;
     }
 
-    yield { event: "http-response-received", response };
+    yield { event: "http-response-received", response: hookedResponse };
 
-    if (response !== MockHttpResponse) {
+    if (hookedResponse !== MockHttpResponse) {
       if (stage.expectedResponse !== undefined) {
         if (
-          String(response?.statusCode) !== stage.expectedResponse &&
-          getHttpResponseRange(response!.statusCode) !== stage.expectedResponse &&
+          String(hookedResponse?.statusCode) !== stage.expectedResponse &&
+          getHttpResponseRange(hookedResponse!.statusCode) !== stage.expectedResponse &&
           request.defaultResponse !== "default"
         ) {
           yield {
             event: "response-processing-error",
-            error: `HTTP response code "${response?.statusCode}" does not match expected stage response code "${stage.expectedResponse}"`,
+            error: `HTTP response code "${hookedResponse?.statusCode}" does not match expected stage response code "${stage.expectedResponse}"`,
           };
           return;
         }
       } else {
         if (
-          String(response?.statusCode) !== request.defaultResponse &&
-          getHttpResponseRange(response!.statusCode) !== request.defaultResponse &&
+          String(hookedResponse?.statusCode) !== request.defaultResponse &&
+          getHttpResponseRange(hookedResponse!.statusCode) !== request.defaultResponse &&
           request.defaultResponse !== "default"
         ) {
           yield {
             event: "response-processing-error",
-            error: `HTTP response code "${response?.statusCode}" does not match default response code "${request.defaultResponse}"`,
+            error: `HTTP response code "${hookedResponse?.statusCode}" does not match default response code "${request.defaultResponse}"`,
           };
           return;
         }
@@ -284,7 +290,7 @@ export async function* executePlaybook(
       { type: "playbook-request", name, step: stepId, responseCode: "default" },
       request.responses,
       httpRequest,
-      response,
+      hookedResponse,
       replacements.value.parameters
     );
 
@@ -536,12 +542,12 @@ function getRequestByRef(file: Playbook.Bundle, ref: Playbook.RequestRef) {
   return ref.type === "operation" ? file.operations[ref.id]?.request : file.requests?.[ref.id];
 }
 
-async function* iteratePlaybook(requests: DynamicRequestList): StageGenerator {
-  for (const request of requests) {
-    if ("ref" in request) {
+async function* iteratePlaybook(requests: StaticRequestList | DynamicRequestList): StageGenerator {
+  if (Symbol.asyncIterator in requests) {
+    yield* requests;
+  } else {
+    for (const request of requests) {
       yield { stage: request, hooks: {} };
-    } else {
-      yield* request;
     }
   }
 }

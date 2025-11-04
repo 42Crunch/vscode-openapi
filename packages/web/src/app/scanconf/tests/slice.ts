@@ -5,17 +5,20 @@ import { loadPlaybook, showScanconfOperation } from "../actions";
 import { ExecutionResult } from "../components/scenario/types";
 import { Current, handleMockStep, handleTryItStep } from "../playbook-execution-handler";
 import { Configuration, configure } from "../../../core/playbook/identity-tests";
+import { HookExecutorStep, isHookExecutorStep } from "../../../core/playbook/playbook-tests";
 
 export type State = {
   suiteId?: string;
   tryCurrent: Current;
   tryResult: ExecutionResult;
   config: Configuration;
+  failed: string[];
 };
 
 const initialState: State = {
   tryCurrent: { auth: [] },
   tryResult: [],
+  failed: [],
   config: {},
 };
 
@@ -36,8 +39,17 @@ export const slice = createSlice({
       state.tryResult = [];
     },
 
-    addTryExecutionStep: (state, { payload: step }: PayloadAction<PlaybookExecutorStep>) => {
-      handleTryItStep(state, step);
+    addTryExecutionStep: (
+      state,
+      { payload: step }: PayloadAction<PlaybookExecutorStep | HookExecutorStep>
+    ) => {
+      if (isHookExecutorStep(step)) {
+        if (step.event === "test-failed") {
+          state.failed.push(step.message);
+        }
+      } else {
+        handleTryItStep(state, step);
+      }
     },
   },
 
