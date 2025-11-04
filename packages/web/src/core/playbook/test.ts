@@ -1,23 +1,15 @@
 import { EnvData } from "@xliic/common/env";
 import { HttpClient } from "@xliic/common/http";
-import {
-  BundledSwaggerOrOasSpec,
-  deref,
-  getOperationById,
-  isSwagger,
-  OpenApi30,
-  OpenApi31,
-  Swagger,
-} from "@xliic/openapi";
+import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 
-import { AuthResult, PlaybookExecutorStep, PlaybookHttpRequestPrepared } from "./playbook";
+import { PlaybookExecutorStep } from "./playbook";
 import { PlaybookEnvStack } from "./playbook-env";
 
 import { createAuthCache } from "./auth-cache";
-import { executePlaybook, getExternalEnvironment, PlaybookList } from "./execute";
-import { makeHttpRequest } from "./http";
+import { executePlaybook, getExternalEnvironment } from "./execute";
 import { SuiteConfiguration, TestSuite } from "./identity-tests/types";
+import { HookExecutorStep } from "./playbook-tests";
 
 export async function* testPlaybook(
   client: HttpClient,
@@ -28,7 +20,7 @@ export async function* testPlaybook(
   extraEnv: PlaybookEnvStack = [],
   suite: TestSuite,
   config: SuiteConfiguration
-): AsyncGenerator<PlaybookExecutorStep> {
+): AsyncGenerator<PlaybookExecutorStep | HookExecutorStep> {
   const cache = createAuthCache();
   const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv)];
   const result: PlaybookEnvStack = [];
@@ -42,7 +34,7 @@ export async function* testPlaybook(
     oas,
     server,
     file,
-    [test1.foo(config.tests[test1.id])],
+    test1.foo(config.tests[test1.id]),
     [...env, ...extraEnv, ...result],
     0
   );

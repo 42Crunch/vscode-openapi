@@ -24,6 +24,7 @@ import { webappHttpClient } from "../../core/http-client/webapp-client";
 import { testPlaybook } from "../../core/playbook/test";
 import { SuiteConfiguration } from "../../core/playbook/identity-tests/types";
 import basic from "../../core/playbook/identity-tests/basic";
+import { HookExecutorStep } from "../../core/playbook/playbook-tests";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 
@@ -76,7 +77,7 @@ async function execute(
   httpClient: HttpClient,
   dispatch: (action: Action) => void,
   resetAction: () => Action,
-  addExecutionStepAction: (action: PlaybookExecutorStep) => Action,
+  addExecutionStepAction: (action: PlaybookExecutorStep | HookExecutorStep) => Action,
   server: string,
   suiteConfig: SuiteConfiguration,
   extraEnv: PlaybookEnvStack = []

@@ -15,64 +15,64 @@ import { AuthResult, PlaybookExecutorStep, PlaybookHttpRequestPrepared } from ".
 import { PlaybookEnvStack } from "./playbook-env";
 
 import { createAuthCache } from "./auth-cache";
-import { executePlaybook, getExternalEnvironment, PlaybookList } from "./execute";
+import { executePlaybook, getExternalEnvironment } from "./execute";
 import { makeHttpRequest } from "./http";
 
-export async function* testPlaybook(
-  target: [string, string],
-  client: HttpClient,
-  oas: BundledSwaggerOrOasSpec,
-  server: string,
-  file: Playbook.Bundle,
-  playbooks: PlaybookList,
-  envenv: EnvData,
-  extraEnv: PlaybookEnvStack = []
-): AsyncGenerator<PlaybookExecutorStep> {
-  const cache = createAuthCache();
-  const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv)];
-  const result: PlaybookEnvStack = [];
+// export async function* testPlaybook(
+//   target: [string, string],
+//   client: HttpClient,
+//   oas: BundledSwaggerOrOasSpec,
+//   server: string,
+//   file: Playbook.Bundle,
+//   playbooks: DynamicPlaybookList,
+//   envenv: EnvData,
+//   extraEnv: PlaybookEnvStack = []
+// ): AsyncGenerator<PlaybookExecutorStep> {
+//   const cache = createAuthCache();
+//   const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv)];
+//   const result: PlaybookEnvStack = [];
 
-  for (const { name, requests } of playbooks) {
-    let playbookResult: PlaybookEnvStack | undefined = undefined;
+//   for (const { name, requests } of playbooks) {
+//     let playbookResult: PlaybookEnvStack | undefined = undefined;
 
-    const playbookExecution = executePlaybook(
-      name,
-      cache,
-      client,
-      oas,
-      server,
-      file,
-      requests,
-      [...env, ...extraEnv, ...result],
-      0
-    );
+//     const playbookExecution = executePlaybook(
+//       name,
+//       cache,
+//       client,
+//       oas,
+//       server,
+//       file,
+//       requests,
+//       [...env, ...extraEnv, ...result],
+//       0
+//     );
 
-    while (true) {
-      const { value, done } = await playbookExecution.next();
+//     while (true) {
+//       const { value, done } = await playbookExecution.next();
 
-      if (done) {
-        playbookResult = value;
-        break;
-      } else {
-        if (value.event === "http-request-prepared" && value.operationId === target[1]) {
-          // Do something with the prepared request
-          await executeAuthTests(client, oas, server, value);
-        }
+//       if (done) {
+//         playbookResult = value;
+//         break;
+//       } else {
+//         if (value.event === "http-request-prepared" && value.operationId === target[1]) {
+//           // Do something with the prepared request
+//           await executeAuthTests(client, oas, server, value);
+//         }
 
-        yield value;
-      }
-    }
+//         yield value;
+//       }
+//     }
 
-    if (playbookResult === undefined) {
-      // playbook failed, bail
-      break;
-    } else {
-      result.push(...playbookResult);
-    }
-  }
+//     if (playbookResult === undefined) {
+//       // playbook failed, bail
+//       break;
+//     } else {
+//       result.push(...playbookResult);
+//     }
+//   }
 
-  return result;
-}
+//   return result;
+// }
 
 async function executeAuthTests(
   client: HttpClient,

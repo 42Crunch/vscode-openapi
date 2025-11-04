@@ -177,24 +177,22 @@ const weakPasswords: Test = {
   },
   execute: dummyExecutor,
 
-  foo: (config: TestConfiguration): StageGenerator => {
-    const generator = async function* (): StageGenerator {
-      yield {
-        stage: { ref: { type: "operation", id: "userinfo" } },
-        hooks: {
-          security: async function* (auth) {
-            return {
-              basic: { credential: { type: "basic", default: "", methods: {} }, value: "foo:bar" },
-            };
-          },
-          response: async function* (response) {
-            console.log("Response in weakPasswords test:", response);
-            return response;
-          },
+  foo: async function* (config: TestConfiguration): StageGenerator {
+    yield {
+      stage: { ref: { type: "operation", id: "userinfo" } },
+      hooks: {
+        security: async function* (auth) {
+          return {
+            basic: { credential: { type: "basic", default: "", methods: {} }, value: "foo:bar" },
+          };
         },
-      };
+        response: async function* (response) {
+          console.log("Response in weakPasswords test:", response);
+          yield { event: "test-failed", message: "Test failed as expected" };
+          return response;
+        },
+      },
     };
-    return generator();
   },
 };
 

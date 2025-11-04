@@ -14,6 +14,7 @@ import { saveAuthorizationTest } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import { SuiteConfiguration } from "../../../core/playbook/identity-tests/types";
 import { startTryExecution } from "./slice";
+import Execution from "../components/execution/Execution";
 
 export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; suiteId: string }) {
   const dispatch = useAppDispatch();
@@ -22,7 +23,9 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; su
   //   playbook: { authorizationTests },
   // } = useAppSelector((state) => state.scanconf);
 
-  const { servers } = useAppSelector((state) => state.scanconf);
+  const servers = useAppSelector((state) => state.scanconf.servers);
+  const failed = useAppSelector((state) => state.tests.failed);
+  const tryResult = useAppSelector((state) => state.tests.tryResult);
 
   const suiteHasFailures = Object.values(suite.failures).some((failures) => failures.length > 0);
 
@@ -54,6 +57,30 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; su
           <Tests>
             {Object.entries(suite.tests).map(([testId, test]) => (
               <TestCard key={testId} testId={testId} test={test} />
+            ))}
+          </Tests>
+        </CollapsibleSection>
+      )}
+
+      {tryResult.length > 0 && (
+        <CollapsibleSection title="Result">
+          <Execution result={tryResult} />
+        </CollapsibleSection>
+      )}
+
+      {failed.length > 0 && (
+        <CollapsibleSection title="Failed Tests" defaultOpen>
+          <Tests>
+            {failed.map((failure, idx) => (
+              <TestCardContent key={idx}>
+                <CollapsibleCard>
+                  <Description>
+                    <span>Test Failure</span>
+                    <ExclamationCircle />
+                  </Description>
+                  <TestCardBody>{failure}</TestCardBody>
+                </CollapsibleCard>
+              </TestCardContent>
             ))}
           </Tests>
         </CollapsibleSection>
