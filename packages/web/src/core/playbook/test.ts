@@ -10,8 +10,9 @@ import { createAuthCache } from "./auth-cache";
 import { executePlaybook, getExternalEnvironment } from "./execute";
 import { SuiteConfiguration, TestSuite } from "./identity-tests/types";
 import { HookExecutorStep } from "./playbook-tests";
+import { Action } from "@reduxjs/toolkit";
 
-export async function* testPlaybook(
+export async function testPlaybook(
   client: HttpClient,
   oas: BundledSwaggerOrOasSpec,
   server: string,
@@ -19,29 +20,49 @@ export async function* testPlaybook(
   envenv: EnvData,
   extraEnv: PlaybookEnvStack = [],
   suite: TestSuite,
-  config: SuiteConfiguration
-): AsyncGenerator<PlaybookExecutorStep | HookExecutorStep> {
+  config: SuiteConfiguration,
+  dispatch: (action: Action) => void,
+  addExecutionStepAction: (action: {
+    testId: string;
+    step: PlaybookExecutorStep | HookExecutorStep;
+  }) => Action
+) {
   const cache = createAuthCache();
   const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv)];
-  const result: PlaybookEnvStack = [];
+  //const result: PlaybookEnvStack = [];
 
   const test1 = suite.tests[0];
-
-  const playbookResult: PlaybookEnvStack | undefined = yield* executePlaybook(
-    "test1",
-    cache,
-    client,
-    oas,
-    server,
-    file,
-    test1.foo(config.tests[test1.id]),
-    [...env, ...extraEnv, ...result],
-    0
-  );
-
-  if (playbookResult !== undefined) {
-    result.push(...playbookResult);
+  for (const { id, stages } of test1.foo(config.tests[test1.id])) {
+    for await (const step of executePlaybook(
+      id,
+      cache,
+      client,
+      oas,
+      server,
+      file,
+      stages(),
+      [...env, ...extraEnv],
+      0
+    )) {
+      dispatch(addExecutionStepAction({ testId: id, step }));
+    }
   }
 
-  return result;
+  // const playbookResult: PlaybookEnvStack | undefined = yield* executePlaybook(
+  //   "test1",
+  //   cache,
+  //   client,
+  //   oas,
+  //   server,
+  //   file,
+  //   test1.foo(config.tests[test1.id]),
+  //   [...env, ...extraEnv, ...result],
+  //   0
+  // );
+
+  // if (playbookResult !== undefined) {
+  //   result.push(...playbookResult);
+  // }
+
+  // return result;
 }

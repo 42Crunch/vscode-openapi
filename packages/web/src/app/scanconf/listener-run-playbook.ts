@@ -73,7 +73,6 @@ import {
 } from "./slice";
 import { AppDispatch, RootState } from "./store";
 import { webappHttpClient } from "../../core/http-client/webapp-client";
-import { S } from "vitest/dist/chunks/config.d.D2ROskhv";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 

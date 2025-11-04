@@ -40,17 +40,18 @@ export function onTryExecuteTestSuite(
   return () =>
     startAppListening({
       actionCreator: startTryExecution,
-      effect: async ({ payload: server }, listenerApi) => {
+      effect: async ({ payload: { server, suiteId } }, listenerApi) => {
         const {
-          scanconf: { playbook, oas },
-          prefs: { useGlobalBlocks, rejectUnauthorized },
-          tests: { suiteId, config },
+          prefs: { rejectUnauthorized },
+          tests: { config },
           config: {
             data: { scanProxy },
           },
         } = listenerApi.getState();
 
         const suiteConfig = config[suiteId!];
+
+        listenerApi.dispatch(resetTryExecution({ suiteId }));
 
         await execute(
           listenerApi.getState(),
@@ -60,7 +61,6 @@ export function onTryExecuteTestSuite(
               listenerApi.dispatch(sendHttpRequest({ id, request, config }))
           ),
           listenerApi.dispatch,
-          resetTryExecution,
           addTryExecutionStep,
           server,
           suiteConfig
@@ -76,15 +76,15 @@ async function execute(
   },
   httpClient: HttpClient,
   dispatch: (action: Action) => void,
-  resetAction: () => Action,
-  addExecutionStepAction: (action: PlaybookExecutorStep | HookExecutorStep) => Action,
+  addExecutionStepAction: (action: {
+    testId: string;
+    step: PlaybookExecutorStep | HookExecutorStep;
+  }) => Action,
   server: string,
   suiteConfig: SuiteConfiguration,
   extraEnv: PlaybookEnvStack = []
 ) {
-  dispatch(resetAction());
-
-  for await (const step of testPlaybook(
+  testPlaybook(
     httpClient,
     state.scanconf.oas,
     server,
@@ -92,8 +92,8 @@ async function execute(
     state.env.data,
     extraEnv,
     basic,
-    suiteConfig
-  )) {
-    dispatch(addExecutionStepAction(step));
-  }
+    suiteConfig,
+    dispatch,
+    addExecutionStepAction
+  );
 }
