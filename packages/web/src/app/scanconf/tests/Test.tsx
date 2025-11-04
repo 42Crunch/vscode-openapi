@@ -25,7 +25,7 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; su
 
   const servers = useAppSelector((state) => state.scanconf.servers);
   const failed = useAppSelector((state) => state.tests.failed);
-  const tryResult = useAppSelector((state) => state.tests.tryResult);
+  const tryResult = useAppSelector((state) => state.tests.try?.[suiteId]);
 
   const suiteHasFailures = Object.values(suite.failures).some((failures) => failures.length > 0);
 
@@ -34,7 +34,7 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; su
       <TryAndServerSelector
         servers={servers}
         onTry={(server: string) => {
-          dispatch(startTryExecution(server));
+          dispatch(startTryExecution({ server, suiteId }));
         }}
       />
       <CollapsibleSection title={suiteId} defaultOpen={suiteHasFailures}>
@@ -62,9 +62,11 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; su
         </CollapsibleSection>
       )}
 
-      {tryResult.length > 0 && (
+      {Object.keys(tryResult || {}).length > 0 && (
         <CollapsibleSection title="Result">
-          <Execution result={tryResult} />
+          {Object.entries(tryResult).map(([testId, result]) => (
+            <Execution key={testId} result={result.result} />
+          ))}
         </CollapsibleSection>
       )}
 
