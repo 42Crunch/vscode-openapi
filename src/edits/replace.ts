@@ -7,6 +7,7 @@ import * as vscode from "vscode";
 import { Parsed, Path } from "@xliic/preserving-json-yaml-parser";
 import { indent } from "./indent";
 import { findLocationForPath } from "@xliic/preserving-json-yaml-parser";
+import { getSafeEndPosition } from "../util";
 
 export function replaceLiteral(
   document: vscode.TextDocument,
@@ -37,11 +38,12 @@ export function replaceObject(
   if (location === undefined) {
     throw new Error(`Unable to replace, node at JSON Pointer ${path} is not found`);
   }
+  const endPos =
+    document.languageId === "yaml"
+      ? getSafeEndPosition(document, location.end)
+      : document.positionAt(location.end);
 
-  const range = new vscode.Range(
-    document.positionAt(location.start),
-    document.positionAt(location.end)
-  );
+  const range = new vscode.Range(document.positionAt(location.start), endPos);
 
   // reindent replacement to the target indentation level
   // remove spaces at the first line, as the insertion starts
