@@ -359,7 +359,7 @@ export function insertYamlNode(context: FixContext, value: string): [string, vsc
 }
 
 // Must be applied to get correct end position of YAML node value
-function getSafeEndPosition(document: vscode.TextDocument, offset: number): vscode.Position {
+export function getSafeEndPosition(document: vscode.TextDocument, offset: number): vscode.Position {
   const pos = document.positionAt(offset);
   const column = pos.character;
   if (column === 0) {
