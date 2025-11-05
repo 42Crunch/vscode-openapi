@@ -180,7 +180,7 @@ const weakPasswords: Test = {
   foo: function (config: TestConfiguration): { id: string; stages: () => StageGenerator }[] {
     return [
       {
-        id: "foo1",
+        id: "password: foo",
         stages: async function* (): StageGenerator {
           yield {
             stage: { ref: { type: "operation", id: "userinfo" } },
@@ -203,7 +203,7 @@ const weakPasswords: Test = {
         },
       },
       {
-        id: "foo2",
+        id: "password: bar",
         stages: async function* (): StageGenerator {
           yield {
             stage: { ref: { type: "operation", id: "userinfo" } },
