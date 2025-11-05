@@ -1,16 +1,12 @@
 import styled from "styled-components";
 
-import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
-import { ItemId } from "../../../components/layout/SearchSidebar";
-import Form from "../../../new-components/Form";
-import { Check, CircleCheck, ExclamationCircle, TriangleExclamation } from "../../../icons";
+import { Check, ExclamationCircle } from "../../../icons";
 import CollapsibleCard from "../../../new-components/CollapsibleCard";
 import CollapsibleSection from "../components/CollapsibleSection";
 import TryAndServerSelector from "../components/TryAndServerSelector";
 
-import { saveAuthorizationTest } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import { SuiteConfiguration } from "../../../core/playbook/identity-tests/types";
 import { startTryExecution } from "./slice";
@@ -18,10 +14,6 @@ import Execution from "../components/execution/Execution";
 
 export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; suiteId: string }) {
   const dispatch = useAppDispatch();
-
-  // const {
-  //   playbook: { authorizationTests },
-  // } = useAppSelector((state) => state.scanconf);
 
   const servers = useAppSelector((state) => state.scanconf.servers);
   const failed = useAppSelector((state) => state.tests.failed);
@@ -52,6 +44,7 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; su
           </div>
         ))}
       </CollapsibleSection>
+
       {Object.keys(Object.entries(suite.tests)).length > 0 && (
         <CollapsibleSection title="Tests" defaultOpen>
           <Tests>
@@ -64,42 +57,28 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; su
 
       {Object.keys(tryResult || {}).length > 0 && (
         <CollapsibleSection title="Result">
-          <Results>
-            <TestTitle>
-              <span>weak-passwords</span>
-              <Passed>Passed</Passed>
-            </TestTitle>
-            {Object.entries(tryResult).map(([testId, result]) => (
-              <TestCardContent key={testId}>
-                <CollapsibleCard>
-                  <Description>{testId}</Description>
-                  <TestCardBody>
-                    <Execution key={testId} result={result.result} />
-                  </TestCardBody>
-                </CollapsibleCard>
-              </TestCardContent>
-            ))}
-          </Results>
+          {Object.entries(tryResult).map(([testId, result]) => (
+            <div key={testId}>
+              <TestTitle>
+                <span>{testId}</span>
+                <Passed>Passed</Passed>
+              </TestTitle>
+              <Results>
+                {Object.entries(result).map(([stageId, stage]) => (
+                  <TestCardContent key={stageId}>
+                    <CollapsibleCard>
+                      <Description>{stageId}</Description>
+                      <TestCardBody>
+                        <Execution result={stage.result} />
+                      </TestCardBody>
+                    </CollapsibleCard>
+                  </TestCardContent>
+                ))}
+              </Results>
+            </div>
+          ))}
         </CollapsibleSection>
       )}
-      {/* 
-      {failed.length > 0 && (
-        <CollapsibleSection title="Failed Tests" defaultOpen>
-          <Tests>
-            {failed.map((failure, idx) => (
-              <TestCardContent key={idx}>
-                <CollapsibleCard>
-                  <Description>
-                    <span>Test Failure</span>
-                    <ExclamationCircle />
-                  </Description>
-                  <TestCardBody>{failure}</TestCardBody>
-                </CollapsibleCard>
-              </TestCardContent>
-            ))}
-          </Tests>
-        </CollapsibleSection>
-      )} */}
     </Container>
   );
 }
