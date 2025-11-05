@@ -17,7 +17,12 @@ import { PlaybookExecutorStep } from "../../core/playbook/playbook";
 import { PlaybookEnvStack } from "../../core/playbook/playbook-env";
 import { sendHttpRequest } from "../../features/http-client/slice";
 
-import { addTryExecutionStep, resetTryExecution, startTryExecution } from "./tests/slice";
+import {
+  addTryExecutionTest,
+  addTryExecutionStep,
+  resetTryExecution,
+  startTryExecution,
+} from "./tests/slice";
 
 import { AppDispatch, RootState } from "./store";
 import { webappHttpClient } from "../../core/http-client/webapp-client";
@@ -61,6 +66,7 @@ export function onTryExecuteTestSuite(
               listenerApi.dispatch(sendHttpRequest({ id, request, config }))
           ),
           listenerApi.dispatch,
+          addTryExecutionTest,
           addTryExecutionStep,
           server,
           suiteConfig
@@ -76,8 +82,10 @@ async function execute(
   },
   httpClient: HttpClient,
   dispatch: (action: Action) => void,
+  addExecutionTestAction: (action: { testId: string }) => Action,
   addExecutionStepAction: (action: {
     testId: string;
+    stageId: string;
     step: PlaybookExecutorStep | HookExecutorStep;
   }) => Action,
   server: string,
@@ -94,6 +102,7 @@ async function execute(
     basic,
     suiteConfig,
     dispatch,
+    addExecutionTestAction,
     addExecutionStepAction
   );
 }

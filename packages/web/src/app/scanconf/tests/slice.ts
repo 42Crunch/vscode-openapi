@@ -9,7 +9,10 @@ import { HookExecutorStep, isHookExecutorStep } from "../../../core/playbook/pla
 
 export type State = {
   suiteId?: string;
-  try: Record<string, Record<string, { current: Current; result: ExecutionResult }>>;
+  try: Record<
+    string,
+    Record<string, Record<string, { current: Current; result: ExecutionResult }>>
+  >;
   config: Configuration;
   failed: string[];
 };
@@ -37,24 +40,34 @@ export const slice = createSlice({
       state.try[suiteId] = {};
     },
 
+    addTryExecutionTest: (state, { payload: { testId } }: PayloadAction<{ testId: string }>) => {
+      if (!state.try[state.suiteId!][testId]) {
+        state.try[state.suiteId!][testId] = {};
+      }
+    },
+
     addTryExecutionStep: (
       state,
       {
-        payload: { testId, step },
-      }: PayloadAction<{ testId: string; step: PlaybookExecutorStep | HookExecutorStep }>
+        payload: { testId, stageId, step },
+      }: PayloadAction<{
+        testId: string;
+        stageId: string;
+        step: PlaybookExecutorStep | HookExecutorStep;
+      }>
     ) => {
       if (isHookExecutorStep(step)) {
         if (step.event === "test-failed") {
           state.failed.push(step.message);
         }
       } else {
-        if (!state.try[state.suiteId!][testId]) {
-          state.try[state.suiteId!][testId] = { current: { auth: [] }, result: [] };
+        if (!state.try[state.suiteId!][testId][stageId]) {
+          state.try[state.suiteId!][testId][stageId] = { current: { auth: [] }, result: [] };
         }
         handleTryItStep(
           {
-            tryCurrent: state.try[state.suiteId!][testId].current,
-            tryResult: state.try[state.suiteId!][testId].result,
+            tryCurrent: state.try[state.suiteId!][testId][stageId].current,
+            tryResult: state.try[state.suiteId!][testId][stageId].result,
           },
           step
         );
@@ -69,7 +82,12 @@ export const slice = createSlice({
   },
 });
 
-export const { setTestSuiteId, startTryExecution, resetTryExecution, addTryExecutionStep } =
-  slice.actions;
+export const {
+  setTestSuiteId,
+  startTryExecution,
+  resetTryExecution,
+  addTryExecutionTest,
+  addTryExecutionStep,
+} = slice.actions;
 
 export default slice.reducer;
