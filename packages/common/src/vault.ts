@@ -112,3 +112,7 @@ export type SecurityScheme =
 export type Vault = {
   schemes: Record<string, SecurityScheme>;
 };
+
+export type SaveVaultMessage = { command: "saveVault"; payload: Vault };
+
+export type LoadVaultMessage = { command: "loadVault"; payload: Vault };

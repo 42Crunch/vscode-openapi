@@ -727,6 +727,10 @@
       {
         "command": "openapi.exportAuditReport",
         "title": "42Crunch: Export Audit Report file for the current OpenAPI file"
+      },
+      {
+        "command": "openapi.showVault",
+        "title": "42Crunch: Open Vault"
       }
     ],
     "keybindings": [
