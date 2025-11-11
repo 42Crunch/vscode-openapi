@@ -2,7 +2,7 @@ import styled from "styled-components";
 import { useState } from "react";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { Vault, SecurityScheme, SecurityCredential, SchemeType } from "@xliic/common/vault";
+import { SecurityScheme, SecurityCredential, SchemeType } from "@xliic/common/vault";
 
 import { Pen, TrashCan } from "../../icons";
 import { Menu, MenuItem } from "../../new-components/Menu";
@@ -15,9 +15,18 @@ import Separator from "../../components/Separator";
 import NewCredentialDialog from "./NewCredentialDialog";
 import EditCredentialDialog from "./EditCredentialDialog";
 import { useAppDispatch } from "./store";
-import { updateCredential } from "../../features/vault/slice";
+import { deleteCredential, updateCredential } from "../../features/vault/slice";
+import { requestConfirmation } from "../../features/confirmation-dialog/slice";
 
-export default function VaultSchema({ name, schema }: { name: string; schema: SecurityScheme }) {
+export default function VaultSchema({
+  schemaName,
+  schema,
+}: {
+  schemaName: string;
+  schema: SecurityScheme;
+}) {
+  const dispatch = useAppDispatch();
+
   const credentialKeys = "credentials" in schema ? Object.keys(schema.credentials) : [];
   return (
     <VaultSchemaBody>
@@ -28,7 +37,7 @@ export default function VaultSchema({ name, schema }: { name: string; schema: Se
       <Credentials>
         {credentialKeys.map((key) => (
           <Credential
-            schemaName={name}
+            schemaName={schemaName}
             schemeType={schema.type}
             name={key}
             credential={(schema as any).credentials[key]}
@@ -36,7 +45,15 @@ export default function VaultSchema({ name, schema }: { name: string; schema: Se
             key={key}
           />
         ))}
-        <NewCredentialDialog existing={[]} onAddScheme={() => {}} />
+        <NewCredentialDialog
+          existing={credentialKeys}
+          schemeType={schema.type}
+          onCredentialAdd={(name, value) => {
+            dispatch(
+              updateCredential({ id: { scheme: schemaName, credential: undefined }, name, value })
+            );
+          }}
+        />
       </Credentials>
     </VaultSchemaBody>
   );
@@ -68,7 +85,18 @@ function Credential({
               <Pen />
               Edit
             </MenuItem>
-            <MenuItem onClick={(e) => e.stopPropagation()} onSelect={() => {}}>
+            <MenuItem
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() =>
+                dispatch(
+                  requestConfirmation({
+                    title: "Delete credential",
+                    message: `Are you sure you want to delete credential "${name}"?`,
+                    actions: [deleteCredential({ scheme: schemaName, credential: name })],
+                  })
+                )
+              }
+            >
               <TrashCan />
               Delete
             </MenuItem>
