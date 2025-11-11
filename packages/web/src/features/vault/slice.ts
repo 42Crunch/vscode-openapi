@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from "@reduxjs/toolkit";
-import { SchemeType, Vault } from "@xliic/common/vault";
+import { SchemeType, SecurityCredential, Vault } from "@xliic/common/vault";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 
 export interface VaultState {
@@ -61,10 +61,36 @@ export const slice = createSlice({
         state.selectedSchemeId = Object.keys(state.data.schemes)[0];
       }
     },
+
+    updateCredential: (
+      state,
+      action: PayloadAction<{
+        id: { scheme: string; credential: string | undefined };
+        name: string;
+        value: SecurityCredential;
+      }>
+    ) => {
+      const { id, name, value } = action.payload;
+      const scheme = state.data.schemes[id.scheme];
+      if ("credentials" in scheme) {
+        if (id.credential === undefined) {
+          // new credential
+          scheme.credentials[name] = value;
+        } else if (id.credential !== name) {
+          // rename existing credential
+          delete scheme.credentials[id.credential];
+          scheme.credentials[name] = value;
+        } else {
+          // update existing credential
+          scheme.credentials[name] = value;
+        }
+      }
+    },
   },
 });
 
-export const { loadVault, saveVault, selectScheme, addScheme, deleteScheme } = slice.actions;
+export const { loadVault, saveVault, selectScheme, addScheme, deleteScheme, updateCredential } =
+  slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<
   ReturnType<(typeof slice.actions)[keyof typeof slice.actions]>

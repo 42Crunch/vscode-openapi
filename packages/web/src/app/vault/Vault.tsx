@@ -63,7 +63,9 @@ export default function Vault() {
       noSectionTitles
       //errors={errors}
       render={(selected) => {
-        return <VaultSchema schema={data?.schemes?.[selected?.itemId!]!} />;
+        return (
+          <VaultSchema name={selected?.itemId!} schema={data?.schemes?.[selected?.itemId!]!} />
+        );
       }}
       renderButtons={() => (
         <NewSchemeDialog

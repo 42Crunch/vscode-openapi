@@ -8,7 +8,8 @@ import {
 import { Webapp, NoopMessage } from "@xliic/common/message";
 import { SaveVaultMessage } from "@xliic/common/vault";
 
-import vault, { addScheme, deleteScheme, saveVault } from "./slice";
+import vault, { addScheme, deleteScheme, saveVault, updateCredential } from "./slice";
+import { update } from "@xliic/scanconf-changes";
 
 const reducer = { vault };
 const initStore = () => configureStore({ reducer });
@@ -23,7 +24,7 @@ export function onVaultChange(
 ) {
   return () =>
     startAppListening({
-      matcher: isAnyOf(addScheme, deleteScheme),
+      matcher: isAnyOf(addScheme, deleteScheme, updateCredential),
       effect: async (action, listenerApi) => {
         const {
           vault: { data: vault, hasErrors },

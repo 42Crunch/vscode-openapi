@@ -1,9 +1,10 @@
 import styled from "styled-components";
+import { useState } from "react";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { Vault, SecurityScheme } from "@xliic/common/vault";
+import { Vault, SecurityScheme, SecurityCredential, SchemeType } from "@xliic/common/vault";
 
-import { Plus, Pen, TrashCan } from "../../icons";
+import { Pen, TrashCan } from "../../icons";
 import { Menu, MenuItem } from "../../new-components/Menu";
 
 import CollapsibleCard, {
@@ -11,8 +12,12 @@ import CollapsibleCard, {
   TopDescription,
 } from "../../new-components/CollapsibleCard";
 import Separator from "../../components/Separator";
+import NewCredentialDialog from "./NewCredentialDialog";
+import EditCredentialDialog from "./EditCredentialDialog";
+import { useAppDispatch } from "./store";
+import { updateCredential } from "../../features/vault/slice";
 
-export default function VaultSchema({ schema }: { schema: SecurityScheme }) {
+export default function VaultSchema({ name, schema }: { name: string; schema: SecurityScheme }) {
   const credentialKeys = "credentials" in schema ? Object.keys(schema.credentials) : [];
   return (
     <VaultSchemaBody>
@@ -22,24 +27,44 @@ export default function VaultSchema({ schema }: { schema: SecurityScheme }) {
       <Separator title="Credentials" />
       <Credentials>
         {credentialKeys.map((key) => (
-          <Credential name={key} schema={schema} credentialKey={key} key={key} />
+          <Credential
+            schemaName={name}
+            schemeType={schema.type}
+            name={key}
+            credential={(schema as any).credentials[key]}
+            existing={credentialKeys}
+            key={key}
+          />
         ))}
-        <AddNewCredential>
-          <Plus />
-          New credential
-        </AddNewCredential>
+        <NewCredentialDialog existing={[]} onAddScheme={() => {}} />
       </Credentials>
     </VaultSchemaBody>
   );
 }
 
-function Credential({ name }: { name: string; schema: SecurityScheme; credentialKey: string }) {
+function Credential({
+  name,
+  credential,
+  schemaName,
+  schemeType,
+  existing,
+}: {
+  name: string;
+  credential: SecurityCredential;
+  schemaName: string;
+  schemeType: SchemeType;
+  existing: string[];
+}) {
+  const dispatch = useAppDispatch();
+
+  const [isEditDialogOpen, setEditDialogOpen] = useState(false);
+
   return (
     <CredentialBody>
       <CollapsibleCard
         menu={
           <Menu>
-            <MenuItem onClick={(e) => e.stopPropagation()} onSelect={() => {}}>
+            <MenuItem onClick={(e) => e.stopPropagation()} onSelect={() => setEditDialogOpen(true)}>
               <Pen />
               Edit
             </MenuItem>
@@ -55,6 +80,17 @@ function Credential({ name }: { name: string; schema: SecurityScheme; credential
         </TopDescription>
         <BottomDescription>Credential details go here</BottomDescription>
       </CollapsibleCard>
+      <EditCredentialDialog
+        id={{ scheme: schemaName, credential: name }}
+        existing={existing}
+        credential={credential}
+        schemeType={schemeType}
+        onCredentialUpdate={(id, name, value) => {
+          dispatch(updateCredential({ id, name, value }));
+        }}
+        isOpen={isEditDialogOpen}
+        setOpen={setEditDialogOpen}
+      />
     </CredentialBody>
   );
 }
@@ -66,8 +102,6 @@ const Metadata = styled.div`
 
 const CredentialBody = styled.div`
   background-color: var(${ThemeColorVariables.background});
-  //border: 1px solid var(${ThemeColorVariables.border});
-  //padding: 8px;
 `;
 
 const Credentials = styled.div`
@@ -80,18 +114,4 @@ const Credentials = styled.div`
 const Title = styled.div`
   font-size: 14px;
   font-weight: 600;
-`;
-
-const AddNewCredential = styled.div`
-  display: flex;
-  padding: 8px 12px;
-  gap: 4px;
-  cursor: pointer;
-  align-items: center;
-  cusror: pointer;
-  border: 1px dashed var(${ThemeColorVariables.border});
-  color: var(${ThemeColorVariables.linkForeground});
-  > svg {
-    fill: var(${ThemeColorVariables.linkForeground});
-  }
 `;
