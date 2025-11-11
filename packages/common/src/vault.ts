@@ -121,6 +121,19 @@ export type SecurityScheme =
   | MutualTLSSecurityScheme
   | AliasSecurityScheme;
 
+export type SecurityCredential =
+  | BasicCredential
+  | BearerCredential
+  | ApiKeyCredential
+  | AccessTokenCredential
+  | KeyPairCredential
+  | DynamicCredential;
+
+export type CredentialIdentifier = {
+  scheme: string;
+  credential: string;
+};
+
 export type Vault = {
   schemes: Record<string, SecurityScheme>;
 };
