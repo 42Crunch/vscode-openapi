@@ -6,7 +6,7 @@ import { Webapp } from "@xliic/common/webapp/vault";
 
 import { RouterContext, Routes } from "../../features/router/RouterContext";
 import { ThemeState } from "../../features/theme/slice";
-import { makeWebappMessageHandler, RouterApp } from "../webapp";
+import { makeWebappMessageHandler, NavigationRouterApp, RouterApp } from "../webapp";
 import { createListener } from "./listener";
 import { initStore, messageHandlers } from "./store";
 import Vault from "./Vault";

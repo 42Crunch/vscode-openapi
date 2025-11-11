@@ -1,11 +1,12 @@
 import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from "@reduxjs/toolkit";
-import { Vault } from "@xliic/common/vault";
+import { SchemeType, Vault } from "@xliic/common/vault";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 
 export interface VaultState {
   ready: boolean;
   hasErrors: boolean;
   data: Vault;
+  selectedSchemeId?: string;
 }
 
 const initialState: VaultState = {
@@ -30,10 +31,40 @@ export const slice = createSlice({
       // this is also a hook for a listener
       state.data = action.payload;
     },
+
+    selectScheme: (state, action: PayloadAction<string>) => {
+      state.selectedSchemeId = action.payload;
+    },
+
+    addScheme: (
+      state,
+      action: PayloadAction<{ name: string; type: SchemeType; scheme: string }>
+    ) => {
+      const { name, type, scheme } = action.payload;
+      if (type === "alias") {
+        state.data.schemes[name] = {
+          type: "alias",
+          scheme: scheme,
+        };
+      } else {
+        state.data.schemes[name] = {
+          type: type,
+          credentials: {},
+        };
+      }
+      state.selectedSchemeId = name;
+    },
+
+    deleteScheme: (state, action: PayloadAction<string>) => {
+      delete state.data.schemes[action.payload];
+      if (state.selectedSchemeId === action.payload) {
+        state.selectedSchemeId = Object.keys(state.data.schemes)[0];
+      }
+    },
   },
 });
 
-export const { loadVault, saveVault } = slice.actions;
+export const { loadVault, saveVault, selectScheme, addScheme, deleteScheme } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<
   ReturnType<(typeof slice.actions)[keyof typeof slice.actions]>
