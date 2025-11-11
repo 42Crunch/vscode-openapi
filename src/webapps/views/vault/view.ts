@@ -19,7 +19,6 @@ import { getCliUpdate } from "../../../platform/cli-ast-update";
 import { executeHttpRequest } from "../../http-handler";
 
 export class VaultWebView extends WebView<Webapp> {
-  private vault?: Vault;
   constructor(extensionPath: string, private configuration: Configuration, private logger: Logger) {
     super(extensionPath, "vault", "Vault", vscode.ViewColumn.One);
 
@@ -31,15 +30,21 @@ export class VaultWebView extends WebView<Webapp> {
   }
 
   hostHandlers: Webapp["hostHandlers"] = {
-    saveVault: async (vault) => {},
+    saveVault: async (vault) => {
+      const vaultUri = vscode.Uri.parse("file:///Users/anton/crunch/vault/vault.json");
+      const vaultContent = Buffer.from(JSON.stringify(vault, null, 2));
+      await vscode.workspace.fs.writeFile(vaultUri, vaultContent);
+    },
   };
 
   async onStart() {
     await this.sendColorTheme(vscode.window.activeColorTheme);
-    //this.config = //
+    const vaultUri = vscode.Uri.parse("file:///Users/anton/crunch/vault/vault.json");
+    const vaultContent = await vscode.workspace.fs.readFile(vaultUri);
+
     await this.sendRequest({
       command: "loadVault",
-      payload: null as any,
+      payload: JSON.parse(Buffer.from(vaultContent).toString()),
     });
   }
 

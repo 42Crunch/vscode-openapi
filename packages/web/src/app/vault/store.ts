@@ -12,11 +12,13 @@ import { Webapp } from "@xliic/common/webapp/vault";
 import vault, { loadVault } from "../../features/vault/slice";
 import router from "../../features/router/slice";
 import theme, { changeTheme, ThemeState } from "../../features/theme/slice";
+import confirmationDialog from "../../features/confirmation-dialog/slice";
 
 const reducer = {
   theme,
   router,
   vault,
+  confirmationDialog,
 };
 
 export const messageHandlers: Webapp["webappHandlers"] = {

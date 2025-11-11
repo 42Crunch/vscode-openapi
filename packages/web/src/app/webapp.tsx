@@ -52,6 +52,7 @@ export function RouterApp() {
   return (
     <ErrorBoundary FallbackComponent={Fallback}>
       <ThemeStyles />
+      <ConfirmationDialog />
       <Router />
     </ErrorBoundary>
   );
