@@ -1,10 +1,5 @@
 import { SearchSidebarControlled } from "../../components/layout/SearchSidebar";
-import {
-  selectScheme,
-  useFeatureSelector,
-  addScheme,
-  deleteScheme,
-} from "../../features/vault/slice";
+import { selectScheme, addScheme, deleteScheme } from "../../features/vault/slice";
 import { requestConfirmation } from "../../features/confirmation-dialog/slice";
 
 import { TrashCan } from "../../icons";
@@ -61,10 +56,12 @@ export default function Vault() {
         dispatch(selectScheme(selected.itemId));
       }}
       noSectionTitles
-      //errors={errors}
       render={(selected) => {
         return (
-          <VaultSchema name={selected?.itemId!} schema={data?.schemes?.[selected?.itemId!]!} />
+          <VaultSchema
+            schemaName={selected?.itemId!}
+            schema={data?.schemes?.[selected?.itemId!]!}
+          />
         );
       }}
       renderButtons={() => (

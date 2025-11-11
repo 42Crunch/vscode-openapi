@@ -1,9 +1,6 @@
-import { useWatch } from "react-hook-form";
-
-import { SchemeType, SchemeTypeList, SecurityScheme } from "@xliic/common/vault";
+import { SchemeType } from "@xliic/common/vault";
 
 import Input from "../../components/Input";
-import Select from "../../components/Select";
 
 export default function EditCredentialForm({ schemeType }: { schemeType: SchemeType }) {
   const credentialFormMap: Record<SchemeType, JSX.Element | undefined> = {
@@ -20,12 +17,6 @@ export default function EditCredentialForm({ schemeType }: { schemeType: SchemeT
     <>
       <Input label="Name" name="name" />
       {credentialFormMap[schemeType]}
-      {/* <Select label="Type" name="type" options={typeOptions} />
-      {type === "alias" && (
-        <>
-          <Select label="Alias of" name="scheme" options={existingOptions} />
-        </>
-      )} */}
     </>
   );
 }

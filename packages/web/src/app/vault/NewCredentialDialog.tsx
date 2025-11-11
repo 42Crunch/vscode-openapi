@@ -1,51 +1,41 @@
-import * as z from "zod";
 import styled from "styled-components";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { SchemeType } from "@xliic/common/vault";
+import { SchemeType, SecurityCredential } from "@xliic/common/vault";
 
 import FormDialog from "../../new-components/FormDialog";
-import NewSchemeForm from "./NewSchemeForm";
 import { Plus } from "../../icons";
-
-const SCHEME_NAME_REGEX = /^[a-zA-Z0-9\._\-]*$/;
-const SCHEME_NAME_REGEX_MESSAGE =
-  "Only alphanumeric characters, dot, underscore or hyphen are allowed in the scheme name";
+import { credentialFormSchema } from "./credential-schema";
+import EditCredentialForm from "./EditCredentialForm";
 
 export default function NewCredentialDialog({
-  onAddScheme,
+  onCredentialAdd,
   existing,
+  schemeType,
 }: {
-  onAddScheme: (name: string, type: SchemeType, scheme: string) => void;
+  onCredentialAdd: (name: string, value: SecurityCredential) => void;
   existing: string[];
+  schemeType: SchemeType;
 }) {
   const defaultValues = {
     name: "",
-    type: "basic",
-    scheme: "",
+    username: "",
+    password: "",
+    key: "",
   };
-
-  const schema = z.object({
-    name: z
-      .string()
-      .regex(SCHEME_NAME_REGEX, {
-        message: SCHEME_NAME_REGEX_MESSAGE,
-      })
-      .refine((value) => !existing.includes(value), {
-        message: "Already exists",
-      }),
-    type: z.string(),
-  });
+  // FIXME default values per scheme type
 
   const onSubmit = (data: any) => {
-    onAddScheme(data.name, data.type, data.scheme);
+    const name = data.name;
+    delete data.name;
+    onCredentialAdd(name, data);
   };
 
   return (
     <FormDialog
-      title="New scheme"
+      title="New credential"
       defaultValues={defaultValues}
-      schema={schema}
+      schema={credentialFormSchema(undefined, existing)[schemeType]}
       onSubmit={onSubmit}
       trigger={
         <Trigger>
@@ -55,7 +45,7 @@ export default function NewCredentialDialog({
       }
       noOverflow
     >
-      <NewSchemeForm existing={existing} />
+      <EditCredentialForm schemeType={schemeType} />
     </FormDialog>
   );
 }
