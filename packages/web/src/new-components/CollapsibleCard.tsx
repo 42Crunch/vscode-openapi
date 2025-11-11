@@ -7,9 +7,11 @@ import { AngleDown, AngleUp } from "../icons";
 export default function CollapsibleCard({
   children,
   defaultCollapsed,
+  menu,
 }: {
   defaultCollapsed?: boolean;
   children: [...ReactNode[], ReactNode];
+  menu?: ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(defaultCollapsed ?? true);
 
@@ -29,6 +31,7 @@ export default function CollapsibleCard({
       >
         <div>{collapsed ? <AngleDown /> : <AngleUp />}</div>
         <div>{...head}</div>
+        {menu}
       </Title>
       {!collapsed && <Content>{body}</Content>}
     </Container>
@@ -64,6 +67,12 @@ const Title = styled.div<{ $collapsed: boolean; $thin: boolean }>`
   & > div:nth-child(3) {
     display: flex;
     align-items: center;
+  }
+  & > span.menu {
+    visibility: hidden;
+  }
+  &:hover > span.menu {
+    visibility: visible;
   }
 
   border-left: 5px solid transparent;

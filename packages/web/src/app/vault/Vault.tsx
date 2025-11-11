@@ -1,18 +1,51 @@
-import SearchSidebar from "../../components/layout/SearchSidebar";
-import { saveVault, useFeatureDispatch, useFeatureSelector } from "../../features/vault/slice";
-import Form from "../../new-components/Form";
+import { SearchSidebarControlled } from "../../components/layout/SearchSidebar";
+import {
+  selectScheme,
+  useFeatureSelector,
+  addScheme,
+  deleteScheme,
+} from "../../features/vault/slice";
+import { requestConfirmation } from "../../features/confirmation-dialog/slice";
 
-import { unwrapFormValues, wrapFormValues } from "./util";
+import { TrashCan } from "../../icons";
+import { Menu, MenuItem } from "../../new-components/Menu";
+import NewSchemeDialog from "./NewSchemeDialog";
+import VaultSchema from "./VaultSchema";
+import { useAppDispatch, useAppSelector } from "./store";
 
 export default function Vault() {
-  const dispatch = useFeatureDispatch();
-  const { ready, data } = useFeatureSelector((state) => state.vault);
+  const dispatch = useAppDispatch();
+  const { ready, data, selectedSchemeId } = useAppSelector((state) => state.vault);
+
+  const items = Object.keys(data?.schemes || {}).map((key) => ({
+    id: key,
+    label: key,
+    menu: (
+      <Menu>
+        <MenuItem
+          onClick={(e) => e.stopPropagation()}
+          onSelect={() =>
+            dispatch(
+              requestConfirmation({
+                title: "Delete scheme",
+                message: `Are you sure you want to delete scheme "${key}"?`,
+                actions: [deleteScheme(key)],
+              })
+            )
+          }
+        >
+          <TrashCan />
+          Delete
+        </MenuItem>
+      </Menu>
+    ),
+  }));
 
   const sections = [
     {
-      id: "foo",
-      title: "Bar",
-      items: [],
+      id: "schemas",
+      title: "Schemas",
+      items: items,
     },
   ];
 
@@ -21,23 +54,25 @@ export default function Vault() {
   }
 
   return (
-    <SearchSidebar
+    <SearchSidebarControlled
       sections={sections}
-      //errors={errors}
-      defaultSelection={{ sectionId: "platform", itemId: "platform-connection" }}
-      render={(selected) => {
-        return (
-          <Form
-            data={data}
-            wrapFormData={wrapFormValues}
-            unwrapFormData={unwrapFormValues}
-            saveData={(data) => dispatch(saveVault(wrapFormValues(data)))}
-            //schema={schema}
-          >
-            <div>Vault: {selected?.itemId}</div>
-          </Form>
-        );
+      selected={selectedSchemeId ? { sectionId: "schemas", itemId: selectedSchemeId } : undefined}
+      onSelected={(selected) => {
+        dispatch(selectScheme(selected.itemId));
       }}
+      noSectionTitles
+      //errors={errors}
+      render={(selected) => {
+        return <VaultSchema schema={data?.schemes?.[selected?.itemId!]!} />;
+      }}
+      renderButtons={() => (
+        <NewSchemeDialog
+          existing={Object.keys(data?.schemes || {})}
+          onAddScheme={(name, type, scheme) => {
+            dispatch(addScheme({ name, type, scheme }));
+          }}
+        />
+      )}
     />
   );
 }

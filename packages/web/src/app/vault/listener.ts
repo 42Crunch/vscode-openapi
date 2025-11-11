@@ -10,6 +10,7 @@ import * as listener from "../../features/vault/listener";
 import { AppDispatch, RootState } from "./store";
 import { startListeners } from "../webapp";
 import { startNavigationListening } from "../../features/router/listener";
+import { onConfirmationAccept } from "../../features/confirmation-dialog/listener";
 import { Routes } from "../../features/router/RouterContext";
 
 const listenerMiddleware = createListenerMiddleware();
@@ -17,12 +18,15 @@ type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 const startAppListening = listenerMiddleware.startListening as AppStartListening;
 
 export function createListener(host: Webapp["host"], routes: Routes) {
-  const listeners: Record<keyof Webapp["hostHandlers"], () => UnsubscribeListener> = {
+  const executeWebappMessages: Record<keyof Webapp["hostHandlers"], () => UnsubscribeListener> = {
     saveVault: listener.onVaultChange(startAppListening, host),
   };
 
   startNavigationListening(startAppListening, routes);
-  startListeners(listeners);
+  startListeners({
+    ...executeWebappMessages,
+    confirmationAccept: onConfirmationAccept(startAppListening),
+  });
 
   return listenerMiddleware;
 }

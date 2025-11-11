@@ -99,6 +99,18 @@ export type AliasSecurityScheme = {
   scheme: string;
 };
 
+export const SchemeTypeList = [
+  "apiKey",
+  "alias",
+  "basic",
+  "bearer",
+  "oauth2",
+  "openIdConnect",
+  "mutualTLS",
+] as const;
+
+export type SchemeType = (typeof SchemeTypeList)[number];
+
 /** Security scheme object, contains named credentials */
 export type SecurityScheme =
   | BasicSecurityScheme
