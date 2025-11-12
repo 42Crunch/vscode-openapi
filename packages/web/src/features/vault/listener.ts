@@ -26,13 +26,10 @@ export function onVaultChange(
       matcher: isAnyOf(addScheme, deleteScheme, updateCredential, deleteCredential),
       effect: async (action, listenerApi) => {
         const {
-          vault: { data: vault, hasErrors },
+          vault: { data: vault },
         } = listenerApi.getState();
-        if (hasErrors) {
-          console.log("not saving vault, has errors");
-        } else {
-          host.postMessage({ command: "saveVault", payload: vault });
-        }
+
+        host.postMessage({ command: "saveVault", payload: vault });
       },
     });
 }

@@ -18,12 +18,13 @@ export default function Environment({ name }: { name: string }) {
   } = useAppSelector((state) => state.scanconf);
 
   const env = useAppSelector((state) => state.env.data);
+  const vault = useAppSelector((state) => state.vault.data);
 
   const [activeTab, setActiveTab] = useState("environment");
 
   const environment = environments[name];
 
-  const { missing } = makeEnvEnv(environment, env);
+  const { missing } = makeEnvEnv(environment, env, vault);
 
   return (
     <Form
