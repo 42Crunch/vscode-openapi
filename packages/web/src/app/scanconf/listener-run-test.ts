@@ -1,4 +1,4 @@
-import { Action, TypedStartListening } from "@reduxjs/toolkit";
+import { Action, isAnyOf, TypedStartListening } from "@reduxjs/toolkit";
 
 import { EnvData } from "@xliic/common/env";
 import {
@@ -16,12 +16,14 @@ import { Playbook } from "@xliic/scanconf";
 import { PlaybookExecutorStep } from "../../core/playbook/playbook";
 import { PlaybookEnvStack } from "../../core/playbook/playbook-env";
 import { sendHttpRequest } from "../../features/http-client/slice";
+import { Configuration, configure } from "../../core/playbook/identity-tests";
 
 import {
   addTryExecutionTest,
   addTryExecutionStep,
   resetTryExecution,
   startTryExecution,
+  updateTestConfig,
 } from "./tests/slice";
 
 import { AppDispatch, RootState } from "./store";
@@ -30,6 +32,8 @@ import { testPlaybook } from "../../core/playbook/test";
 import { SuiteConfiguration } from "../../core/playbook/identity-tests/types";
 import basic from "../../core/playbook/identity-tests/basic";
 import { HookExecutorStep } from "../../core/playbook/playbook-tests";
+import { loadPlaybook } from "./actions";
+import { loadVault } from "../../features/vault/slice";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 
@@ -71,6 +75,27 @@ export function onTryExecuteTestSuite(
           server,
           suiteConfig
         );
+      },
+    });
+}
+
+export function onUpdateVaultOrPlaybook(
+  startAppListening: AppStartListening,
+  host: HttpCapableWebappHost
+) {
+  return () =>
+    startAppListening({
+      matcher: isAnyOf(loadPlaybook, loadVault),
+
+      effect: async (action, listenerApi) => {
+        const {
+          scanconf: { oas },
+          vault: { data: vault },
+        } = listenerApi.getState();
+
+        const config = configure(oas, vault);
+
+        listenerApi.dispatch(updateTestConfig(config));
       },
     });
 }

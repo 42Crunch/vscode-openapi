@@ -42,7 +42,8 @@ export async function runScenario(
     file,
     [{ name: "test", requests: file.operations[name].scenarios[0].requests }],
     { default: {}, secrets: {} },
-    env
+    env,
+    { schemes: {} }
   )) {
     steps.push(step);
   }
@@ -71,7 +72,8 @@ export async function runPlaybooks(
     file,
     playbooks,
     { default: {}, secrets: {} },
-    env
+    env,
+    { schemes: {} }
   )) {
     steps.push(step);
   }

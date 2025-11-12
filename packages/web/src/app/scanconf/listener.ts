@@ -17,7 +17,7 @@ import {
   onMockExecuteScenario,
   onTryExecuteScenario,
 } from "./listener-run-playbook";
-import { onTryExecuteTestSuite } from "./listener-run-test";
+import { onTryExecuteTestSuite, onUpdateVaultOrPlaybook } from "./listener-run-test";
 import { onShowScanconf, onLoadUpdatedScanconf } from "./listeners/host-messages";
 import listeners from "./listeners/webapp-messages";
 import { AppDispatch, RootState } from "./store";
@@ -37,6 +37,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
   const executeTryGlobalListener = onExecuteGlobal(startAppListening, host);
   const executeMockGlobalListener = onMockExecuteGlobal(startAppListening, host);
   const executeTryTestSuiteListener = onTryExecuteTestSuite(startAppListening, host);
+  const executeUpdateVaultOrPlaybookListener = onUpdateVaultOrPlaybook(startAppListening, host);
 
   const executeWebappMessages = listeners(startAppListening, host);
 
@@ -52,6 +53,7 @@ export function createListener(host: Webapp["host"], routes: Routes) {
     executeTryGlobalListener,
     executeMockGlobalListener,
     executeTryTestSuiteListener,
+    executeUpdateVaultOrPlaybookListener,
     executeSendHttpRequestListener: onSendHttpRequest(startAppListening, host),
     executeConfirmationAccept: onConfirmationAccept(startAppListening),
     executeShowScanconfOperationListener: onShowScanconf(startAppListening),

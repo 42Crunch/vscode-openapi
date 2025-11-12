@@ -35,6 +35,7 @@ export default function RequestInternal({
   const { oas, playbook, servers } = useAppSelector((state) => state.scanconf);
   const config = useAppSelector((state) => state.config.data);
   const env = useAppSelector((state) => state.env.data);
+  const vault = useAppSelector((state) => state.vault.data);
   const useGlobalBlocks = useAppSelector((state) => state.prefs.useGlobalBlocks);
 
   const {
@@ -67,7 +68,7 @@ export default function RequestInternal({
     environment: {
       env: { host },
     },
-  } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
+  } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env, vault);
 
   useEffect(() => {
     const updated = { ...inputs };

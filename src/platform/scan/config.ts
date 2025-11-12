@@ -10,8 +10,11 @@ export type ConfigFile = {
 };
 
 export async function getVaultUri(openapiUri: vscode.Uri): Promise<vscode.Uri> {
-  const rootUri = getRootUri(openapiUri);
-  const vaultUri = vscode.Uri.joinPath(rootUri, ".42c", "vault.json");
+  // const rootUri = getRootUri(openapiUri);
+  // const vaultUri = vscode.Uri.joinPath(rootUri, ".42c", "vault.json");
+  // return vaultUri;
+
+  const vaultUri = vscode.Uri.parse("file:///Users/anton/crunch/vault/vault.json");
   return vaultUri;
 }
 
