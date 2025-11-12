@@ -10,7 +10,7 @@ import { useAppDispatch, useAppSelector } from "./store";
 
 export default function Vault() {
   const dispatch = useAppDispatch();
-  const { ready, data, selectedSchemeId } = useAppSelector((state) => state.vault);
+  const { data, selectedSchemeId } = useAppSelector((state) => state.vault);
 
   const items = Object.keys(data?.schemes || {}).map((key) => ({
     id: key,
@@ -43,10 +43,6 @@ export default function Vault() {
       items: items,
     },
   ];
-
-  if (!ready) {
-    return null;
-  }
 
   return (
     <SearchSidebarControlled

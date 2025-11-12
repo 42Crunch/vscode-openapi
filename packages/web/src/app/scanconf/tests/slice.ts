@@ -1,10 +1,9 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
-import { loadPlaybook } from "../actions";
 import { ExecutionResult } from "../components/scenario/types";
 import { Current, handleTryItStep } from "../playbook-execution-handler";
-import { Configuration, configure } from "../../../core/playbook/identity-tests";
+import { Configuration } from "../../../core/playbook/identity-tests";
 import { HookExecutorStep, isHookExecutorStep } from "../../../core/playbook/playbook-tests";
 
 export type State = {
@@ -73,12 +72,10 @@ export const slice = createSlice({
         );
       }
     },
-  },
 
-  extraReducers: (builder) => {
-    builder.addCase(loadPlaybook, (state, { payload: { oas, playbook, vault } }) => {
-      state.config = configure(oas, vault);
-    });
+    updateTestConfig: (state, { payload: config }: PayloadAction<Configuration>) => {
+      state.config = config;
+    },
   },
 });
 
@@ -88,6 +85,7 @@ export const {
   resetTryExecution,
   addTryExecutionTest,
   addTryExecutionStep,
+  updateTestConfig,
 } = slice.actions;
 
 export default slice.reducer;

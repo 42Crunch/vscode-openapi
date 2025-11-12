@@ -3,15 +3,11 @@ import { CredentialIdentifier, SchemeType, SecurityCredential, Vault } from "@xl
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 
 export interface VaultState {
-  ready: boolean;
-  hasErrors: boolean;
   data: Vault;
   selectedSchemeId?: string;
 }
 
 const initialState: VaultState = {
-  ready: false,
-  hasErrors: false,
   data: { schemes: {} },
 };
 
@@ -20,11 +16,7 @@ export const slice = createSlice({
   initialState,
   reducers: {
     loadVault: (state, action: PayloadAction<Vault>) => {
-      if (!state.ready) {
-        // first load
-        state.ready = true;
-        state.data = action.payload;
-      }
+      state.data = action.payload;
     },
 
     saveVault: (state, action: PayloadAction<Vault>) => {

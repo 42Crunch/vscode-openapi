@@ -2,14 +2,12 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 import { BundledSwaggerOrOasSpec, getHttpResponseRange, getServerUrls } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
-import { Vault } from "@xliic/common/vault";
 
 import { loadPlaybook } from "./actions";
 
 export type State = {
   oas: BundledSwaggerOrOasSpec;
   playbook: Playbook.Bundle;
-  vault: Vault;
   servers: string[];
 
   selectedCredentialGroup: number;
@@ -33,7 +31,6 @@ const initialState: State = {
     environments: {},
     authorizationTests: {},
   },
-  vault: { schemes: {} },
   servers: [],
   selectedCredentialGroup: 0,
 };
@@ -300,10 +297,9 @@ export const slice = createSlice({
   },
 
   extraReducers: (builder) => {
-    builder.addCase(loadPlaybook, (state, { payload: { oas, playbook, vault } }) => {
+    builder.addCase(loadPlaybook, (state, { payload: { oas, playbook } }) => {
       state.oas = oas;
       state.playbook = playbook;
-      state.vault = vault;
       state.servers = getServerUrls(oas);
 
       // select first credential

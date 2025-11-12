@@ -73,6 +73,7 @@ import {
 } from "./slice";
 import { AppDispatch, RootState } from "./store";
 import { webappHttpClient } from "../../core/http-client/webapp-client";
+import { Vault } from "@xliic/common/vault";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 
@@ -105,6 +106,7 @@ export function onMockExecuteScenario(
           router: {
             current: [parent, page],
           },
+          vault: { data: vault },
         } = listenerApi.getState();
 
         if (parent !== "scanconf" || page !== "operations" || operationId === undefined) {
@@ -131,7 +133,8 @@ export function onMockExecuteScenario(
           resetMockOperationExecution,
           addMockOperationExecutionStep,
           playbooks,
-          "http://localhost"
+          "http://localhost",
+          vault
         );
       },
     });
@@ -154,6 +157,7 @@ export function onMockExecuteRequest(
             current: [parent, page],
           },
           prefs: { useGlobalBlocks },
+          vault: { data: vault },
         } = listenerApi.getState();
 
         if (parent !== "scanconf" || page !== "requests") {
@@ -174,7 +178,8 @@ export function onMockExecuteRequest(
             { name: "Request", requests: [{ ref: ref! }] },
             { name: "Global After", requests: useGlobalBlocks ? after : [] },
           ],
-          "http://localhost"
+          "http://localhost",
+          vault
         );
       },
     });
@@ -206,6 +211,7 @@ export function onMockExecuteAuthRequests(
           router: {
             current: [parent, page],
           },
+          vault: { data: vault },
         } = listenerApi.getState();
 
         if (parent !== "scanconf" || page !== "auth") {
@@ -238,7 +244,8 @@ export function onMockExecuteAuthRequests(
           resetMockAuthRequestsExecution,
           addMockAuthRequestsExecutionStep,
           [{ name: "auth", requests: subcredential.requests }],
-          "http://localhost"
+          "http://localhost",
+          vault
         );
       },
     });
@@ -267,6 +274,7 @@ export function onMockExecuteGlobal(
           router: {
             current: [parent, page],
           },
+          vault: { data: vault },
         } = listenerApi.getState();
 
         if (parent !== "scanconf" || page !== "global") {
@@ -288,7 +296,8 @@ export function onMockExecuteGlobal(
           resetMockGlobal,
           addMockGlobalStep,
           playbooks,
-          "http://localhost"
+          "http://localhost",
+          vault
         );
       },
     });
@@ -311,6 +320,7 @@ export function onTryExecuteScenario(
           config: {
             data: { scanProxy },
           },
+          vault: { data: vault },
         } = listenerApi.getState();
 
         const operation = operations[operationId!];
@@ -334,7 +344,8 @@ export function onTryExecuteScenario(
           resetTryExecution,
           addTryExecutionStep,
           playbooks,
-          server
+          server,
+          vault
         );
       },
     });
@@ -355,13 +366,14 @@ export function onExecuteAuthentication(
           config: {
             data: { scanProxy },
           },
+          vault: { data: vault },
         } = listenerApi.getState();
 
         if (selectedCredential === undefined || selectedSubcredential === undefined) {
           return;
         }
 
-        const env: PlaybookEnvStack = [getExternalEnvironment(playbook, envenv)];
+        const env: PlaybookEnvStack = [getExternalEnvironment(playbook, envenv, vault)];
 
         listenerApi.dispatch(resetTryAuthentication());
         listenerApi.dispatch(addTryAuthenticationStep({ event: "playbook-started", name: "" }));
@@ -403,6 +415,7 @@ export function onExecuteRequest(
           config: {
             data: { scanProxy },
           },
+          vault: { data: vault },
         } = listenerApi.getState();
 
         const playbooks: PlaybookList = [
@@ -423,6 +436,7 @@ export function onExecuteRequest(
           addExecutionStep,
           playbooks,
           server,
+          vault,
           [{ id: { type: "try-inputs" }, env: inputs, assignments: [] }]
         );
       },
@@ -443,6 +457,7 @@ export function onExecuteGlobal(startAppListening: AppStartListening, host: Http
           config: {
             data: { scanProxy },
           },
+          vault: { data: vault },
         } = listenerApi.getState();
 
         const playbooks =
@@ -461,7 +476,8 @@ export function onExecuteGlobal(startAppListening: AppStartListening, host: Http
           resetTryGlobal,
           addTryGlobalStep,
           playbooks,
-          server
+          server,
+          vault
         );
       },
     });
@@ -478,6 +494,7 @@ async function execute(
   addExecutionStepAction: (action: PlaybookExecutorStep) => Action,
   playbooks: PlaybookList,
   server: string,
+  vault: Vault,
   extraEnv: PlaybookEnvStack = []
 ) {
   dispatch(resetAction());
@@ -488,7 +505,8 @@ async function execute(
     state.scanconf.playbook,
     playbooks,
     state.env.data,
-    extraEnv
+    extraEnv,
+    vault
   )) {
     dispatch(addExecutionStepAction(step));
   }

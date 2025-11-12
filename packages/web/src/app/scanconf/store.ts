@@ -9,6 +9,7 @@ import logger from "redux-logger";
 import { Webapp } from "@xliic/common/webapp/scanconf";
 
 import config, { loadConfig } from "../../features/config/slice";
+import vault, { loadVault } from "../../features/vault/slice";
 import env, { loadEnv } from "../../features/env/slice";
 import prefs, { loadPrefs } from "../../features/prefs/slice";
 import router from "../../features/router/slice";
@@ -46,6 +47,7 @@ const reducer = {
   generalError,
   confirmationDialog,
   tests,
+  vault,
 };
 
 export const messageHandlers: Webapp["webappHandlers"] = {
@@ -58,6 +60,7 @@ export const messageHandlers: Webapp["webappHandlers"] = {
   loadConfig,
   loadPrefs,
   showGeneralError,
+  loadVault,
 };
 
 export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme: ThemeState) =>

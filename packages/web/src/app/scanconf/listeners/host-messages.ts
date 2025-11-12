@@ -15,20 +15,11 @@ export function onShowScanconf(startAppListening: TypedStartListening<RootState,
   return () =>
     startAppListening({
       actionCreator: showScanconfOperation,
-      effect: async ({ payload: { oas, scanconf, vault } }, listenerApi) => {
+      effect: async ({ payload: { oas, scanconf } }, listenerApi) => {
         const [parsed, parseError] = jsonParse(scanconf);
         if (parseError !== undefined) {
           listenerApi.dispatch(
             showGeneralError({ message: `Failed to parse scan configuration: ${parseError}` })
-          );
-          listenerApi.dispatch(goTo(["general-error"]));
-          return;
-        }
-
-        const [parsedVault, parseVaultError] = jsonParse(vault ?? '{"schemes": {}}');
-        if (parseVaultError !== undefined) {
-          listenerApi.dispatch(
-            showGeneralError({ message: `Failed to parse vault: ${parseVaultError}` })
           );
           listenerApi.dispatch(goTo(["general-error"]));
           return;
@@ -42,7 +33,6 @@ export function onShowScanconf(startAppListening: TypedStartListening<RootState,
               scanconf,
               oas,
               changes,
-              vault: parsedVault,
             })
           );
           listenerApi.dispatch(goTo(["scanconf-update"]));
@@ -57,7 +47,7 @@ export function onShowScanconf(startAppListening: TypedStartListening<RootState,
           return;
         }
 
-        listenerApi.dispatch(loadPlaybook({ playbook, oas, vault: parsedVault }));
+        listenerApi.dispatch(loadPlaybook({ playbook, oas }));
         listenerApi.dispatch(goTo(["scanconf", "requests"]));
       },
     });
@@ -110,7 +100,7 @@ export function onLoadUpdatedScanconf(
           payload: JSON.stringify(patched, null, 2),
         });
 
-        listenerApi.dispatch(loadPlaybook({ playbook, oas, vault: { schemes: {} } }));
+        listenerApi.dispatch(loadPlaybook({ playbook, oas }));
         listenerApi.dispatch(goTo(["scanconf", "requests"]));
       },
     });

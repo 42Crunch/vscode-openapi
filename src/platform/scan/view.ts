@@ -58,6 +58,7 @@ export type Target = {
 export class ScanWebView extends WebView<Webapp> {
   private target?: Target;
   private tempApi?: { apiId: string; collectionId: string };
+  private vaultWatcher?: vscode.Disposable;
 
   constructor(
     title: string,
@@ -209,7 +210,7 @@ export class ScanWebView extends WebView<Webapp> {
 
         this.sendRequest({
           command: "loadUpdatedScanconf",
-          payload: { oas: this.target!.bundle.value, scanconf, vault: undefined },
+          payload: { oas: this.target!.bundle.value, scanconf },
         });
       } catch (error: any) {
         this.sendRequest({
@@ -233,6 +234,24 @@ export class ScanWebView extends WebView<Webapp> {
       const vaultContent = await vscode.workspace.fs.readFile(this.target.vaultUri);
       const scanconf = new TextDecoder("utf-8").decode(content);
       const vault = new TextDecoder("utf-8").decode(vaultContent);
+
+      this.vaultWatcher = vscode.workspace
+        .createFileSystemWatcher(new vscode.RelativePattern(this.target.vaultUri, "**/*"))
+        .onDidChange(async (vaultUri) => {
+          console.log("Vault file changed");
+          const vaultContent = await vscode.workspace.fs.readFile(vaultUri);
+          const vault = new TextDecoder("utf-8").decode(vaultContent);
+          await this.sendRequest({
+            command: "loadVault",
+            payload: JSON.parse(vault),
+          });
+        });
+
+      await this.sendRequest({
+        command: "loadVault",
+        payload: JSON.parse(vault),
+      });
+
       await this.sendRequest({
         command: "showScanconfOperation",
         payload: {
@@ -240,13 +259,13 @@ export class ScanWebView extends WebView<Webapp> {
           path: this.target.path,
           method: this.target.method,
           scanconf,
-          vault,
         },
       });
     }
   }
 
   async onDispose(): Promise<void> {
+    this.vaultWatcher?.dispose();
     await super.onDispose();
   }
 

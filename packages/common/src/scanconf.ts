@@ -4,7 +4,6 @@ import { SimpleEnvironment } from "./env";
 export type OasWithScanconf = {
   oas: BundledSwaggerOrOasSpec;
   scanconf: string;
-  vault: string | undefined;
 };
 
 export type OasWithScanconfPathMethod = OasWithScanconf & {

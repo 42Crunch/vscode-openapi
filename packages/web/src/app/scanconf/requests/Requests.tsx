@@ -17,6 +17,7 @@ export default function Operations() {
   const dispatch = useAppDispatch();
 
   const { oas, playbook, servers } = useAppSelector((state) => state.scanconf);
+  const vault = useAppSelector((state) => state.vault.data);
 
   const requestRef = useAppSelector((state) => state.requests.ref);
 
@@ -123,7 +124,7 @@ export default function Operations() {
       return;
     }
 
-    const { simple } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
+    const { simple } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env, vault);
 
     dispatch(
       runFullScan({

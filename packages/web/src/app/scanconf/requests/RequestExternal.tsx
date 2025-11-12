@@ -40,6 +40,7 @@ export default function RequestExternal({
   const dispatch = useAppDispatch();
   const { playbook, servers } = useAppSelector((state) => state.scanconf);
   const env = useAppSelector((state) => state.env.data);
+  const vault = useAppSelector((state) => state.vault.data);
 
   const onRun = (server: string, inputs: UnknownEnvironment) =>
     dispatch(executeRequest({ server, inputs }));
@@ -62,7 +63,7 @@ export default function RequestExternal({
     environment: {
       env: { host },
     },
-  } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
+  } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env, vault);
 
   useEffect(() => {
     const updated = { ...inputs };

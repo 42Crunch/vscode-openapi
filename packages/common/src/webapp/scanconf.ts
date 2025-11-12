@@ -14,6 +14,7 @@ import { OpenLinkMessage } from "../link";
 import { ShowGeneralErrorMessage } from "../error";
 import { SendHttpRequestMessage, ShowHttpResponseMessage, ShowHttpErrorMessage } from "../http";
 import { LoadPreferencesMessage, SavePreferencesMessage } from "../prefs";
+import { LoadVaultMessage } from "../vault";
 
 export type Webapp = App<
   // consumes
@@ -25,6 +26,7 @@ export type Webapp = App<
   | LoadEnvMessage
   | LoadPreferencesMessage
   | LoadConfigMessage
+  | LoadVaultMessage
   | LoadUpdatedScanconf,
   // produces
   | SaveScanconfMessage
