@@ -10,20 +10,20 @@ const suites = { basic /*"api-key": apiKey*/ };
 
 export type Configuration = Record<string, SuiteConfiguration>;
 
-export function configure(spec: BundledSwaggerOrOasSpec, vault: Vault) {
+export function configure(spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault) {
   const result: Configuration = {};
   for (const [id, suite] of Object.entries(suites)) {
     const suiteResult: SuiteConfiguration = { failures: {}, tests: {} };
     for (const [checkId, checker] of suite.requirements) {
       suiteResult.failures[checkId] = [];
-      suiteResult.failures[checkId].push(...checker(spec, vault));
+      suiteResult.failures[checkId].push(...checker(spec, playbook, vault));
     }
 
     if (noSuiteLevelFailures(suiteResult)) {
       for (const test of suite.tests) {
         const testFailures = [];
         for (const [checkId, checker] of test.requirements) {
-          testFailures.push(...checker(spec, vault));
+          testFailures.push(...checker(spec, playbook, vault));
         }
         suiteResult.tests[test.id] = { failures: testFailures };
       }

@@ -89,11 +89,11 @@ export function onUpdateVaultOrPlaybook(
 
       effect: async (action, listenerApi) => {
         const {
-          scanconf: { oas },
+          scanconf: { oas, playbook },
           vault: { data: vault },
         } = listenerApi.getState();
 
-        const config = configure(oas, vault);
+        const config = configure(oas, playbook, vault);
 
         listenerApi.dispatch(updateTestConfig(config));
       },

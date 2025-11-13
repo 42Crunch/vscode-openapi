@@ -1,32 +1,25 @@
 import { Vault } from "@xliic/common/vault";
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
-import { PlaybookExecutorStep } from "../playbook";
-import { HttpClient } from "@xliic/common/http";
 import { StageGenerator } from "../execute";
 
 export type TestSuite = {
   id: string;
   description?: string;
-  requirements: [string, (spec: BundledSwaggerOrOasSpec, vault: Vault) => string[]][];
+  requirements: [
+    string,
+    (spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault) => string[]
+  ][];
   tests: Test[];
 };
 
-export type TestExecutor = (
-  client: HttpClient,
-  oas: BundledSwaggerOrOasSpec,
-  playbook: Playbook.Bundle,
-  vault: Vault,
-  test: Test,
-  config: TestConfiguration
-) => AsyncGenerator<PlaybookExecutorStep>;
-
 export type Test = {
   id: string;
-  requirements: [string, (spec: BundledSwaggerOrOasSpec, vault: Vault) => string[]][];
-  generate: (value: string) => string[];
-  foo: (config: TestConfiguration) => { id: string; stages: () => StageGenerator }[];
-  execute: TestExecutor;
+  requirements: [
+    string,
+    (spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault) => string[]
+  ][];
+  run: (config: TestConfiguration) => { id: string; stages: () => StageGenerator }[];
 };
 
 export type TestConfiguration = {
