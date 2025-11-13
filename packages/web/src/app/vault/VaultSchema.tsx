@@ -2,7 +2,12 @@ import styled from "styled-components";
 import { useState } from "react";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { SecurityScheme, SecurityCredential, SchemeType } from "@xliic/common/vault";
+import {
+  SecurityScheme,
+  SecurityCredential,
+  SchemeType,
+  AliasSecurityScheme,
+} from "@xliic/common/vault";
 
 import { Pen, TrashCan } from "../../icons";
 import { Menu, MenuItem } from "../../new-components/Menu";
@@ -25,14 +30,46 @@ export default function VaultSchema({
   schemaName: string;
   schema: SecurityScheme;
 }) {
-  const dispatch = useAppDispatch();
-
-  const credentialKeys = "credentials" in schema ? Object.keys(schema.credentials) : [];
   return (
     <VaultSchemaBody>
-      <Metadata>
-        <Title>Type: {schema.type}</Title>
-      </Metadata>
+      {schema.type === "alias" ? (
+        <AliasSchemaContent schema={schema} />
+      ) : (
+        <CredentialsSchemaContent schemaName={schemaName} schema={schema} />
+      )}
+    </VaultSchemaBody>
+  );
+}
+
+function SchemaMetadata({ type, children }: { type: string; children?: React.ReactNode }) {
+  return (
+    <Metadata>
+      <Title>Type: {type}</Title>
+      {children}
+    </Metadata>
+  );
+}
+
+function AliasSchemaContent({ schema }: { schema: AliasSecurityScheme }) {
+  return (
+    <SchemaMetadata type={schema.type}>
+      <AliasDestination>Alias destination: {schema.scheme}</AliasDestination>
+    </SchemaMetadata>
+  );
+}
+
+function CredentialsSchemaContent({
+  schemaName,
+  schema,
+}: {
+  schemaName: string;
+  schema: SecurityScheme;
+}) {
+  const dispatch = useAppDispatch();
+  const credentialKeys = "credentials" in schema ? Object.keys(schema.credentials) : [];
+  return (
+    <>
+      <SchemaMetadata type={schema.type} />
       <Separator title="Credentials" />
       <Credentials>
         {credentialKeys.map((key) => (
@@ -50,12 +87,16 @@ export default function VaultSchema({
           schemeType={schema.type}
           onCredentialAdd={(name, value) => {
             dispatch(
-              updateCredential({ id: { scheme: schemaName, credential: undefined }, name, value })
+              updateCredential({
+                id: { scheme: schemaName, credential: undefined },
+                name,
+                value,
+              })
             );
           }}
         />
       </Credentials>
-    </VaultSchemaBody>
+    </>
   );
 }
 
@@ -142,4 +183,9 @@ const Credentials = styled.div`
 const Title = styled.div`
   font-size: 14px;
   font-weight: 600;
+`;
+
+const AliasDestination = styled.div`
+  margin-top: 4px;
+  font-size: 12px;
 `;
