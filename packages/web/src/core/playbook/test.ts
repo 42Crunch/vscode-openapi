@@ -34,7 +34,7 @@ export async function testPlaybook(
   //const result: PlaybookEnvStack = [];
 
   const test1 = suite.tests[0];
-  for (const { id, stages } of test1.foo(config.tests[test1.id])) {
+  for (const { id, stages } of test1.run(config.tests[test1.id])) {
     dispatch(addTestExecutionAction({ testId: test1.id }));
     for await (const step of executePlaybook(
       id,

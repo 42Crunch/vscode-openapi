@@ -12,7 +12,9 @@ import {
   Vault,
   SecurityScheme as VaultSecurityScheme,
 } from "@xliic/common/vault";
-import { Test, TestConfiguration, TestExecutor, TestSuite } from "./types";
+import { Playbook } from "@xliic/scanconf";
+
+import { Test, TestConfiguration, TestSuite } from "./types";
 import { StageGenerator } from "../execute";
 import { AuthResult } from "../playbook";
 
@@ -96,7 +98,11 @@ function checkVaultSchemeType(
   return false;
 }
 
-function usesBasicAuth(spec: BundledSwaggerOrOasSpec, vault: Vault): string[] {
+function usesBasicAuth(
+  spec: BundledSwaggerOrOasSpec,
+  playbook: Playbook.Bundle,
+  vault: Vault
+): string[] {
   const activeSchemes = getActiveSecuritySchemes(spec);
   for (const scheme of Object.values(activeSchemes)) {
     if (scheme?.type === "http" && scheme?.scheme === "basic") {
@@ -106,7 +112,11 @@ function usesBasicAuth(spec: BundledSwaggerOrOasSpec, vault: Vault): string[] {
   return ["No operations using Basic Auth schemes found"];
 }
 
-function hasValidBasicAuthCredentials(spec: BundledSwaggerOrOasSpec, vault: Vault): string[] {
+function hasValidBasicAuthCredentials(
+  spec: BundledSwaggerOrOasSpec,
+  playbook: Playbook.Bundle,
+  vault: Vault
+): string[] {
   const [schemes, errors] = matchActiveSchemesToVault(spec, vault);
   if (errors !== undefined) {
     return errors;
@@ -162,22 +172,16 @@ function hasValidBasicAuthCredentials(spec: BundledSwaggerOrOasSpec, vault: Vaul
 //   },
 // };
 
-const dummyExecutor: TestExecutor = async function* (client, oas, playbook, vault, test, config) {
-  yield { event: "playbook-started", name: `${test.id}` };
-  yield { event: "playbook-finished" };
-};
-
 const weakPasswords: Test = {
   id: "weak-passwords",
   requirements: [["must-have-valid-basic-auth-credentials", hasValidBasicAuthCredentials]],
   // output: returns username: with "password" as password and username: with $username as password
-  generate(value: string): string[] {
-    const { username } = parseBasicAuth(value);
-    return [`${username}:password`, `${username}:$username`];
-  },
-  execute: dummyExecutor,
+  // generate(value: string): string[] {
+  //   const { username } = parseBasicAuth(value);
+  //   return [`${username}:password`, `${username}:$username`];
+  // },
 
-  foo: function (config: TestConfiguration): { id: string; stages: () => StageGenerator }[] {
+  run: function (config: TestConfiguration): { id: string; stages: () => StageGenerator }[] {
     return [
       {
         id: "password: foo",
