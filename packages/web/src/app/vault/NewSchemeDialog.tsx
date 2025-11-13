@@ -33,6 +33,7 @@ export default function NewSchemeDialog({
         message: "Already exists",
       }),
     type: z.string(),
+    scheme: z.string().optional(),
   });
 
   const onSubmit = (data: any) => {
