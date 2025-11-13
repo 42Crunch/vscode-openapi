@@ -16,7 +16,7 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; su
   const dispatch = useAppDispatch();
 
   const servers = useAppSelector((state) => state.scanconf.servers);
-  const failed = useAppSelector((state) => state.tests.failed);
+  //const failed = useAppSelector((state) => state.tests.failed);
   const tryResult = useAppSelector((state) => state.tests.try?.[suiteId]);
 
   const suiteHasFailures = Object.values(suite.failures).some((failures) => failures.length > 0);
@@ -61,13 +61,15 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; su
             <div key={testId}>
               <TestTitle>
                 <span>{testId}</span>
-                <Passed>Passed</Passed>
+                <Passed>???</Passed>
               </TestTitle>
               <Results>
                 {Object.entries(result).map(([stageId, stage]) => (
                   <TestCardContent key={stageId}>
                     <CollapsibleCard>
-                      <Description>{stageId}</Description>
+                      <Description>
+                        {stageId} <Passed>{stage.failed}</Passed>
+                      </Description>
                       <TestCardBody>
                         <Execution result={stage.result} />
                       </TestCardBody>
