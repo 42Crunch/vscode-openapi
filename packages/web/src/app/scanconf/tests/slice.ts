@@ -10,15 +10,15 @@ export type State = {
   suiteId?: string;
   try: Record<
     string,
-    Record<string, Record<string, { current: Current; result: ExecutionResult }>>
+    Record<string, Record<string, { current: Current; result: ExecutionResult; failed?: string }>>
   >;
   config: Configuration;
-  failed: string[];
+  //  failed: string[];
 };
 
 const initialState: State = {
   try: {},
-  failed: [],
+  //failed: [],
   config: {},
 };
 
@@ -55,14 +55,15 @@ export const slice = createSlice({
         step: PlaybookExecutorStep | HookExecutorStep;
       }>
     ) => {
+      if (!state.try[state.suiteId!][testId][stageId]) {
+        state.try[state.suiteId!][testId][stageId] = { current: { auth: [] }, result: [] };
+      }
+
       if (isHookExecutorStep(step)) {
         if (step.event === "test-failed") {
-          state.failed.push(step.message);
+          state.try[state.suiteId!][testId][stageId].failed = step.message;
         }
       } else {
-        if (!state.try[state.suiteId!][testId][stageId]) {
-          state.try[state.suiteId!][testId][stageId] = { current: { auth: [] }, result: [] };
-        }
         handleTryItStep(
           {
             tryCurrent: state.try[state.suiteId!][testId][stageId].current,
