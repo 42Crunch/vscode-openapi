@@ -33,21 +33,23 @@ export async function testPlaybook(
   const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv, { schemes: {} })];
   //const result: PlaybookEnvStack = [];
 
-  const test1 = suite.tests[0];
-  for (const { id, stages } of test1.run(config.tests[test1.id])) {
-    dispatch(addTestExecutionAction({ testId: test1.id }));
-    for await (const step of executePlaybook(
-      id,
-      cache,
-      client,
-      oas,
-      server,
-      file,
-      stages(),
-      [...env, ...extraEnv],
-      0
-    )) {
-      dispatch(addStepExecutionAction({ testId: test1.id, stageId: id, step }));
+  // Run all tests in the suite
+  for (const test of suite.tests) {
+    for (const { id, stages } of test.run(config.tests[test.id])) {
+      dispatch(addTestExecutionAction({ testId: test.id }));
+      for await (const step of executePlaybook(
+        id,
+        cache,
+        client,
+        oas,
+        server,
+        file,
+        stages(),
+        [...env, ...extraEnv],
+        0
+      )) {
+        dispatch(addStepExecutionAction({ testId: test.id, stageId: id, step }));
+      }
     }
   }
 }

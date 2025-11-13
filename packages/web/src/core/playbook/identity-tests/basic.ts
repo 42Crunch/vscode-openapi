@@ -221,6 +221,71 @@ const weakPasswords: Test = {
                 };
               },
               response: async function* (response) {
+                yield { event: "test-failed", message: "Failed" };
+                return response;
+              },
+
+              error: async function* (error) {
+                yield { event: "test-failed", message: "Unexpected http error" };
+                return error;
+              },
+            },
+          };
+        },
+      },
+    ];
+  },
+};
+
+const weakPasswords2: Test = {
+  id: "weak-passwords2",
+  requirements: [["must-have-valid-basic-auth-credentials", hasValidBasicAuthCredentials]],
+  // output: returns username: with "password" as password and username: with $username as password
+  // generate(value: string): string[] {
+  //   const { username } = parseBasicAuth(value);
+  //   return [`${username}:password`, `${username}:$username`];
+  // },
+
+  run: function (config: TestConfiguration): { id: string; stages: () => StageGenerator }[] {
+    return [
+      {
+        id: "password: foo",
+        stages: async function* (): StageGenerator {
+          yield {
+            stage: { ref: { type: "operation", id: "userinfo" } },
+            hooks: {
+              security: async function* (auth) {
+                return {
+                  basic: {
+                    credential: { type: "basic", default: "", methods: {} },
+                    value: "foo:bar",
+                  },
+                };
+              },
+              response: async function* (response) {
+                console.log("Response in weakPasswords test:", response);
+                yield { event: "test-failed", message: "Test failed as expected" };
+                return response;
+              },
+            },
+          };
+        },
+      },
+      {
+        id: "password: bar",
+        stages: async function* (): StageGenerator {
+          yield {
+            stage: { ref: { type: "operation", id: "userinfo" } },
+            hooks: {
+              security: async function* (auth) {
+                return {
+                  basic: {
+                    credential: { type: "basic", default: "", methods: {} },
+                    value: "foo:bar",
+                  },
+                };
+              },
+              response: async function* (response) {
                 console.log("Response in weakPasswords test:", response);
                 yield { event: "test-failed", message: "Test failed as expected" };
                 return response;
@@ -300,7 +365,10 @@ const suite: TestSuite = {
   description: "A suite of tests for Basic Authentication.",
   requirements: [["must-use-basic-auth", usesBasicAuth]],
 
-  tests: [weakPasswords /*changeUsernameCase, changePasswordCase, truncatePassword*/],
+  tests: [
+    weakPasswords,
+    weakPasswords2 /*changeUsernameCase, changePasswordCase, truncatePassword*/,
+  ],
 };
 
 export default suite;
