@@ -1,8 +1,9 @@
 import { useWatch } from "react-hook-form";
 
-import Input from "../../components/Input";
-import Select from "../../components/Select";
 import { SchemeTypeList } from "@xliic/common/vault";
+
+import Input from "../../new-components/fat-fields/Input";
+import Select from "../../new-components/fat-fields/Select";
 
 export default function NewSchemeForm({ existing }: { existing: string[] }) {
   const type = useWatch({ name: "type" });
