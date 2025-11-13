@@ -107,8 +107,8 @@ async function execute(
   },
   httpClient: HttpClient,
   dispatch: (action: Action) => void,
-  addExecutionTestAction: (action: { testId: string }) => Action,
-  addExecutionStepAction: (action: {
+  addTestExecutionAction: (action: { testId: string }) => Action,
+  addStepExecutionAction: (action: {
     testId: string;
     stageId: string;
     step: PlaybookExecutorStep | HookExecutorStep;
@@ -127,7 +127,7 @@ async function execute(
     basic,
     suiteConfig,
     dispatch,
-    addExecutionTestAction,
-    addExecutionStepAction
+    addTestExecutionAction,
+    addStepExecutionAction
   );
 }

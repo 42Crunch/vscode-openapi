@@ -22,8 +22,8 @@ export async function testPlaybook(
   suite: TestSuite,
   config: SuiteConfiguration,
   dispatch: (action: Action) => void,
-  addExecutionTestAction: (action: { testId: string }) => Action,
-  addExecutionStepAction: (action: {
+  addTestExecutionAction: (action: { testId: string }) => Action,
+  addStepExecutionAction: (action: {
     stageId: string;
     testId: string;
     step: PlaybookExecutorStep | HookExecutorStep;
@@ -35,7 +35,7 @@ export async function testPlaybook(
 
   const test1 = suite.tests[0];
   for (const { id, stages } of test1.foo(config.tests[test1.id])) {
-    dispatch(addExecutionTestAction({ testId: test1.id }));
+    dispatch(addTestExecutionAction({ testId: test1.id }));
     for await (const step of executePlaybook(
       id,
       cache,
@@ -47,7 +47,7 @@ export async function testPlaybook(
       [...env, ...extraEnv],
       0
     )) {
-      dispatch(addExecutionStepAction({ testId: test1.id, stageId: id, step }));
+      dispatch(addStepExecutionAction({ testId: test1.id, stageId: id, step }));
     }
   }
 }
