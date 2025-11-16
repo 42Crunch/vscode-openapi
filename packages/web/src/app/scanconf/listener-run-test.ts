@@ -35,6 +35,7 @@ import basic from "../../core/playbook/identity-tests/basic";
 import { HookExecutorStep } from "../../core/playbook/playbook-tests";
 import { loadPlaybook } from "./actions";
 import { loadVault } from "../../features/vault/slice";
+import { Vault } from "@xliic/common/vault";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 
@@ -105,6 +106,7 @@ async function execute(
   state: {
     scanconf: { oas: BundledSwaggerOrOasSpec; playbook: Playbook.Bundle };
     env: { data: EnvData };
+    vault: { data: Vault };
   },
   httpClient: HttpClient,
   dispatch: (action: Action) => void,
@@ -123,6 +125,7 @@ async function execute(
     state.scanconf.oas,
     server,
     state.scanconf.playbook,
+    state.vault.data,
     state.env.data,
     extraEnv,
     basic,

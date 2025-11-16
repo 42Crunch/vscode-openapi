@@ -1,6 +1,7 @@
 import {
   BundledSwaggerOrOasSpec,
   deref,
+  getOperationById,
   getOperations,
   OpenApi30,
   OpenApi31,
@@ -10,6 +11,7 @@ import { Result } from "@xliic/result";
 import {
   BasicCredential,
   BasicSecurityScheme,
+  SecurityCredential,
   Vault,
   SecurityScheme as VaultSecurityScheme,
 } from "@xliic/common/vault";
@@ -212,7 +214,7 @@ function basicCredentialToString(credential: BasicCredential): string {
 }
 
 type TruncateTestConfig = TestConfig & {
-  foo: string;
+  operationId: string[];
 };
 
 const truncatedPasswordsTest: Test<TruncateTestConfig> = {
@@ -228,17 +230,26 @@ const truncatedPasswordsTest: Test<TruncateTestConfig> = {
     playbook: Playbook.Bundle,
     vault: Vault
   ): TruncateTestConfig {
+    const operationId = selectOperationId();
+
     return {
       ready: true,
       failures: {},
-      foo: "bar",
+      operationId,
     };
   },
 
-  run: function (config: TruncateTestConfig): { id: string; stages: () => StageGenerator }[] {
+  run: function (
+    config: TruncateTestConfig,
+    spec: BundledSwaggerOrOasSpec,
+    playbook: Playbook.Bundle,
+    vault: Vault
+  ): { id: string; stages: () => StageGenerator }[] {
     const result = [];
-    const credentials = truncatedThree({ username: "user", password: "password123" });
-    for (const operationId of selectOperationId()) {
+    for (const operationId of config.operationId) {
+      const schemeName = getSchemeNameByOperationId(spec, operationId);
+      const credential = getVaultCredential(vault, schemeName);
+      const credentials = truncatedThree(credential);
       for (const credential of credentials) {
         const credentialString = basicCredentialToString(credential);
         result.push({
@@ -458,6 +469,29 @@ async function* tryCredentialGenerator(operationId: string, credential: string):
       },
     },
   };
+}
+
+function getSchemeNameByOperationId(spec: BundledSwaggerOrOasSpec, operationId: string) {
+  const result = getOperationById(spec, operationId);
+  if (result === undefined) {
+    throw new Error(`Operation with id "${operationId}" not found / FIXME`);
+  }
+  const security = result.operation.security ?? spec.security ?? [];
+  // just grab the first one, FIXME
+  return Object.keys(security[0])[0];
+}
+
+function getVaultCredential(vault: Vault, schemeName: string): BasicCredential {
+  const vaultScheme = vault.schemes[schemeName];
+  // FIXME handle different types
+  if (vaultScheme === undefined || vaultScheme.type !== "basic") {
+    throw new Error(`Vault scheme "${schemeName}" not found / FIXME`);
+  }
+  const credentials = Object.values(vaultScheme.credentials);
+  if (credentials.length === 0) {
+    throw new Error(`No credentials in vault scheme "${schemeName}" / FIXME`);
+  }
+  return credentials[0] as BasicCredential;
 }
 
 export default suite;

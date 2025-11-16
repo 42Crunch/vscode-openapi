@@ -51,7 +51,12 @@ export type Test<C extends TestConfig> = {
     (spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault) => string | undefined
   >;
   configure(spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault): C;
-  run(config: C): { id: string; stages: () => StageGenerator }[];
+  run(
+    config: C,
+    spec: BundledSwaggerOrOasSpec,
+    playbook: Playbook.Bundle,
+    vault: Vault
+  ): { id: string; stages: () => StageGenerator }[];
 };
 
 export type Suite = {
