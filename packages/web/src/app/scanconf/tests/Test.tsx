@@ -8,11 +8,11 @@ import CollapsibleSection from "../components/CollapsibleSection";
 import TryAndServerSelector from "../components/TryAndServerSelector";
 
 import { useAppDispatch, useAppSelector } from "../store";
-import { SuiteConfiguration } from "../../../core/playbook/identity-tests/types";
+import { SuiteConfig, TestConfig } from "../../../core/playbook/identity-tests/types";
 import { startTryExecution } from "./slice";
 import Execution from "../components/execution/Execution";
 
-export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; suiteId: string }) {
+export default function Test({ suite, suiteId }: { suite: SuiteConfig; suiteId: string }) {
   const dispatch = useAppDispatch();
 
   const servers = useAppSelector((state) => state.scanconf.servers);
@@ -30,18 +30,8 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; su
         }}
       />
       <CollapsibleSection title={suiteId} defaultOpen={suiteHasFailures}>
-        {Object.entries(suite.failures).map(([requirementId, failures]) => (
-          <div key={requirementId}>
-            {failures.length > 0 ? (
-              <ul>
-                {failures.map((failure, idx) => (
-                  <li key={idx}>{failure}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>All test suite requirements are satisfied</p>
-            )}
-          </div>
+        {Object.entries(suite.failures).map(([requirementId, failure]) => (
+          <div key={requirementId}>{failure}</div>
         ))}
       </CollapsibleSection>
 
@@ -85,25 +75,23 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfiguration; su
   );
 }
 
-function TestCard({ testId, test }: { testId: string; test: { failures: string[] } }) {
-  const hasFailures = test.failures.length > 0;
-
+function TestCard({ testId, test }: { testId: string; test: TestConfig }) {
   return (
     <TestCardContent>
       <CollapsibleCard>
         <Description>
           <span>{testId}</span>
-          {hasFailures ? <ExclamationCircle /> : <Check />}
+          {test.ready ? <Check /> : <ExclamationCircle />}
         </Description>
         <TestCardBody>
-          {hasFailures ? (
+          {test.ready ? (
+            "All test requirements are satisfied"
+          ) : (
             <ul>
-              {test.failures.map((failure, idx) => (
-                <li key={idx}>{failure}</li>
+              {Object.entries(test.failures).map(([key, failure]) => (
+                <li key={key}>{failure}</li>
               ))}
             </ul>
-          ) : (
-            "All test requirements are satisfied"
           )}
         </TestCardBody>
       </CollapsibleCard>

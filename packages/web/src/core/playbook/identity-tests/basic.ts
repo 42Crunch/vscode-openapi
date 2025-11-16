@@ -8,13 +8,14 @@ import {
 } from "@xliic/openapi";
 import { Result } from "@xliic/result";
 import {
+  BasicCredential,
   BasicSecurityScheme,
   Vault,
   SecurityScheme as VaultSecurityScheme,
 } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
 
-import { Test, TestConfiguration, TestSuite } from "./types";
+import { Test, TestConfig, Suite } from "./types";
 import { StageGenerator } from "../execute";
 import { AuthResult } from "../playbook";
 
@@ -66,9 +67,8 @@ function matchSchemesToVault(spec: BundledSwaggerOrOasSpec, vault: Vault): strin
 function matchActiveSchemesToVault(
   spec: BundledSwaggerOrOasSpec,
   vault: Vault
-): Result<Record<string, VaultSecurityScheme | undefined>, string[]> {
+): Result<Record<string, VaultSecurityScheme | undefined>, string> {
   const result: Record<string, VaultSecurityScheme | undefined> = {};
-  const errors: string[] = [];
   const activeSchemes = getActiveSecuritySchemes(spec);
   for (const [name, scheme] of Object.entries(activeSchemes)) {
     const vaultScheme = vault.schemes[name];
@@ -77,12 +77,7 @@ function matchActiveSchemesToVault(
       result[name] = vaultScheme;
     } else {
       result[name] = undefined;
-      //errors.push(`Mismatched or missing vault scheme for security scheme "${name}"`);
     }
-  }
-
-  if (errors.length > 0) {
-    return [undefined, errors];
   }
 
   return [result, undefined];
@@ -102,21 +97,21 @@ function usesBasicAuth(
   spec: BundledSwaggerOrOasSpec,
   playbook: Playbook.Bundle,
   vault: Vault
-): string[] {
+): string | undefined {
   const activeSchemes = getActiveSecuritySchemes(spec);
   for (const scheme of Object.values(activeSchemes)) {
     if (scheme?.type === "http" && scheme?.scheme === "basic") {
-      return [];
+      return undefined;
     }
   }
-  return ["No operations using Basic Auth schemes found"];
+  return "No operations using Basic Auth schemes found";
 }
 
 function hasValidBasicAuthCredentials(
   spec: BundledSwaggerOrOasSpec,
   playbook: Playbook.Bundle,
   vault: Vault
-): string[] {
+): string {
   const [schemes, errors] = matchActiveSchemesToVault(spec, vault);
   if (errors !== undefined) {
     return errors;
@@ -132,7 +127,7 @@ function hasValidBasicAuthCredentials(
   }
 
   if (Object.keys(basicSchemes).length === 0) {
-    return ["No matching Vault Basic Auth schemes found"];
+    return "No matching Vault Basic Auth schemes found";
   }
 
   const schemesWithNoCredentials: string[] = [];
@@ -145,7 +140,7 @@ function hasValidBasicAuthCredentials(
     }
   }
 
-  return schemesWithNoCredentials;
+  return schemesWithNoCredentials.join("; ");
 }
 
 // const skipBasicAuth: AuthenticationTest = {
@@ -172,8 +167,93 @@ function hasValidBasicAuthCredentials(
 //   },
 // };
 
+// truncate password test
+// select operation (using some function, etc)
+// modify credentials, from the vault, and inject it into the operation
+// verify that operation fails (check response status, etc), perhaps having an idea what's a valid
+// response looks like would have in verification step
+
+// let's say we know operation id and schema we're going to use, this can be passed via test configuration
+
+/*
+const truncatePassword: Test = {
+  requirements: [["must-have-valid-basic-auth-credentials", hasValidBasicAuthCredentials]],
+  run: function (config: TestConfiguration): { id: string; stages: () => StageGenerator }[] {
+    return [{ id: "zomg", stages: () => operation("userinfo") }];
+  },
+};
+// output: returns username: with password truncated to N characters
+*/
+
+function selectOperationId(): string[] {
+  return ["user-info-basic-trim"];
+}
+
+function truncatedThree(credential: BasicCredential): BasicCredential[] {
+  const { username, password } = credential;
+  if (password.length < 4) {
+    // TODO return error
+    return [];
+  }
+
+  const truncated1 = password.substring(0, password.length - 1);
+  const truncated2 = password.substring(0, password.length - 2);
+  const truncated3 = password.substring(0, password.length - 3);
+
+  return [
+    { username, password: truncated1 },
+    { username, password: truncated2 },
+    { username, password: truncated3 },
+  ];
+}
+
+function basicCredentialToString(credential: BasicCredential): string {
+  return `${credential.username}:${credential.password}`;
+}
+
+type TruncateTestConfig = TestConfig & {
+  foo: string;
+};
+
+const truncatedPasswordsTest: Test<TruncateTestConfig> = {
+  requirements: { hasValidBasicAuthCredentials },
+  // output: returns username: with "password" as password and username: with $username as password
+  // generate(value: string): string[] {
+  //   const { username } = parseBasicAuth(value);
+  //   return [`${username}:password`, `${username}:$username`];
+  // },
+
+  configure: function (
+    spec: BundledSwaggerOrOasSpec,
+    playbook: Playbook.Bundle,
+    vault: Vault
+  ): TruncateTestConfig {
+    return {
+      ready: true,
+      failures: {},
+      foo: "bar",
+    };
+  },
+
+  run: function (config: TruncateTestConfig): { id: string; stages: () => StageGenerator }[] {
+    const result = [];
+    const credentials = truncatedThree({ username: "user", password: "password123" });
+    for (const operationId of selectOperationId()) {
+      for (const credential of credentials) {
+        const credentialString = basicCredentialToString(credential);
+        result.push({
+          id: `password: ${credential.password} for ${operationId}`,
+          stages: () => tryCredentialGenerator(operationId, credentialString),
+        });
+      }
+    }
+
+    return result;
+  },
+};
+
+/*
 const weakPasswords: Test = {
-  id: "weak-passwords",
   requirements: [["must-have-valid-basic-auth-credentials", hasValidBasicAuthCredentials]],
   // output: returns username: with "password" as password and username: with $username as password
   // generate(value: string): string[] {
@@ -181,64 +261,19 @@ const weakPasswords: Test = {
   //   return [`${username}:password`, `${username}:$username`];
   // },
 
-  run: function (config: TestConfiguration): { id: string; stages: () => StageGenerator }[] {
-    return [
-      {
-        id: "password: foo",
-        stages: async function* (): StageGenerator {
-          yield {
-            stage: { ref: { type: "operation", id: "userinfo" } },
-            hooks: {
-              security: async function* (auth) {
-                return {
-                  basic: {
-                    credential: { type: "basic", default: "", methods: {} },
-                    value: "foo:bar",
-                  },
-                };
-              },
-              response: async function* (response) {
-                console.log("Response in weakPasswords test:", response);
-                yield { event: "test-failed", message: "Test failed as expected" };
-                return response;
-              },
-            },
-          };
-        },
-      },
-      {
-        id: "password: bar",
-        stages: async function* (): StageGenerator {
-          yield {
-            stage: { ref: { type: "operation", id: "userinfo" } },
-            hooks: {
-              security: async function* (auth) {
-                return {
-                  basic: {
-                    credential: { type: "basic", default: "", methods: {} },
-                    value: "foo:bar",
-                  },
-                };
-              },
-              response: async function* (response) {
-                yield { event: "test-failed", message: "Failed" };
-                return response;
-              },
+  // run1: function () {
+  //   const response = operation("userinfo");
+  //   if (response.status === 200) {
+  //     return { failed: "Expected authentication to fail with weak password" };
+  //   }
+  // },
 
-              error: async function* (error) {
-                yield { event: "test-failed", message: "Unexpected http error" };
-                return error;
-              },
-            },
-          };
-        },
-      },
-    ];
+  run: function (config: TestConfiguration): { id: string; stages: () => StageGenerator }[] {
+    return [{ id: "zomg", stages: () => operation("userinfo") }];
   },
 };
 
 const weakPasswords2: Test = {
-  id: "weak-passwords2",
   requirements: [["must-have-valid-basic-auth-credentials", hasValidBasicAuthCredentials]],
   // output: returns username: with "password" as password and username: with $username as password
   // generate(value: string): string[] {
@@ -297,6 +332,7 @@ const weakPasswords2: Test = {
     ];
   },
 };
+*/
 
 /*
 const changeUsernameCase: Test = {
@@ -360,15 +396,68 @@ function parseBasicAuth(value: string): { username: string; password: string } {
   return { username, password };
 }
 
-const suite: TestSuite = {
-  id: "basic-authentication-test-suite",
+const suite: Suite = {
   description: "A suite of tests for Basic Authentication.",
-  requirements: [["must-use-basic-auth", usesBasicAuth]],
+  requirements: { usesBasicAuth },
 
-  tests: [
-    weakPasswords,
-    weakPasswords2 /*changeUsernameCase, changePasswordCase, truncatePassword*/,
-  ],
+  tests: {
+    //weakPasswords,
+    truncatedPasswordsTest,
+    //weakPasswords2 /*changeUsernameCase, changePasswordCase, truncatePassword*/,
+  },
 };
+
+// TODO: test, truncate long password -- needs password longer that 16 chars in vault.
+// etc etc
+
+async function* operation(id: string): StageGenerator {
+  yield {
+    stage: { ref: { type: "operation", id } },
+    hooks: {
+      security: async function* (auth) {
+        return {
+          basic: {
+            credential: { type: "basic", default: "", methods: {} },
+            value: "foo:bar",
+          },
+        };
+      },
+      response: async function* (response) {
+        yield { event: "test-failed", message: "Failed" };
+        return response;
+      },
+
+      error: async function* (error) {
+        yield { event: "test-failed", message: "Unexpected http error" };
+        return error;
+      },
+    },
+  };
+}
+
+async function* tryCredentialGenerator(operationId: string, credential: string): StageGenerator {
+  yield {
+    stage: { ref: { type: "operation", id: operationId } },
+    hooks: {
+      security: async function* (auth) {
+        return {
+          basic: {
+            credential: { type: "basic", default: "", methods: {} },
+            value: credential,
+          },
+        };
+      },
+      response: async function* (response) {
+        yield { event: "test-failed", message: "Failed" };
+        return response;
+      },
+
+      error: async function* (error) {
+        yield { event: "test-failed", message: "Unexpected http error" };
+        return error;
+      },
+    },
+  };
+}
 
 export default suite;

@@ -8,7 +8,7 @@ import { PlaybookEnvStack } from "./playbook-env";
 
 import { createAuthCache } from "./auth-cache";
 import { executePlaybook, getExternalEnvironment } from "./execute";
-import { SuiteConfiguration, TestSuite } from "./identity-tests/types";
+import { SuiteConfig, Suite } from "./identity-tests/types";
 import { HookExecutorStep } from "./playbook-tests";
 import { Action } from "@reduxjs/toolkit";
 
@@ -19,8 +19,8 @@ export async function testPlaybook(
   file: Playbook.Bundle,
   envenv: EnvData,
   extraEnv: PlaybookEnvStack = [],
-  suite: TestSuite,
-  config: SuiteConfiguration,
+  suite: Suite,
+  config: SuiteConfig,
   dispatch: (action: Action) => void,
   addTestExecutionAction: (action: { testId: string }) => Action,
   addStepExecutionAction: (action: {
@@ -34,9 +34,9 @@ export async function testPlaybook(
   //const result: PlaybookEnvStack = [];
 
   // Run all tests in the suite
-  for (const test of suite.tests) {
-    for (const { id, stages } of test.run(config.tests[test.id])) {
-      dispatch(addTestExecutionAction({ testId: test.id }));
+  for (const [testId, test] of Object.entries(suite.tests)) {
+    for (const { id, stages } of test.run(config.tests[testId])) {
+      dispatch(addTestExecutionAction({ testId }));
       for await (const step of executePlaybook(
         id,
         cache,
@@ -48,7 +48,7 @@ export async function testPlaybook(
         [...env, ...extraEnv],
         0
       )) {
-        dispatch(addStepExecutionAction({ testId: test.id, stageId: id, step }));
+        dispatch(addStepExecutionAction({ testId, stageId: id, step }));
       }
     }
   }

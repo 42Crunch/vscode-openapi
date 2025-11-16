@@ -19,7 +19,13 @@ export type State = {
 const initialState: State = {
   try: {},
   //failed: [],
-  config: {},
+  config: {
+    basic: {
+      ready: false,
+      failures: {},
+      tests: {},
+    },
+  },
 };
 
 export const slice = createSlice({

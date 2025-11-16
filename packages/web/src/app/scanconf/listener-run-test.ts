@@ -16,7 +16,7 @@ import { Playbook } from "@xliic/scanconf";
 import { PlaybookExecutorStep } from "../../core/playbook/playbook";
 import { PlaybookEnvStack } from "../../core/playbook/playbook-env";
 import { sendHttpRequest } from "../../features/http-client/slice";
-import { Configuration, configure } from "../../core/playbook/identity-tests";
+import { configure } from "../../core/playbook/identity-tests";
 
 import {
   addTryExecutionTest,
@@ -29,7 +29,8 @@ import {
 import { AppDispatch, RootState } from "./store";
 import { webappHttpClient } from "../../core/http-client/webapp-client";
 import { testPlaybook } from "../../core/playbook/test";
-import { SuiteConfiguration } from "../../core/playbook/identity-tests/types";
+import { SuiteConfig } from "../../core/playbook/identity-tests/types";
+import { SuiteId } from "../../core/playbook/identity-tests/index";
 import basic from "../../core/playbook/identity-tests/basic";
 import { HookExecutorStep } from "../../core/playbook/playbook-tests";
 import { loadPlaybook } from "./actions";
@@ -58,7 +59,7 @@ export function onTryExecuteTestSuite(
           },
         } = listenerApi.getState();
 
-        const suiteConfig = config[suiteId!];
+        const suiteConfig = config[suiteId as SuiteId];
 
         listenerApi.dispatch(resetTryExecution({ suiteId }));
 
@@ -114,7 +115,7 @@ async function execute(
     step: PlaybookExecutorStep | HookExecutorStep;
   }) => Action,
   server: string,
-  suiteConfig: SuiteConfiguration,
+  suiteConfig: SuiteConfig,
   extraEnv: PlaybookEnvStack = []
 ) {
   testPlaybook(
