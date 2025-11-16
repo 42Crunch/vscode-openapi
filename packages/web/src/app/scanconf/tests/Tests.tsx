@@ -5,15 +5,20 @@ import Test from "./Test";
 import { setTestSuiteId } from "./slice";
 
 import Button from "../../../new-components/Button";
+import { SuiteId } from "../../../core/playbook/identity-tests";
 
-export default function AuthorizationTests() {
+export default function Tests() {
   const dispatch = useAppDispatch();
 
   const { config, suiteId } = useAppSelector((state) => state.tests);
 
   const errors = Object.keys(config)
     .map((key) => {
-      if (Object.keys(config[key].failures).some((k) => config[key].failures[k].length > 0)) {
+      if (
+        Object.keys(config[key as SuiteId].failures).some(
+          (k) => config[key as SuiteId].failures[k].length > 0
+        )
+      ) {
         return [key, `${key} has failures`];
       }
     })
@@ -41,7 +46,9 @@ export default function AuthorizationTests() {
       title="test suites"
       sections={sections}
       errors={Object.fromEntries(errors)}
-      render={(selected) => <Test suite={config[selected.itemId]} suiteId={selected.itemId} />}
+      render={(selected) => (
+        <Test suite={config[selected.itemId as SuiteId]} suiteId={selected.itemId} />
+      )}
       onSelected={(selected) => {
         dispatch(setTestSuiteId(selected.itemId));
       }}
