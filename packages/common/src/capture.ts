@@ -12,6 +12,7 @@ export type CaptureItem = {
   prepareOptions: PrepareOptions;
   status: Status;
   pollingCounter: number;
+  startPollingCounter: number;
   log: string[];
   downloadedFile: string | undefined;
 };

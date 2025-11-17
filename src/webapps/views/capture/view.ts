@@ -2,28 +2,37 @@
  Copyright (c) 42Crunch Ltd. All rights reserved.
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
-import * as fs from "fs";
 import * as vscode from "vscode";
-import FormData from "form-data";
-import got, { Method, OptionsOfJSONResponseBody } from "got";
 
 import { Webapp } from "@xliic/common/webapp/capture";
 import { CaptureItem, CaptureSettings, PrepareOptions, Status } from "@xliic/common/capture";
-import { getEndpoints } from "@xliic/common/endpoints";
 import { GeneralError } from "@xliic/common/error";
 
 import { loadConfig } from "../../../util/config";
 import { WebView } from "../../web-view";
 import { Configuration } from "../../../configuration";
-import { getAnondCredentials, getPlatformCredentials, hasCredentials } from "../../../credentials";
-import { delay } from "../../../time-util";
-import { executeHttpRequest, getHooks } from "../../http-handler";
+import { executeHttpRequest } from "../../http-handler";
 import { offerUpgrade } from "../../../platform/upgrade";
 import { Logger } from "../../../platform/types";
+import {
+  CaptureConnection,
+  getCaptureConnection,
+  requestDelete,
+  requestDownload,
+  requestPrepare,
+  requestStart,
+  requestStatus,
+  requestUpload,
+} from "./api";
+import { delay } from "../../../time-util";
 
 const pollingDelayMs = 5 * 1000; // 5s
 const pollingTimeMs = 5 * 60 * 1000; // 5min
 const pollingLimit = Math.floor(pollingTimeMs / pollingDelayMs);
+
+const startPollingDelayMs = 100; // 0.1s
+const startPollingTimeMs = 30 * 1000; // 30s
+const startPollingLimit = Math.floor(startPollingTimeMs / startPollingDelayMs);
 
 export class CaptureWebView extends WebView<Webapp> {
   private items: CaptureItem[];
@@ -136,18 +145,38 @@ export class CaptureWebView extends WebView<Webapp> {
         return;
       }
 
-      // Start request -> capture server
-      try {
-        await delay(3000); // FIXME: remove when capture api is updated
-        await requestStart(captureConnection, quickgenId, this.logger);
-        this.showExecutionStartResponse(item, true, "");
-      } catch (error) {
-        this.showExecutionStartResponse(item, false, getError(error));
-        await this.maybeOfferUpgrade(error);
-        return;
-      }
+      const captureStarted: Promise<"success" | "error"> = new Promise(async (resolve) => {
+        const startCapture = async () => {
+          if (item.startPollingCounter > startPollingLimit) {
+            this.showExecutionStartResponse(item, false, "Polling limit exceeded");
+            resolve("error");
+            return;
+          }
+
+          try {
+            item.startPollingCounter += 1;
+            await requestStart(captureConnection, quickgenId, this.logger);
+            this.showExecutionStartResponse(item, true, "");
+            resolve("success");
+            return;
+          } catch (error: any) {
+            if (error?.response?.statusCode === 409) {
+              setTimeout(async () => {
+                startCapture();
+              }, startPollingDelayMs);
+            } else {
+              this.showExecutionStartResponse(item, false, getError(error));
+              await this.maybeOfferUpgrade(error);
+              resolve("error");
+            }
+            return;
+          }
+        };
+        startCapture();
+      });
 
       const refreshJobStatus = async (quickgenId: string) => {
+        await delay(pollingDelayMs);
         try {
           const status = await requestStatus(captureConnection, quickgenId, this.logger);
           item.pollingCounter += 1;
@@ -165,8 +194,11 @@ export class CaptureWebView extends WebView<Webapp> {
         }
       };
 
-      // Wait for correct status request -> capture server
-      refreshJobStatus(quickgenId);
+      const startResult = await captureStarted;
+
+      if (startResult === "success") {
+        refreshJobStatus(quickgenId);
+      }
     },
 
     saveCaptureSettings: async (payload: { id: string; settings: CaptureSettings }) => {
@@ -297,6 +329,7 @@ export class CaptureWebView extends WebView<Webapp> {
       },
       status: "pending",
       pollingCounter: 0,
+      startPollingCounter: 0,
       log: ["Started new session"],
       downloadedFile: undefined,
     };
@@ -418,148 +451,9 @@ export class CaptureWebView extends WebView<Webapp> {
   }
 }
 
-export async function getCaptureConnection(
-  configuration: Configuration,
-  secrets: vscode.SecretStorage,
-  useDevEndpoints: boolean,
-  logger: Logger
-): Promise<CaptureConnection | undefined> {
-  const credentialType = await hasCredentials(configuration, secrets);
-
-  if (credentialType === "anond-token") {
-    const anondToken = getAnondCredentials(configuration);
-    return requestDiscover({ freemiumToken: anondToken }, useDevEndpoints, logger);
-  } else if (credentialType === "api-token") {
-    const platformCredentials = await getPlatformCredentials(configuration, secrets);
-    return requestDiscover(
-      { platformUrl: platformCredentials?.platformUrl, apiKey: platformCredentials?.apiToken },
-      useDevEndpoints,
-      logger
-    );
-  }
-}
-
-export type CaptureConnection = {
-  token: string;
-  captureInstanceUrl: string;
-};
-
-export async function requestDiscover(
-  credentials: any,
-  useDevEndpoints: boolean,
-  logger: Logger
-): Promise<CaptureConnection> {
-  const { freemiumdUrl } = getEndpoints(useDevEndpoints);
-  try {
-    const response = await got("api/v1/anon/discover", {
-      prefixUrl: vscode.Uri.parse(freemiumdUrl).with({ path: "" }).toString(),
-      method: "POST",
-      responseType: "json",
-      json: credentials,
-      hooks: getHooks("POST", logger),
-    });
-    return response.body as unknown as CaptureConnection;
-  } catch (error) {
-    throw new Error(`Failed to discover capture instance: ${error}`);
-  }
-}
-
-export async function requestPrepare(
-  capture: CaptureConnection,
-  prepareOptions: PrepareOptions,
-  logger: Logger
-) {
-  const response = await got("capture/api/1.0/quickgen/prepare", {
-    ...gotOptions(capture, "POST", logger),
-    json: {
-      base_path: prepareOptions.basePath,
-      servers: prepareOptions.servers,
-    },
-  });
-  return (response.body as any)["quickgen_id"];
-}
-
-export async function requestUpload(
-  capture: CaptureConnection,
-  quickgenId: string,
-  files: string[],
-  listener: (percent: number) => void,
-  logger: Logger
-) {
-  const form = new FormData();
-  for (const uri of files) {
-    const fsPath = vscode.Uri.parse(uri).fsPath;
-    form.append("file", fs.createReadStream(fsPath));
-  }
-  const response = await got(`capture/api/1.0/quickgen/${quickgenId}/prepare/upload-file`, {
-    ...gotOptions(capture, "POST", logger),
-    body: form,
-  }).on("uploadProgress", (progress) => {
-    listener(progress.percent);
-  });
-  return response.body;
-}
-
-export async function requestStart(capture: CaptureConnection, quickgenId: string, logger: Logger) {
-  const response = await got(`capture/api/1.0/quickgen/${quickgenId}/execution/start`, {
-    ...gotOptions(capture, "POST", logger),
-  });
-  return response.body;
-}
-
-export async function requestStatus(
-  capture: CaptureConnection,
-  quickgenId: string,
-  logger: Logger
-) {
-  const response = await got(`capture/api/1.0/quickgen/${quickgenId}/execution/status`, {
-    ...gotOptions(capture, "GET", logger),
-  });
-  return (response.body as any)["status"];
-}
-
-export async function requestDownload(
-  capture: CaptureConnection,
-  quickgenId: string,
-  logger: Logger
-) {
-  const response = await got(`capture/api/1.0/quickgen/${quickgenId}/results/openapi`, {
-    ...gotOptions(capture, "GET", logger),
-  });
-  return response.body;
-}
-
-export async function requestDelete(
-  capture: CaptureConnection,
-  quickgenId: string,
-  logger: Logger
-) {
-  const response = await got(`capture/api/1.0/quickgen/${quickgenId}/delete`, {
-    ...gotOptions(capture, "DELETE", logger),
-  });
-  return response.body;
-}
-
 function getError(error: any): string {
   if (error?.response?.body?.detail) {
     return `${error}, ${error.response.body.detail}`;
   }
   return `${error}`;
-}
-
-function gotOptions(
-  capture: CaptureConnection,
-  method: Method,
-  logger: Logger
-): OptionsOfJSONResponseBody {
-  const prefixUrl = vscode.Uri.parse(capture.captureInstanceUrl).with({ path: "" }).toString();
-  return {
-    method,
-    prefixUrl,
-    headers: {
-      Authorization: `Token ${capture.token}`,
-    },
-    responseType: "json",
-    hooks: getHooks(method, logger),
-  };
 }
