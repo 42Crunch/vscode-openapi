@@ -1,5 +1,5 @@
 import * as z from "zod";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { useFormContext } from "react-hook-form";
 
 import { CaptureItem, PrepareOptions } from "@xliic/common/capture";
@@ -7,7 +7,14 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 
 import Input from "../../new-components/fat-fields/Input";
 import Form from "../../new-components/Form";
-import { CloudArrowDown, FileCode, FileExport, FileImport, TrashCan } from "../../icons";
+import {
+  CircleNotchLight,
+  CloudArrowDown,
+  FileCode,
+  FileExport,
+  FileImport,
+  TrashCan,
+} from "../../icons";
 import {
   saveCaptureSettings,
   convert,
@@ -18,6 +25,7 @@ import {
 } from "./slice";
 import { useAppDispatch, useAppSelector } from "./store";
 import { Menu, MenuItem } from "../../new-components/Menu";
+import ProgressBar from "./ProgressBar";
 
 export default function CaptureJob() {
   const dispatch = useAppDispatch();
@@ -127,6 +135,12 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
             Save OpenAPI file
           </Action>
         )}
+
+        {item.status === "running" && (
+          <Spinner>
+            <CircleNotchLight />
+          </Spinner>
+        )}
       </FilesList>
 
       <Separator />
@@ -165,6 +179,18 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
           </div>
         )}
       </Logs>
+
+      {Object.keys(item.uploadStatus).length > 0 && (
+        <>
+          <Separator />
+          <Title>Upload progress</Title>
+          <UploadProgress>
+            {Object.entries(item.uploadStatus || {}).map(([url, status]) => (
+              <ProgressBar key={url} label={getFilename(url)} progress={status.percent} />
+            ))}
+          </UploadProgress>
+        </>
+      )}
     </div>
   );
 }
@@ -243,9 +269,35 @@ const Logs = styled.div`
   gap: 4px;
 `;
 
+const UploadProgress = styled.div`
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
 const Separator = styled.hr`
   border: none;
   border-top: 1px solid var(${ThemeColorVariables.border});
+`;
+
+const rotation = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(359deg);
+  }
+`;
+
+const Spinner = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  > svg {
+    animation: ${rotation} 2s infinite linear;
+    transition: width 0.2s linear;
+  }
 `;
 
 const schema = z.object({

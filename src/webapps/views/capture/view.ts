@@ -3,10 +3,12 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 import * as vscode from "vscode";
+import * as fs from "fs";
 
 import { Webapp } from "@xliic/common/webapp/capture";
-import { CaptureItem, CaptureSettings, PrepareOptions, Status } from "@xliic/common/capture";
 import { GeneralError } from "@xliic/common/error";
+import { Result } from "@xliic/result";
+import { CaptureItem, CaptureSettings, PrepareOptions, Status } from "@xliic/common/capture";
 
 import { loadConfig } from "../../../util/config";
 import { WebView } from "../../web-view";
@@ -14,6 +16,7 @@ import { Configuration } from "../../../configuration";
 import { executeHttpRequest } from "../../http-handler";
 import { offerUpgrade } from "../../../platform/upgrade";
 import { Logger } from "../../../platform/types";
+import { retry } from "../../../time-util";
 import {
   CaptureConnection,
   getCaptureConnection,
@@ -24,19 +27,9 @@ import {
   requestStatus,
   requestUpload,
 } from "./api";
-import { delay } from "../../../time-util";
-
-const pollingDelayMs = 5 * 1000; // 5s
-const pollingTimeMs = 5 * 60 * 1000; // 5min
-const pollingLimit = Math.floor(pollingTimeMs / pollingDelayMs);
-
-const startPollingDelayMs = 100; // 0.1s
-const startPollingTimeMs = 30 * 1000; // 30s
-const startPollingLimit = Math.floor(startPollingTimeMs / startPollingDelayMs);
 
 export class CaptureWebView extends WebView<Webapp> {
   private items: CaptureItem[];
-  private useDevEndpoints: boolean;
   private captureConnections: Map<string, CaptureConnection>;
 
   constructor(
@@ -47,7 +40,6 @@ export class CaptureWebView extends WebView<Webapp> {
   ) {
     super(extensionPath, "capture", "API Contract Generator", vscode.ViewColumn.One);
     this.items = [];
-    this.useDevEndpoints = configuration.get<boolean>("internalUseDevEndpoints");
     this.captureConnections = new Map<string, CaptureConnection>();
 
     vscode.window.onDidChangeActiveColorTheme((e) => {
@@ -91,113 +83,158 @@ export class CaptureWebView extends WebView<Webapp> {
 
     convert: async (payload: { id: string }) => {
       const item = this.items.find((item) => item.id === payload.id)!;
-      item.log = ["Started new session"];
       item.downloadedFile = undefined;
+      item.uploadStatus = {};
+      item.log = [];
 
-      let captureConnection: CaptureConnection;
+      const files = await sortFiles(item.files);
 
-      try {
-        captureConnection = await this.getCaptureConnection(undefined);
-      } catch (error) {
-        this.showExecutionStatusResponse(item, "failed", false, (error as Error).message);
+      if (files.env.length > 1) {
+        this.updateItem(
+          item,
+          "failed",
+          "Multiple environment files provided. Please provide only one environment file."
+        );
+        return;
+      }
+
+      const [captureConnection, captureConnectionError] = await this.getCaptureConnection(
+        undefined
+      );
+
+      if (captureConnectionError !== undefined) {
+        this.updateItem(
+          item,
+          "failed",
+          `Failed to establish connection to capture server: ${getError(captureConnectionError)}`
+        );
         return;
       }
 
       // Handle the case when restart requested
       if (item.quickgenId && item.status === "failed") {
-        try {
-          await requestDelete(captureConnection, item.quickgenId, this.logger);
-        } catch (error) {
-          // Silent removal
-        }
+        await requestDelete(captureConnection, item.quickgenId, this.logger);
       }
 
-      item.status = "running";
+      this.updateItem(item, "running", "Started new session");
 
-      // Prepare request -> capture server
-      let quickgenId = undefined;
-      try {
-        quickgenId = await requestPrepare(captureConnection, item.prepareOptions, this.logger);
-        this.captureConnections.set(quickgenId, captureConnection);
-        this.showPrepareResponse(item, quickgenId, true, "");
-      } catch (error) {
-        this.showPrepareResponse(item, quickgenId, false, getError(error));
-        await this.maybeOfferUpgrade(error);
-        return;
-      }
+      const [quickgenId, prepareError] = await requestPrepare(
+        captureConnection,
+        item.prepareOptions,
+        this.logger
+      );
 
-      // Upload request -> capture server
-      try {
-        await requestUpload(
-          captureConnection,
-          quickgenId,
-          item.files,
-          (percent: number) => {
-            if (item.status !== "failed") {
-              this.showPrepareUploadFileResponse(item, true, "", percent === 1.0, percent);
-            }
-          },
-          this.logger
+      if (prepareError !== undefined) {
+        await this.updateItem(
+          item,
+          "failed",
+          `Failed to prepare quickgen job: ${getError(prepareError)}`
         );
-      } catch (error) {
-        this.showPrepareUploadFileResponse(item, false, getError(error), false, 0.0);
-        await this.maybeOfferUpgrade(error);
+        await this.maybeOfferUpgrade(prepareError);
         return;
       }
 
-      const captureStarted: Promise<"success" | "error"> = new Promise(async (resolve) => {
-        const startCapture = async () => {
-          if (item.startPollingCounter > startPollingLimit) {
-            this.showExecutionStartResponse(item, false, "Polling limit exceeded");
-            resolve("error");
-            return;
-          }
-
-          try {
-            item.startPollingCounter += 1;
-            await requestStart(captureConnection, quickgenId, this.logger);
-            this.showExecutionStartResponse(item, true, "");
-            resolve("success");
-            return;
-          } catch (error: any) {
-            if (error?.response?.statusCode === 409) {
-              setTimeout(async () => {
-                startCapture();
-              }, startPollingDelayMs);
-            } else {
-              this.showExecutionStartResponse(item, false, getError(error));
-              await this.maybeOfferUpgrade(error);
-              resolve("error");
-            }
-            return;
-          }
-        };
-        startCapture();
-      });
-
-      const refreshJobStatus = async (quickgenId: string) => {
-        await delay(pollingDelayMs);
-        try {
-          const status = await requestStatus(captureConnection, quickgenId, this.logger);
-          item.pollingCounter += 1;
-          this.showExecutionStatusResponse(item, status, true, "");
-          const keepPolling = item.pollingCounter <= pollingLimit;
-          if ((status === "pending" || status === "running") && keepPolling) {
-            setTimeout(async () => {
-              refreshJobStatus(quickgenId);
-            }, pollingDelayMs);
-          }
-        } catch (error) {
-          this.showExecutionStatusResponse(item, "finished", false, getError(error));
+      this.captureConnections.set(quickgenId, captureConnection);
+      await this.updateItem(item, "running", `Created quickgen job`);
+      await this.updateItem(item, "running", "Starting file uploads");
+      for (const postman of files.postman) {
+        const [_, error] = await this.uploadFile(
+          captureConnection,
+          item,
+          quickgenId,
+          postman,
+          files.env[0]
+        );
+        if (error !== undefined) {
+          this.updateItem(item, "failed", `Upload failed for file ${postman}: ${getError(error)}`);
           await this.maybeOfferUpgrade(error);
           return;
         }
+      }
+
+      for (const other of files.other) {
+        const [_, error] = await this.uploadFile(
+          captureConnection,
+          item,
+          quickgenId,
+          other,
+          undefined
+        );
+        if (error !== undefined) {
+          this.updateItem(item, "failed", `Upload failed for file ${other}: ${getError(error)}`);
+          await this.maybeOfferUpgrade(error);
+          return;
+        }
+      }
+
+      this.updateItem(item, "running", "All files uploaded, starting conversion");
+
+      const start = async (): Promise<Result<"done" | "retry", unknown>> => {
+        const [_, error] = await requestStart(captureConnection, quickgenId, this.logger);
+        if (error !== undefined) {
+          if ((error as any)?.response?.statusCode === 409) {
+            return ["retry", undefined];
+          } else {
+            return [undefined, error];
+          }
+        }
+        return ["done", undefined];
       };
 
-      const startResult = await captureStarted;
+      // start capture
+      const [started, startError] = await retry(start, {
+        maxRetries: 30,
+        delay: 500,
+        maxDelay: 5000,
+      });
 
-      if (startResult === "success") {
-        refreshJobStatus(quickgenId);
+      if (startError !== undefined) {
+        this.updateItem(item, "failed", `Failed to start conversion: ${getError(startError)}`);
+        await this.maybeOfferUpgrade(startError);
+        return;
+      }
+
+      if (started !== "done") {
+        this.updateItem(item, "failed", `Failed to start conversion: exceeded maximum retries`);
+        return;
+      }
+
+      this.updateItem(item, "running", "Conversion started, checking for status");
+
+      const monitor = async (): Promise<Result<"done" | "retry", unknown>> => {
+        const [status, statusError] = await requestStatus(
+          captureConnection,
+          quickgenId,
+          this.logger
+        );
+        if (statusError !== undefined) {
+          return [undefined, statusError];
+        }
+
+        if (status === "pending" || status === "running") {
+          return ["retry", undefined];
+        }
+
+        return ["done", undefined];
+      };
+
+      // monitor status
+      const [status, convertError] = await retry(monitor, {
+        maxRetries: 60,
+        delay: 2000,
+        maxDelay: 5000,
+      });
+
+      if (convertError !== undefined) {
+        await this.updateItem(item, "failed", `Conversion failed: ${getError(convertError)}`);
+        await this.maybeOfferUpgrade(convertError);
+        return;
+      }
+
+      if (status === "done") {
+        await this.updateItem(item, "finished", `Conversion completed`);
+      } else {
+        await this.updateItem(item, "failed", `Conversion failed exceeding maximum wait time`);
       }
     },
 
@@ -220,7 +257,12 @@ export class CaptureWebView extends WebView<Webapp> {
 
       if (uri) {
         const item = this.items.find((item) => item.id === payload.id)!;
-        const captureConnection = await this.getCaptureConnection(item.quickgenId);
+        const [captureConnection, error] = await this.getCaptureConnection(item.quickgenId);
+
+        if (error !== undefined) {
+          // show error FIXME
+          return;
+        }
 
         try {
           const fileText = await requestDownload(captureConnection, item.quickgenId!, this.logger);
@@ -242,7 +284,11 @@ export class CaptureWebView extends WebView<Webapp> {
       // If prepare fails, there will be no quickgenId defined
       if (item?.quickgenId) {
         try {
-          const captureConnection = await this.getCaptureConnection(item.quickgenId);
+          const [captureConnection, error] = await this.getCaptureConnection(item.quickgenId);
+          if (error !== undefined) {
+            // show error FIXME
+            return;
+          }
           await requestDelete(captureConnection, item.quickgenId, this.logger);
           this.captureConnections.delete(item.quickgenId);
         } catch (error) {
@@ -265,22 +311,18 @@ export class CaptureWebView extends WebView<Webapp> {
       executeHttpRequest(id, request, config, this.logger),
   };
 
-  async getCaptureConnection(quickgenId: string | undefined): Promise<CaptureConnection> {
+  async getCaptureConnection(
+    quickgenId: string | undefined
+  ): Promise<Result<CaptureConnection, unknown>> {
     if (quickgenId !== undefined) {
-      return this.captureConnections.get(quickgenId)!;
+      return [this.captureConnections.get(quickgenId)!, undefined];
     } else {
-      const connection = await getCaptureConnection(
+      return await getCaptureConnection(
         this.configuration,
         this.secrets,
-        this.useDevEndpoints,
+        this.configuration.get<boolean>("internalUseDevEndpoints"),
         this.logger
       );
-
-      if (!connection) {
-        throw new Error("Failed to get capture connection");
-      }
-
-      return connection;
     }
   }
 
@@ -291,18 +333,21 @@ export class CaptureWebView extends WebView<Webapp> {
       command: "showCaptureWindow",
       payload: { items: this.items },
     });
-    try {
-      const captureConnection = await this.getCaptureConnection(undefined);
-      await this.sendRequest({
-        command: "setCaptureToken",
-        payload: captureConnection.token,
-      });
-    } catch (error) {
+
+    const [connection, error] = await this.getCaptureConnection(undefined);
+
+    if (error !== undefined) {
       this.showGeneralError({
         message: "Failed to establish connection to capture server, please check your credentials.",
-        details: (error as Error).message,
+        details: `${error}`,
       });
+      return;
     }
+
+    await this.sendRequest({
+      command: "setCaptureToken",
+      payload: connection.token,
+    });
   }
 
   async showCaptureWebView() {
@@ -318,6 +363,48 @@ export class CaptureWebView extends WebView<Webapp> {
     }
   }
 
+  async uploadFile(
+    captureConnection: CaptureConnection,
+    item: CaptureItem,
+    quickgenId: string,
+    data_file: string,
+    env_file: string | undefined
+  ): Promise<Result<unknown, unknown>> {
+    item.uploadStatus[data_file] = { status: "active", percent: 0 };
+
+    this.sendRequestSilently({
+      command: "saveCapture",
+      payload: item,
+    });
+
+    const [upload, uploadError] = await requestUpload(
+      captureConnection,
+      quickgenId,
+      data_file,
+      env_file,
+      (percent: number) => {
+        item.uploadStatus[data_file] = { status: "active", percent };
+        this.sendRequestSilently({
+          command: "saveCapture",
+          payload: item,
+        });
+      },
+      this.logger
+    );
+
+    if (uploadError !== undefined) {
+      return [undefined, uploadError];
+    }
+
+    item.uploadStatus[data_file] = { status: "active", percent: 100 };
+    this.sendRequestSilently({
+      command: "saveCapture",
+      payload: item,
+    });
+
+    return [upload, undefined];
+  }
+
   getNewItem(files: string[]): CaptureItem {
     return {
       id: crypto.randomUUID(),
@@ -327,10 +414,9 @@ export class CaptureWebView extends WebView<Webapp> {
         basePath: "/",
         servers: ["https://server.example.com"],
       },
+      uploadStatus: {},
       status: "pending",
-      pollingCounter: 0,
-      startPollingCounter: 0,
-      log: ["Started new session"],
+      log: [],
       downloadedFile: undefined,
     };
   }
@@ -340,84 +426,10 @@ export class CaptureWebView extends WebView<Webapp> {
     itemOptions.servers = options.servers.map((e) => e.trim()).filter((e) => e.length > 0);
   }
 
-  showPrepareResponse(item: CaptureItem, quickgenId: string, success: boolean, error: string) {
-    if (success) {
-      item.quickgenId = quickgenId;
-      item.status = "running";
-      item.log.push("Created quickgen job");
-    } else {
-      item.status = "failed";
-      item.log.push("Failed to prepare quickgen job: " + error);
-    }
-    this.sendRequestSilently({
-      command: "saveCapture",
-      payload: item,
-    });
-  }
-
-  showPrepareUploadFileResponse(
-    item: CaptureItem,
-    success: boolean,
-    error: string,
-    completed: boolean,
-    percent: number
-  ) {
-    if (success) {
-      const log = item.log;
-      if (completed) {
-        if (log[log.length - 1].startsWith("Uploading files")) {
-          log[log.length - 1] = `Uploading files: 100%`;
-        }
-        item.log.push("All files successfully uploaded");
-      } else {
-        percent = Math.ceil(100 * percent);
-        if (log[log.length - 1].startsWith("Uploading files")) {
-          log[log.length - 1] = `Uploading files: ${percent}%`;
-        } else {
-          log.push(`Uploading files: ${percent}%`);
-        }
-      }
-    } else {
-      item.status = "failed";
-      item.log.push("Failed to upload files: " + error);
-    }
-    this.sendRequestSilently({
-      command: "saveCapture",
-      payload: item,
-    });
-  }
-
-  showExecutionStartResponse(item: CaptureItem, success: boolean, message: string) {
-    if (success) {
-      item.log.push("Quickgen job started");
-    } else {
-      item.status = "failed";
-      item.log.push("Quickgen job failed to start: " + message);
-    }
-    this.sendRequestSilently({
-      command: "saveCapture",
-      payload: item,
-    });
-  }
-
-  showExecutionStatusResponse(item: CaptureItem, status: Status, success: boolean, error: string) {
-    if (success) {
-      const log = item.log;
-      if (log[log.length - 1].startsWith("Quickgen job ")) {
-        log[log.length - 1] = `Quickgen job ${status}`;
-      } else {
-        log.push(`Quickgen job ${status}`);
-      }
-      if (status === "finished") {
-        item.status = "finished";
-      } else if (status === "failed") {
-        item.status = "failed";
-      }
-    } else {
-      item.status = "failed";
-      item.log.push("Quickgen job execution failed: " + error);
-    }
-    this.sendRequestSilently({
+  updateItem(item: CaptureItem, status: Status, message: string) {
+    item.status = status;
+    item.log.push(message);
+    return this.sendRequestSilently({
       command: "saveCapture",
       payload: item,
     });
@@ -456,4 +468,47 @@ function getError(error: any): string {
     return `${error}, ${error.response.body.detail}`;
   }
   return `${error}`;
+}
+
+async function sortFiles(
+  files: string[]
+): Promise<{ env: string[]; postman: string[]; other: string[] }> {
+  const env: string[] = [];
+  const postman: string[] = [];
+  const other: string[] = [];
+  for (const file of files) {
+    const type = await checkFileType(file);
+    if (type === "env_file") {
+      env.push(file);
+    } else if (type === "postman_file") {
+      postman.push(file);
+    } else {
+      other.push(file);
+    }
+  }
+  return { env, postman, other };
+}
+
+async function checkFileType(uri: string): Promise<"env_file" | "postman_file" | "other"> {
+  const filePath = vscode.Uri.parse(uri).fsPath;
+  const parsed = await parseFile(filePath);
+
+  if (parsed !== undefined && typeof parsed === "object" && Array.isArray(parsed?.["values"])) {
+    return "env_file";
+  } else if (parsed !== undefined && typeof parsed === "object") {
+    return "postman_file";
+  }
+
+  return "other";
+}
+
+async function parseFile(filePath: string): Promise<any> {
+  if (filePath.endsWith(".json")) {
+    try {
+      const content = await fs.promises.readFile(filePath, "utf-8");
+      return JSON.parse(content);
+    } catch (e) {
+      // Ignore JSON parse errors
+    }
+  }
 }

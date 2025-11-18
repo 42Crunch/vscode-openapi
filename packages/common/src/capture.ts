@@ -5,14 +5,20 @@ export type PrepareOptions = {
 
 export type Status = "pending" | "running" | "finished" | "failed";
 
+export type FileUploadStatus = {
+  status: "pending" | "active";
+  percent: number;
+};
+
+export type UploadStatus = Record<string, FileUploadStatus>;
+
 export type CaptureItem = {
   id: string;
   files: string[];
+  uploadStatus: UploadStatus;
   quickgenId: string | undefined;
   prepareOptions: PrepareOptions;
   status: Status;
-  pollingCounter: number;
-  startPollingCounter: number;
   log: string[];
   downloadedFile: string | undefined;
 };
