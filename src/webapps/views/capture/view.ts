@@ -25,8 +25,10 @@ import {
   requestPrepare,
   requestStart,
   requestStatus,
+  requestSummary,
   requestUpload,
 } from "./api";
+import { basename } from "../../../fs-util";
 
 export class CaptureWebView extends WebView<Webapp> {
   private items: CaptureItem[];
@@ -134,9 +136,11 @@ export class CaptureWebView extends WebView<Webapp> {
         return;
       }
 
+      item.quickgenId = quickgenId;
       this.captureConnections.set(quickgenId, captureConnection);
-      await this.updateItem(item, "running", `Created quickgen job`);
-      await this.updateItem(item, "running", "Starting file uploads");
+      await this.updateItem(item, undefined, "Created quickgen job");
+      await this.updateItem(item, undefined, "Starting file uploads");
+
       for (const postman of files.postman) {
         const [_, error] = await this.uploadFile(
           captureConnection,
@@ -150,6 +154,7 @@ export class CaptureWebView extends WebView<Webapp> {
           await this.maybeOfferUpgrade(error);
           return;
         }
+        item.uploadStatus[postman].percent = 100;
       }
 
       for (const other of files.other) {
@@ -167,7 +172,7 @@ export class CaptureWebView extends WebView<Webapp> {
         }
       }
 
-      this.updateItem(item, "running", "All files uploaded, starting conversion");
+      this.updateItem(item, undefined, "All files uploaded, starting conversion");
 
       const start = async (): Promise<Result<"done" | "retry", unknown>> => {
         const [_, error] = await requestStart(captureConnection, quickgenId, this.logger);
@@ -189,7 +194,13 @@ export class CaptureWebView extends WebView<Webapp> {
       });
 
       if (startError !== undefined) {
-        this.updateItem(item, "failed", `Failed to start conversion: ${getError(startError)}`);
+        await this.updateItem(
+          item,
+          "failed",
+          `Failed to start conversion: ${getError(startError)}`
+        );
+        const uploadSummary = await this.getUploadSummary(captureConnection, quickgenId, item);
+        await this.updateItem(item, "failed", uploadSummary);
         await this.maybeOfferUpgrade(startError);
         return;
       }
@@ -199,7 +210,7 @@ export class CaptureWebView extends WebView<Webapp> {
         return;
       }
 
-      this.updateItem(item, "running", "Conversion started, checking for status");
+      this.updateItem(item, undefined, "Conversion started, waiting for completion");
 
       const monitor = async (): Promise<Result<"done" | "retry", unknown>> => {
         const [status, statusError] = await requestStatus(
@@ -230,6 +241,9 @@ export class CaptureWebView extends WebView<Webapp> {
         await this.maybeOfferUpgrade(convertError);
         return;
       }
+
+      const uploadSummary = await this.getUploadSummary(captureConnection, quickgenId, item);
+      await this.updateItem(item, undefined, uploadSummary);
 
       if (status === "done") {
         await this.updateItem(item, "finished", `Conversion completed`);
@@ -369,21 +383,21 @@ export class CaptureWebView extends WebView<Webapp> {
     quickgenId: string,
     data_file: string,
     env_file: string | undefined
-  ): Promise<Result<unknown, unknown>> {
-    item.uploadStatus[data_file] = { status: "active", percent: 0 };
+  ): Promise<Result<string, unknown>> {
+    item.uploadStatus[data_file] = { percent: 0, fileId: undefined };
 
     this.sendRequestSilently({
       command: "saveCapture",
       payload: item,
     });
 
-    const [upload, uploadError] = await requestUpload(
+    const [fileId, uploadError] = await requestUpload(
       captureConnection,
       quickgenId,
       data_file,
       env_file,
       (percent: number) => {
-        item.uploadStatus[data_file] = { status: "active", percent };
+        item.uploadStatus[data_file] = { percent, fileId: undefined };
         this.sendRequestSilently({
           command: "saveCapture",
           payload: item,
@@ -396,13 +410,45 @@ export class CaptureWebView extends WebView<Webapp> {
       return [undefined, uploadError];
     }
 
-    item.uploadStatus[data_file] = { status: "active", percent: 100 };
+    item.uploadStatus[data_file] = { percent: 100, fileId };
     this.sendRequestSilently({
       command: "saveCapture",
       payload: item,
     });
 
-    return [upload, undefined];
+    return [fileId, undefined];
+  }
+
+  async getUploadSummary(
+    captureConnection: CaptureConnection,
+    quickgenId: string,
+    item: CaptureItem
+  ): Promise<string[]> {
+    const uploadSummary: string[] = [];
+
+    for (const [file, status] of Object.entries(item.uploadStatus)) {
+      const filename = basename(vscode.Uri.parse(file));
+
+      if (status.fileId !== undefined) {
+        const [summary, error] = await requestSummary(
+          captureConnection,
+          quickgenId,
+          status.fileId,
+          this.logger
+        );
+
+        if (error !== undefined) {
+          uploadSummary.push(`Failed to get summary for file ${filename}: ${getError(error)}`);
+          continue;
+        }
+
+        for (const line of summary) {
+          uploadSummary.push(`Error in "${filename}": ${line}`);
+        }
+      }
+    }
+
+    return uploadSummary;
   }
 
   getNewItem(files: string[]): CaptureItem {
@@ -426,9 +472,15 @@ export class CaptureWebView extends WebView<Webapp> {
     itemOptions.servers = options.servers.map((e) => e.trim()).filter((e) => e.length > 0);
   }
 
-  updateItem(item: CaptureItem, status: Status, message: string) {
-    item.status = status;
-    item.log.push(message);
+  updateItem(item: CaptureItem, status: Status | undefined, message: string | string[]) {
+    if (status !== undefined) {
+      item.status = status;
+    }
+    if (Array.isArray(message)) {
+      item.log.push(...message);
+    } else {
+      item.log.push(message);
+    }
     return this.sendRequestSilently({
       command: "saveCapture",
       payload: item,

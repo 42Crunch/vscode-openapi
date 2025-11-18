@@ -86,7 +86,7 @@ export async function requestUpload(
   env_file: string | undefined,
   listener: (percent: number) => void,
   logger: Logger
-): Promise<Result<unknown, unknown>> {
+): Promise<Result<string, unknown>> {
   const form = new FormData();
   form.append("data_file", fs.createReadStream(vscode.Uri.parse(data_file).fsPath));
   if (env_file) {
@@ -100,7 +100,7 @@ export async function requestUpload(
     listener(progress.percent);
   });
 
-  return [response.body || {}, undefined];
+  return [(response.body as any).file_id, undefined];
 }
 
 export async function requestStart(
@@ -129,7 +129,31 @@ export async function requestStatus(
     });
     return [(response.body as any)["status"], undefined];
   } catch (error) {
-    return [undefined, error || "Unknown error executing capture status"];
+    return [undefined, error || "Unknown error getting capture status"];
+  }
+}
+
+export async function requestSummary(
+  capture: CaptureConnection,
+  quickgenId: string,
+  fileId: string,
+  logger: Logger
+): Promise<Result<string[], unknown>> {
+  try {
+    const response = await got(
+      `capture/api/1.0/quickgen/${quickgenId}/prepare/summary/files/${fileId}`,
+      {
+        ...gotOptions(capture, "GET", logger),
+      }
+    );
+
+    const errors = Array.isArray((response.body as any)?.errors)
+      ? (response.body as any)?.errors.map((err: any) => err?.detail)
+      : [];
+
+    return [errors, undefined];
+  } catch (error) {
+    return [undefined, error || "Unknown error getting capture summary"];
   }
 }
 

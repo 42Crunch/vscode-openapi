@@ -6,8 +6,8 @@ export type PrepareOptions = {
 export type Status = "pending" | "running" | "finished" | "failed";
 
 export type FileUploadStatus = {
-  status: "pending" | "active";
   percent: number;
+  fileId: string | undefined;
 };
 
 export type UploadStatus = Record<string, FileUploadStatus>;
