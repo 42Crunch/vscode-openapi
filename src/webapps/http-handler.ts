@@ -5,6 +5,7 @@
 
 import http from "http";
 import https from "https";
+import { URL } from "url";
 import got, { RequestError } from "got";
 import FormData from "form-data";
 
@@ -13,6 +14,13 @@ import { ShowHttpResponseMessage, ShowHttpErrorMessage } from "@xliic/common/htt
 
 import { createProxyAgentsAndCerts } from "../proxy";
 import { Logger } from "../platform/types";
+import { LogBuilder, Scope } from "../log-redactor";
+
+const redactor = new LogBuilder()
+  .addHeaderRules("X-API-KEY", "Authorization")
+  .addQueryRule("token")
+  .addUuidTokenRegExpRule(Scope.REQUEST_BODY)
+  .build();
 
 export async function executeHttpRequest(
   id: string,
@@ -171,17 +179,45 @@ function isSslError(code: string): boolean {
 
 export function getHooks(method: string, logger: Logger) {
   const logResponse = (response: any, retryWithMergedOptions: Function) => {
-    logger.debug(`${method} ${response.url} ${response.statusCode}`);
+    logger.debug(`${method} ${getSafeUrl(response.url)} ${response.statusCode}`);
     return response;
   };
 
   const logRequest = (options: any) => {
-    const body = options.json ? JSON.stringify(options.json) : "";
-    logger.trace(`${method} ${options.prefixUrl}${options.url} ${body}`);
+    const body = options.json
+      ? JSON.stringify(redactor.redact(options.json, Scope.REQUEST_BODY))
+      : "";
+    const safeUrl = getSafeUrl(`${options.prefixUrl}${options.url}`);
+    logger.trace(`${method} ${safeUrl} ${body}`);
   };
 
   return {
     beforeRequest: [logRequest],
     afterResponse: [logResponse],
   };
+}
+
+export function getSafeUrl(url: string): string {
+  try {
+    const myUrl = new URL(url);
+    if (myUrl.search) {
+      const safeUrl = new URL(url);
+      safeUrl.search = "";
+      const newSearchParams = safeUrl.searchParams;
+      myUrl.searchParams.forEach((value, name, _searchParams) => {
+        if (value) {
+          const safeValue = redactor.redactFieldValue(name, value, Scope.REQUEST_QUERY);
+          newSearchParams.append(name, safeValue);
+        } else {
+          newSearchParams.append(name, value);
+        }
+      });
+      // URLSearchParams object uses rules to determine which characters to percent-encode
+      // For example [ and ] will always be encoded to %5 and %5D
+      return safeUrl.toString().replace("%5BREDACTED%5D", "[REDACTED]");
+    }
+  } catch (error) {
+    return url;
+  }
+  return url;
 }

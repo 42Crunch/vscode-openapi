@@ -37,12 +37,17 @@ import { CliAstManifestEntry, getCliUpdate } from "./cli-ast-update";
 import { extensionQualifiedId } from "../types";
 import { createTempDirectory, existsSync } from "../util/fs";
 import { getProxyEnv } from "../proxy";
+import { LogBuilder, Scope } from "../log-redactor";
 
 const asyncExecFile = promisify(execFile);
 
 let lastCliUpdateCheckTime = 0;
 const cliUpdateCheckInterval = 1000 * 60 * 60 * 1; // 1 hour
 const execMaxBuffer = 1024 * 1024 * 20; // 20MB
+const redactor = new LogBuilder()
+  .addCmdExecArgsRule("--token")
+  .addCmdExecEnvRules("API_KEY", "SCAN_TOKEN")
+  .build();
 
 export async function createScanConfigWithCliBinary(
   scanconfUri: vscode.Uri,
@@ -67,7 +72,7 @@ export async function createScanConfigWithCliBinary(
   await writeFile(oasFilename, oas, { encoding: "utf8" });
 
   try {
-    logger.debug(`Running the binary: ${cli} ${args.join(" ")}`);
+    logger.debug(`Running the binary: ${cli} ${getBinaryArgs(args)}`);
 
     await asyncExecFile(cli, args, { cwd: tmpdir, windowsHide: true, maxBuffer: execMaxBuffer });
 
@@ -313,7 +318,8 @@ export async function runScanWithCliBinary(
   }
 
   try {
-    logger.debug(`Running the binary: ${cli} ${args.join(" ")}`);
+    logger.debug("Binary environment: " + getBinaryEnv(scanEnv));
+    logger.debug(`Running the binary: ${cli} ${getBinaryArgs(args)}`);
     const output = await asyncExecFile(cli, args, {
       cwd: dir as string,
       windowsHide: true,
@@ -363,7 +369,8 @@ export async function runValidateScanConfigWithCliBinary(
   logger.info(`Running validate using: ${cli}`);
 
   try {
-    logger.debug(`Running the binary: ${cli} ${args.join(" ")}`);
+    logger.debug("Binary environment: " + getBinaryEnv(scanEnv));
+    logger.debug(`Running the binary: ${cli} ${getBinaryArgs(args)}`);
     const output = await asyncExecFile(cli, args, {
       cwd: dir as string,
       windowsHide: true,
@@ -474,7 +481,8 @@ export async function runAuditWithCliBinary(
   }
 
   try {
-    logger.debug(`Running the binary: ${cli} ${args.join(" ")}`);
+    logger.debug("Binary environment: " + getBinaryEnv(env));
+    logger.debug(`Running the binary: ${cli} ${getBinaryArgs(args)}`);
     const output = await asyncExecFile(cli, args, {
       cwd: dir as string,
       windowsHide: true,
@@ -655,4 +663,28 @@ async function readSqgReport(sqgReportFilename: string) {
     const report = await readFile(sqgReportFilename, { encoding: "utf8" });
     return JSON.parse(report);
   }
+}
+
+function getBinaryArgs(args: string[]): string {
+  const builder: string[] = [args[0]];
+  for (let i = 1; i < args.length; i++) {
+    const arg = args[i];
+    builder.push(redactor.redactFieldValue(args[i - 1], arg, Scope.CMD_EXEC_ARGS));
+  }
+  return builder.join(" ");
+}
+
+function getBinaryEnv(cmdEnv: SimpleEnvironment): string {
+  let index = 0;
+  const builder: string[] = [];
+  for (const [key, value] of Object.entries(cmdEnv)) {
+    builder.push(key);
+    builder.push("=");
+    builder.push(redactor.redactFieldValue(key, value, Scope.CMD_EXEC_ENV));
+    if (index < Object.keys(cmdEnv).length - 1) {
+      builder.push(", ");
+    }
+    index += 1;
+  }
+  return builder.join(" ");
 }

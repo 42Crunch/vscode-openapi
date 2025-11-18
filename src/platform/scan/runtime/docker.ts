@@ -10,6 +10,9 @@ import { EnvStore } from "../../../envstore";
 import { Logger } from "../../types";
 import { delay } from "../../../time-util";
 import { getProxyEnv } from "../../../proxy";
+import { LogBuilder, Scope } from "../../../log-redactor";
+
+const redactor = new LogBuilder().addCmdExecEnvRules("SCAN_TOKEN").build();
 
 export async function runScanWithDocker(
   envStore: EnvStore,
@@ -43,7 +46,9 @@ export async function runScanWithDocker(
   );
 
   const envString = Object.entries(env)
-    .map(([key, value]) => `-e ${key}='${value}'`)
+    .map(
+      ([key, value]) => `-e ${key}='${redactor.redactFieldValue(key, value, Scope.CMD_EXEC_ENV)}'`
+    )
     .join(" ");
 
   const hostNetwork =
