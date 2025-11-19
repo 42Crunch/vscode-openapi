@@ -92,55 +92,37 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
           </div>
         )}
 
-        {(item.status === "pending" || item.status === "failed") && (
-          <Action
-            onClick={(e) => {
-              dispatch(selectFiles({ id: item.id }));
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-          >
-            <FileImport />
-            Add more files
-          </Action>
-        )}
+        <ActionList>
+          {(item.status === "pending" || item.status === "failed") && (
+            <Action
+              onClick={(e) => {
+                dispatch(selectFiles({ id: item.id }));
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+            >
+              <FileImport />
+              Add more files
+            </Action>
+          )}
 
-        {(item.status === "pending" || item.status === "failed") && item.files.length > 0 && (
-          <Action
-            $disabled={!isValid}
-            $primary
-            onClick={(e) => {
-              if (isValid) {
-                dispatch(convert({ id: item.id }));
-              }
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-          >
-            <FileExport />
-            Generate
-          </Action>
-        )}
-
-        {item.status === "finished" && (
-          <Action
-            $primary
-            onClick={(e) => {
-              dispatch(downloadFile({ id: item.id }));
-              e.stopPropagation();
-              e.preventDefault();
-            }}
-          >
-            <CloudArrowDown />
-            Save OpenAPI file
-          </Action>
-        )}
-
-        {item.status === "running" && (
-          <Spinner>
-            <CircleNotchLight />
-          </Spinner>
-        )}
+          {(item.status === "pending" || item.status === "failed") && item.files.length > 0 && (
+            <Action
+              $disabled={!isValid}
+              $primary
+              onClick={(e) => {
+                if (isValid) {
+                  dispatch(convert({ id: item.id }));
+                }
+                e.stopPropagation();
+                e.preventDefault();
+              }}
+            >
+              <FileExport />
+              Generate
+            </Action>
+          )}
+        </ActionList>
       </FilesList>
 
       <Separator />
@@ -155,40 +137,66 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
         <Input label="Servers" name="servers" description="A list of servers to use for the API" />
       </Options>
 
-      <Separator />
-      <Title>Logs</Title>
-
-      <Logs>
-        {item.log.map((log, index) => (
-          <div key={index}>{log}</div>
-        ))}
-
-        {item.downloadedFile && (
-          <div key={`item-${item.id}-log-${item.log.length}`}>
-            OpenAPI file saved to{" "}
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                dispatch(openLink(item.downloadedFile || ""));
-              }}
-            >
-              {getFilename(item.downloadedFile)}
-            </a>
-          </div>
-        )}
-      </Logs>
-
       {Object.keys(item.uploadStatus).length > 0 && (
         <>
           <Separator />
-          <Title>Upload progress</Title>
-          <UploadProgress>
-            {Object.entries(item.uploadStatus || {}).map(([url, status]) => (
-              <ProgressBar key={url} label={getFilename(url)} progress={status.percent} />
+          <Title>Progress</Title>
+          <UploadStatus>
+            <UploadProgress>
+              {Object.entries(item.uploadStatus || {}).map(([url, status]) => (
+                <FileUploadProgress key={`file-${url}`}>
+                  <ProgressBar key={url} label={getFilename(url)} progress={status.percent} />
+                  {item.status === "running" && (
+                    <Spinner>
+                      <CircleNotchLight />
+                    </Spinner>
+                  )}
+                </FileUploadProgress>
+              ))}
+            </UploadProgress>
+            {item.status === "finished" && (
+              <Action
+                $primary
+                onClick={(e) => {
+                  dispatch(downloadFile({ id: item.id }));
+                  e.stopPropagation();
+                  e.preventDefault();
+                }}
+              >
+                <CloudArrowDown />
+                Save OpenAPI file
+              </Action>
+            )}
+
+            {item.downloadedFile && (
+              <div>
+                OpenAPI file saved to{" "}
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dispatch(openLink(item.downloadedFile || ""));
+                  }}
+                >
+                  {getFilename(item.downloadedFile)}
+                </a>
+              </div>
+            )}
+          </UploadStatus>
+        </>
+      )}
+
+      {item.log.length > 0 && (
+        <>
+          <Separator />
+          <Title>Logs</Title>
+
+          <Logs>
+            {item.log.map((log, index) => (
+              <div key={index}>{log}</div>
             ))}
-          </UploadProgress>
+          </Logs>
         </>
       )}
     </div>
@@ -205,7 +213,6 @@ function unwrapPrepareOptions(data: any): PrepareOptions {
 
 const Action = styled.div<{ $disabled?: boolean; $primary?: boolean }>`
   display: flex;
-  padding: 0 8px;
   gap: 4px;
   align-items: center;
   cursor: pointer;
@@ -262,6 +269,22 @@ const FilesList = styled.div`
   align-items: start;
 `;
 
+const FileUploadProgress = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  > div:first-child {
+    flex: 1;
+    max-width: 600px;
+  }
+`;
+
+const ActionList = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+`;
+
 const Logs = styled.div`
   font-family: monospace;
   display: flex;
@@ -270,7 +293,12 @@ const Logs = styled.div`
 `;
 
 const UploadProgress = styled.div`
-  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+const UploadStatus = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
