@@ -87,6 +87,7 @@ const Item = styled.li`
   overflow: hidden;
   > span.label {
     flex: 1;
+    overflow-wrap: anywhere;
   }
 `;
 
