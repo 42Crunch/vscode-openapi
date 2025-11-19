@@ -9,6 +9,7 @@ function General() {
   return (
     <>
       <Title>General settings</Title>
+
       <Container>
         <Input
           name="requestFlowrate"
@@ -35,6 +36,16 @@ function General() {
           name="responseFollowRedirection"
           label="Follow redirects"
           description="Define if the scan follows redirects (HTTP 3XX) it receives as responses to the tests requests"
+          options={[
+            { value: true, label: "true" },
+            { value: false, label: "false" },
+          ]}
+        />
+
+        <Select
+          name="happyPathOnly"
+          label="Happy path only"
+          description="If set to true, API Scan only runs the happy path tests during the scan before stopping, instead of a full scan"
           options={[
             { value: true, label: "true" },
             { value: false, label: "false" },

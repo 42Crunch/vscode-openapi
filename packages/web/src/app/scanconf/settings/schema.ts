@@ -11,6 +11,7 @@ export const schema = z.object({
   requestFlowrate: z.coerce.number(),
   requestTimeout: z.coerce.number(),
   requestTlsInsecureSkipVerify: z.boolean(),
+  happyPathOnly: z.boolean(),
   responseFollowRedirection: z.boolean(),
   maxScanDuration: z.coerce.number(),
   reportMaxIssues: z.coerce.number(),
