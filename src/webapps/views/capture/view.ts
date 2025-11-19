@@ -100,6 +100,15 @@ export class CaptureWebView extends WebView<Webapp> {
         return;
       }
 
+      if (files.postman.length === 0 && files.other.length === 0) {
+        this.updateItem(
+          item,
+          "failed",
+          "No valid Postman or HAR files provided. Please provide at least one Postman or HAR file."
+        );
+        return;
+      }
+
       const [captureConnection, captureConnectionError] = await this.getCaptureConnection(
         undefined
       );
@@ -154,7 +163,6 @@ export class CaptureWebView extends WebView<Webapp> {
           await this.maybeOfferUpgrade(error);
           return;
         }
-        item.uploadStatus[postman].percent = 100;
       }
 
       for (const other of files.other) {
@@ -237,6 +245,8 @@ export class CaptureWebView extends WebView<Webapp> {
       });
 
       if (convertError !== undefined) {
+        const uploadSummary = await this.getUploadSummary(captureConnection, quickgenId, item);
+        await this.updateItem(item, "failed", uploadSummary);
         await this.updateItem(item, "failed", `Conversion failed: ${getError(convertError)}`);
         await this.maybeOfferUpgrade(convertError);
         return;
