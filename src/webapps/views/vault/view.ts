@@ -13,7 +13,7 @@ import { Logger } from "../../../platform/types";
 
 export class VaultWebView extends WebView<Webapp> {
   constructor(extensionPath: string, private configuration: Configuration, private logger: Logger) {
-    super(extensionPath, "vault", "Vault", vscode.ViewColumn.One, "key-skeleton");
+    super(extensionPath, "vault", "Vault", vscode.ViewColumn.One, "key-skeleton-left-right");
 
     vscode.window.onDidChangeActiveColorTheme((e) => {
       if (this.isActive()) {
