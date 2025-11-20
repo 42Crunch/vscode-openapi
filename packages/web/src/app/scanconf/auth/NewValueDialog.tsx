@@ -1,21 +1,22 @@
 import { FieldValues } from "react-hook-form";
-import styled from "styled-components";
 import * as z from "zod";
 
 import { Playbook } from "@xliic/scanconf";
-import { ThemeColorVariables } from "@xliic/common/theme";
 
 import Input from "../../../components/Input";
-import { Plus } from "../../../icons";
 import FormDialog from "../../../new-components/FormDialog";
 import { ENV_VAR_NAME_REGEX, ENV_VAR_NAME_REGEX_MESSAGE } from "../../../core/playbook/variables";
 
 export default function NewValueDialog({
   onAddCredentialValue,
   existing,
+  isOpen,
+  setOpen,
 }: {
   existing: string[];
   onAddCredentialValue: (name: string, value: Playbook.CredentialMethod) => void;
+  isOpen: boolean;
+  setOpen: (open: boolean) => void;
 }) {
   const defaultValues = { name: "", value: "" };
 
@@ -37,14 +38,11 @@ export default function NewValueDialog({
 
   return (
     <FormDialog
+      open={isOpen}
+      onOpenChange={setOpen}
       defaultValues={defaultValues}
       onSubmit={onSubmit}
       schema={schema}
-      trigger={
-        <AddRequestButton>
-          <Plus />
-        </AddRequestButton>
-      }
     >
       <ValueForm />
     </FormDialog>
@@ -59,15 +57,3 @@ function ValueForm() {
     </>
   );
 }
-
-const AddRequestButton = styled.button`
-  border: none;
-  background-color: transparent;
-  cursor: pointer;
-  > svg {
-    fill: var(${ThemeColorVariables.linkForeground});
-    &:hover {
-      fill: var(${ThemeColorVariables.linkActiveForeground});
-    }
-  }
-`;

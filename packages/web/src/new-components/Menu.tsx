@@ -1,19 +1,19 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import styled from "styled-components";
-import { Check, EllipsisVertical, Sliders } from "../icons";
+import { Check, EllipsisVertical, Sliders, Plus } from "../icons";
 
 export function Menu({
   children,
   icon,
 }: {
   children: React.ReactNode;
-  icon?: "ellipsis" | "sliders";
+  icon?: "ellipsis" | "sliders" | "plus";
 }) {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger asChild className="menu">
-        <IconButton>{icon === "sliders" ? <Sliders /> : <EllipsisVertical />}</IconButton>
+        <IconButton>{getIcon(icon)}</IconButton>
       </DropdownMenu.Trigger>
 
       <DropdownMenu.Portal>
@@ -31,6 +31,19 @@ export function CheckboxMenuItemIndicator() {
       <Check />
     </ItemIndicator>
   );
+}
+
+function getIcon(icon: "ellipsis" | "sliders" | "plus" | undefined) {
+  switch (icon) {
+    case "ellipsis":
+      return <EllipsisVertical />;
+    case "sliders":
+      return <Sliders />;
+    case "plus":
+      return <Plus />;
+    default:
+      return <EllipsisVertical />;
+  }
 }
 
 const IconButton = styled.span`

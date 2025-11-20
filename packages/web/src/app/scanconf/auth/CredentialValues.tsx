@@ -1,7 +1,12 @@
+import { useState } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
-import { Playbook } from "@xliic/scanconf";
+import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import styled from "styled-components";
+
+import { Playbook } from "@xliic/scanconf";
+import { ThemeColorVariables } from "@xliic/common/theme";
+
 import Input from "../../../components/Input";
 import { Menu, MenuItem } from "../../../new-components/Menu";
 import { TabContainer } from "../../../new-components/Tabs";
@@ -10,7 +15,7 @@ import AddRequest from "../operations/AddRequest";
 import * as actions from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import NewValueDialog from "./NewValueDialog";
-import { TrashCan } from "../../../icons";
+import { TrashCan, KeySkeletonLeftRight, PenNib } from "../../../icons";
 import { setRequestId } from "../requests/slice";
 import { goTo } from "../../../features/router/slice";
 
@@ -54,12 +59,13 @@ export default function CredentialValues({
     dispatch(setRequestId(req));
     dispatch(goTo(["scanconf", "requests"]));
   };
+  const { getValues } = useFormContext();
+
+  const [isEditDialogOpen, setEditDialogOpen] = useState(false);
 
   const { fields, append, remove } = useFieldArray({
     name: "methods",
   });
-
-  const { getValues } = useFormContext();
 
   const tabs = fields.map((method: any, index) => {
     return {
@@ -111,20 +117,34 @@ export default function CredentialValues({
   });
 
   return (
-    <TabContainer
-      activeTab={selectedSubcredential}
-      setActiveTab={(tab: string) => dispatch(actions.selectSubcredential(tab))}
-      tabs={tabs}
-      menu={
-        <NewValueDialog
-          existing={getValues("methods").map((value: any) => value.key as string)}
-          onAddCredentialValue={(name: string, value: Playbook.CredentialMethod) => {
-            append({ key: name, value: value });
-            dispatch(actions.selectSubcredential(name));
-          }}
-        />
-      }
-    />
+    <>
+      <TabContainer
+        activeTab={selectedSubcredential}
+        setActiveTab={(tab: string) => dispatch(actions.selectSubcredential(tab))}
+        tabs={tabs}
+        menu={
+          <Menu icon="plus">
+            <MenuItem onClick={(e) => e.stopPropagation()} onSelect={() => null}>
+              <KeySkeletonLeftRight />
+              Pick from Vault
+            </MenuItem>
+            <MenuItem onClick={(e) => e.stopPropagation()} onSelect={() => setEditDialogOpen(true)}>
+              <PenNib />
+              Create legacy credential
+            </MenuItem>
+          </Menu>
+        }
+      />
+      <NewValueDialog
+        isOpen={isEditDialogOpen}
+        setOpen={setEditDialogOpen}
+        existing={getValues("methods").map((value: any) => value.key as string)}
+        onAddCredentialValue={(name: string, value: Playbook.CredentialMethod) => {
+          append({ key: name, value: value });
+          dispatch(actions.selectSubcredential(name));
+        }}
+      />
+    </>
   );
 }
 
