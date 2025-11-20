@@ -6,22 +6,8 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 
-function getHtml(contents: string): string {
-  return `<!DOCTYPE html>
-  <html lang="en">
-  <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src https://github.com https://raw.githubusercontent.com;">
-  </head>
-  <body>
-${contents}
-  </body>
-  </html>`;
-}
-
 export function create(context: vscode.ExtensionContext) {
-  const filename = context.asAbsolutePath("webview/generated/whatsnew.html");
+  const filename = context.asAbsolutePath("webview/whatsnew.html");
   const contents = fs.readFileSync(filename, { encoding: "utf8" });
   const panel = vscode.window.createWebviewPanel(
     "whatsNew",
@@ -29,6 +15,6 @@ export function create(context: vscode.ExtensionContext) {
     vscode.ViewColumn.Active,
     { enableCommandUris: true }
   );
-  panel.webview.html = getHtml(contents);
+  panel.webview.html = contents;
   return panel;
 }
