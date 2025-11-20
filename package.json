@@ -50,10 +50,9 @@
   "scripts": {
     "vscode:prepublish": "npm run build",
     "postinstall": "cd packages && npm install",
-    "build": "npm run build-webapps && npm run build-quickfixes && npm run build-whatsnew && npm run build-snippets && npm run build-schema && npm run compile",
+    "build": "npm run build-webapps && npm run build-quickfixes && npm run build-snippets && npm run build-schema && npm run compile",
     "build-snippets": "yaml --json --single < snippets/snippets.yaml > src/generated/snippets.json",
     "build-quickfixes": "yaml --json --single < quickfixes/quickfixes.yaml > src/generated/quickfixes.json",
-    "build-whatsnew": "node scripts/build-whatsnew.js",
     "build-schema": "node scripts/build-schema.js",
     "build-webapps": "cd packages && npm run build",
     "compile": "tsc -b",
@@ -1050,7 +1049,6 @@
     "eslint": "^9.30.1",
     "glob": "^11.0.3",
     "globals": "^15.11.0",
-    "marked": "^4.0.10",
     "mocha": "^11.7.1",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0"
