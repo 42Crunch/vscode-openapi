@@ -54,6 +54,8 @@ export default function FormDialog({
       <Dialog.Portal>
         <Overlay />
         <DialogContent $noOverflow={noOverflow}>
+          {title && <Dialog.Title>{title}</Dialog.Title>}
+
           <FormProvider {...methods}>
             <Form
               onSubmit={methods.handleSubmit((data) => {
@@ -61,7 +63,6 @@ export default function FormDialog({
                 effectiveSetOpen(false);
               })}
             >
-              {title && <Dialog.Title>{title}</Dialog.Title>}
               {description && <Dialog.Description>{description}</Dialog.Description>}
               <FormContents>{children}</FormContents>
               <div style={{ display: "flex", marginTop: 25, justifyContent: "flex-end", gap: 4 }}>
@@ -105,6 +106,9 @@ const DialogContent = styled(Dialog.Content)<{ $noOverflow?: boolean }>`
   color: var(${ThemeColorVariables.foreground});
   border-radius: 6px;
   box-shadow: hsl(206 22% 7% / 35%) 0px 10px 38px -10px, hsl(206 22% 7% / 20%) 0px 10px 20px -15px;
+  > h2:first-child {
+    margin-top: 0;
+  }
 `;
 
 const FormContents = styled.div`
