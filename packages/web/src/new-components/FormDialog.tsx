@@ -10,7 +10,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import Button from "./Button";
 import ButtonSecondary from "./ButtonSecondary";
 
-export default function FormDialog({
+export default function FormDialog<T extends FieldValues>({
   onSubmit,
   defaultValues,
   trigger,
@@ -23,8 +23,8 @@ export default function FormDialog({
   onOpenChange,
 }: {
   trigger?: JSX.Element;
-  defaultValues: FieldValues;
-  onSubmit: (values: FieldValues) => void;
+  defaultValues: T;
+  onSubmit: (values: T) => void;
   title?: string;
   description?: string;
   schema?: ZodObject<any>;
@@ -33,9 +33,9 @@ export default function FormDialog({
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }) {
-  const methods = useForm({
+  const methods = useForm<T>({
     values: defaultValues,
-    resolver: schema !== undefined ? zodResolver(schema) : undefined,
+    resolver: schema !== undefined ? zodResolver(schema as any) : undefined,
   });
 
   const [internalOpen, setInternalOpen] = useState(false);
@@ -59,7 +59,7 @@ export default function FormDialog({
           <FormProvider {...methods}>
             <Form
               onSubmit={methods.handleSubmit((data) => {
-                onSubmit(data);
+                onSubmit(data as T);
                 effectiveSetOpen(false);
               })}
             >
