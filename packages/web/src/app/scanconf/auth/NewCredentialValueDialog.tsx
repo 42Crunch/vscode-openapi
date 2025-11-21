@@ -7,7 +7,7 @@ import Input from "../../../components/Input";
 import FormDialog from "../../../new-components/FormDialog";
 import { ENV_VAR_NAME_REGEX, ENV_VAR_NAME_REGEX_MESSAGE } from "../../../core/playbook/variables";
 
-export default function NewValueDialog({
+export default function NewCredentialValueDialog({
   onAddCredentialValue,
   existing,
   isOpen,
