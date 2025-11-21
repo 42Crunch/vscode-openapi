@@ -163,6 +163,10 @@ export const TabButton = styled(Tabs.Trigger)`
   &[data-state="active"] > span.menu {
     visibility: visible;
   }
+
+  &:hover > span.menu {
+    visibility: visible;
+  }
 `;
 
 export const RoundTabButton = styled(Tabs.Trigger)`
