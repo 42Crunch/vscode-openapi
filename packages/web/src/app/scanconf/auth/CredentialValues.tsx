@@ -1,11 +1,9 @@
 import { useState } from "react";
 import * as Tabs from "@radix-ui/react-tabs";
-import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import styled from "styled-components";
 
 import { Playbook } from "@xliic/scanconf";
-import { ThemeColorVariables } from "@xliic/common/theme";
 
 import Input from "../../../components/Input";
 import { Menu, MenuItem } from "../../../new-components/Menu";
@@ -14,7 +12,8 @@ import Scenario from "../operations/Scenario";
 import AddRequest from "../operations/AddRequest";
 import * as actions from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
-import NewValueDialog from "./NewValueDialog";
+import NewCredentialValueDialog from "./NewCredentialValueDialog";
+import NewVaultCredentialValueDialog from "./NewVaultCredentialValueDialog";
 import { TrashCan, KeySkeletonLeftRight, PenNib } from "../../../icons";
 import { setRequestId } from "../requests/slice";
 import { goTo } from "../../../features/router/slice";
@@ -61,7 +60,8 @@ export default function CredentialValues({
   };
   const { getValues } = useFormContext();
 
-  const [isEditDialogOpen, setEditDialogOpen] = useState(false);
+  const [isCredentialValueDialogOpen, setCredentialValueDialogOpen] = useState(false);
+  const [isVaultCredentialValueDialogOpen, setVaultCredentialValueDialogOpen] = useState(false);
 
   const { fields, append, remove } = useFieldArray({
     name: "methods",
@@ -124,20 +124,36 @@ export default function CredentialValues({
         tabs={tabs}
         menu={
           <Menu icon="plus">
-            <MenuItem onClick={(e) => e.stopPropagation()} onSelect={() => null}>
+            <MenuItem
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() => setVaultCredentialValueDialogOpen(true)}
+            >
               <KeySkeletonLeftRight />
-              Pick from Vault
+              Use Vault credential
             </MenuItem>
-            <MenuItem onClick={(e) => e.stopPropagation()} onSelect={() => setEditDialogOpen(true)}>
+            <MenuItem
+              onClick={(e) => e.stopPropagation()}
+              onSelect={() => setCredentialValueDialogOpen(true)}
+            >
               <PenNib />
               Create legacy credential
             </MenuItem>
           </Menu>
         }
       />
-      <NewValueDialog
-        isOpen={isEditDialogOpen}
-        setOpen={setEditDialogOpen}
+      <NewCredentialValueDialog
+        isOpen={isCredentialValueDialogOpen}
+        setOpen={setCredentialValueDialogOpen}
+        existing={getValues("methods").map((value: any) => value.key as string)}
+        onAddCredentialValue={(name: string, value: Playbook.CredentialMethod) => {
+          append({ key: name, value: value });
+          dispatch(actions.selectSubcredential(name));
+        }}
+      />
+      <NewVaultCredentialValueDialog
+        scheme={credentialId}
+        isOpen={isVaultCredentialValueDialogOpen}
+        setOpen={setVaultCredentialValueDialogOpen}
         existing={getValues("methods").map((value: any) => value.key as string)}
         onAddCredentialValue={(name: string, value: Playbook.CredentialMethod) => {
           append({ key: name, value: value });
