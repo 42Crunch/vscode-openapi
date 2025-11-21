@@ -18,22 +18,16 @@ export default function NewCredentialValueDialog({
   isOpen: boolean;
   setOpen: (open: boolean) => void;
 }) {
-  const defaultValues = { name: "", value: "" };
+  const defaultValues: FormSchema = { name: "", value: "" };
 
-  const onSubmit = (values: FieldValues) => {
+  const onSubmit = (values: FormSchema) => {
     onAddCredentialValue(values.name, { credential: values.value, requests: [] });
   };
 
-  const schema = z.object({
-    name: z
-      .string()
-      .regex(ENV_VAR_NAME_REGEX(), {
-        message: ENV_VAR_NAME_REGEX_MESSAGE,
-      })
-      .refine((value) => !existing.includes(value), {
-        message: "Already exists",
-      }),
-    value: z.string().min(1),
+  const schema = formSchema.extend({
+    name: formSchema.shape.name.refine((value) => !existing.includes(value), {
+      message: "Already exists",
+    }),
   });
 
   return (
@@ -57,3 +51,12 @@ function ValueForm() {
     </>
   );
 }
+
+const formSchema = z.object({
+  name: z.string().regex(ENV_VAR_NAME_REGEX(), {
+    message: ENV_VAR_NAME_REGEX_MESSAGE,
+  }),
+  value: z.string().min(1),
+});
+
+type FormSchema = z.infer<typeof formSchema>;

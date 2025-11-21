@@ -30,9 +30,13 @@ export default function NewVaultCredentialValueDialog({
     "credentials" in vault.schemes[scheme] ? vault.schemes[scheme].credentials : {}
   ).map((name) => ({ value: name, label: name }));
 
-  const defaultValues = { name: "", type: "auto", vaultName: credentialNames[0]?.value || "" };
+  const defaultValues: FormSchema = {
+    name: "",
+    type: "auto",
+    vaultName: credentialNames[0]?.value || "",
+  };
 
-  const onSubmit = (values: FieldValues) => {
+  const onSubmit = (values: FormSchema) => {
     if (values.type === "auto") {
       onAddCredentialValue(values.name, { credential: "{{$vault}}", requests: [] });
     } else {
@@ -43,17 +47,10 @@ export default function NewVaultCredentialValueDialog({
     }
   };
 
-  const schema = z.object({
-    name: z
-      .string()
-      .regex(ENV_VAR_NAME_REGEX(), {
-        message: ENV_VAR_NAME_REGEX_MESSAGE,
-      })
-      .refine((value) => !existing.includes(value), {
-        message: "Already exists",
-      }),
-    type: z.string(),
-    vaultName: z.string().min(1),
+  const schema = formSchema.extend({
+    name: formSchema.shape.name.refine((value) => !existing.includes(value), {
+      message: "Already exists",
+    }),
   });
 
   return (
@@ -71,7 +68,7 @@ export default function NewVaultCredentialValueDialog({
 }
 
 function ValueForm({ names }: { names: SelectOption[] }) {
-  const type = useWatch({ name: "type" });
+  const type = useWatch<FormSchema>({ name: "type" });
 
   return (
     <FormContainer>
@@ -95,6 +92,16 @@ function ValueForm({ names }: { names: SelectOption[] }) {
     </FormContainer>
   );
 }
+
+const formSchema = z.object({
+  name: z.string().regex(ENV_VAR_NAME_REGEX(), {
+    message: ENV_VAR_NAME_REGEX_MESSAGE,
+  }),
+  type: z.enum(["auto", "name"]),
+  vaultName: z.string().min(1),
+});
+
+type FormSchema = z.infer<typeof formSchema>;
 
 const FormContainer = styled.div`
   min-height: 300px;
