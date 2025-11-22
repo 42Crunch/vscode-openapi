@@ -25,9 +25,10 @@ export default function NewVaultCredentialValueDialog({
   setOpen: (open: boolean) => void;
 }) {
   const vault = useAppSelector((state) => state.vault.data);
+  const vaultScheme = vault.schemes[scheme] || {};
 
   const credentialNames = Object.keys(
-    "credentials" in vault.schemes[scheme] ? vault.schemes[scheme].credentials : {}
+    "credentials" in vaultScheme ? vaultScheme.credentials : {}
   ).map((name) => ({ value: name, label: name }));
 
   const defaultValues: FormSchema = {
