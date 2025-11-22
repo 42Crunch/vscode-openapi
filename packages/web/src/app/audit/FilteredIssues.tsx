@@ -9,7 +9,7 @@ import CollapsibleCard, {
   BottomDescription,
   BottomItem,
   TopDescription,
-} from "../../components/CollapsibleCard";
+} from "../../new-components/CollapsibleCard";
 import KdbArticle from "./KdbArticle";
 import FilterPanel from "./FilterPanel";
 import { copyIssueId, goToLine, openLink } from "./slice";
