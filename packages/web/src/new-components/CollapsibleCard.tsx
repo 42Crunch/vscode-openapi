@@ -75,11 +75,11 @@ const Title = styled.div<{ $collapsed: boolean; $thin: boolean }>`
     visibility: visible;
   }
 
-  border-left: 5px solid transparent;
+  border-left: 3px solid transparent;
   ${({ $collapsed }) =>
     !$collapsed &&
     `border-bottom: 1px solid var(${ThemeColorVariables.border});
-    border-left: 5px solid var(${ThemeColorVariables.badgeBackground});`}
+    border-left: 3px solid var(${ThemeColorVariables.badgeBackground});`}
 `;
 
 export const TopDescription = styled.div`
