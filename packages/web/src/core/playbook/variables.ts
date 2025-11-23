@@ -30,12 +30,16 @@ import {
   generateParameterValues as generateSwaggerParameterValues,
   getParameters as getSwaggerParameters,
 } from "../../util-swagger";
+import { Vault } from "@xliic/common/vault";
 
 export const ENV_VAR_NAME_REGEX = () => /^([\w\-]+)$/g;
 export const ENV_VAR_NAME_REGEX_MESSAGE = "Only the alphanumeric characters, minus or underscore";
 
 export const ENV_VAR_REGEX = () => /{{([\w\-$]+)}}/g;
 export const ENTIRE_ENV_VAR_REGEX = () => /^{{([\w\-$]+)}}$/;
+
+export const SCANCONF_VAR_REGEX = () => /{{([\w\-$]+)(?::([\w\-]+))?}}/g;
+export const ENTIRE_SCANCONF_VAR_REGEX = () => /^{{([\w\-$]+)(?::([\w\-]+))?}}$/;
 
 export function replaceEnvironmentVariables(
   location: "stage-environment" | "request-environment",
@@ -65,13 +69,22 @@ export function replaceRequestVariables(
 }
 
 export function replaceCredentialVariables(
-  credential: string,
+  credential: Playbook.Credential,
+  credentialName: string,
+  credentialValue: string,
+  vault: Vault,
   envStack: PlaybookEnvStack
 ): ReplacementResult<string> {
-  return substituteValues(credential, envStack, {}, { type: "credential", path: [] }, () => ({
-    body: undefined,
-    parameters: undefined,
-  }));
+  return substituteValues(
+    credentialValue,
+    envStack,
+    { credentialName, credential, vault },
+    { type: "credential", path: [] },
+    () => ({
+      body: undefined,
+      parameters: undefined,
+    })
+  );
 }
 
 function replaceObject<T>(
@@ -114,10 +127,11 @@ function replaceString(
   location: VariableLocation,
   fakeMaker: FakeMaker
 ): ReplacementResult<unknown> {
-  const matches = value.match(ENTIRE_ENV_VAR_REGEX());
-  if (matches && matches.length === 2) {
+  const matches = value.match(ENTIRE_SCANCONF_VAR_REGEX());
+  if (matches && (matches.length === 2 || matches.length === 3)) {
     // ENTIRE_ENV_VAR_REGEX replaces entire value, possibly changing its type
     const name = matches[1];
+    console.log("replacing", matches);
     return replaceValue(name, value, envStack, object, location, fakeMaker);
   } else {
     // replace parts of the string value, or possibly none at all
@@ -153,8 +167,8 @@ function substituteValues(
 
   // ENV_VAR_REGEX replaces part of a string value matched, resulting value is always a string
   const result = value.replace(
-    ENV_VAR_REGEX(),
-    (match: string, name: string, offset: number): string => {
+    SCANCONF_VAR_REGEX(),
+    (match: string, name: string, parameter: string | undefined, offset: number): string => {
       const result = lookupOrDynamic(envStack, name, object, location, fakeMaker);
       if (result !== undefined) {
         found.push({ ...result, offset, location });

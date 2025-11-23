@@ -1,6 +1,8 @@
 import { Path, findByPath } from "@xliic/preserving-json-yaml-parser";
 
 import { VariableLocation } from "@xliic/common/env";
+import { Vault } from "@xliic/common/vault";
+import { Playbook } from "@xliic/scanconf";
 
 export const DynamicVariableNames = [
   "$randomString",
@@ -9,6 +11,7 @@ export const DynamicVariableNames = [
   "$timestamp",
   "$timestamp3339",
   "$randomFromSchema",
+  "$vault",
 ] as const;
 
 export type DynamicVariableName = (typeof DynamicVariableNames)[number];
@@ -25,6 +28,7 @@ export const DynamicVariables: Record<
   $timestamp: () => generateTimestamp(),
   $timestamp3339: () => generateIsoTimestamp(),
   $randomFromSchema: randomFromSchema,
+  $vault: vault,
 };
 
 function randomFromSchema(
@@ -68,4 +72,24 @@ function getRandomUint32() {
   const buffer = new Uint32Array(1);
   crypto.getRandomValues(buffer);
   return buffer[0];
+}
+
+function vault(object: unknown, location: VariableLocation, fakerMaker: FakeMaker) {
+  const { credentialName, credential, vault } = object as {
+    credentialName: string;
+    credential: Playbook.Credential;
+    vault: Vault;
+  };
+  // grab first credential value from vault
+  const scheme = vault.schemes?.[credentialName];
+  if (scheme && "credentials" in scheme) {
+    const firstCredential = Object.values(scheme.credentials)[0];
+    if ("apiKey" in firstCredential) {
+      return firstCredential.apiKey;
+    } else if ("username" in firstCredential && "password" in firstCredential) {
+      return `${firstCredential.username}:${firstCredential.password}`;
+    }
+  }
+
+  return "{{vault}}";
 }

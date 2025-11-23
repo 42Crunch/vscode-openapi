@@ -48,6 +48,7 @@ export async function testPlaybook(
         file,
         stages(),
         [...env, ...extraEnv],
+        vault,
         0
       )) {
         dispatch(addStepExecutionAction({ testId, stageId: id, step }));
