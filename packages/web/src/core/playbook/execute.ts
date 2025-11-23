@@ -51,6 +51,7 @@ export async function* executeAllPlaybooks(
       file,
       requests,
       [...env, ...extraEnv, ...result],
+      vault,
       0
     );
 
@@ -74,6 +75,7 @@ export async function* executePlaybook<T extends StaticRequestList | DynamicRequ
   file: Playbook.Bundle,
   requests: T,
   env: PlaybookEnvStack,
+  vault: Vault,
   depth: number
 ): AsyncGenerator<
   T extends StaticRequestList ? PlaybookExecutorStep : PlaybookExecutorStep | HookExecutorStep,
@@ -128,6 +130,7 @@ export async function* executePlaybook<T extends StaticRequestList | DynamicRequ
       file,
       auth,
       [...env, ...result],
+      vault,
       depth
     );
 
@@ -367,6 +370,7 @@ export async function* executeAuth(
   file: Playbook.Bundle,
   auth: string[] | undefined,
   env: PlaybookEnvStack,
+  vault: Vault,
   depth: number
 ): AsyncGenerator<PlaybookExecutorStep, AuthResult | undefined> {
   const result: AuthResult = {};
@@ -418,8 +422,11 @@ export async function* executeAuth(
         server,
         file,
         authName,
+        credential,
+        credentialName,
         method,
         env,
+        vault,
         depth
       );
 
@@ -448,8 +455,11 @@ async function* executeGetCredentialValue(
   server: string,
   file: Playbook.Bundle,
   authName: string,
+  credential: Playbook.Credential,
+  credentialName: string,
   method: Playbook.CredentialMethod,
   env: PlaybookEnvStack,
+  vault: Vault,
   depth: number
 ): AsyncGenerator<PlaybookExecutorStep, string | undefined> {
   const credentialEnvStack = [...env];
@@ -464,6 +474,7 @@ async function* executeGetCredentialValue(
       file,
       method.requests,
       env,
+      vault,
       depth + 1
     );
 
@@ -475,7 +486,13 @@ async function* executeGetCredentialValue(
     credentialEnvStack.push(...result);
   }
 
-  const replacements = replaceCredentialVariables(method.credential, credentialEnvStack);
+  const replacements = replaceCredentialVariables(
+    credential,
+    credentialName,
+    method.credential,
+    vault,
+    credentialEnvStack
+  );
 
   if (replacements.missing.length !== 0) {
     // FIXME something is not found, err

@@ -390,6 +390,7 @@ export function onExecuteAuthentication(
           playbook,
           [`${selectedCredential}/${selectedSubcredential}`],
           env,
+          vault,
           0
         )) {
           listenerApi.dispatch(addTryAuthenticationStep(step));
