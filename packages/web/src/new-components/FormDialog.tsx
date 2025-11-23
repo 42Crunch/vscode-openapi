@@ -2,7 +2,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { ReactNode, useEffect, useState } from "react";
 import { FieldValues, FormProvider, useForm } from "react-hook-form";
 import styled from "styled-components";
-import { ZodObject } from "zod";
+import { ZodObject, ZodSchema } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
@@ -27,7 +27,7 @@ export default function FormDialog<T extends FieldValues>({
   onSubmit: (values: T) => void;
   title?: string;
   description?: string;
-  schema?: ZodObject<any>;
+  schema?: ZodSchema;
   children: ReactNode;
   noOverflow?: boolean;
   open?: boolean;
