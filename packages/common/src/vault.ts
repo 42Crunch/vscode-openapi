@@ -154,6 +154,25 @@ export function getScheme(vault: Vault, schemeName: string): Result<SecuritySche
   return [scheme, undefined];
 }
 
+export function maybeResolveAliasScheme(
+  vault: Vault,
+  scheme: SecurityScheme
+): Result<CredentialsSecurityScheme, string> {
+  if (scheme.type !== "alias") {
+    return [scheme, undefined];
+  }
+
+  const [aliasScheme, aliasError] = getScheme(vault, scheme.scheme);
+  if (aliasError !== undefined) {
+    return [undefined, `Target of alias scheme '${scheme.scheme}' not found: ${aliasError}`];
+  }
+  if (aliasScheme.type === "alias") {
+    return [undefined, `Alias scheme '${scheme.scheme}' cannot point to another alias scheme.`];
+  } else {
+    return [aliasScheme, undefined];
+  }
+}
+
 export function getCredentialNamesFromScheme(
   vault: Vault,
   schemeName: string
@@ -163,19 +182,55 @@ export function getCredentialNamesFromScheme(
     return [undefined, error];
   }
 
-  if (scheme.type === "alias") {
-    const [alias, aliasError] = getScheme(vault, scheme.scheme);
-
-    if (aliasError !== undefined) {
-      return [undefined, `Target of alias scheme '${schemeName}' not found: ${aliasError}`];
-    }
-
-    if (alias.type === "alias") {
-      return [undefined, `Alias scheme '${schemeName}' cannot point to another alias scheme.`];
-    } else {
-      return [Object.keys(alias.credentials), undefined];
-    }
-  } else {
-    return [Object.keys(scheme.credentials), undefined];
+  const [credentialScheme, aliasError] = maybeResolveAliasScheme(vault, scheme);
+  if (aliasError !== undefined) {
+    return [undefined, aliasError];
   }
+
+  return [Object.keys(credentialScheme.credentials), undefined];
+}
+
+export function getCredentialByName(
+  vault: Vault,
+  schemeName: string,
+  credentialName: string
+): Result<SecurityCredential, string> {
+  const [scheme, error] = getScheme(vault, schemeName);
+  if (error !== undefined) {
+    return [undefined, error];
+  }
+
+  const [credentialScheme, aliasError] = maybeResolveAliasScheme(vault, scheme);
+  if (aliasError !== undefined) {
+    return [undefined, aliasError];
+  }
+
+  const credential = credentialScheme.credentials[credentialName];
+  if (credential === undefined) {
+    return [undefined, `Credential '${credentialName}' not found in scheme '${schemeName}'`];
+  }
+
+  return [credential, undefined];
+}
+
+export function getAnyCredential(
+  vault: Vault,
+  schemeName: string
+): Result<SecurityCredential, string> {
+  const [scheme, error] = getScheme(vault, schemeName);
+  if (error !== undefined) {
+    return [undefined, error];
+  }
+
+  const [credentialScheme, aliasError] = maybeResolveAliasScheme(vault, scheme);
+  if (aliasError !== undefined) {
+    return [undefined, aliasError];
+  }
+
+  const first = Object.values(credentialScheme.credentials)[0];
+  if (first === undefined) {
+    return [undefined, `No credentials found in scheme '${schemeName}'`];
+  }
+
+  return [first, undefined];
 }

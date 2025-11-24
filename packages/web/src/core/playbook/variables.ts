@@ -2,7 +2,6 @@ import jsf from "json-schema-faker";
 
 import { LookupFailure, LookupResult, ReplacementResult } from "@xliic/common/env";
 import {
-  OpenApi3,
   Swagger,
   HttpMethod,
   isOpenapi,
@@ -131,8 +130,9 @@ function replaceString(
   if (matches && (matches.length === 2 || matches.length === 3)) {
     // ENTIRE_ENV_VAR_REGEX replaces entire value, possibly changing its type
     const name = matches[1];
+    const parameter = matches[2];
     console.log("replacing", matches);
-    return replaceValue(name, value, envStack, object, location, fakeMaker);
+    return replaceValue(name, value, parameter, envStack, object, location, fakeMaker);
   } else {
     // replace parts of the string value, or possibly none at all
     return substituteValues(value, envStack, object, location, fakeMaker);
@@ -142,12 +142,13 @@ function replaceString(
 function replaceValue(
   name: string,
   value: string,
+  parameter: string | undefined,
   envStack: PlaybookEnvStack,
   object: unknown,
   location: VariableLocation,
   fakeMaker: FakeMaker
 ): ReplacementResult<unknown> {
-  const result = lookupOrDynamic(envStack, name, object, location, fakeMaker);
+  const result = lookupOrDynamic(envStack, name, parameter, object, location, fakeMaker);
   if (result !== undefined) {
     return { found: [{ ...result, offset: 0, location }], missing: [], value: result.value };
   } else {
@@ -169,7 +170,7 @@ function substituteValues(
   const result = value.replace(
     SCANCONF_VAR_REGEX(),
     (match: string, name: string, parameter: string | undefined, offset: number): string => {
-      const result = lookupOrDynamic(envStack, name, object, location, fakeMaker);
+      const result = lookupOrDynamic(envStack, name, parameter, object, location, fakeMaker);
       if (result !== undefined) {
         found.push({ ...result, offset, location });
         return `${result.value}`;
@@ -190,13 +191,21 @@ function substituteValues(
 function lookupOrDynamic(
   envStack: PlaybookEnvStack,
   varname: string,
+  parameter: string | undefined,
   object: unknown,
   location: VariableLocation,
   fakeMaker: () => { body: unknown; parameters: unknown }
 ): EnvStackLookupResult | undefined {
   if (DynamicVariableNames.includes(varname as DynamicVariableName)) {
-    const dynamic = DynamicVariables[varname as DynamicVariableName](object, location, fakeMaker);
-    return { context: { type: "built-in" }, value: dynamic, name: varname };
+    const dynamic = DynamicVariables[varname as DynamicVariableName](
+      object,
+      parameter,
+      location,
+      fakeMaker
+    );
+    if (dynamic !== undefined) {
+      return { context: { type: "built-in" }, value: dynamic, name: varname };
+    }
   } else {
     return lookup(envStack, varname);
   }
