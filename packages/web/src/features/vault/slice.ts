@@ -4,11 +4,13 @@ import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 
 export interface VaultState {
   data: Vault;
+  enabled: boolean;
   selectedSchemeId?: string;
 }
 
 const initialState: VaultState = {
   data: { schemes: {} },
+  enabled: false,
 };
 
 export const slice = createSlice({
@@ -17,6 +19,7 @@ export const slice = createSlice({
   reducers: {
     loadVault: (state, action: PayloadAction<Vault>) => {
       state.data = action.payload;
+      state.enabled = true;
     },
 
     saveVault: (state, action: PayloadAction<Vault>) => {
