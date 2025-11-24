@@ -14,6 +14,7 @@ import config, {
   showScandManagerConnectionTest,
   showCliTest,
   showCliDownload,
+  showSelectedVaultFile,
 } from "../../features/config/slice";
 import theme, { changeTheme, ThemeState } from "../../features/theme/slice";
 import client from "../../features/http-client/slice";
@@ -39,6 +40,7 @@ export const messageHandlers: Webapp["webappHandlers"] = {
   showCliDownload,
   showHttpError: () => null,
   showHttpResponse: () => null,
+  showSelectedVaultFile,
 };
 
 export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme: ThemeState) => {

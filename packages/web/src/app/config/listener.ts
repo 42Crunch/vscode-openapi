@@ -23,6 +23,7 @@ export function createListener(host: Webapp["host"]) {
     downloadCli: listener.onDownloadCli(startAppListening, host),
     openLink: listener.onOpenLink(startAppListening, host),
     sendHttpRequest: onSendHttpRequest(startAppListening, host),
+    selectVaultFile: listener.onSelectVaultFile(startAppListening, host),
   };
 
   startListeners(listeners);

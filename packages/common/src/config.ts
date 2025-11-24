@@ -34,6 +34,8 @@ export type Config = {
   approvedHosts: ApprovedHostConfiguration[];
   internalFeatures: boolean;
   internalUseDevEndpoints: boolean;
+  vaultUri: string;
+  useVault: boolean;
 };
 
 export type ConnectionTestResult = { success: true } | { success: false; message: string };
@@ -112,4 +114,14 @@ export type ApprovedHostConfiguration = {
   header?: string;
   prefix?: string;
   token?: string;
+};
+
+export type SelectVaultFile = {
+  command: "selectVaultFile";
+  payload: undefined;
+};
+
+export type ShowSelectedVaultFile = {
+  command: "showSelectedVaultFile";
+  payload: string;
 };

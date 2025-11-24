@@ -4,18 +4,17 @@ import * as yaml from "yaml";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirnameUri, relative } from "../../fs-util";
 import { exists, existsDir } from "../../util/fs";
+import { Config } from "@xliic/common/config";
 
 export type ConfigFile = {
   apis: Record<string, { alias: string }>;
 };
 
-export async function getVaultUri(openapiUri: vscode.Uri): Promise<vscode.Uri> {
-  // const rootUri = getRootUri(openapiUri);
-  // const vaultUri = vscode.Uri.joinPath(rootUri, ".42c", "vault.json");
-  // return vaultUri;
-
-  const vaultUri = vscode.Uri.parse("file:///Users/anton/crunch/vault/vault.json");
-  return vaultUri;
+export async function getVaultUri(config: Config): Promise<vscode.Uri | undefined> {
+  if (config.useVault && config.vaultUri.trim() !== "") {
+    return vscode.Uri.parse(config.vaultUri);
+  }
+  return undefined;
 }
 
 export async function getOrCreateScanconfUri(

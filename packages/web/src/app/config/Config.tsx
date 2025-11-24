@@ -18,10 +18,10 @@ import runtimeBinary from "./screen/runtime-binary";
 import runtimeScandManager from "./screen/runtime-scand-manager";
 import runtimeDocker from "./screen/runtime-docker";
 import auditRuntime from "./screen/audit-runtime";
-
 import scanRuntime from "./screen/scan-runtime";
 import openapiExternalRefs from "./screen/openapi-external-refs";
 import devEndpoints from "./screen/dev-endpoints";
+import vault from "./screen/vault";
 
 import { unwrapFormValues, wrapFormValues } from "./util";
 
@@ -43,6 +43,7 @@ export default function Config() {
         mandatoryTags,
         auditRuntime,
         scanRuntime,
+        vault,
       ],
     },
     {
@@ -77,6 +78,7 @@ export default function Config() {
     [runtimeDocker.id]: runtimeDocker,
     [openapiExternalRefs.id]: openapiExternalRefs,
     [devEndpoints.id]: devEndpoints,
+    [vault.id]: vault,
   };
 
   useEffect(() => {

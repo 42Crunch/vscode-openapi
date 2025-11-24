@@ -13,6 +13,7 @@ import {
   TestScandManagerConnectionMessage,
   TestCliMessage,
   DownloadCliMessage,
+  SelectVaultFile,
 } from "@xliic/common/config";
 
 import { OpenLinkMessage } from "@xliic/common/link";
@@ -27,6 +28,7 @@ import {
   testCli,
   downloadCli,
   openLink,
+  selectVaultFile,
 } from "./slice";
 
 import config from "./slice";
@@ -174,6 +176,22 @@ export function onOpenLink(
         host.postMessage({
           command: "openLink",
           payload: action.payload,
+        });
+      },
+    });
+}
+
+export function onSelectVaultFile(
+  startAppListening: FeatureListening,
+  host: Webapp<NoopMessage, SelectVaultFile>["host"]
+) {
+  return () =>
+    startAppListening({
+      actionCreator: selectVaultFile,
+      effect: async (action, listenerApi) => {
+        host.postMessage({
+          command: "selectVaultFile",
+          payload: undefined,
         });
       },
     });

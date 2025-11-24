@@ -41,6 +41,9 @@ export async function loadConfig(
   const internalFeatures = configuration.get<boolean>("internalFeatures");
   const internalUseDevEndpoints = configuration.get<boolean>("internalUseDevEndpoints");
 
+  const useVault = configuration.get<boolean>("useVault");
+  const vaultUri = configuration.get<string>("vaultUri");
+
   return {
     platformUrl,
     platformAuthType: platformAuthType == "" ? derivedAuthType : platformAuthType,
@@ -71,6 +74,8 @@ export async function loadConfig(
     approvedHosts,
     internalFeatures,
     internalUseDevEndpoints,
+    vaultUri,
+    useVault,
   };
 }
 
@@ -164,6 +169,10 @@ export async function saveConfig(
     config.internalUseDevEndpoints,
     vscode.ConfigurationTarget.Global
   );
+
+  await configuration.update("vaultUri", config.vaultUri, vscode.ConfigurationTarget.Global);
+
+  await configuration.update("useVault", config.useVault, vscode.ConfigurationTarget.Global);
 
   await configuration.update(
     "platformConformanceScanProxy",
