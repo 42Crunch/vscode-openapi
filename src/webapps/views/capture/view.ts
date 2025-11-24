@@ -212,13 +212,14 @@ export class CaptureWebView extends WebView<Webapp> {
           `Failed to start conversion: ${getError(startError)}`
         );
         const uploadSummary = await this.getUploadSummary(captureConnection, quickgenId, item);
-        await this.updateItem(item, "failed", uploadSummary);
+        await this.updateItem(item, undefined, uploadSummary);
+        await this.updateItem(item, "failed", `Conversion failed`);
         await this.maybeOfferUpgrade(startError);
         return;
       }
 
       if (started !== "done") {
-        this.updateItem(item, "failed", `Failed to start conversion: exceeded maximum retries`);
+        this.updateItem(item, "failed", `Conversion failed: exceeded maximum retries`);
         return;
       }
 
@@ -250,7 +251,7 @@ export class CaptureWebView extends WebView<Webapp> {
 
       if (convertError !== undefined) {
         const uploadSummary = await this.getUploadSummary(captureConnection, quickgenId, item);
-        await this.updateItem(item, "failed", uploadSummary);
+        await this.updateItem(item, undefined, uploadSummary);
         await this.updateItem(item, "failed", `Conversion failed: ${getError(convertError)}`);
         await this.maybeOfferUpgrade(convertError);
         return;
