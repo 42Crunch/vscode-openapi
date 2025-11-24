@@ -7,6 +7,7 @@ import {
   SecurityCredential,
   SchemeType,
   AliasSecurityScheme,
+  CredentialsSecurityScheme,
 } from "@xliic/common/vault";
 
 import { Pen, TrashCan } from "../../icons";
@@ -63,10 +64,10 @@ function CredentialsSchemaContent({
   schema,
 }: {
   schemaName: string;
-  schema: SecurityScheme;
+  schema: CredentialsSecurityScheme;
 }) {
   const dispatch = useAppDispatch();
-  const credentialKeys = "credentials" in schema ? Object.keys(schema.credentials) : [];
+  const credentialKeys = Object.keys(schema.credentials);
   return (
     <>
       <SchemaMetadata type={schema.type} />

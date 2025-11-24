@@ -4,6 +4,7 @@ import styled from "styled-components";
 
 import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { getCredentialNamesFromScheme } from "@xliic/common/vault";
 
 import Input from "../../../new-components/fat-fields/Input";
 import FormDialog from "../../../new-components/FormDialog";
@@ -23,11 +24,14 @@ export default function NewCredentialValueDialog({
   onAddCredentialValue: (name: string, value: Playbook.CredentialMethod) => void;
 }) {
   const vault = useAppSelector((state) => state.vault.data);
-  const vaultScheme = vault.schemes[scheme] || {};
 
-  const credentialNames = Object.keys(
-    "credentials" in vaultScheme ? vaultScheme.credentials : {}
-  ).map((name) => ({ value: name, label: name }));
+  const [names, namesError] = getCredentialNamesFromScheme(vault, scheme);
+
+  const credentialNames =
+    names?.map((name) => ({
+      value: name,
+      label: name,
+    })) ?? [];
 
   const defaultValues: FormSchema = {
     name: "",
