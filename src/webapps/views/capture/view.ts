@@ -58,10 +58,6 @@ export class CaptureWebView extends WebView<Webapp> {
         canSelectFiles: true,
         canSelectFolders: false,
         canSelectMany: true,
-        filters: {
-          Postman: ["json"],
-          HAR: ["har"],
-        },
       });
       if (uris === undefined || uris.length === 0) {
         return;
