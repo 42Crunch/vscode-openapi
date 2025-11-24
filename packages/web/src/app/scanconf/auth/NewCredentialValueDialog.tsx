@@ -24,6 +24,7 @@ export default function NewCredentialValueDialog({
   onAddCredentialValue: (name: string, value: Playbook.CredentialMethod) => void;
 }) {
   const vault = useAppSelector((state) => state.vault.data);
+  const useVault = useAppSelector((state) => state.vault.enabled);
 
   const [names, namesError] = getCredentialNamesFromScheme(vault, scheme);
 
@@ -35,7 +36,7 @@ export default function NewCredentialValueDialog({
 
   const defaultValues: FormSchema = {
     name: "",
-    type: "auto",
+    type: useVault ? "auto" : "manual",
     vaultByName: credentialNames[0]?.value || "",
     manual: "",
   };
@@ -89,12 +90,12 @@ export default function NewCredentialValueDialog({
         </AddRequestButton>
       }
     >
-      <ValueForm names={credentialNames} />
+      <ValueForm names={credentialNames} useVault={useVault} />
     </FormDialog>
   );
 }
 
-function ValueForm({ names }: { names: SelectOption[] }) {
+function ValueForm({ names, useVault }: { names: SelectOption[]; useVault: boolean }) {
   const type = useWatch<FormSchema>({ name: "type" });
 
   return (
@@ -105,8 +106,8 @@ function ValueForm({ names }: { names: SelectOption[] }) {
       <RadioGroup
         name="type"
         options={[
-          { value: "auto", label: "Automatically" },
-          { value: "by-name", label: "By name" },
+          { value: "auto", label: "Automatically", disabled: !useVault },
+          { value: "by-name", label: "By name", disabled: !useVault },
           { value: "manual", label: "Manually" },
         ]}
       />

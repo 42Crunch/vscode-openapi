@@ -7,6 +7,7 @@ import { useId } from "react";
 export type RadioOption = {
   value: string;
   label: string;
+  disabled?: boolean;
 };
 
 export default function RadioGroup({
@@ -23,8 +24,8 @@ export default function RadioGroup({
   return (
     <Group value={value} onValueChange={onValueChange}>
       {options.map((option, index) => (
-        <Option key={index}>
-          <Item value={option.value} id={`${id}-${index}`}>
+        <Option key={index} $disabled={option.disabled}>
+          <Item value={option.value} disabled={!!option.disabled} id={`${id}-${index}`}>
             <Indicator>
               <Circle />
             </Indicator>
@@ -42,10 +43,14 @@ export const Group = styled(RadixRadioGroup.Root)`
   gap: 8px;
 `;
 
-export const Option = styled.div`
+export const Option = styled.div<{ $disabled?: boolean }>`
   display: flex;
   align-items: center;
   gap: 4px;
+  > label {
+    color: ${({ $disabled }) =>
+      $disabled ? `var(${ThemeColorVariables.disabledForeground})` : "inherit"};
+  }
 `;
 
 export const Item = styled(RadixRadioGroup.Item)`
