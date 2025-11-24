@@ -45,7 +45,7 @@ export default function NewCredentialValueDialog({
       onAddCredentialValue(values.name, { credential: "{{$vault}}", requests: [] });
     } else if (values.type === "by-name") {
       onAddCredentialValue(values.name, {
-        credential: `{{$vault:${values.vaultByName}}}`,
+        credential: `{{$vault-name:${values.vaultByName}}}`,
         requests: [],
       });
     } else if (values.type === "manual") {

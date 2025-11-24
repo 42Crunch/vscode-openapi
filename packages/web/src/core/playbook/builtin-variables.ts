@@ -1,7 +1,7 @@
-import { Path, findByPath } from "@xliic/preserving-json-yaml-parser";
+import { findByPath } from "@xliic/preserving-json-yaml-parser";
 
 import { VariableLocation } from "@xliic/common/env";
-import { Vault } from "@xliic/common/vault";
+import { Vault, getAnyCredential, getCredentialByName } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
 
 export const DynamicVariableNames = [
@@ -12,6 +12,7 @@ export const DynamicVariableNames = [
   "$timestamp3339",
   "$randomFromSchema",
   "$vault",
+  "$vault-name",
 ] as const;
 
 export type DynamicVariableName = (typeof DynamicVariableNames)[number];
@@ -20,7 +21,12 @@ export type FakeMaker = () => { body: unknown; parameters: unknown };
 
 export const DynamicVariables: Record<
   DynamicVariableName,
-  (object: unknown, location: VariableLocation, fakerMaker: FakeMaker) => void
+  (
+    object: unknown,
+    parameter: string | undefined,
+    location: VariableLocation,
+    fakerMaker: FakeMaker
+  ) => void
 > = {
   $randomString: () => generateRandomString(20),
   $randomuint: () => getRandomUint32(),
@@ -29,10 +35,12 @@ export const DynamicVariables: Record<
   $timestamp3339: () => generateIsoTimestamp(),
   $randomFromSchema: randomFromSchema,
   $vault: vault,
+  "$vault-name": vaultName,
 };
 
 function randomFromSchema(
   object: unknown,
+  parameter: string | undefined,
   location: VariableLocation,
   fakerMaker: FakeMaker
 ): unknown {
@@ -74,22 +82,55 @@ function getRandomUint32() {
   return buffer[0];
 }
 
-function vault(object: unknown, location: VariableLocation, fakerMaker: FakeMaker) {
+function vault(
+  object: unknown,
+  parameter: string | undefined,
+  location: VariableLocation,
+  fakerMaker: FakeMaker
+) {
   const { credentialName, credential, vault } = object as {
     credentialName: string;
     credential: Playbook.Credential;
     vault: Vault;
   };
-  // grab first credential value from vault
-  const scheme = vault.schemes?.[credentialName];
-  if (scheme && "credentials" in scheme) {
-    const firstCredential = Object.values(scheme.credentials)[0];
-    if ("apiKey" in firstCredential) {
-      return firstCredential.apiKey;
-    } else if ("username" in firstCredential && "password" in firstCredential) {
-      return `${firstCredential.username}:${firstCredential.password}`;
-    }
+
+  const [schemeCredential, schemeCredentialError] = getAnyCredential(vault, credentialName);
+  if (schemeCredentialError !== undefined) {
+    return undefined;
   }
 
-  return "{{vault}}";
+  if ("apiKey" in schemeCredential) {
+    return schemeCredential.apiKey;
+  } else if ("username" in schemeCredential && "password" in schemeCredential) {
+    return `${schemeCredential.username}:${schemeCredential.password}`;
+  }
+}
+
+function vaultName(
+  object: unknown,
+  parameter: string | undefined,
+  location: VariableLocation,
+  fakerMaker: FakeMaker
+) {
+  const { credentialName, credential, vault } = object as {
+    credentialName: string;
+    credential: Playbook.Credential;
+    vault: Vault;
+  };
+
+  const [schemeCredential, schemeCredentialError] = getCredentialByName(
+    vault,
+    credentialName,
+    parameter!
+  );
+
+  if (schemeCredentialError !== undefined) {
+    return undefined;
+  }
+
+  if ("apiKey" in schemeCredential) {
+    return schemeCredential.apiKey;
+  } else if ("username" in schemeCredential && "password" in schemeCredential) {
+    return `${schemeCredential.username}:${schemeCredential.password}`;
+  }
 }
