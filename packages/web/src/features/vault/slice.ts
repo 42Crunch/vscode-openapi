@@ -64,7 +64,7 @@ export const slice = createSlice({
     ) => {
       const { id, name, value } = action.payload;
       const scheme = state.data.schemes[id.scheme];
-      if ("credentials" in scheme) {
+      if (scheme.type !== "alias") {
         if (id.credential === undefined) {
           // new credential
           scheme.credentials[name] = value;
@@ -80,10 +80,10 @@ export const slice = createSlice({
     },
 
     deleteCredential: (state, action: PayloadAction<CredentialIdentifier>) => {
-      const { scheme, credential } = action.payload;
-      const sch = state.data.schemes[scheme];
-      if ("credentials" in sch) {
-        delete sch.credentials[credential];
+      const { scheme: schemeName, credential } = action.payload;
+      const scheme = state.data.schemes[schemeName];
+      if (scheme.type !== "alias") {
+        delete scheme.credentials[credential];
       }
     },
   },

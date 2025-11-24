@@ -1,3 +1,5 @@
+import { Result } from "@xliic/result";
+
 export type Identity = {
   identity?: string;
 };
@@ -121,6 +123,8 @@ export type SecurityScheme =
   | MutualTLSSecurityScheme
   | AliasSecurityScheme;
 
+export type CredentialsSecurityScheme = Exclude<SecurityScheme, AliasSecurityScheme>;
+
 export type SecurityCredential =
   | BasicCredential
   | BearerCredential
@@ -141,3 +145,37 @@ export type Vault = {
 export type SaveVaultMessage = { command: "saveVault"; payload: Vault };
 
 export type LoadVaultMessage = { command: "loadVault"; payload: Vault };
+
+export function getScheme(vault: Vault, schemeName: string): Result<SecurityScheme, string> {
+  const scheme = vault.schemes[schemeName];
+  if (!scheme) {
+    return [undefined, `Scheme '${schemeName}' not found in vault`];
+  }
+  return [scheme, undefined];
+}
+
+export function getCredentialNamesFromScheme(
+  vault: Vault,
+  schemeName: string
+): Result<string[], string> {
+  const [scheme, error] = getScheme(vault, schemeName);
+  if (error !== undefined) {
+    return [undefined, error];
+  }
+
+  if (scheme.type === "alias") {
+    const [alias, aliasError] = getScheme(vault, scheme.scheme);
+
+    if (aliasError !== undefined) {
+      return [undefined, `Target of alias scheme '${schemeName}' not found: ${aliasError}`];
+    }
+
+    if (alias.type === "alias") {
+      return [undefined, `Alias scheme '${schemeName}' cannot point to another alias scheme.`];
+    } else {
+      return [Object.keys(alias.credentials), undefined];
+    }
+  } else {
+    return [Object.keys(scheme.credentials), undefined];
+  }
+}
