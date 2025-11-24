@@ -325,6 +325,7 @@ const Spinner = styled.div`
   > svg {
     animation: ${rotation} 2s infinite linear;
     transition: width 0.2s linear;
+    fill: var(${ThemeColorVariables.foreground});
   }
 `;
 
