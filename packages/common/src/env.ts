@@ -20,6 +20,7 @@ export type LookupResult = {
 export type LookupFailure = {
   name: string;
   location: VariableLocation;
+  error?: string;
 };
 
 export type ReplacementResult<T> = {

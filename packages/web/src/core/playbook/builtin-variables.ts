@@ -3,6 +3,7 @@ import { findByPath } from "@xliic/preserving-json-yaml-parser";
 import { VariableLocation } from "@xliic/common/env";
 import { Vault, getAnyCredential, getCredentialByName } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
+import { Result } from "@xliic/result";
 
 export const DynamicVariableNames = [
   "$randomString",
@@ -26,11 +27,11 @@ export const DynamicVariables: Record<
     parameter: string | undefined,
     location: VariableLocation,
     fakerMaker: FakeMaker
-  ) => void
+  ) => Result<unknown, string>
 > = {
   $randomString: () => generateRandomString(20),
   $randomuint: () => getRandomUint32(),
-  $uuid: () => crypto.randomUUID(),
+  $uuid: () => [crypto.randomUUID(), undefined],
   $timestamp: () => generateTimestamp(),
   $timestamp3339: () => generateIsoTimestamp(),
   $randomFromSchema: randomFromSchema,
@@ -43,17 +44,18 @@ function randomFromSchema(
   parameter: string | undefined,
   location: VariableLocation,
   fakerMaker: FakeMaker
-): unknown {
+): Result<unknown, string> {
   const fake = fakerMaker();
   if (location.path[0] == "body" && location.path[1] === "value") {
-    return findByPath(fake.body as any, location.path.slice(2));
+    return [findByPath(fake.body as any, location.path.slice(2)), undefined];
   } else if (location.path[0] === "parameters") {
     const name = findByPath(object as any, [...location.path.slice(0, -1), "key"]);
-    return (fake.parameters as any)[location.path[1]][name];
+    return [(fake.parameters as any)[location.path[1]][name], undefined];
   }
+  return [undefined, `Unsupported location for $randomFromSchema variable`];
 }
 
-function generateRandomString(length: number) {
+function generateRandomString(length: number): Result<string, string> {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
   const randomValues = new Uint32Array(length);
   crypto.getRandomValues(randomValues);
@@ -63,23 +65,23 @@ function generateRandomString(length: number) {
     result += characters.charAt(randomValues[i] % characters.length);
   }
 
-  return result;
+  return [result, undefined];
 }
 
-function generateTimestamp() {
+function generateTimestamp(): Result<number, string> {
   const now = new Date();
-  return Math.floor(now.getTime() / 1000);
+  return [Math.floor(now.getTime() / 1000), undefined];
 }
 
-function generateIsoTimestamp() {
+function generateIsoTimestamp(): Result<string, string> {
   const now = new Date();
-  return now.toISOString();
+  return [now.toISOString(), undefined];
 }
 
-function getRandomUint32() {
+function getRandomUint32(): Result<number, string> {
   const buffer = new Uint32Array(1);
   crypto.getRandomValues(buffer);
-  return buffer[0];
+  return [buffer[0], undefined];
 }
 
 function vault(
@@ -87,7 +89,7 @@ function vault(
   parameter: string | undefined,
   location: VariableLocation,
   fakerMaker: FakeMaker
-) {
+): Result<string, string> {
   const { credentialName, credential, vault } = object as {
     credentialName: string;
     credential: Playbook.Credential;
@@ -96,14 +98,16 @@ function vault(
 
   const [schemeCredential, schemeCredentialError] = getAnyCredential(vault, credentialName);
   if (schemeCredentialError !== undefined) {
-    return undefined;
+    return [undefined, schemeCredentialError];
   }
 
   if ("apiKey" in schemeCredential) {
-    return schemeCredential.apiKey;
+    return [`${schemeCredential.apiKey}`, undefined];
   } else if ("username" in schemeCredential && "password" in schemeCredential) {
-    return `${schemeCredential.username}:${schemeCredential.password}`;
+    return [`${schemeCredential.username}:${schemeCredential.password}`, undefined];
   }
+
+  return [undefined, `Unsupported credential type for '$vault' variable`];
 }
 
 function vaultName(
@@ -111,7 +115,7 @@ function vaultName(
   parameter: string | undefined,
   location: VariableLocation,
   fakerMaker: FakeMaker
-) {
+): Result<string, string> {
   const { credentialName, credential, vault } = object as {
     credentialName: string;
     credential: Playbook.Credential;
@@ -125,12 +129,14 @@ function vaultName(
   );
 
   if (schemeCredentialError !== undefined) {
-    return undefined;
+    return [undefined, schemeCredentialError];
   }
 
   if ("apiKey" in schemeCredential) {
-    return schemeCredential.apiKey;
+    return [`${schemeCredential.apiKey}`, undefined];
   } else if ("username" in schemeCredential && "password" in schemeCredential) {
-    return `${schemeCredential.username}:${schemeCredential.password}`;
+    return [`${schemeCredential.username}:${schemeCredential.password}`, undefined];
   }
+
+  return [undefined, `Unsupported credential type for '$vault-name' variable`];
 }

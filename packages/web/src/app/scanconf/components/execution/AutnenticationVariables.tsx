@@ -29,11 +29,15 @@ export function AuthenticationVariables({
           )}
           {hasMissing && (
             <Missing>
-              Missing {variables?.missing?.map((name) => `{{${name.name}}}`)?.join(", ")}
+              Missing{" "}
+              {variables?.missing
+                ?.map((missing) => `${missing.name}${missing.error ? `: ${missing.error}` : ""}`)
+                ?.join(", ")}
             </Missing>
           )}
         </BottomItem>
       </BottomDescription>
+
       <CredentialValue>{value}</CredentialValue>
     </CollapsibleCard>
   );

@@ -30,6 +30,7 @@ import {
   getParameters as getSwaggerParameters,
 } from "../../util-swagger";
 import { Vault } from "@xliic/common/vault";
+import { Result } from "@xliic/result";
 
 export const ENV_VAR_NAME_REGEX = () => /^([\w\-]+)$/g;
 export const ENV_VAR_NAME_REGEX_MESSAGE = "Only the alphanumeric characters, minus or underscore";
@@ -148,12 +149,11 @@ function replaceValue(
   location: VariableLocation,
   fakeMaker: FakeMaker
 ): ReplacementResult<unknown> {
-  const result = lookupOrDynamic(envStack, name, parameter, object, location, fakeMaker);
-  if (result !== undefined) {
-    return { found: [{ ...result, offset: 0, location }], missing: [], value: result.value };
-  } else {
-    return { found: [], missing: [{ name, location }], value };
+  const [result, error] = lookupOrDynamic(envStack, name, parameter, object, location, fakeMaker);
+  if (error !== undefined) {
+    return { found: [], missing: [{ name, location, error }], value };
   }
+  return { found: [{ ...result, offset: 0, location }], missing: [], value: result.value };
 }
 
 function substituteValues(
@@ -170,14 +170,21 @@ function substituteValues(
   const result = value.replace(
     SCANCONF_VAR_REGEX(),
     (match: string, name: string, parameter: string | undefined, offset: number): string => {
-      const result = lookupOrDynamic(envStack, name, parameter, object, location, fakeMaker);
-      if (result !== undefined) {
-        found.push({ ...result, offset, location });
-        return `${result.value}`;
-      } else {
-        missing.push({ name, location });
+      const [result, error] = lookupOrDynamic(
+        envStack,
+        name,
+        parameter,
+        object,
+        location,
+        fakeMaker
+      );
+      if (error !== undefined) {
+        missing.push({ name, location, error });
         return match;
       }
+
+      found.push({ ...result, offset, location });
+      return `${result.value}`;
     }
   );
 
@@ -195,17 +202,18 @@ function lookupOrDynamic(
   object: unknown,
   location: VariableLocation,
   fakeMaker: () => { body: unknown; parameters: unknown }
-): EnvStackLookupResult | undefined {
+): Result<EnvStackLookupResult, string> {
   if (DynamicVariableNames.includes(varname as DynamicVariableName)) {
-    const dynamic = DynamicVariables[varname as DynamicVariableName](
+    const [dynamic, error] = DynamicVariables[varname as DynamicVariableName](
       object,
       parameter,
       location,
       fakeMaker
     );
-    if (dynamic !== undefined) {
-      return { context: { type: "built-in" }, value: dynamic, name: varname };
+    if (error !== undefined) {
+      return [undefined, error];
     }
+    return [{ context: { type: "built-in" }, value: dynamic, name: varname }, undefined];
   } else {
     return lookup(envStack, varname);
   }

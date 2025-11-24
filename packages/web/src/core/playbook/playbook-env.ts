@@ -1,4 +1,5 @@
 import { Environment } from "@xliic/common/env";
+import { Result } from "@xliic/result";
 import { Playbook } from "@xliic/scanconf";
 
 export type PlaybookVariableSuccessfullAssignment = {
@@ -52,14 +53,13 @@ export type PlaybookVariableUseLocation =
 export function lookup(
   envStack: PlaybookEnvStack,
   varname: string
-): EnvStackLookupResult | undefined {
+): Result<EnvStackLookupResult, string> {
   for (let i = envStack.length - 1; i >= 0; i--) {
     // traverse from the end
     const { id, env } = envStack[i];
     if (env.hasOwnProperty(varname)) {
-      return { context: id, value: env[varname], name: varname };
+      return [{ context: id, value: env[varname], name: varname }, undefined];
     }
   }
-  // not found
-  return undefined;
+  return [undefined, `Variable ${varname} not found in environment stack`];
 }
