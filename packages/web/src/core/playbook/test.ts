@@ -32,7 +32,7 @@ export async function testPlaybook(
   }) => Action
 ) {
   const cache = createAuthCache();
-  const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv, { schemes: {} })];
+  const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv)];
   //const result: PlaybookEnvStack = [];
 
   // Run all tests in the suite

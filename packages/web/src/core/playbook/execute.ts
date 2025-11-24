@@ -39,7 +39,7 @@ export async function* executeAllPlaybooks(
   vault: Vault
 ): AsyncGenerator<PlaybookExecutorStep> {
   const cache = createAuthCache();
-  const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv, vault)];
+  const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv)];
   const result: PlaybookEnvStack = [];
   for (const { name, requests } of playbooks) {
     const playbookResult: PlaybookEnvStack | undefined = yield* executePlaybook(
@@ -512,8 +512,7 @@ async function* executeGetCredentialValue(
 
 export function makeEnvEnv(
   environment: Playbook.Environment,
-  env: EnvData,
-  vault: Vault
+  env: EnvData
 ): { environment: PlaybookEnv; simple: SimpleEnvironment; missing: string[] } {
   const result: Playbook.OperationEnvironment = {};
   const simple: SimpleEnvironment = {};
@@ -522,23 +521,7 @@ export function makeEnvEnv(
     if (variable.from === "hardcoded") {
       result[name] = variable.value;
     } else if (variable.from === "environment") {
-      const vaultScheme = vault.schemes[name];
-      if (
-        vaultScheme !== undefined &&
-        "credentials" in vaultScheme &&
-        Object.keys(vaultScheme.credentials).length > 0
-      ) {
-        console.log("found vault scheme for variable", name);
-        const credentialKey = Object.keys(vaultScheme.credentials)[0];
-        const credential: any = vaultScheme.credentials[credentialKey];
-        if (vaultScheme.type === "basic") {
-          result[name] = `${credential.username}:${credential.password}`;
-          simple[variable.name] = `${credential.username}:${credential.password}`;
-        } else if (vaultScheme.type === "apiKey") {
-          result[name] = credential.key;
-          simple[variable.name] = credential.key;
-        }
-      } else if (env.secrets.hasOwnProperty(variable.name)) {
+      if (env.secrets.hasOwnProperty(variable.name)) {
         result[name] = env.secrets[variable.name];
         simple[variable.name] = env.secrets[variable.name];
       } else if (env.default.hasOwnProperty(variable.name)) {
@@ -565,16 +548,11 @@ export function makeEnvEnv(
   };
 }
 
-export function getExternalEnvironment(
-  file: Playbook.Bundle,
-  envenv: EnvData,
-  vault: Vault
-): PlaybookEnv {
+export function getExternalEnvironment(file: Playbook.Bundle, envenv: EnvData): PlaybookEnv {
   const environmentName = file.runtimeConfiguration?.environment || "default";
   const { environment } = makeEnvEnv(
     file?.environments?.[environmentName] || { variables: {} },
-    envenv,
-    vault
+    envenv
   );
   return environment;
 }

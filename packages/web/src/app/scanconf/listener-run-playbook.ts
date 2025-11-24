@@ -373,7 +373,7 @@ export function onExecuteAuthentication(
           return;
         }
 
-        const env: PlaybookEnvStack = [getExternalEnvironment(playbook, envenv, vault)];
+        const env: PlaybookEnvStack = [getExternalEnvironment(playbook, envenv)];
 
         listenerApi.dispatch(resetTryAuthentication());
         listenerApi.dispatch(addTryAuthenticationStep({ event: "playbook-started", name: "" }));

@@ -29,7 +29,6 @@ export default function Operation({ operationId }: { operationId: string }) {
 
   const { oas, playbook, servers } = useAppSelector((state) => state.scanconf);
   const config = useAppSelector((state) => state.config.data);
-  const vault = useAppSelector((state) => state.vault.data);
 
   const { mockResult, tryResult } = useAppSelector((state) => state.operations);
   const env = useAppSelector((state) => state.env.data);
@@ -72,7 +71,7 @@ export default function Operation({ operationId }: { operationId: string }) {
     environment: {
       env: { host },
     },
-  } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env, vault);
+  } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
 
   if (operation === undefined) {
     return (
