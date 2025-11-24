@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
-import Input from "../../../components/Input";
+import Input from "../../../new-components/fat-fields/Input";
 import FormDialog from "../../../new-components/FormDialog";
 import { ENV_VAR_NAME_REGEX, ENV_VAR_NAME_REGEX_MESSAGE } from "../../../core/playbook/variables";
 import { RadioGroup } from "../../../new-components/fields/RadioGroup";
@@ -97,13 +97,13 @@ function ValueForm({ names }: { names: SelectOption[] }) {
     <FormContainer>
       <Input label="Credential name" name="name" />
 
-      <div>Choose how the credential value is provided</div>
+      <div>How the credential value is provided</div>
       <RadioGroup
         name="type"
         options={[
-          { value: "auto", label: "Vault, auto" },
-          { value: "by-name", label: "Vault, named" },
-          { value: "manual", label: "Manual" },
+          { value: "auto", label: "Automatically" },
+          { value: "by-name", label: "By name" },
+          { value: "manual", label: "Manually" },
         ]}
       />
 
