@@ -135,6 +135,26 @@ export class ConfigWebView extends WebView<Webapp> {
 
     sendHttpRequest: ({ id, request, config }) =>
       executeHttpRequest(id, request, config, this.logger),
+
+    selectVaultFile: async () => {
+      const uris = await vscode.window.showOpenDialog({
+        title: "Select Vault File",
+        canSelectFiles: true,
+        canSelectFolders: false,
+        canSelectMany: false,
+        filters: {
+          Vault: ["json"],
+        },
+      });
+      if (uris === undefined || uris.length === 0) {
+        return;
+      }
+
+      return {
+        command: "showSelectedVaultFile",
+        payload: uris[0].toString(),
+      };
+    },
   };
 
   async onStart() {

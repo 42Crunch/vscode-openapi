@@ -1006,6 +1006,17 @@
           "scope": "machine",
           "type": "string",
           "description": "Proxy URL for 42Crunch API Scan"
+        },
+        "openapi.useVault": {
+          "scope": "machine",
+          "type": "boolean",
+          "default": false,
+          "description": "Use Vault for secrets management"
+        },
+        "openapi.vaultUri": {
+          "scope": "machine",
+          "type": "string",
+          "description": "Vault URI"
         }
       }
     },

@@ -12,6 +12,8 @@ import {
   TestCliMessage,
   DownloadCliMessage,
   ShowCliDownloadMessage,
+  SelectVaultFile,
+  ShowSelectedVaultFile,
 } from "../config";
 import { ChangeThemeMessage } from "../theme";
 import { OpenLinkMessage } from "../link";
@@ -27,7 +29,8 @@ export type Webapp = App<
   | ShowCliTestMessage
   | ShowCliDownloadMessage
   | ShowHttpResponseMessage
-  | ShowHttpErrorMessage,
+  | ShowHttpErrorMessage
+  | ShowSelectedVaultFile,
   // produces
   | SaveConfigMessage
   | TestPlatformConnectionMessage
@@ -37,4 +40,5 @@ export type Webapp = App<
   | DownloadCliMessage
   | OpenLinkMessage
   | SendHttpRequestMessage
+  | SelectVaultFile
 >;

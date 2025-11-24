@@ -48,7 +48,7 @@ export type Target = {
   documentUri: string;
   documentVersion: number;
   scanconfUri: vscode.Uri;
-  vaultUri: vscode.Uri;
+  vaultUri: vscode.Uri | undefined;
   //scanconfVersion: number;
   versions: BundleDocumentVersions;
   path: string;
@@ -231,26 +231,28 @@ export class ScanWebView extends WebView<Webapp> {
         await this.sendRequest({ command: "loadPrefs", payload: prefs });
       }
       const content = await vscode.workspace.fs.readFile(this.target.scanconfUri);
-      const vaultContent = await vscode.workspace.fs.readFile(this.target.vaultUri);
       const scanconf = new TextDecoder("utf-8").decode(content);
-      const vault = new TextDecoder("utf-8").decode(vaultContent);
 
-      this.vaultWatcher = vscode.workspace
-        .createFileSystemWatcher(new vscode.RelativePattern(this.target.vaultUri, "**/*"))
-        .onDidChange(async (vaultUri) => {
-          console.log("Vault file changed");
-          const vaultContent = await vscode.workspace.fs.readFile(vaultUri);
-          const vault = new TextDecoder("utf-8").decode(vaultContent);
-          await this.sendRequest({
-            command: "loadVault",
-            payload: JSON.parse(vault),
+      if (this.target.vaultUri !== undefined) {
+        const vaultContent = await vscode.workspace.fs.readFile(this.target.vaultUri);
+        const vault = new TextDecoder("utf-8").decode(vaultContent);
+        this.vaultWatcher = vscode.workspace
+          .createFileSystemWatcher(new vscode.RelativePattern(this.target.vaultUri, "**/*"))
+          .onDidChange(async (vaultUri) => {
+            console.log("Vault file changed");
+            const vaultContent = await vscode.workspace.fs.readFile(vaultUri);
+            const vault = new TextDecoder("utf-8").decode(vaultContent);
+            await this.sendRequest({
+              command: "loadVault",
+              payload: JSON.parse(vault),
+            });
           });
-        });
 
-      await this.sendRequest({
-        command: "loadVault",
-        payload: JSON.parse(vault),
-      });
+        await this.sendRequest({
+          command: "loadVault",
+          payload: JSON.parse(vault),
+        });
+      }
 
       await this.sendRequest({
         command: "showScanconfOperation",
@@ -273,7 +275,7 @@ export class ScanWebView extends WebView<Webapp> {
     bundle: Bundle,
     document: vscode.TextDocument,
     scanconfUri: vscode.Uri,
-    vaultUri: vscode.Uri,
+    vaultUri: vscode.Uri | undefined,
     path: string,
     method: HttpMethod
   ) {

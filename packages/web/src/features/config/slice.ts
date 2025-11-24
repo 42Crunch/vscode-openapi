@@ -38,7 +38,8 @@ export type ConfigScreenId =
   | "audit-runtime"
   | "scan-runtime"
   | "openapi-external-refs"
-  | "internal-settings";
+  | "internal-settings"
+  | "vault";
 
 export type ConfigScreen = {
   id: ConfigScreenId;
@@ -91,6 +92,8 @@ const initialState: ConfigState = {
     internalUseDevEndpoints: false,
     internalFeatures: false,
     internalDisableLogRedaction: false,
+    vaultUri: "",
+    useVault: false,
   },
   platformConnectionTestResult: undefined,
   waitingForPlatformConnectionTest: false,
@@ -114,6 +117,7 @@ const initialState: ConfigState = {
     "scan-runtime": undefined,
     "openapi-external-refs": undefined,
     "internal-settings": undefined,
+    vault: undefined,
   },
   hasErrors: false,
 };
@@ -241,6 +245,13 @@ export const slice = createSlice({
     openLink: (state, action: PayloadAction<string>) => {
       // hook for a listener
     },
+
+    selectVaultFile: (state, action: PayloadAction<undefined>) => {
+      // hook for a listener
+    },
+    showSelectedVaultFile: (state, action: PayloadAction<string>) => {
+      state.data.vaultUri = action.payload;
+    },
   },
 });
 
@@ -277,6 +288,8 @@ export const {
   downloadCli,
   showCliDownload,
   openLink,
+  showSelectedVaultFile,
+  selectVaultFile,
 } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<

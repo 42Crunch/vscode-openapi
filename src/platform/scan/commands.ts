@@ -213,7 +213,7 @@ async function editorRunSingleOperationScan(
 
   const title = bundle?.value?.info?.title || "OpenAPI";
   const scanconfUri = await getOrCreateScanconfUri(editor.document.uri, title);
-  const vaultUri = await getVaultUri(editor.document.uri);
+  const vaultUri = await getVaultUri(config);
 
   const tags = store.isConnected() ? await store.getTagsForDocument(editor.document, memento) : [];
 
