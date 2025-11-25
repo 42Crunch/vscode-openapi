@@ -26,7 +26,7 @@ export default function Subscription({
 
   const authType = useAppSelector((state) => state.config.data.platformAuthType);
 
-  const { upgradeUrl } = getEndpoints(useDevEndpoints);
+  const { upgradeUrl, stripeBillingUrl } = getEndpoints(useDevEndpoints);
 
   if (error) {
     return (
@@ -80,7 +80,7 @@ export default function Subscription({
                     e.stopPropagation();
                     dispatch(
                       openLink(
-                        `${upgradeUrl}?prefilled_email=${encodeURIComponent(data.userEmail)}`
+                        `${stripeBillingUrl}?prefilled_email=${encodeURIComponent(data.userEmail)}`
                       )
                     );
                   }}
