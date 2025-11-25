@@ -731,6 +731,10 @@
       {
         "command": "openapi.showVault",
         "title": "42Crunch: Open Vault"
+      },
+      {
+        "command": "openapi.createVault",
+        "title": "42Crunch: Create Vault"
       }
     ],
     "keybindings": [

@@ -161,7 +161,7 @@ export async function activate(context: vscode.ExtensionContext) {
   environment.activate(context, envStore);
   config.activate(context, configuration, context.secrets, platformStore, logger);
   capture.activate(context, configuration, context.secrets, platformStore, logger, signUpWebView);
-  vault.activate(context, configuration, logger);
+  vault.activate(context, configuration, context.secrets, logger);
 
   await platform.activate(
     context,
