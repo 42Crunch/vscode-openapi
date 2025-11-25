@@ -115,3 +115,11 @@ export function getHttpResponseRange(httpStatus: number) {
     return "5XX";
   }
 }
+
+export function getSecurityScheme(oas: BundledSwaggerOrOasSpec, schemeName: string) {
+  if (isOpenapi(oas)) {
+    return oas.components?.securitySchemes?.[schemeName];
+  } else {
+    return oas.securityDefinitions?.[schemeName];
+  }
+}
