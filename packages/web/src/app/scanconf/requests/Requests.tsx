@@ -1,5 +1,6 @@
 import { HttpMethod } from "@xliic/openapi";
 import { Playbook, serialize } from "@xliic/scanconf";
+import { Vault } from "@xliic/common/vault";
 
 import { ItemId, SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
 import { Menu, MenuItem } from "../../../new-components/Menu";
@@ -17,6 +18,7 @@ export default function Operations() {
   const dispatch = useAppDispatch();
 
   const { oas, playbook, servers } = useAppSelector((state) => state.scanconf);
+  const { data: vault, enabled: useVault } = useAppSelector((state) => state.vault);
 
   const requestRef = useAppSelector((state) => state.requests.ref);
 
@@ -107,7 +109,7 @@ export default function Operations() {
     },
   ];
 
-  const runScan = (server: string) => {
+  const runScan = (server: string, vault: Vault | undefined, useVault: boolean) => {
     const updatedServer = optionallyReplaceLocalhost(
       server,
       config.platformAuthType,
@@ -116,7 +118,7 @@ export default function Operations() {
       config.platform
     );
 
-    const [serialized, error] = serialize(oas, playbook);
+    const [serialized, error] = serialize(oas, playbook, vault, { replaceVaultSecrets: useVault });
     if (error !== undefined) {
       console.log("failed to serialize", error);
       // FIXME show error when serializing
@@ -148,7 +150,7 @@ export default function Operations() {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            runScan(preferredScanServer || servers[0]);
+            runScan(preferredScanServer || servers[0], vault, useVault);
           }}
         >
           Scan all operations

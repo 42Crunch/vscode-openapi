@@ -101,8 +101,8 @@ function vault(
     return [undefined, schemeCredentialError];
   }
 
-  if ("apiKey" in schemeCredential) {
-    return [`${schemeCredential.apiKey}`, undefined];
+  if ("key" in schemeCredential) {
+    return [`${schemeCredential.key}`, undefined];
   } else if ("username" in schemeCredential && "password" in schemeCredential) {
     return [`${schemeCredential.username}:${schemeCredential.password}`, undefined];
   }
@@ -132,8 +132,8 @@ function vaultName(
     return [undefined, schemeCredentialError];
   }
 
-  if ("apiKey" in schemeCredential) {
-    return [`${schemeCredential.apiKey}`, undefined];
+  if ("key" in schemeCredential) {
+    return [`${schemeCredential.key}`, undefined];
   } else if ("username" in schemeCredential && "password" in schemeCredential) {
     return [`${schemeCredential.username}:${schemeCredential.password}`, undefined];
   }

@@ -29,6 +29,7 @@ export default function Operation({ operationId }: { operationId: string }) {
 
   const { oas, playbook, servers } = useAppSelector((state) => state.scanconf);
   const config = useAppSelector((state) => state.config.data);
+  const { data: vault, enabled: useVault } = useAppSelector((state) => state.vault);
 
   const { mockResult, tryResult } = useAppSelector((state) => state.operations);
   const env = useAppSelector((state) => state.env.data);
@@ -105,7 +106,9 @@ export default function Operation({ operationId }: { operationId: string }) {
             config.platform
           );
 
-          const [serialized, error] = serialize(oas, playbook);
+          const [serialized, error] = serialize(oas, playbook, vault, {
+            replaceVaultSecrets: useVault,
+          });
           if (error !== undefined) {
             console.log("failed to serialize", error);
             // FIXME show error when serializing
