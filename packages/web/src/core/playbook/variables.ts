@@ -13,6 +13,8 @@ import { Environment, VariableLocation } from "@xliic/common/env";
 import { Playbook } from "@xliic/scanconf";
 import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 import { deref } from "@xliic/openapi";
+import { Vault } from "@xliic/common/vault";
+import { Result } from "@xliic/result";
 
 import { EnvStackLookupResult, PlaybookEnvStack, lookup } from "./playbook-env";
 import {
@@ -29,8 +31,6 @@ import {
   generateParameterValues as generateSwaggerParameterValues,
   getParameters as getSwaggerParameters,
 } from "../../util-swagger";
-import { Vault } from "@xliic/common/vault";
-import { Result } from "@xliic/result";
 
 export const ENV_VAR_NAME_REGEX = () => /^([\w\-]+)$/g;
 export const ENV_VAR_NAME_REGEX_MESSAGE = "Only the alphanumeric characters, minus or underscore";

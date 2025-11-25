@@ -36,6 +36,7 @@ export default function RequestInternal({
   const config = useAppSelector((state) => state.config.data);
   const env = useAppSelector((state) => state.env.data);
   const useGlobalBlocks = useAppSelector((state) => state.prefs.useGlobalBlocks);
+  const { data: vault, enabled: useVault } = useAppSelector((state) => state.vault);
 
   const {
     tryResult,
@@ -102,7 +103,9 @@ export default function RequestInternal({
             config.platform
           );
 
-          const [serialized, error] = serialize(oas, playbook);
+          const [serialized, error] = serialize(oas, playbook, vault, {
+            replaceVaultSecrets: useVault,
+          });
           if (error !== undefined) {
             console.log("failed to serialize", error);
             // FIXME show error when serializing

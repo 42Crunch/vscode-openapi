@@ -1,13 +1,20 @@
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { NullableResult, Result } from "@xliic/result";
 import { joinJsonPointer } from "@xliic/preserving-json-yaml-parser";
+import { getAnyCredential, getCredentialByName, Vault } from "@xliic/common/vault";
 
 import * as scan from "./scanconfig";
 import * as playbook from "./playbook";
 
+type SerializationOptions = {
+  replaceVaultSecrets?: boolean;
+};
+
 export function serialize(
   oas: BundledSwaggerOrOasSpec,
-  file: playbook.Bundle
+  file: playbook.Bundle,
+  vault: Vault | undefined,
+  options: SerializationOptions
 ): Result<scan.ConfigurationFileBundle, string> {
   const runtimeConfiguration = file.runtimeConfiguration as scan.RuntimeConfiguration;
   const customizations = file.customizations as scan.Customizations;
@@ -16,6 +23,8 @@ export function serialize(
   const [authenticationDetails, authError] = serializeAuthenticationDetails(
     oas,
     file,
+    vault,
+    options,
     file.authenticationDetails
   );
   if (authError !== undefined) {
@@ -72,13 +81,24 @@ function undefinedIfEmpty<T extends Array<unknown> | Record<string, unknown>>(
 function serializeAuthenticationDetails(
   oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle,
+  vault: Vault | undefined,
+  options: SerializationOptions,
   credentials: playbook.Credentials[]
 ): Result<Record<string, scan.Credential>[], string> {
   const result = [];
   for (const credential of credentials) {
-    const [detail, detailError] = serializeAuthenticationDetail(oas, file, credential);
+    const [detail, detailError] = serializeAuthenticationDetail(
+      oas,
+      file,
+      vault,
+      options,
+      credential
+    );
     if (detailError !== undefined) {
-      return [undefined, "xxx"];
+      return [
+        undefined,
+        `failed to serialize authentication group ${result.length} : ${detailError}`,
+      ];
     }
     result.push(detail);
   }
@@ -89,6 +109,8 @@ function serializeAuthenticationDetails(
 function serializeAuthenticationDetail(
   oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle,
+  vault: Vault | undefined,
+  options: SerializationOptions,
   credential: playbook.Credentials
 ): Result<Record<string, scan.Credential>, string> {
   const result: Record<string, scan.Credential> = {};
@@ -96,10 +118,13 @@ function serializeAuthenticationDetail(
     const [credentialContent, credentialContentError] = serializeCredentials(
       oas,
       file,
+      vault,
+      options,
+      key,
       value.methods
     );
     if (credentialContentError !== undefined) {
-      return [undefined, "xxx"];
+      return [undefined, `failed to serialize credential '${key}': ${credentialContentError}`];
     }
     result[key] = {
       type: value.type,
@@ -118,6 +143,9 @@ function serializeAuthenticationDetail(
 function serializeCredentials(
   oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle,
+  vault: Vault | undefined,
+  options: SerializationOptions,
+  schemeName: string,
   methods: Record<string, playbook.CredentialMethod>
 ): Result<Record<string, scan.CredentialContent>, string> {
   const result: Record<string, scan.CredentialContent> = {};
@@ -126,12 +154,25 @@ function serializeCredentials(
     if (requestsError !== undefined) {
       return [undefined, `failed to serialize requests: ${requestsError}`];
     }
+
+    const [credential, credentialError] = replaceCredentialValue(
+      schemeName,
+      value.credential,
+      vault,
+      options
+    );
+
+    if (credentialError !== undefined) {
+      return [undefined, `failed to replace credential value: ${credentialError}`];
+    }
+
     result[key] = {
-      credential: value.credential,
+      credential,
       description: value.description,
       requests: requests.length > 0 ? requests : undefined,
     };
   }
+
   return [result, undefined];
 }
 
@@ -535,4 +576,84 @@ function serializeUrlencoded(value: object): Record<string, scan.UrlencodedObjec
     acc[key] = { value };
     return acc;
   }, {} as Record<string, scan.UrlencodedObject>);
+}
+
+function replaceVaultValue(
+  schemeName: string,
+  value: string,
+  vault: Vault
+): Result<string, string> {
+  const ENTIRE_SCANCONF_VAR_REGEX = () => /^{{([\w\-$]+)(?::([\w\-]+))?}}$/;
+  const matches = value.match(ENTIRE_SCANCONF_VAR_REGEX());
+  if (matches && (matches.length === 2 || matches.length === 3)) {
+    const name = matches[1];
+    const parameter = matches[2];
+    if (name === "$vault") {
+      const [vaultValue, vaultError] = vaultAuto(vault, schemeName);
+      if (vaultError !== undefined) {
+        return [undefined, `failed to replace vault value: ${vaultError}`];
+      }
+      return [vaultValue, undefined];
+    } else if (name === "$vault-name" && parameter !== undefined) {
+      const [vaultNameValue, vaultNameError] = vaultName(vault, schemeName, parameter);
+      if (vaultNameError !== undefined) {
+        return [undefined, `failed to replace vault-name value: ${vaultNameError}`];
+      }
+      return [vaultNameValue, undefined];
+    }
+  }
+
+  return [value, undefined];
+}
+
+function replaceCredentialValue(
+  schemeName: string,
+  value: string,
+  vault: Vault | undefined,
+  options: SerializationOptions
+): Result<string, string> {
+  if (!options?.replaceVaultSecrets) {
+    return [value, undefined];
+  }
+
+  return replaceVaultValue(schemeName, value, vault!);
+}
+
+function vaultAuto(vault: Vault, schemeName: string): Result<string, string> {
+  const [schemeCredential, schemeCredentialError] = getAnyCredential(vault, schemeName);
+  if (schemeCredentialError !== undefined) {
+    return [undefined, schemeCredentialError];
+  }
+
+  if ("key" in schemeCredential) {
+    return [`${schemeCredential.key}`, undefined];
+  } else if ("username" in schemeCredential && "password" in schemeCredential) {
+    return [`${schemeCredential.username}:${schemeCredential.password}`, undefined];
+  }
+
+  return [undefined, `Unsupported credential type for '$vault' variable`];
+}
+
+function vaultName(
+  vault: Vault,
+  schemeName: string,
+  credentialName: string
+): Result<string, string> {
+  const [schemeCredential, schemeCredentialError] = getCredentialByName(
+    vault,
+    schemeName,
+    credentialName
+  );
+
+  if (schemeCredentialError !== undefined) {
+    return [undefined, schemeCredentialError];
+  }
+
+  if ("key" in schemeCredential) {
+    return [`${schemeCredential.key}`, undefined];
+  } else if ("username" in schemeCredential && "password" in schemeCredential) {
+    return [`${schemeCredential.username}:${schemeCredential.password}`, undefined];
+  }
+
+  return [undefined, `Unsupported credential type for '$vault-name' variable`];
 }
