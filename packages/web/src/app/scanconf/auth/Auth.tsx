@@ -1,4 +1,6 @@
 import { Playbook } from "@xliic/scanconf";
+import { getSecurityScheme } from "@xliic/openapi";
+
 import { SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
 import { addCredential, removeCredential, selectCredential } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
@@ -14,7 +16,20 @@ export default function Auth() {
     playbook: { authenticationDetails },
     selectedCredentialGroup,
     selectedCredential,
+    oas,
   } = useAppSelector((state) => state.scanconf);
+
+  const { data: vault, enabled: useVault } = useAppSelector((state) => state.vault);
+
+  const errors = useVault
+    ? Object.fromEntries(
+        Object.keys(authenticationDetails?.[0] || {}).map((key) =>
+          getSecurityScheme(oas, key) !== undefined
+            ? [key, undefined]
+            : [key, `Security scheme '${key}' is not found in OpenAPI file`]
+        )
+      )
+    : {};
 
   const onAddCredential = (id: string, credential: Playbook.Credential) => {
     // no way to select credentialGroup for now
@@ -69,6 +84,7 @@ export default function Auth() {
           selectCredential({ group: parseInt(selected.sectionId), credential: selected.itemId })
         );
       }}
+      errors={errors}
     />
   );
 }
