@@ -119,7 +119,7 @@
       },
       {
         "view": "platformLaunchpadWelcome",
-        "contents": "API Contract Generator\nConvert Postman or HAR files to OpenAPI.\n[Generate](command:openapi.showCapture)"
+        "contents": "API Contract Generator\nConvert Postman or HAR files to OpenAPI.\n[Generate](command:openapi.showCapture)\nStore reusable API credentials in Vault\n[Open Vault](command:openapi.showVault)"
       }
     ],
     "menus": {
