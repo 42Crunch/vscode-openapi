@@ -134,6 +134,7 @@ export const slice = createSlice({
       } else {
         // subsequent loads
         state.data.cli = action.payload.cli;
+        state.data.vaultUri = action.payload.vaultUri;
       }
     },
 
@@ -249,9 +250,6 @@ export const slice = createSlice({
     selectVaultFile: (state, action: PayloadAction<undefined>) => {
       // hook for a listener
     },
-    showSelectedVaultFile: (state, action: PayloadAction<string>) => {
-      state.data.vaultUri = action.payload;
-    },
   },
 });
 
@@ -288,7 +286,6 @@ export const {
   downloadCli,
   showCliDownload,
   openLink,
-  showSelectedVaultFile,
   selectVaultFile,
 } = slice.actions;
 

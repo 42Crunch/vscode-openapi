@@ -13,13 +13,19 @@ import CredentialValues from "./CredentialValues";
 import { unwrapCredential, wrapCredential } from "./form";
 import { startTryAuthentication } from "./slice";
 import TryAndServerSelector from "../components/TryAndServerSelector";
+import VaultDetails from "./VaultDetails";
+import { TriangleExclamation } from "../../../icons";
+import { ThemeColorVariables } from "@xliic/common/theme";
+import { checkVault } from "./vault-utils";
 
 export default function Credential({ selected }: { selected: ItemId }) {
   const dispatch = useAppDispatch();
+  const { data: vault, enabled: useVault } = useAppSelector((state) => state.vault);
 
   const {
     playbook: { authenticationDetails },
     servers,
+    oas,
   } = useAppSelector((state) => state.scanconf);
 
   const { tryResult } = useAppSelector((state) => state.auth);
@@ -30,6 +36,9 @@ export default function Credential({ selected }: { selected: ItemId }) {
   const group = parseInt(selected.sectionId);
   const credentialId = selected.itemId;
   const credential = authenticationDetails[group][credentialId];
+
+  const vaultErrors = useVault ? checkVault(oas, vault, credentialId, credential) : [];
+
   return (
     <Container>
       <TryAndServerSelector
@@ -48,6 +57,22 @@ export default function Credential({ selected }: { selected: ItemId }) {
           key={selected.itemId}
         />
       </CollapsibleSection>
+
+      {useVault && (
+        <CollapsibleSection
+          title="Vault"
+          defaultOpen={vaultErrors.length > 0}
+          menu={
+            vaultErrors.length > 0 && (
+              <Warning>
+                <TriangleExclamation />
+              </Warning>
+            )
+          }
+        >
+          <VaultDetails errors={vaultErrors} />
+        </CollapsibleSection>
+      )}
 
       <CollapsibleSection
         defaultOpen={false}
@@ -74,6 +99,12 @@ export default function Credential({ selected }: { selected: ItemId }) {
     </Container>
   );
 }
+
+const Warning = styled.div`
+  > svg {
+    fill: var(${ThemeColorVariables.errorForeground});
+  }
+`;
 
 const Container = styled.div`
   padding: 8px;
