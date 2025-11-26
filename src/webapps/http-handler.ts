@@ -3,16 +3,31 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
+import FormData from "form-data";
+import got, { RequestError } from "got";
 import http from "http";
 import https from "https";
-import got, { RequestError } from "got";
-import FormData from "form-data";
+import { URL } from "url";
 
-import { HttpRequest, HttpResponse, HttpError, HttpConfig } from "@xliic/common/http";
-import { ShowHttpResponseMessage, ShowHttpErrorMessage } from "@xliic/common/http";
+import {
+  HttpConfig,
+  HttpError,
+  HttpRequest,
+  HttpResponse,
+  ShowHttpErrorMessage,
+  ShowHttpResponseMessage,
+} from "@xliic/common/http";
 
-import { createProxyAgentsAndCerts } from "../proxy";
+import { LogBuilder, Scope } from "../log-redactor";
 import { Logger } from "../platform/types";
+import { createProxyAgentsAndCerts } from "../proxy";
+import { LogLevel } from "vscode";
+
+const redactor = new LogBuilder()
+  .addHeaderRules("X-API-KEY", "Authorization")
+  .addQueryRule("token")
+  .addUuidTokenRegExpRule(Scope.REQUEST_BODY)
+  .build();
 
 export async function executeHttpRequest(
   id: string,
@@ -171,17 +186,62 @@ function isSslError(code: string): boolean {
 
 export function getHooks(method: string, logger: Logger) {
   const logResponse = (response: any, retryWithMergedOptions: Function) => {
-    logger.debug(`${method} ${response.url} ${response.statusCode}`);
+    const logLevel = logger.logLevel();
+    if (logLevel !== LogLevel.Off && logLevel <= LogLevel.Debug) {
+      redactor.setRedactionEnabled(logger.isRedactionEnabled());
+      logger.debug(`${method} ${getSafeUrl(response.url)} ${response.statusCode}`);
+    }
     return response;
   };
 
   const logRequest = (options: any) => {
-    const body = options.json ? JSON.stringify(options.json) : "";
-    logger.trace(`${method} ${options.prefixUrl}${options.url} ${body}`);
+    const logLevel = logger.logLevel();
+    if (logLevel !== LogLevel.Off && logLevel <= LogLevel.Trace) {
+      redactor.setRedactionEnabled(logger.isRedactionEnabled());
+      const body = options.json
+        ? redactor.redact(JSON.stringify(options.json), Scope.REQUEST_BODY)
+        : "";
+      const safeUrl = getSafeUrl(`${options.prefixUrl}${options.url}`);
+      if (options.headers) {
+        const headers = [];
+        for (const name of Object.keys(options.headers)) {
+          const value = options.headers[name];
+          headers.push(name + ":" + redactor.redactFieldValue(name, value, Scope.REQUEST_HEADER));
+        }
+        logger.trace(`${method} ${safeUrl} headers=[${headers.join(",")}] ${body}`);
+      } else {
+        logger.trace(`${method} ${safeUrl} ${body}`);
+      }
+    }
   };
 
   return {
     beforeRequest: [logRequest],
     afterResponse: [logResponse],
   };
+}
+
+export function getSafeUrl(url: string): string {
+  try {
+    const myUrl = new URL(url);
+    if (myUrl.search) {
+      const safeUrl = new URL(url);
+      safeUrl.search = "";
+      const newSearchParams = safeUrl.searchParams;
+      myUrl.searchParams.forEach((value, name, _searchParams) => {
+        if (value) {
+          const safeValue = redactor.redactFieldValue(name, value, Scope.REQUEST_QUERY);
+          newSearchParams.append(name, safeValue);
+        } else {
+          newSearchParams.append(name, value);
+        }
+      });
+      // URLSearchParams object uses rules to determine which characters to percent-encode
+      // For example [ and ] will always be encoded to %5 and %5D
+      return safeUrl.toString().replace("%5BREDACTED%5D", "[REDACTED]");
+    }
+  } catch (error) {
+    return url;
+  }
+  return url;
 }

@@ -3,6 +3,7 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 import * as vscode from "vscode";
+import { LogLevel } from "vscode";
 
 export const platformUriScheme = "openapi-42crunch";
 export const MAX_NAME_LEN = 2048;
@@ -100,6 +101,8 @@ export interface Logger {
   info(message: string): void;
   debug(message: string): void;
   trace(message: string): void;
+  logLevel(): LogLevel;
+  isRedactionEnabled(): boolean;
 }
 
 export type ApiAuditReport = {
