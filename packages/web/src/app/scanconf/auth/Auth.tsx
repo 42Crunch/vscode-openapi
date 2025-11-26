@@ -8,6 +8,7 @@ import Credential from "./Credential";
 import NewCredentialDialog from "./NewCredentialDialog";
 import { Menu, MenuItem } from "../../../new-components/Menu";
 import { TrashCan } from "../../../icons";
+import { checkVault } from "./vault-utils";
 
 export default function Auth() {
   const dispatch = useAppDispatch();
@@ -23,11 +24,12 @@ export default function Auth() {
 
   const errors = useVault
     ? Object.fromEntries(
-        Object.keys(authenticationDetails?.[0] || {}).map((key) =>
-          getSecurityScheme(oas, key) !== undefined
-            ? [key, undefined]
-            : [key, `Security scheme '${key}' is not found in OpenAPI file`]
-        )
+        Object.entries(authenticationDetails?.[0] || {}).map(([key, credential]) => [
+          key,
+          checkVault(oas, vault, key, credential).join(", ") === ""
+            ? undefined
+            : checkVault(oas, vault, key, credential).join(", "),
+        ])
       )
     : {};
 
@@ -67,7 +69,7 @@ export default function Auth() {
     <SearchSidebarControlled
       title="security schemes"
       sections={sections}
-      render={(selected) => <Credential selected={selected} />}
+      render={(selected) => <Credential key={selected.itemId} selected={selected} />}
       renderButtons={() => (
         <NewCredentialDialog
           existing={Object.keys(authenticationDetails?.[0] || [])}

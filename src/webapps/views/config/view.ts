@@ -146,13 +146,18 @@ export class ConfigWebView extends WebView<Webapp> {
           Vault: ["json"],
         },
       });
+
       if (uris === undefined || uris.length === 0) {
         return;
       }
 
+      this.config = await loadConfig(this.configuration, this.secrets);
+      this.config.vaultUri = uris[0].toString();
+      await saveConfig(this.config, this.configuration, this.secrets);
+
       return {
-        command: "showSelectedVaultFile",
-        payload: uris[0].toString(),
+        command: "loadConfig",
+        payload: this.config,
       };
     },
   };

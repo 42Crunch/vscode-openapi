@@ -120,8 +120,3 @@ export type SelectVaultFile = {
   command: "selectVaultFile";
   payload: undefined;
 };
-
-export type ShowSelectedVaultFile = {
-  command: "showSelectedVaultFile";
-  payload: string;
-};
