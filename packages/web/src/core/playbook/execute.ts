@@ -15,7 +15,7 @@ import {
   replaceRequestVariables,
 } from "./variables";
 import { createAuthCache, getAuthEntry, setAuthEntry, AuthCache } from "./auth-cache";
-import { HookExecutorStep, Hooks } from "./playbook-tests";
+import { TestStep, Hooks } from "./playbook-tests";
 import { Vault } from "@xliic/common/vault";
 
 export type StageGenerator = AsyncGenerator<{ stage: Playbook.Stage; hooks: Hooks }, void>;
@@ -78,7 +78,7 @@ export async function* executePlaybook<T extends StaticRequestList | DynamicRequ
   vault: Vault,
   depth: number
 ): AsyncGenerator<
-  T extends StaticRequestList ? PlaybookExecutorStep : PlaybookExecutorStep | HookExecutorStep,
+  T extends StaticRequestList ? PlaybookExecutorStep : PlaybookExecutorStep | TestStep,
   PlaybookEnvStack | undefined
 > {
   const result: PlaybookEnvStack = [];

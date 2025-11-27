@@ -1,17 +1,17 @@
+import { Action } from "@reduxjs/toolkit";
+
+import { Playbook } from "@xliic/scanconf";
+import { Vault } from "@xliic/common/vault";
 import { EnvData } from "@xliic/common/env";
 import { HttpClient } from "@xliic/common/http";
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
-import { Playbook } from "@xliic/scanconf";
 
 import { PlaybookExecutorStep } from "./playbook";
 import { PlaybookEnvStack } from "./playbook-env";
-
 import { createAuthCache } from "./auth-cache";
 import { executePlaybook, getExternalEnvironment } from "./execute";
 import { SuiteConfig, Suite } from "./identity-tests/types";
-import { HookExecutorStep } from "./playbook-tests";
-import { Action } from "@reduxjs/toolkit";
-import { Vault } from "@xliic/common/vault";
+import { TestStep } from "./playbook-tests";
 
 export async function testPlaybook(
   client: HttpClient,
@@ -28,7 +28,7 @@ export async function testPlaybook(
   addStepExecutionAction: (action: {
     stageId: string;
     testId: string;
-    step: PlaybookExecutorStep | HookExecutorStep;
+    step: PlaybookExecutorStep | TestStep;
   }) => Action
 ) {
   const cache = createAuthCache();

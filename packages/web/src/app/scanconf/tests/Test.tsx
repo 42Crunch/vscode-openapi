@@ -16,7 +16,6 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfig; suiteId: 
   const dispatch = useAppDispatch();
 
   const servers = useAppSelector((state) => state.scanconf.servers);
-  //const failed = useAppSelector((state) => state.tests.failed);
   const tryResult = useAppSelector((state) => state.tests.try?.[suiteId]);
 
   const suiteHasFailures = Object.values(suite.failures).some((failures) => failures.length > 0);

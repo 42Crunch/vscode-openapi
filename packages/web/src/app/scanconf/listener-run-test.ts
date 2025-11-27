@@ -32,7 +32,7 @@ import { testPlaybook } from "../../core/playbook/test";
 import { SuiteConfig } from "../../core/playbook/identity-tests/types";
 import { SuiteId } from "../../core/playbook/identity-tests/index";
 import basic from "../../core/playbook/identity-tests/basic";
-import { HookExecutorStep } from "../../core/playbook/playbook-tests";
+import { TestStep } from "../../core/playbook/playbook-tests";
 import { loadPlaybook } from "./actions";
 import { loadVault } from "../../features/vault/slice";
 import { Vault } from "@xliic/common/vault";
@@ -114,7 +114,7 @@ async function execute(
   addStepExecutionAction: (action: {
     testId: string;
     stageId: string;
-    step: PlaybookExecutorStep | HookExecutorStep;
+    step: PlaybookExecutorStep | TestStep;
   }) => Action,
   server: string,
   suiteConfig: SuiteConfig,

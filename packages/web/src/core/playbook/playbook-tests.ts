@@ -10,7 +10,7 @@ export type TestFailed = {
   message: string;
 };
 
-export function isHookExecutorStep(step: unknown): step is HookExecutorStep {
+export function isTestStep(step: unknown): step is TestStep {
   return TestEventNames.includes((step as TestFailed)?.event);
 }
 
@@ -24,4 +24,4 @@ export type Hooks = {
 };
 
 type YieldOf<T> = T extends AsyncGenerator<infer Y, any, any> ? Y : never;
-export type HookExecutorStep = YieldOf<ReturnType<NonNullable<Hooks[keyof Hooks]>>>;
+export type TestStep = YieldOf<ReturnType<NonNullable<Hooks[keyof Hooks]>>>;
