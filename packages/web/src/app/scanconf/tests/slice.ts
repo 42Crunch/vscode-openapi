@@ -7,8 +7,11 @@ import { Configuration } from "../../../core/playbook/identity-tests";
 import { TestStep, isTestStep } from "../../../core/playbook/playbook-tests";
 
 type TryResult = Record<string, SuiteResult>;
-type SuiteResult = Record<string, StageResult>;
-type StageResult = Record<string, { current: Current; result: ExecutionResult; failed?: string }>;
+export type SuiteResult = Record<string, StageResult>;
+export type StageResult = Record<
+  string,
+  { current: Current; result: ExecutionResult; failed?: string }
+>;
 
 export type State = {
   suiteId?: string;
