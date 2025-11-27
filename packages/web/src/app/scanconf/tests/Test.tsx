@@ -8,8 +8,8 @@ import CollapsibleSection from "../components/CollapsibleSection";
 import TryAndServerSelector from "../components/TryAndServerSelector";
 
 import { useAppDispatch, useAppSelector } from "../store";
-import { SuiteConfig, TestConfig } from "../../../core/playbook/identity-tests/types";
-import { startTryExecution } from "./slice";
+import { Suite, SuiteConfig, TestConfig } from "../../../core/playbook/identity-tests/types";
+import { StageResult, startTryExecution, SuiteResult } from "./slice";
 import Execution from "../components/execution/Execution";
 
 export default function Test({ suite, suiteId }: { suite: SuiteConfig; suiteId: string }) {
@@ -47,30 +47,40 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfig; suiteId: 
       {Object.keys(tryResult || {}).length > 0 && (
         <CollapsibleSection title="Result">
           {Object.entries(tryResult).map(([testId, result]) => (
-            <div key={testId}>
-              <TestTitle>
-                <span>{testId}</span>
-                <Passed>???</Passed>
-              </TestTitle>
-              <Results>
-                {Object.entries(result).map(([stageId, stage]) => (
-                  <TestCardContent key={stageId}>
-                    <CollapsibleCard>
-                      <Description>
-                        {stageId} <Passed>{stage.failed}</Passed>
-                      </Description>
-                      <TestCardBody>
-                        <Execution result={stage.result} />
-                      </TestCardBody>
-                    </CollapsibleCard>
-                  </TestCardContent>
-                ))}
-              </Results>
-            </div>
+            <TestResultCard key={testId} testId={testId} result={result} />
           ))}
         </CollapsibleSection>
       )}
     </Container>
+  );
+}
+
+function TestResultCard({ testId, result }: { testId: string; result: StageResult }) {
+  const hasFailures = Object.values(result).some((stage: any) => stage.failed);
+
+  return (
+    <div>
+      <TestTitle>
+        <span>{testId}</span>
+        <Status>{hasFailures ? "Failed" : "Passed"}</Status>
+      </TestTitle>
+      <Results>
+        {Object.entries(result).map(([stageId, stage]) => (
+          <TestCardContent key={stageId}>
+            <CollapsibleCard>
+              <Description>
+                <span> {stageId}</span>
+                <div>{stage.failed ? <ExclamationCircle /> : <Check />}</div>
+              </Description>
+              <TestCardBody>
+                <Execution result={stage.result} />
+                {stage.failed && <Failure>{stage.failed}</Failure>}
+              </TestCardBody>
+            </CollapsibleCard>
+          </TestCardContent>
+        ))}
+      </Results>
+    </div>
   );
 }
 
@@ -129,6 +139,7 @@ export const Description = styled.div`
   display: flex;
   gap: 4px;
   align-items: center;
+  justify-content: space-between;
   > span {
     > svg {
       fill: var(${ThemeColorVariables.linkForeground});
@@ -151,7 +162,7 @@ const TestTitle = styled.div`
   }
 `;
 
-const Passed = styled.div`
+const Status = styled.div`
   text-transform: uppercase;
   padding-left: 1rem;
   padding-right: 1rem;
@@ -165,4 +176,12 @@ const Passed = styled.div`
   padding: 0.25rem 0.5rem;
   color: var(${ThemeColorVariables.badgeForeground});
   background-color: var(${ThemeColorVariables.badgeBackground});
+`;
+
+const Failure = styled.div`
+  margin-top: 8px;
+  padding: 8px;
+  background-color: var(${ThemeColorVariables.errorBackground});
+  color: var(${ThemeColorVariables.errorForeground});
+  border-radius: 4px;
 `;

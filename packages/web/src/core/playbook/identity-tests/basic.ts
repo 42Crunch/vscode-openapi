@@ -459,7 +459,7 @@ async function* tryCredentialGenerator(operationId: string, credential: string):
         };
       },
       response: async function* (response) {
-        yield { event: "test-failed", message: "Failed 1" };
+        //yield { event: "test-failed", message: "Failed 1" };
         return response;
       },
 
