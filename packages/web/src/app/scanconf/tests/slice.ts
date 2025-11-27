@@ -4,21 +4,20 @@ import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
 import { ExecutionResult } from "../components/scenario/types";
 import { Current, handleTryItStep } from "../playbook-execution-handler";
 import { Configuration } from "../../../core/playbook/identity-tests";
-import { HookExecutorStep, isHookExecutorStep } from "../../../core/playbook/playbook-tests";
+import { TestStep, isTestStep } from "../../../core/playbook/playbook-tests";
+
+type TryResult = Record<string, SuiteResult>;
+type SuiteResult = Record<string, StageResult>;
+type StageResult = Record<string, { current: Current; result: ExecutionResult; failed?: string }>;
 
 export type State = {
   suiteId?: string;
-  try: Record<
-    string,
-    Record<string, Record<string, { current: Current; result: ExecutionResult; failed?: string }>>
-  >;
+  try: TryResult;
   config: Configuration;
-  //  failed: string[];
 };
 
 const initialState: State = {
   try: {},
-  //failed: [],
   config: {
     basic: {
       ready: false,
@@ -58,14 +57,14 @@ export const slice = createSlice({
       }: PayloadAction<{
         testId: string;
         stageId: string;
-        step: PlaybookExecutorStep | HookExecutorStep;
+        step: PlaybookExecutorStep | TestStep;
       }>
     ) => {
       if (!state.try[state.suiteId!][testId][stageId]) {
         state.try[state.suiteId!][testId][stageId] = { current: { auth: [] }, result: [] };
       }
 
-      if (isHookExecutorStep(step)) {
+      if (isTestStep(step)) {
         if (step.event === "test-failed") {
           state.try[state.suiteId!][testId][stageId].failed = step.message;
         }
