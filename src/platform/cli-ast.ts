@@ -678,7 +678,7 @@ function getBinaryArgs(args: string[]): string {
   const builder: string[] = [args[0]];
   for (let i = 1; i < args.length; i++) {
     const arg = args[i];
-    builder.push(redactor.redactFieldValue(args[i - 1], arg, Scope.CMD_EXEC_ARGS));
+    builder.push(redactor.redactFieldValue(args[i - 1], arg, "CMD_EXEC_ARGS"));
   }
   return builder.join(" ");
 }
@@ -686,7 +686,7 @@ function getBinaryArgs(args: string[]): string {
 function getBinaryEnv(cmdEnv: SimpleEnvironment): string {
   const builder: string[] = [];
   for (const [key, value] of Object.entries(cmdEnv)) {
-    builder.push(key + "=" + redactor.redactFieldValue(key, value, Scope.CMD_EXEC_ENV));
+    builder.push(key + "=" + redactor.redactFieldValue(key, value, "CMD_EXEC_ENV"));
   }
   return builder.join(",");
 }

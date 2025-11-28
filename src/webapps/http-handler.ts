@@ -26,7 +26,7 @@ import { LogLevel } from "vscode";
 const redactor = new LogBuilder()
   .addHeaderRules("X-API-KEY", "Authorization")
   .addQueryRule("token")
-  .addUuidTokenRegExpRule(Scope.REQUEST_BODY)
+  .addUuidTokenRegExpRule("REQUEST_BODY")
   .build();
 
 export async function executeHttpRequest(
@@ -199,14 +199,14 @@ export function getHooks(method: string, logger: Logger) {
     if (logLevel !== LogLevel.Off && logLevel <= LogLevel.Trace) {
       redactor.setRedactionEnabled(logger.isRedactionEnabled());
       const body = options.json
-        ? redactor.redact(JSON.stringify(options.json), Scope.REQUEST_BODY)
+        ? redactor.redact(JSON.stringify(options.json), "REQUEST_BODY")
         : "";
       const safeUrl = getSafeUrl(`${options.prefixUrl}${options.url}`);
       if (options.headers) {
         const headers = [];
         for (const name of Object.keys(options.headers)) {
           const value = options.headers[name];
-          headers.push(name + ":" + redactor.redactFieldValue(name, value, Scope.REQUEST_HEADER));
+          headers.push(name + ":" + redactor.redactFieldValue(name, value, "REQUEST_HEADER"));
         }
         logger.trace(`${method} ${safeUrl} headers=[${headers.join(",")}] ${body}`);
       } else {
@@ -230,7 +230,7 @@ export function getSafeUrl(url: string): string {
       const newSearchParams = safeUrl.searchParams;
       myUrl.searchParams.forEach((value, name, _searchParams) => {
         if (value) {
-          const safeValue = redactor.redactFieldValue(name, value, Scope.REQUEST_QUERY);
+          const safeValue = redactor.redactFieldValue(name, value, "REQUEST_QUERY");
           newSearchParams.append(name, safeValue);
         } else {
           newSearchParams.append(name, value);

@@ -1,10 +1,9 @@
-export enum Scope {
-  CMD_EXEC_ENV = "CMD_EXEC_ENV",
-  CMD_EXEC_ARGS = "CMD_EXEC_ARGS",
-  REQUEST_QUERY = "REQUEST_QUERY",
-  REQUEST_HEADER = "REQUEST_HEADER",
-  REQUEST_BODY = "REQUEST_BODY",
-}
+export type Scope =
+  | "CMD_EXEC_ENV"
+  | "CMD_EXEC_ARGS"
+  | "REQUEST_QUERY"
+  | "REQUEST_HEADER"
+  | "REQUEST_BODY";
 
 interface Rule {
   field: string | null;
@@ -35,7 +34,7 @@ export class LogRedactor {
     }
     for (const rule of this.rules) {
       if (rule.scope === scope && rule.field !== null && areFieldsEqual(rule.field, field, scope)) {
-        if (scope === Scope.CMD_EXEC_ARGS) {
+        if (scope === "CMD_EXEC_ARGS") {
           return value.startsWith("--") ? value : rule.mask;
         } else {
           return rule.mask;
@@ -60,7 +59,7 @@ export class LogRedactor {
 }
 
 function areFieldsEqual(field1: string, field2: string, scope: Scope): boolean {
-  if (scope == Scope.REQUEST_HEADER) {
+  if (scope === "REQUEST_HEADER") {
     // HTTP header names are case-insensitive according to the HTTP specification
     return field1.toLowerCase() === field2.toLowerCase();
   } else {
@@ -80,22 +79,22 @@ export class LogBuilder {
 
   public addHeaderRules(...fields: string[]): LogBuilder {
     for (const field of fields) {
-      this.addRule(field, LogRedactor.REDACTED, Scope.REQUEST_HEADER);
+      this.addRule(field, LogRedactor.REDACTED, "REQUEST_HEADER");
     }
     return this;
   }
 
   public addQueryRule(field: string): LogBuilder {
-    return this.addRule(field, LogRedactor.REDACTED, Scope.REQUEST_QUERY);
+    return this.addRule(field, LogRedactor.REDACTED, "REQUEST_QUERY");
   }
 
   public addCmdExecArgsRule(field: string): LogBuilder {
-    return this.addRule(field, LogRedactor.REDACTED, Scope.CMD_EXEC_ARGS);
+    return this.addRule(field, LogRedactor.REDACTED, "CMD_EXEC_ARGS");
   }
 
   public addCmdExecEnvRules(...fields: string[]): LogBuilder {
     for (const field of fields) {
-      this.addRule(field, LogRedactor.REDACTED, Scope.CMD_EXEC_ENV);
+      this.addRule(field, LogRedactor.REDACTED, "CMD_EXEC_ENV");
     }
     return this;
   }

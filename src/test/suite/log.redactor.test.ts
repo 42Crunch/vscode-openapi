@@ -7,33 +7,33 @@ suite("Log Redactor", () => {
     const red = new LogBuilder()
       .addHeaderRules("abc", "FOO")
       .addQueryRule("token")
-      .addRegExpRule("12.*3", Scope.REQUEST_BODY)
+      .addRegExpRule("12.*3", "REQUEST_BODY")
       .build();
 
     assert.strictEqual(
       LogRedactor.REDACTED,
-      red.redactFieldValue("abc", "test1", Scope.REQUEST_HEADER)
+      red.redactFieldValue("abc", "test1", "REQUEST_HEADER")
     );
-    assert.strictEqual("a", red.redactFieldValue("aac", "a", Scope.REQUEST_HEADER));
-    assert.strictEqual("b", red.redactFieldValue("abc", "b", Scope.REQUEST_QUERY));
+    assert.strictEqual("a", red.redactFieldValue("aac", "a", "REQUEST_HEADER"));
+    assert.strictEqual("b", red.redactFieldValue("abc", "b", "REQUEST_QUERY"));
 
     assert.strictEqual(
       LogRedactor.REDACTED,
-      red.redactFieldValue("FOO", "test2", Scope.REQUEST_HEADER)
+      red.redactFieldValue("FOO", "test2", "REQUEST_HEADER")
     );
-    assert.strictEqual("c", red.redactFieldValue("BaR", "c", Scope.REQUEST_HEADER));
-    assert.strictEqual("d", red.redactFieldValue("FOO", "d", Scope.CMD_EXEC_ENV));
+    assert.strictEqual("c", red.redactFieldValue("BaR", "c", "REQUEST_HEADER"));
+    assert.strictEqual("d", red.redactFieldValue("FOO", "d", "CMD_EXEC_ENV"));
 
     assert.strictEqual(
       LogRedactor.REDACTED,
-      red.redactFieldValue("token", "test3", Scope.REQUEST_QUERY)
+      red.redactFieldValue("token", "test3", "REQUEST_QUERY")
     );
-    assert.strictEqual("e", red.redactFieldValue("towel", "e", Scope.REQUEST_QUERY));
-    assert.strictEqual("f", red.redactFieldValue("token", "f", Scope.CMD_EXEC_ARGS));
+    assert.strictEqual("e", red.redactFieldValue("towel", "e", "REQUEST_QUERY"));
+    assert.strictEqual("f", red.redactFieldValue("token", "f", "CMD_EXEC_ARGS"));
 
-    assert.strictEqual("test [REDACTED] me", red.redact("test 12hello3 me", Scope.REQUEST_BODY));
-    assert.strictEqual("test 12hello5 me1", red.redact("test 12hello5 me1", Scope.REQUEST_BODY));
-    assert.strictEqual("test 12hello3 me2", red.redact("test 12hello3 me2", Scope.REQUEST_QUERY));
+    assert.strictEqual("test [REDACTED] me", red.redact("test 12hello3 me", "REQUEST_BODY"));
+    assert.strictEqual("test 12hello5 me1", red.redact("test 12hello5 me1", "REQUEST_BODY"));
+    assert.strictEqual("test 12hello3 me2", red.redact("test 12hello3 me2", "REQUEST_QUERY"));
   });
 
   test("Get safe URL", () => {
