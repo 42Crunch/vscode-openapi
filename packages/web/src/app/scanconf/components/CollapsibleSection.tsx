@@ -10,6 +10,7 @@ type CollapsibleSectionProps = {
   isOpen?: boolean;
   setOpen?: (open: boolean) => void;
   defaultOpen?: boolean;
+  icon?: React.ReactNode;
   menu?: React.ReactNode;
   children?: React.ReactNode;
 };
@@ -36,6 +37,7 @@ export function ControlledCollapsibleSection({
   setOpen,
   title,
   count,
+  icon,
   menu,
   children,
 }: SetRequired<Omit<CollapsibleSectionProps, "defaultOpen">, "setOpen" | "isOpen">) {
@@ -52,6 +54,7 @@ export function ControlledCollapsibleSection({
         <Description>
           {typeof title === "string" ? <Title>{title}</Title> : title}
           {!!count && <Counter>{count}</Counter>}
+          {icon}
           {menu && <Menu>{menu}</Menu>}
         </Description>
       </Header>
