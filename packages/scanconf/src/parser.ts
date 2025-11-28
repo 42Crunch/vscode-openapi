@@ -387,7 +387,10 @@ function parseVariableAssigmment(
       undefined,
     ];
   } else if (
-    (assignment.in === "header" || assignment.in === "query" || assignment.in === "cookie") &&
+    (assignment.in === "header" ||
+      assignment.in === "query" ||
+      assignment.in === "cookie" ||
+      assignment.in === "path") &&
     (assignment.from == "response" || assignment.from == "request")
   ) {
     return [

@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/42Crunch/vscode-openapi.git"
   },
-  "version": "2.1.0",
+  "version": "2.1.1",
   "scripts": {
     "build": "tsc"
   },
