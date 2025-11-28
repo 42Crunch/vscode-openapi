@@ -70,7 +70,7 @@ export async function activate(context: vscode.ExtensionContext) {
     info: (message: string) => logOutputChannel.info(message),
     debug: (message: string) => logOutputChannel.debug(message),
     trace: (message: string) => logOutputChannel.trace(message),
-    logLevel: () => {
+    getLogLevel: () => {
       return logOutputChannel.logLevel;
     },
     isRedactionEnabled: () => {

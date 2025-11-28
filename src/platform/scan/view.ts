@@ -302,8 +302,8 @@ function makeAggregateLogger(
       logger.fatal(message);
       view.sendLogMessage(message, "fatal");
     },
-    logLevel: () => {
-      return logger.logLevel();
+    getLogLevel: () => {
+      return logger.getLogLevel();
     },
     isRedactionEnabled: () => {
       return logger.isRedactionEnabled();

@@ -101,7 +101,7 @@ export interface Logger {
   info(message: string): void;
   debug(message: string): void;
   trace(message: string): void;
-  logLevel(): LogLevel;
+  getLogLevel(): LogLevel;
   isRedactionEnabled(): boolean;
 }
 

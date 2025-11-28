@@ -186,7 +186,7 @@ function isSslError(code: string): boolean {
 
 export function getHooks(method: string, logger: Logger) {
   const logResponse = (response: any, retryWithMergedOptions: Function) => {
-    const logLevel = logger.logLevel();
+    const logLevel = logger.getLogLevel();
     if (logLevel !== LogLevel.Off && logLevel <= LogLevel.Debug) {
       redactor.setRedactionEnabled(logger.isRedactionEnabled());
       logger.debug(`${method} ${getSafeUrl(response.url)} ${response.statusCode}`);
@@ -195,7 +195,7 @@ export function getHooks(method: string, logger: Logger) {
   };
 
   const logRequest = (options: any) => {
-    const logLevel = logger.logLevel();
+    const logLevel = logger.getLogLevel();
     if (logLevel !== LogLevel.Off && logLevel <= LogLevel.Trace) {
       redactor.setRedactionEnabled(logger.isRedactionEnabled());
       const body = options.json

@@ -664,7 +664,7 @@ async function readSqgReport(sqgReportFilename: string) {
 }
 
 function debug(cli: string, args: string[], env: SimpleEnvironment | undefined, logger: Logger) {
-  const logLevel = logger.logLevel();
+  const logLevel = logger.getLogLevel();
   if (logLevel !== LogLevel.Off && logLevel <= LogLevel.Debug) {
     redactor.setRedactionEnabled(logger.isRedactionEnabled());
     if (env) {
