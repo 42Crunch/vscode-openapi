@@ -123,3 +123,21 @@ export function getSecurityScheme(oas: BundledSwaggerOrOasSpec, schemeName: stri
     return oas.securityDefinitions?.[schemeName];
   }
 }
+
+export function getSecuritySchemes(oas: BundledSwaggerOrOasSpec) {
+  if (isOpenapi(oas)) {
+    return oas.components?.securitySchemes || {};
+  } else {
+    return oas.securityDefinitions || {};
+  }
+}
+
+export function getBasicSecuritySchemes(oas: BundledSwaggerOrOasSpec) {
+  const schemes = getSecuritySchemes(oas);
+
+  return Object.entries(schemes)
+    .filter(([name, scheme]) => {
+      return scheme.type === "http" && scheme.scheme === "basic";
+    })
+    .map(([name, scheme]) => name);
+}
