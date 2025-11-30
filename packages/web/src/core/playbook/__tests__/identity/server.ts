@@ -1,55 +1,31 @@
-import http, { IncomingMessage, ServerResponse } from "http";
-import { URL } from "url";
+import http from "http";
+import { URL } from "node:url";
 import { StringDecoder } from "string_decoder";
-import { createSecretKey } from "crypto";
-import { SignJWT, jwtVerify } from "jose";
 import type { AddressInfo } from "node:net";
 
-type UserInfo = {
-  user: string;
-  pass: string;
-  name: string;
-  is_admin: boolean;
-  account_balance: number;
-};
+import type { Handler, Routes } from "./types";
+import { respond } from "./util.ts";
+import { routes as basic } from "./basic/handler.ts";
+import { routes as basicFlow } from "./basic-flow/handler.ts";
 
-type AuthN = (req: IncomingMessage) => Promise<string | undefined>;
-
-type Handler = (
-  req: IncomingMessage,
-  res: ServerResponse,
-  bodyOrQuery?: string | URLSearchParams
-) => void;
-
-const data: Record<string, UserInfo> = {
-  "user@example.com": {
-    user: "user@example.com",
-    pass: "password123",
-    name: "John Doe",
-    is_admin: false,
-    account_balance: 1000,
-  },
-};
-
-const tokenToUser: Record<string, string> = {
-  "2760cf6a-d99f-4f8f-881c-3637713615c0": "user@example.com",
-};
+type AggregateRoutes = Record<string, Routes>;
+type PathHandler = Record<string, Handler>;
+type ResolvedRoutes = [unknown, PathHandler][];
 
 let server: http.Server | undefined = undefined;
 
-const routes: Record<string, Handler> = {
-  "/api/user/info-token GET": (req, res) => handleGetUserInfo(req, res, getUserByToken),
-  "/api/user/info-basic GET": (req, res) => handleGetUserInfo(req, res, getUserByBasicAuth),
-  "/api/user/info-basic-trim GET": (req, res) =>
-    handleGetUserInfo(req, res, getUserByBasicAuthTrim),
+const routes: AggregateRoutes = {
+  "/basic": basic,
+  "/basic-flow": basicFlow,
 };
 
 export function start(port: number | undefined): Promise<number> {
+  const resolvedRoutes = resolveRoutes(routes);
+
   server = http.createServer((req, res) => {
     const url = URL.parse(`http://localhost${req.url}`)!;
     const method = req.method?.toUpperCase() || "";
 
-    const routeKey = `${url.pathname} ${method}`;
     const decoder = new StringDecoder("utf-8");
     let buffer = "";
 
@@ -60,14 +36,13 @@ export function start(port: number | undefined): Promise<number> {
     req.on("end", () => {
       buffer += decoder.end();
 
-      const handler = routes[routeKey];
+      const [handler, params] = matchPath(resolvedRoutes, url, method);
+
       if (handler) {
-        if (method === "GET" || method === "DELETE") {
-          handler(req, res, url.searchParams);
-        } else {
-          handler(req, res, buffer);
-        }
+        console.log(`Handling ${method} ${url.pathname}`);
+        handler(req, res, params, buffer);
       } else {
+        console.log(`No handler found for ${method} ${url.pathname}`);
         respond(res, 404, { message: "Not Found" });
       }
     });
@@ -92,52 +67,53 @@ export function stop() {
   }
 }
 
-async function handleGetUserInfo(req: IncomingMessage, res: ServerResponse, authn: AuthN) {
-  const user = await authn(req);
-  if (user) {
-    return respond(res, 200, data[user]);
-  } else {
-    return respond(res, 403, { message: "not authenticated" });
+function matchPath(
+  routes: ResolvedRoutes,
+  url: URL,
+  method: string
+): [Handler, Record<string, string>] | [undefined, undefined] {
+  for (const [pattern, handler] of routes) {
+    // @ts-ignore-next-line
+    if (pattern.test(url)) {
+      // @ts-ignore-next-line
+      const result = pattern.exec(url);
+      const params: Record<string, string> = Object.assign(
+        {},
+        result.protocol?.groups,
+        result.hostname?.groups,
+        result.port?.groups,
+        result.pathname?.groups,
+        result.search?.groups,
+        result.hash?.groups
+      );
+
+      // @ts-ignore-next-line
+      return [handler[method], params];
+    }
   }
+  return [undefined, undefined];
 }
 
-async function getUserByToken(req: IncomingMessage): Promise<string | undefined> {
-  const token = req.headers["x-access-token"] as string;
-  if (token) {
-    return tokenToUser[token];
+function resolveRoutes(routes: AggregateRoutes): ResolvedRoutes {
+  const resolved: Record<string, PathHandler> = {};
+
+  for (const [basePath, routeList] of Object.entries(routes)) {
+    for (const [route, handler] of routeList) {
+      const path = `${basePath}${route.path}`;
+      let pathHandler = resolved[path];
+      if (!pathHandler) {
+        pathHandler = {};
+        resolved[path] = pathHandler;
+      }
+      pathHandler[route.method] = handler;
+    }
   }
-}
 
-async function getUserByBasicAuth(req: IncomingMessage): Promise<string | undefined> {
-  const credentials = getHttpBasicCredentials(req);
-  if (credentials === "user:password123") {
-    return "user@example.com";
-  }
-}
-
-async function getUserByBasicAuthTrim(req: IncomingMessage): Promise<string | undefined> {
-  const credentials = getHttpBasicCredentials(req);
-  if (
-    credentials === "user:password123" ||
-    credentials === "user:password12" ||
-    credentials === "user:password1"
-  ) {
-    return "user@example.com";
-  }
-}
-
-function getHttpBasicCredentials(req: IncomingMessage): string | undefined {
-  const auth = req.headers.authorization;
-  const prefix = "Basic ";
-
-  if (auth && auth.startsWith(prefix)) {
-    return Buffer.from(auth.slice(prefix.length), "base64").toString("utf-8");
-  }
-}
-
-function respond(res: ServerResponse, statusCode: number, payload: object) {
-  res.writeHead(statusCode, { "Content-Type": "application/json" });
-  res.end(JSON.stringify(payload));
+  return Object.entries(resolved).map(([path, handler]) => [
+    // @ts-ignore-next-line
+    new URLPattern({ pathname: path }),
+    handler,
+  ]);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

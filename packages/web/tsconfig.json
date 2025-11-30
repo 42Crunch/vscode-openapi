@@ -15,7 +15,8 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["vite-plugin-svgr/client", "@types/mdx"]
+    "types": ["vite-plugin-svgr/client", "@types/mdx"],
+    "rewriteRelativeImportExtensions": true
   },
   "include": ["./src"]
 }
