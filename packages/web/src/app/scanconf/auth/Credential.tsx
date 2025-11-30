@@ -62,7 +62,7 @@ export default function Credential({ selected }: { selected: ItemId }) {
         <CollapsibleSection
           title="Vault"
           defaultOpen={vaultErrors.length > 0}
-          menu={
+          icon={
             vaultErrors.length > 0 && (
               <Warning>
                 <TriangleExclamation />
@@ -101,6 +101,9 @@ export default function Credential({ selected }: { selected: ItemId }) {
 }
 
 const Warning = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
   > svg {
     fill: var(${ThemeColorVariables.errorForeground});
   }

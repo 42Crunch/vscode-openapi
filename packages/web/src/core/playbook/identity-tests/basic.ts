@@ -1,6 +1,7 @@
 import {
   BundledSwaggerOrOasSpec,
   deref,
+  getBasicSecuritySchemes,
   getOperationById,
   getOperations,
   OpenApi30,
@@ -20,6 +21,7 @@ import { Playbook } from "@xliic/scanconf";
 import { Test, TestConfig, Suite } from "./types";
 import { StageGenerator } from "../execute";
 import { AuthResult } from "../playbook";
+import { selectOperationBySecurityScheme, selectOperationsForTest } from "./selector";
 
 function getSecuritySchemes(spec: BundledSwaggerOrOasSpec) {
   return ("swagger" in spec ? spec.securityDefinitions : spec.components?.securitySchemes) ?? {};
@@ -187,10 +189,6 @@ const truncatePassword: Test = {
 // output: returns username: with password truncated to N characters
 */
 
-function selectOperationId(): string[] {
-  return ["user-info-basic-trim"];
-}
-
 function truncatedThree(credential: BasicCredential): BasicCredential[] {
   const { username, password } = credential;
   if (password.length < 4) {
@@ -226,16 +224,21 @@ const truncatedPasswordsTest: Test<TruncateTestConfig> = {
   // },
 
   configure: function (
-    spec: BundledSwaggerOrOasSpec,
+    oas: BundledSwaggerOrOasSpec,
     playbook: Playbook.Bundle,
     vault: Vault
   ): TruncateTestConfig {
-    const operationId = selectOperationId();
+    const schemes = getBasicSecuritySchemes(oas);
+    // check if not empty, pick first one for now
+    const operations = selectOperationBySecurityScheme(oas, schemes[0]);
+    // check if not empty, pick first one for now
+
+    const forTest = selectOperationsForTest(oas, operations);
 
     return {
       ready: true,
       failures: {},
-      operationId,
+      operationId: forTest,
     };
   },
 
@@ -460,8 +463,15 @@ async function* tryCredentialGenerator(operationId: string, credential: string):
       },
       response: async function* (response) {
         console.log("Response in tryCredentialGenerator:", response);
-        if (response?.statusCode !== 200) {
-          yield { event: "test-failed", message: `Expected 200 OK, got ${response?.statusCode}` };
+        if (
+          response?.statusCode === 200 ||
+          response?.statusCode === 201 ||
+          response?.statusCode === 204
+        ) {
+          yield {
+            event: "test-failed",
+            message: `Expected failure, got successfull response: ${response?.statusCode}`,
+          };
         }
         //yield { event: "test-failed", message: "Failed 1" };
         return response;
