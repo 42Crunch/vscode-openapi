@@ -1,0 +1,132 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8888"
+    }
+  ],
+  "paths": {
+    "/basic-flow/posts": {
+      "get": {
+        "tags": ["users"],
+        "summary": "get user information",
+        "operationId": "userinfoBasic",
+        "responses": {
+          "200": {
+            "description": "successful authentication sent user information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "maxItems": 1,
+                  "minItems": 1,
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UsersItem"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "invalid or missing token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": ["message"],
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": ["message"],
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "maxLength": 255,
+                      "minLength": 1,
+                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basic": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UsersItem": {
+        "required": ["pass", "user"],
+        "type": "object",
+        "properties": {
+          "user": {
+            "maxLength": 35,
+            "minLength": 0,
+            "pattern": "^.*$",
+            "type": "string",
+            "format": "o:standard:email",
+            "example": "email1@foo.com",
+            "x-42c-format": "o:standard:email"
+          },
+          "pass": {
+            "maxLength": 12,
+            "minLength": 4,
+            "pattern": "^[a-zA-Z0-9&@#!?]{4,12}$",
+            "type": "string",
+            "format": "string",
+            "example": "p@ssword1"
+          },
+          "name": {
+            "maxLength": 50,
+            "minLength": 5,
+            "pattern": "(^[\\w\\s\\.]{5,50}$)",
+            "type": "string",
+            "example": "Johnny Appleseed"
+          },
+          "is_admin": {
+            "type": "boolean",
+            "description": "is admin"
+          },
+          "account_balance": {
+            "maximum": 1000,
+            "minimum": 0,
+            "type": "number",
+            "description": "remaining balance",
+            "format": "float"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "basic": {
+        "type": "http",
+        "scheme": "basic"
+      }
+    }
+  }
+}
