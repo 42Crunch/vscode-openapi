@@ -39,6 +39,8 @@ const createPost: Handler = async (req, res, params, body) => {
   const { content } = JSON.parse(body);
 
   posts.push({ content, user });
+
+  return respond(res, 201, { message: "post created" });
 };
 
 const deletePost: Handler = async (req, res, params, body) => {

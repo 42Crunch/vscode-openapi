@@ -12,59 +12,167 @@
   "paths": {
     "/basic-flow/posts": {
       "get": {
-        "tags": ["users"],
-        "summary": "get user information",
-        "operationId": "userinfoBasic",
+        "tags": ["posts"],
+        "summary": "get all posts",
+        "operationId": "getPosts",
         "responses": {
           "200": {
-            "description": "successful authentication sent user information",
+            "description": "successful operation",
             "content": {
               "application/json": {
                 "schema": {
-                  "maxItems": 1,
-                  "minItems": 1,
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/UsersItem"
+                    "$ref": "#/components/schemas/Post"
                   }
                 }
               }
             }
           },
           "403": {
-            "description": "invalid or missing token",
+            "description": "not authenticated",
             "content": {
               "application/json": {
                 "schema": {
-                  "required": ["message"],
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "maxLength": 255,
-                      "minLength": 1,
-                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
-                      "type": "string"
-                    }
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basic": []
+          }
+        ]
+      }
+    },
+    "/basic-flow/post": {
+      "post": {
+        "tags": ["posts"],
+        "summary": "create a post",
+        "operationId": "createPost",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "content": {
+                    "type": "string"
                   }
+                },
+                "required": ["content"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "post created"
+          },
+          "403": {
+            "description": "not authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basic": []
+          }
+        ]
+      }
+    },
+    "/basic-flow/post/{id}": {
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "tags": ["posts"],
+        "summary": "get a post",
+        "operationId": "getPost",
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Post"
                 }
               }
             }
           },
-          "default": {
-            "description": "unexpected error",
+          "403": {
+            "description": "not authenticated",
             "content": {
               "application/json": {
                 "schema": {
-                  "required": ["message"],
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "maxLength": 255,
-                      "minLength": 1,
-                      "pattern": "^[\\w\\s\\.\\-@:,;]{1,255}$",
-                      "type": "string"
-                    }
-                  }
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "post not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "basic": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["posts"],
+        "summary": "delete a post",
+        "operationId": "deletePost",
+        "responses": {
+          "200": {
+            "description": "post deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "not authorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "post not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
                 }
               }
             }
@@ -80,46 +188,25 @@
   },
   "components": {
     "schemas": {
-      "UsersItem": {
-        "required": ["pass", "user"],
+      "Post": {
         "type": "object",
         "properties": {
+          "content": {
+            "type": "string"
+          },
           "user": {
-            "maxLength": 35,
-            "minLength": 0,
-            "pattern": "^.*$",
-            "type": "string",
-            "format": "o:standard:email",
-            "example": "email1@foo.com",
-            "x-42c-format": "o:standard:email"
-          },
-          "pass": {
-            "maxLength": 12,
-            "minLength": 4,
-            "pattern": "^[a-zA-Z0-9&@#!?]{4,12}$",
-            "type": "string",
-            "format": "string",
-            "example": "p@ssword1"
-          },
-          "name": {
-            "maxLength": 50,
-            "minLength": 5,
-            "pattern": "(^[\\w\\s\\.]{5,50}$)",
-            "type": "string",
-            "example": "Johnny Appleseed"
-          },
-          "is_admin": {
-            "type": "boolean",
-            "description": "is admin"
-          },
-          "account_balance": {
-            "maximum": 1000,
-            "minimum": 0,
-            "type": "number",
-            "description": "remaining balance",
-            "format": "float"
+            "type": "string"
           }
         }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": ["message"]
       }
     },
     "securitySchemes": {
