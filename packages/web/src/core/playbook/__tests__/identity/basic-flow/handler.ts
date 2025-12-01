@@ -1,4 +1,4 @@
-import type { IncomingMessage, ServerResponse } from "http";
+import type { IncomingMessage } from "http";
 import type { Handler, Routes } from "../types";
 import { respond } from "../util.ts";
 
@@ -17,7 +17,7 @@ const users: Record<string, User> = {
   },
 };
 
-const posts: Post[] = [];
+const posts: (Post | null)[] = [];
 
 const getPosts: Handler = async (req, res) => {
   const user = await getUserByBasicAuth(req);
@@ -54,7 +54,11 @@ const deletePost: Handler = async (req, res, params, body) => {
     return respond(res, 404, { message: "post not found" });
   }
 
-  posts.splice(id, 1);
+  if (posts[id]?.user !== user) {
+    return respond(res, 403, { message: "not authorized to delete this post" });
+  }
+
+  posts[id] = null;
 
   return respond(res, 200, { message: "post deleted" });
 };
@@ -68,7 +72,7 @@ const getPost: Handler = async (req, res, params, body) => {
 
   const id = parseInt(params.id, 10);
 
-  if (isNaN(id) || id < 0 || id >= posts.length) {
+  if (isNaN(id) || id < 0 || id >= posts.length || posts[id] === null) {
     return respond(res, 404, { message: "post not found" });
   }
 
