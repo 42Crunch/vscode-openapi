@@ -40,7 +40,7 @@ const createPost: Handler = async (req, res, params, body) => {
 
   posts.push({ content, user });
 
-  return respond(res, 201, { message: "post created" });
+  return respond(res, 201, { id: posts.length - 1 });
 };
 
 const deletePost: Handler = async (req, res, params, body) => {

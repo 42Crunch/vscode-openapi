@@ -68,8 +68,15 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "post created"
+          "201": {
+            "description": "post created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostCreated"
+                }
+              }
+            }
           },
           "403": {
             "description": "not authenticated",
@@ -196,6 +203,14 @@
           },
           "user": {
             "type": "string"
+          }
+        }
+      },
+      "PostCreated": {
+        "type": "object",
+        "properties": {
+          "id ": {
+            "type": "number"
           }
         }
       },
