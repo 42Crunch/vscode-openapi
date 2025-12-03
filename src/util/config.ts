@@ -155,13 +155,13 @@ export async function saveConfig(
 
   await configuration.update(
     "internalFeatures",
-    config.internalFeatures,
+    config.internalFeatures ? true : undefined,
     vscode.ConfigurationTarget.Global
   );
 
   await configuration.update(
     "internalUseDevEndpoints",
-    config.internalUseDevEndpoints,
+    config.internalUseDevEndpoints ? true : undefined,
     vscode.ConfigurationTarget.Global
   );
 
