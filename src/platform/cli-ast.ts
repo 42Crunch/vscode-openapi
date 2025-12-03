@@ -37,7 +37,7 @@ import { CliAstManifestEntry, getCliUpdate } from "./cli-ast-update";
 import { extensionQualifiedId } from "../types";
 import { createTempDirectory, existsSync } from "../util/fs";
 import { getProxyEnv } from "../proxy";
-import { LogBuilder, Scope } from "../log-redactor";
+import { LogBuilder } from "../log-redactor";
 import { LogLevel } from "vscode";
 
 const asyncExecFile = promisify(execFile);
@@ -53,12 +53,14 @@ const redactor = new LogBuilder()
 export async function createScanConfigWithCliBinary(
   scanconfUri: vscode.Uri,
   oas: string,
+  tags: string[],
   cliDirectoryOverride: string,
   logger: Logger
 ): Promise<void> {
   const tmpdir = createTempDirectory("scan-");
   const oasFilename = join(tmpdir, "openapi.json");
   const cli = join(getBinDirectory(cliDirectoryOverride), getCliFilename());
+
   const args = [
     "scan",
     "conf",
@@ -67,8 +69,14 @@ export async function createScanConfigWithCliBinary(
     "json",
     "--output",
     "scanconfig.json",
-    "openapi.json",
   ];
+
+  // re-enable when tagging is supported
+  // if (tags.length > 0) {
+  //   args.push("--tag", tags.join(","));
+  // }
+
+  args.push("openapi.json");
 
   await writeFile(oasFilename, oas, { encoding: "utf8" });
 
@@ -98,13 +106,14 @@ export async function createScanConfigWithCliBinary(
 
 export async function createDefaultConfigWithCliBinary(
   oas: string,
+  tags: string[],
   cliDirectoryOverride: string,
   logger: Logger
 ): Promise<string> {
   const tmpdir = createTempDirectory("scanconf-update-");
   const scanconfFilename = join(tmpdir, "scanconf.json");
   const scanconfUri = vscode.Uri.file(scanconfFilename);
-  await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride, logger);
+  await createScanConfigWithCliBinary(scanconfUri, oas, tags, cliDirectoryOverride, logger);
   const scanconf = await readFile(scanconfFilename, { encoding: "utf8" });
   unlinkSync(scanconfFilename);
   rmdirSync(tmpdir);

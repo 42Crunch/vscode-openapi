@@ -34,6 +34,7 @@ import { ScanReportWebView } from "./report-view";
 import { existsUri } from "../../util/fs";
 
 export default (
+  context: vscode.ExtensionContext,
   cache: Cache,
   platformContext: PlatformContext,
   store: PlatformStore,
@@ -56,6 +57,7 @@ export default (
       try {
         await editorRunSingleOperationScan(
           signUpWebView,
+          context.workspaceState,
           editor,
           cache,
           store,
@@ -85,6 +87,7 @@ export default (
       try {
         await editorRunSingleOperationScan(
           signUpWebView,
+          context.workspaceState,
           vscode.window.activeTextEditor,
           cache,
           store,
@@ -122,6 +125,7 @@ export default (
         try {
           await editorRunSingleOperationScan(
             signUpWebView,
+            context.workspaceState,
             editor,
             cache,
             store,
@@ -168,6 +172,7 @@ export default (
 
 async function editorRunSingleOperationScan(
   signUpView: SignUpWebView,
+  memento: vscode.Memento,
   editor: vscode.TextEditor,
   cache: Cache,
   store: PlatformStore,
@@ -209,10 +214,13 @@ async function editorRunSingleOperationScan(
   const title = bundle?.value?.info?.title || "OpenAPI";
   const scanconfUri = await getOrCreateScanconfUri(editor.document.uri, title);
 
+  const tags = store.isConnected() ? await store.getTagsForDocument(editor.document, memento) : [];
+
   if (
     (scanconfUri === undefined || !(await existsUri(scanconfUri))) &&
     !(await createDefaultScanConfig(
       editor.document,
+      tags,
       store,
       cache,
       secrets,
@@ -233,6 +241,7 @@ async function editorRunSingleOperationScan(
 
 async function createDefaultScanConfig(
   document: vscode.TextDocument,
+  tags: string[],
   store: PlatformStore,
   cache: Cache,
   secrets: vscode.SecretStorage,
@@ -253,15 +262,19 @@ async function createDefaultScanConfig(
       try {
         const oas = stringify(bundle.value);
 
-        const config = await loadConfig(configuration, secrets);
-
         if (platformAuthType === "anond-token") {
           // free users must use CLI for scan, there is no need to fallback to anond for initial audit
           // if there is no CLI available, they will not be able to run scan or create a scan config in any case
-          await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride, logger);
+          await createScanConfigWithCliBinary(scanconfUri, oas, tags, cliDirectoryOverride, logger);
         } else {
           if (scanRuntime === "cli") {
-            await createScanConfigWithCliBinary(scanconfUri, oas, cliDirectoryOverride, logger);
+            await createScanConfigWithCliBinary(
+              scanconfUri,
+              oas,
+              tags,
+              cliDirectoryOverride,
+              logger
+            );
           } else {
             // this will run audit on the platform as well
             await createScanConfigWithPlatform(store, scanconfUri, oas);

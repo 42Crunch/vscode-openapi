@@ -50,6 +50,7 @@ export function activate(
         cache,
         logger,
         configuration,
+        context.workspaceState,
         secrets,
         store,
         envStore,
@@ -101,6 +102,7 @@ export function activate(
   activateLens(configuration.get("codeLens"));
 
   commands(
+    context,
     cache,
     platformContext,
     store,

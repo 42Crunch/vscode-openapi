@@ -64,6 +64,7 @@ export class ScanWebView extends WebView<Webapp> {
     private cache: Cache,
     private logger: Logger,
     private configuration: Configuration,
+    private memento: vscode.Memento,
     private secrets: vscode.SecretStorage,
     private store: PlatformStore,
     private envStore: EnvStore,
@@ -189,10 +190,15 @@ export class ScanWebView extends WebView<Webapp> {
         const config = await loadConfig(this.configuration, this.secrets);
         const stringOas = stringify(this.target!.bundle.value);
 
+        const tags = this.store.isConnected()
+          ? await this.store.getTagsForDocument(this.target!.document, this.memento)
+          : [];
+
         const scanconf =
           config.scanRuntime === "cli"
             ? await createDefaultConfigWithCliBinary(
                 stringOas,
+                tags,
                 config.cliDirectoryOverride,
                 this.logger
               )
