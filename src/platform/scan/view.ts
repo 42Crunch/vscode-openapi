@@ -302,6 +302,12 @@ function makeAggregateLogger(
       logger.fatal(message);
       view.sendLogMessage(message, "fatal");
     },
+    getLogLevel: () => {
+      return logger.getLogLevel();
+    },
+    isRedactionEnabled: () => {
+      return logger.isRedactionEnabled();
+    },
   };
 }
 
