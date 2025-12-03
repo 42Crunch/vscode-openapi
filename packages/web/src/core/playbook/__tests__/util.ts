@@ -1,7 +1,9 @@
+import { assert, expect } from "vitest";
+
 import { Playbook } from "@xliic/scanconf";
 import { Scanconf, parse } from "@xliic/scanconf";
+import { Vault } from "@xliic/common/vault";
 
-import { assert, expect } from "vitest";
 import { executeAllPlaybooks, PlaybookList } from "../execute";
 import { PlaybookExecutorStep } from "../playbook";
 import { PlaybookEnv } from "../playbook-env";
@@ -26,7 +28,8 @@ export async function runScenario(
   oas: any,
   file: Playbook.Bundle,
   name: string,
-  vars?: PlaybookEnv
+  vars?: PlaybookEnv,
+  vault?: Vault
 ): Promise<PlaybookExecutorStep[]> {
   const steps = [];
   const env = [];
@@ -43,7 +46,7 @@ export async function runScenario(
     [{ name: "test", requests: file.operations[name].scenarios[0].requests }],
     { default: {}, secrets: {} },
     env,
-    { schemes: {} }
+    vault ?? { schemes: {} }
   )) {
     steps.push(step);
   }

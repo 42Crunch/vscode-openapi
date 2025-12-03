@@ -241,7 +241,7 @@ const truncatedPasswordsTest: Test<TruncateTestConfig> = {
       operationId: forTest,
     };
   },
-
+  /*
   run: function (
     config: TruncateTestConfig,
     spec: BundledSwaggerOrOasSpec,
@@ -260,6 +260,24 @@ const truncatedPasswordsTest: Test<TruncateTestConfig> = {
           stages: () => tryCredentialGenerator(operationId, credentialString),
         });
       }
+    }
+
+    return result;
+  },
+  */
+
+  run: function (
+    config: TruncateTestConfig,
+    spec: BundledSwaggerOrOasSpec,
+    playbook: Playbook.Bundle,
+    vault: Vault
+  ): { id: string; stages: () => StageGenerator }[] {
+    const result = [];
+    for (const operationId of config.operationId) {
+      result.push({
+        id: operationId,
+        stages: () => pickScenarioById(playbook, operationId),
+      });
     }
 
     return result;
@@ -483,6 +501,20 @@ async function* tryCredentialGenerator(operationId: string, credential: string):
       },
     },
   };
+}
+
+async function* pickScenarioById(playbook: Playbook.Bundle, operationId: string): StageGenerator {
+  const operation = playbook.operations[operationId];
+
+  const scenario = operation.scenarios?.[0];
+
+  for (const stage of scenario?.requests || []) {
+    const result = yield {
+      stage,
+      hooks: {},
+    };
+    console.log("Picked scenario step result:", result);
+  }
 }
 
 function getSchemeNameByOperationId(spec: BundledSwaggerOrOasSpec, operationId: string) {

@@ -132,7 +132,6 @@ function replaceString(
     // ENTIRE_ENV_VAR_REGEX replaces entire value, possibly changing its type
     const name = matches[1];
     const parameter = matches[2];
-    console.log("replacing", matches);
     return replaceValue(name, value, parameter, envStack, object, location, fakeMaker);
   } else {
     // replace parts of the string value, or possibly none at all

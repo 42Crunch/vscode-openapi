@@ -1,5 +1,5 @@
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
-import { HttpClient } from "@xliic/common/http";
+import { HttpClient, type HttpResponse } from "@xliic/common/http";
 import { BundledSwaggerOrOasSpec, getOperationById, getHttpResponseRange } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 
@@ -18,7 +18,11 @@ import { createAuthCache, getAuthEntry, setAuthEntry, AuthCache } from "./auth-c
 import { TestStep, Hooks } from "./playbook-tests";
 import { Vault } from "@xliic/common/vault";
 
-export type StageGenerator = AsyncGenerator<{ stage: Playbook.Stage; hooks: Hooks }, void>;
+export type StageGenerator = AsyncGenerator<
+  { stage: Playbook.Stage; hooks: Hooks },
+  void,
+  { response: HttpResponse | typeof MockHttpResponse }
+>;
 
 export type DynamicRequestList = StageGenerator;
 export type StaticRequestList = Playbook.Stage[];
@@ -353,7 +357,7 @@ export async function* executePlaybook<T extends StaticRequestList | DynamicRequ
 
     result.push(...stepAssignments);
 
-    step = await steps.next();
+    step = await steps.next({ response });
     stepId++;
   }
 
