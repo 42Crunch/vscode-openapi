@@ -27,13 +27,10 @@ import { SignUpWebView } from "../webapps/signup/view";
 import { setDecorations } from "./decoration";
 import { setAudit } from "./service";
 import { AuditWebView } from "./view";
+import { GraphQlHandler } from "../graphql/handler";
 
 const asyncExecFile = promisify(execFile);
 const execMaxBuffer = 1024 * 1024 * 20; // 20MB
-
-const ARGUMENT_PATTERN = new RegExp("\\(.*:.*\\)$");
-const LIST_TYPE_PATTERN = new RegExp(":\\s*\\[.*]!?$");
-const SIMPLE_TYPE_PATTERN = new RegExp(":\\s*[^()\\[\\]]+$");
 
 export function registerSecurityGqlAudit(
   context: vscode.ExtensionContext,
@@ -249,18 +246,20 @@ async function splitReportByDocument(
   };
 
   const issues: IssuesByDocument = {};
+  const handler = new GraphQlHandler(ast);
   for (const [uri, reportedIssues] of Object.entries(issuesPerDocument)) {
     const [document, root] = files[uri];
     issues[uri] = [];
     reportedIssues.forEach((issue: ReportedIssue) => {
-      const loc = getLocationByPointer(document, ast, issue.pointer);
-      if (loc) {
-        const [lineNo, range] = loc;
+      const pos = handler.getPosition(issue.pointer);
+      if (pos) {
+        const start = document.positionAt(pos.start);
+        const end = document.positionAt(pos.end);
         issues[uri].push({
           ...issue,
           documentUri: uri,
-          lineNo,
-          range,
+          lineNo: start.line,
+          range: new vscode.Range(start, end),
         });
       }
     });
@@ -272,114 +271,6 @@ async function splitReportByDocument(
   }
 
   return [grades, issues, documents, badIssues];
-}
-
-function getLocationByPointer(
-  document: vscode.TextDocument,
-  reg: any,
-  pointer: string
-): [number, vscode.Range] | undefined {
-  let items;
-
-  // Wisely split location into parts by .
-  if (pointer.match(ARGUMENT_PATTERN)) {
-    const mainPtr = pointer.substring(0, pointer.lastIndexOf("("));
-    const prefix = pointer.substring(pointer.lastIndexOf("("));
-    items = mainPtr.split(".");
-    items[items.length - 1] = items[items.length - 1] + prefix;
-  } else {
-    items = pointer.split(".");
-  }
-
-  // Find final field
-  let objTypeDef = null;
-  let fieldDef = null;
-  for (let item of items) {
-    item = cleanValue(item);
-    if (objTypeDef !== null && fieldDef !== null) {
-      objTypeDef = null;
-      fieldDef = null;
-    }
-    if (objTypeDef === null) {
-      for (const def of reg.definitions) {
-        // Not all definitions have name property
-        if (def.name?.value === item) {
-          objTypeDef = def;
-          break;
-        }
-      }
-    } else {
-      if (fieldDef === null) {
-        for (const field of objTypeDef.fields) {
-          if (field.name.value === item) {
-            fieldDef = field;
-            break;
-          }
-        }
-      }
-    }
-  }
-
-  let loc = undefined;
-  if (fieldDef !== null) {
-    // Try to find more precise location
-    const lastItem = items[items.length - 1];
-    if (lastItem.match(SIMPLE_TYPE_PATTERN) || lastItem.match(LIST_TYPE_PATTERN)) {
-      // id: ID or Mutation.usersAddEmailForAuthenticated()[0]: _
-      // Notifications(): [Notification] or Query.starship().Starship.coordinates: [[Float!]!]
-      loc = getTypeName(fieldDef.type).loc;
-    } else if (lastItem.match(ARGUMENT_PATTERN)) {
-      // Notifications(limit: Int) or Query.migration(exclude[0]: String)
-      let name = lastItem.substring(lastItem.indexOf("(") + 1, lastItem.lastIndexOf(":")).trim();
-      name = cleanValue2(name, "[");
-      let myValDef = null;
-      for (const valDef of fieldDef.arguments) {
-        if (name === valDef.name?.value || name.startsWith(valDef.name.value + ".")) {
-          myValDef = valDef;
-          break;
-        }
-      }
-      if (myValDef != null) {
-        const typeName = getTypeName(myValDef.type);
-        loc = typeName.loc;
-      } else {
-        loc = fieldDef.type.loc;
-      }
-    } else {
-      loc = fieldDef.loc;
-    }
-  } else if (objTypeDef !== null) {
-    loc = objTypeDef.loc;
-  }
-
-  if (loc) {
-    const pos1 = document.positionAt(loc.start);
-    const pos2 = document.positionAt(loc.end);
-    const range = new vscode.Range(pos1, pos2);
-    return [pos1.line, range];
-  } else {
-    console.info(`Unable to locate node: ${pointer}`);
-    return undefined;
-  }
-}
-
-function getTypeName(type: any) {
-  if (type.kind === "NonNullType" || type.kind === "ListType") {
-    return getTypeName(type.type);
-  } else {
-    return type;
-  }
-}
-
-function cleanValue(value: string): string {
-  value = cleanValue2(value, "(");
-  value = cleanValue2(value, "[");
-  return cleanValue2(value, ":");
-}
-
-function cleanValue2(value: string, valueToRemove: string): string {
-  const i = value.indexOf(valueToRemove);
-  return 0 < i ? value.substring(0, i) : value;
 }
 
 function processIssues(
