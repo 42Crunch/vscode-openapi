@@ -74,7 +74,7 @@ export async function activate(context: vscode.ExtensionContext) {
       return logOutputChannel.logLevel;
     },
     isRedactionEnabled: () => {
-      return true; // TODO: set it later
+      return !configuration.get<boolean>("internalDisableLogRedaction");
     },
   };
 

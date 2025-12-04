@@ -992,6 +992,12 @@
           "default": false,
           "deprecationMessage": "This is an internal setting and should not be used by end users."
         },
+        "openapi.internalDisableLogRedaction": {
+          "scope": "application",
+          "type": "boolean",
+          "default": false,
+          "deprecationMessage": "This is an internal setting and should not be used by end users."
+        },
         "openapi.platformConformanceScanProxy": {
           "scope": "machine",
           "type": "string",

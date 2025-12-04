@@ -4,12 +4,13 @@ import { Checkbox } from "../../../components/Checkbox";
 import { ConfigScreen } from "../../../features/config/slice";
 import { Container, Title } from "../layout";
 
-export function DevEndpoints() {
+export function Internal() {
   return (
     <>
-      <Title>Use development versions of APIs</Title>
+      <Title>Internal settings</Title>
       <Container>
         <Checkbox label="Use development endpoints" name="internalUseDevEndpoints" />
+        <Checkbox label="Disable log redaction" name="internalDisableLogRedaction" />
       </Container>
     </>
   );
@@ -17,13 +18,14 @@ export function DevEndpoints() {
 
 const schema = z.object({
   internalUseDevEndpoints: z.boolean(),
+  internalDisableLogRedaction: z.boolean(),
 });
 
 const screen: ConfigScreen = {
-  id: "dev-endpoints",
-  label: "Development endpoints",
+  id: "internal-settings",
+  label: "Internal settings",
   schema,
-  form: DevEndpoints,
+  form: Internal,
 };
 
 export default screen;

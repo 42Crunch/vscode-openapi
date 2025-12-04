@@ -21,7 +21,7 @@ import auditRuntime from "./screen/audit-runtime";
 
 import scanRuntime from "./screen/scan-runtime";
 import openapiExternalRefs from "./screen/openapi-external-refs";
-import devEndpoints from "./screen/dev-endpoints";
+import internalSettings from "./screen/internal-settings";
 
 import { unwrapFormValues, wrapFormValues } from "./util";
 
@@ -59,9 +59,9 @@ export default function Config() {
 
   if (data.internalFeatures) {
     sections.push({
-      id: "internal",
+      id: "internal-settings",
       title: "Internal",
-      items: [devEndpoints],
+      items: [internalSettings],
     });
   }
 
@@ -76,7 +76,7 @@ export default function Config() {
     [runtimeScandManager.id]: runtimeScandManager,
     [runtimeDocker.id]: runtimeDocker,
     [openapiExternalRefs.id]: openapiExternalRefs,
-    [devEndpoints.id]: devEndpoints,
+    [internalSettings.id]: internalSettings,
   };
 
   useEffect(() => {

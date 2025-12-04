@@ -34,6 +34,7 @@ export type Config = {
   approvedHosts: ApprovedHostConfiguration[];
   internalFeatures: boolean;
   internalUseDevEndpoints: boolean;
+  internalDisableLogRedaction: boolean;
 };
 
 export type ConnectionTestResult = { success: true } | { success: false; message: string };

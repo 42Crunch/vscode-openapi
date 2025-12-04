@@ -38,7 +38,7 @@ export type ConfigScreenId =
   | "audit-runtime"
   | "scan-runtime"
   | "openapi-external-refs"
-  | "dev-endpoints";
+  | "internal-settings";
 
 export type ConfigScreen = {
   id: ConfigScreenId;
@@ -90,6 +90,7 @@ const initialState: ConfigState = {
     approvedHosts: [],
     internalUseDevEndpoints: false,
     internalFeatures: false,
+    internalDisableLogRedaction: false,
   },
   platformConnectionTestResult: undefined,
   waitingForPlatformConnectionTest: false,
@@ -112,7 +113,7 @@ const initialState: ConfigState = {
     "audit-runtime": undefined,
     "scan-runtime": undefined,
     "openapi-external-refs": undefined,
-    "dev-endpoints": undefined,
+    "internal-settings": undefined,
   },
   hasErrors: false,
 };

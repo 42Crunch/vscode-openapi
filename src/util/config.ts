@@ -40,6 +40,7 @@ export async function loadConfig(
 
   const internalFeatures = configuration.get<boolean>("internalFeatures");
   const internalUseDevEndpoints = configuration.get<boolean>("internalUseDevEndpoints");
+  const internalDisableLogRedaction = configuration.get<boolean>("internalDisableLogRedaction");
 
   return {
     platformUrl,
@@ -71,6 +72,7 @@ export async function loadConfig(
     approvedHosts,
     internalFeatures,
     internalUseDevEndpoints,
+    internalDisableLogRedaction,
   };
 }
 
@@ -162,6 +164,12 @@ export async function saveConfig(
   await configuration.update(
     "internalUseDevEndpoints",
     config.internalUseDevEndpoints ? true : undefined,
+    vscode.ConfigurationTarget.Global
+  );
+
+  await configuration.update(
+    "internalDisableLogRedaction",
+    config.internalDisableLogRedaction ? true : undefined,
     vscode.ConfigurationTarget.Global
   );
 
