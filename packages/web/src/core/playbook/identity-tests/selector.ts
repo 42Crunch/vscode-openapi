@@ -16,7 +16,7 @@ export function selectOperationBySecurityScheme(
   return operationIds;
 }
 
-export function selectOperationsForTest(
+export function selectOperationsToTest(
   oas: BundledSwaggerOrOasSpec,
   operationIds: string[]
 ): string[] {

@@ -35,9 +35,22 @@ export async function testPlaybook(
   const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv)];
   //const result: PlaybookEnvStack = [];
 
+  const [tests, suiteFailures] = config;
+
+  // Skip if suite has failures
+  if (suiteFailures) {
+    return;
+  }
+
   // Run all tests in the suite
   for (const [testId, test] of Object.entries(suite.tests)) {
-    for (const { id, stages } of test.run(config.tests[testId], oas, file, vault)) {
+    const [testConfig, testFailures] = tests![testId];
+    // Skip tests that are not ready
+    if (testFailures) {
+      continue;
+    }
+
+    for (const { id, stages } of test.run(testConfig!, oas, file, vault)) {
       dispatch(addTestExecutionAction({ testId }));
       for await (const step of executePlaybook(
         id,

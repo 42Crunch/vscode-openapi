@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from "../store";
 import { Suite, SuiteConfig, TestConfig } from "../../../core/playbook/identity-tests/types";
 import { StageResult, startTryExecution, SuiteResult } from "./slice";
 import Execution from "../components/execution/Execution";
+import { Result } from "@xliic/result";
 
 export default function Test({ suite, suiteId }: { suite: SuiteConfig; suiteId: string }) {
   const dispatch = useAppDispatch();
@@ -18,7 +19,10 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfig; suiteId: 
   const servers = useAppSelector((state) => state.scanconf.servers);
   const tryResult = useAppSelector((state) => state.tests.try?.[suiteId]);
 
-  const suiteHasFailures = Object.values(suite.failures).some((failures) => failures.length > 0);
+  const [tests, suiteFailures] = suite;
+
+  const suiteHasFailures =
+    suiteFailures && Object.values(suiteFailures).some((failure) => failure.length > 0);
 
   return (
     <Container>
@@ -28,17 +32,19 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfig; suiteId: 
           dispatch(startTryExecution({ server, suiteId }));
         }}
       />
-      <CollapsibleSection title={suiteId} defaultOpen={suiteHasFailures}>
-        {Object.entries(suite.failures).map(([requirementId, failure]) => (
-          <div key={requirementId}>{failure}</div>
-        ))}
-      </CollapsibleSection>
+      {suiteFailures && (
+        <CollapsibleSection title={suiteId} defaultOpen={suiteHasFailures}>
+          {Object.entries(suiteFailures).map(([requirementId, failure]) => (
+            <div key={requirementId}>{failure}</div>
+          ))}
+        </CollapsibleSection>
+      )}
 
-      {Object.keys(Object.entries(suite.tests)).length > 0 && (
+      {tests && Object.keys(tests).length > 0 && (
         <CollapsibleSection title="Tests" defaultOpen>
           <Tests>
-            {Object.entries(suite.tests).map(([testId, test]) => (
-              <TestCard key={testId} testId={testId} test={test} />
+            {Object.entries(tests).map(([testId, testResult]) => (
+              <TestCard key={testId} testId={testId} testResult={testResult} />
             ))}
           </Tests>
         </CollapsibleSection>
@@ -84,20 +90,29 @@ function TestResultCard({ testId, result }: { testId: string; result: StageResul
   );
 }
 
-function TestCard({ testId, test }: { testId: string; test: TestConfig }) {
+function TestCard({
+  testId,
+  testResult,
+}: {
+  testId: string;
+  testResult: Result<TestConfig, Record<string, string>>;
+}) {
+  const [test, failures] = testResult;
+  const ready = !failures;
+
   return (
     <TestCardContent>
       <CollapsibleCard>
         <Description>
           <span>{testId}</span>
-          {test.ready ? <Check /> : <ExclamationCircle />}
+          {ready ? <Check /> : <ExclamationCircle />}
         </Description>
         <TestCardBody>
-          {test.ready ? (
+          {ready ? (
             "All test requirements are satisfied"
           ) : (
             <ul>
-              {Object.entries(test.failures).map(([key, failure]) => (
+              {Object.entries(failures).map(([key, failure]) => (
                 <li key={key}>{failure}</li>
               ))}
             </ul>

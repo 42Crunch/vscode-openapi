@@ -14,11 +14,8 @@ export default function Tests() {
 
   const errors = Object.keys(config)
     .map((key) => {
-      if (
-        Object.keys(config[key as SuiteId].failures).some(
-          (k) => config[key as SuiteId].failures[k].length > 0
-        )
-      ) {
+      const [tests, failures] = config[key as SuiteId];
+      if (failures && Object.values(failures).some((f) => f.length > 0)) {
         return [key, `${key} has failures`];
       }
     })

@@ -1,56 +1,24 @@
 import { Vault } from "@xliic/common/vault";
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
+import { Result } from "@xliic/result";
 import { StageGenerator } from "../execute";
 
-/*
-export type TestSuite = {
-  id: string;
-  description?: string;
-  requirements: [
-    string,
-    (spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault) => string[]
-  ][];
-  tests: Record<string, Test<any>>;
-};
+export type ConfigFailures = Record<string, string>;
 
-export type Test<T extends TestConfiguration = TestConfiguration> = {
-  id: string;
-  requirements: [
-    string,
-    (spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault) => string[]
-  ][];
-  configure: (spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault) => T;
-  run: (config: T) => { id: string; stages: () => StageGenerator }[];
-};
+export type TestConfig = Record<string, unknown>;
 
-export type TestConfiguration = {
-  failures: string[];
-};
-
-export type SuiteConfiguration = {
-  failures: Record<string, string[]>;
-  tests: Record<string, TestConfiguration>;
-};
-*/
-
-export type TestConfig = {
-  ready: boolean;
-  failures: Record<string, string>;
-};
-
-export type SuiteConfig = {
-  ready: boolean;
-  failures: Record<string, string>;
-  tests: Record<string, TestConfig>;
-};
+export type SuiteConfig = Result<
+  Record<string, Result<TestConfig, ConfigFailures>>,
+  ConfigFailures
+>;
 
 export type Test<C extends TestConfig> = {
-  requirements: Record<
-    string,
-    (spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault) => string | undefined
-  >;
-  configure(spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault): C;
+  configure(
+    spec: BundledSwaggerOrOasSpec,
+    playbook: Playbook.Bundle,
+    vault: Vault
+  ): Result<C, ConfigFailures>;
   run(
     config: C,
     spec: BundledSwaggerOrOasSpec,
@@ -61,9 +29,10 @@ export type Test<C extends TestConfig> = {
 
 export type Suite = {
   description: string;
-  requirements: Record<
-    string,
-    (spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault) => string | undefined
-  >;
+  configure(
+    spec: BundledSwaggerOrOasSpec,
+    playbook: Playbook.Bundle,
+    vault: Vault
+  ): Result<Record<string, Test<TestConfig>>, ConfigFailures>;
   tests: Record<string, Test<TestConfig>>;
 };

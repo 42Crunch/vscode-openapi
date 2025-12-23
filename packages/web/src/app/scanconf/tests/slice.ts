@@ -22,11 +22,7 @@ export type State = {
 const initialState: State = {
   try: {},
   config: {
-    basic: {
-      ready: false,
-      failures: {},
-      tests: {},
-    },
+    basic: [undefined, {}],
   },
 };
 
