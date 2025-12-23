@@ -155,7 +155,7 @@ const truncatedPasswordsTest: Test<TruncateTestConfig> = {
     vault: Vault
   ): AsyncGenerator<TestStage, void, unknown> {
     for (const operationId of config.operationId) {
-      yield {
+      const result = yield {
         id: operationId,
         stages: () => pickScenarioById(playbook, operationId),
       };

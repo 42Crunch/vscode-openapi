@@ -3,6 +3,7 @@ import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 import { Result } from "@xliic/result";
 import { StageGenerator } from "../execute";
+import { PlaybookEnvStack } from "../playbook-env";
 
 export type ConfigFailures = Record<string, string>;
 
@@ -29,7 +30,7 @@ export type Test<C extends TestConfig> = {
     spec: BundledSwaggerOrOasSpec,
     playbook: Playbook.Bundle,
     vault: Vault
-  ): AsyncGenerator<TestStage, void, unknown>;
+  ): AsyncGenerator<TestStage, void, PlaybookEnvStack | undefined>;
 };
 
 export type Suite = {
