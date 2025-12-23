@@ -3,7 +3,7 @@ import basic from "./basic";
 import { Test, TestConfig, Suite, SuiteConfig, ConfigFailures } from "./types";
 import { Playbook } from "@xliic/scanconf";
 import { Vault } from "@xliic/common/vault";
-import { Result } from "@xliic/result";
+import { failure, Result, success } from "@xliic/result";
 
 const suites = { basic } as const;
 
@@ -24,7 +24,7 @@ function configureSuite<S extends Suite>(
   const [testsToRun, suiteFailures] = suite.configure(spec, playbook, vault);
 
   if (suiteFailures) {
-    return [undefined, suiteFailures];
+    return failure(suiteFailures);
   }
 
   // Configure each test
@@ -33,7 +33,7 @@ function configureSuite<S extends Suite>(
     tests[key] = test.configure(spec, playbook, vault);
   }
 
-  return [tests, undefined];
+  return success(tests);
 }
 
 export function configure(

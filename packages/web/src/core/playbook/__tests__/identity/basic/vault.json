@@ -1,0 +1,25 @@
+{
+  "schemes": {
+    "access-token": {
+      "type": "apiKey",
+      "credentials": {
+        "foo": {
+          "key": "bar"
+        }
+      }
+    },
+    "basic": {
+      "type": "basic",
+      "credentials": {
+        "user": {
+          "username": "user",
+          "password": "password123"
+        }
+      }
+    },
+    "token": {
+      "type": "alias",
+      "scheme": "access-token"
+    }
+  }
+}
