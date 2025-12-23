@@ -18,13 +18,13 @@ import { createAuthCache, getAuthEntry, setAuthEntry, AuthCache } from "./auth-c
 import { TestStep, Hooks } from "./playbook-tests";
 import { Vault } from "@xliic/common/vault";
 
-export type StageGenerator = AsyncGenerator<
+export type StepGenerator = AsyncGenerator<
   { stage: Playbook.Stage; hooks: Hooks },
   void,
   { response: HttpResponse | typeof MockHttpResponse }
 >;
 
-export type DynamicRequestList = StageGenerator;
+export type DynamicRequestList = StepGenerator;
 export type StaticRequestList = Playbook.Stage[];
 
 export type PlaybookList = {
@@ -363,6 +363,8 @@ export async function* executePlaybook<T extends StaticRequestList | DynamicRequ
 
   yield { event: "playbook-finished" };
 
+  console.log("ZZZ playbook execution result:", result);
+
   return result;
 }
 
@@ -565,7 +567,7 @@ function getRequestByRef(file: Playbook.Bundle, ref: Playbook.RequestRef) {
   return ref.type === "operation" ? file.operations[ref.id]?.request : file.requests?.[ref.id];
 }
 
-async function* iteratePlaybook(requests: StaticRequestList | DynamicRequestList): StageGenerator {
+async function* iteratePlaybook(requests: StaticRequestList | DynamicRequestList): StepGenerator {
   if (Symbol.asyncIterator in requests) {
     yield* requests;
   } else {

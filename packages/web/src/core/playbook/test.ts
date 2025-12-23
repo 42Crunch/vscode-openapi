@@ -50,22 +50,39 @@ export async function testPlaybook(
       continue;
     }
 
-    for await (const { id, stages } of test.run(testConfig!, oas, file, vault)) {
+    const stageGenerator = test.run(testConfig!, oas, file, vault);
+    let stepGenerator = await stageGenerator.next();
+
+    while (!stepGenerator.done) {
+      const { id, steps } = stepGenerator.value;
       dispatch(addTestExecutionAction({ testId }));
-      for await (const step of executePlaybook(
+
+      console.log("Starting playbook execution for stage:", id);
+      // Execute the playbook and collect the return value
+      const playbookExecutor = executePlaybook(
         id,
         cache,
         client,
         oas,
         server,
         file,
-        stages(),
+        steps(),
         [...env, ...extraEnv],
         vault,
         0
-      )) {
-        dispatch(addStepExecutionAction({ testId, stageId: id, step }));
+      );
+
+      let playbookStep = await playbookExecutor.next();
+      while (!playbookStep.done) {
+        dispatch(addStepExecutionAction({ testId, stageId: id, step: playbookStep.value }));
+        playbookStep = await playbookExecutor.next();
       }
+
+      console.log("Completed playbook execution for stage:", id);
+      console.log("Playbook step result:", playbookStep.value);
+
+      // Pass the return value (PlaybookEnvStack) to the next test stage
+      stepGenerator = await stageGenerator.next(playbookStep.value);
     }
   }
 }

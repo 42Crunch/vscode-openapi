@@ -2,7 +2,7 @@ import { Vault } from "@xliic/common/vault";
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 import { Result } from "@xliic/result";
-import { StageGenerator } from "../execute";
+import { StepGenerator } from "../execute";
 import { PlaybookEnvStack } from "../playbook-env";
 
 export type ConfigFailures = Record<string, string>;
@@ -16,7 +16,7 @@ export type SuiteConfig = Result<
 
 export type TestStage = {
   id: string;
-  stages: () => StageGenerator;
+  steps: () => StepGenerator;
 };
 
 export type Test<C extends TestConfig> = {

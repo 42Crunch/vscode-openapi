@@ -16,7 +16,7 @@ import {
 import { Playbook } from "@xliic/scanconf";
 
 import { Test, TestConfig, Suite, ConfigFailures, TestStage } from "./types";
-import { StageGenerator } from "../execute";
+import { StepGenerator } from "../execute";
 import { selectOperationBySecurityScheme, selectOperationsToTest } from "./selector";
 
 function getActiveSecuritySchemes(spec: BundledSwaggerOrOasSpec) {
@@ -153,12 +153,15 @@ const truncatedPasswordsTest: Test<TruncateTestConfig> = {
     spec: BundledSwaggerOrOasSpec,
     playbook: Playbook.Bundle,
     vault: Vault
-  ): AsyncGenerator<TestStage, void, unknown> {
+  ) {
     for (const operationId of config.operationId) {
-      const result = yield {
+      const envStack = yield {
         id: operationId,
-        stages: () => pickScenarioById(playbook, operationId),
+        steps: () => pickScenarioById(playbook, operationId),
       };
+      // envStack contains the PlaybookEnvStack returned from executePlaybook
+      // Can be used for subsequent test stages if needed
+      console.log("Received env stack from previous stage:", envStack);
     }
   },
 };
@@ -184,7 +187,7 @@ const suite: Suite = {
   },
 };
 
-async function* pickScenarioById(playbook: Playbook.Bundle, operationId: string): StageGenerator {
+async function* pickScenarioById(playbook: Playbook.Bundle, operationId: string): StepGenerator {
   const operation = playbook.operations[operationId];
 
   const scenario = operation.scenarios?.[0];

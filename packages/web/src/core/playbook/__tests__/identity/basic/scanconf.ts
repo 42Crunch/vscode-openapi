@@ -5,7 +5,7 @@ const basicCredential: Scanconf.Credential = {
   default: "User",
   credentials: {
     User: {
-      credential: "foo:bar",
+      credential: "{{$vault}}",
     },
   },
 };
