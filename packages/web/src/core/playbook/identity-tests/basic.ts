@@ -7,7 +7,7 @@ import {
   OpenApi31,
   Swagger,
 } from "@xliic/openapi";
-import { Result } from "@xliic/result";
+import { Result, success, failure } from "@xliic/result";
 import {
   BasicSecurityScheme,
   Vault,
@@ -15,9 +15,9 @@ import {
 } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
 
-import { Test, TestConfig, Suite } from "./types";
+import { Test, TestConfig, Suite, ConfigFailures } from "./types";
 import { StageGenerator } from "../execute";
-import { selectOperationBySecurityScheme, selectOperationsForTest } from "./selector";
+import { selectOperationBySecurityScheme, selectOperationsToTest } from "./selector";
 
 function getActiveSecuritySchemes(spec: BundledSwaggerOrOasSpec) {
   const result: Record<
@@ -128,25 +128,24 @@ type TruncateTestConfig = TestConfig & {
 };
 
 const truncatedPasswordsTest: Test<TruncateTestConfig> = {
-  requirements: { hasValidBasicAuthCredentials },
-
   configure: function (
     oas: BundledSwaggerOrOasSpec,
     playbook: Playbook.Bundle,
     vault: Vault
-  ): TruncateTestConfig {
+  ): Result<TruncateTestConfig, ConfigFailures> {
+    const failed = hasValidBasicAuthCredentials(oas, playbook, vault);
+    if (failed) {
+      return failure({ hasValidBasicAuthCredentials: failed });
+    }
+
     const schemes = getBasicSecuritySchemes(oas);
     // check if not empty, pick first one for now
     const operations = selectOperationBySecurityScheme(oas, schemes[0]);
+
     // check if not empty, pick first one for now
+    const toTest = selectOperationsToTest(oas, operations);
 
-    const forTest = selectOperationsForTest(oas, operations);
-
-    return {
-      ready: true,
-      failures: {},
-      operationId: forTest,
-    };
+    return success({ operationId: toTest });
   },
 
   run: function (
@@ -169,12 +168,22 @@ const truncatedPasswordsTest: Test<TruncateTestConfig> = {
 
 const suite: Suite = {
   description: "A suite of tests for Basic Authentication.",
-  requirements: { usesBasicAuth },
+
+  configure: function (
+    spec: BundledSwaggerOrOasSpec,
+    playbook: Playbook.Bundle,
+    vault: Vault
+  ): Result<Record<string, Test<TestConfig>>, ConfigFailures> {
+    const failed = usesBasicAuth(spec, playbook, vault);
+    if (failed) {
+      return failure({ usesBasicAuth: failed });
+    }
+
+    return success({ truncatedPasswordsTest });
+  },
 
   tests: {
-    //weakPasswords,
     truncatedPasswordsTest,
-    //weakPasswords2 /*changeUsernameCase, changePasswordCase, truncatePassword*/,
   },
 };
 

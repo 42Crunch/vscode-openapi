@@ -1,9 +1,9 @@
-//import apiKey from "./api-key";
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import basic from "./basic";
-import { Test, TestConfig, Suite, SuiteConfig } from "./types";
+import { Test, TestConfig, Suite, SuiteConfig, ConfigFailures } from "./types";
 import { Playbook } from "@xliic/scanconf";
 import { Vault } from "@xliic/common/vault";
+import { Result } from "@xliic/result";
 
 const suites = { basic } as const;
 
@@ -14,101 +14,26 @@ export type Configuration = {
   [K in SuiteId]: SuiteConfig;
 };
 
-/*
-
-export type Configuration = Record<string, SuiteConfiguration>;
-
-export function configure(spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault) {
-  const result: Configuration = {};
-  for (const [id, suite] of Object.entries(suites)) {
-    const suiteResult: SuiteConfiguration = { failures: {}, tests: {} };
-    for (const [checkId, checker] of suite.requirements) {
-      suiteResult.failures[checkId] = [];
-      suiteResult.failures[checkId].push(...checker(spec, playbook, vault));
-    }
-
-    if (noSuiteLevelFailures(suiteResult)) {
-      for (const [testId, test] of Object.entries(suite.tests)) {
-        const testFailures = [];
-        for (const [checkId, checker] of test.requirements) {
-          testFailures.push(...checker(spec, playbook, vault));
-        }
-        const foo = test.configure(spec, playbook, vault);
-        suiteResult.tests[testId] = { failures: testFailures };
-      }
-    }
-    result[id] = suiteResult;
-  }
-
-  return result;
-}
-
-function noSuiteLevelFailures(suiteResult: SuiteConfiguration): boolean {
-  for (const failures of Object.values(suiteResult.failures)) {
-    if (failures.length > 0) {
-      return false;
-    }
-  }
-  return true;
-}
-*/
-
 function configureSuite<S extends Suite>(
   suite: S,
   spec: BundledSwaggerOrOasSpec,
   playbook: Playbook.Bundle,
   vault: Vault
 ): SuiteConfig {
-  const failures: Record<string, string> = {};
-  for (const [checkId, checker] of Object.entries(suite.requirements)) {
-    const failure = checker(spec, playbook, vault);
-    if (failure) {
-      failures[checkId] = failure;
-    }
+  // Call suite.configure() which checks suite-level requirements
+  const [testsToRun, suiteFailures] = suite.configure(spec, playbook, vault);
+
+  if (suiteFailures) {
+    return [undefined, suiteFailures];
   }
 
-  if (Object.keys(failures).length > 0) {
-    return {
-      ready: false,
-      failures,
-      tests: {},
-    };
+  // Configure each test
+  const tests: Record<string, Result<TestConfig, ConfigFailures>> = {};
+  for (const [key, test] of Object.entries(testsToRun!)) {
+    tests[key] = test.configure(spec, playbook, vault);
   }
 
-  const tests: Record<string, TestConfig> = {};
-  for (const key of Object.keys(suite.tests)) {
-    tests[key] = configureTest(suite.tests[key], spec, playbook, vault);
-  }
-
-  return {
-    ready: true,
-    failures: {},
-    tests,
-  };
-}
-
-function configureTest<T extends Test<TestConfig>>(
-  test: T,
-  spec: BundledSwaggerOrOasSpec,
-  playbook: Playbook.Bundle,
-  vault: Vault
-): TestConfig {
-  const failures: Record<string, string> = {};
-  for (const [checkId, checker] of Object.entries(test.requirements)) {
-    const failure = checker(spec, playbook, vault);
-    if (failure) {
-      failures[checkId] = failure;
-    }
-  }
-
-  if (Object.keys(failures).length > 0) {
-    return {
-      ready: false,
-      failures,
-    };
-  }
-
-  return test.configure(spec, playbook, vault);
+  return [tests, undefined];
 }
 
 export function configure(
