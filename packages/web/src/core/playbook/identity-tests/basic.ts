@@ -148,21 +148,18 @@ const truncatedPasswordsTest: Test<TruncateTestConfig> = {
     return success({ operationId: toTest });
   },
 
-  run: function (
+  run: async function* (
     config: TruncateTestConfig,
     spec: BundledSwaggerOrOasSpec,
     playbook: Playbook.Bundle,
     vault: Vault
-  ): TestStage[] {
-    const result = [];
+  ): AsyncGenerator<TestStage, void, unknown> {
     for (const operationId of config.operationId) {
-      result.push({
+      yield {
         id: operationId,
         stages: () => pickScenarioById(playbook, operationId),
-      });
+      };
     }
-
-    return result;
   },
 };
 
