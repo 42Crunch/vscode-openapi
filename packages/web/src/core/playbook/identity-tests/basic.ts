@@ -15,7 +15,7 @@ import {
 } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
 
-import { Test, TestConfig, Suite, ConfigFailures } from "./types";
+import { Test, TestConfig, Suite, ConfigFailures, TestStage } from "./types";
 import { StageGenerator } from "../execute";
 import { selectOperationBySecurityScheme, selectOperationsToTest } from "./selector";
 
@@ -153,7 +153,7 @@ const truncatedPasswordsTest: Test<TruncateTestConfig> = {
     spec: BundledSwaggerOrOasSpec,
     playbook: Playbook.Bundle,
     vault: Vault
-  ): { id: string; stages: () => StageGenerator }[] {
+  ): TestStage[] {
     const result = [];
     for (const operationId of config.operationId) {
       result.push({

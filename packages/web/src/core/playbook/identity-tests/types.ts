@@ -13,6 +13,11 @@ export type SuiteConfig = Result<
   ConfigFailures
 >;
 
+export type TestStage = {
+  id: string;
+  stages: () => StageGenerator;
+};
+
 export type Test<C extends TestConfig> = {
   configure(
     spec: BundledSwaggerOrOasSpec,
@@ -24,7 +29,7 @@ export type Test<C extends TestConfig> = {
     spec: BundledSwaggerOrOasSpec,
     playbook: Playbook.Bundle,
     vault: Vault
-  ): { id: string; stages: () => StageGenerator }[];
+  ): TestStage[];
 };
 
 export type Suite = {
