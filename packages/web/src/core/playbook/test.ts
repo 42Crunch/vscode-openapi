@@ -50,7 +50,7 @@ export async function testPlaybook(
       continue;
     }
 
-    for (const { id, stages } of test.run(testConfig!, oas, file, vault)) {
+    for await (const { id, stages } of test.run(testConfig!, oas, file, vault)) {
       dispatch(addTestExecutionAction({ testId }));
       for await (const step of executePlaybook(
         id,

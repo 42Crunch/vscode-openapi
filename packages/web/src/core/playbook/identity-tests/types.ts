@@ -29,7 +29,7 @@ export type Test<C extends TestConfig> = {
     spec: BundledSwaggerOrOasSpec,
     playbook: Playbook.Bundle,
     vault: Vault
-  ): TestStage[];
+  ): AsyncGenerator<TestStage, void, unknown>;
 };
 
 export type Suite = {
