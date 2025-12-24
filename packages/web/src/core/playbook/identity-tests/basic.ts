@@ -9,6 +9,7 @@ import {
 } from "@xliic/openapi";
 import { Result, success, failure } from "@xliic/result";
 import {
+  BasicCredential,
   BasicSecurityScheme,
   Vault,
   SecurityScheme as VaultSecurityScheme,
@@ -155,13 +156,18 @@ const truncatedPasswordsTest: Test<TruncateTestConfig> = {
     vault: Vault
   ) {
     for (const operationId of config.operationId) {
+      console.log(`Running truncated passwords test for operation: ${operationId}`);
+
+      const operation = playbook.operations[operationId];
+      const scenario = operation.scenarios?.[0];
+
       const envStack = yield {
         id: operationId,
-        steps: () => pickScenarioById(playbook, operationId),
+        steps: () => testStageFoo(playbook, vault, scenario!.requests[0]),
       };
-      // envStack contains the PlaybookEnvStack returned from executePlaybook
-      // Can be used for subsequent test stages if needed
-      console.log("Received env stack from previous stage:", envStack);
+
+      console.log("Got env stack:", envStack);
+      console.log("Running second iteration with truncated passwords...");
     }
   },
 };
@@ -197,7 +203,84 @@ async function* pickScenarioById(playbook: Playbook.Bundle, operationId: string)
       stage,
       hooks: {},
     };
-    console.log("Picked scenario step result:", result);
+    console.log("Received step execution:", result);
+  }
+}
+
+function getRequestByRef(file: Playbook.Bundle, ref: Playbook.RequestRef) {
+  return ref.type === "operation" ? file.operations[ref.id]?.request : file.requests?.[ref.id];
+}
+
+function getVaultCredential(vault: Vault, schemeName: string): BasicCredential {
+  const vaultScheme = vault.schemes[schemeName];
+  // FIXME handle different types
+  if (vaultScheme === undefined || vaultScheme.type !== "basic") {
+    throw new Error(`Vault scheme "${schemeName}" not found / FIXME`);
+  }
+  const credentials = Object.values(vaultScheme.credentials);
+  if (credentials.length === 0) {
+    throw new Error(`No credentials in vault scheme "${schemeName}" / FIXME`);
+  }
+  return credentials[0] as BasicCredential;
+}
+
+function truncatedThree(credential: BasicCredential): BasicCredential[] {
+  const { username, password } = credential;
+  if (password.length < 4) {
+    // TODO return error
+    return [];
+  }
+
+  const truncated1 = password.substring(0, password.length - 1);
+  const truncated2 = password.substring(0, password.length - 2);
+  const truncated3 = password.substring(0, password.length - 3);
+
+  return [
+    { username, password: truncated1 },
+    { username, password: truncated2 },
+    { username, password: truncated3 },
+  ];
+}
+
+function basicCredentialToString(credential: BasicCredential): string {
+  return `${credential.username}:${credential.password}`;
+}
+
+async function* testStageFoo(
+  file: Playbook.Bundle,
+  vault: Vault,
+  stage: Playbook.Stage
+): StepGenerator {
+  // const schemeName = getSchemeNameByOperationId(spec, operationId);
+  // const credential = getVaultCredential(vault, schemeName);
+  // const credentials = truncatedThree(credential);
+
+  const request = getRequestByRef(file, stage.ref!);
+
+  const schemeName = (request as Playbook.StageContent)?.auth?.[0];
+
+  const credential = getVaultCredential(vault, schemeName!);
+  const credentials = truncatedThree(credential);
+
+  for (const credential of credentials) {
+    const credentialString = basicCredentialToString(credential);
+
+    console.log("Stage auth before modification:", schemeName);
+
+    const result = yield {
+      stage,
+      hooks: {
+        security: async function* (auth) {
+          return {
+            basic: {
+              credential: { type: "basic", default: "", methods: {} },
+              value: credentialString,
+            },
+          };
+        },
+      },
+    };
+    console.log("Received step execution in foo:", result);
   }
 }
 
