@@ -11,7 +11,6 @@ import { PlaybookEnvStack } from "./playbook-env";
 import { createAuthCache } from "./auth-cache";
 import { executePlaybook, getExternalEnvironment } from "./execute";
 import { SuiteConfig, Suite } from "./identity-tests/types";
-import { TestStep } from "./playbook-tests";
 
 export async function testPlaybook(
   client: HttpClient,
@@ -24,11 +23,10 @@ export async function testPlaybook(
   suite: Suite,
   config: SuiteConfig,
   dispatch: (action: Action) => void,
-  addTestExecutionAction: (action: { testId: string }) => Action,
   addStepExecutionAction: (action: {
     stageId: string;
     testId: string;
-    step: PlaybookExecutorStep | TestStep;
+    step: PlaybookExecutorStep;
   }) => Action
 ) {
   const cache = createAuthCache();
@@ -55,7 +53,6 @@ export async function testPlaybook(
 
     while (!stepGenerator.done) {
       const { id, steps, envStack } = stepGenerator.value;
-      dispatch(addTestExecutionAction({ testId }));
 
       // Execute the playbook and collect the return value
       const playbookExecutor = executePlaybook(
@@ -65,7 +62,7 @@ export async function testPlaybook(
         oas,
         server,
         file,
-        steps(),
+        steps,
         [...env, ...extraEnv, ...(envStack || [])],
         vault,
         0
@@ -77,7 +74,15 @@ export async function testPlaybook(
         playbookStep = await playbookExecutor.next();
       }
 
-      // Pass the return value (PlaybookEnvStack) to the next test stage
+      console.log(
+        "Finished test stage:",
+        testId,
+        id,
+        "return value:",
+        JSON.stringify(playbookStep.value)
+      );
+
+      // Pass the return value (Result<PlaybookEnvStack, PlaybookError>) to the next test stage
       stepGenerator = await stageGenerator.next(playbookStep.value);
     }
   }

@@ -76,11 +76,13 @@ function TestResultCard({ testId, result }: { testId: string; result: StageResul
             <CollapsibleCard>
               <Description>
                 <span> {stageId}</span>
-                <div>{stage.failed ? <ExclamationCircle /> : <Check />}</div>
+                <div>{stage.failures.length > 0 ? <ExclamationCircle /> : <Check />}</div>
               </Description>
               <TestCardBody>
                 <Execution result={stage.result} />
-                {stage.failed && <Failure>{stage.failed}</Failure>}
+                {stage.failures.length > 0 && (
+                  <Failure>{stage.failures.map((f) => JSON.stringify(f)).join(", ")}</Failure>
+                )}
               </TestCardBody>
             </CollapsibleCard>
           </TestCardContent>

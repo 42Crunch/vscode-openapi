@@ -3,7 +3,6 @@ import { HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
 import { Playbook } from "@xliic/scanconf";
 
 import { PlaybookEnvStack } from "../../../../core/playbook/playbook-env";
-import { MockHttpResponseType } from "../../../../core/http-client/mock-client";
 
 export type VariableReplacement = {
   stack: PlaybookEnvStack;
@@ -25,7 +24,7 @@ export type OperationResult = {
   operationId?: string;
   httpRequest?: HttpRequest;
   httpRequestPrepareError?: string;
-  httpResponse?: HttpResponse | MockHttpResponseType;
+  httpResponse?: HttpResponse;
   httpError?: HttpError;
   auth: Record<string, AuthenticationResult>;
   variablesReplaced?: VariableReplacement;

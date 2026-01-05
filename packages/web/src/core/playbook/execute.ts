@@ -1,10 +1,11 @@
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
-import { HttpClient, type HttpResponse } from "@xliic/common/http";
+import { HttpClient, type HttpResponse, HttpError, HttpRequest } from "@xliic/common/http";
 import { BundledSwaggerOrOasSpec, getOperationById, getHttpResponseRange } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
+import { Result, success, failure } from "@xliic/result";
 
 import { makeExternalHttpRequest, makeHttpRequest } from "./http";
-import { MockHttpClient, MockHttpResponse } from "../http-client/mock-client";
+import { MockHttpClient, MockHttpResponse, MockHttpResponseType } from "../http-client/mock-client";
 import { AuthResult, PlaybookExecutorStep } from "./playbook";
 import { PlaybookEnv, PlaybookEnvStack } from "./playbook-env";
 import { assignVariables, failedAssigments } from "./variable-assignments";
@@ -15,14 +16,26 @@ import {
   replaceRequestVariables,
 } from "./variables";
 import { createAuthCache, getAuthEntry, setAuthEntry, AuthCache } from "./auth-cache";
-import { TestStep, Hooks } from "./playbook-tests";
 import { Vault } from "@xliic/common/vault";
+import { TestIssue } from "./identity-tests/types";
+import { on } from "events";
 
-export type StepGenerator = AsyncGenerator<
-  { stage: Playbook.Stage; hooks: Hooks },
-  void,
-  { response: HttpResponse | typeof MockHttpResponse }
->;
+export type PlaybookError =
+  | "playbook-aborted"
+  | "http-request-prepare-error"
+  | "http-error-received"
+  | "response-processing-error";
+
+export type StepExecutionError = PlaybookError | HttpError;
+
+export type TestStep = {
+  stage: Playbook.Stage;
+  security?: AuthResult;
+  next: "prepare" | "complete";
+  onFailure: "continue" | "abort";
+};
+
+export type StepGenerator = AsyncGenerator<TestStep, TestIssue[], any>;
 
 export type DynamicRequestList = StepGenerator;
 export type StaticRequestList = Playbook.Stage[];
@@ -46,7 +59,7 @@ export async function* executeAllPlaybooks(
   const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv)];
   const result: PlaybookEnvStack = [];
   for (const { name, requests } of playbooks) {
-    const playbookResult: PlaybookEnvStack | undefined = yield* executePlaybook(
+    const [playbookResult, playbookError] = yield* executePlaybook(
       name,
       cache,
       client,
@@ -59,11 +72,11 @@ export async function* executeAllPlaybooks(
       0
     );
 
-    if (playbookResult === undefined) {
+    if (playbookError !== undefined) {
       // playbook failed, bail
       break;
     } else {
-      result.push(...playbookResult);
+      result.push(...playbookResult.env);
     }
   }
 
@@ -82,8 +95,8 @@ export async function* executePlaybook<T extends StaticRequestList | DynamicRequ
   vault: Vault,
   depth: number
 ): AsyncGenerator<
-  T extends StaticRequestList ? PlaybookExecutorStep : PlaybookExecutorStep | TestStep,
-  PlaybookEnvStack | undefined
+  PlaybookExecutorStep,
+  Result<{ env: PlaybookEnvStack; result: TestIssue[] }, PlaybookError>
 > {
   const result: PlaybookEnvStack = [];
 
@@ -94,22 +107,32 @@ export async function* executePlaybook<T extends StaticRequestList | DynamicRequ
       event: "playbook-aborted",
       error: "Maximum playbook execution depth is reached",
     };
-    return;
+    return failure<PlaybookError>("playbook-aborted");
   }
 
   const steps = iteratePlaybook(requests);
 
-  let stepId = 0;
-  let step = await steps.next();
+  let stepId = -1;
+  let step;
+  let response: HttpResponse | MockHttpResponseType | undefined = undefined;
 
-  while (!step.done) {
-    const { stage, hooks } = step.value;
+  while (true) {
+    stepId++;
+    step = await steps.next([response!, undefined]);
+    if (step.done) {
+      console.log("Done executing playbook, breaking", name, step);
+      break;
+    }
+    const { stage, next, security: stageSecurity, onFailure } = step.value;
+
     if (stage.ref === undefined) {
       yield {
         event: "playbook-aborted",
         error: "non-reference requests are not supported",
       };
-      return;
+      const error = failure<PlaybookError>("playbook-aborted");
+      //await steps.next(error);
+      return error;
     }
 
     const request = getRequestByRef(file, stage.ref);
@@ -119,36 +142,37 @@ export async function* executePlaybook<T extends StaticRequestList | DynamicRequ
         event: "playbook-aborted",
         error: `request not found: ${stage.ref.type}/${stage.ref.id}`,
       };
-      return;
+      const error = failure<PlaybookError>("playbook-aborted");
+      //await steps.next(error);
+      return error;
     }
 
     yield { event: "request-started", ref: stage.ref };
 
     // skip auth for external requests
     const auth = request.operationId === undefined ? undefined : request.auth;
-    const security = yield* executeAuth(
-      cache,
-      client,
-      oas,
-      server,
-      file,
-      auth,
-      [...env, ...result],
-      vault,
-      depth
-    );
+    const security =
+      stageSecurity ??
+      (yield* executeAuth(
+        cache,
+        client,
+        oas,
+        server,
+        file,
+        auth,
+        [...env, ...result],
+        vault,
+        depth
+      ));
 
     if (security === undefined) {
       yield {
         event: "http-request-prepare-error",
         error: `Failed to retrieve credentials`,
       };
-      return;
-    }
-
-    let hookedSecurity = security;
-    if (hooks.security !== undefined) {
-      hookedSecurity = yield* hooks.security(security) as any;
+      const error = failure<PlaybookError>("http-request-prepare-error");
+      //await steps.next(error);
+      return error;
     }
 
     const replacedStageEnv = replaceEnvironmentVariables(
@@ -208,89 +232,104 @@ export async function* executePlaybook<T extends StaticRequestList | DynamicRequ
         event: "http-request-prepare-error",
         error: `failed to replace request variables: ${getMissingVariableNames(missing)}`,
       };
-      return;
+      const error = failure<PlaybookError>("http-request-prepare-error");
+      //await steps.next(error);
+      return error;
     }
 
-    const [httpRequest, requestError] =
+    const [preparedHttpRequest, requestPrepareError] =
       "operationId" in replacements.value
-        ? await makeHttpRequest(
-            oas,
-            server,
-            request.operationId,
-            replacements.value,
-            hookedSecurity
-          )
+        ? await makeHttpRequest(oas, server, request.operationId, replacements.value, security)
         : await makeExternalHttpRequest(replacements.value);
 
-    if (requestError !== undefined) {
-      yield { event: "http-request-prepare-error", error: requestError };
-      return;
+    if (requestPrepareError !== undefined) {
+      yield { event: "http-request-prepare-error", error: requestPrepareError };
+      const error = failure<PlaybookError>("http-request-prepare-error");
+      //await steps.next(error);
+      return error;
     }
 
-    let hookedRequest = httpRequest;
-    if (hooks.request !== undefined) {
-      hookedRequest = yield* hooks.request(httpRequest) as any;
+    let httpRequest = preparedHttpRequest;
+    if (next === "prepare") {
+      step = await steps.next(success(preparedHttpRequest));
+      if (step.done) {
+        break;
+      }
+      httpRequest = (step.value as any)[0];
     }
 
     if ("operationId" in replacements.value) {
       yield {
         event: "http-request-prepared",
-        request: hookedRequest,
+        request: httpRequest,
         operationId: request.operationId!,
         playbookRequest: replacements.value,
-        auth: hookedSecurity,
+        auth: security,
       };
     } else {
       yield {
         event: "external-http-request-prepared",
-        request: hookedRequest,
+        request: httpRequest,
         playbookRequest: replacements.value,
-        auth: hookedSecurity,
+        auth: security,
       };
     }
 
-    const [response, error2] = await client(hookedRequest);
+    const [receivedHttpResponse, error2] = await client(httpRequest);
 
     if (error2 !== undefined) {
-      let hookedError2 = error2;
-      if (hooks.error !== undefined) {
-        hookedError2 = yield* hooks.error(error2) as any;
+      console.log("HTTP error received during playbook execution:", error2);
+      yield { event: "http-error-received", error: error2 };
+      await steps.next(failure<StepExecutionError>(error2));
+      return failure<PlaybookError>("http-error-received");
+    }
+
+    yield { event: "http-response-received", response: receivedHttpResponse };
+
+    response = receivedHttpResponse;
+    if (next === "prepare") {
+      step = await steps.next(success(receivedHttpResponse));
+      if (step.done) {
+        break;
       }
-      yield { event: "http-error-received", error: hookedError2 };
-      return;
+      response = step.value as any;
+      console.log("got response in prepare:", step);
     }
 
-    let hookedResponse = response;
-    if (hooks.response !== undefined) {
-      hookedResponse = yield* hooks.response(response) as any;
-    }
-
-    yield { event: "http-response-received", response: hookedResponse };
-
-    if (hookedResponse !== MockHttpResponse) {
+    if (response !== MockHttpResponse) {
       if (stage.expectedResponse !== undefined) {
         if (
-          String(hookedResponse?.statusCode) !== stage.expectedResponse &&
-          getHttpResponseRange(hookedResponse!.statusCode) !== stage.expectedResponse &&
+          String(response?.statusCode) !== stage.expectedResponse &&
+          getHttpResponseRange(response!.statusCode) !== stage.expectedResponse &&
           request.defaultResponse !== "default"
         ) {
+          if (onFailure === "continue") {
+            continue;
+          }
           yield {
             event: "response-processing-error",
-            error: `HTTP response code "${hookedResponse?.statusCode}" does not match expected stage response code "${stage.expectedResponse}"`,
+            error: `HTTP response code "${response?.statusCode}" does not match expected stage response code "${stage.expectedResponse}"`,
           };
-          return;
+          const error = failure<PlaybookError>("response-processing-error");
+          //await steps.next(error);
+          return error;
         }
       } else {
         if (
-          String(hookedResponse?.statusCode) !== request.defaultResponse &&
-          getHttpResponseRange(hookedResponse!.statusCode) !== request.defaultResponse &&
+          String(response?.statusCode) !== request.defaultResponse &&
+          getHttpResponseRange(response!.statusCode) !== request.defaultResponse &&
           request.defaultResponse !== "default"
         ) {
+          if (onFailure === "continue") {
+            continue;
+          }
           yield {
             event: "response-processing-error",
-            error: `HTTP response code "${hookedResponse?.statusCode}" does not match default response code "${request.defaultResponse}"`,
+            error: `HTTP response code "${response?.statusCode}" does not match default response code "${request.defaultResponse}"`,
           };
-          return;
+          const error = failure<PlaybookError>("response-processing-error");
+          //await steps.next(error);
+          return error;
         }
       }
     }
@@ -299,7 +338,7 @@ export async function* executePlaybook<T extends StaticRequestList | DynamicRequ
       { type: "playbook-request", name, step: stepId, responseCode: "default" },
       request.responses,
       httpRequest,
-      hookedResponse,
+      response!,
       replacements.value.parameters
     );
 
@@ -308,7 +347,9 @@ export async function* executePlaybook<T extends StaticRequestList | DynamicRequ
         event: "response-processing-error",
         error: requestAssignmentsError,
       };
-      return;
+      const error = failure<PlaybookError>("response-processing-error");
+      //await steps.next(error);
+      return error;
     }
 
     result.push(...requestAssignments);
@@ -323,14 +364,17 @@ export async function* executePlaybook<T extends StaticRequestList | DynamicRequ
           .map((a) => a.name)
           .join(", ")}`,
       };
-      return;
+
+      const error = failure<PlaybookError>("response-processing-error");
+      //await steps.next(error);
+      return error;
     }
 
     const [stepAssignments, stepAssignmentsError] = assignVariables(
       { type: "playbook-stage", name, step: stepId, responseCode: "default" },
       stage.responses,
       httpRequest,
-      response,
+      response!,
       replacements.value.parameters
     );
 
@@ -339,7 +383,9 @@ export async function* executePlaybook<T extends StaticRequestList | DynamicRequ
         event: "response-processing-error",
         error: stepAssignmentsError,
       };
-      return;
+      const error = failure<PlaybookError>("response-processing-error");
+      //await steps.next(error);
+      return error;
     }
 
     yield { event: "variables-assigned", assignments: stepAssignments };
@@ -352,20 +398,19 @@ export async function* executePlaybook<T extends StaticRequestList | DynamicRequ
           .map((a) => a.name)
           .join(", ")}`,
       };
-      return;
+      const error = failure<PlaybookError>("response-processing-error");
+      //await steps.next(error);
+      return error;
     }
 
     result.push(...stepAssignments);
-
-    step = await steps.next({ response });
-    stepId++;
   }
 
-  yield { event: "playbook-finished" };
+  yield { event: "playbook-finished", result: step.value };
 
-  console.log("ZZZ playbook execution result:", result);
+  console.log("ZZZ playbook execution result:", name, "last step value:", step.value);
 
-  return result;
+  return success({ env: result, result: step.value });
 }
 
 export async function* executeAuth(
@@ -471,7 +516,7 @@ async function* executeGetCredentialValue(
   const credentialEnvStack = [...env];
 
   if (method.requests !== undefined) {
-    const result = yield* executePlaybook(
+    const [result, error] = yield* executePlaybook(
       authName,
       cache,
       client,
@@ -484,12 +529,12 @@ async function* executeGetCredentialValue(
       depth + 1
     );
 
-    if (result === undefined) {
+    if (error !== undefined) {
       // failed to execute playbook, exiting
       return undefined;
     }
 
-    credentialEnvStack.push(...result);
+    credentialEnvStack.push(...result.env);
   }
 
   const replacements = replaceCredentialVariables(
@@ -569,10 +614,16 @@ function getRequestByRef(file: Playbook.Bundle, ref: Playbook.RequestRef) {
 
 async function* iteratePlaybook(requests: StaticRequestList | DynamicRequestList): StepGenerator {
   if (Symbol.asyncIterator in requests) {
-    yield* requests;
+    const iterator = requests[Symbol.asyncIterator]();
+    let step = await iterator.next();
+    while (!step.done) {
+      step = await iterator.next(yield step.value);
+    }
+    return step.value;
   } else {
     for (const request of requests) {
-      yield { stage: request, hooks: {} };
+      yield { stage: request, next: "complete", onFailure: "abort" };
     }
+    return [];
   }
 }
