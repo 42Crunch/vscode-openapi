@@ -16,7 +16,7 @@ export type SuiteConfig = Result<
 
 export type TestStage = {
   id: string;
-  steps: StepGenerator;
+  steps: StepGenerator<TestIssue[]>;
   envStack?: PlaybookEnvStack;
 };
 

@@ -1,5 +1,5 @@
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
-import { HttpClient, type HttpResponse, HttpError, HttpRequest } from "@xliic/common/http";
+import { HttpClient, type HttpResponse, HttpError } from "@xliic/common/http";
 import { BundledSwaggerOrOasSpec, getOperationById, getHttpResponseRange } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 import { Result, success, failure } from "@xliic/result";
@@ -17,8 +17,6 @@ import {
 } from "./variables";
 import { createAuthCache, getAuthEntry, setAuthEntry, AuthCache } from "./auth-cache";
 import { Vault } from "@xliic/common/vault";
-import { TestIssue } from "./identity-tests/types";
-import { on } from "events";
 
 export type PlaybookError =
   | "playbook-aborted"
@@ -35,9 +33,8 @@ export type TestStep = {
   onFailure: "continue" | "abort";
 };
 
-export type StepGenerator = AsyncGenerator<TestStep, TestIssue[], any>;
+export type StepGenerator<R> = AsyncGenerator<TestStep, R, any>;
 
-export type DynamicRequestList = StepGenerator;
 export type StaticRequestList = Playbook.Stage[];
 
 export type PlaybookList = {
@@ -66,7 +63,7 @@ export async function* executeAllPlaybooks(
       oas,
       server,
       file,
-      requests,
+      staticSteps(requests),
       [...env, ...extraEnv, ...result],
       vault,
       0
@@ -83,20 +80,26 @@ export async function* executeAllPlaybooks(
   return result;
 }
 
-export async function* executePlaybook<T extends StaticRequestList | DynamicRequestList>(
+export async function* staticSteps(requests: StaticRequestList): StepGenerator<undefined> {
+  for (const request of requests) {
+    yield { stage: request, next: "complete", onFailure: "abort" };
+  }
+}
+
+export async function* executePlaybook<R>(
   name: string,
   cache: AuthCache,
   client: HttpClient | MockHttpClient,
   oas: BundledSwaggerOrOasSpec,
   server: string,
   file: Playbook.Bundle,
-  requests: T,
+  steps: StepGenerator<R>,
   env: PlaybookEnvStack,
   vault: Vault,
   depth: number
 ): AsyncGenerator<
   PlaybookExecutorStep,
-  Result<{ env: PlaybookEnvStack; result: TestIssue[] }, PlaybookError>
+  Result<{ env: PlaybookEnvStack; result: R }, PlaybookError>
 > {
   const result: PlaybookEnvStack = [];
 
@@ -109,8 +112,6 @@ export async function* executePlaybook<T extends StaticRequestList | DynamicRequ
     };
     return failure<PlaybookError>("playbook-aborted");
   }
-
-  const steps = iteratePlaybook(requests);
 
   let stepId = -1;
   let step;
@@ -523,7 +524,7 @@ async function* executeGetCredentialValue(
       oas,
       server,
       file,
-      method.requests,
+      staticSteps(method.requests),
       env,
       vault,
       depth + 1
@@ -610,20 +611,4 @@ export function getExternalEnvironment(file: Playbook.Bundle, envenv: EnvData): 
 
 function getRequestByRef(file: Playbook.Bundle, ref: Playbook.RequestRef) {
   return ref.type === "operation" ? file.operations[ref.id]?.request : file.requests?.[ref.id];
-}
-
-async function* iteratePlaybook(requests: StaticRequestList | DynamicRequestList): StepGenerator {
-  if (Symbol.asyncIterator in requests) {
-    const iterator = requests[Symbol.asyncIterator]();
-    let step = await iterator.next();
-    while (!step.done) {
-      step = await iterator.next(yield step.value);
-    }
-    return step.value;
-  } else {
-    for (const request of requests) {
-      yield { stage: request, next: "complete", onFailure: "abort" };
-    }
-    return [];
-  }
 }
