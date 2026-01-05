@@ -25,7 +25,7 @@ import {
   TestStageGenerator,
   TestIssue,
 } from "./types";
-import { StepGenerator, TestStep } from "../execute";
+import { ExecutionStep, StepGenerator } from "../execute";
 import { selectOperationBySecurityScheme, selectOperationsToTest } from "./selector";
 import { AuthResult } from "../playbook";
 import { PlaybookEnvStack } from "../playbook-env";
@@ -366,7 +366,7 @@ async function* send(httpRequest: any): any {
 async function* execute(
   stage: Playbook.Stage,
   security?: AuthResult
-): AsyncGenerator<TestStep, Result<HttpResponse, HttpError>, any> {
+): AsyncGenerator<ExecutionStep, Result<HttpResponse, HttpError>, any> {
   const httpRequest = yield {
     stage,
     next: "prepare",
