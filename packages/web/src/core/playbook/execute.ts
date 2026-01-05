@@ -26,14 +26,14 @@ export type PlaybookError =
 
 export type StepExecutionError = PlaybookError | HttpError;
 
-export type TestStep = {
+export type ExecutionStep = {
   stage: Playbook.Stage;
   security?: AuthResult;
   next: "prepare" | "complete";
   onFailure: "continue" | "abort";
 };
 
-export type StepGenerator<R> = AsyncGenerator<TestStep, R, any>;
+export type StepGenerator<R> = AsyncGenerator<ExecutionStep, R, any>;
 
 export type StaticRequestList = Playbook.Stage[];
 
@@ -51,7 +51,7 @@ export async function* executeAllPlaybooks(
   envenv: EnvData,
   extraEnv: PlaybookEnvStack = [],
   vault: Vault
-): AsyncGenerator<PlaybookExecutorStep> {
+): AsyncGenerator<PlaybookExecutorStep<undefined>> {
   const cache = createAuthCache();
   const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv)];
   const result: PlaybookEnvStack = [];
@@ -98,7 +98,7 @@ export async function* executePlaybook<R>(
   vault: Vault,
   depth: number
 ): AsyncGenerator<
-  PlaybookExecutorStep,
+  PlaybookExecutorStep<R>,
   Result<{ env: PlaybookEnvStack; result: R }, PlaybookError>
 > {
   const result: PlaybookEnvStack = [];
@@ -424,7 +424,7 @@ export async function* executeAuth(
   env: PlaybookEnvStack,
   vault: Vault,
   depth: number
-): AsyncGenerator<PlaybookExecutorStep, AuthResult | undefined> {
+): AsyncGenerator<PlaybookExecutorStep<undefined>, AuthResult | undefined> {
   const result: AuthResult = {};
   if (auth === undefined) {
     return result;
@@ -513,7 +513,7 @@ async function* executeGetCredentialValue(
   env: PlaybookEnvStack,
   vault: Vault,
   depth: number
-): AsyncGenerator<PlaybookExecutorStep, string | undefined> {
+): AsyncGenerator<PlaybookExecutorStep<undefined>, string | undefined> {
   const credentialEnvStack = [...env];
 
   if (method.requests !== undefined) {

@@ -70,7 +70,13 @@ export async function testPlaybook(
 
       let playbookStep = await playbookExecutor.next();
       while (!playbookStep.done) {
-        dispatch(addStepExecutionAction({ testId, stageId: id, step: playbookStep.value }));
+        dispatch(
+          addStepExecutionAction({
+            testId,
+            stageId: id,
+            step: playbookStep.value as PlaybookExecutorStep,
+          })
+        );
         playbookStep = await playbookExecutor.next();
       }
 

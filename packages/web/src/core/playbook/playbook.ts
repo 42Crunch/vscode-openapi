@@ -1,5 +1,5 @@
 import { HttpMethod } from "@xliic/openapi";
-import { HttpClient, HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
+import { HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
 import { Playbook } from "@xliic/scanconf";
 import { LookupResult, LookupFailure } from "@xliic/common/env";
 
@@ -44,9 +44,9 @@ export type AuthAborted = {
   error: string;
 };
 
-export type PlaybookFinished = {
+export type PlaybookFinished<R = undefined> = {
   event: "playbook-finished";
-  result: any;
+  result?: R;
 };
 
 export type PlaybookAborted = {
@@ -116,13 +116,13 @@ export type PlaybookResponseProcessingError = {
   error: string;
 };
 
-export type PlaybookExecutorStep =
+export type PlaybookExecutorStep<R = undefined> =
   | PlaybookStarted
   | AuthStarted
   | AuthFinished
   | AuthAborted
   | RequestStarted
-  | PlaybookFinished
+  | PlaybookFinished<R>
   | PlaybookAborted
   | PlaybookPayloadVariablesReplaced
   | PlaybookCredentialVariablesReplaced
@@ -134,8 +134,3 @@ export type PlaybookExecutorStep =
   | PlaybookHttpErrorReceived
   | PlaybookVariablesAssigned
   | PlaybookResponseProcessingError;
-
-export type Executor = (
-  client: HttpClient,
-  playbook: Playbook
-) => AsyncGenerator<PlaybookExecutorStep>;

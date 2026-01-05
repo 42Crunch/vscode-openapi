@@ -4,6 +4,7 @@ import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
 import { ExecutionResult } from "../components/scenario/types";
 import { Current, handleTryItStep } from "../playbook-execution-handler";
 import { Configuration } from "../../../core/playbook/identity-tests";
+import { TestIssue } from "../../../core/playbook/identity-tests/types";
 
 type TryResult = Record<string, SuiteResult>;
 export type SuiteResult = Record<string, StageResult>;
@@ -49,7 +50,7 @@ export const slice = createSlice({
       }: PayloadAction<{
         testId: string;
         stageId: string;
-        step: PlaybookExecutorStep;
+        step: PlaybookExecutorStep<TestIssue[]>;
       }>
     ) => {
       if (!state.try[state.suiteId!][testId]) {
@@ -69,10 +70,10 @@ export const slice = createSlice({
           tryCurrent: state.try[state.suiteId!][testId][stageId].current,
           tryResult: state.try[state.suiteId!][testId][stageId].result,
         },
-        step
+        step as PlaybookExecutorStep
       );
 
-      if (step.event === "playbook-finished") {
+      if (step.event === "playbook-finished" && step.result) {
         console.log("test stage result", testId, stageId, step.result);
         state.try[state.suiteId!][testId][stageId].failures.push(...step.result);
       }
