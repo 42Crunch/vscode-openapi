@@ -16,7 +16,15 @@ import {
 } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
 
-import { Test, TestConfig, Suite, ConfigFailures, TestStage, TestStageGenerator } from "./types";
+import {
+  Test,
+  TestConfig,
+  Suite,
+  ConfigFailures,
+  TestStage,
+  TestStageGenerator,
+  TestIssue,
+} from "./types";
 import { StepGenerator, TestStep } from "../execute";
 import { selectOperationBySecurityScheme, selectOperationsToTest } from "./selector";
 import { AuthResult } from "../playbook";
@@ -273,7 +281,7 @@ async function* setupScenario(
   file: Playbook.Bundle,
   vault: Vault,
   scenario: Playbook.Scenario
-): StepGenerator {
+): StepGenerator<[]> {
   return [];
 }
 
@@ -281,7 +289,7 @@ async function* cleanupScenario(
   file: Playbook.Bundle,
   vault: Vault,
   scenario: Playbook.Scenario
-): StepGenerator {
+): StepGenerator<[]> {
   return [];
 }
 
@@ -310,7 +318,7 @@ async function* testScenarioStage(
   envStack: PlaybookEnvStack,
   stage: Playbook.Stage,
   credential: BasicCredential
-): StepGenerator {
+): StepGenerator<TestIssue[]> {
   const credentialString = basicCredentialToString(credential);
   const [response, error] = yield* execute(stage, {
     basic: {
