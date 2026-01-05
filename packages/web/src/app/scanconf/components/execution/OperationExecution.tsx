@@ -9,6 +9,7 @@ import HttpRequest from "../http-request/HttpRequest";
 import { OperationResult } from "../scenario/types";
 import { OperationAuthentication } from "./OperationAuthentication";
 import OperationHttpResponse from "./OperationHttpResponse";
+import { MockHttpResponse } from "../../../../core/http-client/mock-client";
 
 export default function OperationExecution({ operation }: { operation: OperationResult }) {
   return (
@@ -34,7 +35,7 @@ export default function OperationExecution({ operation }: { operation: Operation
         <HttpRequest
           operationId={operation.operationId}
           request={operation.httpRequest}
-          statusCode={operation?.httpResponse?.statusCode}
+          statusCode={operation?.httpResponse?.statusCode ?? 0}
           requestRef={operation.ref}
         />
       )}
@@ -45,7 +46,7 @@ export default function OperationExecution({ operation }: { operation: Operation
         </ErrorBanner>
       )}
 
-      {operation.httpResponse !== undefined && operation.httpResponse !== null && (
+      {operation.httpResponse !== undefined && (
         <OperationHttpResponse
           response={operation.httpResponse}
           variables={operation.variablesAssigned}

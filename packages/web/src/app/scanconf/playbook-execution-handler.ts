@@ -1,3 +1,4 @@
+import { MockHttpResponse } from "../../core/http-client/mock-client";
 import {
   PlaybookExecutorStep,
   AuthFinished,
@@ -204,7 +205,9 @@ const PlaybookStepHandlers: PlaybookEventHandlers = {
     event: PlaybookHttpResponseReceived
   ): void {
     const operation = currentOperation(stateCurrent, stateResult);
-    operation.httpResponse = event.response;
+    if (event.response !== MockHttpResponse) {
+      operation.httpResponse = event.response;
+    }
     operation.status = "success";
   },
 

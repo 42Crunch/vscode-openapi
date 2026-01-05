@@ -13,16 +13,14 @@ import { Webapp } from "@xliic/common/message";
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 
-import { PlaybookExecutorStep } from "../../core/playbook/playbook";
 import { PlaybookEnvStack } from "../../core/playbook/playbook-env";
 import { sendHttpRequest } from "../../features/http-client/slice";
 import { configure } from "../../core/playbook/identity-tests";
 
 import {
-  addTryExecutionTest,
-  addTryExecutionStep,
   resetTryExecution,
   startTryExecution,
+  addTryExecutionStep,
   updateTestConfig,
 } from "./tests/slice";
 
@@ -32,10 +30,10 @@ import { testPlaybook } from "../../core/playbook/test";
 import { SuiteConfig } from "../../core/playbook/identity-tests/types";
 import { SuiteId } from "../../core/playbook/identity-tests/index";
 import basic from "../../core/playbook/identity-tests/basic";
-import { TestStep } from "../../core/playbook/playbook-tests";
 import { loadPlaybook } from "./actions";
 import { loadVault } from "../../features/vault/slice";
 import { Vault } from "@xliic/common/vault";
+import { PlaybookExecutorStep } from "../../core/playbook/playbook";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;
 
@@ -72,7 +70,6 @@ export function onTryExecuteTestSuite(
               listenerApi.dispatch(sendHttpRequest({ id, request, config }))
           ),
           listenerApi.dispatch,
-          addTryExecutionTest,
           addTryExecutionStep,
           server,
           suiteConfig
@@ -110,11 +107,10 @@ async function execute(
   },
   httpClient: HttpClient,
   dispatch: (action: Action) => void,
-  addTestExecutionAction: (action: { testId: string }) => Action,
   addStepExecutionAction: (action: {
     testId: string;
     stageId: string;
-    step: PlaybookExecutorStep | TestStep;
+    step: PlaybookExecutorStep;
   }) => Action,
   server: string,
   suiteConfig: SuiteConfig,
@@ -131,7 +127,6 @@ async function execute(
     basic,
     suiteConfig,
     dispatch,
-    addTestExecutionAction,
     addStepExecutionAction
   );
 }

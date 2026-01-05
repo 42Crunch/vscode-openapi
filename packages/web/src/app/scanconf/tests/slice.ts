@@ -4,13 +4,12 @@ import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
 import { ExecutionResult } from "../components/scenario/types";
 import { Current, handleTryItStep } from "../playbook-execution-handler";
 import { Configuration } from "../../../core/playbook/identity-tests";
-import { TestStep, isTestStep } from "../../../core/playbook/playbook-tests";
 
 type TryResult = Record<string, SuiteResult>;
 export type SuiteResult = Record<string, StageResult>;
 export type StageResult = Record<
   string,
-  { current: Current; result: ExecutionResult; failed?: string }
+  { current: Current; result: ExecutionResult; failures: any[] }
 >;
 
 export type State = {
@@ -43,12 +42,6 @@ export const slice = createSlice({
       state.try[suiteId] = {};
     },
 
-    addTryExecutionTest: (state, { payload: { testId } }: PayloadAction<{ testId: string }>) => {
-      if (!state.try[state.suiteId!][testId]) {
-        state.try[state.suiteId!][testId] = {};
-      }
-    },
-
     addTryExecutionStep: (
       state,
       {
@@ -56,25 +49,32 @@ export const slice = createSlice({
       }: PayloadAction<{
         testId: string;
         stageId: string;
-        step: PlaybookExecutorStep | TestStep;
+        step: PlaybookExecutorStep;
       }>
     ) => {
-      if (!state.try[state.suiteId!][testId][stageId]) {
-        state.try[state.suiteId!][testId][stageId] = { current: { auth: [] }, result: [] };
+      if (!state.try[state.suiteId!][testId]) {
+        state.try[state.suiteId!][testId] = {};
       }
 
-      if (isTestStep(step)) {
-        if (step.event === "test-failed") {
-          state.try[state.suiteId!][testId][stageId].failed = step.message;
-        }
-      } else {
-        handleTryItStep(
-          {
-            tryCurrent: state.try[state.suiteId!][testId][stageId].current,
-            tryResult: state.try[state.suiteId!][testId][stageId].result,
-          },
-          step
-        );
+      if (!state.try[state.suiteId!][testId][stageId]) {
+        state.try[state.suiteId!][testId][stageId] = {
+          current: { auth: [] },
+          result: [],
+          failures: [],
+        };
+      }
+
+      handleTryItStep(
+        {
+          tryCurrent: state.try[state.suiteId!][testId][stageId].current,
+          tryResult: state.try[state.suiteId!][testId][stageId].result,
+        },
+        step
+      );
+
+      if (step.event === "playbook-finished") {
+        console.log("test stage result", testId, stageId, step.result);
+        state.try[state.suiteId!][testId][stageId].failures.push(...step.result);
       }
     },
 
@@ -88,7 +88,6 @@ export const {
   setTestSuiteId,
   startTryExecution,
   resetTryExecution,
-  addTryExecutionTest,
   addTryExecutionStep,
   updateTestConfig,
 } = slice.actions;

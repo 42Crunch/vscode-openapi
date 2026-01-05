@@ -16,9 +16,12 @@ import {
 } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
 
-import { Test, TestConfig, Suite, ConfigFailures, TestStage } from "./types";
-import { StepGenerator } from "../execute";
+import { Test, TestConfig, Suite, ConfigFailures, TestStage, TestStageGenerator } from "./types";
+import { StepGenerator, TestStep } from "../execute";
 import { selectOperationBySecurityScheme, selectOperationsToTest } from "./selector";
+import { AuthResult } from "../playbook";
+import { PlaybookEnvStack } from "../playbook-env";
+import { HttpError, HttpResponse } from "@xliic/common/http";
 
 function getActiveSecuritySchemes(spec: BundledSwaggerOrOasSpec) {
   const result: Record<
@@ -161,13 +164,33 @@ const truncatedPasswordsTest: Test<TruncateTestConfig> = {
       const operation = playbook.operations[operationId];
       const scenario = operation.scenarios?.[0];
 
-      const envStack = yield {
-        id: operationId,
-        steps: () => testStageFoo(playbook, vault, scenario!.requests[0]),
+      console.log("Scenario:", scenario);
+
+      const [setupResult, setupError] = yield {
+        id: `${operationId}-setup`,
+        steps: setupScenario(playbook, vault, scenario),
       };
 
-      console.log("Got env stack:", envStack);
-      console.log("Running second iteration with truncated passwords...");
+      if (setupError) {
+        console.log("Setup error:", setupError);
+        continue;
+      }
+
+      console.log("Setup result:", setupResult);
+
+      yield* testScenario(operationId, playbook, vault, setupResult.env, scenario!.requests[0]);
+
+      // console.log("Test result:", testResult);
+
+      // const cleanupResult = yield {
+      //   id: operationId,
+      //   steps: cleanupScenario(playbook, vault, scenario),
+      // };
+
+      // console.log("Cleanup result:", cleanupResult);
+
+      // console.log("Got env stack:", envStack);
+      // console.log("Running second iteration with truncated passwords...");
     }
   },
 };
@@ -193,19 +216,19 @@ const suite: Suite = {
   },
 };
 
-async function* pickScenarioById(playbook: Playbook.Bundle, operationId: string): StepGenerator {
-  const operation = playbook.operations[operationId];
+// async function* pickScenarioById(playbook: Playbook.Bundle, operationId: string): StepGenerator {
+//   const operation = playbook.operations[operationId];
 
-  const scenario = operation.scenarios?.[0];
+//   const scenario = operation.scenarios?.[0];
 
-  for (const stage of scenario?.requests || []) {
-    const result = yield {
-      stage,
-      hooks: {},
-    };
-    console.log("Received step execution:", result);
-  }
-}
+//   for (const stage of scenario?.requests || []) {
+//     const result = yield {
+//       stage,
+//       next: "complete",
+//     };
+//     console.log("Received step execution:", result);
+//   }
+// }
 
 function getRequestByRef(file: Playbook.Bundle, ref: Playbook.RequestRef) {
   return ref.type === "operation" ? file.operations[ref.id]?.request : file.requests?.[ref.id];
@@ -246,42 +269,106 @@ function basicCredentialToString(credential: BasicCredential): string {
   return `${credential.username}:${credential.password}`;
 }
 
-async function* testStageFoo(
+async function* setupScenario(
   file: Playbook.Bundle,
   vault: Vault,
-  stage: Playbook.Stage
+  scenario: Playbook.Scenario
 ): StepGenerator {
-  // const schemeName = getSchemeNameByOperationId(spec, operationId);
-  // const credential = getVaultCredential(vault, schemeName);
-  // const credentials = truncatedThree(credential);
+  return [];
+}
 
+async function* cleanupScenario(
+  file: Playbook.Bundle,
+  vault: Vault,
+  scenario: Playbook.Scenario
+): StepGenerator {
+  return [];
+}
+
+async function* testScenario(
+  id: string,
+  file: Playbook.Bundle,
+  vault: Vault,
+  envStack: PlaybookEnvStack,
+  stage: Playbook.Stage
+): TestStageGenerator {
   const request = getRequestByRef(file, stage.ref!);
-
   const schemeName = (request as Playbook.StageContent)?.auth?.[0];
-
   const credential = getVaultCredential(vault, schemeName!);
   const credentials = truncatedThree(credential);
-
-  for (const credential of credentials) {
-    const credentialString = basicCredentialToString(credential);
-
-    console.log("Stage auth before modification:", schemeName);
-
-    const result = yield {
-      stage,
-      hooks: {
-        security: async function* (auth) {
-          return {
-            basic: {
-              credential: { type: "basic", default: "", methods: {} },
-              value: credentialString,
-            },
-          };
-        },
-      },
+  for (let i = 0; i < credentials.length; i++) {
+    yield {
+      id: `${id}-truncated-test=${i}`,
+      steps: testScenarioStage(file, vault, envStack, stage, credentials[i]),
     };
-    console.log("Received step execution in foo:", result);
   }
+}
+
+async function* testScenarioStage(
+  file: Playbook.Bundle,
+  vault: Vault,
+  envStack: PlaybookEnvStack,
+  stage: Playbook.Stage,
+  credential: BasicCredential
+): StepGenerator {
+  const credentialString = basicCredentialToString(credential);
+  const [response, error] = yield* execute(stage, {
+    basic: {
+      credential: { type: "basic", default: "", methods: {} },
+      value: credentialString,
+    },
+  });
+
+  if (error) {
+    return [{ id: "request failed", message: `Request failed: ${error.message}` }];
+  }
+
+  if (
+    response?.statusCode === 200 ||
+    response?.statusCode === 201 ||
+    response?.statusCode === 204
+  ) {
+    return [{ id: "issue", message: `Request succeeded with truncated password` }];
+  }
+
+  return [
+    {
+      id: "no.issue",
+      message: `Request failed as expected with status code ${response?.statusCode}`,
+    },
+  ];
+}
+
+async function* prepare(stage: Playbook.Stage, security?: AuthResult): any {
+  const httpRequest = yield {
+    stage,
+    next: "prepare",
+    security,
+  };
+
+  return httpRequest;
+}
+
+async function* send(httpRequest: any): any {
+  const httpResponse = yield httpRequest;
+
+  return httpResponse;
+}
+
+async function* execute(
+  stage: Playbook.Stage,
+  security?: AuthResult
+): AsyncGenerator<TestStep, Result<HttpResponse, HttpError>, any> {
+  const httpRequest = yield {
+    stage,
+    next: "prepare",
+    security,
+    onFailure: "continue",
+  };
+
+  const httpResponse = yield httpRequest;
+
+  return httpResponse;
 }
 
 export default suite;

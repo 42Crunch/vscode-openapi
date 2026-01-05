@@ -10,7 +10,6 @@ import { PlaybookEnv } from "../playbook-env";
 import { httpClient } from "./httpclient";
 import { Suite, SuiteConfig } from "../identity-tests/types";
 import { testPlaybook } from "../test";
-import { TestStep } from "../playbook-tests";
 
 export function makeStepAssert(steps: PlaybookExecutorStep[]) {
   return (obj: any) => expect(steps.shift()).toMatchObject(obj);
@@ -95,8 +94,8 @@ export async function runSuite(
   config: SuiteConfig,
   vars?: PlaybookEnv,
   vault?: Vault
-): Promise<Array<PlaybookExecutorStep | TestStep>> {
-  const steps: Array<PlaybookExecutorStep | TestStep> = [];
+): Promise<Array<PlaybookExecutorStep>> {
+  const steps: Array<PlaybookExecutorStep> = [];
   const env = [];
 
   if (vars) {
@@ -115,8 +114,6 @@ export async function runSuite(
     config,
     // dispatch function - not used in tests
     () => {},
-    // addTestExecutionAction - returns an Action
-    (action) => ({ type: "test-started", payload: action }),
     // addStepExecutionAction - collect steps and return an Action
     (action) => {
       steps.push(action.step);

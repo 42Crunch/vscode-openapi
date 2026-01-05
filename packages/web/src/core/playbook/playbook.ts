@@ -46,6 +46,7 @@ export type AuthAborted = {
 
 export type PlaybookFinished = {
   event: "playbook-finished";
+  result: any;
 };
 
 export type PlaybookAborted = {
