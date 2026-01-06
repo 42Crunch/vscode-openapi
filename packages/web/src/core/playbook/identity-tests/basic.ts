@@ -1,139 +1,14 @@
-import {
-  BundledSwaggerOrOasSpec,
-  deref,
-  getBasicSecuritySchemes,
-  getOperations,
-  OpenApi30,
-  OpenApi31,
-  Swagger,
-} from "@xliic/openapi";
+import { BundledSwaggerOrOasSpec, getBasicSecuritySchemes } from "@xliic/openapi";
 import { Result, success, failure } from "@xliic/result";
-import {
-  BasicCredential,
-  BasicSecurityScheme,
-  Vault,
-  SecurityScheme as VaultSecurityScheme,
-} from "@xliic/common/vault";
+import { BasicCredential, Vault } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
 
-import {
-  Test,
-  TestConfig,
-  Suite,
-  ConfigFailures,
-  TestStage,
-  TestStageGenerator,
-  TestIssue,
-} from "./types";
-import { ExecutionStep, StepGenerator } from "../execute";
+import { Test, TestConfig, Suite, ConfigFailures, TestStageGenerator, TestIssue } from "./types";
+import { StepGenerator } from "../execute";
 import { selectOperationBySecurityScheme, selectOperationsToTest } from "./selector";
-import { AuthResult } from "../playbook";
 import { PlaybookEnvStack } from "../playbook-env";
-import { HttpError, HttpResponse } from "@xliic/common/http";
-
-function getActiveSecuritySchemes(spec: BundledSwaggerOrOasSpec) {
-  const result: Record<
-    string,
-    Swagger.SecurityScheme | OpenApi30.SecurityScheme | OpenApi31.SecurityScheme
-  > = {};
-  const operations = getOperations(spec);
-  for (const [, , operation] of operations) {
-    const security = operation.security ?? spec.security ?? [];
-    for (const entry of security) {
-      for (const name of Object.keys(entry)) {
-        const schemeOrRef =
-          "swagger" in spec
-            ? spec.securityDefinitions?.[name]
-            : spec.components?.securitySchemes?.[name];
-        const scheme = deref(spec, schemeOrRef);
-        if (scheme) {
-          result[name] = scheme;
-        }
-      }
-    }
-  }
-
-  return result;
-}
-
-function matchActiveSchemesToVault(
-  spec: BundledSwaggerOrOasSpec,
-  vault: Vault
-): Result<Record<string, VaultSecurityScheme | undefined>, string> {
-  const result: Record<string, VaultSecurityScheme | undefined> = {};
-  const activeSchemes = getActiveSecuritySchemes(spec);
-  for (const [name, scheme] of Object.entries(activeSchemes)) {
-    const vaultScheme = vault.schemes[name];
-    // check if vaultScheme matches scheme
-    if (vaultScheme !== undefined && checkVaultSchemeType(vaultScheme, scheme)) {
-      result[name] = vaultScheme;
-    } else {
-      result[name] = undefined;
-    }
-  }
-
-  return [result, undefined];
-}
-
-function checkVaultSchemeType(
-  vaultScheme: VaultSecurityScheme,
-  scheme: Swagger.SecurityScheme | OpenApi30.SecurityScheme | OpenApi31.SecurityScheme
-): boolean {
-  if (scheme.type === "http" && scheme.scheme === "basic" && vaultScheme.type === "basic") {
-    return true;
-  }
-  return false;
-}
-
-function usesBasicAuth(
-  spec: BundledSwaggerOrOasSpec,
-  playbook: Playbook.Bundle,
-  vault: Vault
-): string | undefined {
-  const activeSchemes = getActiveSecuritySchemes(spec);
-  for (const scheme of Object.values(activeSchemes)) {
-    if (scheme?.type === "http" && scheme?.scheme === "basic") {
-      return undefined;
-    }
-  }
-  return "No operations using Basic Auth schemes found";
-}
-
-function hasValidBasicAuthCredentials(
-  spec: BundledSwaggerOrOasSpec,
-  playbook: Playbook.Bundle,
-  vault: Vault
-): string {
-  const [schemes, errors] = matchActiveSchemesToVault(spec, vault);
-  if (errors !== undefined) {
-    return errors;
-  }
-
-  const basicSchemes: Record<string, BasicSecurityScheme> = {};
-
-  for (const name of Object.keys(schemes)) {
-    const vaultScheme = schemes[name];
-    if (vaultScheme?.type === "basic") {
-      basicSchemes[name] = vaultScheme;
-    }
-  }
-
-  if (Object.keys(basicSchemes).length === 0) {
-    return "No matching Vault Basic Auth schemes found";
-  }
-
-  const schemesWithNoCredentials: string[] = [];
-  for (const name of Object.keys(basicSchemes)) {
-    const vaultScheme = basicSchemes[name];
-    if (Object.keys(vaultScheme.credentials).length === 0) {
-      schemesWithNoCredentials.push(
-        `No credentials found in vault for Basic Auth scheme "${name}"`
-      );
-    }
-  }
-
-  return schemesWithNoCredentials.join("; ");
-}
+import { execute } from "../test-http-api";
+import { hasValidBasicAuthCredentials, usesBasicAuth } from "../test-requirements";
 
 type TruncateTestConfig = TestConfig & {
   operationId: string[];
@@ -187,18 +62,6 @@ const truncatedPasswordsTest: Test<TruncateTestConfig> = {
       console.log("Setup result:", setupResult);
 
       yield* testScenario(operationId, playbook, vault, setupResult.env, scenario!.requests[0]);
-
-      // console.log("Test result:", testResult);
-
-      // const cleanupResult = yield {
-      //   id: operationId,
-      //   steps: cleanupScenario(playbook, vault, scenario),
-      // };
-
-      // console.log("Cleanup result:", cleanupResult);
-
-      // console.log("Got env stack:", envStack);
-      // console.log("Running second iteration with truncated passwords...");
     }
   },
 };
@@ -223,20 +86,6 @@ const suite: Suite = {
     truncatedPasswordsTest,
   },
 };
-
-// async function* pickScenarioById(playbook: Playbook.Bundle, operationId: string): StepGenerator {
-//   const operation = playbook.operations[operationId];
-
-//   const scenario = operation.scenarios?.[0];
-
-//   for (const stage of scenario?.requests || []) {
-//     const result = yield {
-//       stage,
-//       next: "complete",
-//     };
-//     console.log("Received step execution:", result);
-//   }
-// }
 
 function getRequestByRef(file: Playbook.Bundle, ref: Playbook.RequestRef) {
   return ref.type === "operation" ? file.operations[ref.id]?.request : file.requests?.[ref.id];
@@ -345,38 +194,6 @@ async function* testScenarioStage(
       message: `Request failed as expected with status code ${response?.statusCode}`,
     },
   ];
-}
-
-async function* prepare(stage: Playbook.Stage, security?: AuthResult): any {
-  const httpRequest = yield {
-    stage,
-    next: "prepare",
-    security,
-  };
-
-  return httpRequest;
-}
-
-async function* send(httpRequest: any): any {
-  const httpResponse = yield httpRequest;
-
-  return httpResponse;
-}
-
-async function* execute(
-  stage: Playbook.Stage,
-  security?: AuthResult
-): AsyncGenerator<ExecutionStep, Result<HttpResponse, HttpError>, any> {
-  const httpRequest = yield {
-    stage,
-    next: "prepare",
-    security,
-    onFailure: "continue",
-  };
-
-  const httpResponse = yield httpRequest;
-
-  return httpResponse;
 }
 
 export default suite;
