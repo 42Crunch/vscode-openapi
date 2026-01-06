@@ -19,9 +19,29 @@ export default function Start() {
       <h1>Welcome to API Contract Generator</h1>
 
       <p>
-        Save time by reducing the manual creation of OpenAPI files; generate OpenAPI files
-        automatically from Postman collections or HAR files, directly in your IDE. Saving you time
-        and effort of manually creating OpenAPI files.
+        Generate OpenAPI files automatically from Postman collections or HAR files, directly in your
+        IDE. Saves you time and effort by not having to manually create them.
+      </p>
+
+      <p>
+        <Bold>Get started now!</Bold>
+      </p>
+
+      <p>
+        <Bold>Step 1</Bold> - Click on <Bold>"Select Postman/HAR files"</Bold> to upload one or more
+        Postman collections and HAR files. Please add an environment variable file to any Postman
+        collections uploaded.
+      </p>
+
+      <p>
+        <Bold>Step 2</Bold> - Click on <Bold>Generate</Bold> to automatically generate your OpenAPI
+        file.
+      </p>
+
+      <p>
+        <Bold>Step 3</Bold> - <Bold>Download</Bold> your new OpenAPI file or <Bold>open</Bold> it
+        directly in the IDE for further editing. We recommend your run API Audit to improve the
+        quality and security of the file.
       </p>
 
       <Action
@@ -36,22 +56,16 @@ export default function Start() {
       </Action>
 
       <p>
-        <Bold>Get started now!</Bold>
+        <Bold>File Upload Limitations</Bold>
       </p>
 
       <p>
-        <Bold>Step 1</Bold> - Click on <Bold>Add files</Bold> to upload the Postman collection for
-        your API and / or HAR files recording traffic to it
-      </p>
-
-      <p>
-        <Bold>Step 2</Bold> - Click on <Bold>Generate</Bold> to automatically generate your OpenAPI
-        file.
-      </p>
-
-      <p>
-        <Bold>Step 3</Bold> - <Bold>Download</Bold> your new OpenAPI file, or <Bold>open</Bold> it
-        in the IDE for further editing.
+        <ul>
+          <li>Max 10 files</li>
+          <li>Max size of combined files is 250MB</li>
+          <li>Supports Postman collections and HAR files</li>
+          <li>Only supports one Postman environment variable file per OpenAPI file</li>
+        </ul>
       </p>
 
       {token !== undefined && (

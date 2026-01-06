@@ -68,9 +68,10 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
     <div>
       <Title>API Contract Generator</Title>
       <ul>
-        <li>Add up to 10 files</li>
+        <li>Max 10 files</li>
         <li>Max size of combined files is 250MB</li>
         <li>Supports Postman collections and HAR files</li>
+        <li>Only supports one Postman environment variable file per OpenAPI file</li>
       </ul>
       <Separator />
 
@@ -246,7 +247,7 @@ const File = styled.div`
 `;
 
 const Title = styled.div`
-  margin-top: 16px;
+  margin-top: 0px;
   margin-bottom: 16px;
   font-size: 13px;
   font-weight: 600;
