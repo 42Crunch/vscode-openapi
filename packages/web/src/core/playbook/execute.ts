@@ -28,7 +28,7 @@ export type StepExecutionError = PlaybookError | HttpError;
 
 export type ExecutionStep = {
   stage: Playbook.Stage;
-  security?: AuthResult;
+  securityOverride?: AuthResult;
   next: "prepare" | "complete";
   onFailure: "continue" | "abort";
 };
@@ -124,7 +124,7 @@ export async function* executePlaybook<R>(
       console.log("Done executing playbook, breaking", name, step);
       break;
     }
-    const { stage, next, security: stageSecurity, onFailure } = step.value;
+    const { stage, next, securityOverride, onFailure } = step.value;
 
     if (stage.ref === undefined) {
       yield {
@@ -153,7 +153,7 @@ export async function* executePlaybook<R>(
     // skip auth for external requests
     const auth = request.operationId === undefined ? undefined : request.auth;
     const security =
-      stageSecurity ??
+      securityOverride ??
       (yield* executeAuth(
         cache,
         client,

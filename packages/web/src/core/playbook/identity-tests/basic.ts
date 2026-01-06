@@ -42,12 +42,9 @@ const truncatedPasswordsTest: Test<TruncateTestConfig> = {
     vault: Vault
   ) {
     for (const operationId of config.operationId) {
-      console.log(`Running truncated passwords test for operation: ${operationId}`);
-
       const operation = playbook.operations[operationId];
+      // use first scenario for now
       const scenario = operation.scenarios?.[0];
-
-      console.log("Scenario:", scenario);
 
       const [setupResult, setupError] = yield {
         id: `${operationId}-setup`,
@@ -55,35 +52,24 @@ const truncatedPasswordsTest: Test<TruncateTestConfig> = {
       };
 
       if (setupError) {
-        console.log("Setup error:", setupError);
+        // failed to setup
+        // TODO report error
         continue;
       }
 
-      console.log("Setup result:", setupResult);
+      yield* testScenario(operationId, playbook, vault, setupResult.env, scenario);
 
-      yield* testScenario(operationId, playbook, vault, setupResult.env, scenario!.requests[0]);
+      const [cleanupResult, cleanupError] = yield {
+        id: `${operationId}-cleanup`,
+        steps: cleanupScenario(playbook, vault, scenario),
+      };
+
+      if (cleanupError) {
+        // failed to cleanup
+        // TODO report error
+        continue;
+      }
     }
-  },
-};
-
-const suite: Suite = {
-  description: "A suite of tests for Basic Authentication.",
-
-  configure: function (
-    spec: BundledSwaggerOrOasSpec,
-    playbook: Playbook.Bundle,
-    vault: Vault
-  ): Result<Record<string, Test<TestConfig>>, ConfigFailures> {
-    const failed = usesBasicAuth(spec, playbook, vault);
-    if (failed) {
-      return failure({ usesBasicAuth: failed });
-    }
-
-    return success({ truncatedPasswordsTest });
-  },
-
-  tests: {
-    truncatedPasswordsTest,
   },
 };
 
@@ -147,8 +133,9 @@ async function* testScenario(
   file: Playbook.Bundle,
   vault: Vault,
   envStack: PlaybookEnvStack,
-  stage: Playbook.Stage
+  scenario: Playbook.Scenario
 ): TestStageGenerator {
+  const stage = scenario!.requests[0];
   const request = getRequestByRef(file, stage.ref!);
   const schemeName = (request as Playbook.StageContent)?.auth?.[0];
   const credential = getVaultCredential(vault, schemeName!);
@@ -156,23 +143,20 @@ async function* testScenario(
   for (let i = 0; i < credentials.length; i++) {
     yield {
       id: `${id}-truncated-test=${i}`,
-      steps: testScenarioStage(file, vault, envStack, stage, credentials[i]),
+      steps: testOperation(stage, schemeName!, credentials[i]),
     };
   }
 }
 
-async function* testScenarioStage(
-  file: Playbook.Bundle,
-  vault: Vault,
-  envStack: PlaybookEnvStack,
+async function* testOperation(
   stage: Playbook.Stage,
-  credential: BasicCredential
+  schemeName: string,
+  badCredential: BasicCredential
 ): StepGenerator<TestIssue[]> {
-  const credentialString = basicCredentialToString(credential);
   const [response, error] = yield* execute(stage, {
-    basic: {
+    [schemeName]: {
       credential: { type: "basic", default: "", methods: {} },
-      value: credentialString,
+      value: basicCredentialToString(badCredential),
     },
   });
 
@@ -195,5 +179,22 @@ async function* testScenarioStage(
     },
   ];
 }
+
+const suite: Suite = {
+  description: "A suite of tests for Basic Authentication.",
+
+  configure: function (spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault) {
+    const failed = usesBasicAuth(spec, playbook, vault);
+    if (failed) {
+      return failure({ usesBasicAuth: failed });
+    }
+
+    return success({ truncatedPasswordsTest });
+  },
+
+  tests: {
+    truncatedPasswordsTest,
+  },
+};
 
 export default suite;
