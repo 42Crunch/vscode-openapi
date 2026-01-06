@@ -23,12 +23,12 @@ export async function* send(httpRequest: any): any {
 
 export async function* execute(
   stage: Playbook.Stage,
-  security?: AuthResult
+  securityOverride?: AuthResult
 ): AsyncGenerator<ExecutionStep, Result<HttpResponse, HttpError>, any> {
   const httpRequest = yield {
     stage,
     next: "prepare",
-    security,
+    securityOverride,
     onFailure: "continue",
   };
 
