@@ -24,7 +24,7 @@ export default function Subscription({
 
   const dispatch = useAppDispatch();
 
-  const { upgradeUrl } = getEndpoints(useDevEndpoints);
+  const { upgradeUrl, stripeBillingUrl } = getEndpoints(useDevEndpoints);
 
   if (error) {
     return (
@@ -67,7 +67,9 @@ export default function Subscription({
                 e.preventDefault();
                 e.stopPropagation();
                 dispatch(
-                  openLink(`${upgradeUrl}?prefilled_email=${encodeURIComponent(data.userEmail)}`)
+                  openLink(
+                    `${stripeBillingUrl}?prefilled_email=${encodeURIComponent(data.userEmail)}`
+                  )
                 );
               }}
             >
