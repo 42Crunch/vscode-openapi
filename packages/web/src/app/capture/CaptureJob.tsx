@@ -302,7 +302,7 @@ const UploadProgress = styled.div`
 const UploadStatus = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
 `;
 
 const Separator = styled.hr`
