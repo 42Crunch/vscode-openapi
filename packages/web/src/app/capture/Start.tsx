@@ -19,29 +19,8 @@ export default function Start() {
       <h1>Welcome to API Contract Generator</h1>
 
       <p>
-        Generate OpenAPI files automatically from Postman collections or HAR files, directly in your
-        IDE. Saves you time and effort by not having to manually create them.
-      </p>
-
-      <p>
-        <Bold>Get started now!</Bold>
-      </p>
-
-      <p>
-        <Bold>Step 1</Bold> - Click on <Bold>"Select Postman/HAR files"</Bold> to upload one or more
-        Postman collections and HAR files. Please add an environment variable file to any Postman
-        collections uploaded.
-      </p>
-
-      <p>
-        <Bold>Step 2</Bold> - Click on <Bold>Generate</Bold> to automatically generate your OpenAPI
-        file.
-      </p>
-
-      <p>
-        <Bold>Step 3</Bold> - <Bold>Download</Bold> your new OpenAPI file or <Bold>open</Bold> it
-        directly in the IDE for further editing. We recommend your run API Audit to improve the
-        quality and security of the file.
+        Generate OpenAPI files automatically from Postman collections and HAR files, directly in
+        your IDE. This saves you time and avoids extra manual effort.
       </p>
 
       <Action
@@ -56,16 +35,24 @@ export default function Start() {
       </Action>
 
       <p>
-        <Bold>File Upload Limitations</Bold>
+        <Bold>Get started now!</Bold>
       </p>
 
       <p>
-        <ul>
-          <li>Max 10 files</li>
-          <li>Max size of combined files is 250MB</li>
-          <li>Supports Postman collections and HAR files</li>
-          <li>Only supports one Postman environment variable file per OpenAPI file</li>
-        </ul>
+        <Bold>Step 1</Bold> - Click <Bold>Select Postman/HAR files</Bold> to upload one or more
+        Postman collections and HAR files. If you use environment variables in your Postman
+        collections, also include an environment variable file.
+      </p>
+
+      <p>
+        <Bold>Step 2</Bold> - Click <Bold>Generate</Bold> to automatically generate your OpenAPI
+        file.
+      </p>
+
+      <p>
+        <Bold>Step 3</Bold> - <Bold>Download</Bold> your new OpenAPI file or <Bold>edit</Bold> it it
+        directly in the IDE. We recommend your run audit on your API contract to improve its quality
+        and security.
       </p>
 
       {token !== undefined && (
@@ -99,7 +86,7 @@ const Action = styled.div<{ $disabled?: boolean }>`
   gap: 4px;
   align-items: center;
   font-weight: 600;
-  font-size: 16px;
+  font-size: 15px;
   cursor: pointer;
   color: var(
     ${({ $disabled }) =>

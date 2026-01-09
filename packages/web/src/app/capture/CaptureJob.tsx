@@ -70,8 +70,8 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
       <ul>
         <li>Max 10 files</li>
         <li>Max size of combined files is 250MB</li>
-        <li>Supports Postman collections and HAR files</li>
-        <li>Only supports one Postman environment variable file per OpenAPI file</li>
+        <li>Supports multiple Postman collections and HAR files</li>
+        <li>Supports one environment variable file per OpenAPI file</li>
       </ul>
       <Separator />
 
