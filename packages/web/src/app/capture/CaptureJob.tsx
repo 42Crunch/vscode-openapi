@@ -131,7 +131,7 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
 
       <Options>
         <Input
-          label="Base Path"
+          label="Base path"
           name="basePath"
           description="The URL prefix for all API paths, relative to the host root"
         />
@@ -171,7 +171,7 @@ function CaptureJobForm({ item }: { item: CaptureItem }) {
 
             {item.downloadedFile && (
               <div>
-                OpenAPI file saved to{" "}
+                OpenAPI file saved as{" "}
                 <a
                   href="#"
                   onClick={(e) => {

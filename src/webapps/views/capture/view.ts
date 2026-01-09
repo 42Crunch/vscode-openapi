@@ -54,7 +54,7 @@ export class CaptureWebView extends WebView<Webapp> {
   hostHandlers: Webapp["hostHandlers"] = {
     selectFiles: async (payload: { id: string | undefined }) => {
       const uris = await vscode.window.showOpenDialog({
-        title: "Select HAR/Postman files",
+        title: "Select Postman or HAR files",
         canSelectFiles: true,
         canSelectFolders: false,
         canSelectMany: true,

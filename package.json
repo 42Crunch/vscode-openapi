@@ -119,7 +119,7 @@
       },
       {
         "view": "platformLaunchpadWelcome",
-        "contents": "API Contract Generator\nConvert HAR/Postman files to OpenAPI.\n[Generate](command:openapi.showCapture)"
+        "contents": "API Contract Generator\nConvert Postman or HAR files to OpenAPI.\n[Generate](command:openapi.showCapture)"
       }
     ],
     "menus": {
@@ -371,7 +371,7 @@
       },
       {
         "command": "openapi.showCapture",
-        "title": "42Crunch: Convert HAR/Postman files to OpenAPI"
+        "title": "42Crunch: Convert Postman or HAR files to OpenAPI"
       },
       {
         "command": "openapi.outline.resetSearch",

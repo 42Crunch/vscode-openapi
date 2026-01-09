@@ -31,7 +31,7 @@ export default function Start() {
         }}
       >
         <FileImport />
-        Select Postman/HAR files
+        Select Postman or HAR files
       </Action>
 
       <p>
@@ -39,7 +39,7 @@ export default function Start() {
       </p>
 
       <p>
-        <Bold>Step 1</Bold> - Click <Bold>Select Postman/HAR files</Bold> to upload one or more
+        <Bold>Step 1</Bold> - Click <Bold>Select Postman or HAR files</Bold> to upload one or more
         Postman collections and HAR files. If you use environment variables in your Postman
         collections, also include an environment variable file.
       </p>
