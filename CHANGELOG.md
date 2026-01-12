@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 5.0.0 (January 14, 2025)
+
+- API Contract Generator
+- Improved logging
+- Bugfixes in quickfix implementation
+
 ## Version 4.40.0 (October 21, 2025)
 
 - Improved configuration of proxy servers for API Scan
