@@ -42,6 +42,12 @@ export default function Start() {
         <Bold>Step 1</Bold> - Click <Bold>Select Postman or HAR files</Bold> to upload one or more
         Postman collections and HAR files. If you use environment variables in your Postman
         collections, also include an environment variable file.
+        <ul>
+          <li>Max 10 files</li>
+          <li>Max size of combined files is 250MB</li>
+          <li>Supports multiple Postman collections and HAR files</li>
+          <li>Supports one environment variable file per OpenAPI file</li>
+        </ul>
       </p>
 
       <p>
