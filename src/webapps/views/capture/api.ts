@@ -93,14 +93,18 @@ export async function requestUpload(
     form.append("env_file", fs.createReadStream(vscode.Uri.parse(env_file).fsPath));
   }
 
-  const response = await got(`capture/api/1.0/quickgen/${quickgenId}/prepare/upload-file`, {
-    ...gotOptions(capture, "POST", logger),
-    body: form,
-  }).on("uploadProgress", (progress) => {
-    listener(progress.percent);
-  });
+  try {
+    const response = await got(`capture/api/1.0/quickgen/${quickgenId}/prepare/upload-file`, {
+      ...gotOptions(capture, "POST", logger),
+      body: form,
+    }).on("uploadProgress", (progress) => {
+      listener(progress.percent);
+    });
 
-  return [(response.body as any).file_id, undefined];
+    return [(response.body as any).file_id, undefined];
+  } catch (error) {
+    return [undefined, error || "Unknown error during capture upload"];
+  }
 }
 
 export async function requestStart(
