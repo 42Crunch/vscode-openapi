@@ -1,8 +1,12 @@
-# OpenAPI Editing with API quality, Conformance and Security Testing
+# OpenAPI Editing with API Quality, Conformance and Security Testing
 
-Rich support for the OpenAPI Specification (OAS) / Swagger specification making it quicker and easier to create, edit and navigate your OpenAPI definitions.
+The plugin provides rich support for the OpenAPI Specification (OAS) / Swagger specification making it quicker and easier to create, edit and navigate your OpenAPI definitions. Manually create, import and edit OpenAPI contracts, along with using features such as Preview, functional "Try it" testing and intellisense, is free and does not require registration or have usage limits.
 
-Also check the quality, conformance and security of your APIs from inside VS Code, with the bundled 42Crunch API security testing tools - [API Audit](#activating-api-audit) and [API Scan](#activating-api-scan). Audit and Scan are available to both our freemium users and to 42Crunch platform subscribers. Monthly usage limitations apply for freemium users. [Upgrade options](https://42crunch.com/single-user-pricing/) available.
+Additional 42Crunch tools are available in the OpenAPI Editor. These API security testing tools are provided primarily for our enterprise customers. We have also made these tools available on a limited free basis to all our OpenAPI editor users (freemium registration is required). The tools are as follows:
+
+- [API Contract Generator](#api-contract-generator) - Automatically generate OpenAPI contracts from your existing Postman Collections and HAR files
+- [API Contract Audit](#activating-api-audit) - Check the quality, conformance and security of your OpenAPI contracts
+- [API Scan](#activating-api-scan) - Scan your API for security vulnerabilities
 
 ## OpenAPI Editing
 
@@ -22,6 +26,18 @@ It also supports both OpenAPI v2 and v3.0.x in JSON or YAML format. [QuickStart]
 - Split your OpenAPI into multiple files linked via $ref
 - Use quick fixes to automatically resolve problems in your OpenAPI
 - Use Code snippets to add paths, operations, components, security
+
+## API Contract Generator
+
+Designed to reduce time spent by developers on repetitive manual tasks and improve the quality of OpenAPI documentation, this feature enables users to automatically generate OpenAPI contracts from your existing Postman Collections and HAR files (recorded web traffic to the API).
+
+- Allows users to automatically generate API specifications from scratch
+- Streamlines the API design process
+- Helps maintain consistency across API definitions
+
+To access the API Contract Generator, click on the 42C icon in the 42Crunch OpenAPI (Swagger) Editor in the IDE.
+
+![OpenAPI Explorer](./images/api-contract-generator.png)
 
 ## Activating API Audit
 
@@ -46,7 +62,7 @@ The free version of API Scan runs locally in your own environment and requires n
 
 ## Freemium
 
-This service lets users of our OpenAPI editor extension who are not customers run the API Audit and Scan tests on their APIs.
+This service lets users of our OpenAPI editor extension, who are not customers, run API Contract Generator, API Audit and API Scan.
 
 - [Getting a Freemium Token](#getting-a-freemium-token)
 
