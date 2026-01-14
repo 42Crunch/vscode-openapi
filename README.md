@@ -1,6 +1,6 @@
 # OpenAPI Editing with API Quality, Conformance and Security Testing
 
-The plugin provides rich support for the OpenAPI Specification (OAS) / Swagger specification making it quicker and easier to create, edit and navigate your OpenAPI definitions. Manually create, import and edit OpenAPI contracts, along with using features such as Preview, functional "Try it" testing and intellisense, is free and does not require registration or have usage limits.
+Manually create, import and edit OpenAPI contracts, along with using features such as Preview, functional “Try it” testing and Intellisense. The OpenAPI editor is free and does not require registration or have usage limits.
 
 Additional 42Crunch tools are available in the OpenAPI Editor. These API security testing tools are provided primarily for our enterprise customers. We have also made these tools available on a limited free basis to all our OpenAPI editor users (freemium registration is required). The tools are as follows:
 
