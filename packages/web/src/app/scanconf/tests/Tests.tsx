@@ -30,9 +30,19 @@ export default function Tests() {
           id: "basic",
           label: "HTTP Basic Tests",
         },
+        // {
+        //   id: "api-key",
+        //   label: "API Key Tests",
+        // },
+      ],
+    },
+    {
+      id: "bolaAndBflaTests",
+      title: "BOLA and BFLA Tests",
+      items: [
         {
-          id: "api-key",
-          label: "API Key Tests",
+          id: "basicBola",
+          label: "Basic BOLA",
         },
       ],
     },
