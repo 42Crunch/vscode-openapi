@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 5.0.1 (January 14, 2025)
+
+- Fixed typos in what's new page
+
 ## Version 5.0.0 (January 14, 2025)
 
 - API Contract Generator
