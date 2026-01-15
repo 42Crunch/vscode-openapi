@@ -8,6 +8,7 @@ import * as path from "path";
 import { Configuration } from "./configuration";
 import { Bundle } from "./types";
 import { Cache } from "./cache";
+import { ChangeThemeMessage } from "@xliic/common/theme";
 
 type Preview = {
   panel: vscode.WebviewPanel;
@@ -20,6 +21,13 @@ type Previews = {
   redoc?: Preview;
   swaggerui?: Preview;
 };
+
+const kinds: Record<vscode.ColorThemeKind, ChangeThemeMessage["payload"]["kind"]> = {
+  [vscode.ColorThemeKind.Light]: "light",
+  [vscode.ColorThemeKind.Dark]: "dark",
+  [vscode.ColorThemeKind.HighContrast]: "highContrast",
+  [vscode.ColorThemeKind.HighContrastLight]: "highContrastLight",
+} as const;
 
 export function activate(
   context: vscode.ExtensionContext,
@@ -132,6 +140,21 @@ async function showPreview(
     context.subscriptions
   );
 
+  vscode.window.onDidChangeActiveColorTheme((e) => {
+    const changeThemeMessage: ChangeThemeMessage = {
+      command: "changeTheme",
+      payload: {
+        kind: kinds[e.kind],
+      },
+    };
+
+    for (const preview of Object.values(previews)) {
+      if (preview) {
+        preview.panel.webview.postMessage(changeThemeMessage);
+      }
+    }
+  });
+
   panel.webview.postMessage({ command: "preview", text: JSON.stringify(bundle.value) });
   previews[name] = { panel, documentUri };
 }
@@ -174,22 +197,30 @@ function buildWebviewPanel(
         path.join(context.extensionPath, "webview", "generated", "preview", name, "style.css")
       )
     );
+
     panel.webview.html = getWebviewContent(panel.webview, index, style);
   });
 }
 
 // Directive connect-src must be set to allow XHR
 function getWebviewContent(webview: vscode.Webview, index: vscode.Uri, style: vscode.Uri) {
+  const themeKind: ChangeThemeMessage["payload"]["kind"] =
+    kinds[vscode.window.activeColorTheme.kind];
+  const htmlClasses = themeKind === "dark" || themeKind === "highContrast" ? "dark-mode" : "";
+
   return `<!DOCTYPE html>
-  <html lang="en">
+  <html lang="en" class="${htmlClasses}">
   <head>
 	  <meta charset="UTF-8">
 	  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} https: data:; script-src ${webview.cspSource}; style-src ${webview.cspSource} 'unsafe-inline'; connect-src http: https:;">
 	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	  <style>
-	    body {
-		  background-color: #FEFEFE;
-	    }
+      body {
+        background-color: #FEFEFE;
+      }
+      .dark-mode body {
+        background-color: #1C2022;
+      }
 	  </style>
     <link href="${style}" rel="stylesheet"/>
   </head>

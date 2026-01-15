@@ -15,10 +15,16 @@ export const Preview = () => {
       const message = event.data;
       switch (message.command) {
         case "preview":
-          console.log("Received message:", version, message);
           globalThis["previewPayload"] = message.text;
           setOas(JSON.parse(message.text));
           setVersion(Date.now());
+          break;
+        case "changeTheme":
+          if (message.payload.kind === "dark" || message.payload.kind === "highContrast") {
+            document.documentElement.classList.add("dark-mode");
+          } else {
+            document.documentElement.classList.remove("dark-mode");
+          }
           break;
       }
     });
