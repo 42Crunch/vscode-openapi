@@ -34,14 +34,14 @@
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.3.1",
     "react-error-boundary": "^4.0.13",
-    "react-hook-form": "7.65.0",
+    "react-hook-form": "7.71.1",
     "react-redux": "^9.1.0",
     "redux": "^5.0.1",
     "redux-logger": "^3.0.6",
     "styled-components": "^6.1.17",
     "swagger-client": "^3.34.4",
     "tough-cookie": "^5.0.0",
-    "zod": "^3.24.3"
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@mdx-js/rollup": "^3.1.0",
