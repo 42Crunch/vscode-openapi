@@ -8,6 +8,8 @@ export function wrapCredential(credential: Playbook.Credential) {
   });
   return {
     ...result,
+    in: wrapUndefinedString(result.in),
+    name: wrapUndefinedString(result.name),
     ttl: wrapUndefinedString(result.ttl),
     tti: wrapUndefinedString(result.tti),
     methods,
@@ -24,6 +26,8 @@ export function unwrapCredential(data: any): Playbook.Credential {
     ...data,
     ttl: unwrapUndefinedString(data.ttl),
     tti: unwrapUndefinedString(data.tti),
+    in: unwrapUndefinedString(data.in),
+    name: unwrapUndefinedString(data.name),
     methods,
   };
 }
