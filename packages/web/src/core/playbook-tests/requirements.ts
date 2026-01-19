@@ -14,6 +14,14 @@ import {
 } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
 
+export function usesAuth(spec: BundledSwaggerOrOasSpec): string | undefined {
+  const activeSchemes = getActiveSecuritySchemes(spec);
+  if (Object.keys(activeSchemes).length > 0) {
+    return undefined;
+  }
+  return "No operations using authentication found";
+}
+
 export function usesBasicAuth(
   spec: BundledSwaggerOrOasSpec,
   playbook: Playbook.Bundle,
