@@ -23,6 +23,7 @@ const initialState: State = {
   try: {},
   config: {
     basic: [undefined, {}],
+    basicBola: [undefined, {}],
   },
 };
 
