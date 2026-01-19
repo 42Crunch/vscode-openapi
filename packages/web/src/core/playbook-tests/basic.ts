@@ -9,6 +9,7 @@ import { selectOperationBySecurityScheme, selectOperationsToTest } from "./selec
 import { PlaybookEnvStack } from "../playbook/playbook-env";
 import { execute } from "./http-api";
 import { hasValidBasicAuthCredentials, usesBasicAuth } from "./requirements";
+import { getScenario } from "./scenario";
 
 type TruncateTestConfig = TestConfig & {
   operationId: string[];
@@ -42,9 +43,8 @@ const truncatedPasswordsTest: Test<TruncateTestConfig> = {
     vault: Vault
   ) {
     for (const operationId of config.operationId) {
-      const operation = playbook.operations[operationId];
-      // use first scenario for now
-      const scenario = operation.scenarios?.[0];
+      // first scenario for now
+      const scenario = getScenario(playbook, operationId)!;
 
       const [setupResult, setupError] = yield {
         id: `${operationId}-setup`,
