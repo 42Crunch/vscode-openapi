@@ -4,7 +4,7 @@ import { StringDecoder } from "string_decoder";
 import type { AddressInfo } from "node:net";
 
 import type { Handler, Routes } from "./types";
-import { respond } from "./util.ts";
+import { respond } from "./server-util.ts";
 import { routes as basic } from "./basic/handler.ts";
 import { routes as basicFlow } from "./basic-flow/handler.ts";
 

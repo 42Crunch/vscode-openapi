@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "http";
 import type { Routes } from "../types";
-import { respond } from "../util.ts";
+import { respond } from "../server-util.ts";
 
 type UserInfo = {
   user: string;

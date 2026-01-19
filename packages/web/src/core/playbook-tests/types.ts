@@ -2,8 +2,8 @@ import { Vault } from "@xliic/common/vault";
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 import { Result } from "@xliic/result";
-import { StepGenerator, PlaybookError } from "../execute";
-import { PlaybookEnvStack } from "../playbook-env";
+import { StepGenerator, PlaybookError } from "../playbook/execute";
+import { PlaybookEnvStack } from "../playbook/playbook-env";
 
 export type ConfigFailures = Record<string, string>;
 

@@ -1,5 +1,4 @@
 import { afterAll, beforeAll, test } from "vitest";
-import { once } from "events";
 
 import oas from "./pixi-no-header.json";
 import scenarioAuth from "./scenario-auth";

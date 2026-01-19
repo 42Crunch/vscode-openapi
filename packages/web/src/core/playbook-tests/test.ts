@@ -6,11 +6,11 @@ import { EnvData } from "@xliic/common/env";
 import { HttpClient } from "@xliic/common/http";
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 
-import { PlaybookExecutorStep } from "./playbook";
-import { PlaybookEnvStack } from "./playbook-env";
-import { createAuthCache } from "./auth-cache";
-import { executePlaybook, getExternalEnvironment } from "./execute";
-import { SuiteConfig, Suite } from "./identity-tests/types";
+import { PlaybookExecutorStep } from "../playbook/playbook";
+import { PlaybookEnvStack } from "../playbook/playbook-env";
+import { createAuthCache } from "../playbook/auth-cache";
+import { executePlaybook, getExternalEnvironment } from "../playbook/execute";
+import { SuiteConfig, Suite } from "./types";
 
 export async function testPlaybook(
   client: HttpClient,

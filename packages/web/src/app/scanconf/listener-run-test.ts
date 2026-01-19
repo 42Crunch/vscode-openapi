@@ -15,7 +15,7 @@ import { Playbook } from "@xliic/scanconf";
 
 import { PlaybookEnvStack } from "../../core/playbook/playbook-env";
 import { sendHttpRequest } from "../../features/http-client/slice";
-import { configure } from "../../core/playbook/identity-tests";
+import { configure } from "../../core/playbook-tests";
 
 import {
   resetTryExecution,
@@ -26,10 +26,10 @@ import {
 
 import { AppDispatch, RootState } from "./store";
 import { webappHttpClient } from "../../core/http-client/webapp-client";
-import { testPlaybook } from "../../core/playbook/test";
-import { SuiteConfig } from "../../core/playbook/identity-tests/types";
-import { SuiteId } from "../../core/playbook/identity-tests/index";
-import basic from "../../core/playbook/identity-tests/basic";
+import { testPlaybook } from "../../core/playbook-tests/test";
+import { SuiteConfig } from "../../core/playbook-tests/types";
+import { SuiteId } from "../../core/playbook-tests/index";
+import basic from "../../core/playbook-tests/basic";
 import { loadPlaybook } from "./actions";
 import { loadVault } from "../../features/vault/slice";
 import { Vault } from "@xliic/common/vault";

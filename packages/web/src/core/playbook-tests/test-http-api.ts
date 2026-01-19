@@ -2,8 +2,8 @@ import { HttpError, HttpResponse } from "@xliic/common/http";
 import { Playbook } from "@xliic/scanconf";
 import { Result } from "@xliic/result";
 
-import { AuthResult } from "./playbook";
-import { ExecutionStep } from "./execute";
+import { AuthResult } from "../playbook/playbook";
+import { ExecutionStep } from "../playbook/execute";
 
 export async function* prepare(stage: Playbook.Stage, security?: AuthResult): any {
   const httpRequest = yield {

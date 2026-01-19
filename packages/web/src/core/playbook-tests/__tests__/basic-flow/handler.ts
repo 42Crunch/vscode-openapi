@@ -1,6 +1,6 @@
 import type { IncomingMessage } from "http";
 import type { Handler, Routes } from "../types";
-import { respond } from "../util.ts";
+import { respond } from "../server-util.ts";
 
 type User = {
   pass: string;

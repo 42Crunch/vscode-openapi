@@ -1,8 +1,8 @@
 import { expect, test } from "vitest";
 
-import oas from "./identity/pixi-userinfo-auth.json";
-import oasNoBasic from "./identity/pixi-userinfo-auth-no-basic.json";
-import { configure } from "../identity-tests";
+import oas from "./pixi-userinfo-auth.json";
+import oasNoBasic from "./pixi-userinfo-auth-no-basic.json";
+import { configure } from "../index";
 
 test("check identity tests config requiring basic auth", async () => {
   const result = configure(oas as any, null as any, {

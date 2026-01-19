@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "icons": "svgr --icon --typescript --jsx-runtime automatic --out-dir src/icons icons",
-    "server": "node --experimental-transform-types src/core/playbook/__tests__/identity/server.ts",
+    "server": "node --experimental-transform-types src/core/playbook-tests/__tests__/server.ts",
     "test": "vitest"
   },
   "type": "module",

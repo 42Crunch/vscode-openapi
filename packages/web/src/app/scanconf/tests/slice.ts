@@ -3,8 +3,8 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
 import { ExecutionResult } from "../components/scenario/types";
 import { Current, handleTryItStep } from "../playbook-execution-handler";
-import { Configuration } from "../../../core/playbook/identity-tests";
-import { TestIssue } from "../../../core/playbook/identity-tests/types";
+import { Configuration } from "../../../core/playbook-tests";
+import { TestIssue } from "../../../core/playbook-tests/types";
 
 type TryResult = Record<string, SuiteResult>;
 export type SuiteResult = Record<string, StageResult>;

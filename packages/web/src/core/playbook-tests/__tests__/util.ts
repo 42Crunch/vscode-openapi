@@ -4,10 +4,12 @@ import { Playbook } from "@xliic/scanconf";
 import { Scanconf, parse } from "@xliic/scanconf";
 import { Vault } from "@xliic/common/vault";
 
-import { executeAllPlaybooks, PlaybookList } from "../execute";
-import { PlaybookExecutorStep } from "../playbook";
-import { PlaybookEnv } from "../playbook-env";
+import { executeAllPlaybooks, PlaybookList } from "../../playbook/execute";
+import { PlaybookExecutorStep } from "../../playbook/playbook";
+import { PlaybookEnv } from "../../playbook/playbook-env";
 import { httpClient } from "./httpclient";
+import { testPlaybook } from "../test";
+import { Suite, SuiteConfig } from "../types";
 
 export function makeStepAssert(steps: PlaybookExecutorStep[]) {
   return (obj: any) => expect(steps.shift()).toMatchObject(obj);
@@ -80,6 +82,44 @@ export async function runPlaybooks(
   )) {
     steps.push(step);
   }
+
+  return steps;
+}
+
+export async function runSuite(
+  target: string,
+  oas: any,
+  file: Playbook.Bundle,
+  suite: Suite,
+  config: SuiteConfig,
+  vars?: PlaybookEnv,
+  vault?: Vault
+): Promise<Array<PlaybookExecutorStep>> {
+  const steps: Array<PlaybookExecutorStep> = [];
+  const env = [];
+
+  if (vars) {
+    env.push(vars);
+  }
+
+  await testPlaybook(
+    httpClient,
+    oas,
+    target,
+    file,
+    vault ?? { schemes: {} },
+    { default: {}, secrets: {} },
+    env,
+    suite,
+    config,
+    // dispatch function - not used in tests
+    () => {},
+    // addStepExecutionAction - collect steps and return an Action
+    (action) => {
+      steps.push(action.step);
+      return { type: "test-step", payload: action };
+    }
+  );
 
   return steps;
 }

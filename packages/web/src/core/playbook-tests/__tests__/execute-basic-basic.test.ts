@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, test, expect } from "vitest";
 
-import { parseScenario, runSuite } from "../util";
+import { parseScenario, runSuite } from "./util";
 import { start, stop } from "./server";
-import { configure } from "../../identity-tests";
-import basicSuite from "../../identity-tests/basic";
+import { configure } from "../index";
+import basicSuite from "..//basic";
 
 import oas from "./basic/oas.json";
 import vault from "./basic/vault.json";

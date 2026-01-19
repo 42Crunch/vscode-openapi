@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, test, expect } from "vitest";
 
-import { parseScenario, runScenario } from "../util";
+import { parseScenario, runScenario } from "./util";
 import { start, stop } from "./server";
 
 import oas from "./basic/oas.json";

@@ -4,11 +4,7 @@ import { BasicCredential, Vault } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
 
 import { Test, TestConfig, Suite, ConfigFailures, TestStageGenerator, TestIssue } from "./types";
-import { StepGenerator } from "../execute";
-//import { selectOperationBySecurityScheme, selectOperationsToTest } from "./selector";
-import { PlaybookEnvStack } from "../playbook-env";
-import { execute } from "../test-http-api";
-import { hasValidBasicAuthCredentials, usesBasicAuth } from "../test-requirements";
+import { hasValidBasicAuthCredentials, usesBasicAuth } from "./test-requirements";
 
 type BasicTestConfig = TestConfig & {
   operationId: string[];

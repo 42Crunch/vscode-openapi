@@ -5,7 +5,7 @@ import Test from "./Test";
 import { setTestSuiteId } from "./slice";
 
 import Button from "../../../new-components/Button";
-import { SuiteId } from "../../../core/playbook/identity-tests";
+import { SuiteId } from "../../../core/playbook-tests";
 
 export default function Tests() {
   const dispatch = useAppDispatch();

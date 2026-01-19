@@ -8,7 +8,7 @@ import CollapsibleSection from "../components/CollapsibleSection";
 import TryAndServerSelector from "../components/TryAndServerSelector";
 
 import { useAppDispatch, useAppSelector } from "../store";
-import { Suite, SuiteConfig, TestConfig } from "../../../core/playbook/identity-tests/types";
+import { Suite, SuiteConfig, TestConfig } from "../../../core/playbook-tests/types";
 import { StageResult, startTryExecution, SuiteResult } from "./slice";
 import Execution from "../components/execution/Execution";
 import { Result } from "@xliic/result";
