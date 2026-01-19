@@ -51,7 +51,7 @@ export async function* executeAllPlaybooks(
   envenv: EnvData,
   extraEnv: PlaybookEnvStack = [],
   vault: Vault
-): AsyncGenerator<PlaybookExecutorStep<undefined>> {
+): AsyncGenerator<PlaybookExecutorStep<undefined>, Result<PlaybookEnvStack, PlaybookError>> {
   const cache = createAuthCache();
   const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv)];
   const result: PlaybookEnvStack = [];
@@ -70,14 +70,12 @@ export async function* executeAllPlaybooks(
     );
 
     if (playbookError !== undefined) {
-      // playbook failed, bail
-      break;
-    } else {
-      result.push(...playbookResult.env);
+      return failure(playbookError);
     }
-  }
 
-  return result;
+    result.push(...playbookResult.env);
+  }
+  return success(result);
 }
 
 export async function* staticSteps(requests: StaticRequestList): StepGenerator<undefined> {
