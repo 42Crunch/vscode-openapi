@@ -7,8 +7,8 @@ import { Test, TestConfig, Suite, ConfigFailures, TestStageGenerator, TestIssue 
 import { StepGenerator } from "../playbook/execute";
 import { selectOperationBySecurityScheme, selectOperationsToTest } from "./selector";
 import { PlaybookEnvStack } from "../playbook/playbook-env";
-import { execute } from "./test-http-api";
-import { hasValidBasicAuthCredentials, usesBasicAuth } from "./test-requirements";
+import { execute } from "./http-api";
+import { hasValidBasicAuthCredentials, usesBasicAuth } from "./requirements";
 
 type TruncateTestConfig = TestConfig & {
   operationId: string[];

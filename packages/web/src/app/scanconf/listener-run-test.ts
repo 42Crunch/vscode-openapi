@@ -12,6 +12,7 @@ import {
 import { Webapp } from "@xliic/common/message";
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
+import { Vault } from "@xliic/common/vault";
 
 import { PlaybookEnvStack } from "../../core/playbook/playbook-env";
 import { sendHttpRequest } from "../../features/http-client/slice";
@@ -27,12 +28,10 @@ import {
 import { AppDispatch, RootState } from "./store";
 import { webappHttpClient } from "../../core/http-client/webapp-client";
 import { testPlaybook } from "../../core/playbook-tests/test";
-import { SuiteConfig } from "../../core/playbook-tests/types";
-import { SuiteId } from "../../core/playbook-tests/index";
+import type { SuiteConfig, SuiteId } from "../../core/playbook-tests";
 import basic from "../../core/playbook-tests/basic";
 import { loadPlaybook } from "./actions";
 import { loadVault } from "../../features/vault/slice";
-import { Vault } from "@xliic/common/vault";
 import { PlaybookExecutorStep } from "../../core/playbook/playbook";
 
 type AppStartListening = TypedStartListening<RootState, AppDispatch>;

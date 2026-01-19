@@ -1,6 +1,7 @@
 import styled from "styled-components";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { Result } from "@xliic/result";
 
 import { Check, ExclamationCircle } from "../../../icons";
 import CollapsibleCard from "../../../new-components/CollapsibleCard";
@@ -8,10 +9,9 @@ import CollapsibleSection from "../components/CollapsibleSection";
 import TryAndServerSelector from "../components/TryAndServerSelector";
 
 import { useAppDispatch, useAppSelector } from "../store";
-import { Suite, SuiteConfig, TestConfig } from "../../../core/playbook-tests/types";
-import { StageResult, startTryExecution, SuiteResult } from "./slice";
+import { SuiteConfig, TestConfig } from "../../../core/playbook-tests";
+import { StageResult, startTryExecution } from "./slice";
 import Execution from "../components/execution/Execution";
-import { Result } from "@xliic/result";
 
 export default function Test({ suite, suiteId }: { suite: SuiteConfig; suiteId: string }) {
   const dispatch = useAppDispatch();

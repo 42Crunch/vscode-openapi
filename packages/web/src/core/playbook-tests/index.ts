@@ -1,19 +1,20 @@
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import basic from "./basic";
 import basicBola from "./basic-bola";
-import { TestConfig, Suite, SuiteConfig, ConfigFailures } from "./types";
+import type { TestConfig, Suite, SuiteConfig, ConfigFailures } from "./types";
 import { Playbook } from "@xliic/scanconf";
 import { Vault } from "@xliic/common/vault";
 import { failure, Result, success } from "@xliic/result";
 
 const suites = { basic, basicBola } as const;
 
-export type Suites = typeof suites;
-export type SuiteId = keyof Suites;
-
-export type Configuration = {
+type Suites = typeof suites;
+type SuiteId = keyof Suites;
+type Configuration = {
   [K in SuiteId]: SuiteConfig;
 };
+
+export type { Suites, SuiteId, SuiteConfig, Configuration, TestConfig };
 
 function configureSuite<S extends Suite>(
   suite: S,
