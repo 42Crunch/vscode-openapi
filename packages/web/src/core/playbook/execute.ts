@@ -119,7 +119,6 @@ export async function* executePlaybook<R>(
     stepId++;
     step = await steps.next([response!, undefined]);
     if (step.done) {
-      console.log("Done executing playbook, breaking", name, step);
       break;
     }
     const { stage, next, securityOverride, onFailure } = step.value;
@@ -277,7 +276,6 @@ export async function* executePlaybook<R>(
     const [receivedHttpResponse, error2] = await client(httpRequest);
 
     if (error2 !== undefined) {
-      console.log("HTTP error received during playbook execution:", error2);
       yield { event: "http-error-received", error: error2 };
       await steps.next(failure<StepExecutionError>(error2));
       return failure<PlaybookError>("http-error-received");
@@ -292,7 +290,6 @@ export async function* executePlaybook<R>(
         break;
       }
       response = step.value as any;
-      console.log("got response in prepare:", step);
     }
 
     if (response !== MockHttpResponse) {
@@ -406,8 +403,6 @@ export async function* executePlaybook<R>(
   }
 
   yield { event: "playbook-finished", result: step.value };
-
-  console.log("ZZZ playbook execution result:", name, "last step value:", step.value);
 
   return success({ env: result, result: step.value });
 }
