@@ -16,11 +16,11 @@ type TruncateTestConfig = TestConfig & {
 };
 
 const truncatedPasswordsTest: Test<TruncateTestConfig> = {
-  configure: function (
+  configure: async function (
     oas: BundledSwaggerOrOasSpec,
     playbook: Playbook.Bundle,
     vault: Vault
-  ): Result<TruncateTestConfig, ConfigFailures> {
+  ): Promise<Result<TruncateTestConfig, ConfigFailures>> {
     const failed = hasValidBasicAuthCredentials(oas, playbook, vault);
     if (failed) {
       return failure({ hasValidBasicAuthCredentials: failed });

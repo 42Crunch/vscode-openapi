@@ -5,30 +5,27 @@ import { Playbook } from "@xliic/scanconf";
 
 import { Test, TestConfig, Suite, ConfigFailures, TestStageGenerator, TestIssue } from "./types";
 import { hasValidBasicAuthCredentials, usesBasicAuth } from "./requirements";
+import { getAllOperationIds } from "./selector";
+import { mockScenario } from "./mock";
 
 type BasicTestConfig = TestConfig & {
   operationId: string[];
 };
 
 const basicBola: Test<BasicTestConfig> = {
-  configure: function (
+  configure: async function (
     oas: BundledSwaggerOrOasSpec,
     playbook: Playbook.Bundle,
     vault: Vault
-  ): Result<BasicTestConfig, ConfigFailures> {
-    const failed = hasValidBasicAuthCredentials(oas, playbook, vault);
-    if (failed) {
-      return failure({ hasValidBasicAuthCredentials: failed });
+  ): Promise<Result<BasicTestConfig, ConfigFailures>> {
+    const operationIds = getAllOperationIds(oas);
+    console.log("Im configuring Bola Tests");
+    const first = operationIds[0];
+    if (first) {
+      const result = await mockScenario(oas, playbook, first, vault);
+      console.log("Mock scenario result:", result);
     }
-
-    const schemes = getBasicSecuritySchemes(oas);
-    // check if not empty, pick first one for now
-    //const operations = selectOperationBySecurityScheme(oas, schemes[0]);
-
-    // check if not empty, pick first one for now
-    //const toTest = selectOperationsToTest(oas, operations);
-
-    return success({ operationId: [] });
+    return success({ operationId: operationIds });
   },
 
   run: async function* (

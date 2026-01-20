@@ -36,7 +36,7 @@ export type Test<C extends TestConfig> = {
     spec: BundledSwaggerOrOasSpec,
     playbook: Playbook.Bundle,
     vault: Vault
-  ): Result<C, ConfigFailures>;
+  ): Promise<Result<C, ConfigFailures>>;
   run(
     config: C,
     spec: BundledSwaggerOrOasSpec,

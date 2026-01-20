@@ -16,14 +16,14 @@ type Configuration = {
 
 export type { Suites, SuiteId, SuiteConfig, Configuration, TestConfig };
 
-function configureSuite<S extends Suite>(
+async function configureSuite<S extends Suite>(
   suite: S,
   spec: BundledSwaggerOrOasSpec,
   playbook: Playbook.Bundle,
   vault: Vault
-): SuiteConfig {
+): Promise<SuiteConfig> {
   // Call suite.configure() which checks suite-level requirements
-  const [testsToRun, suiteFailures] = suite.configure(spec, playbook, vault);
+  const [testsToRun, suiteFailures] = await suite.configure(spec, playbook, vault);
 
   if (suiteFailures) {
     return failure(suiteFailures);
@@ -32,20 +32,20 @@ function configureSuite<S extends Suite>(
   // Configure each test
   const tests: Record<string, Result<TestConfig, ConfigFailures>> = {};
   for (const [key, test] of Object.entries(testsToRun!)) {
-    tests[key] = test.configure(spec, playbook, vault);
+    tests[key] = await test.configure(spec, playbook, vault);
   }
 
   return success(tests);
 }
 
-export function configure(
+export async function configure(
   spec: BundledSwaggerOrOasSpec,
   playbook: Playbook.Bundle,
   vault: Vault
-): Configuration {
+): Promise<Configuration> {
   const result = {} as any;
   for (const id of Object.keys(suites) as Array<keyof Suites>) {
-    result[id] = configureSuite(suites[id], spec, playbook, vault);
+    result[id] = await configureSuite(suites[id], spec, playbook, vault);
   }
   return result;
 }

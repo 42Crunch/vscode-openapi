@@ -15,7 +15,7 @@ afterAll(stop);
 
 test("execute auth", async () => {
   const file = parseScenario(oas, scenarioAuth);
-  const steps = await runScenario(`http://localhost:${port}`, oas, file, "userinfo");
+  const { steps } = await runScenario(`http://localhost:${port}`, oas, file, "userinfo");
   const step = makeStepAssert(steps);
 
   step({

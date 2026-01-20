@@ -19,7 +19,7 @@ afterAll(stop);
 
 test("execute basic auth test suite", async () => {
   const file = parseScenario(oas, scanconf);
-  const config = configure(oas as any, file, vault as any);
+  const config = await configure(oas as any, file, vault as any);
 
   // Extract the basic suite config
   const basicConfig = config.basic;

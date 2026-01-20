@@ -22,3 +22,10 @@ export function selectOperationsToTest(
 ): string[] {
   return operationIds; //.slice(0, 1);
 }
+
+export function getAllOperationIds(oas: BundledSwaggerOrOasSpec): string[] {
+  const operations = getOperations(oas).map(([path, method, operation]) =>
+    makeOperationId(operation.operationId, path, method)
+  );
+  return operations;
+}

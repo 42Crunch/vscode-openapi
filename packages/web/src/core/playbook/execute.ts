@@ -602,6 +602,6 @@ export function getExternalEnvironment(file: Playbook.Bundle, envenv: EnvData): 
   return environment;
 }
 
-function getRequestByRef(file: Playbook.Bundle, ref: Playbook.RequestRef) {
+export function getRequestByRef(file: Playbook.Bundle, ref: Playbook.RequestRef) {
   return ref.type === "operation" ? file.operations[ref.id]?.request : file.requests?.[ref.id];
 }

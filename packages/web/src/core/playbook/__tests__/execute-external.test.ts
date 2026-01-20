@@ -15,7 +15,7 @@ afterAll(stop);
 
 test("execute external", async () => {
   const file = parseScenario(oas, scenario(port));
-  const steps = await runScenario(`http://localhost:${port}`, oas, file, "userinfo");
+  const { steps } = await runScenario(`http://localhost:${port}`, oas, file, "userinfo");
   const step = makeStepAssert(steps);
 
   step({

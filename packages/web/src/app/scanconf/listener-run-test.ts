@@ -91,7 +91,9 @@ export function onUpdateVaultOrPlaybook(
           vault: { data: vault },
         } = listenerApi.getState();
 
-        const config = configure(oas, playbook, vault);
+        console.log("Updating test config due to vault or playbook change");
+        const config = await configure(oas, playbook, vault);
+        console.log("New test config:", config);
 
         listenerApi.dispatch(updateTestConfig(config));
       },

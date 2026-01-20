@@ -1,8 +1,7 @@
 import { afterAll, beforeAll, expect, test } from "vitest";
-import { once } from "events";
 import oas from "./pixi.json";
 import scenarioSimple from "./scenario-simple";
-import { makeStepAssert, parseScenario, runScenario } from "./util";
+import { makeStepAssert, mockScenario, parseScenario, runScenario } from "./util";
 import { start, stop } from "./server";
 
 let port: number;
@@ -15,7 +14,7 @@ afterAll(stop);
 
 test("execute simple", async () => {
   const file = parseScenario(oas, scenarioSimple);
-  const steps = await runScenario(`http://localhost:${port}`, oas, file, "userinfo");
+  const { steps, result } = await runScenario(`http://localhost:${port}`, oas, file, "userinfo");
   const step = makeStepAssert(steps);
 
   step({
@@ -124,4 +123,16 @@ test("execute simple", async () => {
   step({
     event: "playbook-finished",
   });
+
+  // console.log("RESULT:");
+  // console.log(JSON.stringify(result[0], null, 2));
+});
+
+test("mock simple", async () => {
+  const file = parseScenario(oas, scenarioSimple);
+  const { steps, result } = await mockScenario(`http://localhost:${port}`, oas, file, "userinfo");
+  console.log("MOCK Result:");
+  console.log(JSON.stringify(result[0], null, 2));
+  console.log("MOCK Steps:");
+  console.log(JSON.stringify(steps, null, 2));
 });
