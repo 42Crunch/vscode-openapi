@@ -12,58 +12,45 @@ type BasicTestConfig = TestConfig & {
   operationId: string[];
 };
 
+async function configure(
+  oas: BundledSwaggerOrOasSpec,
+  playbook: Playbook.Bundle,
+  vault: Vault
+): Promise<Result<BasicTestConfig, ConfigFailures>> {
+  const operationIds: string[] = [];
+
+  for (const operationId of getAllOperationIds(oas)) {
+    const checkForBola = await canBeTestedForBola(oas, playbook, vault, operationId);
+    if (checkForBola) {
+      operationIds.push(operationId);
+    }
+  }
+
+  return success({ operationId: operationIds });
+}
+
+async function* run(
+  config: BasicTestConfig,
+  spec: BundledSwaggerOrOasSpec,
+  playbook: Playbook.Bundle,
+  vault: Vault
+) {}
+
+async function canBeTestedForBola(
+  oas: BundledSwaggerOrOasSpec,
+  playbook: Playbook.Bundle,
+  vault: Vault,
+  operationId: string
+): Promise<boolean> {
+  const mock = await mockScenario(oas, playbook, operationId, vault);
+  // check mock.variables
+
+  return false;
+}
+
 const basicBola: Test<BasicTestConfig> = {
-  configure: async function (
-    oas: BundledSwaggerOrOasSpec,
-    playbook: Playbook.Bundle,
-    vault: Vault
-  ): Promise<Result<BasicTestConfig, ConfigFailures>> {
-    const operationIds = getAllOperationIds(oas);
-    console.log("Im configuring Bola Tests");
-    const first = operationIds[0];
-    if (first) {
-      const result = await mockScenario(oas, playbook, first, vault);
-      console.log("Mock scenario result:", result);
-    }
-    return success({ operationId: operationIds });
-  },
-
-  run: async function* (
-    config: BasicTestConfig,
-    spec: BundledSwaggerOrOasSpec,
-    playbook: Playbook.Bundle,
-    vault: Vault
-  ) {
-    for (const operationId of config.operationId) {
-      const operation = playbook.operations[operationId];
-      // use first scenario for now
-      const scenario = operation.scenarios?.[0];
-
-      //   const [setupResult, setupError] = yield {
-      //     id: `${operationId}-setup`,
-      //     steps: setupScenario(playbook, vault, scenario),
-      //   };
-
-      //   if (setupError) {
-      //     // failed to setup
-      //     // TODO report error
-      //     continue;
-      //   }
-
-      //   yield* testScenario(operationId, playbook, vault, setupResult.env, scenario);
-
-      //   const [cleanupResult, cleanupError] = yield {
-      //     id: `${operationId}-cleanup`,
-      //     steps: cleanupScenario(playbook, vault, scenario),
-      //   };
-
-      //   if (cleanupError) {
-      //     // failed to cleanup
-      //     // TODO report error
-      //     continue;
-      //   }
-    }
-  },
+  configure,
+  run,
 };
 
 const suite: Suite = {

@@ -1,25 +1,37 @@
-import { assert, expect } from "vitest";
-
 import { Result } from "@xliic/result";
 import { Playbook } from "@xliic/scanconf";
-import { Scanconf, parse } from "@xliic/scanconf";
 import { Vault } from "@xliic/common/vault";
+import { LookupResult } from "@xliic/common/env";
 
-import { executeAllPlaybooks, PlaybookList, PlaybookError } from "../playbook/execute";
+import { executeAllPlaybooks, PlaybookError } from "../playbook/execute";
 import { PlaybookExecutorStep } from "../playbook/playbook";
-import { PlaybookEnv, PlaybookEnvStack } from "../playbook/playbook-env";
+import { PlaybookEnvStack } from "../playbook/playbook-env";
 import { mockHttpClient } from "../http-client/mock-client";
+
+export type OperationVariables = {
+  operationId: string;
+  found: LookupResult[];
+};
 
 export async function mockScenario(
   oas: any,
   file: Playbook.Bundle,
   operationId: string,
   vault: Vault
-): Promise<{ steps: PlaybookExecutorStep[]; result: Result<PlaybookEnvStack, PlaybookError> }> {
+): Promise<{
+  steps: PlaybookExecutorStep[];
+  result: Result<PlaybookEnvStack, PlaybookError>;
+  variables: OperationVariables[];
+}> {
   const client = mockHttpClient();
 
-  const steps = [];
+  const steps: PlaybookExecutorStep[] = [];
   const env: PlaybookEnvStack = [];
+  const state: StepProcessingState = {
+    authStack: [],
+    pendingOperationId: undefined,
+    operations: [],
+  };
 
   const iterator = executeAllPlaybooks(
     client,
@@ -40,7 +52,44 @@ export async function mockScenario(
       break;
     }
     steps.push(value);
+    processStep(state, value);
   }
 
-  return { steps, result };
+  return { steps, result, variables: state.operations };
+}
+
+type StepProcessingState = {
+  authStack: string[];
+  pendingOperationId: string | undefined;
+  operations: OperationVariables[];
+};
+
+function processStep(state: StepProcessingState, step: PlaybookExecutorStep): void {
+  switch (step.event) {
+    case "auth-started":
+      state.authStack.push(step.name);
+      break;
+    case "auth-finished":
+      state.authStack.pop();
+      break;
+    case "request-started":
+      // Only track top-level operations (not auth playbooks)
+      if (state.authStack.length === 0) {
+        const ref = step.ref;
+        if (ref?.type === "operation") {
+          state.pendingOperationId = ref.id;
+        }
+      }
+      break;
+    case "payload-variables-substituted":
+      // Only track top-level operations (not auth playbooks)
+      if (state.authStack.length === 0 && state.pendingOperationId !== undefined) {
+        state.operations.push({
+          operationId: state.pendingOperationId,
+          found: step.found,
+        });
+        state.pendingOperationId = undefined;
+      }
+      break;
+  }
 }
