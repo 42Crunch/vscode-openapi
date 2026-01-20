@@ -50,7 +50,8 @@ function hasStep(context: { type: string }): context is ContextWithStep {
   );
 }
 
-function isPathParameter(found: LookupResult): boolean {
+function isBolaInjectableParameter(found: LookupResult): boolean {
+  // bola injectable parameters are parameters in the path (for now)
   const path = found.location.path;
   return (
     path.length === 4 &&
@@ -61,7 +62,8 @@ function isPathParameter(found: LookupResult): boolean {
   );
 }
 
-function checkVariablesForBola(variables: OperationVariables[], operationId: string): boolean {
+function hasBolaInjectionTargets(variables: OperationVariables[], operationId: string): boolean {
+  // check if any of the injectable parameters were set by operations prior to this one
   const operationIndex = variables.findIndex((v) => v.operationId === operationId);
   if (operationIndex === -1) {
     return false;
@@ -70,7 +72,7 @@ function checkVariablesForBola(variables: OperationVariables[], operationId: str
   const operation = variables[operationIndex];
 
   for (const found of operation.found) {
-    if (isPathParameter(found) && hasStep(found.context)) {
+    if (isBolaInjectableParameter(found) && hasStep(found.context)) {
       if (found.context.step < operationIndex) {
         return true;
       }
@@ -87,7 +89,8 @@ async function canBeTestedForBola(
   operationId: string
 ): Promise<boolean> {
   const mock = await mockScenario(oas, playbook, operationId, vault);
-  return checkVariablesForBola(mock.variables, operationId);
+
+  return hasBolaInjectionTargets(mock.variables, operationId);
 }
 
 const basicBola: Test<BasicTestConfig> = {
