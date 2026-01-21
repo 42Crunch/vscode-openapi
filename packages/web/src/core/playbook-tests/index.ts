@@ -15,6 +15,7 @@ type Configuration = {
 };
 
 export type { Suites, SuiteId, SuiteConfig, Configuration, TestConfig };
+export { suites };
 
 async function configureSuite<S extends Suite>(
   suite: S,

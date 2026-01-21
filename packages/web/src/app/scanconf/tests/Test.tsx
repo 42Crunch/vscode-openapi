@@ -10,6 +10,7 @@ import TryAndServerSelector from "../components/TryAndServerSelector";
 
 import { useAppDispatch, useAppSelector } from "../store";
 import { SuiteConfig, TestConfig } from "../../../core/playbook-tests";
+import { TestIssue } from "../../../core/playbook-tests/types";
 import { StageResult, startTryExecution } from "./slice";
 import Execution from "../components/execution/Execution";
 
@@ -81,7 +82,14 @@ function TestResultCard({ testId, result }: { testId: string; result: StageResul
               <TestCardBody>
                 <Execution result={stage.result} />
                 {stage.failures.length > 0 && (
-                  <Failure>{stage.failures.map((f) => JSON.stringify(f)).join(", ")}</Failure>
+                  <Failures>
+                    {stage.failures.map((issue: TestIssue, index: number) => (
+                      <Failure key={index}>
+                        <FailureId>{issue.id}</FailureId>
+                        <FailureMessage>{issue.message}</FailureMessage>
+                      </Failure>
+                    ))}
+                  </Failures>
                 )}
               </TestCardBody>
             </CollapsibleCard>
@@ -195,10 +203,23 @@ const Status = styled.div`
   background-color: var(${ThemeColorVariables.badgeBackground});
 `;
 
-const Failure = styled.div`
+const Failures = styled.div`
   margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const Failure = styled.div`
   padding: 8px;
   background-color: var(${ThemeColorVariables.errorBackground});
   color: var(${ThemeColorVariables.errorForeground});
   border-radius: 4px;
 `;
+
+const FailureId = styled.div`
+  font-weight: 600;
+  margin-bottom: 4px;
+`;
+
+const FailureMessage = styled.div``;

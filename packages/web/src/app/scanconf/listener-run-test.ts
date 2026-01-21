@@ -28,8 +28,7 @@ import {
 import { AppDispatch, RootState } from "./store";
 import { webappHttpClient } from "../../core/http-client/webapp-client";
 import { testPlaybook } from "../../core/playbook-tests/test";
-import type { SuiteConfig, SuiteId } from "../../core/playbook-tests";
-import basic from "../../core/playbook-tests/basic";
+import { suites, type SuiteConfig, type SuiteId } from "../../core/playbook-tests";
 import { loadPlaybook } from "./actions";
 import { loadVault } from "../../features/vault/slice";
 import { PlaybookExecutorStep } from "../../core/playbook/playbook";
@@ -71,6 +70,7 @@ export function onTryExecuteTestSuite(
           listenerApi.dispatch,
           addTryExecutionStep,
           server,
+          suiteId as SuiteId,
           suiteConfig
         );
       },
@@ -114,6 +114,7 @@ async function execute(
     step: PlaybookExecutorStep;
   }) => Action,
   server: string,
+  suiteId: SuiteId,
   suiteConfig: SuiteConfig,
   extraEnv: PlaybookEnvStack = []
 ) {
@@ -125,7 +126,7 @@ async function execute(
     state.vault.data,
     state.env.data,
     extraEnv,
-    basic,
+    suites[suiteId],
     suiteConfig,
     dispatch,
     addStepExecutionAction

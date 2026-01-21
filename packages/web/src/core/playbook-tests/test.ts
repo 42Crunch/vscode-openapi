@@ -10,7 +10,7 @@ import { PlaybookExecutorStep } from "../playbook/playbook";
 import { PlaybookEnvStack } from "../playbook/playbook-env";
 import { createAuthCache } from "../playbook/auth-cache";
 import { executePlaybook, getExternalEnvironment } from "../playbook/execute";
-import { SuiteConfig, Suite } from "./types";
+import { SuiteConfig, Suite, TestIssue } from "./types";
 
 export async function testPlaybook(
   client: HttpClient,
@@ -28,7 +28,7 @@ export async function testPlaybook(
     testId: string;
     step: PlaybookExecutorStep;
   }) => Action
-) {
+): Promise<TestIssue[]> {
   const result = [];
 
   const cache = createAuthCache();
@@ -39,7 +39,7 @@ export async function testPlaybook(
 
   // Skip if suite has failures
   if (suiteFailures) {
-    return;
+    return [];
   }
 
   // Run all tests in the suite
