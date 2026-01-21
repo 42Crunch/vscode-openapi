@@ -72,6 +72,29 @@ export function hasValidBasicAuthCredentials(
   return schemesWithNoCredentials.join("; ");
 }
 
+export function hasMultipleBasicAuthCredentials(
+  spec: BundledSwaggerOrOasSpec,
+  vault: Vault,
+  minCredentials: number = 2
+): string | undefined {
+  const [schemes, errors] = matchActiveSchemesToVault(spec, vault);
+  if (errors !== undefined) {
+    return errors;
+  }
+
+  for (const name of Object.keys(schemes)) {
+    const vaultScheme = schemes[name];
+    if (vaultScheme?.type === "basic") {
+      const credentialCount = Object.keys(vaultScheme.credentials).length;
+      if (credentialCount >= minCredentials) {
+        return undefined; // Found enough credentials
+      }
+    }
+  }
+
+  return `BOLA testing requires at least ${minCredentials} credentials in the vault`;
+}
+
 function matchActiveSchemesToVault(
   spec: BundledSwaggerOrOasSpec,
   vault: Vault
