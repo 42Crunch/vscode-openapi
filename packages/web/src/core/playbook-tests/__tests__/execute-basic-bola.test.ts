@@ -3,7 +3,7 @@ import { afterAll, beforeAll, test, expect } from "vitest";
 import { parsePlaybook, parseScenario, runSuite } from "./util";
 import { start, stop } from "./server";
 import { configure } from "../index";
-import basicSuite from "..//basic";
+import basicSuite from "../basic-bola";
 
 import oas from "./basic-flow/oas.json";
 import vault from "./basic-flow/vault.json";

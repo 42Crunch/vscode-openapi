@@ -7,13 +7,10 @@ import { Test, TestConfig, Suite, ConfigFailures, TestStageGenerator, TestIssue 
 import { hasValidBasicAuthCredentials, usesBasicAuth } from "./requirements";
 import { getAllOperationIds } from "./selector";
 import { mockScenario, OperationVariables } from "./mock";
-import {
-  PlaybookLookupResult,
-  PlaybookStageVariableLocation,
-  PlaybookVariableDefinitionLocation,
-} from "../playbook/playbook-env";
+import { PlaybookLookupResult } from "../playbook/playbook-env";
+import { getScenario } from "./scenario";
 
-type BasicTestConfig = TestConfig & {
+type BasicBolaTestConfig = TestConfig & {
   operationId: string[];
 };
 
@@ -21,7 +18,7 @@ async function configure(
   oas: BundledSwaggerOrOasSpec,
   playbook: Playbook.Bundle,
   vault: Vault
-): Promise<Result<BasicTestConfig, ConfigFailures>> {
+): Promise<Result<BasicBolaTestConfig, ConfigFailures>> {
   const operationIds: string[] = [];
 
   for (const operationId of getAllOperationIds(oas)) {
@@ -37,11 +34,18 @@ async function configure(
 }
 
 async function* run(
-  config: BasicTestConfig,
+  config: BasicBolaTestConfig,
   spec: BundledSwaggerOrOasSpec,
   playbook: Playbook.Bundle,
   vault: Vault
-) {}
+) {
+  console.log("Running basic BOLA test for operations:", config.operationId);
+
+  for (const operationId of config.operationId) {
+    // first scenario for now
+    const scenario = getScenario(playbook, operationId);
+  }
+}
 
 function isBolaInjectableParameter(found: PlaybookLookupResult): boolean {
   // bola injectable parameters are parameters in the path (for now)
@@ -93,7 +97,7 @@ async function canBeTestedForBola(
   return hasBolaInjectionTargets(mock.variables, operationId);
 }
 
-const basicBola: Test<BasicTestConfig> = {
+const basicBola: Test<BasicBolaTestConfig> = {
   configure,
   run,
 };
