@@ -31,12 +31,12 @@ test("execute simple", async () => {
     event: "payload-variables-substituted",
     found: [
       {
-        context: { type: "built-in" },
+        source: { type: "built-in" },
         name: "$randomuint",
         location: { type: "request", path: ["body", "value", "name"] },
       },
       {
-        context: { type: "built-in" },
+        source: { type: "built-in" },
         name: "$randomuint",
         location: { type: "request", path: ["body", "value", "user"] },
       },
@@ -82,7 +82,7 @@ test("execute simple", async () => {
     event: "payload-variables-substituted",
     found: [
       {
-        context: {
+        source: {
           name: "test",
           responseCode: "200",
           step: 0,

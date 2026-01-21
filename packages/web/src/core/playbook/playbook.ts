@@ -1,9 +1,8 @@
 import { HttpMethod } from "@xliic/openapi";
 import { HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
 import { Playbook } from "@xliic/scanconf";
-import { LookupResult, LookupFailure } from "@xliic/common/env";
 
-import { PlaybookEnvStack } from "./playbook-env";
+import { PlaybookEnvStack, PlaybookLookupResult, PlaybookLookupFailure } from "./playbook-env";
 import { MockHttpResponseType } from "../http-client/mock-client";
 
 export type AuthResult = Record<
@@ -57,8 +56,8 @@ export type PlaybookAborted = {
 export type PlaybookPayloadVariablesReplaced = {
   event: "payload-variables-substituted";
   stack: PlaybookEnvStack;
-  found: LookupResult[];
-  missing: LookupFailure[];
+  found: PlaybookLookupResult[];
+  missing: PlaybookLookupFailure[];
 };
 
 export type PlaybookCredentialVariablesReplaced = {
@@ -66,8 +65,8 @@ export type PlaybookCredentialVariablesReplaced = {
   name: string;
   result: string;
   stack: PlaybookEnvStack;
-  found: LookupResult[];
-  missing: LookupFailure[];
+  found: PlaybookLookupResult[];
+  missing: PlaybookLookupFailure[];
 };
 
 export type PlaybookCredentialRetrievedFromCache = {

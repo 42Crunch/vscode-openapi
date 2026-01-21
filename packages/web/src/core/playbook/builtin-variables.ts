@@ -1,9 +1,9 @@
 import { findByPath } from "@xliic/preserving-json-yaml-parser";
 
-import { VariableLocation } from "@xliic/common/env";
 import { Vault, getAnyCredential, getCredentialByName } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
 import { Result } from "@xliic/result";
+import { PlaybookVariableSubstitutionLocation } from "./playbook-env";
 
 export const DynamicVariableNames = [
   "$randomString",
@@ -25,7 +25,7 @@ export const DynamicVariables: Record<
   (
     object: unknown,
     parameter: string | undefined,
-    location: VariableLocation,
+    location: PlaybookVariableSubstitutionLocation,
     fakerMaker: FakeMaker
   ) => Result<unknown, string>
 > = {
@@ -42,7 +42,7 @@ export const DynamicVariables: Record<
 function randomFromSchema(
   object: unknown,
   parameter: string | undefined,
-  location: VariableLocation,
+  location: PlaybookVariableSubstitutionLocation,
   fakerMaker: FakeMaker
 ): Result<unknown, string> {
   const fake = fakerMaker();
@@ -87,7 +87,7 @@ function getRandomUint32(): Result<number, string> {
 function vault(
   object: unknown,
   parameter: string | undefined,
-  location: VariableLocation,
+  location: PlaybookVariableSubstitutionLocation,
   fakerMaker: FakeMaker
 ): Result<string, string> {
   const { credentialName, credential, vault } = object as {
@@ -113,7 +113,7 @@ function vault(
 function vaultName(
   object: unknown,
   parameter: string | undefined,
-  location: VariableLocation,
+  location: PlaybookVariableSubstitutionLocation,
   fakerMaker: FakeMaker
 ): Result<string, string> {
   const { credentialName, credential, vault } = object as {

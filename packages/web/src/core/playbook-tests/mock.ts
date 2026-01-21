@@ -1,16 +1,15 @@
 import { Result } from "@xliic/result";
 import { Playbook } from "@xliic/scanconf";
 import { Vault } from "@xliic/common/vault";
-import { LookupResult } from "@xliic/common/env";
 
 import { executeAllPlaybooks, PlaybookError } from "../playbook/execute";
 import { PlaybookExecutorStep } from "../playbook/playbook";
-import { PlaybookEnvStack } from "../playbook/playbook-env";
+import { PlaybookEnvStack, PlaybookLookupResult } from "../playbook/playbook-env";
 import { mockHttpClient } from "../http-client/mock-client";
 
 export type OperationVariables = {
   operationId: string;
-  found: LookupResult[];
+  found: PlaybookLookupResult[];
 };
 
 export async function mockScenario(

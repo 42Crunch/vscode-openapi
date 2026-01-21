@@ -1,18 +1,21 @@
 import styled from "styled-components";
 
-import { LookupResult, LookupFailure } from "@xliic/common/env";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { TriangleExclamation } from "../../../../icons";
-import { PlaybookVariableDefinitionLocation } from "../../../../core/playbook/playbook-env";
+import {
+  PlaybookLookupResult,
+  PlaybookLookupFailure,
+  PlaybookVariableDefinitionLocation,
+} from "../../../../core/playbook/playbook-env";
 
 export default function VariableUsed({
   found,
   missing,
   currentStep,
 }: {
-  found: LookupResult[] | undefined;
-  missing: LookupFailure[] | undefined;
+  found: PlaybookLookupResult[] | undefined;
+  missing: PlaybookLookupFailure[] | undefined;
   currentStep: number;
 }) {
   const uniqueFound =
@@ -41,7 +44,7 @@ export default function VariableUsed({
   );
 }
 
-function renderMissing(value: LookupFailure, index: number) {
+function renderMissing(value: PlaybookLookupFailure, index: number) {
   return (
     <Row key={index}>
       <div>
@@ -57,12 +60,12 @@ function renderMissing(value: LookupFailure, index: number) {
   );
 }
 
-function renderFound(value: LookupResult, index: number, currentStep: number) {
+function renderFound(value: PlaybookLookupResult, index: number, currentStep: number) {
   return (
     <Row key={index}>
       <div></div>
       <div>{value.name}</div>
-      <div>{formatLocation(value.context as PlaybookVariableDefinitionLocation, currentStep)}</div>
+      <div>{formatLocation(value.source, currentStep)}</div>
     </Row>
   );
 }

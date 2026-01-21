@@ -1,6 +1,5 @@
 import jsf from "json-schema-faker";
 
-import { LookupFailure, LookupResult, ReplacementResult } from "@xliic/common/env";
 import {
   Swagger,
   HttpMethod,
@@ -9,14 +8,21 @@ import {
   OpenApi30,
   OpenApi31,
 } from "@xliic/openapi";
-import { Environment, VariableLocation } from "@xliic/common/env";
+import { Environment } from "@xliic/common/env";
 import { Playbook } from "@xliic/scanconf";
 import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 import { deref } from "@xliic/openapi";
 import { Vault } from "@xliic/common/vault";
 import { Result } from "@xliic/result";
 
-import { EnvStackLookupResult, PlaybookEnvStack, lookup } from "./playbook-env";
+import {
+  PlaybookEnvStack,
+  PlaybookVariableSubstitutionLocation,
+  PlaybookLookupResult,
+  PlaybookLookupFailure,
+  PlaybookReplacementResult,
+  lookup,
+} from "./playbook-env";
 import {
   DynamicVariableName,
   DynamicVariableNames,
@@ -45,7 +51,7 @@ export function replaceEnvironmentVariables(
   location: "stage-environment" | "request-environment",
   environment: Environment,
   envStack: PlaybookEnvStack
-): ReplacementResult<Environment> {
+): PlaybookReplacementResult<Environment> {
   return replaceObject(location, environment, envStack, () => ({
     body: undefined,
     parameters: undefined,
@@ -57,7 +63,7 @@ export function replaceRequestVariables(
   request: Playbook.CRequest | Playbook.ExternalCRequest,
   operation: OpenApi31.Operation | OpenApi30.Operation | Swagger.Operation | undefined,
   envStack: PlaybookEnvStack
-): ReplacementResult<Playbook.CRequest | Playbook.ExternalCRequest> {
+): PlaybookReplacementResult<Playbook.CRequest | Playbook.ExternalCRequest> {
   let fake: { body: unknown; parameters: unknown };
   const fakeMaker: FakeMaker = () => {
     if (fake === undefined) {
@@ -74,7 +80,7 @@ export function replaceCredentialVariables(
   credentialValue: string,
   vault: Vault,
   envStack: PlaybookEnvStack
-): ReplacementResult<string> {
+): PlaybookReplacementResult<string> {
   return substituteValues(
     credentialValue,
     envStack,
@@ -92,9 +98,9 @@ function replaceObject<T>(
   object: T,
   envStack: PlaybookEnvStack,
   fakeMaker: FakeMaker
-): ReplacementResult<T> {
-  const missing: LookupFailure[] = [];
-  const found: LookupResult[] = [];
+): PlaybookReplacementResult<T> {
+  const missing: PlaybookLookupFailure[] = [];
+  const found: PlaybookLookupResult[] = [];
 
   const replaced = simpleClone(object, (value, sublocation) => {
     if (typeof value === "string") {
@@ -124,9 +130,9 @@ function replaceString(
   value: string,
   envStack: PlaybookEnvStack,
   object: unknown,
-  location: VariableLocation,
+  location: PlaybookVariableSubstitutionLocation,
   fakeMaker: FakeMaker
-): ReplacementResult<unknown> {
+): PlaybookReplacementResult<unknown> {
   const matches = value.match(ENTIRE_SCANCONF_VAR_REGEX());
   if (matches && (matches.length === 2 || matches.length === 3)) {
     // ENTIRE_ENV_VAR_REGEX replaces entire value, possibly changing its type
@@ -145,9 +151,9 @@ function replaceValue(
   parameter: string | undefined,
   envStack: PlaybookEnvStack,
   object: unknown,
-  location: VariableLocation,
+  location: PlaybookVariableSubstitutionLocation,
   fakeMaker: FakeMaker
-): ReplacementResult<unknown> {
+): PlaybookReplacementResult<unknown> {
   const [result, error] = lookupOrDynamic(envStack, name, parameter, object, location, fakeMaker);
   if (error !== undefined) {
     return { found: [], missing: [{ name, location, error }], value };
@@ -159,11 +165,11 @@ function substituteValues(
   value: string,
   envStack: PlaybookEnvStack,
   object: unknown,
-  location: VariableLocation,
+  location: PlaybookVariableSubstitutionLocation,
   fakeMaker: FakeMaker
-): ReplacementResult<string> {
-  const missing: LookupFailure[] = [];
-  const found: LookupResult[] = [];
+): PlaybookReplacementResult<string> {
+  const missing: PlaybookLookupFailure[] = [];
+  const found: PlaybookLookupResult[] = [];
 
   // ENV_VAR_REGEX replaces part of a string value matched, resulting value is always a string
   const result = value.replace(
@@ -199,9 +205,9 @@ function lookupOrDynamic(
   varname: string,
   parameter: string | undefined,
   object: unknown,
-  location: VariableLocation,
+  location: PlaybookVariableSubstitutionLocation,
   fakeMaker: () => { body: unknown; parameters: unknown }
-): Result<EnvStackLookupResult, string> {
+): Result<PlaybookLookupResult, string> {
   if (DynamicVariableNames.includes(varname as DynamicVariableName)) {
     const [dynamic, error] = DynamicVariables[varname as DynamicVariableName](
       object,
@@ -212,9 +218,12 @@ function lookupOrDynamic(
     if (error !== undefined) {
       return [undefined, error];
     }
-    return [{ context: { type: "built-in" }, value: dynamic, name: varname }, undefined];
+    return [
+      { source: { type: "built-in" }, location, offset: 0, value: dynamic, name: varname },
+      undefined,
+    ];
   } else {
-    return lookup(envStack, varname);
+    return lookup(envStack, varname, location);
   }
 }
 
@@ -270,6 +279,6 @@ function generateBody(schema: any) {
   }
 }
 
-export function getMissingVariableNames(missing: LookupFailure[]): string {
+export function getMissingVariableNames(missing: PlaybookLookupFailure[]): string {
   return missing.map((missing) => missing.name).join(", ");
 }

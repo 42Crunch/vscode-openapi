@@ -2,12 +2,16 @@ import { BundledSwaggerOrOasSpec, getBasicSecuritySchemes } from "@xliic/openapi
 import { Result, success, failure } from "@xliic/result";
 import { BasicCredential, Vault } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
-import { LookupResult } from "@xliic/common/env";
 
 import { Test, TestConfig, Suite, ConfigFailures, TestStageGenerator, TestIssue } from "./types";
 import { hasValidBasicAuthCredentials, usesBasicAuth } from "./requirements";
 import { getAllOperationIds } from "./selector";
 import { mockScenario, OperationVariables } from "./mock";
+import {
+  PlaybookLookupResult,
+  PlaybookStageVariableLocation,
+  PlaybookVariableDefinitionLocation,
+} from "../playbook/playbook-env";
 
 type BasicTestConfig = TestConfig & {
   operationId: string[];
@@ -39,18 +43,13 @@ async function* run(
   vault: Vault
 ) {}
 
-type ContextWithStep = {
-  type: "playbook-request" | "playbook-stage";
-  step: number;
-};
-
-function hasStep(context: { type: string }): context is ContextWithStep {
-  return (
-    (context.type === "playbook-request" || context.type === "playbook-stage") && "step" in context
-  );
+function isStageVariable(
+  context: PlaybookVariableDefinitionLocation
+): context is PlaybookStageVariableLocation {
+  return context.type === "playbook-request" || context.type === "playbook-stage";
 }
 
-function isBolaInjectableParameter(found: LookupResult): boolean {
+function isBolaInjectableParameter(found: PlaybookLookupResult): boolean {
   // bola injectable parameters are parameters in the path (for now)
   const path = found.location.path;
   return (
@@ -72,8 +71,8 @@ function hasBolaInjectionTargets(variables: OperationVariables[], operationId: s
   const operation = variables[operationIndex];
 
   for (const found of operation.found) {
-    if (isBolaInjectableParameter(found) && hasStep(found.context)) {
-      if (found.context.step < operationIndex) {
+    if (isBolaInjectableParameter(found) && isStageVariable(found.source)) {
+      if (found.source.step < operationIndex) {
         return true;
       }
     }

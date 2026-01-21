@@ -1,13 +1,16 @@
-import { LookupFailure, LookupResult } from "@xliic/common/env";
 import { HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
 import { Playbook } from "@xliic/scanconf";
 
-import { PlaybookEnvStack } from "../../../../core/playbook/playbook-env";
+import {
+  PlaybookEnvStack,
+  PlaybookLookupResult,
+  PlaybookLookupFailure,
+} from "../../../../core/playbook/playbook-env";
 
 export type VariableReplacement = {
   stack: PlaybookEnvStack;
-  found: LookupResult[];
-  missing: LookupFailure[];
+  found: PlaybookLookupResult[];
+  missing: PlaybookLookupFailure[];
 };
 
 export type ProgressState = "pending" | "success" | "failure";

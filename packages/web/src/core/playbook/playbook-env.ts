@@ -2,6 +2,11 @@ import { Environment } from "@xliic/common/env";
 import { Result } from "@xliic/result";
 import { Playbook } from "@xliic/scanconf";
 
+export type Segment = string | number;
+export type Path = Segment[];
+
+export type PlaybookVariableSubstitutionLocation = { type: string; path: Path };
+
 export type PlaybookVariableSuccessfullAssignment = {
   name: string;
   value: unknown;
@@ -28,12 +33,6 @@ export type PlaybookVariableAssignments = PlaybookVariableAssignment[];
 
 export type PlaybookEnvStack = PlaybookEnv[];
 
-export type EnvStackLookupResult = {
-  context: PlaybookVariableDefinitionLocation;
-  value: unknown;
-  name: string;
-};
-
 export type PlaybookStageVariableLocation =
   | {
       type: "playbook-request";
@@ -56,19 +55,40 @@ export type PlaybookVariableDefinitionLocation =
   | { type: "request-environment" }
   | PlaybookStageVariableLocation;
 
+export type PlaybookLookupResult = {
+  name: string;
+  value: unknown;
+  location: PlaybookVariableSubstitutionLocation;
+  offset: number;
+  source: PlaybookVariableDefinitionLocation;
+};
+
+export type PlaybookLookupFailure = {
+  name: string;
+  location: PlaybookVariableSubstitutionLocation;
+  error?: string;
+};
+
+export type PlaybookReplacementResult<T> = {
+  value: T;
+  found: PlaybookLookupResult[];
+  missing: PlaybookLookupFailure[];
+};
+
 export type PlaybookVariableUseLocation =
   | { type: "stage-environment" }
   | { type: "request-environment" };
 
 export function lookup(
   envStack: PlaybookEnvStack,
-  varname: string
-): Result<EnvStackLookupResult, string> {
+  varname: string,
+  location: PlaybookVariableSubstitutionLocation
+): Result<PlaybookLookupResult, string> {
   for (let i = envStack.length - 1; i >= 0; i--) {
     // traverse from the end
     const { id, env } = envStack[i];
     if (env.hasOwnProperty(varname)) {
-      return [{ context: id, value: env[varname], name: varname }, undefined];
+      return [{ source: id, value: env[varname], name: varname, location, offset: 0 }, undefined];
     }
   }
   return [undefined, `Variable ${varname} not found in environment stack`];
