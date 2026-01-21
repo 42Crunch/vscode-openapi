@@ -80,8 +80,12 @@ export async function* executeAllPlaybooks(
 
 export async function* staticSteps(requests: StaticRequestList): StepGenerator<undefined> {
   for (const request of requests) {
-    yield { stage: request, next: "complete", onFailure: "abort" };
+    yield playbookStageToExecutionStep(request);
   }
+}
+
+export function playbookStageToExecutionStep(stage: Playbook.Stage): ExecutionStep {
+  return { stage, next: "complete", onFailure: "abort" };
 }
 
 export async function* executePlaybook<R>(

@@ -24,8 +24,6 @@ test("execute basic auth test suite", async () => {
   // Extract the basic suite config
   const basicBola = config.basicBola;
 
-  console.log("Basic Bola Config:", basicBola);
-
   const steps = await runSuite(
     `http://localhost:${port}`,
     oas,
@@ -35,8 +33,6 @@ test("execute basic auth test suite", async () => {
     undefined,
     vault as any
   );
-
-  console.log(steps);
 
   // Verify we got steps from the test execution
   //expect(steps.length).toBeGreaterThan(0);

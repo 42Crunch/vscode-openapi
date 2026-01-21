@@ -4,11 +4,13 @@ import { BasicCredential, Vault } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
 
 import { Test, TestConfig, Suite, ConfigFailures, TestStageGenerator, TestIssue } from "./types";
+import { playbookStageToExecutionStep, StepGenerator } from "../playbook/execute";
+import { PlaybookEnvStack, PlaybookLookupResult } from "../playbook/playbook-env";
 import { hasValidBasicAuthCredentials, usesBasicAuth } from "./requirements";
 import { getAllOperationIds } from "./selector";
 import { mockScenario, OperationVariables } from "./mock";
-import { PlaybookLookupResult } from "../playbook/playbook-env";
 import { getScenario } from "./scenario";
+import { execute } from "./http-api";
 
 type BasicBolaTestConfig = TestConfig & {
   operationId: string[];
@@ -38,13 +40,119 @@ async function* run(
   spec: BundledSwaggerOrOasSpec,
   playbook: Playbook.Bundle,
   vault: Vault
-) {
+): TestStageGenerator {
   console.log("Running basic BOLA test for operations:", config.operationId);
 
   for (const operationId of config.operationId) {
     // first scenario for now
-    const scenario = getScenario(playbook, operationId);
+    const scenario = getScenario(playbook, operationId)!;
+
+    const [setupResult, setupError] = yield {
+      id: `${operationId}-setup`,
+      steps: setupScenario(playbook, vault, scenario),
+    };
+
+    if (setupError) {
+      // failed to setup
+      // TODO report error
+      continue;
+    }
+
+    yield* testScenario(operationId, playbook, vault, setupResult.env, scenario);
+
+    const [cleanupResult, cleanupError] = yield {
+      id: `${operationId}-cleanup`,
+      steps: cleanupScenario(playbook, vault, scenario),
+    };
+
+    if (cleanupError) {
+      // failed to cleanup
+      // TODO report error
+      continue;
+    }
   }
+}
+
+async function* setupScenario(
+  file: Playbook.Bundle,
+  vault: Vault,
+  scenario: Playbook.Scenario
+): StepGenerator<[]> {
+  // Execute all scenario steps except the last one (which is the target operation)
+  // For now, just return empty - actual setup will execute prior steps
+  return [];
+}
+
+async function* cleanupScenario(
+  file: Playbook.Bundle,
+  vault: Vault,
+  scenario: Playbook.Scenario
+): StepGenerator<[]> {
+  return [];
+}
+
+async function* testScenario(
+  id: string,
+  file: Playbook.Bundle,
+  vault: Vault,
+  envStack: PlaybookEnvStack,
+  scenario: Playbook.Scenario
+): TestStageGenerator {
+  yield {
+    id: `${id}-bola-test`,
+    steps: runScenario(scenario, id),
+  };
+}
+
+async function* runScenario(
+  scenario: Playbook.Scenario,
+  targetOperationId: string
+): StepGenerator<[]> {
+  for (const stage of scenario.requests) {
+    if (stage?.ref?.type === "operation" && stage.ref.id === targetOperationId) {
+      console.log(`Testing operation for BOLA: ${targetOperationId}`);
+      const [response, error] = yield* execute(stage, {
+        basic: {
+          credential: { type: "basic", default: "", methods: {} },
+          value: "zomm:zomm",
+        },
+      });
+      console.log(`Received response: ${response?.statusCode}, error: ${error?.message}`);
+    } else {
+      yield playbookStageToExecutionStep(stage);
+    }
+  }
+  return [];
+}
+
+async function* testOperation(stage: Playbook.Stage): StepGenerator<TestIssue[]> {
+  const [response, error] = yield* execute(stage, {});
+
+  if (error) {
+    return [{ id: "request-failed", message: `Request failed: ${error.message}` }];
+  }
+
+  // For BOLA testing, a successful response (200, 201, 204) with a different user's ID
+  // indicates a potential vulnerability
+  if (
+    response?.statusCode === 200 ||
+    response?.statusCode === 201 ||
+    response?.statusCode === 204
+  ) {
+    return [
+      {
+        id: "potential-bola",
+        message: `Request succeeded - potential BOLA vulnerability (status: ${response?.statusCode})`,
+      },
+    ];
+  }
+
+  return [
+    {
+      id: "no-issue",
+      message: `Request returned status code ${response?.statusCode}`,
+    },
+  ];
 }
 
 function isBolaInjectableParameter(found: PlaybookLookupResult): boolean {
