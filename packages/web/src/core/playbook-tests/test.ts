@@ -29,6 +29,8 @@ export async function testPlaybook(
     step: PlaybookExecutorStep;
   }) => Action
 ) {
+  const result = [];
+
   const cache = createAuthCache();
   const env: PlaybookEnvStack = [getExternalEnvironment(file, envenv)];
   //const result: PlaybookEnvStack = [];
@@ -70,8 +72,6 @@ export async function testPlaybook(
 
       let playbookStep = await playbookExecutor.next();
       while (!playbookStep.done) {
-        console.log(`Dispatching playbook step for test: ${testId}, stage: ${id}`);
-        console.log(`Playbook step: ${JSON.stringify(playbookStep.value)}`);
         dispatch(
           addStepExecutionAction({
             testId,
@@ -82,16 +82,22 @@ export async function testPlaybook(
         playbookStep = await playbookExecutor.next();
       }
 
-      console.log(
-        "Finished test stage:",
-        testId,
-        id,
-        "return value:",
-        JSON.stringify(playbookStep.value)
-      );
+      const [finalStep, finalStepError] = playbookStep.value;
+
+      if (finalStepError) {
+        // Playbook execution failed - log and break
+        console.error(
+          `Playbook execution failed for test: ${testId}, stage: ${id}, error: ${finalStepError}`
+        );
+        break;
+      }
+
+      result.push(...finalStep.result);
 
       // Pass the return value (Result<PlaybookEnvStack, PlaybookError>) to the next test stage
       stepGenerator = await stageGenerator.next(playbookStep.value);
     }
   }
+
+  return result;
 }

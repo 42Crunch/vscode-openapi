@@ -9,7 +9,7 @@ import { PlaybookExecutorStep } from "../../playbook/playbook";
 import { PlaybookEnv } from "../../playbook/playbook-env";
 import { httpClient } from "./httpclient";
 import { testPlaybook } from "../test";
-import { Suite, SuiteConfig } from "../types";
+import { Suite, SuiteConfig, TestIssue } from "../types";
 
 export function makeStepAssert(steps: PlaybookExecutorStep[]) {
   return (obj: any) => expect(steps.shift()).toMatchObject(obj);
@@ -115,7 +115,7 @@ export async function runSuite(
   config: SuiteConfig,
   vars?: PlaybookEnv,
   vault?: Vault
-): Promise<Array<PlaybookExecutorStep>> {
+): Promise<{ issues: TestIssue[]; steps: Array<PlaybookExecutorStep> }> {
   const steps: Array<PlaybookExecutorStep> = [];
   const env = [];
 
@@ -123,7 +123,7 @@ export async function runSuite(
     env.push(vars);
   }
 
-  await testPlaybook(
+  const issues = await testPlaybook(
     httpClient,
     oas,
     target,
@@ -142,5 +142,5 @@ export async function runSuite(
     }
   );
 
-  return steps;
+  return { issues: issues ?? [], steps };
 }
