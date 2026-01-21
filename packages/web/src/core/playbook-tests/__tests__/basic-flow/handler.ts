@@ -15,6 +15,9 @@ const users: Record<string, User> = {
   user1: {
     pass: "password123",
   },
+  user2: {
+    pass: "password456",
+  },
 };
 
 const posts: (Post | null)[] = [];
@@ -65,6 +68,26 @@ const deletePost: Handler = async (req, res, params, body) => {
   return respond(res, 200, { message: "post deleted" });
 };
 
+// Vulnerable to BOLA - does not check if user owns the post
+const deletePostVulnerable: Handler = async (req, res, params, body) => {
+  const user = await getUserByBasicAuth(req);
+
+  if (!user) {
+    return respond(res, 403, { message: "not authenticated" });
+  }
+
+  const id = parseInt(params.id, 10);
+
+  if (isNaN(id) || id < 0 || id >= posts.length || posts[id] === null) {
+    return respond(res, 404, { message: "post not found" });
+  }
+
+  // VULNERABLE: No check for post ownership - any authenticated user can delete any post
+  posts[id] = null;
+
+  return respond(res, 200, { message: "post deleted" });
+};
+
 const getPost: Handler = async (req, res, params, body) => {
   const user = await getUserByBasicAuth(req);
 
@@ -105,4 +128,5 @@ export const routes: Routes = [
   [{ path: "/post", method: "POST" }, createPost],
   [{ path: "/post/:id", method: "DELETE" }, deletePost],
   [{ path: "/post/:id", method: "GET" }, getPost],
+  [{ path: "/post-vulnerable/:id", method: "DELETE" }, deletePostVulnerable],
 ];

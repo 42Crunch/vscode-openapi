@@ -107,22 +107,28 @@ async function* testScenario(
 async function* runScenario(
   scenario: Playbook.Scenario,
   targetOperationId: string
-): StepGenerator<[]> {
+): StepGenerator<TestIssue[]> {
+  const issues = [];
   for (const stage of scenario.requests) {
     if (stage?.ref?.type === "operation" && stage.ref.id === targetOperationId) {
       console.log(`Testing operation for BOLA: ${targetOperationId}`);
       const [response, error] = yield* execute(stage, {
         basic: {
           credential: { type: "basic", default: "", methods: {} },
-          value: "zomm:zomm",
+          value: "user2:password456",
         },
       });
-      console.log(`Received response: ${response?.statusCode}, error: ${error?.message}`);
+      if (response?.statusCode === 200) {
+        issues.push({
+          id: "potential-bola",
+          message: `Request succeeded - potential BOLA vulnerability (status: ${response?.statusCode}) in operationId ${targetOperationId}`,
+        });
+      }
     } else {
       yield playbookStageToExecutionStep(stage);
     }
   }
-  return [];
+  return issues;
 }
 
 async function* testOperation(stage: Playbook.Stage): StepGenerator<TestIssue[]> {

@@ -70,6 +70,8 @@ export async function testPlaybook(
 
       let playbookStep = await playbookExecutor.next();
       while (!playbookStep.done) {
+        console.log(`Dispatching playbook step for test: ${testId}, stage: ${id}`);
+        console.log(`Playbook step: ${JSON.stringify(playbookStep.value)}`);
         dispatch(
           addStepExecutionAction({
             testId,

@@ -250,8 +250,8 @@
                   },
                   "variableAssignments": {
                     "id": {
-                      "from": "response",
                       "in": "body",
+                      "from": "response",
                       "contentType": "json",
                       "path": {
                         "type": "jsonPointer",
@@ -307,6 +307,80 @@
             {
               "fuzzing": true,
               "$ref": "#/operations/getPosts/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "deletePostVulnerable": {
+      "operationId": "deletePostVulnerable",
+      "request": {
+        "operationId": "deletePostVulnerable",
+        "auth": [
+          "basic"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "deletePostVulnerable",
+            "method": "DELETE",
+            "url": "{{host}}/basic-flow/post-vulnerable/{id}",
+            "paths": [
+              {
+                "key": "id",
+                "value": "{{id}}"
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "404": {
+            "expectations": {
+              "httpStatus": 404
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "$ref": "#/operations/createPost/request",
+              "responses": {
+                "201": {
+                  "expectations": {
+                    "httpStatus": 201
+                  },
+                  "variableAssignments": {
+                    "id": {
+                      "in": "body",
+                      "from": "response",
+                      "contentType": "json",
+                      "path": {
+                        "type": "jsonPointer",
+                        "value": "/id"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/deletePostVulnerable/request"
             }
           ],
           "fuzzing": true
