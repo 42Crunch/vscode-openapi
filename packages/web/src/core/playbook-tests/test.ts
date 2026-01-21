@@ -42,6 +42,8 @@ export async function testPlaybook(
 
   // Run all tests in the suite
   for (const [testId, test] of Object.entries(suite.tests)) {
+    console.log("Starting test:", testId);
+    console.log("Test config:", tests);
     const [testConfig, testFailures] = tests![testId];
     // Skip tests that are not ready
     if (testFailures) {

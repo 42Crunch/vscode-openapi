@@ -43,12 +43,6 @@ async function* run(
   vault: Vault
 ) {}
 
-function isStageVariable(
-  context: PlaybookVariableDefinitionLocation
-): context is PlaybookStageVariableLocation {
-  return context.type === "playbook-request" || context.type === "playbook-stage";
-}
-
 function isBolaInjectableParameter(found: PlaybookLookupResult): boolean {
   // bola injectable parameters are parameters in the path (for now)
   const path = found.location.path;
@@ -71,8 +65,15 @@ function hasBolaInjectionTargets(variables: OperationVariables[], operationId: s
   const operation = variables[operationIndex];
 
   for (const found of operation.found) {
-    if (isBolaInjectableParameter(found) && isStageVariable(found.source)) {
+    // if parameter of interest comes from prior step, then it's a valid injection target
+    if (
+      (isBolaInjectableParameter(found) && found.source.type === "playbook-request") ||
+      found.source.type === "playbook-stage"
+    ) {
       if (found.source.step < operationIndex) {
+        console.log(
+          `Parameter "${found.name}" of operation "${operation.operationId}" comes from step ${found.source.step}, injectable!`
+        );
         return true;
       }
     }

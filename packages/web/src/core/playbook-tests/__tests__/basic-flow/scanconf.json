@@ -1,0 +1,331 @@
+{
+  "version": "2.0.0",
+  "runtimeConfiguration": {
+    "environment": "default",
+    "laxTestingModeEnabled": false,
+    "apiConnectivityCheck": true,
+    "logLevel": "error",
+    "logDestination": "stdout+platform",
+    "logMaxFileSize": 2147483648,
+    "requestHeaderNameRequestId": "x-scan-request-id",
+    "requestHeaderNameScenarioId": "x-scan-scenario-id",
+    "requestHeaderNameRequestType": "x-scan-request-type",
+    "requestFlowrate": 100,
+    "requestTimeout": 30,
+    "requestTlsInsecureSkipVerify": true,
+    "responseFollowRedirection": false,
+    "responseMaxBodySizeScan": 10485760,
+    "happyPathOnly": false,
+    "maxRequestRetryAttempts": 5,
+    "maxScanDuration": 1800,
+    "memoryLimit": 2147483648,
+    "memoryTimeSpan": 10,
+    "reportMaxRequestSizeHappyPath": 8092,
+    "reportMaxRequestSizeTest": 8092,
+    "reportIncludeRequestBody": true,
+    "reportIncludeResponseBody": true,
+    "reportMaxHttpResponseSizeHappyPath": 8092,
+    "reportMaxBodySizeHappyPath": 8092,
+    "reportMaxHttpResponseSizeTest": 8092,
+    "reportMaxBodySizeTest": 8092,
+    "reportIssuesOnly": false,
+    "reportMaxIssues": 1000,
+    "reportMaxSize": 20971520,
+    "reportGenerateCurlCommand": true,
+    "normalizeServerUrls": true
+  },
+  "customizations": {
+    "happyPaths": {
+      "retry": 1,
+      "responsePolicy": {
+        "httpStatusExpected": true,
+        "mustBeConformant": true
+      },
+      "httpStatusExpected": []
+    },
+    "tests": {
+      "responsePolicy": {
+        "httpStatusExpected": true,
+        "mustBeConformant": true
+      }
+    }
+  },
+  "environments": {
+    "default": {
+      "variables": {
+        "basic": {
+          "name": "SCAN42C_SECURITY_BASIC",
+          "from": "environment",
+          "required": true
+        },
+        "host": {
+          "name": "SCAN42C_HOST",
+          "from": "environment",
+          "required": false,
+          "default": "http://localhost:8888"
+        }
+      }
+    }
+  },
+  "operations": {
+    "createPost": {
+      "operationId": "createPost",
+      "request": {
+        "operationId": "createPost",
+        "auth": [
+          "basic"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "createPost",
+            "method": "POST",
+            "url": "{{host}}/basic-flow/post",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "content": "jvjiicmqbuqrgccyssyhrytwldoqagah"
+              }
+            }
+          }
+        },
+        "defaultResponse": "201",
+        "responses": {
+          "201": {
+            "expectations": {
+              "httpStatus": 201
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/createPost/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "deletePost": {
+      "operationId": "deletePost",
+      "request": {
+        "operationId": "deletePost",
+        "auth": [
+          "basic"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "deletePost",
+            "method": "DELETE",
+            "url": "{{host}}/basic-flow/post/{id}",
+            "paths": [
+              {
+                "key": "id",
+                "value": "{{id}}"
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "404": {
+            "expectations": {
+              "httpStatus": 404
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "$ref": "#/operations/createPost/request",
+              "expectedResponse": "201",
+              "responses": {
+                "201": {
+                  "expectations": {
+                    "httpStatus": 201
+                  },
+                  "variableAssignments": {
+                    "id": {
+                      "in": "body",
+                      "from": "response",
+                      "contentType": "json",
+                      "path": {
+                        "type": "jsonPointer",
+                        "value": "/id"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/deletePost/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "getPost": {
+      "operationId": "getPost",
+      "request": {
+        "operationId": "getPost",
+        "auth": [
+          "basic"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "getPost",
+            "method": "GET",
+            "url": "{{host}}/basic-flow/post/{id}",
+            "paths": [
+              {
+                "key": "id",
+                "value": "{{id}}"
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "404": {
+            "expectations": {
+              "httpStatus": 404
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "$ref": "#/operations/createPost/request",
+              "responses": {
+                "201": {
+                  "expectations": {
+                    "httpStatus": 201
+                  },
+                  "variableAssignments": {
+                    "id": {
+                      "from": "response",
+                      "in": "body",
+                      "contentType": "json",
+                      "path": {
+                        "type": "jsonPointer",
+                        "value": "/id"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/getPost/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "getPosts": {
+      "operationId": "getPosts",
+      "request": {
+        "operationId": "getPosts",
+        "auth": [
+          "basic"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "getPosts",
+            "method": "GET",
+            "url": "{{host}}/basic-flow/posts"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/getPosts/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    }
+  },
+  "authenticationDetails": [
+    {
+      "basic": {
+        "type": "basic",
+        "default": "basic",
+        "credentials": {
+          "basic": {
+            "credential": "{{$vault}}",
+            "description": "basic security"
+          }
+        }
+      }
+    }
+  ]
+}

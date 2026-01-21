@@ -25,6 +25,27 @@ export function parseScenario(oas: any, scenario: Scanconf.ConfigurationFileBund
   return file;
 }
 
+export function parsePlaybook(oas: any, scanconf: any) {
+  const [file, error] = parse(oas, scanconf);
+
+  if (error !== undefined) {
+    assert.fail("Error parsing config: " + JSON.stringify(error));
+  }
+
+  return file;
+}
+
+export async function runScenario2(
+  port: number,
+  oas: unknown,
+  scanconf: unknown,
+  vault: unknown,
+  name: string
+): Promise<PlaybookExecutorStep[]> {
+  const playbook = parsePlaybook(oas, scanconf);
+  return runScenario(`http://localhost:${port}`, oas, playbook, name, undefined, vault as Vault);
+}
+
 export async function runScenario(
   target: string,
   oas: any,
