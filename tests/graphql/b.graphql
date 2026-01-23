@@ -1,0 +1,172 @@
+type Query {
+  """
+  A viewer that wraps all operations authenticated via security scheme 'access-token', which is of type 'apiKey'
+  """
+  viewerApiKey(apiKey: String!): ViewerApiKey
+
+  """
+  A viewer that wraps operations for all available authentication mechanisms
+  """
+  viewerAnyAuth(accessToken: AccessTokenInput): ViewerAnyAuth
+}
+
+"""A viewer for security scheme 'access-token'"""
+type ViewerApiKey {
+  """
+  Returns the list of ALL users. Must be admin to call.
+  
+  Equivalent to GET /api/admin/all_users
+  """
+  apiAdminAllUsers(xAccessToken: String!): [UsersListItem]
+
+  """
+  search for a specific user
+  
+  Equivalent to GET /api/admin/users/search
+  """
+  apiAdminUsersSearch(
+    """search query ?search=xxx"""
+    search: String!
+    xAccessToken: String!
+  ): [UsersItem]
+
+  """
+  user supplies valid token and receives all user info
+  
+  Equivalent to GET /api/user/info
+  """
+  apiUserInfo(
+    """Users JWT Token"""
+    xAccessToken: String!
+  ): [UsersItem]
+}
+
+type UsersListItem {
+  """remaining balance"""
+  accountBalance: Float
+  name: String!
+  user: String!
+}
+
+type UsersItem {
+  """remaining balance"""
+  accountBalance: Float
+
+  """is admin"""
+  isAdmin: Boolean
+  name: String
+  pass: String!
+  user: String!
+}
+
+"""Warning: Not every request will work with this viewer type"""
+type ViewerAnyAuth {
+  """
+  Returns the list of ALL users. Must be admin to call.
+  
+  Equivalent to GET /api/admin/all_users
+  """
+  apiAdminAllUsers(xAccessToken: String!): [UsersListItem]
+
+  """
+  search for a specific user
+  
+  Equivalent to GET /api/admin/users/search
+  """
+  apiAdminUsersSearch(
+    """search query ?search=xxx"""
+    search: String!
+    xAccessToken: String!
+  ): [UsersItem]
+
+  """
+  user supplies valid token and receives all user info
+  
+  Equivalent to GET /api/user/info
+  """
+  apiUserInfo(
+    """Users JWT Token"""
+    xAccessToken: String!
+  ): [UsersItem]
+}
+
+"""API key credentials for the security protocol 'access-token'"""
+input AccessTokenInput {
+  apiKey: String
+}
+
+type Mutation {
+  """
+  user supplies user name and password and receives a json web token
+  
+  Equivalent to POST /api/login
+  """
+  authenticate(userRegistrationDataInput: UserRegistrationDataInput): ApiLogin
+
+  """
+  user supplies email and password to register and receives a json web token.
+  
+  Equivalent to POST /api/register
+  """
+  register(userRegistrationDataInput: UserRegistrationDataInput!): ApiRegister
+
+  """
+  A viewer that wraps all operations authenticated via security scheme 'access-token', which is of type 'apiKey'
+  """
+  mutationViewerApiKey(apiKey: String!): MutationViewerApiKey
+
+  """
+  A viewer that wraps operations for all available authentication mechanisms
+  """
+  mutationViewerAnyAuth(accessToken: AccessTokenInput): MutationViewerAnyAuth
+}
+
+type ApiLogin {
+  message: String!
+  token: String!
+}
+
+input UserRegistrationDataInput {
+  accountBalance: Int!
+  isAdmin: Boolean!
+  name: String!
+  pass: String!
+  user: String!
+}
+
+type ApiRegister {
+  message: String
+  token: String
+}
+
+"""A viewer for security scheme 'access-token'"""
+type MutationViewerApiKey {
+  """
+  user supplies valid token and updates all user info
+  
+  Equivalent to PUT /api/user/edit_info
+  """
+  edituserinfo(userUpdateDataInput: UserUpdateDataInput!, xAccessToken: String!): ApiUserEditInfo
+}
+
+type ApiUserEditInfo {
+  message: String!
+}
+
+input UserUpdateDataInput {
+  accountBalance: Float!
+  isAdmin: Boolean!
+  name: String!
+  pass: String!
+  user: String!
+}
+
+"""Warning: Not every request will work with this viewer type"""
+type MutationViewerAnyAuth {
+  """
+  user supplies valid token and updates all user info
+  
+  Equivalent to PUT /api/user/edit_info
+  """
+  edituserinfo(userUpdateDataInput: UserUpdateDataInput!, xAccessToken: String!): ApiUserEditInfo
+}

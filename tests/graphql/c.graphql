@@ -1,0 +1,15 @@
+directive @cost(weight: String!) on OBJECT | FIELD_DEFINITION
+directive @listSize(
+  assumedSize: Int
+  slicingArguments: [String!]
+  sizedFields: [String!]
+  requireOneSlicingArgument: Boolean
+) on FIELD_DEFINITION
+
+type Query @cost(weight: "10.0") {
+  users(first: Int): [User] @listSize(slicingArguments: ["nonExistentArg"])
+}
+
+type User @cost(weight: "10.0") {
+  name: String
+}
