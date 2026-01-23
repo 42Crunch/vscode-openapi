@@ -147,7 +147,8 @@ export const slice = createSlice({
           audit.filename.toLowerCase().endsWith(".graphql") ||
           audit.filename.toLowerCase().endsWith(".gql") ||
           audit.filename.toLowerCase().endsWith(".graphqls") ||
-          audit.filename.toLowerCase().endsWith(".sdl")
+          audit.filename.toLowerCase().endsWith(".sdl") ||
+          audit.filename.toLowerCase().endsWith(".gqls")
             ? "graphql"
             : "openapi";
       }

@@ -19,7 +19,8 @@ export async function updateContext(cache: Cache, document: vscode.TextDocument 
     document.fileName.endsWith(".graphql") ||
     document.fileName.endsWith(".gql") ||
     document.fileName.endsWith(".graphqls") ||
-    document.fileName.endsWith(".sdl")
+    document.fileName.endsWith(".sdl") ||
+    document.fileName.endsWith(".gqls")
   ) {
     vscode.commands.executeCommand("setContext", "graphqlEnabled", true);
   } else {
