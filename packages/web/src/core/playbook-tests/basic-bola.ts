@@ -28,6 +28,7 @@ async function configure(
   const operationIds: string[] = [];
 
   for (const operationId of getAllOperationIds(oas)) {
+    console.log(`Checking operationId "${operationId}" for BOLA testability`);
     const checkForBola = await canBeTestedForBola(oas, playbook, vault, operationId);
     if (checkForBola) {
       operationIds.push(operationId);
@@ -211,6 +212,8 @@ async function canBeTestedForBola(
   operationId: string
 ): Promise<boolean> {
   const mock = await mockScenario(oas, playbook, operationId, vault);
+
+  console.log(`Mocked scenario for operationId "${operationId}":`, mock);
 
   return hasBolaInjectionTargets(mock.variables, operationId);
 }

@@ -67,7 +67,14 @@ export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme:
   configureStore({
     reducer,
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().prepend(listenerMiddleware.middleware).concat(logger),
+      getDefaultMiddleware({
+        serializableCheck: {
+          // contains non-serializable MockHttpResponse objects
+          ignoredActions: ["requests/addMockRequestExecutionStep"],
+        },
+      })
+        .prepend(listenerMiddleware.middleware)
+        .concat(logger),
     preloadedState: {
       theme,
     },
