@@ -72,29 +72,35 @@ function TestResultCard({ testId, result }: { testId: string; result: StageResul
         <Status>{hasFailures ? "Failed" : "Passed"}</Status>
       </TestTitle>
       <Results>
-        {Object.entries(result).map(([stageId, stage]) => (
-          <TestCardContent key={stageId}>
-            <CollapsibleCard>
-              <Description>
-                <span> {stageId}</span>
-                <div>{stage.failures.length > 0 ? <ExclamationCircle /> : <Check />}</div>
-              </Description>
-              <TestCardBody>
-                <Execution result={stage.result} />
-                {stage.failures.length > 0 && (
-                  <Failures>
-                    {stage.failures.map((issue: TestIssue, index: number) => (
-                      <Failure key={index}>
-                        <FailureId>{issue.id}</FailureId>
-                        <FailureMessage>{issue.message}</FailureMessage>
-                      </Failure>
-                    ))}
-                  </Failures>
-                )}
-              </TestCardBody>
-            </CollapsibleCard>
-          </TestCardContent>
-        ))}
+        {Object.entries(result)
+          .filter(([stageId, stage]) => {
+            // dont show stages without results or failures
+            const resultisNonEmpty = stage.result.some((result) => result.results.length > 0);
+            return stage.failures.length > 0 || resultisNonEmpty;
+          })
+          .map(([stageId, stage]) => (
+            <TestCardContent key={stageId}>
+              <CollapsibleCard>
+                <Description>
+                  <span> {stageId}</span>
+                  <div>{stage.failures.length > 0 ? <ExclamationCircle /> : <Check />}</div>
+                </Description>
+                <TestCardBody>
+                  <Execution result={stage.result} />
+                  {stage.failures.length > 0 && (
+                    <Failures>
+                      {stage.failures.map((issue: TestIssue, index: number) => (
+                        <Failure key={index}>
+                          <FailureId>{issue.id}</FailureId>
+                          <FailureMessage>{issue.message}</FailureMessage>
+                        </Failure>
+                      ))}
+                    </Failures>
+                  )}
+                </TestCardBody>
+              </CollapsibleCard>
+            </TestCardContent>
+          ))}
       </Results>
     </div>
   );
