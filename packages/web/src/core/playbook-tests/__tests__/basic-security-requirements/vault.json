@@ -1,0 +1,21 @@
+{
+  "schemes": {
+    "admin": {
+      "type": "apiKey",
+      "credentials": {
+        "admin1": {
+          "key": "secret"
+        }
+      }
+    },
+    "basic": {
+      "type": "basic",
+      "credentials": {
+        "user1": {
+          "username": "user1",
+          "password": "password123"
+        }
+      }
+    }
+  }
+}

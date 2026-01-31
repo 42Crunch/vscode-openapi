@@ -7,6 +7,7 @@ import type { Handler, Routes } from "./types";
 import { respond } from "./server-util.ts";
 import { routes as basic } from "./basic/handler.ts";
 import { routes as basicFlow } from "./basic-flow/handler.ts";
+import { routes as basicSecurityRequirement } from "./basic-security-requirements/handler.ts";
 
 type AggregateRoutes = Record<string, Routes>;
 type PathHandler = Record<string, Handler>;
@@ -17,6 +18,7 @@ let server: http.Server | undefined = undefined;
 const routes: AggregateRoutes = {
   "/basic": basic,
   "/basic-flow": basicFlow,
+  "/basic-security-requirements": basicSecurityRequirement,
 };
 
 export function start(port: number | undefined): Promise<number> {

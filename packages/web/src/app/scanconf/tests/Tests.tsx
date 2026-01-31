@@ -30,10 +30,6 @@ export default function Tests() {
           id: "basic",
           label: "HTTP Basic Tests",
         },
-        // {
-        //   id: "api-key",
-        //   label: "API Key Tests",
-        // },
       ],
     },
     {
@@ -43,6 +39,10 @@ export default function Tests() {
         {
           id: "basicBola",
           label: "Basic BOLA",
+        },
+        {
+          id: "basicSecurityRequirements",
+          label: "Basic Security Requirements",
         },
       ],
     },

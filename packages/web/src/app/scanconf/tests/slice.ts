@@ -24,6 +24,7 @@ const initialState: State = {
   config: {
     basic: [undefined, {}],
     basicBola: [undefined, {}],
+    basicSecurityRequirements: [undefined, {}],
   },
 };
 
