@@ -7,7 +7,6 @@ import { Suite } from "../types";
 import {
   hasAtLeastTwoSecuritySchemes,
   hasCredentialsForAllSchemes,
-  hasMultipleBasicAuthCredentials,
   usesBasicAuth,
 } from "../requirements";
 import basicSecurityRequirements from "./basic";
@@ -33,7 +32,7 @@ function configure(spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vau
 }
 
 export default {
-  description: "Simple BOLA test suite",
+  description: "Check that security requirements are enforced",
   configure,
   tests: {
     basicSecurityRequirements,

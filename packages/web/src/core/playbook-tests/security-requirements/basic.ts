@@ -1,4 +1,4 @@
-import { BundledSwaggerOrOasSpec, getBasicSecuritySchemes } from "@xliic/openapi";
+import { BundledSwaggerOrOasSpec, getSecurityRequirementsById } from "@xliic/openapi";
 import { Result, success, failure } from "@xliic/result";
 import { BasicCredential, Vault } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
@@ -6,15 +6,12 @@ import { Playbook } from "@xliic/scanconf";
 import { Test, TestConfig, Suite, ConfigFailures, TestStageGenerator, TestIssue } from "../types";
 import { playbookStageToExecutionStep, StepGenerator } from "../../playbook/execute";
 import { PlaybookEnvStack, PlaybookLookupResult } from "../../playbook/playbook-env";
-import {
-  hasMultipleBasicAuthCredentials,
-  hasValidBasicAuthCredentials,
-  usesBasicAuth,
-} from "../requirements";
+
 import { getAllOperationIds } from "../selector";
 import { mockScenario, OperationVariables } from "../mock";
 import { getScenario } from "../scenario";
 import { execute } from "../http-api";
+import { updateSecurityRequirements } from "../mutate-oas";
 
 type BasicSecReqTestConfig = TestConfig & {
   operationId: string[];
@@ -28,25 +25,23 @@ async function configure(
   const operationIds: string[] = [];
 
   for (const operationId of getAllOperationIds(oas)) {
-    console.log(`Checking operationId "${operationId}" for BOLA testability`);
-    const checkForBola = await canBeTestedForBola(oas, playbook, vault, operationId);
-    if (checkForBola) {
+    const securityRequirements = getSecurityRequirementsById(oas, operationId);
+
+    if (securityRequirements.length > 0) {
       operationIds.push(operationId);
     }
   }
-
-  console.log("BOLA testable operations:", operationIds);
 
   return success({ operationId: operationIds });
 }
 
 async function* run(
   config: BasicSecReqTestConfig,
-  spec: BundledSwaggerOrOasSpec,
+  oas: BundledSwaggerOrOasSpec,
   playbook: Playbook.Bundle,
   vault: Vault
 ): TestStageGenerator {
-  console.log("Running basic BOLA test for operations:", config.operationId);
+  console.log("Running basic seqreq test for operations:", config.operationId);
 
   for (const operationId of config.operationId) {
     // first scenario for now
@@ -63,7 +58,7 @@ async function* run(
       continue;
     }
 
-    yield* testScenario(operationId, playbook, vault, setupResult.env, scenario);
+    yield* testScenario(oas, operationId, playbook, vault, setupResult.env, scenario);
 
     const [cleanupResult, cleanupError] = yield {
       id: `${operationId}-cleanup`,
@@ -97,6 +92,7 @@ async function* cleanupScenario(
 }
 
 async function* testScenario(
+  oas: BundledSwaggerOrOasSpec,
   id: string,
   file: Playbook.Bundle,
   vault: Vault,
@@ -104,25 +100,32 @@ async function* testScenario(
   scenario: Playbook.Scenario
 ): TestStageGenerator {
   yield {
-    id: `${id}-bola-test`,
-    steps: runScenario(scenario, id),
+    id: `${id}-seqreq-test`,
+    steps: runScenario(oas, scenario, id),
   };
 }
 
 async function* runScenario(
+  oas: BundledSwaggerOrOasSpec,
   scenario: Playbook.Scenario,
   targetOperationId: string
 ): StepGenerator<TestIssue[]> {
   const issues = [];
   for (const stage of scenario.requests) {
     if (stage?.ref?.type === "operation" && stage.ref.id === targetOperationId) {
-      console.log(`Testing operation for BOLA: ${targetOperationId}`);
-      const [response, error] = yield* execute(stage, {
-        basic: {
-          credential: { type: "basic", default: "", methods: {} },
-          value: "user2:password456",
+      console.log(`Testing operation for SEQREQ: ${targetOperationId}`);
+      console.log("Stage:", stage);
+
+      const [patched, error0] = updateSecurityRequirements(oas, targetOperationId, [
+        {
+          basic: [],
         },
+      ]);
+
+      const [response, error] = yield* execute(stage, {
+        oas: patched,
       });
+
       if (response?.statusCode === 200) {
         issues.push({
           id: "potential-bola",

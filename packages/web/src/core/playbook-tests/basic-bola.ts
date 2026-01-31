@@ -118,9 +118,11 @@ async function* runScenario(
     if (stage?.ref?.type === "operation" && stage.ref.id === targetOperationId) {
       console.log(`Testing operation for BOLA: ${targetOperationId}`);
       const [response, error] = yield* execute(stage, {
-        basic: {
-          credential: { type: "basic", default: "", methods: {} },
-          value: "user2:password456",
+        security: {
+          basic: {
+            credential: { type: "basic", default: "", methods: {} },
+            value: "user2:password456",
+          },
         },
       });
       if (response?.statusCode === 200) {

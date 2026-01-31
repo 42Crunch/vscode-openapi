@@ -4,6 +4,7 @@ import { Result } from "@xliic/result";
 
 import { AuthResult } from "../playbook/playbook";
 import { ExecutionStep } from "../playbook/execute";
+import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 
 export async function* prepare(stage: Playbook.Stage, security?: AuthResult): any {
   const httpRequest = yield {
@@ -23,12 +24,16 @@ export async function* send(httpRequest: any): any {
 
 export async function* execute(
   stage: Playbook.Stage,
-  securityOverride?: AuthResult
+  overrides?: {
+    security?: AuthResult;
+    oas?: BundledSwaggerOrOasSpec;
+  }
 ): AsyncGenerator<ExecutionStep, Result<HttpResponse, HttpError>, any> {
   const httpRequest = yield {
     stage,
     next: "prepare",
-    securityOverride,
+    securityOverride: overrides?.security,
+    oasOverride: overrides?.oas,
     onFailure: "continue",
   };
 

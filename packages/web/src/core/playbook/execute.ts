@@ -29,6 +29,7 @@ export type StepExecutionError = PlaybookError | HttpError;
 export type ExecutionStep = {
   stage: Playbook.Stage;
   securityOverride?: AuthResult;
+  oasOverride?: BundledSwaggerOrOasSpec;
   next: "prepare" | "complete";
   onFailure: "continue" | "abort";
 };
@@ -125,7 +126,7 @@ export async function* executePlaybook<R>(
     if (step.done) {
       break;
     }
-    const { stage, next, securityOverride, onFailure } = step.value;
+    const { stage, next, securityOverride, oasOverride, onFailure } = step.value;
 
     if (stage.ref === undefined) {
       yield {
@@ -158,7 +159,7 @@ export async function* executePlaybook<R>(
       (yield* executeAuth(
         cache,
         client,
-        oas,
+        oasOverride ?? oas,
         server,
         file,
         auth,
@@ -206,10 +207,10 @@ export async function* executePlaybook<R>(
 
     const operation =
       request.operationId !== undefined
-        ? getOperationById(oas, request.operationId)?.operation
+        ? getOperationById(oasOverride ?? oas, request.operationId)?.operation
         : undefined;
 
-    const replacements = replaceRequestVariables(oas, request.request, operation, [
+    const replacements = replaceRequestVariables(oasOverride ?? oas, request.request, operation, [
       ...env,
       ...result,
       requestEnv,
@@ -241,7 +242,13 @@ export async function* executePlaybook<R>(
 
     const [preparedHttpRequest, requestPrepareError] =
       "operationId" in replacements.value
-        ? await makeHttpRequest(oas, server, request.operationId, replacements.value, security)
+        ? await makeHttpRequest(
+            oasOverride ?? oas,
+            server,
+            request.operationId,
+            replacements.value,
+            security
+          )
         : await makeExternalHttpRequest(replacements.value);
 
     if (requestPrepareError !== undefined) {
