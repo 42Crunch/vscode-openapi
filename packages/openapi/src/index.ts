@@ -23,6 +23,11 @@ export type BundledSwaggerOrOas30Spec = OpenApi30.BundledSpec | Swagger.BundledS
 
 export type BundledOasSpec = OpenApi30.BundledSpec | OpenApi31.BundledSpec;
 
+export type SecurityRequirement =
+  | OpenApi31.SecurityRequirement
+  | OpenApi30.SecurityRequirement
+  | Swagger.SecurityRequirement;
+
 export function isSwagger(spec: BundledSwaggerOrOasSpec): spec is Swagger.BundledSpec {
   return "swagger" in spec;
 }
@@ -129,6 +134,15 @@ export function getSecuritySchemes(oas: BundledSwaggerOrOasSpec) {
     return oas.components?.securitySchemes || {};
   } else {
     return oas.securityDefinitions || {};
+  }
+}
+
+export function getSecurityRequirementsById(oas: BundledSwaggerOrOasSpec, operationId: string) {
+  const operation = getOperationById(oas, operationId);
+  if (operation) {
+    return operation.operation.security ?? oas.security ?? [];
+  } else {
+    return [];
   }
 }
 
