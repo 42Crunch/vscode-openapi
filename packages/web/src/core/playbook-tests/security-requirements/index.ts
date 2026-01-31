@@ -24,7 +24,7 @@ function configure(spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vau
     return failure({ hasAtLeastTwoSecuritySchemes: atLeastTwoSchemesFailed });
   }
 
-  const credentialsFailed = hasCredentialsForAllSchemes(spec, vault, 2);
+  const credentialsFailed = hasCredentialsForAllSchemes(spec, vault);
   if (credentialsFailed) {
     return failure({ hasCredentialsForAllSchemes: credentialsFailed });
   }
