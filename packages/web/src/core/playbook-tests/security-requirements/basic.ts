@@ -1,9 +1,9 @@
 import { BundledSwaggerOrOasSpec, getSecurityRequirementsById } from "@xliic/openapi";
-import { Result, success, failure } from "@xliic/result";
-import { BasicCredential, Vault } from "@xliic/common/vault";
+import { Result, success } from "@xliic/result";
+import { Vault } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
 
-import { Test, TestConfig, Suite, ConfigFailures, TestStageGenerator, TestIssue } from "../types";
+import { Test, TestConfig, ConfigFailures, TestStageGenerator, TestIssue } from "../types";
 import { playbookStageToExecutionStep, StepGenerator } from "../../playbook/execute";
 import { PlaybookEnvStack, PlaybookLookupResult } from "../../playbook/playbook-env";
 
@@ -47,6 +47,8 @@ async function* run(
     // first scenario for now
     const scenario = getScenario(playbook, operationId)!;
 
+    const stageToTest = findStageToTest(scenario, operationId);
+
     const [setupResult, setupError] = yield {
       id: `${operationId}-setup`,
       steps: setupScenario(playbook, vault, scenario),
@@ -58,7 +60,7 @@ async function* run(
       continue;
     }
 
-    yield* testScenario(oas, operationId, playbook, vault, setupResult.env, scenario);
+    yield* testScenario(oas, operationId, playbook, vault, setupResult.env, scenario, stageToTest!);
 
     const [cleanupResult, cleanupError] = yield {
       id: `${operationId}-cleanup`,
@@ -97,76 +99,65 @@ async function* testScenario(
   file: Playbook.Bundle,
   vault: Vault,
   envStack: PlaybookEnvStack,
-  scenario: Playbook.Scenario
+  scenario: Playbook.Scenario,
+  stageToTest: number
 ): TestStageGenerator {
   yield {
     id: `${id}-seqreq-test`,
-    steps: runScenario(oas, scenario, id),
+    steps: runScenario(oas, scenario, stageToTest),
   };
 }
 
 async function* runScenario(
   oas: BundledSwaggerOrOasSpec,
   scenario: Playbook.Scenario,
-  targetOperationId: string
+  stageToTest: number
 ): StepGenerator<TestIssue[]> {
   const issues = [];
-  for (const stage of scenario.requests) {
-    if (stage?.ref?.type === "operation" && stage.ref.id === targetOperationId) {
-      console.log(`Testing operation for SEQREQ: ${targetOperationId}`);
-      console.log("Stage:", stage);
 
-      const [patched, error0] = updateSecurityRequirements(oas, targetOperationId, [
-        {
-          basic: [],
-        },
-      ]);
+  for (let i = 0; i < scenario.requests.length; i++) {
+    const stage = scenario.requests[i];
 
-      const [response, error] = yield* execute(stage, {
-        oas: patched,
-      });
-
-      if (response?.statusCode === 200) {
-        issues.push({
-          id: "potential-bola",
-          message: `Request succeeded - potential BOLA vulnerability (status: ${response?.statusCode}) in operationId ${targetOperationId}`,
-        });
-      }
-    } else {
+    if (i !== stageToTest) {
       yield playbookStageToExecutionStep(stage);
+      continue;
+    }
+
+    const operationId = stage.ref?.type === "operation" ? stage.ref.id : `stage-${i}`;
+
+    // test our target stage
+    console.log(`Testing operation for SEQREQ: ${operationId}`);
+    console.log("Stage:", stage);
+
+    const [patched, error0] = updateSecurityRequirements(oas, operationId, [
+      {
+        basic: [],
+      },
+    ]);
+
+    const [response, error] = yield* execute(stage, {
+      oas: patched,
+    });
+
+    if (response?.statusCode === 200) {
+      issues.push({
+        id: "potential-bola",
+        message: `Request succeeded - potential BOLA vulnerability (status: ${response?.statusCode}) in operationId ${operationId}`,
+      });
     }
   }
+
   return issues;
 }
 
-async function* testOperation(stage: Playbook.Stage): StepGenerator<TestIssue[]> {
-  const [response, error] = yield* execute(stage, {});
-
-  if (error) {
-    return [{ id: "request-failed", message: `Request failed: ${error.message}` }];
+function findStageToTest(scenario: Playbook.Scenario, operationId: string): number | undefined {
+  for (let i = 0; i < scenario.requests.length; i++) {
+    const stage = scenario.requests[i];
+    if (stage?.ref?.type === "operation" && stage.ref.id === operationId && stage.fuzzing) {
+      return i;
+    }
   }
-
-  // For BOLA testing, a successful response (200, 201, 204) with a different user's ID
-  // indicates a potential vulnerability
-  if (
-    response?.statusCode === 200 ||
-    response?.statusCode === 201 ||
-    response?.statusCode === 204
-  ) {
-    return [
-      {
-        id: "potential-bola",
-        message: `Request succeeded - potential BOLA vulnerability (status: ${response?.statusCode})`,
-      },
-    ];
-  }
-
-  return [
-    {
-      id: "no-issue",
-      message: `Request returned status code ${response?.statusCode}`,
-    },
-  ];
+  return undefined;
 }
 
 function isBolaInjectableParameter(found: PlaybookLookupResult): boolean {
