@@ -95,6 +95,44 @@ export function hasMultipleBasicAuthCredentials(
   return `BOLA testing requires at least ${minCredentials} credentials in the vault`;
 }
 
+export function hasAtLeastTwoSecuritySchemes(spec: BundledSwaggerOrOasSpec): string | undefined {
+  const schemes = getActiveSecuritySchemes(spec);
+  if (Object.keys(schemes).length < 2) {
+    return "API must have at least two security schemes";
+  }
+}
+
+export function hasCredentialsForAllSchemes(
+  spec: BundledSwaggerOrOasSpec,
+  vault: Vault
+): string | undefined {
+  const [schemes, schemesError] = matchActiveSchemesToVault(spec, vault);
+
+  if (schemesError !== undefined) {
+    return `Failed to get schemes: ${schemesError}`;
+  }
+
+  const missingSchemes: string[] = [];
+  const emptySchemes: string[] = [];
+
+  for (const [name, vaultScheme] of Object.entries(schemes)) {
+    if (!vaultScheme) {
+      missingSchemes.push(name);
+    } else if ("credentials" in vaultScheme && Object.keys(vaultScheme.credentials).length === 0) {
+      emptySchemes.push(name);
+    }
+  }
+
+  if (missingSchemes.length > 0) {
+    return `Vault is missing schemes: ${missingSchemes.join(", ")}`;
+  }
+
+  if (emptySchemes.length > 0) {
+    return `Vault has no credentials for schemes: ${emptySchemes.join(", ")}`;
+  }
+  return undefined;
+}
+
 function matchActiveSchemesToVault(
   spec: BundledSwaggerOrOasSpec,
   vault: Vault
@@ -119,6 +157,28 @@ function checkVaultSchemeType(
   scheme: Swagger.SecurityScheme | OpenApi30.SecurityScheme | OpenApi31.SecurityScheme
 ): boolean {
   if (scheme.type === "http" && scheme.scheme === "basic" && vaultScheme.type === "basic") {
+    return true;
+  }
+  if (scheme.type === "basic" && vaultScheme.type === "basic") {
+    return true;
+  }
+  if (scheme.type === "apiKey" && vaultScheme.type === "apiKey") {
+    return true;
+  }
+  if (
+    scheme.type === "http" &&
+    scheme.scheme?.toLowerCase() === "bearer" &&
+    vaultScheme.type === "bearer"
+  ) {
+    return true;
+  }
+  if (scheme.type === "oauth2" && vaultScheme.type === "oauth2") {
+    return true;
+  }
+  if (scheme.type === "openIdConnect" && vaultScheme.type === "openIdConnect") {
+    return true;
+  }
+  if (scheme.type === "mutualTLS" && vaultScheme.type === "mutualTLS") {
     return true;
   }
   return false;

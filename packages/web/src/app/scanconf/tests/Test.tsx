@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { Result } from "@xliic/result";
 
-import { Check, ExclamationCircle } from "../../../icons";
+import { Check, SquareCheck, ExclamationCircle } from "../../../icons";
 import CollapsibleCard from "../../../new-components/CollapsibleCard";
 import CollapsibleSection from "../components/CollapsibleSection";
 import TryAndServerSelector from "../components/TryAndServerSelector";
@@ -121,7 +121,7 @@ function TestCard({
       <CollapsibleCard>
         <Description>
           <span>{testId}</span>
-          {ready ? <Check /> : <ExclamationCircle />}
+          {ready ? <SquareCheck /> : <ExclamationCircle />}
         </Description>
         <TestCardBody>
           {ready ? (

@@ -4,7 +4,12 @@ import { Vault } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
 
 import { Suite } from "../types";
-import { hasMultipleBasicAuthCredentials, usesBasicAuth } from "../requirements";
+import {
+  hasAtLeastTwoSecuritySchemes,
+  hasCredentialsForAllSchemes,
+  hasMultipleBasicAuthCredentials,
+  usesBasicAuth,
+} from "../requirements";
 import basicSecurityRequirements from "./basic";
 
 function configure(spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault) {
@@ -13,9 +18,15 @@ function configure(spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vau
     return failure({ usesBasicAuth: basicAuthFailed });
   }
 
-  const credentialsFailed = hasMultipleBasicAuthCredentials(spec, vault, 2);
+  const atLeastTwoSchemesFailed = hasAtLeastTwoSecuritySchemes(spec);
+
+  if (atLeastTwoSchemesFailed) {
+    return failure({ hasAtLeastTwoSecuritySchemes: atLeastTwoSchemesFailed });
+  }
+
+  const credentialsFailed = hasCredentialsForAllSchemes(spec, vault, 2);
   if (credentialsFailed) {
-    return failure({ hasMultipleCredentials: credentialsFailed });
+    return failure({ hasCredentialsForAllSchemes: credentialsFailed });
   }
 
   return success({ basicSecurityRequirements });
