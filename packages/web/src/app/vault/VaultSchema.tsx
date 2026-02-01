@@ -8,21 +8,29 @@ import {
   SchemeType,
   AliasSecurityScheme,
   CredentialsSecurityScheme,
+  BasicCredential,
+  ApiKeyCredential,
+  BearerCredential,
+  AccessTokenCredential,
+  KeyPairCredential,
 } from "@xliic/common/vault";
 
 import { Pen, TrashCan } from "../../icons";
 import { Menu, MenuItem } from "../../new-components/Menu";
 
-import CollapsibleCard, {
-  BottomDescription,
-  TopDescription,
-} from "../../new-components/CollapsibleCard";
+import CollapsibleCard, { TopDescription } from "../../new-components/CollapsibleCard";
 import Separator from "../../components/Separator";
 import NewCredentialDialog from "./NewCredentialDialog";
 import EditCredentialDialog from "./EditCredentialDialog";
 import { useAppDispatch } from "./store";
 import { deleteCredential, updateCredential } from "../../features/vault/slice";
 import { requestConfirmation } from "../../features/confirmation-dialog/slice";
+import BasicCredentialView from "./credential/view/BasicCredentialView";
+import ApiKeyCredentialView from "./credential/view/ApiKeyCredentialView";
+import BearerCredentialView from "./credential/view/BearerCredentialView";
+import OAuth2CredentialView from "./credential/view/OAuth2CredentialView";
+import OpenIdConnectCredentialView from "./credential/view/OpenIdConnectCredentialView";
+import MutualTLSCredentialView from "./credential/view/MutualTLSCredentialView";
 
 export default function VaultSchema({
   schemaName,
@@ -148,7 +156,9 @@ function Credential({
         <TopDescription>
           <div>{name}</div>
         </TopDescription>
-        <BottomDescription>Credential details go here</BottomDescription>
+        <CredentialDetails>
+          <CredentialView schemeType={schemeType} credential={credential} />
+        </CredentialDetails>
       </CollapsibleCard>
       <EditCredentialDialog
         id={{ scheme: schemaName, credential: name }}
@@ -163,6 +173,31 @@ function Credential({
       />
     </CredentialBody>
   );
+}
+
+function CredentialView({
+  schemeType,
+  credential,
+}: {
+  schemeType: SchemeType;
+  credential: SecurityCredential;
+}) {
+  switch (schemeType) {
+    case "basic":
+      return <BasicCredentialView credential={credential as BasicCredential} />;
+    case "apiKey":
+      return <ApiKeyCredentialView credential={credential as ApiKeyCredential} />;
+    case "bearer":
+      return <BearerCredentialView credential={credential as BearerCredential} />;
+    case "oauth2":
+      return <OAuth2CredentialView credential={credential as AccessTokenCredential} />;
+    case "openIdConnect":
+      return <OpenIdConnectCredentialView credential={credential as AccessTokenCredential} />;
+    case "mutualTLS":
+      return <MutualTLSCredentialView credential={credential as KeyPairCredential} />;
+    default:
+      return null;
+  }
 }
 
 const VaultSchemaBody = styled.div``;
@@ -189,4 +224,8 @@ const Title = styled.div`
 const AliasDestination = styled.div`
   margin-top: 4px;
   font-size: 12px;
+`;
+
+const CredentialDetails = styled.div`
+  padding: 8px 12px;
 `;
