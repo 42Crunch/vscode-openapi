@@ -23,19 +23,13 @@ export default function Tests() {
 
   const sections = [
     {
-      id: "identityTests",
+      id: "default",
       title: "Identity Tests",
       items: [
         {
           id: "basic",
           label: "HTTP Basic Tests",
         },
-      ],
-    },
-    {
-      id: "bolaAndBflaTests",
-      title: "BOLA and BFLA Tests",
-      items: [
         {
           id: "basicBola",
           label: "Basic BOLA",
@@ -52,6 +46,7 @@ export default function Tests() {
     <SearchSidebarControlled
       title="test suites"
       sections={sections}
+      noSectionTitles
       errors={Object.fromEntries(errors)}
       render={(selected) => (
         <Test suite={config[selected.itemId as SuiteId]} suiteId={selected.itemId} />
@@ -59,7 +54,7 @@ export default function Tests() {
       onSelected={(selected) => {
         dispatch(setTestSuiteId(selected.itemId));
       }}
-      selected={suiteId !== undefined ? { sectionId: "identityTests", itemId: suiteId } : undefined}
+      selected={suiteId !== undefined ? { sectionId: "default", itemId: suiteId } : undefined}
       renderButtons={() => (
         <Button
           style={{ width: "100%" }}
