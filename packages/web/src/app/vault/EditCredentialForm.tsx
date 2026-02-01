@@ -1,5 +1,6 @@
 import { SchemeType } from "@xliic/common/vault";
 import Input from "../../new-components/fat-fields/Input";
+import Roles from "./Roles";
 import BasicCredentialForm from "./credential/form/BasicCredentialForm";
 import { ApiKeyCredentialForm } from "./credential/form/ApiKeyCredentialForm";
 import BearerCredentialForm from "./credential/form/BearerCredentialForm";
@@ -22,6 +23,7 @@ export default function EditCredentialForm({ schemeType }: { schemeType: SchemeT
     <>
       <Input label="Name" name="name" />
       {credentialFormMap[schemeType]}
+      <Roles label="Roles" name="roles" />
     </>
   );
 }

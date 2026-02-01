@@ -9,6 +9,7 @@ export type CredentialMetadata = {
     expired?: boolean;
     disabled?: boolean;
   };
+  roles?: string[];
 };
 
 export type SecuritySchemeMetadata = {

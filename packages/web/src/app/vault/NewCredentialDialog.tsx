@@ -17,14 +17,14 @@ export default function NewCredentialDialog({
   existing: string[];
   schemeType: SchemeType;
 }) {
-  const defaultValues: Record<SchemeType, Record<string, string>> = {
-    basic: { name: "", username: "", password: "" },
-    apiKey: { name: "", key: "" },
+  const defaultValues: Record<SchemeType, Record<string, unknown>> = {
+    basic: { name: "", username: "", password: "", roles: [] },
+    apiKey: { name: "", key: "", roles: [] },
     alias: { name: "" },
-    bearer: { name: "", token: "", format: "" },
-    oauth2: { name: "", token: "" },
-    openIdConnect: { name: "", token: "" },
-    mutualTLS: { name: "", pkcsData: "", pkcsPassword: "" },
+    bearer: { name: "", token: "", format: "", roles: [] },
+    oauth2: { name: "", token: "", roles: [] },
+    openIdConnect: { name: "", token: "", roles: [] },
+    mutualTLS: { name: "", pkcsData: "", pkcsPassword: "", roles: [] },
   };
 
   const onSubmit = (data: any) => {

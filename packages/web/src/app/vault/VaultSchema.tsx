@@ -5,6 +5,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import {
   SecurityScheme,
   SecurityCredential,
+  CredentialMetadata,
   SchemeType,
   AliasSecurityScheme,
   CredentialsSecurityScheme,
@@ -158,6 +159,7 @@ function Credential({
         </TopDescription>
         <CredentialDetails>
           <CredentialView schemeType={schemeType} credential={credential} />
+          <CredentialRoles credential={credential} />
         </CredentialDetails>
       </CollapsibleCard>
       <EditCredentialDialog
@@ -200,6 +202,23 @@ function CredentialView({
   }
 }
 
+function CredentialRoles({ credential }: { credential: SecurityCredential }) {
+  const roles = (credential as CredentialMetadata).roles;
+  if (!roles || roles.length === 0) {
+    return null;
+  }
+  return (
+    <RolesDisplay>
+      <RolesLabel>Roles</RolesLabel>
+      <RolesList>
+        {roles.map((role) => (
+          <RoleTag key={role}>{role}</RoleTag>
+        ))}
+      </RolesList>
+    </RolesDisplay>
+  );
+}
+
 const VaultSchemaBody = styled.div``;
 const Metadata = styled.div`
   margin: 16px 0px;
@@ -228,4 +247,33 @@ const AliasDestination = styled.div`
 
 const CredentialDetails = styled.div`
   padding: 8px 12px;
+`;
+
+const RolesDisplay = styled.div`
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 0;
+`;
+
+const RolesLabel = styled.div`
+  font-weight: 600;
+  font-size: 90%;
+  min-width: 120px;
+  color: var(${ThemeColorVariables.foreground});
+`;
+
+const RolesList = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+`;
+
+const RoleTag = styled.div`
+  padding: 0 6px;
+  border-radius: 2px;
+  font-size: 12px;
+  line-height: 20px;
+  background-color: var(${ThemeColorVariables.badgeBackground});
+  color: var(${ThemeColorVariables.badgeForeground});
 `;
