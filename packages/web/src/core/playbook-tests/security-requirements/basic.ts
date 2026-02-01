@@ -1,4 +1,9 @@
-import { BundledSwaggerOrOasSpec, getSecurityRequirementsById } from "@xliic/openapi";
+import {
+  BundledSwaggerOrOasSpec,
+  SecurityRequirement,
+  getSecurityRequirementsById,
+  getSecuritySchemes,
+} from "@xliic/openapi";
 import { Result, success } from "@xliic/result";
 import { Vault } from "@xliic/common/vault";
 import { Playbook } from "@xliic/scanconf";
@@ -12,6 +17,7 @@ import { mockScenario, OperationVariables } from "../mock";
 import { getScenario } from "../scenario";
 import { execute } from "../http-api";
 import { updateSecurityRequirements } from "../mutate-oas";
+import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 
 type BasicSecReqTestConfig = TestConfig & {
   operationId: string[];
@@ -93,6 +99,33 @@ async function* cleanupScenario(
   return [];
 }
 
+function getAlternativeSecurityRequirements(
+  oas: BundledSwaggerOrOasSpec,
+  operationRequirements: SecurityRequirement[]
+): SecurityRequirement[] {
+  const schemeNames = Object.keys(getSecuritySchemes(oas));
+
+  const existing = operationRequirements.map((req) => new Set(Object.keys(req)));
+
+  return powerSet(schemeNames)
+    .filter((candidate) => !existing.some((req) => req.isSubsetOf(candidate)))
+    .map((subset) => Object.fromEntries([...subset].map((name) => [name, []])));
+}
+
+function powerSet(items: string[]): Set<string>[] {
+  const result: Set<string>[] = [];
+  for (let mask = 1; mask < 1 << items.length; mask++) {
+    const subset = new Set<string>();
+    for (let i = 0; i < items.length; i++) {
+      if (mask & (1 << i)) {
+        subset.add(items[i]);
+      }
+    }
+    result.push(subset);
+  }
+  return result;
+}
+
 async function* testScenario(
   oas: BundledSwaggerOrOasSpec,
   id: string,
@@ -102,16 +135,20 @@ async function* testScenario(
   scenario: Playbook.Scenario,
   stageToTest: number
 ): TestStageGenerator {
+  const operationRequirements = getSecurityRequirementsById(oas, id);
+  const alternatives = getAlternativeSecurityRequirements(oas, operationRequirements);
+
   yield {
     id: `${id}-seqreq-test`,
-    steps: runScenario(oas, scenario, stageToTest),
+    steps: runScenario(oas, scenario, stageToTest, alternatives),
   };
 }
 
 async function* runScenario(
   oas: BundledSwaggerOrOasSpec,
   scenario: Playbook.Scenario,
-  stageToTest: number
+  stageToTest: number,
+  security: SecurityRequirement[]
 ): StepGenerator<TestIssue[]> {
   const issues = [];
 
@@ -125,24 +162,27 @@ async function* runScenario(
 
     const operationId = stage.ref?.type === "operation" ? stage.ref.id : `stage-${i}`;
 
-    // test our target stage
-    console.log(`Testing operation for SEQREQ: ${operationId}`);
-    console.log("Stage:", stage);
+    console.log(
+      `Testing operation for SEQREQ: ${operationId} with schemes: ${JSON.stringify(security)}`
+    );
 
-    const [patched, error0] = updateSecurityRequirements(oas, operationId, [
-      {
-        basic: [],
-      },
-    ]);
+    const [patched, error0] = updateSecurityRequirements(oas, operationId, [security[0]]);
 
-    const [response, error] = yield* execute(stage, {
-      oas: patched,
-    });
+    if (error0 !== undefined) {
+      console.log(`Failed to patch security requirements: ${error0}`);
+      continue;
+    }
+
+    const auth = Object.keys(security[0]);
+
+    const [response, error] = yield* execute({ ...stage, auth }, { oas: patched });
 
     if (response?.statusCode === 200) {
       issues.push({
-        id: "potential-bola",
-        message: `Request succeeded - potential BOLA vulnerability (status: ${response?.statusCode}) in operationId ${operationId}`,
+        id: "security-requirements-not-enforced",
+        message: `Request succeeded with alternative security scheme "${JSON.stringify(
+          security[0]
+        )}" (status: ${response?.statusCode}) in operationId ${operationId}`,
       });
     }
   }

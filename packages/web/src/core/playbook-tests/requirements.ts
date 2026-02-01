@@ -2,6 +2,7 @@ import {
   BundledSwaggerOrOasSpec,
   deref,
   getOperations,
+  isSwagger,
   OpenApi30,
   OpenApi31,
   Swagger,
@@ -184,27 +185,47 @@ function checkVaultSchemeType(
   return false;
 }
 
-function getActiveSecuritySchemes(spec: BundledSwaggerOrOasSpec) {
-  const result: Record<
-    string,
-    Swagger.SecurityScheme | OpenApi30.SecurityScheme | OpenApi31.SecurityScheme
-  > = {};
+export function getSecuritySchemeNames(oas: BundledSwaggerOrOasSpec): Set<string> {
+  if (isSwagger(oas)) {
+    return oas.securityDefinitions ? new Set(Object.keys(oas.securityDefinitions)) : new Set();
+  } else {
+    return oas.components?.securitySchemes
+      ? new Set(Object.keys(oas.components.securitySchemes))
+      : new Set();
+  }
+}
+
+function getActiveSecuritySchemeNames(spec: BundledSwaggerOrOasSpec): Set<string> {
+  const result = new Set<string>();
   const operations = getOperations(spec);
   for (const [, , operation] of operations) {
     const security = operation.security ?? spec.security ?? [];
     for (const entry of security) {
       for (const name of Object.keys(entry)) {
-        const schemeOrRef =
-          "swagger" in spec
-            ? spec.securityDefinitions?.[name]
-            : spec.components?.securitySchemes?.[name];
-        const scheme = deref(spec, schemeOrRef);
-        if (scheme) {
-          result[name] = scheme;
-        }
+        result.add(name);
       }
     }
   }
 
   return result;
+}
+
+function getSecurityScheme(oas: BundledSwaggerOrOasSpec, name: string) {
+  if (isSwagger(oas)) {
+    return oas.securityDefinitions?.[name];
+  } else {
+    return oas.components?.securitySchemes?.[name];
+  }
+}
+
+function getActiveSecuritySchemes(
+  spec: BundledSwaggerOrOasSpec
+): Record<string, Swagger.SecurityScheme | OpenApi30.SecurityScheme | OpenApi31.SecurityScheme> {
+  const names = getActiveSecuritySchemeNames(spec);
+  const entries = Array.from(names).map((name) => {
+    const scheme = getSecurityScheme(spec, name);
+    const dereferenced = deref(spec, scheme);
+    return [name, dereferenced];
+  });
+  return Object.fromEntries(entries);
 }

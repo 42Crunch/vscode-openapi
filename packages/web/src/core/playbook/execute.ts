@@ -17,6 +17,7 @@ import {
 } from "./variables";
 import { createAuthCache, getAuthEntry, setAuthEntry, AuthCache } from "./auth-cache";
 import { Vault } from "@xliic/common/vault";
+import { de } from "zod/v4/locales";
 
 export type PlaybookError =
   | "playbook-aborted"
@@ -152,8 +153,8 @@ export async function* executePlaybook<R>(
 
     yield { event: "request-started", ref: stage.ref };
 
-    // skip auth for external requests
-    const auth = request.operationId === undefined ? undefined : request.auth;
+    const auth = getRequestAuth(request, stage);
+
     const security =
       securityOverride ??
       (yield* executeAuth(
@@ -615,4 +616,19 @@ export function getExternalEnvironment(file: Playbook.Bundle, envenv: EnvData): 
 
 export function getRequestByRef(file: Playbook.Bundle, ref: Playbook.RequestRef) {
   return ref.type === "operation" ? file.operations[ref.id]?.request : file.requests?.[ref.id];
+}
+
+function getRequestAuth(
+  request: Playbook.StageContent | Playbook.ExternalStageContent,
+  stage: Playbook.StageReference
+) {
+  // no auth for external requests
+  if (request.operationId !== undefined) {
+    // return stage auth if present, otherwise request auth
+    if (stage?.auth?.length !== undefined && stage.auth.length > 0) {
+      return stage.auth;
+    } else {
+      return request.auth;
+    }
+  }
 }

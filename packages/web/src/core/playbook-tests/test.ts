@@ -11,6 +11,7 @@ import { PlaybookEnvStack } from "../playbook/playbook-env";
 import { createAuthCache } from "../playbook/auth-cache";
 import { executePlaybook, getExternalEnvironment } from "../playbook/execute";
 import { SuiteConfig, Suite, TestIssue } from "./types";
+import { b } from "vitest/dist/chunks/suite.d.FvehnV49";
 
 export async function testPlaybook(
   client: HttpClient,
