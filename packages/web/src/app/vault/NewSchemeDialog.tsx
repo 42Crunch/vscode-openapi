@@ -6,9 +6,9 @@ import FormDialog from "../../new-components/FormDialog";
 import NewSchemeForm from "./NewSchemeForm";
 import { SchemeType } from "@xliic/common/vault";
 
-const SCHEME_NAME_REGEX = /^[a-zA-Z0-9\._\-]*$/;
+const SCHEME_NAME_REGEX = /^[a-zA-Z0-9\._\-]+$/;
 const SCHEME_NAME_REGEX_MESSAGE =
-  "Only alphanumeric characters, dot, underscore or hyphen are allowed in the scheme name";
+  "Only alphanumeric characters, dot, underscore or hyphen are allowed in the scheme name, and it cannot be empty";
 
 export default function NewSchemeDialog({
   onAddScheme,
