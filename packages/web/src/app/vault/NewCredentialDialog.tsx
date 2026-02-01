@@ -17,13 +17,15 @@ export default function NewCredentialDialog({
   existing: string[];
   schemeType: SchemeType;
 }) {
-  const defaultValues = {
-    name: "",
-    username: "",
-    password: "",
-    key: "",
+  const defaultValues: Record<SchemeType, Record<string, string>> = {
+    basic: { name: "", username: "", password: "" },
+    apiKey: { name: "", key: "" },
+    alias: { name: "" },
+    bearer: { name: "", token: "", format: "" },
+    oauth2: { name: "", token: "" },
+    openIdConnect: { name: "", token: "" },
+    mutualTLS: { name: "", pkcsData: "", pkcsPassword: "" },
   };
-  // FIXME default values per scheme type
 
   const onSubmit = (data: any) => {
     const name = data.name;
@@ -34,7 +36,7 @@ export default function NewCredentialDialog({
   return (
     <FormDialog
       title="New credential"
-      defaultValues={defaultValues}
+      defaultValues={defaultValues[schemeType]}
       schema={credentialFormSchema(undefined, existing)[schemeType]}
       onSubmit={onSubmit}
       trigger={

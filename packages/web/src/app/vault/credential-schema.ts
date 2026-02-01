@@ -30,9 +30,23 @@ export function credentialFormSchema(
       username: z.string().trim().min(1, { message: "Username is required" }),
       password: z.string().min(1, { message: "Password is required" }),
     }),
-    bearer: undefined,
-    oauth2: undefined,
-    openIdConnect: undefined,
-    mutualTLS: undefined,
+    bearer: z.object({
+      name: nameSchema(self, existing),
+      token: z.string().trim().min(1, { message: "Token is required" }),
+      format: z.string().trim().min(1, { message: "Format is required" }),
+    }),
+    oauth2: z.object({
+      name: nameSchema(self, existing),
+      token: z.string().trim().min(1, { message: "Access Token is required" }),
+    }),
+    openIdConnect: z.object({
+      name: nameSchema(self, existing),
+      token: z.string().trim().min(1, { message: "Access Token is required" }),
+    }),
+    mutualTLS: z.object({
+      name: nameSchema(self, existing),
+      pkcsData: z.string().trim().min(1, { message: "PKCS12 Data is required" }),
+      pkcsPassword: z.string().min(1, { message: "PKCS12 Password is required" }),
+    }),
   };
 }
