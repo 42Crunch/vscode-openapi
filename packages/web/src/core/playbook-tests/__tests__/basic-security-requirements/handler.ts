@@ -117,6 +117,19 @@ const getUsers: Handler = async (req, res) => {
   return respond(res, 200, userList);
 };
 
+const getUsersVulnerable: Handler = async (req, res) => {
+  // example of a vulnerable auth check, either admin or any authenticated user can access
+  const user = await getUserByBasicAuth(req);
+
+  if (!(verifyAdminAuth(req) || user)) {
+    return respond(res, 403, { message: "not authenticated" });
+  }
+
+  const userList = Object.keys(users).map((username) => ({ username }));
+
+  return respond(res, 200, userList);
+};
+
 const deleteUser: Handler = async (req, res, params, body) => {
   if (!verifyAdminAuth(req)) {
     return respond(res, 403, { message: "not authenticated" });
@@ -163,6 +176,7 @@ export const routes: Routes = [
   [{ path: "/post/:id", method: "DELETE" }, deletePost],
   [{ path: "/post/:id", method: "GET" }, getPost],
   [{ path: "/users", method: "GET" }, getUsers],
+  [{ path: "/users-vulnerable", method: "GET" }, getUsersVulnerable],
   [{ path: "/user", method: "POST" }, createUser],
   [{ path: "/user/:username", method: "DELETE" }, deleteUser],
 ];

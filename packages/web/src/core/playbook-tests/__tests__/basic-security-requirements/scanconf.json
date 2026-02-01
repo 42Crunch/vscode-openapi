@@ -454,6 +454,47 @@
           "fuzzing": true
         }
       ]
+    },
+    "getUsersVulnerable": {
+      "operationId": "getUsersVulnerable",
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "fuzzing": true,
+          "requests": [
+            {
+              "$ref": "#/operations/getUsersVulnerable/request",
+              "fuzzing": true
+            }
+          ]
+        }
+      ],
+      "request": {
+        "operationId": "getUsersVulnerable",
+        "auth": [
+          "admin"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "url": "{{host}}/basic-security-requirements/users-vulnerable",
+            "method": "GET"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          }
+        }
+      }
     }
   },
   "authenticationDetails": [
