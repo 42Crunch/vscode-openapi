@@ -25,6 +25,7 @@ export { default as Copy } from "./Copy";
 export { default as CrunchLogoMain } from "./CrunchLogoMain";
 export { default as EllipsisVertical } from "./EllipsisVertical";
 export { default as ExclamationCircle } from "./ExclamationCircle";
+export { default as EyeSolid } from "./EyeSolid";
 export { default as Eye } from "./Eye";
 export { default as FileCode } from "./FileCode";
 export { default as FileExport } from "./FileExport";

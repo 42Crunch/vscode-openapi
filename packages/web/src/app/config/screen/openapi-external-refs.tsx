@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import * as z from "zod";
 import styled from "styled-components";
-import { Eye } from "../../../icons";
+import { EyeSolid } from "../../../icons";
 import { useController, useFieldArray, useWatch } from "react-hook-form";
 
 const columnPlaceholders: ApprovedHostConfiguration = {
@@ -55,7 +55,7 @@ function OpenApiExternalRefsHostTableRow({ name }: { name: string }): JSX.Elemen
           title={`${showToken ? "Hide" : "Reveal"} token`}
           onClick={() => setShowToken(!showToken)}
         >
-          <Eye />
+          <EyeSolid />
         </RevealTokenInput>
       </TokenCellContainer>
     </Row>
