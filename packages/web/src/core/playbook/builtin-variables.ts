@@ -105,6 +105,8 @@ function vault(
     return [`${schemeCredential.key}`, undefined];
   } else if ("username" in schemeCredential && "password" in schemeCredential) {
     return [`${schemeCredential.username}:${schemeCredential.password}`, undefined];
+  } else if ("token" in schemeCredential) {
+    return [`${schemeCredential.token}`, undefined];
   }
 
   return [undefined, `Unsupported credential type for '$vault' variable`];
@@ -136,6 +138,8 @@ function vaultName(
     return [`${schemeCredential.key}`, undefined];
   } else if ("username" in schemeCredential && "password" in schemeCredential) {
     return [`${schemeCredential.username}:${schemeCredential.password}`, undefined];
+  } else if ("token" in schemeCredential) {
+    return [`${schemeCredential.token}`, undefined];
   }
 
   return [undefined, `Unsupported credential type for '$vault-name' variable`];

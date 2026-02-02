@@ -1,0 +1,15 @@
+{
+  "schemes": {
+    "apiKey": {
+      "type": "apiKey",
+      "credentials": {
+        "user1": {
+          "key": "user-token"
+        },
+        "admin1": {
+          "key": "admin-token"
+        }
+      }
+    }
+  }
+}
