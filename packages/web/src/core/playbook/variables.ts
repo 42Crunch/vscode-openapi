@@ -7,6 +7,7 @@ import {
   BundledSwaggerOrOasSpec,
   OpenApi30,
   OpenApi31,
+  SecurityRequirement,
 } from "@xliic/openapi";
 import { Environment } from "@xliic/common/env";
 import { Playbook } from "@xliic/scanconf";
@@ -78,13 +79,14 @@ export function replaceCredentialVariables(
   credential: Playbook.Credential,
   credentialName: string,
   credentialValue: string,
+  security: SecurityRequirement[],
   vault: Vault,
   envStack: PlaybookEnvStack
 ): PlaybookReplacementResult<string> {
   return substituteValues(
     credentialValue,
     envStack,
-    { credentialName, credential, vault },
+    { credentialName, credential, vault, security },
     { type: "credential", path: [] },
     () => ({
       body: undefined,

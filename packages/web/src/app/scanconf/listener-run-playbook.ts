@@ -388,7 +388,7 @@ export function onExecuteAuthentication(
           oas,
           server,
           playbook,
-          [`${selectedCredential}/${selectedSubcredential}`],
+          { playbookAuth: [`${selectedCredential}/${selectedSubcredential}`], security: [] },
           env,
           vault,
           0

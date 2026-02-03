@@ -4,6 +4,7 @@ import { Vault, getAnyCredential, getCredentialByName } from "@xliic/common/vaul
 import { Playbook } from "@xliic/scanconf";
 import { Result } from "@xliic/result";
 import { PlaybookVariableSubstitutionLocation } from "./playbook-env";
+import { SecurityRequirement } from "@xliic/openapi";
 
 export const DynamicVariableNames = [
   "$randomString",
@@ -90,10 +91,11 @@ function vault(
   location: PlaybookVariableSubstitutionLocation,
   fakerMaker: FakeMaker
 ): Result<string, string> {
-  const { credentialName, credential, vault } = object as {
+  const { credentialName, credential, vault, security } = object as {
     credentialName: string;
     credential: Playbook.Credential;
     vault: Vault;
+    security: SecurityRequirement[];
   };
 
   const [schemeCredential, schemeCredentialError] = getAnyCredential(vault, credentialName);

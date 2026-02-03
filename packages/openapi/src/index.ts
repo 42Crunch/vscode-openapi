@@ -137,7 +137,10 @@ export function getSecuritySchemes(oas: BundledSwaggerOrOasSpec) {
   }
 }
 
-export function getSecurityRequirementsById(oas: BundledSwaggerOrOasSpec, operationId: string) {
+export function getSecurityRequirementsById(
+  oas: BundledSwaggerOrOasSpec,
+  operationId: string
+): SecurityRequirement[] {
   const operation = getOperationById(oas, operationId);
   if (operation) {
     return operation.operation.security ?? oas.security ?? [];

@@ -1,6 +1,12 @@
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
 import { HttpClient, type HttpResponse, HttpError } from "@xliic/common/http";
-import { BundledSwaggerOrOasSpec, getOperationById, getHttpResponseRange } from "@xliic/openapi";
+import {
+  BundledSwaggerOrOasSpec,
+  getOperationById,
+  getHttpResponseRange,
+  SecurityRequirement,
+  getSecurityRequirementsById,
+} from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 import { Result, success, failure } from "@xliic/result";
 
@@ -17,7 +23,6 @@ import {
 } from "./variables";
 import { createAuthCache, getAuthEntry, setAuthEntry, AuthCache } from "./auth-cache";
 import { Vault } from "@xliic/common/vault";
-import { de } from "zod/v4/locales";
 
 export type PlaybookError =
   | "playbook-aborted"
@@ -43,6 +48,11 @@ export type PlaybookList = {
   name: string;
   requests: StaticRequestList;
 }[];
+
+type AuthContext = {
+  playbookAuth: string[];
+  security: SecurityRequirement[];
+};
 
 export async function* executeAllPlaybooks(
   client: HttpClient | MockHttpClient,
@@ -153,7 +163,7 @@ export async function* executePlaybook<R>(
 
     yield { event: "request-started", ref: stage.ref };
 
-    const auth = getRequestAuth(request, stage);
+    const auth = getRequestAuth(oasOverride ?? oas, request, stage);
 
     const security =
       securityOverride ??
@@ -425,7 +435,7 @@ export async function* executeAuth(
   oas: BundledSwaggerOrOasSpec,
   server: string,
   file: Playbook.Bundle,
-  auth: string[] | undefined,
+  auth: AuthContext | undefined,
   env: PlaybookEnvStack,
   vault: Vault,
   depth: number
@@ -435,7 +445,7 @@ export async function* executeAuth(
     return result;
   }
 
-  for (const authName of auth) {
+  for (const authName of auth.playbookAuth) {
     yield { event: "auth-started", name: authName };
     const [credentialName, methodName] = authName.split("/");
     const credential = file.authenticationDetails[0][credentialName];
@@ -482,6 +492,7 @@ export async function* executeAuth(
         credential,
         credentialName,
         method,
+        auth.security,
         env,
         vault,
         depth
@@ -515,6 +526,7 @@ async function* executeGetCredentialValue(
   credential: Playbook.Credential,
   credentialName: string,
   method: Playbook.CredentialMethod,
+  security: SecurityRequirement[],
   env: PlaybookEnvStack,
   vault: Vault,
   depth: number
@@ -547,6 +559,7 @@ async function* executeGetCredentialValue(
     credential,
     credentialName,
     method.credential,
+    security,
     vault,
     credentialEnvStack
   );
@@ -619,16 +632,19 @@ export function getRequestByRef(file: Playbook.Bundle, ref: Playbook.RequestRef)
 }
 
 function getRequestAuth(
+  oas: BundledSwaggerOrOasSpec,
   request: Playbook.StageContent | Playbook.ExternalStageContent,
   stage: Playbook.StageReference
-) {
+): AuthContext | undefined {
   // no auth for external requests
   if (request.operationId !== undefined) {
+    const security = getSecurityRequirementsById(oas, request.operationId);
     // return stage auth if present, otherwise request auth
     if (stage?.auth?.length !== undefined && stage.auth.length > 0) {
-      return stage.auth;
+      return { playbookAuth: stage.auth, security };
     } else {
-      return request.auth;
+      return { playbookAuth: request.auth!, security };
     }
   }
+  return undefined;
 }
