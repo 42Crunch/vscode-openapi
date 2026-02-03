@@ -12,21 +12,21 @@ import {
 import basicScopes from "./basic";
 
 function configure(spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault) {
-  const basicAuthFailed = usesAuth(spec, "basic");
-  if (basicAuthFailed) {
-    return failure({ usesAuth: basicAuthFailed });
+  const noAuth = usesAuth(spec, "openIdConnect");
+  if (noAuth) {
+    return failure({ usesAuth: noAuth });
   }
 
-  const atLeastTwoSchemesFailed = hasAtLeastTwoSecuritySchemes(spec);
+  // const atLeastTwoSchemesFailed = hasAtLeastTwoSecuritySchemes(spec);
 
-  if (atLeastTwoSchemesFailed) {
-    return failure({ hasAtLeastTwoSecuritySchemes: atLeastTwoSchemesFailed });
-  }
+  // if (atLeastTwoSchemesFailed) {
+  //   return failure({ hasAtLeastTwoSecuritySchemes: atLeastTwoSchemesFailed });
+  // }
 
-  const credentialsFailed = hasCredentialsForAllSchemes(spec, vault);
-  if (credentialsFailed) {
-    return failure({ hasCredentialsForAllSchemes: credentialsFailed });
-  }
+  // const credentialsFailed = hasCredentialsForAllSchemes(spec, vault);
+  // if (credentialsFailed) {
+  //   return failure({ hasCredentialsForAllSchemes: credentialsFailed });
+  // }
 
   return success({ basicScopes });
 }

@@ -34,11 +34,14 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfig; suiteId: 
         }}
       />
       {suiteFailures && (
-        <CollapsibleSection title={suiteId} defaultOpen={suiteHasFailures}>
-          {Object.entries(suiteFailures).map(([requirementId, failure]) => (
-            <div key={requirementId}>{failure}</div>
-          ))}
-        </CollapsibleSection>
+        <>
+          <h3>Failed test requirements</h3>
+          <CollapsibleSection title={suiteId} defaultOpen={suiteHasFailures}>
+            {Object.entries(suiteFailures).map(([requirementId, failure]) => (
+              <div key={requirementId}>{failure}</div>
+            ))}
+          </CollapsibleSection>
+        </>
       )}
 
       {tests && Object.keys(tests).length > 0 && (
