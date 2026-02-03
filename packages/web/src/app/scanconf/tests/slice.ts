@@ -25,6 +25,7 @@ const initialState: State = {
     basic: [undefined, {}],
     basicBola: [undefined, {}],
     basicSecurityRequirements: [undefined, {}],
+    basicScopes: [undefined, {}],
   },
 };
 

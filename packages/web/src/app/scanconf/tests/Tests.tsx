@@ -38,6 +38,10 @@ export default function Tests() {
           id: "basicSecurityRequirements",
           label: "Basic Security Requirements",
         },
+        {
+          id: "basicScopes",
+          label: "Basic Scopes",
+        },
       ],
     },
   ];

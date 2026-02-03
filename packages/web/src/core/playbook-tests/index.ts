@@ -2,12 +2,13 @@ import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import basic from "./basic";
 import basicBola from "./basic-bola";
 import basicSecurityRequirements from "./security-requirements";
+import basicScopes from "./scopes";
 import type { TestConfig, Suite, SuiteConfig, ConfigFailures } from "./types";
 import { Playbook } from "@xliic/scanconf";
 import { Vault } from "@xliic/common/vault";
 import { failure, Result, success } from "@xliic/result";
 
-const suites = { basic, basicBola, basicSecurityRequirements } as const;
+const suites = { basic, basicBola, basicSecurityRequirements, basicScopes } as const;
 
 type Suites = typeof suites;
 type SuiteId = keyof Suites;
