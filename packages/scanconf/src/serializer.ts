@@ -1,7 +1,7 @@
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
 import { NullableResult, Result } from "@xliic/result";
 import { joinJsonPointer } from "@xliic/preserving-json-yaml-parser";
-import { getAnyCredential, getCredentialByName, Vault } from "@xliic/common/vault";
+import { Vault } from "@xliic/common/vault";
 
 import * as scan from "./scanconfig";
 import * as playbook from "./playbook";
@@ -578,34 +578,6 @@ function serializeUrlencoded(value: object): Record<string, scan.UrlencodedObjec
   }, {} as Record<string, scan.UrlencodedObject>);
 }
 
-function replaceVaultValue(
-  schemeName: string,
-  value: string,
-  vault: Vault
-): Result<string, string> {
-  const ENTIRE_SCANCONF_VAR_REGEX = () => /^{{([\w\-$]+)(?::([\w\-]+))?}}$/;
-  const matches = value.match(ENTIRE_SCANCONF_VAR_REGEX());
-  if (matches && (matches.length === 2 || matches.length === 3)) {
-    const name = matches[1];
-    const parameter = matches[2];
-    if (name === "$vault") {
-      const [vaultValue, vaultError] = vaultAuto(vault, schemeName);
-      if (vaultError !== undefined) {
-        return [undefined, `failed to replace vault value: ${vaultError}`];
-      }
-      return [vaultValue, undefined];
-    } else if (name === "$vault-name" && parameter !== undefined) {
-      const [vaultNameValue, vaultNameError] = vaultName(vault, schemeName, parameter);
-      if (vaultNameError !== undefined) {
-        return [undefined, `failed to replace vault-name value: ${vaultNameError}`];
-      }
-      return [vaultNameValue, undefined];
-    }
-  }
-
-  return [value, undefined];
-}
-
 function replaceCredentialValue(
   schemeName: string,
   value: string,
@@ -613,47 +585,11 @@ function replaceCredentialValue(
   options: SerializationOptions
 ): Result<string, string> {
   if (!options?.replaceVaultSecrets) {
-    return [value, undefined];
+    // temporarily disabling vault secret handling
+    // it likely shouldn't be done in the serializer at all
+    // but rather before passing playbook to the serializer
+    return [undefined, "Vault secret replacement is disabled"];
   }
 
-  return replaceVaultValue(schemeName, value, vault!);
-}
-
-function vaultAuto(vault: Vault, schemeName: string): Result<string, string> {
-  const [schemeCredential, schemeCredentialError] = getAnyCredential(vault, schemeName);
-  if (schemeCredentialError !== undefined) {
-    return [undefined, schemeCredentialError];
-  }
-
-  if ("key" in schemeCredential) {
-    return [`${schemeCredential.key}`, undefined];
-  } else if ("username" in schemeCredential && "password" in schemeCredential) {
-    return [`${schemeCredential.username}:${schemeCredential.password}`, undefined];
-  }
-
-  return [undefined, `Unsupported credential type for '$vault' variable`];
-}
-
-function vaultName(
-  vault: Vault,
-  schemeName: string,
-  credentialName: string
-): Result<string, string> {
-  const [schemeCredential, schemeCredentialError] = getCredentialByName(
-    vault,
-    schemeName,
-    credentialName
-  );
-
-  if (schemeCredentialError !== undefined) {
-    return [undefined, schemeCredentialError];
-  }
-
-  if ("key" in schemeCredential) {
-    return [`${schemeCredential.key}`, undefined];
-  } else if ("username" in schemeCredential && "password" in schemeCredential) {
-    return [`${schemeCredential.username}:${schemeCredential.password}`, undefined];
-  }
-
-  return [undefined, `Unsupported credential type for '$vault-name' variable`];
+  return [value, undefined];
 }

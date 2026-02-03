@@ -1,7 +1,8 @@
 import styled from "styled-components";
 
 import { Playbook } from "@xliic/scanconf";
-import { Vault, getScheme } from "@xliic/common/vault";
+import { Vault } from "@xliic/common/vault";
+import { getScheme } from "../../../core/vault";
 import Button from "../../../new-components/Button";
 
 export default function VaultDetails({ errors }: { errors: string[] }) {

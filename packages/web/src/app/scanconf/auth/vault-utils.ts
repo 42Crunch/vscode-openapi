@@ -1,4 +1,5 @@
-import { Vault, getScheme } from "@xliic/common/vault";
+import { Vault } from "@xliic/common/vault";
+import { getScheme } from "../../../core/vault";
 import { BundledSwaggerOrOasSpec, getSecurityScheme } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 

@@ -1,6 +1,7 @@
 import { findByPath } from "@xliic/preserving-json-yaml-parser";
 
-import { Vault, getAnyCredential, getCredentialByName } from "@xliic/common/vault";
+import { Vault } from "@xliic/common/vault";
+import { getAnyCredential, getCredentialByName } from "../vault";
 import { Playbook } from "@xliic/scanconf";
 import { Result } from "@xliic/result";
 import { PlaybookVariableSubstitutionLocation } from "./playbook-env";
@@ -98,7 +99,11 @@ function vault(
     security: SecurityRequirement[];
   };
 
-  const [schemeCredential, schemeCredentialError] = getAnyCredential(vault, credentialName);
+  const [schemeCredential, schemeCredentialError] = getAnyCredential(
+    vault,
+    credentialName,
+    security
+  );
   if (schemeCredentialError !== undefined) {
     return [undefined, schemeCredentialError];
   }

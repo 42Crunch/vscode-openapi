@@ -4,7 +4,7 @@ import styled from "styled-components";
 
 import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
-import { getCredentialNamesFromScheme } from "@xliic/common/vault";
+import { getCredentialNamesFromScheme } from "../../../core/vault";
 
 import Input from "../../../new-components/fat-fields/Input";
 import FormDialog from "../../../new-components/FormDialog";
