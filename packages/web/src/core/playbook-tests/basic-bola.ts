@@ -6,11 +6,7 @@ import { Playbook } from "@xliic/scanconf";
 import { Test, TestConfig, Suite, ConfigFailures, TestStageGenerator, TestIssue } from "./types";
 import { playbookStageToExecutionStep, StepGenerator } from "../playbook/execute";
 import { PlaybookEnvStack, PlaybookLookupResult } from "../playbook/playbook-env";
-import {
-  hasMultipleBasicAuthCredentials,
-  hasValidBasicAuthCredentials,
-  usesBasicAuth,
-} from "./requirements";
+import { hasMultipleBasicAuthCredentials, usesAuth } from "./requirements";
 import { getAllOperationIds } from "./selector";
 import { mockScenario, OperationVariables } from "./mock";
 import { getScenario } from "./scenario";
@@ -229,9 +225,9 @@ const suite: Suite = {
   description: "Simple BOLA test suite",
 
   configure: function (spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault) {
-    const basicAuthFailed = usesBasicAuth(spec, playbook, vault);
+    const basicAuthFailed = usesAuth(spec, "basic");
     if (basicAuthFailed) {
-      return failure({ usesBasicAuth: basicAuthFailed });
+      return failure({ usesAuth: basicAuthFailed });
     }
 
     const credentialsFailed = hasMultipleBasicAuthCredentials(spec, vault, 2);

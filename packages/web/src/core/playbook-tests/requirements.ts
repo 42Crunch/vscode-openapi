@@ -10,36 +10,63 @@ import {
 import { Result } from "@xliic/result";
 import {
   BasicSecurityScheme,
+  SchemeType,
   Vault,
   SecurityScheme as VaultSecurityScheme,
 } from "@xliic/common/vault";
-import { Playbook } from "@xliic/scanconf";
 
-export function usesAuth(spec: BundledSwaggerOrOasSpec): string | undefined {
+export type AuthType = Exclude<SchemeType, "alias">;
+
+const authTypeLabels: Record<AuthType, string> = {
+  basic: "Basic Auth",
+  apiKey: "API Key",
+  bearer: "Bearer",
+  oauth2: "OAuth2",
+  openIdConnect: "OpenID Connect",
+  mutualTLS: "Mutual TLS",
+};
+
+function matchesAuthType(
+  scheme: Swagger.SecurityScheme | OpenApi30.SecurityScheme | OpenApi31.SecurityScheme,
+  type: AuthType
+): boolean {
+  switch (type) {
+    case "basic":
+      return (scheme.type === "http" && scheme.scheme === "basic") || scheme.type === "basic";
+    case "apiKey":
+      return scheme.type === "apiKey";
+    case "bearer":
+      return scheme.type === "http" && scheme.scheme?.toLowerCase() === "bearer";
+    case "oauth2":
+      return scheme.type === "oauth2";
+    case "openIdConnect":
+      return scheme.type === "openIdConnect";
+    case "mutualTLS":
+      return scheme.type === "mutualTLS";
+  }
+}
+
+export function usesAuth(
+  spec: BundledSwaggerOrOasSpec,
+  type?: AuthType
+): string | undefined {
   const activeSchemes = getActiveSecuritySchemes(spec);
+  if (type) {
+    for (const scheme of Object.values(activeSchemes)) {
+      if (matchesAuthType(scheme, type)) {
+        return undefined;
+      }
+    }
+    return `No operations using ${authTypeLabels[type]} schemes found`;
+  }
   if (Object.keys(activeSchemes).length > 0) {
     return undefined;
   }
   return "No operations using authentication found";
 }
 
-export function usesBasicAuth(
-  spec: BundledSwaggerOrOasSpec,
-  playbook: Playbook.Bundle,
-  vault: Vault
-): string | undefined {
-  const activeSchemes = getActiveSecuritySchemes(spec);
-  for (const scheme of Object.values(activeSchemes)) {
-    if (scheme?.type === "http" && scheme?.scheme === "basic") {
-      return undefined;
-    }
-  }
-  return "No operations using Basic Auth schemes found";
-}
-
 export function hasValidBasicAuthCredentials(
   spec: BundledSwaggerOrOasSpec,
-  playbook: Playbook.Bundle,
   vault: Vault
 ): string {
   const [schemes, errors] = matchActiveSchemesToVault(spec, vault);
@@ -157,32 +184,10 @@ function checkVaultSchemeType(
   vaultScheme: VaultSecurityScheme,
   scheme: Swagger.SecurityScheme | OpenApi30.SecurityScheme | OpenApi31.SecurityScheme
 ): boolean {
-  if (scheme.type === "http" && scheme.scheme === "basic" && vaultScheme.type === "basic") {
-    return true;
+  if (vaultScheme.type === "alias") {
+    return false;
   }
-  if (scheme.type === "basic" && vaultScheme.type === "basic") {
-    return true;
-  }
-  if (scheme.type === "apiKey" && vaultScheme.type === "apiKey") {
-    return true;
-  }
-  if (
-    scheme.type === "http" &&
-    scheme.scheme?.toLowerCase() === "bearer" &&
-    vaultScheme.type === "bearer"
-  ) {
-    return true;
-  }
-  if (scheme.type === "oauth2" && vaultScheme.type === "oauth2") {
-    return true;
-  }
-  if (scheme.type === "openIdConnect" && vaultScheme.type === "openIdConnect") {
-    return true;
-  }
-  if (scheme.type === "mutualTLS" && vaultScheme.type === "mutualTLS") {
-    return true;
-  }
-  return false;
+  return matchesAuthType(scheme, vaultScheme.type);
 }
 
 export function getSecuritySchemeNames(oas: BundledSwaggerOrOasSpec): Set<string> {

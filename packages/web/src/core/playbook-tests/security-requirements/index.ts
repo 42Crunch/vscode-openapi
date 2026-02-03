@@ -7,14 +7,14 @@ import { Suite } from "../types";
 import {
   hasAtLeastTwoSecuritySchemes,
   hasCredentialsForAllSchemes,
-  usesBasicAuth,
+  usesAuth,
 } from "../requirements";
 import basicSecurityRequirements from "./basic";
 
 function configure(spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault) {
-  const basicAuthFailed = usesBasicAuth(spec, playbook, vault);
+  const basicAuthFailed = usesAuth(spec, "basic");
   if (basicAuthFailed) {
-    return failure({ usesBasicAuth: basicAuthFailed });
+    return failure({ usesAuth: basicAuthFailed });
   }
 
   const atLeastTwoSchemesFailed = hasAtLeastTwoSecuritySchemes(spec);

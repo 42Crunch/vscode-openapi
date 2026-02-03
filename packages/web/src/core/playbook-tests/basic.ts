@@ -8,7 +8,7 @@ import { StepGenerator } from "../playbook/execute";
 import { selectOperationBySecurityScheme, selectOperationsToTest } from "./selector";
 import { PlaybookEnvStack } from "../playbook/playbook-env";
 import { execute } from "./http-api";
-import { hasValidBasicAuthCredentials, usesBasicAuth } from "./requirements";
+import { hasValidBasicAuthCredentials, usesAuth } from "./requirements";
 import { getScenario } from "./scenario";
 
 type TruncateTestConfig = TestConfig & {
@@ -21,7 +21,7 @@ const truncatedPasswordsTest: Test<TruncateTestConfig> = {
     playbook: Playbook.Bundle,
     vault: Vault
   ): Promise<Result<TruncateTestConfig, ConfigFailures>> {
-    const failed = hasValidBasicAuthCredentials(oas, playbook, vault);
+    const failed = hasValidBasicAuthCredentials(oas, vault);
     if (failed) {
       return failure({ hasValidBasicAuthCredentials: failed });
     }
@@ -184,9 +184,9 @@ const suite: Suite = {
   description: "A suite of tests for Basic Authentication.",
 
   configure: function (spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vault: Vault) {
-    const failed = usesBasicAuth(spec, playbook, vault);
+    const failed = usesAuth(spec, "basic");
     if (failed) {
-      return failure({ usesBasicAuth: failed });
+      return failure({ usesAuth: failed });
     }
 
     return success({ truncatedPasswordsTest });
