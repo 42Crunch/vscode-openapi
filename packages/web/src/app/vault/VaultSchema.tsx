@@ -159,7 +159,7 @@ function Credential({
         </TopDescription>
         <CredentialDetails>
           <CredentialView schemeType={schemeType} credential={credential} />
-          <CredentialRoles credential={credential} />
+          <CredentialScopes credential={credential} />
         </CredentialDetails>
       </CollapsibleCard>
       <EditCredentialDialog
@@ -202,20 +202,20 @@ function CredentialView({
   }
 }
 
-function CredentialRoles({ credential }: { credential: SecurityCredential }) {
-  const roles = (credential as CredentialMetadata).roles;
-  if (!roles || roles.length === 0) {
+function CredentialScopes({ credential }: { credential: SecurityCredential }) {
+  const scopes = (credential as CredentialMetadata).scopes;
+  if (!scopes || scopes.length === 0) {
     return null;
   }
   return (
-    <RolesDisplay>
-      <RolesLabel>Roles</RolesLabel>
-      <RolesList>
-        {roles.map((role) => (
-          <RoleTag key={role}>{role}</RoleTag>
+    <ScopesDisplay>
+      <ScopesLabel>Scopes</ScopesLabel>
+      <ScopesList>
+        {scopes.map((scope) => (
+          <ScopeTag key={scope}>{scope}</ScopeTag>
         ))}
-      </RolesList>
-    </RolesDisplay>
+      </ScopesList>
+    </ScopesDisplay>
   );
 }
 
@@ -249,27 +249,27 @@ const CredentialDetails = styled.div`
   padding: 8px 12px;
 `;
 
-const RolesDisplay = styled.div`
+const ScopesDisplay = styled.div`
   display: flex;
   gap: 8px;
   align-items: center;
   padding: 4px 0;
 `;
 
-const RolesLabel = styled.div`
+const ScopesLabel = styled.div`
   font-weight: 600;
   font-size: 90%;
   min-width: 120px;
   color: var(${ThemeColorVariables.foreground});
 `;
 
-const RolesList = styled.div`
+const ScopesList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
 `;
 
-const RoleTag = styled.div`
+const ScopeTag = styled.div`
   padding: 0 6px;
   border-radius: 2px;
   font-size: 12px;

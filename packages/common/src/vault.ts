@@ -9,7 +9,7 @@ export type CredentialMetadata = {
     expired?: boolean;
     disabled?: boolean;
   };
-  roles?: string[];
+  scopes?: string[];
 };
 
 export type SecuritySchemeMetadata = {

@@ -15,7 +15,7 @@ const nameSchema = (self: string | undefined, existing: string[]) =>
       message: "Already exists",
     });
 
-const rolesSchema = z.array(z.string().trim().min(1)).optional();
+const scopesSchema = z.array(z.string().trim().min(1)).optional();
 
 export function credentialFormSchema(
   self: string | undefined,
@@ -25,36 +25,36 @@ export function credentialFormSchema(
     apiKey: z.object({
       name: nameSchema(self, existing),
       key: z.string().trim().min(1, { message: "Api Key is required" }),
-      roles: rolesSchema,
+      scopes: scopesSchema,
     }),
     alias: undefined,
     basic: z.object({
       name: nameSchema(self, existing),
       username: z.string().trim().min(1, { message: "Username is required" }),
       password: z.string().min(1, { message: "Password is required" }),
-      roles: rolesSchema,
+      scopes: scopesSchema,
     }),
     bearer: z.object({
       name: nameSchema(self, existing),
       token: z.string().trim().min(1, { message: "Token is required" }),
       format: z.string().trim().min(1, { message: "Format is required" }),
-      roles: rolesSchema,
+      scopes: scopesSchema,
     }),
     oauth2: z.object({
       name: nameSchema(self, existing),
       token: z.string().trim().min(1, { message: "Access Token is required" }),
-      roles: rolesSchema,
+      scopes: scopesSchema,
     }),
     openIdConnect: z.object({
       name: nameSchema(self, existing),
       token: z.string().trim().min(1, { message: "Access Token is required" }),
-      roles: rolesSchema,
+      scopes: scopesSchema,
     }),
     mutualTLS: z.object({
       name: nameSchema(self, existing),
       pkcsData: z.string().trim().min(1, { message: "PKCS12 Data is required" }),
       pkcsPassword: z.string().min(1, { message: "PKCS12 Password is required" }),
-      roles: rolesSchema,
+      scopes: scopesSchema,
     }),
   };
 }

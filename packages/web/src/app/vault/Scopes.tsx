@@ -5,33 +5,33 @@ import { useController } from "react-hook-form";
 import { ThemeColorVariables } from "@xliic/common/theme";
 import { Xmark } from "../../icons";
 
-export default function Roles({ label, name }: { label: string; name: string }) {
+export default function Scopes({ label, name }: { label: string; name: string }) {
   const {
     field: { value, onChange },
     fieldState: { error, invalid },
   } = useController({ name });
 
-  const roles: string[] = value ?? [];
+  const scopes: string[] = value ?? [];
   const [input, setInput] = useState("");
 
-  const addRole = () => {
+  const addScope = () => {
     const trimmed = input.trim();
-    if (trimmed !== "" && !roles.includes(trimmed)) {
-      onChange([...roles, trimmed]);
+    if (trimmed !== "" && !scopes.includes(trimmed)) {
+      onChange([...scopes, trimmed]);
     }
     setInput("");
   };
 
-  const removeRole = (role: string) => {
-    onChange(roles.filter((r) => r !== role));
+  const removeScope = (scope: string) => {
+    onChange(scopes.filter((r) => r !== scope));
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      addRole();
-    } else if (e.key === "Backspace" && input === "" && roles.length > 0) {
-      removeRole(roles[roles.length - 1]);
+      addScope();
+    } else if (e.key === "Backspace" && input === "" && scopes.length > 0) {
+      removeScope(scopes[scopes.length - 1]);
     }
   };
 
@@ -41,10 +41,10 @@ export default function Roles({ label, name }: { label: string; name: string }) 
         <Inner $invalid={invalid}>
           <Title>{label}</Title>
           <TagArea>
-            {roles.map((role) => (
-              <TagItem key={role}>
-                <span>{role}</span>
-                <RemoveButton type="button" onClick={() => removeRole(role)}>
+            {scopes.map((scope) => (
+              <TagItem key={scope}>
+                <span>{scope}</span>
+                <RemoveButton type="button" onClick={() => removeScope(scope)}>
                   <Xmark />
                 </RemoveButton>
               </TagItem>
@@ -53,8 +53,8 @@ export default function Roles({ label, name }: { label: string; name: string }) 
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={onKeyDown}
-              onBlur={addRole}
-              placeholder={roles.length === 0 ? "Type a role and press Enter" : ""}
+              onBlur={addScope}
+              placeholder={scopes.length === 0 ? "Type a scope and press Enter" : ""}
             />
           </TagArea>
         </Inner>
