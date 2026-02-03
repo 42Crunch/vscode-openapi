@@ -104,6 +104,7 @@ function vault(
     credentialName,
     security
   );
+
   if (schemeCredentialError !== undefined) {
     return [undefined, schemeCredentialError];
   }
