@@ -26,10 +26,10 @@ export default function Tests() {
       id: "default",
       title: "Identity Tests",
       items: [
-        {
-          id: "basic",
-          label: "HTTP Basic Tests",
-        },
+        // {
+        //   id: "basic",
+        //   label: "HTTP Basic Tests",
+        // },
         {
           id: "basicBola",
           label: "Basic BOLA",

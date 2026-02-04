@@ -140,6 +140,7 @@ async function* testScenario(
   const schemeName = (request as Playbook.StageContent)?.auth?.[0];
   const credential = getVaultCredential(vault, schemeName!);
   const credentials = truncatedThree(credential);
+  console.log("Generated truncated credentials", credentials);
   for (let i = 0; i < credentials.length; i++) {
     yield {
       id: `${id}-truncated-test=${i}`,

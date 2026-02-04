@@ -13,7 +13,7 @@ type UserInfo = {
 type AuthN = (req: IncomingMessage) => Promise<string | undefined>;
 
 const data: Record<string, UserInfo> = {
-  "user@example.com": {
+  "user1@example.com": {
     user: "user@example.com",
     pass: "password123",
     name: "John Doe",
@@ -46,7 +46,8 @@ async function handleGetUserInfo(req: IncomingMessage, res: ServerResponse, auth
 
 async function getUserByBasicAuth(req: IncomingMessage): Promise<string | undefined> {
   const credentials = getHttpBasicCredentials(req);
-  if (credentials === "user:password123") {
+  console.log("Credentials:", credentials);
+  if (credentials === "user1:password123") {
     return "user@example.com";
   }
 }
