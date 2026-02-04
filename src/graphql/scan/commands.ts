@@ -5,31 +5,22 @@
 
 import * as vscode from "vscode";
 
-import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
-import { stringify } from "@xliic/preserving-json-yaml-parser";
+import { HttpMethod } from "@xliic/openapi";
 
 import { Cache } from "../../cache";
-import { Configuration, configuration } from "../../configuration";
+import { Configuration } from "../../configuration";
 import { ensureHasCredentials } from "../../credentials";
-import { OperationIdNode } from "../../outlines/nodes/operation-ids";
-import { OperationNode } from "../../outlines/nodes/paths";
-import { TagChildNode } from "../../outlines/nodes/tags";
-import { getPathAndMethod } from "../../outlines/util";
-import { Bundle } from "../../types";
 import { SignUpWebView } from "../../webapps/signup/view";
 import { existsUri } from "../../util/fs";
 import { formatException } from "../../platform/util";
-import { createScanConfigWithPlatform } from "../../platform/scan/runtime/platform";
 import { Logger, PlatformContext } from "../../platform/types";
 import { getOrCreateScanconfUri, getScanconfUri } from "../../platform/scan/config";
 import { PlatformStore } from "../../platform/stores/platform-store";
-import {
-  createGqlScanConfigWithCliBinary,
-  createScanConfigWithCliBinary,
-  ensureCliDownloaded,
-} from "../../platform/cli-ast";
+import { createGqlScanConfigWithCliBinary, ensureCliDownloaded } from "../../platform/cli-ast";
 import { loadConfig } from "../../util/config";
 import { basename } from "path";
+import { ScanWebView } from "../../platform/scan/view";
+import { ScanGqlWebView } from "./view";
 
 export default (
   context: vscode.ExtensionContext,
@@ -39,7 +30,7 @@ export default (
   configuration: Configuration,
   secrets: vscode.SecretStorage,
   logger: Logger,
-  getScanView: null, // (uri: vscode.Uri) => Promise<ScanWebView>
+  getScanView: (uri: vscode.Uri) => Promise<ScanGqlWebView>,
   getExistingReportView: null, // (uri: vscode.Uri) => ScanReportWebView
   signUpWebView: SignUpWebView,
 ) => {
@@ -138,7 +129,7 @@ async function editorRunSingleOperationScan(
   configuration: Configuration,
   secrets: vscode.SecretStorage,
   logger: Logger,
-  getScanView: null, //(uri: vscode.Uri) => Promise<ScanWebView>,
+  getScanView: (uri: vscode.Uri) => Promise<ScanGqlWebView>,
   path: string,
   method: HttpMethod,
 ): Promise<void> {
@@ -196,8 +187,9 @@ async function editorRunSingleOperationScan(
     return;
   }
 
-  // const view = await getScanView(editor.document.uri);
-  // return view.sendScanOperation(bundle, editor.document, scanconfUri, path, method);
+  const view = await getScanView(editor.document.uri);
+  // todo: replace {} to graphql stuff
+  return view.sendScanOperation({}, editor.document, scanconfUri);
 }
 
 async function createDefaultScanConfig(

@@ -14,6 +14,10 @@ import { AuditContext } from "../../types";
 // import { getOpenapiAlias } from "./config";
 import { SignUpWebView } from "../../webapps/signup/view";
 import { Logger, PlatformContext } from "../../platform/types";
+import { ScanWebView } from "../../platform/scan/view";
+import { ScanReportWebView } from "../../platform/scan/report-view";
+import { getOpenapiAlias } from "../../platform/scan/config";
+import { ScanGqlWebView } from "./view";
 
 const selectors = {
   graphql: { scheme: "file", language: "graphql" },
@@ -40,49 +44,49 @@ export function activate(
   auditContext: AuditContext,
 ): vscode.Disposable {
   let disposables: vscode.Disposable[] = [];
-  // const scanViews: Record<string, ScanWebView> = {};
-  // const reportViews: Record<string, ScanReportWebView> = {};
+  const scanViews: Record<string, ScanGqlWebView> = {};
+  const reportViews: Record<string, ScanReportWebView> = {}; // todo: later
 
-  // const getScanView = async (uri: vscode.Uri): Promise<ScanWebView> => {
-  //   const viewId = uri.toString();
-  //   const alias = (await getOpenapiAlias(uri)) || "unknown";
+  const getScanView = async (uri: vscode.Uri): Promise<ScanGqlWebView> => {
+    const viewId = uri.toString();
+    const alias = (await getOpenapiAlias(uri)) || "unknown";
 
-  //   if (scanViews[viewId] === undefined) {
-  //     scanViews[viewId] = new ScanWebView(
-  //       alias,
-  //       context.extensionPath,
-  //       cache,
-  //       logger,
-  //       configuration,
-  //       context.workspaceState,
-  //       secrets,
-  //       store,
-  //       envStore,
-  //       prefs,
-  //       auditView,
-  //       () => getReportView(uri),
-  //       auditContext,
-  //     );
-  //   }
+    if (scanViews[viewId] === undefined) {
+      scanViews[viewId] = new ScanGqlWebView(
+        alias,
+        context.extensionPath,
+        cache,
+        logger,
+        configuration,
+        context.workspaceState,
+        secrets,
+        store,
+        envStore,
+        prefs,
+        auditView,
+        () => getReportView(uri),
+        auditContext,
+      );
+    }
 
-  //   return scanViews[viewId];
-  // };
+    return scanViews[viewId];
+  };
 
-  // const getReportView = async (uri: vscode.Uri): Promise<ScanReportWebView> => {
-  //   const viewId = uri.toString();
-  //   const alias = (await getOpenapiAlias(uri)) || "unknown";
+  const getReportView = async (uri: vscode.Uri): Promise<ScanReportWebView> => {
+    const viewId = uri.toString();
+    const alias = (await getOpenapiAlias(uri)) || "unknown";
 
-  //   if (reportViews[viewId] === undefined) {
-  //     reportViews[viewId] = new ScanReportWebView(alias, context.extensionPath, cache);
-  //   }
+    if (reportViews[viewId] === undefined) {
+      reportViews[viewId] = new ScanReportWebView(alias, context.extensionPath, cache);
+    }
 
-  //   return reportViews[viewId];
-  // };
+    return reportViews[viewId];
+  };
 
-  // const getExistingReportView = (uri: vscode.Uri): ScanReportWebView => {
-  //   const viewId = uri.toString();
-  //   return reportViews[viewId];
-  // };
+  const getExistingReportView = (uri: vscode.Uri): ScanReportWebView => {
+    const viewId = uri.toString();
+    return reportViews[viewId];
+  };
 
   const scanCodelensProvider = new ScanGqlCodelensProvider(cache);
 
@@ -113,7 +117,7 @@ export function activate(
     configuration,
     secrets,
     logger,
-    null, //getScanView,
+    getScanView,
     null, //getExistingReportView,
     signUpWebView,
   );

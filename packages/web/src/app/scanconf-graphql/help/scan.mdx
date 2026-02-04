@@ -1,0 +1,331 @@
+# What is API Conformance Scan
+
+API Conformance Scan is a dynamic API testing tool designed to ensure that your API implementation aligns with its OpenAPI/Swagger definition.
+By comparing the documented API specification with the actual implementation, Scan helps you identify any discrepancies or inconsistencies.
+
+To achieve this, Scan generates a multitude of requests that deviate from the declared OpenAPI file and sends them to your server.
+The tool then evaluates each response, providing insights into how well your API implementation matches its documented counterpart.
+
+## Video tutorial
+
+For a quick introduction to API Conformance Scan, watch our <Link href="https://42crunch.com/tutorial-security-conformance-scan-openapi-swagger-extension-vs-code/">video tutorial</Link>.
+
+# Getting Started
+
+## Default configuration
+
+When you run Scan for the first time, it generates a default configuration for your OpenAPI file.
+ This initial setup produces a set of "happy path" requests, one for every operation defined in your OpenAPI specification.
+
+The contents of each "happy path" request is available to you in the "Operations" tab of the Scan UI.
+
+These "happy path" requests serve as the foundation for testing, establishing a reliable baseline of expected behavior for each operation.
+At the start of a test for each operation Scan expects to successfully execute a "happy path" request before running the rest of the test.
+
+This default configuration is suitable for simple operations; however, more complex operations may require customizations
+to ensure effective testing.
+
+## Customizing defaults
+
+### Operations
+
+You can change the default happy path requests by modifying their payloads within the Operations tab.
+Additionally, you can configure authentication details and fine-tune the body and parameters
+of each operation either directly or utilize variable expressions.
+
+### Scenarios
+
+When your API operation relies on pre-existing resources or requires post-execution cleanup,
+Scenarios come into play. This is particularly useful when you need to set up certain conditions
+before executing an operation and then tear them down afterwards.
+
+A great example of this is the "update user" operation, which updates a user object.
+Before calling this operation, you'd typically want to ensure that the user object exists and after the update, remove it.
+Scenarios enable you to achieve this by adding operations to the "Before" block (e.g., creating the user),
+using the resulting resource in the happy path of the scenario, and then performing cleanup in the "After" block (e.g., deleting the user).
+
+You can create a Scenario for any operation defined in your OpenAPI in the "Scenarios" tab.
+
+## Trying operations
+
+Before launching your scan, you may want to execute individual Operations or Scenarios to ensure they can be successfully run by the Scan.
+
+To facilitate this process, the Scan UI provides a "Try" feature.
+
+When you click "Try" on an Operation or Scenario, the Scan UI will send relevant requests to the server and allow
+ you to inspect the details of the payload sent and the response received.
+
+## Starting the Scan
+
+You can initiate scanning from the "Operations" tab in the Scan UI, where you have two options to do that:
+ scan the entire API by clicking the "Scan all operations" button at the bottom of the list,
+  or click the "Scan" button at the top of a currently selected operation to test just that one operation.
+
+# User Interface
+
+## Operations
+
+Operations tab shows all operations defined in your OpenAPI file. Details of a request configured in this tab are used as a "happy path" request,
+ if not overriden by a Scenario for this request.
+
+You can edit details of a request body and parameters by editing them here.
+You can also use variable expressions (such as `{{name}}`) to substitute parameters or parts of
+the body with values from a variables.
+
+### Environment
+
+The Environment tab in each Operation allows you to define variables that can be used in variable
+expressions in request bodies and parameters.
+
+You can also use variable expression within the VALUE field of environment entries,
+creating values that combine other existing variables and constants.
+
+For instance, by defining an environment variable `username` with a value like `user-{{$randomuint}}@company.com`,
+you can set its actual value to something like `user-555@company.com`.
+
+### Response processing
+
+The Response Processing feature allows you to extract specific values from an operation's responses and
+store them in variables, which can then be used in subsequent operations (particularly useful when multiple operations are part of a Scenario).
+
+To achieve this, you can define response processing statements that specify what information to extract,
+ where to find it, and where to store the retrieved data. These statements are organized by response code, so if your operation returns multiple
+ possible codes (e.g., 200, 400, 5XX), you can create separate groups for each.
+
+Each response processing statement consists of a name of the variable where the extracted information will be stored, as well as a source,
+specifying the location where Scan should look for the desired information, such as request
+or response body, headers, cookies, path or query string parameters.
+
+Additionally, if you're extracting a value from a request or response body, you can use
+JsonPointer or JsonPath to pinpoint the exact location of the value you're looking for.
+
+### Unset variables
+
+In an Operation, every variable expression must resolve to a value before
+the Operation can be executed. However, it is possible to reference variables
+that do not have a value set.
+
+Unset variables in an Operation may be useful when you plan to use the same
+Operation in multiple Scenarios, each providing a different set of values
+for every variable used in the Operation.
+
+However, if an Operation contains an unset variable, you cannot utilize the
+'Try' feature to test the Operation without first providing a value for it.
+
+To resolve this issue, Scan UI lists all required variables for the Operation
+in "Unset variables" and enables you to provide values for them, allowing you
+to use the 'Try' feature.
+
+Please note that test inputs are not saved to the scan configuration.
+
+## Scenarios
+
+Use scenarios to create complex sequences of operations to implement a "happy path" request for any operation
+that cannot be tested with a single request defined in the Operations tab.
+
+If you define a scenario for an operation, it will be used to perform a "happy path" request instead of the one defined in the Operations tab.
+
+Additionally, if an operation has a defined scenario, you can still use it as is in other scenarios.
+
+
+### Happy path scenario
+
+The  "happy path" scenario is the only type of scenario you can currently create in Scan.
+In future versions of Scan, we plan to introduce additional scenario types.
+
+This scenario contains operation references that should be performed in order to execute the test.
+When creating a new scenario, it will initially contain just one reference to the operation selected during scenario creation.
+
+You can add more operation references to the scenario by clicking the "Pick operation" button.
+These references can also be reordered within the scenario using drag-and-drop functionality.
+
+Each operation reference within a scenario has its own distinct response processing configuration and
+environment variables, which take precedence over those defined at the operation level.
+
+### Before and after blocks
+
+Before and after blocks are used to define operations that should be executed before and after the happy path scenario,
+and serve mainly as setup and cleanup steps.
+
+The "Before" and "After" blocks in Scan allow you to define operations that should be executed before and after your Scenario.
+These blocks primarily serve as setup and cleanup steps. These blocks are shared between all scenarios.
+
+### Autorization tests
+
+The Authorization Tests section enables you to apply Broken Object Level Authorization (BOLA)
+and Broken Function Level Authorization (BLFA) tests, as defined in the global Tests section, to your scenario.
+
+## Global blocks
+
+The Global Before and After blocks provide an opportunity to execute setup and cleanup steps at the Scan level.
+These blocks are run only once, respectively, before and after the entire scan execution, allowing you to perform
+global initialization and cleanup tasks.
+
+
+## Authentication
+
+Certain operations may require authentication to function properly.
+Configure authentication settings in the Scan UI's Authentication section.
+
+### Security schemes
+
+A "Security Scheme" describes the type of authentication required by an operation,
+closely following the contents of the relevant OpenAPI's Security Scheme.
+
+These security schemes define the authentication requirements and how they should be sent.
+ For example, you can specify using an API key and sending it in a specific HTTP header.
+
+### Credentials
+
+Credentials are primarily related to authorization aspects of your operations.
+Although all operations might share the same authentication type, some may have different authorization requirements.
+
+For example, while most operations might be accessible to ordinary users, others might require admin privileges.
+
+To effectively test such APIs, you can create distinct Credentials for "ordinary" and
+"admin" users, configuring respective operations to use one or the other.
+
+### Secrets
+
+You may need to use secrets like passwords or API keys as credential values.
+
+The best practice is to avoid storing these sensitive values directly in your scan configuration.
+
+Instead, consider using variables to access secret values received from external sources.
+You can create a variable using the "External inputs" feature in the global Environment section of the scan configuration
+and then utilize variable expression to inject the value into your credential.
+
+For instance, you could create an entry in "External inputs" to define the `password1` variable,
+and then set credential value to `{{password1}}`.
+
+### Dynamic identities
+
+In certain situations, you may need to set identities dynamically using information from one or multiple API calls.
+
+A common example is when all operations in an API require authentication with a token returned by a "login" operation.
+
+To achieve this, you can add a call to the "login" operation within credential, extract the token from its
+response and store it in a variable named `token`. Then, use the expression `{{token}}` in the credential value to access
+the dynamically retrieved token.
+
+You can leverage operations defined in the OpenAPI to retrieve credentials or create external operations to call APIs that are not part of it.
+
+## Tests
+
+The Tests section enables you to define Broken Object Level Authorization (BOLA) and Broken Function Level Authorization (BLFA) tests,
+which can be applied to your scenarios and API operations.
+
+## Environment
+
+### External inputs
+
+The External Inputs section in the Environment allows you to use data from external sources in your Scan configuration.
+
+You can provide input values from outside the Scan using:
+
+- The Environment data stored in the IDE
+
+- Docker container environment variables, if running the Scan with Docker or ScanD Manager outside of the IDE
+
+Each entry in this section defines a variable name that can be used in the Scan configuration "Name" and the corresponding environment
+variable to pass the value to the Scan configuration "Source environment variable".
+
+These entries are marked as either required or not. For non-required entries, you can specify a default value that will be us
+ed if an external value is not provided.
+
+**Important**: You must provide values for all required external inputs before running the scan, otherwise it will fail.
+
+## Settings
+
+The Settings section allows you to customize the behavior of your Scan.
+
+### Logging configuration
+
+In this section, you can configure the logging level and log destination to control the verbosity and output location
+ of logs generated during the scan.
+
+### Environment settings
+
+Choose your global environment settings for scanning.
+
+By default, a "default" environment is created, but you can also create additional environments and switch between them.
+
+# General Concepts
+
+## Variable substitution
+
+Variable substitution is a powerful feature that enables dynamic changes to your requests and responses.
+
+### Syntax
+
+Variable substitution uses variable expressions, which look like this: `{{variable_name}}`.
+
+### Definition of variables
+
+You can define variables in the following sections:
+
+* Global environment section
+* Operation environment section
+* Scenario environment section
+* Response processing section of the Operation or Scenario
+
+### Usage
+
+Variables can be used in various parts of your requests and responses, including:
+
+* Request body
+* Request parameters
+* Response processing
+* Identites
+
+When performing variable substitution, the lookup order is as follows: scenario variables, operation variable, global variables.
+
+### Variable types
+
+Variables have types, which are defined in the Environment section. You can use variables with types `string`, `number`, `boolean`, or `null`.
+
+### Variables in JSON
+
+When substituting variables in the request body, always quote
+ the variable expression, even if you're substituting a number or boolean.
+
+After substitution, the actual type of the variable is used in the request.
+
+For example, if you define a variable `age` with a numeric value of 10, and use it in a request body like this:
+`{ "user_ age": "{{age}}"}` the resulting JSON will be `{ "user_age": 10 }`.
+
+## Built-in variables
+
+There are a number of built in variables that you can use in your scan configuration.
+
+ - `$randomString`:  Generates a random alphanumeric string of 20 characters
+ - `$randomuint`: Generates a random uint32 integer
+ - `$uuid`: Generates a unique UUID
+ - `$timestamp`: Generates the current time in UNIX format
+ - `$timestamp3339`: Generates the current date and time as defined in RFC 3339
+ - `$randomFromSchema`: Generates the values based on the schema defined in your OpenAPI definition
+
+
+## Keeping configuration in sync with OpenAPI
+
+The scan configuration must be kept in sync with the OpenAPI file it is based on,
+as it is crucial for accurate and comprehensive testing. To help users keep
+their scan configuration in sync, the Scan UI checks if the scan configuration
+matches the OpenAPI file, and in the presence of changes, offers to update the scan configuration
+accordingly.
+
+The types of changes that the Scan UI can handle are:
+
+- Adding new operations to the OpenAPI file
+- Removing operations from the OpenAPI file
+- Renaming operations (changing their `operationId`)
+- Adding new security schemes to the OpenAPI file
+
+However, changes to the schemas describing operation payloads (body, parameters, etc),
+adding or removing parameters, etc. are not handled by the Scan UI, as these can be customized by the user.
+
+If such changes are made to the OpenAPI file, the user must make appropriate changes to
+the scan configuration manually.
+
+When changes are detected, the Scan UI will prompt you to update the
+scan configuration to reflect the modifications made to the OpenAPI file.
