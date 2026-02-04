@@ -1,13 +1,22 @@
 {
   "schemes": {
-    "apiKey": {
-      "type": "apiKey",
+    "openIdConnect": {
+      "type": "openIdConnect",
       "credentials": {
         "user1": {
-          "key": "user-token"
+          "token": "user-token",
+          "scopes": [
+            "posts:read",
+            "posts:write"
+          ]
         },
-        "admin1": {
-          "key": "admin-token"
+        "admin": {
+          "token": "admin-token",
+          "scopes": [
+            "posts:read",
+            "posts:write",
+            "admin"
+          ]
         }
       }
     }

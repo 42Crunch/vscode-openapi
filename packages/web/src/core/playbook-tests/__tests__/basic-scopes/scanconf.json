@@ -1,471 +1,479 @@
 {
-    "version": "2.0.0",
-    "runtimeConfiguration": {
-        "environment": "default",
-        "laxTestingModeEnabled": false,
-        "apiConnectivityCheck": true,
-        "logLevel": "error",
-        "logDestination": "stdout+platform",
-        "logMaxFileSize": 2147483648,
-        "requestHeaderNameRequestId": "x-scan-request-id",
-        "requestHeaderNameScenarioId": "x-scan-scenario-id",
-        "requestHeaderNameRequestType": "x-scan-request-type",
-        "requestFlowrate": 100,
-        "requestTimeout": 30,
-        "requestTlsInsecureSkipVerify": true,
-        "responseFollowRedirection": false,
-        "responseMaxBodySizeScan": 10485760,
-        "happyPathOnly": false,
-        "maxRequestRetryAttempts": 5,
-        "maxScanDuration": 1800,
-        "memoryLimit": 2147483648,
-        "memoryTimeSpan": 10,
-        "reportMaxRequestSizeHappyPath": 8092,
-        "reportMaxRequestSizeTest": 8092,
-        "reportIncludeRequestBody": true,
-        "reportIncludeResponseBody": true,
-        "reportMaxHttpResponseSizeHappyPath": 8092,
-        "reportMaxBodySizeHappyPath": 8092,
-        "reportMaxHttpResponseSizeTest": 8092,
-        "reportMaxBodySizeTest": 8092,
-        "reportIssuesOnly": false,
-        "reportMaxIssues": 1000,
-        "reportMaxSize": 20971520,
-        "reportGenerateCurlCommand": true,
-        "normalizeServerUrls": true
+  "version": "2.0.0",
+  "runtimeConfiguration": {
+    "environment": "default",
+    "laxTestingModeEnabled": false,
+    "apiConnectivityCheck": true,
+    "logLevel": "error",
+    "logDestination": "stdout+platform",
+    "logMaxFileSize": 2147483648,
+    "requestHeaderNameRequestId": "x-scan-request-id",
+    "requestHeaderNameScenarioId": "x-scan-scenario-id",
+    "requestHeaderNameRequestType": "x-scan-request-type",
+    "requestFlowrate": 100,
+    "requestTimeout": 30,
+    "requestTlsInsecureSkipVerify": true,
+    "responseFollowRedirection": false,
+    "responseMaxBodySizeScan": 10485760,
+    "happyPathOnly": false,
+    "maxRequestRetryAttempts": 5,
+    "maxScanDuration": 1800,
+    "memoryLimit": 2147483648,
+    "memoryTimeSpan": 10,
+    "reportMaxRequestSizeHappyPath": 8092,
+    "reportMaxRequestSizeTest": 8092,
+    "reportIncludeRequestBody": true,
+    "reportIncludeResponseBody": true,
+    "reportMaxHttpResponseSizeHappyPath": 8092,
+    "reportMaxBodySizeHappyPath": 8092,
+    "reportMaxHttpResponseSizeTest": 8092,
+    "reportMaxBodySizeTest": 8092,
+    "reportIssuesOnly": false,
+    "reportMaxIssues": 1000,
+    "reportMaxSize": 20971520,
+    "reportGenerateCurlCommand": true,
+    "normalizeServerUrls": true
+  },
+  "customizations": {
+    "happyPaths": {
+      "retry": 1,
+      "responsePolicy": {
+        "httpStatusExpected": true,
+        "mustBeConformant": true
+      },
+      "httpStatusExpected": []
     },
-    "customizations": {
-        "happyPaths": {
-            "retry": 1,
-            "responsePolicy": {
-                "httpStatusExpected": true,
-                "mustBeConformant": true
-            },
-            "httpStatusExpected": []
-        },
-        "tests": {
-            "responsePolicy": {
-                "httpStatusExpected": true,
-                "mustBeConformant": true
-            }
-        }
-    },
-    "authenticationDetails": [
-        {
-            "openIdConnect": {
-                "type": "openIdConnect",
-                "default": "openIdConnect",
-                "credentials": {
-                    "openIdConnect": {
-                        "description": "openIdConnect security",
-                        "credential": "{{openIdConnect}}"
-                    }
-                }
-            }
-        }
-    ],
-    "operations": {
-        "createPost": {
-            "operationId": "createPost",
-            "scenarios": [
-                {
-                    "key": "happy.path",
-                    "fuzzing": true,
-                    "requests": [
-                        {
-                            "$ref": "#/operations/createPost/request",
-                            "fuzzing": true
-                        }
-                    ]
-                }
-            ],
-            "request": {
-                "operationId": "createPost",
-                "auth": [
-                    "openIdConnect"
-                ],
-                "request": {
-                    "type": "42c",
-                    "details": {
-                        "url": "{{host}}/basic-scopes/post",
-                        "method": "POST",
-                        "headers": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "requestBody": {
-                            "mode": "json",
-                            "json": {
-                                "content": "augoepuukkftqpltmktsapaekfxldfez"
-                            }
-                        }
-                    }
-                },
-                "defaultResponse": "201",
-                "responses": {
-                    "201": {
-                        "expectations": {
-                            "httpStatus": 201
-                        }
-                    },
-                    "403": {
-                        "expectations": {
-                            "httpStatus": 403
-                        }
-                    }
-                }
-            }
-        },
-        "createUser": {
-            "operationId": "createUser",
-            "scenarios": [
-                {
-                    "key": "happy.path",
-                    "fuzzing": true,
-                    "requests": [
-                        {
-                            "$ref": "#/operations/createUser/request",
-                            "fuzzing": true
-                        }
-                    ]
-                }
-            ],
-            "request": {
-                "operationId": "createUser",
-                "auth": [
-                    "openIdConnect"
-                ],
-                "request": {
-                    "type": "42c",
-                    "details": {
-                        "url": "{{host}}/basic-scopes/user",
-                        "method": "POST",
-                        "headers": [
-                            {
-                                "key": "Content-Type",
-                                "value": "application/json"
-                            }
-                        ],
-                        "requestBody": {
-                            "mode": "json",
-                            "json": {
-                                "username": "otgusgtgacehgwubrvjiwipzjpsguvik"
-                            }
-                        }
-                    }
-                },
-                "defaultResponse": "201",
-                "responses": {
-                    "201": {
-                        "expectations": {
-                            "httpStatus": 201
-                        }
-                    },
-                    "403": {
-                        "expectations": {
-                            "httpStatus": 403
-                        }
-                    }
-                }
-            }
-        },
-        "deletePost": {
-            "operationId": "deletePost",
-            "scenarios": [
-                {
-                    "key": "happy.path",
-                    "fuzzing": true,
-                    "requests": [
-                        {
-                            "$ref": "#/operations/deletePost/request",
-                            "fuzzing": true
-                        }
-                    ]
-                }
-            ],
-            "request": {
-                "operationId": "deletePost",
-                "auth": [
-                    "openIdConnect"
-                ],
-                "request": {
-                    "type": "42c",
-                    "details": {
-                        "url": "{{host}}/basic-scopes/post/{id}",
-                        "method": "DELETE",
-                        "paths": [
-                            {
-                                "key": "id",
-                                "value": 7888136487805612082
-                            }
-                        ]
-                    }
-                },
-                "defaultResponse": "200",
-                "responses": {
-                    "200": {
-                        "expectations": {
-                            "httpStatus": 200
-                        }
-                    },
-                    "403": {
-                        "expectations": {
-                            "httpStatus": 403
-                        }
-                    },
-                    "404": {
-                        "expectations": {
-                            "httpStatus": 404
-                        }
-                    }
-                }
-            }
-        },
-        "deleteUser": {
-            "operationId": "deleteUser",
-            "scenarios": [
-                {
-                    "key": "happy.path",
-                    "fuzzing": true,
-                    "requests": [
-                        {
-                            "$ref": "#/operations/deleteUser/request",
-                            "fuzzing": true
-                        }
-                    ]
-                }
-            ],
-            "request": {
-                "operationId": "deleteUser",
-                "auth": [
-                    "openIdConnect"
-                ],
-                "request": {
-                    "type": "42c",
-                    "details": {
-                        "url": "{{host}}/basic-scopes/user/{username}",
-                        "method": "DELETE",
-                        "paths": [
-                            {
-                                "key": "username",
-                                "value": "cdmwjgdqoydsvymrtvmgsrpenqqeffwb"
-                            }
-                        ]
-                    }
-                },
-                "defaultResponse": "200",
-                "responses": {
-                    "200": {
-                        "expectations": {
-                            "httpStatus": 200
-                        }
-                    },
-                    "403": {
-                        "expectations": {
-                            "httpStatus": 403
-                        }
-                    },
-                    "404": {
-                        "expectations": {
-                            "httpStatus": 404
-                        }
-                    }
-                }
-            }
-        },
-        "getPost": {
-            "operationId": "getPost",
-            "scenarios": [
-                {
-                    "key": "happy.path",
-                    "fuzzing": true,
-                    "requests": [
-                        {
-                            "$ref": "#/operations/getPost/request",
-                            "fuzzing": true
-                        }
-                    ]
-                }
-            ],
-            "request": {
-                "operationId": "getPost",
-                "auth": [
-                    "openIdConnect"
-                ],
-                "request": {
-                    "type": "42c",
-                    "details": {
-                        "url": "{{host}}/basic-scopes/post/{id}",
-                        "method": "GET",
-                        "paths": [
-                            {
-                                "key": "id",
-                                "value": 6500084529520585235
-                            }
-                        ]
-                    }
-                },
-                "defaultResponse": "200",
-                "responses": {
-                    "200": {
-                        "expectations": {
-                            "httpStatus": 200
-                        }
-                    },
-                    "403": {
-                        "expectations": {
-                            "httpStatus": 403
-                        }
-                    },
-                    "404": {
-                        "expectations": {
-                            "httpStatus": 404
-                        }
-                    }
-                }
-            }
-        },
-        "getPosts": {
-            "operationId": "getPosts",
-            "scenarios": [
-                {
-                    "key": "happy.path",
-                    "fuzzing": true,
-                    "requests": [
-                        {
-                            "$ref": "#/operations/getPosts/request",
-                            "fuzzing": true
-                        }
-                    ]
-                }
-            ],
-            "request": {
-                "operationId": "getPosts",
-                "auth": [
-                    "openIdConnect"
-                ],
-                "request": {
-                    "type": "42c",
-                    "details": {
-                        "url": "{{host}}/basic-scopes/posts",
-                        "method": "GET"
-                    }
-                },
-                "defaultResponse": "200",
-                "responses": {
-                    "200": {
-                        "expectations": {
-                            "httpStatus": 200
-                        }
-                    },
-                    "403": {
-                        "expectations": {
-                            "httpStatus": 403
-                        }
-                    }
-                }
-            }
-        },
-        "getUsers": {
-            "operationId": "getUsers",
-            "scenarios": [
-                {
-                    "key": "happy.path",
-                    "fuzzing": true,
-                    "requests": [
-                        {
-                            "$ref": "#/operations/getUsers/request",
-                            "fuzzing": true
-                        }
-                    ]
-                }
-            ],
-            "request": {
-                "operationId": "getUsers",
-                "auth": [
-                    "openIdConnect"
-                ],
-                "request": {
-                    "type": "42c",
-                    "details": {
-                        "url": "{{host}}/basic-scopes/users",
-                        "method": "GET"
-                    }
-                },
-                "defaultResponse": "200",
-                "responses": {
-                    "200": {
-                        "expectations": {
-                            "httpStatus": 200
-                        }
-                    },
-                    "403": {
-                        "expectations": {
-                            "httpStatus": 403
-                        }
-                    }
-                }
-            }
-        },
-        "getUsersVulnerable": {
-            "operationId": "getUsersVulnerable",
-            "scenarios": [
-                {
-                    "key": "happy.path",
-                    "fuzzing": true,
-                    "requests": [
-                        {
-                            "$ref": "#/operations/getUsersVulnerable/request",
-                            "fuzzing": true
-                        }
-                    ]
-                }
-            ],
-            "request": {
-                "operationId": "getUsersVulnerable",
-                "auth": [
-                    "openIdConnect"
-                ],
-                "request": {
-                    "type": "42c",
-                    "details": {
-                        "url": "{{host}}/basic-scopes/users-vulnerable",
-                        "method": "GET"
-                    }
-                },
-                "defaultResponse": "200",
-                "responses": {
-                    "200": {
-                        "expectations": {
-                            "httpStatus": 200
-                        }
-                    },
-                    "403": {
-                        "expectations": {
-                            "httpStatus": 403
-                        }
-                    }
-                }
-            }
-        }
-    },
-    "environments": {
-        "default": {
-            "variables": {
-                "host": {
-                    "from": "environment",
-                    "name": "SCAN42C_HOST",
-                    "required": false,
-                    "default": "http://localhost:8888"
-                },
-                "openIdConnect": {
-                    "from": "environment",
-                    "name": "SCAN42C_SECURITY_OPENIDCONNECT",
-                    "required": true
-                }
-            }
-        }
+    "tests": {
+      "responsePolicy": {
+        "httpStatusExpected": true,
+        "mustBeConformant": true
+      }
     }
+  },
+  "environments": {
+    "default": {
+      "variables": {
+        "host": {
+          "name": "SCAN42C_HOST",
+          "from": "environment",
+          "required": false,
+          "default": "http://localhost:8888"
+        },
+        "openIdConnect": {
+          "name": "SCAN42C_SECURITY_OPENIDCONNECT",
+          "from": "environment",
+          "required": true
+        }
+      }
+    }
+  },
+  "operations": {
+    "createPost": {
+      "operationId": "createPost",
+      "request": {
+        "operationId": "createPost",
+        "auth": [
+          "openIdConnect"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "createPost",
+            "method": "POST",
+            "url": "{{host}}/basic-scopes/post",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "content": "augoepuukkftqpltmktsapaekfxldfez"
+              }
+            }
+          }
+        },
+        "defaultResponse": "201",
+        "responses": {
+          "201": {
+            "expectations": {
+              "httpStatus": 201
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/createPost/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "createUser": {
+      "operationId": "createUser",
+      "request": {
+        "operationId": "createUser",
+        "auth": [
+          "openIdConnect"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "createUser",
+            "method": "POST",
+            "url": "{{host}}/basic-scopes/user",
+            "headers": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "requestBody": {
+              "mode": "json",
+              "json": {
+                "username": "otgusgtgacehgwubrvjiwipzjpsguvik"
+              }
+            }
+          }
+        },
+        "defaultResponse": "201",
+        "responses": {
+          "201": {
+            "expectations": {
+              "httpStatus": 201
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/createUser/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "deletePost": {
+      "operationId": "deletePost",
+      "request": {
+        "operationId": "deletePost",
+        "auth": [
+          "openIdConnect"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "deletePost",
+            "method": "DELETE",
+            "url": "{{host}}/basic-scopes/post/{id}",
+            "paths": [
+              {
+                "key": "id",
+                "value": 7888136487805612000
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "404": {
+            "expectations": {
+              "httpStatus": 404
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/deletePost/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "deleteUser": {
+      "operationId": "deleteUser",
+      "request": {
+        "operationId": "deleteUser",
+        "auth": [
+          "openIdConnect"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "deleteUser",
+            "method": "DELETE",
+            "url": "{{host}}/basic-scopes/user/{username}",
+            "paths": [
+              {
+                "key": "username",
+                "value": "cdmwjgdqoydsvymrtvmgsrpenqqeffwb"
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "404": {
+            "expectations": {
+              "httpStatus": 404
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/deleteUser/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "getPost": {
+      "operationId": "getPost",
+      "request": {
+        "operationId": "getPost",
+        "auth": [
+          "openIdConnect"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "getPost",
+            "method": "GET",
+            "url": "{{host}}/basic-scopes/post/{id}",
+            "paths": [
+              {
+                "key": "id",
+                "value": 6500084529520586000
+              }
+            ]
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          },
+          "404": {
+            "expectations": {
+              "httpStatus": 404
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/getPost/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "getPosts": {
+      "operationId": "getPosts",
+      "request": {
+        "operationId": "getPosts",
+        "auth": [
+          "openIdConnect"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "getPosts",
+            "method": "GET",
+            "url": "{{host}}/basic-scopes/posts"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/getPosts/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "getUsers": {
+      "operationId": "getUsers",
+      "request": {
+        "operationId": "getUsers",
+        "auth": [
+          "openIdConnect"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "getUsers",
+            "method": "GET",
+            "url": "{{host}}/basic-scopes/users"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/getUsers/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    },
+    "getUsersVulnerable": {
+      "operationId": "getUsersVulnerable",
+      "request": {
+        "operationId": "getUsersVulnerable",
+        "auth": [
+          "openIdConnect"
+        ],
+        "request": {
+          "type": "42c",
+          "details": {
+            "operationId": "getUsersVulnerable",
+            "method": "GET",
+            "url": "{{host}}/basic-scopes/users-vulnerable"
+          }
+        },
+        "defaultResponse": "200",
+        "responses": {
+          "200": {
+            "expectations": {
+              "httpStatus": 200
+            }
+          },
+          "403": {
+            "expectations": {
+              "httpStatus": 403
+            }
+          }
+        }
+      },
+      "scenarios": [
+        {
+          "key": "happy.path",
+          "requests": [
+            {
+              "fuzzing": true,
+              "$ref": "#/operations/getUsersVulnerable/request"
+            }
+          ],
+          "fuzzing": true
+        }
+      ]
+    }
+  },
+  "authenticationDetails": [
+    {
+      "openIdConnect": {
+        "type": "openIdConnect",
+        "default": "openIdConnect",
+        "credentials": {
+          "openIdConnect": {
+            "credential": "{{$vault}}",
+            "description": "openIdConnect security"
+          }
+        }
+      }
+    }
+  ]
 }
