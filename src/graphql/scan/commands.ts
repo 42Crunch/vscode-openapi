@@ -23,7 +23,11 @@ import { createScanConfigWithPlatform } from "../../platform/scan/runtime/platfo
 import { Logger, PlatformContext } from "../../platform/types";
 import { getOrCreateScanconfUri, getScanconfUri } from "../../platform/scan/config";
 import { PlatformStore } from "../../platform/stores/platform-store";
-import { createScanConfigWithCliBinary, ensureCliDownloaded } from "../../platform/cli-ast";
+import {
+  createGqlScanConfigWithCliBinary,
+  createScanConfigWithCliBinary,
+  ensureCliDownloaded,
+} from "../../platform/cli-ast";
 import { loadConfig } from "../../util/config";
 import { basename } from "path";
 
@@ -218,7 +222,13 @@ async function createDefaultScanConfig(
     async (progress, cancellationToken): Promise<boolean> => {
       try {
         console.info("scanconfUri = " + scanconfUri);
-        //await createScanConfigWithCliBinary(scanconfUri, text, tags, cliDirectoryOverride, logger);
+        await createGqlScanConfigWithCliBinary(
+          scanconfUri,
+          text,
+          tags,
+          cliDirectoryOverride,
+          logger,
+        );
 
         vscode.window.showInformationMessage(
           `Saved API GraphQL Conformance Scan configuration to: ${scanconfUri.toString()}`,
