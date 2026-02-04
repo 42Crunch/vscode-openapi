@@ -17,17 +17,6 @@ function configure(spec: BundledSwaggerOrOasSpec, playbook: Playbook.Bundle, vau
     return failure({ usesAuth: noAuth });
   }
 
-  // const atLeastTwoSchemesFailed = hasAtLeastTwoSecuritySchemes(spec);
-
-  // if (atLeastTwoSchemesFailed) {
-  //   return failure({ hasAtLeastTwoSecuritySchemes: atLeastTwoSchemesFailed });
-  // }
-
-  // const credentialsFailed = hasCredentialsForAllSchemes(spec, vault);
-  // if (credentialsFailed) {
-  //   return failure({ hasCredentialsForAllSchemes: credentialsFailed });
-  // }
-
   return success({ basicScopes });
 }
 

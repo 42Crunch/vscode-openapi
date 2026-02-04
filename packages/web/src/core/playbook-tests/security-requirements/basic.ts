@@ -199,58 +199,6 @@ function findStageToTest(scenario: Playbook.Scenario, operationId: string): numb
   return undefined;
 }
 
-function isBolaInjectableParameter(found: PlaybookLookupResult): boolean {
-  // bola injectable parameters are parameters in the path (for now)
-  const path = found.location.path;
-  return (
-    path.length === 4 &&
-    path[0] === "parameters" &&
-    path[1] === "path" &&
-    typeof path[2] === "number" &&
-    path[3] === "value"
-  );
-}
-
-function hasBolaInjectionTargets(variables: OperationVariables[], operationId: string): boolean {
-  // check if any of the injectable parameters were set by operations prior to this one
-  const operationIndex = variables.findIndex((v) => v.operationId === operationId);
-  if (operationIndex === -1) {
-    return false;
-  }
-
-  const operation = variables[operationIndex];
-
-  for (const found of operation.found) {
-    // if parameter of interest comes from prior step, then it's a valid injection target
-    if (
-      (isBolaInjectableParameter(found) && found.source.type === "playbook-request") ||
-      found.source.type === "playbook-stage"
-    ) {
-      if (found.source.step < operationIndex) {
-        console.log(
-          `Parameter "${found.name}" of operation "${operation.operationId}" comes from step ${found.source.step}, injectable!`
-        );
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-async function canBeTestedForBola(
-  oas: BundledSwaggerOrOasSpec,
-  playbook: Playbook.Bundle,
-  vault: Vault,
-  operationId: string
-): Promise<boolean> {
-  const mock = await mockScenario(oas, playbook, operationId, vault);
-
-  console.log(`Mocked scenario for operationId "${operationId}":`, mock);
-
-  return hasBolaInjectionTargets(mock.variables, operationId);
-}
-
 export default {
   configure,
   run,

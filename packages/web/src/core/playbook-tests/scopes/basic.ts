@@ -29,13 +29,7 @@ async function configure(
 ): Promise<Result<BasicSecReqTestConfig, ConfigFailures>> {
   const operationIds: string[] = [];
 
-  for (const operationId of getAllOperationIds(oas)) {
-    const securityRequirements = getSecurityRequirementsById(oas, operationId);
-
-    if (securityRequirements.length > 0) {
-      operationIds.push(operationId);
-    }
-  }
+  // TODO find operations that have security requirements with scopes
 
   return success({ operationId: operationIds });
 }
@@ -134,12 +128,11 @@ async function* testScenario(
   scenario: Playbook.Scenario,
   stageToTest: number
 ): TestStageGenerator {
-  const operationRequirements = getSecurityRequirementsById(oas, id);
-  const alternatives = getAlternativeSecurityRequirements(oas, operationRequirements);
+  // find tokens to use for testing
 
   yield {
     id: `${id}-seqreq-test`,
-    steps: runScenario(oas, scenario, stageToTest, alternatives),
+    steps: runScenario(oas, scenario, stageToTest, tokens),
   };
 }
 
@@ -147,7 +140,7 @@ async function* runScenario(
   oas: BundledSwaggerOrOasSpec,
   scenario: Playbook.Scenario,
   stageToTest: number,
-  security: SecurityRequirement[]
+  tokens: string[]
 ): StepGenerator<TestIssue[]> {
   const issues = [];
 
@@ -161,29 +154,9 @@ async function* runScenario(
 
     const operationId = stage.ref?.type === "operation" ? stage.ref.id : `stage-${i}`;
 
-    console.log(
-      `Testing operation for SEQREQ: ${operationId} with schemes: ${JSON.stringify(security)}`
-    );
+    // TODO geneate auth using tokens, execute request with each token and make sure it does not succeed
 
-    const [patched, error0] = updateSecurityRequirements(oas, operationId, [security[0]]);
-
-    if (error0 !== undefined) {
-      console.log(`Failed to patch security requirements: ${error0}`);
-      continue;
-    }
-
-    const auth = Object.keys(security[0]);
-
-    const [response, error] = yield* execute({ ...stage, auth }, { oas: patched });
-
-    if (response?.statusCode === 200) {
-      issues.push({
-        id: "security-requirements-not-enforced",
-        message: `Request succeeded with alternative security scheme "${JSON.stringify(
-          security[0]
-        )}" (status: ${response?.statusCode}) in operationId ${operationId}`,
-      });
-    }
+    const [response, error] = yield* execute({ ...stage, auth });
   }
 
   return issues;
@@ -197,58 +170,6 @@ function findStageToTest(scenario: Playbook.Scenario, operationId: string): numb
     }
   }
   return undefined;
-}
-
-function isBolaInjectableParameter(found: PlaybookLookupResult): boolean {
-  // bola injectable parameters are parameters in the path (for now)
-  const path = found.location.path;
-  return (
-    path.length === 4 &&
-    path[0] === "parameters" &&
-    path[1] === "path" &&
-    typeof path[2] === "number" &&
-    path[3] === "value"
-  );
-}
-
-function hasBolaInjectionTargets(variables: OperationVariables[], operationId: string): boolean {
-  // check if any of the injectable parameters were set by operations prior to this one
-  const operationIndex = variables.findIndex((v) => v.operationId === operationId);
-  if (operationIndex === -1) {
-    return false;
-  }
-
-  const operation = variables[operationIndex];
-
-  for (const found of operation.found) {
-    // if parameter of interest comes from prior step, then it's a valid injection target
-    if (
-      (isBolaInjectableParameter(found) && found.source.type === "playbook-request") ||
-      found.source.type === "playbook-stage"
-    ) {
-      if (found.source.step < operationIndex) {
-        console.log(
-          `Parameter "${found.name}" of operation "${operation.operationId}" comes from step ${found.source.step}, injectable!`
-        );
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-async function canBeTestedForBola(
-  oas: BundledSwaggerOrOasSpec,
-  playbook: Playbook.Bundle,
-  vault: Vault,
-  operationId: string
-): Promise<boolean> {
-  const mock = await mockScenario(oas, playbook, operationId, vault);
-
-  console.log(`Mocked scenario for operationId "${operationId}":`, mock);
-
-  return hasBolaInjectionTargets(mock.variables, operationId);
 }
 
 export default {
