@@ -66,7 +66,7 @@ export default function Test({ suite, suiteId }: { suite: SuiteConfig; suiteId: 
 }
 
 function TestResultCard({ testId, result }: { testId: string; result: StageResult }) {
-  const hasFailures = Object.values(result).some((stage: any) => stage.failed);
+  const hasFailures = Object.values(result).some((result: any) => result.failures.length > 0);
 
   return (
     <div>
