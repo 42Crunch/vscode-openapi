@@ -1034,28 +1034,27 @@
     "packages/result-cjs"
   ],
   "dependencies": {
-    "@xliic/json-schema-ref-parser": "^9.3.0",
+    "@xliic/json-schema-ref-parser": "^9.3.1",
     "@xliic/preserving-json-yaml-parser": "^2.1.0",
     "form-data": "^4.0.4",
     "got": "^11.8.6",
     "graphql": "^16.10.0",
     "jsonc-parser": "^3.0.0",
     "semver": "^7.5.0",
-    "undici": "^7.11.0",
+    "undici": "^7.19.2",
     "yaml": "^2.8.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.32.0",
-    "@types/mocha": "^10.0.7",
+    "@eslint/js": "^9.39.0",
     "@types/node": "^20.14.10",
     "@types/semver": "^6.2.0",
     "@types/vscode": "1.80.0",
     "@vscode/test-electron": "^2.3.4",
-    "eslint": "^9.30.1",
-    "glob": "^13.0.0",
+    "eslint": "^9.39.2",
+    "glob": "^13.0.1",
     "globals": "^15.11.0",
-    "mocha": "^11.7.1",
-    "typescript": "^5.8.3",
-    "typescript-eslint": "^8.38.0"
+    "mocha": "12.0.0-beta-6",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0"
   }
 }
