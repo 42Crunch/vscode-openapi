@@ -22,31 +22,33 @@ export default function Auth() {
     dispatch(selectCredential({ group: 0, credential: id }));
   };
 
-  const sections = authenticationDetails.map((credentials, index) => {
-    const title = index === 0 ? "Default group" : `Group ${index}`;
+  const sections = authenticationDetails
+    ? authenticationDetails.map((credentials, index) => {
+        const title = index === 0 ? "Default group" : `Group ${index}`;
 
-    const items = Object.entries(credentials).map(([id, credential]) => ({
-      id,
-      label: id,
-      menu: (
-        <Menu>
-          <MenuItem
-            onClick={(e) => e.stopPropagation()}
-            onSelect={() => dispatch(removeCredential({ credentialGroup: index, id }))}
-          >
-            <TrashCan />
-            Delete
-          </MenuItem>
-        </Menu>
-      ),
-    }));
+        const items = Object.entries(credentials).map(([id, credential]) => ({
+          id,
+          label: id,
+          menu: (
+            <Menu>
+              <MenuItem
+                onClick={(e) => e.stopPropagation()}
+                onSelect={() => dispatch(removeCredential({ credentialGroup: index, id }))}
+              >
+                <TrashCan />
+                Delete
+              </MenuItem>
+            </Menu>
+          ),
+        }));
 
-    return {
-      id: `${index}`,
-      title,
-      items,
-    };
-  });
+        return {
+          id: `${index}`,
+          title,
+          items,
+        };
+      })
+    : [];
 
   return (
     <SearchSidebarControlled

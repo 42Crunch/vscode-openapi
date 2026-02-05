@@ -67,7 +67,7 @@ export default function TryAndServerSelector({
           }}
         />
 
-        <Action
+        {/* <Action
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault();
@@ -111,7 +111,7 @@ export default function TryAndServerSelector({
               </CheckboxMenuItem>
             </Menu>
           </Option>
-        )}
+        )} */}
       </Operation>
     </Container>
   );

@@ -5,8 +5,6 @@ import styled from "styled-components";
 import Input from "../../../components/Input";
 import { Menu, MenuItem } from "../../../new-components/Menu";
 import { TabContainer } from "../../../new-components/Tabs";
-import Scenario from "../operations/Scenario";
-import AddRequest from "../operations/AddRequest";
 import * as actions from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import NewValueDialog from "./NewValueDialog";
@@ -23,7 +21,11 @@ export default function CredentialValues({
 }) {
   const dispatch = useAppDispatch();
 
-  const { playbook, oas, selectedSubcredential } = useAppSelector((state) => state.scanconf);
+  const {
+    playbook,
+    graphQl: oas,
+    selectedSubcredential,
+  } = useAppSelector((state) => state.scanconf);
   const { mockResult } = useAppSelector((state) => state.auth);
 
   const operationIds = Object.keys(playbook.operations);
@@ -76,35 +78,7 @@ export default function CredentialValues({
       content: (
         <Content value={method.key}>
           <Input label="Credential value" name={`methods.${index}.value.credential`} />
-          <Requests>
-            <Scenario
-              oas={oas}
-              stages={method.value.requests as Playbook.StageReference[]}
-              container={{
-                container: "credential",
-                group: group,
-                credentialId,
-                subCredentialId: method.key,
-              }}
-              executionResult={mockResult?.[0]}
-              saveStage={saveStage}
-              moveStage={moveStage}
-              removeStage={removeStage}
-              operations={playbook.operations}
-              requests={playbook.requests}
-              goToRequest={goToRequest}
-            />
-            <AddRequest
-              operationIds={operationIds}
-              requestIds={requestIds}
-              onSelect={(selected) =>
-                addStage(
-                  { container: "credential", group, credentialId, subCredentialId: method.key },
-                  selected
-                )
-              }
-            />
-          </Requests>
+          <Requests></Requests>
         </Content>
       ),
     };

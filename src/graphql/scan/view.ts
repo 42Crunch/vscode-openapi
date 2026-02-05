@@ -39,11 +39,12 @@ import { createDefaultConfigWithPlatform } from "../../platform/scan/runtime/pla
 import { createTempDirectory } from "../../util/fs";
 import { writeFile } from "fs/promises";
 import { join } from "path";
+import { runGqlScanWithCliBinary } from "../cli-ast-graphql";
 
 export type BundleDocumentVersions = Record<string, number>;
 
 export type Target = {
-  graphQl: any; // todo: a type Bundle;
+  graphQl: string;
   document: vscode.TextDocument;
   documentUri: string;
   documentVersion: number;
@@ -109,6 +110,7 @@ export class ScanGqlWebView extends WebView<Webapp> {
     },
 
     runScan: async ({ env, scanconf }): Promise<void> => {
+      console.info("debug");
       // try {
       //   const config = await loadConfig(this.configuration, this.secrets);
       //   const reportView = await this.getReportView();
@@ -139,33 +141,31 @@ export class ScanGqlWebView extends WebView<Webapp> {
     },
 
     runFullScan: async ({ env, scanconf }): Promise<void> => {
-      // try {
-      //   const config = await loadConfig(this.configuration, this.secrets);
-      //   const reportView = await this.getReportView();
-      //   await reportView.showReport(this.target!.document);
-      //   return await runScan(
-      //     this.secrets,
-      //     this.store,
-      //     this.envStore,
-      //     env,
-      //     this.target!.bundle,
-      //     undefined,
-      //     undefined,
-      //     scanconf,
-      //     config,
-      //     makeAggregateLogger(this.logger, reportView),
-      //     reportView,
-      //     true,
-      //   );
-      // } catch (ex: any) {
-      //   const message =
-      //     ex?.response?.statusCode === 409 &&
-      //     ex?.response?.body?.code === 109 &&
-      //     ex?.response?.body?.message === "limit reached"
-      //       ? "You have reached your maximum number of APIs. Please contact support@42crunch.com to upgrade your account."
-      //       : formatException("Failed to run scan:", ex);
-      //   vscode.window.showErrorMessage(message);
-      // }
+      try {
+        const config = await loadConfig(this.configuration, this.secrets);
+        const reportView = await this.getReportView();
+        await reportView.showReport(this.target!.document);
+        return await runScan(
+          this.secrets,
+          this.store,
+          this.envStore,
+          env,
+          this.target!.graphQl,
+          scanconf,
+          config,
+          makeAggregateLogger(this.logger, reportView),
+          reportView,
+          true,
+        );
+      } catch (ex: any) {
+        const message =
+          ex?.response?.statusCode === 409 &&
+          ex?.response?.body?.code === 109 &&
+          ex?.response?.body?.message === "limit reached"
+            ? "You have reached your maximum number of APIs. Please contact support@42crunch.com to upgrade your account."
+            : formatException("Failed to run scan:", ex);
+        vscode.window.showErrorMessage(message);
+      }
     },
 
     sendHttpRequest: ({ id, request, config }) =>
@@ -234,7 +234,7 @@ export class ScanGqlWebView extends WebView<Webapp> {
     await super.onDispose();
   }
 
-  async sendScanOperation(graphQl: any, document: vscode.TextDocument, scanconfUri: vscode.Uri) {
+  async sendScanOperation(graphQl: string, document: vscode.TextDocument, scanconfUri: vscode.Uri) {
     this.target = {
       graphQl,
       document,
@@ -302,56 +302,54 @@ async function runScan(
   store: PlatformStore,
   envStore: EnvStore,
   scanEnv: SimpleEnvironment,
-  bundle: Bundle,
-  path: string | undefined,
-  method: HttpMethod | undefined,
+  graphQl: string,
   scanconf: string,
   config: Config,
   logger: Logger,
   reportView: ScanReportWebView,
   isFullScan: boolean,
 ): Promise<void> {
-  logger.info(`Starting API Conformance Scan`);
-
-  const stringOas = stringify(bundle.value);
+  logger.info(`Starting GraphQL API Conformance Scan`);
 
   try {
     if (
       config.platformAuthType === "anond-token" ||
       (config.platformAuthType === "api-token" && config.scanRuntime === "cli")
     ) {
-      const [validateReport, validateError] = await runValidateScanConfigWithCliBinary(
+      // TODO: do we need validation?
+
+      // const [validateReport, validateError] = await runValidateScanConfigWithCliBinary(
+      //   secrets,
+      //   envStore,
+      //   scanEnv,
+      //   config,
+      //   logger,
+      //   graphQl,
+      //   scanconf,
+      //   config.cliDirectoryOverride,
+      // );
+
+      // if (validateError !== undefined) {
+      //   throw new Error(
+      //     `Unexpected error running scan config validation: ${JSON.stringify(validateError)}`,
+      //   );
+      // }
+
+      // if (validateReport.report.errors?.length) {
+      //   await reportView.sendLogMessage("Scan configuration has failed validation", "error");
+      //   for (const message of validateReport.report.errors) {
+      //     await reportView.sendLogMessage(message, "error");
+      //   }
+      //   await reportView.sendLogMessage("Please fix the scan configuration and try again", "error");
+      //   return;
+      // }
+
+      const [result, error] = await runGqlScanWithCliBinary(
         secrets,
-        envStore,
         scanEnv,
         config,
         logger,
-        stringOas,
-        scanconf,
-        config.cliDirectoryOverride,
-      );
-
-      if (validateError !== undefined) {
-        throw new Error(
-          `Unexpected error running scan config validation: ${JSON.stringify(validateError)}`,
-        );
-      }
-
-      if (validateReport.report.errors?.length) {
-        await reportView.sendLogMessage("Scan configuration has failed validation", "error");
-        for (const message of validateReport.report.errors) {
-          await reportView.sendLogMessage(message, "error");
-        }
-        await reportView.sendLogMessage("Please fix the scan configuration and try again", "error");
-        return;
-      }
-
-      const [result, error] = await runScanWithCliBinary(
-        secrets,
-        scanEnv,
-        config,
-        logger,
-        stringOas,
+        graphQl,
         scanconf,
         isFullScan,
       );
@@ -384,41 +382,10 @@ async function runScan(
 
       await reportView.showScanReport(result.reportFilename);
     } else {
-      const { token, tmpApi } = await createScanconfToken(store, stringOas, scanconf, logger);
-
-      // fall back to docker if no anond token, and cli is configured
-      const failure =
-        config.scanRuntime === "scand-manager"
-          ? await runScanWithScandManager(envStore, scanEnv, config, logger, token)
-          : await runScanWithDocker(envStore, scanEnv, config, logger, token);
-
-      if (failure !== undefined) {
-        // cleanup
-        try {
-          await store.clearTempApi(tmpApi);
-        } catch (ex) {
-          console.log(`Failed to cleanup temp api ${tmpApi.apiId}: ${ex}`);
-        }
-        reportView.showGeneralError(failure);
-        return;
-      }
-
-      const parsedReport = await loadReport(store, tmpApi, logger);
-      await store.clearTempApi(tmpApi);
-      logger.info(`Finished API API Conformance Scan`);
-
-      if (parsedReport === undefined) {
-        reportView.showGeneralError({ message: `Failed to load Scan report` });
-        return;
-      }
-
-      // save report to a temporary directory
-      const tempDir = createTempDirectory("scan-report");
-      const reportFilename = join(tempDir, "report.json");
-      await writeFile(reportFilename, JSON.stringify(parsedReport));
-      reportView.setTemporaryReportDirectory(tempDir);
-
-      await reportView.showScanReport(reportFilename);
+      logger.error(`GraphQL API Conformance Scan supports only CLI runtime`);
+      reportView.showGeneralError({
+        message: `GraphQL API Conformance Scan supports only CLI runtime`,
+      });
     }
   } catch (e: any) {
     await reportView.showGeneralError({ message: "Failed to execute scan: " + e.message });

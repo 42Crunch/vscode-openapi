@@ -1,8 +1,7 @@
-//import { BundledSwaggerOrOasSpec, HttpMethod } from "@xliic/openapi";
 import { SimpleEnvironment } from "./env";
 
 export type GraphQLWithScanconf = {
-  graphQl: any; // todo: create a type? BundledSwaggerOrOasSpec; string text
+  graphQl: string;
   scanconf: string;
 };
 

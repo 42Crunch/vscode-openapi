@@ -1,13 +1,12 @@
 import { PayloadAction, createSlice, isAnyOf } from "@reduxjs/toolkit";
 import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
 import { ExecutionResult } from "../components/scenario/types";
-import { Current, handleMockStep, handleTryItStep } from "../playbook-execution-handler";
 import * as scanconf from "../slice";
 
 export type State = {
-  mockCurrent: Current;
+  mockCurrent: any;
   mockResult: ExecutionResult;
-  tryCurrent: Current;
+  tryCurrent: any;
   tryResult: ExecutionResult;
 };
 
@@ -30,7 +29,7 @@ export const slice = createSlice({
     },
 
     addTryAuthenticationStep: (state, { payload: step }: PayloadAction<PlaybookExecutorStep>) => {
-      handleTryItStep(state, step);
+      //handleTryItStep(state, step);
     },
 
     resetMockAuthRequestsExecution: (state) => {
@@ -42,7 +41,7 @@ export const slice = createSlice({
       state,
       { payload: step }: PayloadAction<PlaybookExecutorStep>
     ) => {
-      handleMockStep(state, step);
+      //handleMockStep(state, step);
     },
   },
   extraReducers: (builder) => {

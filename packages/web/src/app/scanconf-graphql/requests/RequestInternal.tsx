@@ -16,11 +16,9 @@ import { saveRequest } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import { executeRequest } from "./slice";
 import TryAndServerSelector from "../components/TryAndServerSelector";
-import { extractScanconf, optionallyReplaceLocalhost } from "../operations/util";
 import { makeEnvEnv } from "../../../core/playbook/execute";
 import { runScan } from "../actions";
 import DescriptionTooltip from "../../../new-components/DescriptionTooltip";
-import { findResult } from "../playbook-execution-handler";
 import { ErrorBanner } from "../../../components/Banner";
 
 export default function RequestInternal({
@@ -32,7 +30,7 @@ export default function RequestInternal({
 }) {
   const dispatch = useAppDispatch();
 
-  const { oas, playbook, servers } = useAppSelector((state) => state.scanconf);
+  const { graphQl: oas, playbook, servers } = useAppSelector((state) => state.scanconf);
   const config = useAppSelector((state) => state.config.data);
   const env = useAppSelector((state) => state.env.data);
   const useGlobalBlocks = useAppSelector((state) => state.prefs.useGlobalBlocks);
@@ -46,19 +44,12 @@ export default function RequestInternal({
   const onRun = (server: string, inputs: UnknownEnvironment) =>
     dispatch(executeRequest({ server, inputs }));
 
-  const onSaveRequest = (stage: Playbook.StageContent) =>
-    dispatch(saveRequest({ ref: requestRef, stage }));
+  // const onSaveRequest = (stage: Playbook.StageContent) =>
+  //   dispatch(saveRequest({ ref: requestRef, stage }));
 
-  const credentials = playbook.authenticationDetails[0];
+  // const credentials = playbook.authenticationDetails[0];
 
-  const beforeExecutionResult = findResult(mockResult, "Global Before");
-  const afterExecutionResult = findResult(mockResult, "Global After");
-  const requestResult = findResult(mockResult, "Request");
-
-  const variables = [
-    ...DynamicVariableNames,
-    ...getVariableNamesFromEnvStack(requestResult?.results?.[0]?.variablesReplaced?.stack || []),
-  ];
+  // const variables = [...DynamicVariableNames, ...getVariableNamesFromEnvStack([])];
 
   const [inputs, setInputs] = useState<UnknownEnvironment>({});
 
@@ -94,37 +85,35 @@ export default function RequestInternal({
         host={host as string | undefined}
         onTry={(server: string) => onRun(server, inputs)}
         onScan={(server: string) => {
-          const updatedServer = optionallyReplaceLocalhost(
-            server,
-            config.platformAuthType,
-            config.scanRuntime,
-            config.docker.replaceLocalhost,
-            config.platform
-          );
-
-          const [serialized, error] = serialize(oas, playbook);
-          if (error !== undefined) {
-            console.log("failed to serialize", error);
-            // FIXME show error when serializing
-            return;
-          }
-
-          dispatch(
-            runScan({
-              path: request.request.path,
-              method: request.request.method,
-              operationId: request.operationId,
-              env: {
-                SCAN42C_HOST: updatedServer,
-                ...simple,
-              },
-              scanconf: extractScanconf(serialized, request.operationId),
-            })
-          );
+          // const updatedServer = optionallyReplaceLocalhost(
+          //   server,
+          //   config.platformAuthType,
+          //   config.scanRuntime,
+          //   config.docker.replaceLocalhost,
+          //   config.platform
+          // );
+          // const [serialized, error] = serialize(oas, playbook);
+          // if (error !== undefined) {
+          //   console.log("failed to serialize", error);
+          //   // FIXME show error when serializing
+          //   return;
+          // }
+          // dispatch(
+          //   runScan({
+          //     path: request.request.path,
+          //     method: request.request.method,
+          //     operationId: request.operationId,
+          //     env: {
+          //       SCAN42C_HOST: updatedServer,
+          //       ...simple,
+          //     },
+          //     scanconf: extractScanconf(serialized, request.operationId),
+          //   })
+          // );
         }}
       />
 
-      <CollapsibleSection title="Request">
+      {/* <CollapsibleSection title="Request">
         <RequestCard
           defaultCollapsed={false}
           oas={oas}
@@ -153,23 +142,11 @@ export default function RequestInternal({
         </Inputs>
       </CollapsibleSection>
 
-      {useGlobalBlocks && beforeExecutionResult?.status === "failure" && (
-        <GlobalBlockError>
-          <ErrorBanner message="Check Global Before block" />
-        </GlobalBlockError>
-      )}
-
-      {useGlobalBlocks && afterExecutionResult?.status === "failure" && (
-        <GlobalBlockError>
-          <ErrorBanner message="Check Global After block" />
-        </GlobalBlockError>
-      )}
-
       {tryResult.length > 0 && (
         <CollapsibleSection title="Result">
           <Execution result={tryResult} collapsible={useGlobalBlocks} />
         </CollapsibleSection>
-      )}
+      )} */}
     </Container>
   );
 }

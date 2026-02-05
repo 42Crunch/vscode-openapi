@@ -16,11 +16,12 @@ import { formatException } from "../../platform/util";
 import { Logger, PlatformContext } from "../../platform/types";
 import { getOrCreateScanconfUri, getScanconfUri } from "../../platform/scan/config";
 import { PlatformStore } from "../../platform/stores/platform-store";
-import { createGqlScanConfigWithCliBinary, ensureCliDownloaded } from "../../platform/cli-ast";
+import { createGqlScanConfigWithCliBinary } from "../cli-ast-graphql";
 import { loadConfig } from "../../util/config";
 import { basename } from "path";
 import { ScanWebView } from "../../platform/scan/view";
 import { ScanGqlWebView } from "./view";
+import { ensureCliDownloaded } from "../../platform/cli-ast";
 
 export default (
   context: vscode.ExtensionContext,
@@ -189,7 +190,7 @@ async function editorRunSingleOperationScan(
 
   const view = await getScanView(editor.document.uri);
   // todo: replace {} to graphql stuff
-  return view.sendScanOperation({}, editor.document, scanconfUri);
+  return view.sendScanOperation(text, editor.document, scanconfUri);
 }
 
 async function createDefaultScanConfig(
@@ -213,7 +214,6 @@ async function createDefaultScanConfig(
     },
     async (progress, cancellationToken): Promise<boolean> => {
       try {
-        console.info("scanconfUri = " + scanconfUri);
         await createGqlScanConfigWithCliBinary(
           scanconfUri,
           text,

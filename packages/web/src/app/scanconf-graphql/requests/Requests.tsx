@@ -10,19 +10,17 @@ import AddExternalRequestDialog from "./AddExternalRequestDialog";
 import Request from "./Request";
 import { setRequestId } from "./slice";
 import { runFullScan } from "../actions";
-import { optionallyReplaceLocalhost } from "../operations/util";
-import { makeEnvEnv } from "../../../core/playbook/execute";
 
 export default function Operations() {
   const dispatch = useAppDispatch();
 
-  const { oas, playbook, servers } = useAppSelector((state) => state.scanconf);
-
+  const { graphQl, playbook, servers } = useAppSelector((state) => state.scanconf);
   const requestRef = useAppSelector((state) => state.requests.ref);
 
   const config = useAppSelector((state) => state.config.data);
   const env = useAppSelector((state) => state.env.data);
   const preferredScanServer = useAppSelector((state) => state.prefs.scanServer);
+  //debugger;
 
   const onSetOperationId = ({ sectionId, itemId }: { sectionId: string; itemId: string }) => {
     const type = sectionId === "operation" ? "operation" : "request";
@@ -86,50 +84,23 @@ export default function Operations() {
       id: "external",
       title: "External Requests",
       items: externalRequestItems,
-      menu: (
-        <AddExternalRequestDialog
-          onAddExternalRequest={(
-            id: string,
-            method: HttpMethod,
-            url: string,
-            mode: "json" | "urlencoded"
-          ) => {
-            dispatch(
-              saveRequest({
-                ref: { id, type: "request" },
-                stage: makeExternalStage(method, url, mode),
-              })
-            );
-            dispatch(setRequestId({ type: "request", id }));
-          }}
-        />
-      ),
     },
   ];
 
   const runScan = (server: string) => {
-    const updatedServer = optionallyReplaceLocalhost(
-      server,
-      config.platformAuthType,
-      config.scanRuntime,
-      config.docker.replaceLocalhost,
-      config.platform
-    );
-
-    const [serialized, error] = serialize(oas, playbook);
-    if (error !== undefined) {
-      console.log("failed to serialize", error);
-      // FIXME show error when serializing
-      return;
-    }
-
-    const { simple } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
-
+    const updatedServer = server; // GraphQL do not use docker
+    // const [serialized, error] = serialize(graphQl, playbook);
+    // if (error !== undefined) {
+    //   console.log("failed to serialize", error);
+    //   // FIXME show error when serializing
+    //   return;
+    // }
+    // const { simple } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
+    const serialized = playbook;
     dispatch(
       runFullScan({
         env: {
           SCAN42C_HOST: updatedServer,
-          ...simple,
         },
         scanconf: JSON.stringify(serialized, null, 2),
       })
@@ -223,4 +194,24 @@ function makeExternalStage(
       },
     },
   };
+}
+
+function optionallyReplaceLocalhost(
+  server: string,
+  platformAuthType: "anond-token" | "api-token",
+  runtime: "docker" | "scand-manager" | "cli",
+  replaceLocalhost: boolean,
+  platform: string
+) {
+  if (
+    platformAuthType === "api-token" &&
+    runtime == "docker" &&
+    replaceLocalhost &&
+    (platform === "darwin" || platform === "win32") &&
+    (server.toLowerCase().startsWith("https://localhost") ||
+      server.toLowerCase().startsWith("http://localhost"))
+  ) {
+    return server.replace(/localhost/i, "host.docker.internal");
+  }
+  return server;
 }

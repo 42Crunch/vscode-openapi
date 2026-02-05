@@ -6,7 +6,7 @@ import { Playbook } from "@xliic/scanconf";
 import { loadPlaybook } from "./actions";
 
 export type State = {
-  oas: any; // todo: rename to graphQl
+  graphQl: string;
   playbook: Playbook.Bundle;
   servers: string[];
 
@@ -17,7 +17,7 @@ export type State = {
 };
 
 const initialState: State = {
-  oas: {},
+  graphQl: "",
   playbook: {
     operations: {},
     requests: {},
@@ -294,7 +294,7 @@ export const slice = createSlice({
 
   extraReducers: (builder) => {
     builder.addCase(loadPlaybook, (state, { payload: { graphQl, playbook } }) => {
-      state.oas = graphQl;
+      state.graphQl = graphQl;
       state.playbook = playbook;
       state.servers = []; //getServerUrls(oas);
 

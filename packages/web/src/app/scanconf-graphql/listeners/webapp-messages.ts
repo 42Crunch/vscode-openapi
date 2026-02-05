@@ -80,7 +80,7 @@ const listeners = (
         effect: async (action, listenerApi) => {
           const { scanconf: state } = listenerApi.getState();
 
-          const [serialized, error] = serialize(state.oas, state.playbook);
+          const [serialized, error] = serialize(state.graphQl, state.playbook);
           if (error !== undefined) {
             // FIXME show error when serializing
             return;

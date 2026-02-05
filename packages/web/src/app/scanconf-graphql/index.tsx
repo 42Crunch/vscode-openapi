@@ -9,14 +9,11 @@ import { ThemeState } from "../../features/theme/slice";
 import { NavigationRouterApp, makeWebappMessageHandler } from "../webapp";
 import Auth from "./auth/Auth";
 import { createListener } from "./listener";
-import Operations from "./operations/Operations";
 import Requests from "./requests/Requests";
 import { initStore, messageHandlers } from "./store";
 import Environments from "./environment/Environments";
-import Global from "./global/Global";
 import Settings from "./settings/Settings";
 import EnvironmentsNavigationTab from "./environment/EnvironmentsNavigationTab";
-import AuthorizationTests from "./authorizationTests/AuthorizationTests";
 import UpdatePrompt from "./scanconf-update/UpdatePrompt";
 import GeneralError from "../../features/general-error/GeneralError";
 import { showGeneralError } from "../../features/general-error/slice";
@@ -53,24 +50,9 @@ const routes: Routes = [
         element: <Requests />,
       },
       {
-        id: "operations",
-        title: "Scenarios",
-        element: <Operations />,
-      },
-      {
-        id: "global",
-        title: "Global blocks",
-        element: <Global />,
-      },
-      {
         id: "auth",
         title: "Authentication",
         element: <Auth />,
-      },
-      {
-        id: "authorizationTests",
-        title: "Tests",
-        element: <AuthorizationTests />,
       },
       {
         id: "environments",
@@ -81,12 +63,6 @@ const routes: Routes = [
         id: "settings",
         title: "Settings",
         element: <Settings />,
-      },
-
-      {
-        id: "help",
-        title: "Help",
-        element: <Help />,
       },
     ],
   },

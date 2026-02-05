@@ -55,7 +55,7 @@ export async function createScanConfigWithCliBinary(
   oas: string,
   tags: string[],
   cliDirectoryOverride: string,
-  logger: Logger
+  logger: Logger,
 ): Promise<void> {
   const tmpdir = createTempDirectory("scan-");
   const oasFilename = join(tmpdir, "openapi.json");
@@ -97,62 +97,6 @@ export async function createScanConfigWithCliBinary(
 
     // clean the temp directory
     unlinkSync(oasFilename);
-    unlinkSync(scanconfigFilename);
-    rmdirSync(tmpdir);
-  } catch (ex: any) {
-    throw new Error(formatException(ex));
-  }
-}
-
-export async function createGqlScanConfigWithCliBinary(
-  scanconfUri: vscode.Uri,
-  text: string,
-  tags: string[],
-  cliDirectoryOverride: string,
-  logger: Logger,
-): Promise<void> {
-  const tmpdir = createTempDirectory("scan-");
-  const gqlFilename = join(tmpdir, "openapi.graphql");
-  const cli = join(getBinDirectory(cliDirectoryOverride), getCliFilename());
-
-  const args = [
-    "scan",
-    "conf",
-    "generate",
-    "--graphql",
-    "openapi.graphql",
-    "--hosts",
-    "http://localhost:8000/graphql",
-    "--output",
-    "scanconfig.json",
-  ];
-
-  // scan conf generate --graphql ./spidey.graphql --hosts http://localhost:8000/graphql --output ./scan_conf_spidey_gql.json
-
-  // re-enable when tagging is supported
-  // if (tags.length > 0) {
-  //   args.push("--tag", tags.join(","));
-  // }
-
-  await writeFile(gqlFilename, text, { encoding: "utf8" });
-
-  try {
-    debug(cli, args, undefined, logger);
-
-    await asyncExecFile(cli, args, { cwd: tmpdir, windowsHide: true, maxBuffer: execMaxBuffer });
-
-    // create scan config directory if does not exist
-    const scanconfDir = dirname(scanconfUri.fsPath);
-    if (!existsSync(scanconfDir)) {
-      mkdirSync(scanconfDir, { recursive: true });
-    }
-
-    // copy scanconfig to the destination
-    const scanconfigFilename = join(tmpdir, "scanconfig.json");
-    await copyFile(scanconfigFilename, scanconfUri.fsPath);
-
-    // clean the temp directory
-    unlinkSync(gqlFilename);
     unlinkSync(scanconfigFilename);
     rmdirSync(tmpdir);
   } catch (ex: any) {
@@ -590,7 +534,7 @@ export async function runAuditWithCliBinary(
   }
 }
 
-function getCrunchDirectory() {
+export function getCrunchDirectory() {
   if (process.platform === "win32") {
     return join(process.env["APPDATA"] || homedir(), "42Crunch");
   } else {
@@ -598,7 +542,7 @@ function getCrunchDirectory() {
   }
 }
 
-function getBinDirectory(cliDirectoryOverride: string) {
+export function getBinDirectory(cliDirectoryOverride: string) {
   if (cliDirectoryOverride !== undefined && cliDirectoryOverride !== "") {
     return cliDirectoryOverride;
   } else {
@@ -606,7 +550,7 @@ function getBinDirectory(cliDirectoryOverride: string) {
   }
 }
 
-function getCliFilename() {
+export function getCliFilename() {
   if (process.platform === "win32") {
     return "42c-ast.exe";
   } else {
@@ -614,7 +558,7 @@ function getCliFilename() {
   }
 }
 
-function ensureDirectories(cliDirectoryOverride: string) {
+export function ensureDirectories(cliDirectoryOverride: string) {
   mkdirSync(getBinDirectory(cliDirectoryOverride), { recursive: true });
 }
 
@@ -649,14 +593,14 @@ async function* downloadToTempFile(
   return tmpfile;
 }
 
-function readException(ex: any) {
+export function readException(ex: any) {
   const message = "message" in ex ? ex.message : "";
   const stdout = "stdout" in ex ? Buffer.from(ex.stdout, "utf8").toString() : "";
   const stderr = "stdout" in ex ? Buffer.from(ex.stderr, "utf8").toString() : "";
   return { message, stdout, stderr };
 }
 
-function formatException({
+export function formatException({
   message,
   stdout,
   stderr,
@@ -697,7 +641,7 @@ export type CliError = {
   statusMessage: string;
 };
 
-function parseCliJsonResponse(response: string): CliResponse | undefined {
+export function parseCliJsonResponse(response: string): CliResponse | undefined {
   try {
     if (response.startsWith("{")) {
       return JSON.parse(response);
@@ -709,7 +653,7 @@ function parseCliJsonResponse(response: string): CliResponse | undefined {
   return undefined;
 }
 
-function getUserAgent() {
+export function getUserAgent() {
   const extension = vscode.extensions.getExtension(extensionQualifiedId)!;
   return `42Crunch-VSCode/${extension.packageJSON.version}`;
 }
@@ -728,7 +672,12 @@ async function readSqgReport(sqgReportFilename: string) {
   }
 }
 
-function debug(cli: string, args: string[], env: SimpleEnvironment | undefined, logger: Logger) {
+export function debug(
+  cli: string,
+  args: string[],
+  env: SimpleEnvironment | undefined,
+  logger: Logger,
+) {
   //const logLevel = logger.getLogLevel();
   //if (logLevel !== LogLevel.Off && logLevel <= LogLevel.Debug) {
   redactor.setRedactionEnabled(false); //logger.isRedactionEnabled());

@@ -17,7 +17,6 @@ import { saveRequest } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import { executeRequest } from "./slice";
 import DescriptionTooltip from "../../../new-components/DescriptionTooltip";
-import { findResult } from "../playbook-execution-handler";
 import { ErrorBanner } from "../../../components/Banner";
 import TryAndServerSelector from "../components/TryAndServerSelector";
 import { makeEnvEnv } from "../../../core/playbook/execute";
@@ -47,14 +46,7 @@ export default function RequestExternal({
   const onSaveRequest = (stage: Playbook.ExternalStageContent) =>
     dispatch(saveRequest({ ref: requestRef, stage }));
 
-  const beforeExecutionResult = findResult(mockResult, "Global Before");
-  const afterExecutionResult = findResult(mockResult, "Global After");
-  const requestResult = findResult(mockResult, "Request");
-
-  const variables = [
-    ...DynamicVariableNames,
-    ...getVariableNamesFromEnvStack(requestResult?.results?.[0]?.variablesReplaced?.stack || []),
-  ];
+  const variables = [...DynamicVariableNames, ...getVariableNamesFromEnvStack([])];
 
   const [inputs, setInputs] = useState<UnknownEnvironment>({});
 
@@ -116,18 +108,6 @@ export default function RequestExternal({
           </Form>
         </Inputs>
       </CollapsibleSection>
-
-      {useGlobalBlocks && beforeExecutionResult?.status === "failure" && (
-        <GlobalBlockError>
-          <ErrorBanner message="Check Global Before block" />
-        </GlobalBlockError>
-      )}
-
-      {useGlobalBlocks && afterExecutionResult?.status === "failure" && (
-        <GlobalBlockError>
-          <ErrorBanner message="Check Global After block" />
-        </GlobalBlockError>
-      )}
 
       {tryResult.length > 0 && (
         <CollapsibleSection title="Result">

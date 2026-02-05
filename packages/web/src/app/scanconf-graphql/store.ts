@@ -22,8 +22,6 @@ import {
   loadUpdatedScanconf,
 } from "./actions";
 import auth from "./auth/slice";
-import global from "./global/slice";
-import operations from "./operations/slice";
 import requests from "./requests/slice";
 import scanconf from "./slice";
 import scanconfUpdate from "./scanconf-update/slice";
@@ -34,14 +32,12 @@ const reducer = {
   client,
   scanconf,
   scanconfUpdate,
-  operations,
   requests,
   auth,
   router,
   env,
   prefs,
   config,
-  global,
   generalError,
   confirmationDialog,
 };

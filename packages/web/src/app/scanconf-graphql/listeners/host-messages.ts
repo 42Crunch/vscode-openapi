@@ -1,6 +1,5 @@
 import { TypedStartListening } from "@reduxjs/toolkit";
 
-import { parse2 } from "@xliic/scanconf";
 import { Result } from "@xliic/result";
 import { compare, update } from "@xliic/scanconf-changes";
 import { Webapp } from "@xliic/common/webapp/scanconf-graphql";
@@ -24,7 +23,7 @@ export function onShowScanconf(startAppListening: TypedStartListening<RootState,
           listenerApi.dispatch(goTo(["general-error"]));
           return;
         }
-
+        const playbook = parsed;
         // const changes = compare(oas, parsed);
 
         // if (changes.length > 0) {
@@ -41,7 +40,7 @@ export function onShowScanconf(startAppListening: TypedStartListening<RootState,
         //   return;
         // }
 
-        // listenerApi.dispatch(loadPlaybook({ playbook, graphQl }));
+        listenerApi.dispatch(loadPlaybook({ playbook, graphQl }));
         listenerApi.dispatch(goTo(["scanconf", "requests"]));
       },
     });
@@ -93,8 +92,8 @@ export function onLoadUpdatedScanconf(
         //   command: "saveScanconf",
         //   payload: JSON.stringify(patched, null, 2),
         // });
-
-        //listenerApi.dispatch(loadPlaybook({ playbook, graphQl }));
+        const playbook = updated;
+        listenerApi.dispatch(loadPlaybook({ playbook, graphQl }));
         listenerApi.dispatch(goTo(["scanconf", "requests"]));
       },
     });
