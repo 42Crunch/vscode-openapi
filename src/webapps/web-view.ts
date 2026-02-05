@@ -14,6 +14,7 @@ import {
   ThemeColorNames,
   ThemeColorVariables,
 } from "@xliic/common/theme";
+import { delay } from "../time-util";
 
 export abstract class WebView<W extends Webapp<Message, Message>> {
   private panel?: vscode.WebviewPanel;
@@ -26,7 +27,7 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
     private viewId: string,
     private viewTitle: string,
     private column: vscode.ViewColumn,
-    private icon?: string
+    private icon?: string,
   ) {}
 
   isActive(): boolean {
@@ -34,6 +35,10 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
   }
 
   abstract onStart(): Promise<void>;
+
+  onFullReload(): Promise<void> {
+    return Promise.resolve();
+  }
 
   protected async sendRequest(request: W["consumes"]): Promise<void> {
     if (this.panel) {
@@ -76,7 +81,7 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
       }
     } else {
       throw new Error(
-        `Unable to find response handler for command: ${response.command} in ${this.viewId} webview`
+        `Unable to find response handler for command: ${response.command} in ${this.viewId} webview`,
       );
     }
   }
@@ -103,6 +108,11 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
           this.session = message.payload;
           await this.onStart();
           resolve();
+        } else if (message.command === "fullReload") {
+          await this.onFullReload();
+          this.panel!.dispose();
+          await delay(100);
+          await this.show();
         } else {
           this.handleResponse(message as W["produces"]);
         }
@@ -131,16 +141,16 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
       {
         enableScripts: true,
         retainContextWhenHidden: true,
-      }
+      },
     );
 
     if (this.icon !== undefined) {
       panel.iconPath = {
         light: vscode.Uri.file(
-          path.join(this.extensionPath, "resources", "icons", `${this.icon}.svg`)
+          path.join(this.extensionPath, "resources", "icons", `${this.icon}.svg`),
         ),
         dark: vscode.Uri.file(
-          path.join(this.extensionPath, "resources", "icons", `${this.icon}-dark.svg`)
+          path.join(this.extensionPath, "resources", "icons", `${this.icon}-dark.svg`),
         ),
       };
     }
@@ -198,8 +208,8 @@ export abstract class WebView<W extends Webapp<Message, Message>> {
     const cspSource = panel.webview.cspSource;
     const script = panel.webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this.extensionPath, "webview", "generated", "web", `${this.viewId}.js`)
-      )
+        path.join(this.extensionPath, "webview", "generated", "web", `${this.viewId}.js`),
+      ),
     );
 
     return `<!DOCTYPE html>

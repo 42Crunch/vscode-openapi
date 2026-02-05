@@ -1,6 +1,8 @@
 import styled from "styled-components";
 import { ErrorBoundary } from "react-error-boundary";
 
+import { Webapp, Message } from "@xliic/common/message";
+
 import ThemeStyles from "../features/theme/ThemeStyles";
 import Router from "../features/router/Router";
 import Navigation from "../features/router/Navigation";
@@ -36,6 +38,17 @@ export function startListeners(listeners: Record<string, (() => unknown) | undef
     } else {
       console.log("skipping listener for: ", listenerName);
     }
+  }
+}
+
+export function hookViteReload(host: Webapp<Message, Message>["host"]) {
+  if (import.meta.hot) {
+    import.meta.hot.on("vite:beforeFullReload", (data: any): Promise<void> => {
+      console.log("full reload, resetting state....", data);
+      host.postMessage({ command: "fullReload", payload: undefined });
+      // stop reloading, we'll handle it ourselves on the IDE side
+      return new Promise<void>(() => {});
+    });
   }
 }
 
