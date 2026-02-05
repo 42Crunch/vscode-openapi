@@ -6,7 +6,7 @@ import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
 import { RouterContext, Routes } from "../../features/router/RouterContext";
 import { ThemeState } from "../../features/theme/slice";
-import { NavigationRouterApp, makeWebappMessageHandler } from "../webapp";
+import { NavigationRouterApp, makeWebappMessageHandler, hookViteReload } from "../webapp";
 import Auth from "./auth/Auth";
 import { createListener } from "./listener";
 import Operations from "./operations/Operations";
@@ -94,6 +94,8 @@ const routes: Routes = [
 
 function renderWebView(host: Webapp["host"], theme: ThemeState) {
   const store = initStore(createListener(host, routes), theme);
+
+  hookViteReload(host);
 
   createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
