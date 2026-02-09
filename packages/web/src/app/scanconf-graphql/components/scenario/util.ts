@@ -113,9 +113,9 @@ export function wrapPlaybookRequest(stage: Playbook.StageContent): Record<string
 
   return {
     path: stage.request.path,
-    method: stage.request.method,
+    method: stage.request.details.method,
     parameters: stage.request.parameters,
-    body: stage.request.body,
+    body: { value: JSON.stringify(stage.request.details.requestBody.json, null, 2) },
     environment: wrapEnvironment(stage.environment),
     defaultResponse: stage.defaultResponse,
     injectionKey: stage.injectionKey,
@@ -134,9 +134,9 @@ export function wrapExternalPlaybookRequest(
 
   return {
     url: stage.request.url,
-    method: stage.request.method,
+    method: stage.request.details.method,
     parameters: stage.request.parameters,
-    body: stage.request.body,
+    body: { value: JSON.stringify(stage.request.details.requestBody.json, null, 2) }, //stage.request.body,
     environment: wrapEnvironment(stage.environment),
     defaultResponse: stage.defaultResponse,
     responses: wrapResponses(stage.responses),

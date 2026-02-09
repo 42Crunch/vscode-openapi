@@ -44,12 +44,14 @@ export default function RequestInternal({
   const onRun = (server: string, inputs: UnknownEnvironment) =>
     dispatch(executeRequest({ server, inputs }));
 
-  // const onSaveRequest = (stage: Playbook.StageContent) =>
-  //   dispatch(saveRequest({ ref: requestRef, stage }));
+  const onSaveRequest = (stage: Playbook.StageContent) => {};
+  //dispatch(saveRequest({ ref: requestRef, stage }));
 
-  // const credentials = playbook.authenticationDetails[0];
+  const credentials = playbook?.authenticationDetails
+    ? playbook?.authenticationDetails[0]
+    : undefined;
 
-  // const variables = [...DynamicVariableNames, ...getVariableNamesFromEnvStack([])];
+  const variables = [...DynamicVariableNames, ...getVariableNamesFromEnvStack([])];
 
   const [inputs, setInputs] = useState<UnknownEnvironment>({});
 
@@ -113,17 +115,17 @@ export default function RequestInternal({
         }}
       />
 
-      {/* <CollapsibleSection title="Request">
+      <CollapsibleSection title="Request">
         <RequestCard
           defaultCollapsed={false}
-          oas={oas}
+          config={undefined}
           credentials={credentials}
           availableVariables={variables}
           requestRef={requestRef}
           stage={request!}
           saveRequest={onSaveRequest}
         />
-        <Title>
+        {/* <Title>
           Unset variables
           <DescriptionTooltip>
             Enter values for these unset variables to 'Try' the Operation. Note that these values
@@ -139,14 +141,14 @@ export default function RequestInternal({
           >
             <Environment name="env" />
           </Form>
-        </Inputs>
+        </Inputs> */}
       </CollapsibleSection>
 
       {tryResult.length > 0 && (
         <CollapsibleSection title="Result">
           <Execution result={tryResult} collapsible={useGlobalBlocks} />
         </CollapsibleSection>
-      )} */}
+      )}
     </Container>
   );
 }

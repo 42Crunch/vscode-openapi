@@ -14,7 +14,7 @@ import OperationTabs from "../operation/OperationTabs";
 import DownshiftSelect from "../../../../new-components/fields/DownshiftSelect";
 
 export default function RequestCard({
-  oas,
+  config,
   requestRef,
   stage,
   credentials,
@@ -22,9 +22,9 @@ export default function RequestCard({
   defaultCollapsed,
   availableVariables,
 }: {
-  oas: BundledSwaggerOrOasSpec;
+  config: any;
   requestRef: Playbook.RequestRef;
-  credentials: Playbook.Credentials;
+  credentials: Playbook.Credentials | undefined;
   stage: Playbook.StageContent;
   saveRequest: (request: Playbook.StageContent) => void;
   defaultCollapsed?: boolean;
@@ -43,17 +43,17 @@ export default function RequestCard({
         <CollapsibleCard defaultCollapsed={defaultCollapsed}>
           <TopDescription>
             <span>{requestRef.id}</span>
-            <DefaultResponse>
+            {/* <DefaultResponse>
               <span>Default Response</span>
               <DownshiftSelect name="defaultResponse" options={responseCodeOptions} />
-            </DefaultResponse>
+            </DefaultResponse> */}
           </TopDescription>
           <BottomDescription>
-            <Method>{stage.request.method}</Method>
+            <Method>{stage.request.details.method}</Method>
             <Path>{stage.request.path}</Path>
           </BottomDescription>
           <OperationTabs
-            oas={oas}
+            config={config}
             credentials={credentials}
             method={stage.request.method}
             path={stage.request.path}
