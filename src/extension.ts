@@ -32,12 +32,13 @@ import * as environment from "./environment/activate";
 import * as config from "./webapps/views/config/activate";
 import * as capture from "./webapps/views/capture/activate";
 import { PlatformStore } from "./platform/stores/platform-store";
-import { Logger } from "./platform/types";
+import { Logger, PlatformConnection } from "./platform/types";
 import { getPlatformCredentials, hasCredentials } from "./credentials";
 import { EnvStore } from "./envstore";
 import { debounce } from "./util/debounce";
 import { getApprovedHostnamesTrimmedLowercase, removeSecretsForApprovedHosts } from "./util/config";
 import { SignUpWebView } from "./webapps/signup/view";
+import { PlatformCredentials } from "@xliic/common/signup";
 
 const auditContext: AuditContext = {
   auditsByMainDocument: {},
@@ -60,7 +61,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
   const logOutputChannel = vscode.window.createOutputChannel(
     openapiExtension.packageJSON.displayName,
-    { log: true }
+    { log: true },
   );
 
   const logger: Logger = {
@@ -106,7 +107,7 @@ export async function activate(context: vscode.ExtensionContext) {
   const yamlSchemaDefinitionProvider = new YamlSchemaDefinitionProvider(
     cache,
     externalRefProvider,
-    parserOptions
+    parserOptions,
   );
 
   vscode.languages.registerDefinitionProvider(selectors.json, jsonSchemaDefinitionProvider);
@@ -141,7 +142,7 @@ export async function activate(context: vscode.ExtensionContext) {
     configuration,
     context.secrets,
     platformStore,
-    logger
+    logger,
   );
   const reportWebView = new AuditWebView(context.extensionPath, cache, configuration);
   audit.activate(
@@ -152,7 +153,7 @@ export async function activate(context: vscode.ExtensionContext) {
     configuration,
     signUpWebView,
     reportWebView,
-    platformStore
+    platformStore,
   );
   preview.activate(context, cache, configuration);
   tryit.activate(context, cache, configuration, envStore, prefs);
@@ -172,7 +173,7 @@ export async function activate(context: vscode.ExtensionContext) {
     context.workspaceState,
     envStore,
     prefs,
-    logger
+    logger,
   );
 
   const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
@@ -192,16 +193,20 @@ export async function activate(context: vscode.ExtensionContext) {
     cache.onActiveEditorChanged(vscode.window.activeTextEditor);
   }
 
+  const didCredentialsChangeEmitter = new vscode.EventEmitter<void>();
   const reloadCredentials = debounce(
     async () => {
       const credentials = await hasCredentials(configuration, context.secrets);
       if (credentials === "api-token") {
-        platformStore.setCredentials(await getPlatformCredentials(configuration, context.secrets));
+        const platformCredentials = await getPlatformCredentials(configuration, context.secrets);
+        platformStore.setCredentials(platformCredentials);
+        didCredentialsChangeEmitter.fire();
       } else {
         platformStore.setCredentials(undefined);
+        didCredentialsChangeEmitter.fire();
       }
     },
-    { delay: 3000 }
+    { delay: 3000 },
   );
 
   configuration.onDidChange(async (e: vscode.ConfigurationChangeEvent) => {
@@ -232,12 +237,12 @@ export async function activate(context: vscode.ExtensionContext) {
 
       await removeSecretsForApprovedHosts(
         context.secrets,
-        approvedHostnames.filter((name) => !updatedApprovedHostnames.includes(name))
+        approvedHostnames.filter((name) => !updatedApprovedHostnames.includes(name)),
       );
 
       approvedHostnames = updatedApprovedHostnames;
     },
-    { delay: 3000 }
+    { delay: 3000 },
   );
 
   configuration.onDidChange(async (e: vscode.ConfigurationChangeEvent) => {
@@ -245,6 +250,31 @@ export async function activate(context: vscode.ExtensionContext) {
       cleanupSecrets();
     }
   });
+
+  context.subscriptions.push(
+    vscode.lm.registerMcpServerDefinitionProvider("xliic-mcp", {
+      onDidChangeMcpServerDefinitions: didCredentialsChangeEmitter.event,
+      provideMcpServerDefinitions: async () => {
+        const platformCredentials = await getPlatformCredentials(configuration, context.secrets);
+
+        if (!platformCredentials) {
+          return [];
+        }
+
+        return [
+          new vscode.McpStdioServerDefinition(
+            "42 Crunch MCP",
+            "/Users/anton/.42crunch/bin/42c-ast-mcp",
+            ["mcp", "run"],
+            {
+              PLATFORM_HOST: platformCredentials.platformUrl,
+              API_KEY: platformCredentials.apiToken!,
+            },
+          ),
+        ];
+      },
+    }),
+  );
 
   await reloadCredentials();
 }
