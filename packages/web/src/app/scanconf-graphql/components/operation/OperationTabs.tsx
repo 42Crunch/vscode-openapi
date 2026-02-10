@@ -121,20 +121,20 @@ function makeOasTabs(
     //   ),
     //   disabled: hasNoParameters(parameters.query, scanconfParameters.query),
     // },
-    // {
-    //   id: "header",
-    //   title: "Header",
-    //   content: (
-    //     <ParameterGroup
-    //       oas={oas}
-    //       group={parameters.header}
-    //       name={"parameters.header"}
-    //       placeholder="Add new header"
-    //       variables={availableVariables}
-    //       allowUnknown
-    //     />
-    //   ),
-    // },
+    {
+      id: "header",
+      title: "Header",
+      content: (
+        <ParameterGroup
+          oas={undefined}
+          // group={parameters.header}
+          name={"parameters.headers"}
+          placeholder="Add new header"
+          variables={availableVariables}
+          allowUnknown
+        />
+      ),
+    },
   ];
 }
 

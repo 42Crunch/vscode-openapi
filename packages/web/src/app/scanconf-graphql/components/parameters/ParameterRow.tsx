@@ -18,43 +18,20 @@ export type Schema = { type?: string | string[] };
 
 const DefaultSchema = { type: "string" };
 
-export default function ParameterRow({
-  name,
-  schema,
-  onDelete,
-  variables,
-  isDefinedInOpenAPI,
-}: {
-  name: string;
-  variables: string[];
-  schema: Schema | undefined;
-  onDelete: () => void;
-  isDefinedInOpenAPI: boolean;
-}) {
-  const {
-    fieldState: { error },
-  } = useController({ name: `${name}.value` });
-
-  const { field: nameField } = useController({ name: `${name}.key` });
-
+export default function ParameterRow({ name, value }: { name: string; value: string }) {
   return (
     <Container>
       <Name>
-        {nameField.value}
-        {!isDefinedInOpenAPI && (
+        {name}
+        {/* {!isDefinedInOpenAPI && (
           <DescriptionTooltip icon="exclamation">
             Parameter is not defined in the OpenAPI specification for this API
           </DescriptionTooltip>
-        )}
+        )} */}
       </Name>
-      <LineEditor
-        name={`${name}.value`}
-        variables={variables}
-        encode={(value) => encode(schema || DefaultSchema, value)}
-        decode={(value) => decode(schema, value)}
-      />
-
-      <Remove
+      <Value>{value}</Value>
+      <div></div>
+      {/* <Remove
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -71,10 +48,19 @@ export default function ParameterRow({
           </ErrorMessage>
           <div></div>
         </>
-      )}
+      )} */}
     </Container>
   );
 }
+
+const Value = styled.div`
+  flex: 1;
+  border-bottom: 1px solid var(${ThemeColorVariables.border});
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
 
 const Container = styled.div`
   display: contents;

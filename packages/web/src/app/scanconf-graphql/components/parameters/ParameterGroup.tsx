@@ -10,13 +10,13 @@ import NewParameterSelect from "./NewParameterSelect";
 export default function ParameterGroup({
   oas,
   name,
-  group,
+  //  group,
   placeholder,
   variables,
   allowUnknown,
 }: {
-  group: Record<string, Parameter>;
-  oas: BundledSwaggerOrOasSpec;
+  // group: Record<string, Parameter>;
+  oas: any;
   name: string;
   placeholder: string;
   variables: string[];
@@ -26,9 +26,9 @@ export default function ParameterGroup({
     name: name,
   });
 
-  const addField = async (name: string, parameter: Parameter) => {
-    append({ key: name, value: "" }, { shouldFocus: true });
-  };
+  // const addField = async (name: string, parameter: Parameter) => {
+  //   append({ key: name, value: "" }, { shouldFocus: true });
+  // };
 
   return (
     <Container>
@@ -39,24 +39,15 @@ export default function ParameterGroup({
       </Header>
       <Body>
         {fields.map((field: any, index) => {
-          return (
-            <ParameterRow
-              name={`${name}.${index}`}
-              key={field.id}
-              schema={getParameterSchema(oas, group, field.key)}
-              onDelete={() => remove(index)}
-              variables={variables}
-              isDefinedInOpenAPI={isDefinedInOpenAPI(group, field.key)}
-            />
-          );
+          return <ParameterRow name={field.key} key={field.id} value={field.value} />;
         })}
-        <NewParameterSelect
+        {/* <NewParameterSelect
           placeholder={placeholder}
           name={name}
           group={group}
           onSelection={addField}
           allowUnknown={allowUnknown}
-        />
+        /> */}
       </Body>
     </Container>
   );
