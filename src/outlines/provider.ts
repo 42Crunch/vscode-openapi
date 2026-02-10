@@ -56,7 +56,10 @@ export class OutlineProvider implements vscode.TreeDataProvider<OutlineNode> {
   private sort: boolean;
   private search: { [uri: string]: string | undefined };
 
-  constructor(private context: vscode.ExtensionContext, private cache: Cache) {
+  constructor(
+    private context: vscode.ExtensionContext,
+    private cache: Cache,
+  ) {
     this.search = {};
     cache.onDidActiveDocumentChange(async (document) => {
       if (document) {
@@ -128,11 +131,11 @@ export class OutlineProvider implements vscode.TreeDataProvider<OutlineNode> {
     return item;
   }
 
-  getIcon(icon: string | { dark: string; light: string }) {
+  getIcon(icon: string | { dark: string; light: string }): vscode.IconPath | undefined {
     if (typeof icon === "string") {
       return {
-        light: this.context.asAbsolutePath(path.join("resources", "light", icon as string)),
-        dark: this.context.asAbsolutePath(path.join("resources", "dark", icon as string)),
+        light: vscode.Uri.joinPath(this.context.extensionUri, "resources", "light", icon),
+        dark: vscode.Uri.joinPath(this.context.extensionUri, "resources", "dark", icon),
       };
     }
   }
