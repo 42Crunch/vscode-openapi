@@ -1,17 +1,17 @@
 # Changelog
 
-## Version 5.1.0 (January 30, 2025)
+## Version 5.1.0 (February 10, 2026)
 
 - Added dark mode support for SwaggerUI preview
 - Fixed issue with TTL of a credential not updating when edting scan config
 - Fixed issue where audit of GraphQL API would not show issue in a right location
 - Add .gqls to the list of supported extensions for GraphQL schemas
 
-## Version 5.0.1 (January 14, 2025)
+## Version 5.0.1 (January 14, 2026)
 
 - Fixed typos in what's new page
 
-## Version 5.0.0 (January 14, 2025)
+## Version 5.0.0 (January 14, 2026)
 
 - API Contract Generator
 - Improved logging
