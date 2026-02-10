@@ -80,18 +80,18 @@ const listeners = (
         effect: async (action, listenerApi) => {
           const { scanconf: state } = listenerApi.getState();
 
-          const [serialized, error] = serialize(state.graphQl, state.playbook);
-          if (error !== undefined) {
-            // FIXME show error when serializing
-            return;
-          }
+          // const [serialized, error] = serialize(state.graphQl, state.playbook);
+          // if (error !== undefined) {
+          //   // FIXME show error when serializing
+          //   return;
+          // }
 
-          const scanconf = JSON.stringify(serialized, null, 2);
+          // const scanconf = JSON.stringify(serialized, null, 2);
 
-          host.postMessage({
-            command: "saveScanconf",
-            payload: scanconf,
-          });
+          // host.postMessage({
+          //   command: "saveScanconf",
+          //   payload: scanconf,
+          // });
         },
       }),
 

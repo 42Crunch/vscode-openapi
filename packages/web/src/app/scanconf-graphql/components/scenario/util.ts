@@ -108,7 +108,8 @@ export function unwrapPlaybookStage(stage: FieldValues): Playbook.StageReference
   } as Playbook.StageReference;
 }
 
-export function wrapPlaybookRequest(stage: Playbook.StageContent): Record<string, any> {
+export function wrapPlaybookRequest(stage: any): Record<string, any> {
+  //Playbook.StageContent): Record<string, any> {
   stage = simpleClone(stage);
 
   return {
@@ -128,7 +129,7 @@ export function wrapPlaybookRequest(stage: Playbook.StageContent): Record<string
 }
 
 export function wrapExternalPlaybookRequest(
-  stage: Playbook.ExternalStageContent
+  stage: any //Playbook.ExternalStageContent
 ): Record<string, any> {
   stage = simpleClone(stage);
 

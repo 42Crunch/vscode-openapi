@@ -110,34 +110,32 @@ export class ScanGqlWebView extends WebView<Webapp> {
     },
 
     runScan: async ({ env, scanconf }): Promise<void> => {
-      console.info("debug");
-      // try {
-      //   const config = await loadConfig(this.configuration, this.secrets);
-      //   const reportView = await this.getReportView();
-      //   await reportView.showReport(this.target!.document);
-      //   return await runScan(
-      //     this.secrets,
-      //     this.store,
-      //     this.envStore,
-      //     env,
-      //     this.target!.bundle,
-      //     path,
-      //     method,
-      //     scanconf,
-      //     config,
-      //     makeAggregateLogger(this.logger, reportView),
-      //     reportView,
-      //     false,
-      //   );
-      // } catch (ex: any) {
-      //   const message =
-      //     ex?.response?.statusCode === 409 &&
-      //     ex?.response?.body?.code === 109 &&
-      //     ex?.response?.body?.message === "limit reached"
-      //       ? "You have reached your maximum number of APIs. Please contact support@42crunch.com to upgrade your account."
-      //       : formatException("Failed to run scan:", ex);
-      //   vscode.window.showErrorMessage(message);
-      // }
+      //console.info("debug");
+      try {
+        const config = await loadConfig(this.configuration, this.secrets);
+        const reportView = await this.getReportView();
+        await reportView.showReport(this.target!.document);
+        return await runScan(
+          this.secrets,
+          this.store,
+          this.envStore,
+          env,
+          this.target!.graphQl,
+          scanconf,
+          config,
+          makeAggregateLogger(this.logger, reportView),
+          reportView,
+          false,
+        );
+      } catch (ex: any) {
+        const message =
+          ex?.response?.statusCode === 409 &&
+          ex?.response?.body?.code === 109 &&
+          ex?.response?.body?.message === "limit reached"
+            ? "You have reached your maximum number of APIs. Please contact support@42crunch.com to upgrade your account."
+            : formatException("Failed to run scan:", ex);
+        vscode.window.showErrorMessage(message);
+      }
     },
 
     runFullScan: async ({ env, scanconf }): Promise<void> => {

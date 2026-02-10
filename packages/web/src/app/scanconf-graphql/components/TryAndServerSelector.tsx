@@ -76,7 +76,7 @@ export default function TryAndServerSelector({
         >
           <FileExport />
           Try
-        </Action>
+        </Action> */}
         {onScan && (
           <Action
             onClick={(e) => {
@@ -89,7 +89,7 @@ export default function TryAndServerSelector({
             Scan
           </Action>
         )}
-        {menu && (
+        {/* {menu && (
           <Option>
             <Menu icon="sliders">
               <MenuLabel>Try settings</MenuLabel>

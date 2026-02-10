@@ -25,7 +25,7 @@ export default function RequestCard({
   config: any;
   requestRef: Playbook.RequestRef;
   credentials: Playbook.Credentials | undefined;
-  stage: Playbook.StageContent;
+  stage: any; //Playbook.StageContent;
   saveRequest: (request: Playbook.StageContent) => void;
   defaultCollapsed?: boolean;
   availableVariables: string[];

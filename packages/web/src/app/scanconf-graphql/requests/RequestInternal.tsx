@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { Environment as UnknownEnvironment } from "@xliic/common/env";
-import { Playbook, serialize } from "@xliic/scanconf";
+import { Playbook, Scanconf, serialize } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { DynamicVariableNames } from "../../../core/playbook/builtin-variables";
@@ -20,6 +20,7 @@ import { makeEnvEnv } from "../../../core/playbook/execute";
 import { runScan } from "../actions";
 import DescriptionTooltip from "../../../new-components/DescriptionTooltip";
 import { ErrorBanner } from "../../../components/Banner";
+import { simpleClone } from "@xliic/preserving-json-yaml-parser";
 
 export default function RequestInternal({
   request,
@@ -87,31 +88,30 @@ export default function RequestInternal({
         host={host as string | undefined}
         onTry={(server: string) => onRun(server, inputs)}
         onScan={(server: string) => {
-          // const updatedServer = optionallyReplaceLocalhost(
-          //   server,
-          //   config.platformAuthType,
-          //   config.scanRuntime,
-          //   config.docker.replaceLocalhost,
-          //   config.platform
-          // );
+          //console.info("scan server " + server);
+
           // const [serialized, error] = serialize(oas, playbook);
           // if (error !== undefined) {
           //   console.log("failed to serialize", error);
           //   // FIXME show error when serializing
           //   return;
           // }
-          // dispatch(
-          //   runScan({
-          //     path: request.request.path,
-          //     method: request.request.method,
-          //     operationId: request.operationId,
-          //     env: {
-          //       SCAN42C_HOST: updatedServer,
-          //       ...simple,
-          //     },
-          //     scanconf: extractScanconf(serialized, request.operationId),
-          //   })
-          // );
+
+          const serialized = simpleClone(playbook);
+          const tmp = extractScanconf(serialized, request.operationId);
+
+          dispatch(
+            runScan({
+              path: request.request.path,
+              method: request.request.method,
+              operationId: request.operationId,
+              env: {
+                SCAN42C_HOST: server,
+                ...simple,
+              },
+              scanconf: tmp,
+            })
+          );
         }}
       />
 
@@ -181,6 +181,22 @@ function convertToType(value: string, type: string): unknown {
     }
   }
   return `${value}`;
+}
+
+function extractScanconf(mutable: any, operationId: string): string {
+  if (mutable.operations !== undefined) {
+    for (const key of Object.keys(mutable?.operations)) {
+      if (key !== operationId) {
+        delete mutable.operations[key];
+        // mutable.operations[key].scenarios = [];
+        // mutable.operations[key].before = [];
+        // mutable.operations[key].after = [];
+        // mutable.operations[key].customTests = [];
+        // mutable.operations[key].authorizationTests = [];
+      }
+    }
+  }
+  return JSON.stringify(mutable, null, 2);
 }
 
 const Inputs = styled.div`
