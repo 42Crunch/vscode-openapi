@@ -31,7 +31,7 @@
     "api testing"
   ],
   "engines": {
-    "vscode": "^1.80.0"
+    "vscode": "^1.101.0"
   },
   "extensionDependencies": [
     "redhat.vscode-yaml"
@@ -1025,7 +1025,13 @@
           "fontCharacter": "3"
         }
       }
-    }
+    },
+    "mcpServerDefinitionProviders": [
+      {
+        "id": "xliic-mcp",
+        "label": "42Crunch"
+      }
+    ]
   },
   "workspaces": [
     "packages/common/dist/cjs",
@@ -1049,8 +1055,8 @@
     "@types/mocha": "^10.0.10",
     "@types/node": "^20.14.10",
     "@types/semver": "^6.2.0",
-    "@types/vscode": "1.80.0",
-    "@vscode/test-electron": "^2.3.4",
+    "@types/vscode": "1.101.0",
+    "@vscode/test-electron": "^2.5.2",
     "eslint": "^9.39.2",
     "glob": "^13.0.1",
     "globals": "^15.11.0",
