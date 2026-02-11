@@ -141,9 +141,9 @@ export const slice = createSlice({
     ) => {
       state.selectedCredentialGroup = payload.group;
       state.selectedCredential = payload.credential;
-      state.selectedSubcredential = Object.keys(
-        state.playbook.authenticationDetails?.[payload.group]?.[payload.credential]?.methods || {}
-      )[0];
+      // state.selectedSubcredential = Object.keys(
+      //   state.playbook.authenticationDetails?.[payload.group]?.[payload.credential]?.methods || {}
+      // )[0];
     },
 
     selectSubcredential: (state, { payload }: PayloadAction<string>) => {
@@ -301,11 +301,11 @@ export const slice = createSlice({
       // select first credential
       state.selectedCredentialGroup = 0;
       state.selectedCredential = Object.keys(playbook?.authenticationDetails?.[0] || {})?.[0];
-      if (state.selectedCredential !== undefined) {
-        state.selectedSubcredential = Object.keys(
-          playbook?.authenticationDetails[0][state.selectedCredential]?.methods
-        )?.[0];
-      }
+      // if (state.selectedCredential !== undefined) {
+      //   state.selectedSubcredential = Object.keys(
+      //     playbook?.authenticationDetails[0][state.selectedCredential]?.methods
+      //   )?.[0];
+      // }
 
       // select first authorization test
       state.selectedAuthorizationTest = Object.keys(playbook?.authorizationTests || {})?.[0];

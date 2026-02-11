@@ -45,8 +45,8 @@ export default function RequestInternal({
   const onRun = (server: string, inputs: UnknownEnvironment) =>
     dispatch(executeRequest({ server, inputs }));
 
-  const onSaveRequest = (stage: Playbook.StageContent) => {};
-  //dispatch(saveRequest({ ref: requestRef, stage }));
+  const onSaveRequest = (stage: Playbook.StageContent) =>
+    dispatch(saveRequest({ ref: requestRef, stage }));
 
   const credentials = playbook?.authenticationDetails
     ? playbook?.authenticationDetails[0]

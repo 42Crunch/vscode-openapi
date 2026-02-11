@@ -88,10 +88,10 @@ const listeners = (
 
           // const scanconf = JSON.stringify(serialized, null, 2);
 
-          // host.postMessage({
-          //   command: "saveScanconf",
-          //   payload: scanconf,
-          // });
+          host.postMessage({
+            command: "saveScanconf",
+            payload: JSON.stringify(state.playbook),
+          });
         },
       }),
 

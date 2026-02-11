@@ -10,6 +10,7 @@ import AddExternalRequestDialog from "./AddExternalRequestDialog";
 import Request from "./Request";
 import { setRequestId } from "./slice";
 import { runFullScan } from "../actions";
+import { makeEnvEnv } from "../../../core/playbook/execute";
 
 export default function Operations() {
   const dispatch = useAppDispatch();
@@ -95,12 +96,13 @@ export default function Operations() {
     //   // FIXME show error when serializing
     //   return;
     // }
-    // const { simple } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
+    const { simple } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
     const serialized = playbook;
     dispatch(
       runFullScan({
         env: {
           SCAN42C_HOST: updatedServer,
+          ...simple,
         },
         scanconf: JSON.stringify(serialized, null, 2),
       })
