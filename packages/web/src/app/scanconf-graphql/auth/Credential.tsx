@@ -52,7 +52,7 @@ export default function Credential({ selected }: { selected: ItemId }) {
       <CollapsibleSection
         defaultOpen={false}
         title="Credentials"
-        count={Object.keys(credential.methods).length}
+        count={credential.methods ? Object.keys(credential.methods).length : 0}
       >
         <Form
           data={credential}

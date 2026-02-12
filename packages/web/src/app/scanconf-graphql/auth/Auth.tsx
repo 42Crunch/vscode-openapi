@@ -56,10 +56,15 @@ export default function Auth() {
       sections={sections}
       render={(selected) => <Credential selected={selected} />}
       renderButtons={() => (
-        <NewCredentialDialog
-          existing={Object.keys(authenticationDetails?.[0] || [])}
-          onAddCredential={onAddCredential}
-        />
+        <div>
+          {(authenticationDetails.length === 0 ||
+            Object.keys(authenticationDetails[0]).length === 0) && (
+            <NewCredentialDialog
+              existing={Object.keys(authenticationDetails?.[0] || [])}
+              onAddCredential={onAddCredential}
+            />
+          )}
+        </div>
       )}
       selected={
         selectedCredential !== undefined

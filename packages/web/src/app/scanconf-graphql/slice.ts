@@ -103,6 +103,9 @@ export const slice = createSlice({
       }: PayloadAction<{ credentialGroup: number; id: string; credential: Playbook.Credential }>
     ) => {
       // check if no credential groups exists
+      if (!state.playbook.authenticationDetails) {
+        state.playbook.authenticationDetails = [{}];
+      }
       if (state.playbook.authenticationDetails[credentialGroup] === undefined) {
         state.playbook.authenticationDetails[credentialGroup] = {};
       }
