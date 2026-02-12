@@ -246,12 +246,24 @@ async function splitReportByDocument(
   };
 
   const issues: IssuesByDocument = {};
+  const index: string[] = report.index;
   const handler = new GraphQlHandler(ast);
   for (const [uri, reportedIssues] of Object.entries(issuesPerDocument)) {
     const [document, root] = files[uri];
     issues[uri] = [];
     reportedIssues.forEach((issue: ReportedIssue) => {
-      const pos = handler.getPosition(issue.pointer);
+      let location;
+      if (index) {
+        const parsedValue = parseInt(issue.pointer, 10);
+        if (isNaN(parsedValue)) {
+          location = issue.pointer;
+        } else {
+          location = index[parsedValue];
+        }
+      } else {
+        location = issue.pointer;
+      }
+      const pos = handler.getPosition(location);
       if (pos) {
         const start = document.positionAt(pos.start);
         const end = document.positionAt(pos.end);
@@ -332,7 +344,10 @@ function readAssessment(assessment: any): ReportedIssue[] {
     const result = [];
     for (const id of Object.keys(issues)) {
       const issue = issues[id];
-      const description = issue.description;
+      let description = issue.description;
+      if (description === "") {
+        description = "ID: " + id;
+      }
       for (const occ of issue.occurrences) {
         result.push({
           id,
@@ -350,6 +365,9 @@ function readAssessment(assessment: any): ReportedIssue[] {
 
   if (assessment.issues) {
     issues = issues.concat(transformIssues(assessment.issues));
+  }
+  if (assessment.warnings) {
+    issues = issues.concat(transformIssues(assessment.warnings, 3));
   }
 
   issues.sort((a, b) => b.score - a.score);
