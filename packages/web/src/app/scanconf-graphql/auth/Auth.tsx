@@ -57,7 +57,8 @@ export default function Auth() {
       render={(selected) => <Credential selected={selected} />}
       renderButtons={() => (
         <div>
-          {(authenticationDetails.length === 0 ||
+          {(!authenticationDetails ||
+            authenticationDetails.length === 0 ||
             Object.keys(authenticationDetails[0]).length === 0) && (
             <NewCredentialDialog
               existing={Object.keys(authenticationDetails?.[0] || [])}

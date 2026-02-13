@@ -29,7 +29,10 @@ export default function Credential({ selected }: { selected: ItemId }) {
 
   const group = parseInt(selected.sectionId);
   const credentialId = selected.itemId;
-  const credential = authenticationDetails[group][credentialId];
+  if (!authenticationDetails) {
+    return <div></div>;
+  }
+  const credential = authenticationDetails[group][credentialId] as any;
   return (
     <Container>
       <TryAndServerSelector
@@ -52,7 +55,7 @@ export default function Credential({ selected }: { selected: ItemId }) {
       <CollapsibleSection
         defaultOpen={false}
         title="Credentials"
-        count={credential.methods ? Object.keys(credential.methods).length : 0}
+        count={credential.credentials ? Object.keys(credential.credentials).length : 0}
       >
         <Form
           data={credential}

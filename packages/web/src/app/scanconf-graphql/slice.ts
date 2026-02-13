@@ -110,32 +110,62 @@ export const slice = createSlice({
         state.playbook.authenticationDetails[credentialGroup] = {};
       }
       // add credential
-      state.playbook.authenticationDetails[credentialGroup][id] = credential;
+      ((credential as any)["credentials"] = {
+        [id]: {
+          description: "",
+          credential: "{{ENV_API_TOKEN}}",
+        },
+      }),
+        (state.playbook.authenticationDetails[credentialGroup][id] = credential);
+      (state.playbook.customizations as any)["requests"] = {
+        additionalHeaders: {
+          [credential.name as string]: "{{ENV_API_TOKEN}}",
+        },
+      };
+      // todo: create nested {}?
+      if (!("ENV_API_TOKEN" in state.playbook?.environments?.default?.variables)) {
+        (state.playbook?.environments?.default?.variables as any)["ENV_API_TOKEN"] = {
+          from: "environment",
+          name: "SCAN42C_ENV_API_TOKEN",
+          required: true,
+        };
+      }
     },
 
     removeCredential: (
       state,
       { payload: { credentialGroup, id } }: PayloadAction<{ credentialGroup: number; id: string }>
     ) => {
-      delete state.playbook.authenticationDetails[credentialGroup][id];
-      if (state.selectedCredentialGroup === credentialGroup && state.selectedCredential === id) {
-        // removed currently selected credential, select first available one
-        const firstCredential = Object.keys(
-          state.playbook.authenticationDetails[credentialGroup]
-        )?.[0];
-        if (firstCredential) {
-          state.selectedCredential = firstCredential;
-          const firstMethod = Object.keys(
-            state.playbook.authenticationDetails[credentialGroup][firstCredential].methods
-          )?.[0];
-          if (firstMethod) {
-            state.selectedSubcredential = firstMethod;
-          }
-        } else {
-          state.selectedCredential = undefined;
-          state.selectedSubcredential = undefined;
-        }
-      }
+      delete (state.playbook as any)["authenticationDetails"];
+      // if (state.selectedCredentialGroup === credentialGroup && state.selectedCredential === id) {
+      //   // removed currently selected credential, select first available one
+      //   const firstCredential = Object.keys(
+      //     state.playbook.authenticationDetails[credentialGroup]
+      //   )?.[0];
+      //   if (firstCredential) {
+      //     state.selectedCredential = firstCredential;
+      //     const firstMethod = Object.keys(
+      //       state.playbook.authenticationDetails[credentialGroup][firstCredential].methods
+      //     )?.[0];
+      //     if (firstMethod) {
+      //       state.selectedSubcredential = firstMethod;
+      //     }
+      //   } else {
+      //     state.selectedCredential = undefined;
+      //     state.selectedSubcredential = undefined;
+      //   }
+      // }
+
+      delete (state.playbook.customizations as any)["requests"];
+      delete (state.playbook?.environments?.default?.variables as any)["ENV_API_TOKEN"];
+      // todo: create nested {}?
+      // if (!("ENV_API_TOKEN" in state.playbook?.environments?.default?.variables)) {
+      //   (state.playbook?.environments?.default?.variables as any)["ENV_API_TOKEN"] = {
+      //     from: "environment",
+      //     name: "SCAN42C_ENV_API_TOKEN",
+      //     required: true,
+      //   };
+      // }
     },
 
     selectCredential: (
