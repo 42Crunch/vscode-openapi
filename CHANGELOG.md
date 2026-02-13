@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 5.2.0 (February 13, 2026)
+
+- Fix to support changes in GraphQL report format
+
 ## Version 5.1.0 (February 10, 2026)
 
 - Added dark mode support for SwaggerUI preview
