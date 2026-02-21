@@ -112,7 +112,7 @@ export async function processSnippetParameters(
 ) {
   if (parameters.dropLine) {
     const edit = new vscode.WorkspaceEdit();
-    edit.insert(editor.document.uri, parameters.location, "\n");
+    edit.insert(editor.document.uri, parameters.location, "\n\n");
     await vscode.workspace.applyEdit(edit);
     parameters.location = new vscode.Position(parameters.location.line + 1, 0);
   } else if (brackets) {
