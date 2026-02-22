@@ -3,8 +3,10 @@
  Licensed under the GNU Affero General Public License version 3. See LICENSE.txt in the project root for license information.
 */
 
+import { join } from "node:path";
 import * as vscode from "vscode";
 import * as semver from "semver";
+
 import { configuration, Configuration } from "./configuration";
 import { AuditContext, extensionQualifiedId } from "./types";
 import { parserOptions } from "./parser-options";
@@ -32,13 +34,14 @@ import * as environment from "./environment/activate";
 import * as config from "./webapps/views/config/activate";
 import * as capture from "./webapps/views/capture/activate";
 import { PlatformStore } from "./platform/stores/platform-store";
-import { Logger, PlatformConnection } from "./platform/types";
+import { Logger } from "./platform/types";
 import { getPlatformCredentials, hasCredentials } from "./credentials";
 import { EnvStore } from "./envstore";
 import { debounce } from "./util/debounce";
 import { getApprovedHostnamesTrimmedLowercase, removeSecretsForApprovedHosts } from "./util/config";
 import { SignUpWebView } from "./webapps/signup/view";
-import { PlatformCredentials } from "@xliic/common/signup";
+import { getBinDirectory } from "./platform/cli-ast";
+import { exists } from "./util/fs";
 
 const auditContext: AuditContext = {
   auditsByMainDocument: {},
@@ -257,20 +260,32 @@ export async function activate(context: vscode.ExtensionContext) {
       provideMcpServerDefinitions: async () => {
         const platformCredentials = await getPlatformCredentials(configuration, context.secrets);
 
-        if (!platformCredentials) {
+        const internalRegisterMcp = configuration.get<boolean>("internalRegisterMcp");
+
+        if (!platformCredentials || !internalRegisterMcp) {
           return [];
         }
 
+        const cliDirectoryOverride = configuration.get<string>("cliDirectoryOverride");
+        const binDirectory = getBinDirectory(cliDirectoryOverride);
+        const mcpCliFilename = process.platform === "win32" ? "42c-ast-mcp.exe" : "42c-ast-mcp";
+        const fullPath = join(binDirectory, mcpCliFilename);
+
+        const mcpBinaryExists = await exists(fullPath);
+        if (!mcpBinaryExists) {
+          logger.error(
+            `MCP binary not found at path: ${fullPath}. Please ensure the binary is in place and the cliDirectoryOverride setting is correct.`,
+          );
+          return [];
+        }
+
+        logger.info(`Registering MCP server with path: ${fullPath}`);
+
         return [
-          new vscode.McpStdioServerDefinition(
-            "42 Crunch MCP",
-            "/Users/anton/.42crunch/bin/42c-ast-mcp",
-            ["mcp", "run"],
-            {
-              PLATFORM_HOST: platformCredentials.platformUrl,
-              API_KEY: platformCredentials.apiToken!,
-            },
-          ),
+          new vscode.McpStdioServerDefinition("42Crunch MCP", fullPath, ["mcp", "run"], {
+            PLATFORM_HOST: platformCredentials.platformUrl,
+            API_KEY: platformCredentials.apiToken!,
+          }),
         ];
       },
     }),

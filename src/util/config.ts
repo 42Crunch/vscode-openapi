@@ -6,7 +6,7 @@ import { getCliInfo } from "../platform/cli-ast";
 
 export async function loadConfig(
   configuration: Configuration,
-  secrets: vscode.SecretStorage
+  secrets: vscode.SecretStorage,
 ): Promise<Config> {
   const platformAuthType = configuration.get<Config["platformAuthType"] | "">("platformAuthType");
   const platformUrl = configuration.get<string>("platformUrl")?.trim();
@@ -20,7 +20,7 @@ export async function loadConfig(
 
   const auditRuntime = configuration.get<"platform" | "cli">("platformAuditRuntime");
   const scanRuntime = configuration.get<"docker" | "scand-manager" | "cli">(
-    "platformConformanceScanRuntime"
+    "platformConformanceScanRuntime",
   );
   const scanImage = configuration.get<string>("platformConformanceScanImage");
   const scanProxy = configuration.get<string>("platformConformanceScanProxy");
@@ -29,7 +29,7 @@ export async function loadConfig(
   const repository = configuration.get<string>("platformRepository");
 
   const platformTemporaryCollectionName = configuration.get<string>(
-    "platformTemporaryCollectionName"
+    "platformTemporaryCollectionName",
   );
 
   const platformMandatoryTags = configuration.get<string>("platformMandatoryTags");
@@ -41,6 +41,7 @@ export async function loadConfig(
   const internalFeatures = configuration.get<boolean>("internalFeatures");
   const internalUseDevEndpoints = configuration.get<boolean>("internalUseDevEndpoints");
   const internalDisableLogRedaction = configuration.get<boolean>("internalDisableLogRedaction");
+  const internalRegisterMcp = configuration.get<boolean>("internalRegisterMcp");
 
   return {
     platformUrl,
@@ -73,26 +74,27 @@ export async function loadConfig(
     internalFeatures,
     internalUseDevEndpoints,
     internalDisableLogRedaction,
+    internalRegisterMcp,
   };
 }
 
 export async function saveConfig(
   config: Config,
   configuration: Configuration,
-  secrets: vscode.SecretStorage
+  secrets: vscode.SecretStorage,
 ) {
   await configuration.update("platformUrl", config.platformUrl, vscode.ConfigurationTarget.Global);
 
   await configuration.update(
     "platformAuthType",
     config.platformAuthType,
-    vscode.ConfigurationTarget.Global
+    vscode.ConfigurationTarget.Global,
   );
 
   await configuration.update(
     "securityAuditToken",
     config.anondToken,
-    vscode.ConfigurationTarget.Global
+    vscode.ConfigurationTarget.Global,
   );
 
   if (config.platformServices.source === "auto") {
@@ -101,14 +103,14 @@ export async function saveConfig(
     await configuration.update(
       "platformServices",
       config.platformServices.manual,
-      vscode.ConfigurationTarget.Global
+      vscode.ConfigurationTarget.Global,
     );
   }
 
   await configuration.update(
     "platformScandManager",
     config.scandManager,
-    vscode.ConfigurationTarget.Global
+    vscode.ConfigurationTarget.Global,
   );
 
   await configuration.update("docker", config.docker, vscode.ConfigurationTarget.Global);
@@ -116,67 +118,73 @@ export async function saveConfig(
   await configuration.update(
     "platformAuditRuntime",
     config.auditRuntime,
-    vscode.ConfigurationTarget.Global
+    vscode.ConfigurationTarget.Global,
   );
 
   await configuration.update(
     "platformConformanceScanRuntime",
     config.scanRuntime,
-    vscode.ConfigurationTarget.Global
+    vscode.ConfigurationTarget.Global,
   );
 
   await configuration.update(
     "platformConformanceScanImage",
     config.scanImage,
-    vscode.ConfigurationTarget.Global
+    vscode.ConfigurationTarget.Global,
   );
 
   await configuration.update(
     "platformRepository",
     config.repository,
-    vscode.ConfigurationTarget.Global
+    vscode.ConfigurationTarget.Global,
   );
 
   await configuration.update(
     "cliDirectoryOverride",
     config.cliDirectoryOverride,
-    vscode.ConfigurationTarget.Global
+    vscode.ConfigurationTarget.Global,
   );
 
   await configuration.update(
     "platformTemporaryCollectionName",
     config.platformTemporaryCollectionName,
-    vscode.ConfigurationTarget.Global
+    vscode.ConfigurationTarget.Global,
   );
 
   await configuration.update(
     "platformMandatoryTags",
     config.platformMandatoryTags,
-    vscode.ConfigurationTarget.Global
+    vscode.ConfigurationTarget.Global,
   );
 
   await configuration.update(
     "internalFeatures",
     config.internalFeatures ? true : undefined,
-    vscode.ConfigurationTarget.Global
+    vscode.ConfigurationTarget.Global,
   );
 
   await configuration.update(
     "internalUseDevEndpoints",
     config.internalUseDevEndpoints ? true : undefined,
-    vscode.ConfigurationTarget.Global
+    vscode.ConfigurationTarget.Global,
   );
 
   await configuration.update(
     "internalDisableLogRedaction",
     config.internalDisableLogRedaction ? true : undefined,
-    vscode.ConfigurationTarget.Global
+    vscode.ConfigurationTarget.Global,
+  );
+
+  await configuration.update(
+    "internalRegisterMcp",
+    config.internalRegisterMcp ? true : undefined,
+    vscode.ConfigurationTarget.Global,
   );
 
   await configuration.update(
     "platformConformanceScanProxy",
     config.scanProxy,
-    vscode.ConfigurationTarget.Global
+    vscode.ConfigurationTarget.Global,
   );
 
   // secrets
@@ -200,17 +208,17 @@ export function deriveServices(platformUrl: string): string {
 export async function processApprovedHosts(
   configuration: Configuration,
   secrets: vscode.SecretStorage,
-  approvedHosts: ApprovedHostConfiguration[]
+  approvedHosts: ApprovedHostConfiguration[],
 ) {
   const updateApprovedHostnames = approvedHosts.map((hostConfig) => hostConfig.host.trim());
   const lcaseUpdateApprovedHostnames = updateApprovedHostnames.map((hostname) =>
-    hostname.toLowerCase()
+    hostname.toLowerCase(),
   );
 
   const currentApprovedHostnames = getApprovedHostnames(configuration);
 
   const removedHostnames = currentApprovedHostnames.filter(
-    (currentHost) => !lcaseUpdateApprovedHostnames.includes(currentHost.trim().toLowerCase())
+    (currentHost) => !lcaseUpdateApprovedHostnames.includes(currentHost.trim().toLowerCase()),
   );
 
   // remove secrets for deleted hostnames
@@ -221,30 +229,30 @@ export async function processApprovedHosts(
     approvedHosts.flatMap((hostConfigUpdate) => [
       secrets.store(
         getHostConfigurationSecretKeyFor(hostConfigUpdate.host, "header"),
-        hostConfigUpdate.header || ""
+        hostConfigUpdate.header || "",
       ),
       secrets.store(
         getHostConfigurationSecretKeyFor(hostConfigUpdate.host, "prefix"),
-        hostConfigUpdate.prefix || ""
+        hostConfigUpdate.prefix || "",
       ),
       secrets.store(
         getHostConfigurationSecretKeyFor(hostConfigUpdate.host, "token"),
-        hostConfigUpdate.token || ""
+        hostConfigUpdate.token || "",
       ),
-    ])
+    ]),
   );
 
   // update hostnames configuration
   await configuration.update(
     "approvedHostnames",
     updateApprovedHostnames,
-    vscode.ConfigurationTarget.Global
+    vscode.ConfigurationTarget.Global,
   );
 }
 
 export async function removeSecretsForApprovedHosts(
   secrets: vscode.SecretStorage,
-  removed: string[]
+  removed: string[],
 ) {
   return Promise.all(
     removed.flatMap((removedHost) => {
@@ -254,7 +262,7 @@ export async function removeSecretsForApprovedHosts(
         secrets.delete(getHostConfigurationSecretKeyFor(lcHost, "prefix")),
         secrets.delete(getHostConfigurationSecretKeyFor(lcHost, "token")),
       ];
-    })
+    }),
   );
 }
 
@@ -268,7 +276,7 @@ export function getApprovedHostnamesTrimmedLowercase(configuration: Configuratio
 
 export async function getApprovedHostConfiguration(
   secrets: vscode.SecretStorage,
-  host: string
+  host: string,
 ): Promise<ApprovedHostConfiguration | undefined> {
   const sanitizedHost = host.trim().toLowerCase();
   if (!sanitizedHost) {
@@ -288,7 +296,7 @@ export async function getApprovedHostConfiguration(
 
 async function getApprovedHostsConfiguration(
   configuration: Configuration,
-  secrets: vscode.SecretStorage
+  secrets: vscode.SecretStorage,
 ): Promise<ApprovedHostConfiguration[]> {
   const approvedHostnames = getApprovedHostnames(configuration);
   return (

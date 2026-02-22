@@ -91,6 +91,7 @@ const initialState: ConfigState = {
     internalUseDevEndpoints: false,
     internalFeatures: false,
     internalDisableLogRedaction: false,
+    internalRegisterMcp: false,
   },
   platformConnectionTestResult: undefined,
   waitingForPlatformConnectionTest: false,

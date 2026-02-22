@@ -35,6 +35,7 @@ export type Config = {
   internalFeatures: boolean;
   internalUseDevEndpoints: boolean;
   internalDisableLogRedaction: boolean;
+  internalRegisterMcp: boolean;
 };
 
 export type ConnectionTestResult = { success: true } | { success: false; message: string };

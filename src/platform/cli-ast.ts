@@ -38,7 +38,6 @@ import { extensionQualifiedId } from "../types";
 import { createTempDirectory, existsSync } from "../util/fs";
 import { getProxyEnv } from "../proxy";
 import { LogBuilder } from "../log-redactor";
-import { LogLevel } from "vscode";
 
 const asyncExecFile = promisify(execFile);
 
@@ -55,7 +54,7 @@ export async function createScanConfigWithCliBinary(
   oas: string,
   tags: string[],
   cliDirectoryOverride: string,
-  logger: Logger
+  logger: Logger,
 ): Promise<void> {
   const tmpdir = createTempDirectory("scan-");
   const oasFilename = join(tmpdir, "openapi.json");
@@ -108,7 +107,7 @@ export async function createDefaultConfigWithCliBinary(
   oas: string,
   tags: string[],
   cliDirectoryOverride: string,
-  logger: Logger
+  logger: Logger,
 ): Promise<string> {
   const tmpdir = createTempDirectory("scanconf-update-");
   const scanconfFilename = join(tmpdir, "scanconf.json");
@@ -158,7 +157,7 @@ export async function testCli(cliDirectoryOverride: string): Promise<CliTestResu
 
 export async function ensureCliDownloaded(
   configuration: Configuration,
-  secrets: vscode.SecretStorage
+  secrets: vscode.SecretStorage,
 ): Promise<boolean> {
   const config = await loadConfig(configuration, secrets);
   const info = getCliInfo(config.cliDirectoryOverride);
@@ -169,14 +168,14 @@ export async function ensureCliDownloaded(
     const answer = await vscode.window.showInformationMessage(
       "42Crunch API Security Testing Binary is not found, download?",
       { modal: true },
-      { title: "Download", id: "download" }
+      { title: "Download", id: "download" },
     );
 
     if (answer?.id === "download") {
       const manifest = await getCliUpdate(config.repository, "0.0.0");
       if (manifest === undefined) {
         vscode.window.showErrorMessage(
-          "Failed to download 42Crunch API Security Testing Binary, manifest not found"
+          "Failed to download 42Crunch API Security Testing Binary, manifest not found",
         );
         return false;
       }
@@ -197,7 +196,7 @@ export async function ensureCliDownloaded(
 
 export async function checkForCliUpdate(
   repository: string,
-  cliDirectoryOverride: string
+  cliDirectoryOverride: string,
 ): Promise<boolean> {
   const test = await testCli(cliDirectoryOverride);
   if (test.success) {
@@ -207,7 +206,7 @@ export async function checkForCliUpdate(
       const answer = await vscode.window.showInformationMessage(
         `New version ${manifest.version} of 42Crunch API Security Testing Binary is available, download?`,
         { modal: true },
-        { title: "Download", id: "download" }
+        { title: "Download", id: "download" },
       );
 
       if (answer?.id === "download") {
@@ -234,13 +233,13 @@ function downloadCliWithProgress(manifest: CliAstManifestEntry, cliDirectoryOver
         progress.report({ increment });
       }
       return true;
-    }
+    },
   );
 }
 
 export async function* downloadCli(
   manifest: CliAstManifestEntry,
-  cliDirectoryOverride: string
+  cliDirectoryOverride: string,
 ): AsyncGenerator<CliDownloadProgress, string, unknown> {
   ensureDirectories(cliDirectoryOverride);
   const tmpCli = yield* downloadToTempFile(manifest);
@@ -261,7 +260,7 @@ export async function runScanWithCliBinary(
   logger: Logger,
   oas: string,
   scanconf: string,
-  isFullScan: boolean
+  isFullScan: boolean,
 ): Promise<
   Result<{ reportFilename: string; cli: CliResponse; tempScanDirectory: string }, CliError>
 > {
@@ -313,7 +312,7 @@ export async function runScanWithCliBinary(
     args.push("--token", String(anondToken));
     Object.assign(
       scanEnv,
-      await getProxyEnv(freemiumdUrl, scanEnv["SCAN42C_HOST"], config, logger)
+      await getProxyEnv(freemiumdUrl, scanEnv["SCAN42C_HOST"], config, logger),
     );
   } else {
     const platformConnection = await getPlatformCredentials(configuration, secrets);
@@ -322,7 +321,7 @@ export async function runScanWithCliBinary(
       scanEnv["PLATFORM_HOST"] = platformConnection.platformUrl;
       Object.assign(
         scanEnv,
-        await getProxyEnv(platformConnection.platformUrl, scanEnv["SCAN42C_HOST"], config, logger)
+        await getProxyEnv(platformConnection.platformUrl, scanEnv["SCAN42C_HOST"], config, logger),
       );
     }
   }
@@ -358,7 +357,7 @@ export async function runValidateScanConfigWithCliBinary(
   logger: Logger,
   oas: string,
   scanconf: string,
-  cliDirectoryOverride: string
+  cliDirectoryOverride: string,
 ): Promise<Result<CliValidateResponse, CliError>> {
   logger.info(`Running Validate Scan Config using 42Crunch API Security Testing Binary`);
 
@@ -412,7 +411,7 @@ export async function runAuditWithCliBinary(
   oas: string,
   tags: string[],
   isFullAudit: boolean,
-  cliDirectoryOverride: string
+  cliDirectoryOverride: string,
 ): Promise<
   Result<
     {
@@ -476,14 +475,14 @@ export async function runAuditWithCliBinary(
     const platformConnection = await getPlatformCredentials(configuration, secrets);
     if (platformConnection !== undefined) {
       logger.debug(
-        `Setting PLATFORM_HOST environment variable to: ${platformConnection.platformUrl}`
+        `Setting PLATFORM_HOST environment variable to: ${platformConnection.platformUrl}`,
       );
       logger.debug("Setting API_KEY environment variable.");
       env["API_KEY"] = platformConnection.apiToken!;
       env["PLATFORM_HOST"] = platformConnection.platformUrl;
       Object.assign(
         env,
-        await getProxyEnv(platformConnection.platformUrl, undefined, config, logger)
+        await getProxyEnv(platformConnection.platformUrl, undefined, config, logger),
       );
     }
   }
@@ -542,7 +541,7 @@ function getCrunchDirectory() {
   }
 }
 
-function getBinDirectory(cliDirectoryOverride: string) {
+export function getBinDirectory(cliDirectoryOverride: string) {
   if (cliDirectoryOverride !== undefined && cliDirectoryOverride !== "") {
     return cliDirectoryOverride;
   } else {
@@ -563,7 +562,7 @@ function ensureDirectories(cliDirectoryOverride: string) {
 }
 
 async function* downloadToTempFile(
-  manifest: CliAstManifestEntry
+  manifest: CliAstManifestEntry,
 ): AsyncGenerator<CliDownloadProgress, string, unknown> {
   const asyncFinished = promisify(finished);
   const cliFilename = getCliFilename();
@@ -674,7 +673,7 @@ async function readSqgReport(sqgReportFilename: string) {
 
 function debug(cli: string, args: string[], env: SimpleEnvironment | undefined, logger: Logger) {
   const logLevel = logger.getLogLevel();
-  if (logLevel !== LogLevel.Off && logLevel <= LogLevel.Debug) {
+  if (logLevel !== vscode.LogLevel.Off && logLevel <= vscode.LogLevel.Debug) {
     redactor.setRedactionEnabled(logger.isRedactionEnabled());
     if (env) {
       logger.debug("Binary environment: " + getBinaryEnv(env));
