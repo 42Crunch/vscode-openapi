@@ -102,7 +102,7 @@ export default function RequestInternal({
             config.platform
           );
 
-          const [serialized, error] = serialize(oas, playbook);
+          const [serialized, error] = serialize(playbook);
           if (error !== undefined) {
             console.log("failed to serialize", error);
             // FIXME show error when serializing
@@ -224,7 +224,7 @@ const GlobalBlockError = styled.div`
   margin-bottom: 8px;
 `;
 
-function getVariableNamesFromEnvStack(env: PlaybookEnvStack): string[] {
+export function getVariableNamesFromEnvStack(env: PlaybookEnvStack): string[] {
   const variables: string[] = [];
   for (const entry of env) {
     for (const name of Object.keys(entry.env)) {

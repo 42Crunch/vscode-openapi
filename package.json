@@ -140,6 +140,11 @@
           "group": "navigation"
         },
         {
+          "when": "graphqlEnabled && resourceScheme =~ /^untitled$|^file$/",
+          "command": "openapi.graphql.editorRunFirstOperationScan",
+          "group": "navigation"
+        },
+        {
           "when": "openapiTwoEnabled || openapiThreeEnabled",
           "command": "openapi.preview",
           "group": "navigation"
@@ -557,6 +562,15 @@
         "command": "openapi.platform.editorRunFirstOperationScan",
         "title": "OpenAPI: API Scan",
         "enablement": "!openapiErrors",
+        "icon": {
+          "light": "./resources/42crunch_icon_scan.svg",
+          "dark": "./resources/42crunch_icon_scan.svg"
+        }
+      },
+      {
+        "command": "openapi.graphql.editorRunFirstOperationScan",
+        "title": "GraphQL: GQL Scan",
+        "enablement": "graphqlEnabled",
         "icon": {
           "light": "./resources/42crunch_icon_scan.svg",
           "dark": "./resources/42crunch_icon_scan.svg"

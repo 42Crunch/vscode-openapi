@@ -1,5 +1,5 @@
 import { Playbook } from "@xliic/scanconf";
-import { Scanconf, parse } from "@xliic/scanconf";
+import { Scanconf, parse, makeOasHelpers } from "@xliic/scanconf";
 
 import { assert, expect } from "vitest";
 import { executeAllPlaybooks } from "../execute";
@@ -12,7 +12,7 @@ export function makeStepAssert(steps: PlaybookExecutorStep[]) {
 }
 
 export function parseScenario(oas: any, scenario: Scanconf.ConfigurationFileBundle) {
-  const [file, error] = parse(oas, scenario);
+  const [file, error] = parse(makeOasHelpers(oas), scenario);
 
   if (error !== undefined) {
     assert.fail("Error parsing config: " + JSON.stringify(error));

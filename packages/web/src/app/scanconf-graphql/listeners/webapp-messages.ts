@@ -6,14 +6,17 @@ import { serialize } from "@xliic/scanconf";
 import { showEnvWindow } from "../../../features/env/slice";
 import { setScanServer } from "../../../features/prefs/slice";
 import { onOpenLink } from "../../../features/router/listener";
+import { updateScanconf } from "../../scanconf/scanconf-update/slice";
 import { runFullScan, runScan, sendHttpRequest } from "../actions";
 import {
   addAuthorizationTest,
   addCredential,
   addStage,
+  createVariable,
   moveStage,
   removeAuthorizationTest,
   removeCredential,
+  removeCustomizationForOperation,
   removeRequest,
   removeStage,
   saveAuthorizationTest,
@@ -23,10 +26,7 @@ import {
   saveRequest,
   saveSettings,
   updateOperationAuthorizationTests,
-  createVariable,
-  removeCustomizationForOperation,
 } from "../slice";
-import { updateScanconf } from "../scanconf-update/slice";
 import { AppDispatch, RootState } from "../store";
 
 const listeners = (
@@ -85,12 +85,9 @@ const listeners = (
             // FIXME show error when serializing
             return;
           }
-
-          const scanconf = JSON.stringify(serialized, null, 2);
-
           host.postMessage({
             command: "saveScanconf",
-            payload: scanconf,
+            payload: JSON.stringify(serialized, null, 2),
           });
         },
       }),

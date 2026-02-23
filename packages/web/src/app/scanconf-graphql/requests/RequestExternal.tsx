@@ -2,25 +2,26 @@ import { useEffect, useState } from "react";
 import styled from "styled-components";
 
 import { Environment as UnknownEnvironment } from "@xliic/common/env";
-import { BundledSwaggerOrOasSpec, getServerUrls } from "@xliic/openapi";
-import { Playbook } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
+import { Playbook } from "@xliic/scanconf";
 
 import { DynamicVariableNames } from "../../../core/playbook/builtin-variables";
-import { PlaybookEnvStack } from "../../../core/playbook/playbook-env";
+import { makeEnvEnv } from "../../../core/playbook/execute";
+import DescriptionTooltip from "../../../new-components/DescriptionTooltip";
 import Form from "../../../new-components/Form";
-import CollapsibleSection from "../components/CollapsibleSection";
-import Execution from "../components/execution/Execution";
-import Environment from "../components/environment/Environment";
+import CollapsibleSection from "../../scanconf/components/CollapsibleSection";
+import Environment from "../../scanconf/components/environment/Environment";
+import Execution from "../../scanconf/components/execution/Execution";
+import {
+  getVariableNamesFromEnvStack,
+  unwrapEnvironment,
+  wrapEnvironment,
+} from "../../scanconf/requests/RequestExternal";
 import RequestCardExternal from "../components/scenario/RequestCardExternal";
+import TryAndServerSelector from "../components/TryAndServerSelector";
 import { saveRequest } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
 import { executeRequest } from "./slice";
-import DescriptionTooltip from "../../../new-components/DescriptionTooltip";
-import { findResult } from "../playbook-execution-handler";
-import { ErrorBanner } from "../../../components/Banner";
-import TryAndServerSelector from "../components/TryAndServerSelector";
-import { makeEnvEnv } from "../../../core/playbook/execute";
 
 export default function RequestExternal({
   request,
@@ -47,14 +48,7 @@ export default function RequestExternal({
   const onSaveRequest = (stage: Playbook.ExternalStageContent) =>
     dispatch(saveRequest({ ref: requestRef, stage }));
 
-  const beforeExecutionResult = findResult(mockResult, "Global Before");
-  const afterExecutionResult = findResult(mockResult, "Global After");
-  const requestResult = findResult(mockResult, "Request");
-
-  const variables = [
-    ...DynamicVariableNames,
-    ...getVariableNamesFromEnvStack(requestResult?.results?.[0]?.variablesReplaced?.stack || []),
-  ];
+  const variables = [...DynamicVariableNames, ...getVariableNamesFromEnvStack([])];
 
   const [inputs, setInputs] = useState<UnknownEnvironment>({});
 
@@ -117,18 +111,6 @@ export default function RequestExternal({
         </Inputs>
       </CollapsibleSection>
 
-      {useGlobalBlocks && beforeExecutionResult?.status === "failure" && (
-        <GlobalBlockError>
-          <ErrorBanner message="Check Global Before block" />
-        </GlobalBlockError>
-      )}
-
-      {useGlobalBlocks && afterExecutionResult?.status === "failure" && (
-        <GlobalBlockError>
-          <ErrorBanner message="Check Global After block" />
-        </GlobalBlockError>
-      )}
-
       {tryResult.length > 0 && (
         <CollapsibleSection title="Result">
           <Execution result={tryResult} collapsible={useGlobalBlocks} />
@@ -141,37 +123,6 @@ export default function RequestExternal({
 const Container = styled.div`
   padding: 8px;
 `;
-
-const GlobalBlockError = styled.div`
-  margin-top: 8px;
-  margin-bottom: 8px;
-`;
-
-export function wrapEnvironment(env: UnknownEnvironment) {
-  return {
-    env: Object.entries(env).map(([key, value]) => ({ key, value, type: typeof value })),
-  };
-}
-
-export function unwrapEnvironment(data: any): UnknownEnvironment {
-  const env: UnknownEnvironment = {};
-  for (const { key, value, type } of data.env) {
-    env[key] = convertToType(value, type);
-  }
-  return env;
-}
-
-export function convertToType(value: string, type: string): unknown {
-  if (type !== "string") {
-    try {
-      return JSON.parse(value);
-    } catch (e) {
-      // failed to convert, return string value
-      return value;
-    }
-  }
-  return `${value}`;
-}
 
 const Inputs = styled.div`
   border: 1px solid var(${ThemeColorVariables.border});
@@ -187,29 +138,3 @@ const Title = styled.div`
   cursor: pointer;
   align-items: center;
 `;
-
-function getPreferredServer(
-  oas: BundledSwaggerOrOasSpec,
-  preferredServer: string | undefined
-): string {
-  const servers = getServerUrls(oas);
-
-  const exists = servers.some((url) => url === preferredServer);
-  if (preferredServer !== undefined && preferredServer !== "" && exists) {
-    return preferredServer;
-  }
-  return servers[0];
-}
-
-export function getVariableNamesFromEnvStack(env: PlaybookEnvStack): string[] {
-  const variables: string[] = [];
-  for (const entry of env) {
-    for (const name of Object.keys(entry.env)) {
-      if (!variables.includes(name)) {
-        variables.push(name);
-      }
-    }
-  }
-  variables.sort();
-  return variables;
-}

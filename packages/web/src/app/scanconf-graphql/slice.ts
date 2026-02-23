@@ -4,9 +4,11 @@ import { BundledSwaggerOrOasSpec, getHttpResponseRange, getServerUrls } from "@x
 import { Playbook } from "@xliic/scanconf";
 
 import { loadPlaybook } from "./actions";
+import { arrayMoveMutable, getStageContainer } from "../scanconf/slice";
+import { ENV_API_TOKEN } from "./auth/NewCredentialDialog";
 
 export type State = {
-  oas: BundledSwaggerOrOasSpec;
+  graphQl: string;
   playbook: Playbook.Bundle;
   servers: string[];
 
@@ -17,11 +19,7 @@ export type State = {
 };
 
 const initialState: State = {
-  oas: {
-    openapi: "3.0.0",
-    info: { title: "", version: "0.0" },
-    paths: { "/": { get: { responses: {} } } },
-  },
+  graphQl: "",
   playbook: {
     operations: {},
     requests: {},
@@ -88,7 +86,24 @@ export const slice = createSlice({
         // no default credential, use the first available one
         credential.default = firstAvailable;
       }
+      const myName = state.playbook.authenticationDetails[group][id].name as string;
+      const oldValue = state.playbook.authenticationDetails[group][id].methods[id].credential;
       state.playbook.authenticationDetails[group][id] = credential;
+
+      const oldKey = oldValue.replace("{{", "").replace("}}", "");
+      const newValue = credential.methods[id].credential;
+      const newKey = newValue.replace("{{", "").replace("}}", "");
+
+      const headers = (state.playbook.customizations as any)["requests"].additionalHeaders;
+      headers[myName] = newValue;
+      const vars = state.playbook?.environments?.default?.variables as any;
+
+      vars[newKey] = {
+        from: "environment",
+        name: "SCAN42C_" + ENV_API_TOKEN,
+        required: true,
+      };
+      delete vars[oldKey];
     },
 
     saveEnvironment: (
@@ -107,11 +122,32 @@ export const slice = createSlice({
       }: PayloadAction<{ credentialGroup: number; id: string; credential: Playbook.Credential }>
     ) => {
       // check if no credential groups exists
+      if (!state.playbook.authenticationDetails) {
+        state.playbook.authenticationDetails = [{}];
+      }
       if (state.playbook.authenticationDetails[credentialGroup] === undefined) {
         state.playbook.authenticationDetails[credentialGroup] = {};
       }
       // add credential
+      (credential as any)["credentials"] = {
+        [id]: {
+          description: "",
+          credential: "{{" + ENV_API_TOKEN + "}}",
+        },
+      };
       state.playbook.authenticationDetails[credentialGroup][id] = credential;
+      (state.playbook.customizations as any)["requests"] = {
+        additionalHeaders: {
+          [credential.name as string]: "{{" + ENV_API_TOKEN + "}}",
+        },
+      };
+      if (!(ENV_API_TOKEN in state.playbook?.environments?.default?.variables)) {
+        (state.playbook?.environments?.default?.variables as any)[ENV_API_TOKEN] = {
+          from: "environment",
+          name: "SCAN42C_" + ENV_API_TOKEN,
+          required: true,
+        };
+      }
     },
 
     removeCredential: (
@@ -119,24 +155,10 @@ export const slice = createSlice({
       { payload: { credentialGroup, id } }: PayloadAction<{ credentialGroup: number; id: string }>
     ) => {
       delete state.playbook.authenticationDetails[credentialGroup][id];
-      if (state.selectedCredentialGroup === credentialGroup && state.selectedCredential === id) {
-        // removed currently selected credential, select first available one
-        const firstCredential = Object.keys(
-          state.playbook.authenticationDetails[credentialGroup]
-        )?.[0];
-        if (firstCredential) {
-          state.selectedCredential = firstCredential;
-          const firstMethod = Object.keys(
-            state.playbook.authenticationDetails[credentialGroup][firstCredential].methods
-          )?.[0];
-          if (firstMethod) {
-            state.selectedSubcredential = firstMethod;
-          }
-        } else {
-          state.selectedCredential = undefined;
-          state.selectedSubcredential = undefined;
-        }
-      }
+      state.selectedCredential = undefined;
+      state.selectedSubcredential = undefined;
+      delete (state.playbook.customizations as any)["requests"];
+      delete (state.playbook?.environments?.default?.variables as any)[ENV_API_TOKEN];
     },
 
     selectCredential: (
@@ -145,9 +167,6 @@ export const slice = createSlice({
     ) => {
       state.selectedCredentialGroup = payload.group;
       state.selectedCredential = payload.credential;
-      state.selectedSubcredential = Object.keys(
-        state.playbook.authenticationDetails?.[payload.group]?.[payload.credential]?.methods || {}
-      )[0];
     },
 
     selectSubcredential: (state, { payload }: PayloadAction<string>) => {
@@ -297,47 +316,20 @@ export const slice = createSlice({
   },
 
   extraReducers: (builder) => {
-    builder.addCase(loadPlaybook, (state, { payload: { oas, playbook } }) => {
-      state.oas = oas;
+    builder.addCase(loadPlaybook, (state, { payload: { graphQl, playbook } }) => {
+      state.graphQl = graphQl;
       state.playbook = playbook;
-      state.servers = getServerUrls(oas);
+      state.servers = [];
 
       // select first credential
       state.selectedCredentialGroup = 0;
       state.selectedCredential = Object.keys(playbook?.authenticationDetails?.[0] || {})?.[0];
-      if (state.selectedCredential !== undefined) {
-        state.selectedSubcredential = Object.keys(
-          playbook?.authenticationDetails[0][state.selectedCredential]?.methods
-        )?.[0];
-      }
 
       // select first authorization test
       state.selectedAuthorizationTest = Object.keys(playbook?.authorizationTests || {})?.[0];
     });
   },
 });
-
-export function getStageContainer(
-  playbook: Playbook.Bundle,
-  container: Playbook.StageContainer
-): Playbook.Stage[] {
-  if (container.container === "operationScenarios") {
-    return playbook.operations[container.operationId].scenarios[container.scenarioIndex].requests;
-  } else if (container.container === "operationBefore") {
-    return playbook.operations[container.operationId].before;
-  } else if (container.container === "operationAfter") {
-    return playbook.operations[container.operationId].after;
-  } else if (container.container === "globalBefore") {
-    return playbook.before;
-  } else if (container.container === "globalAfter") {
-    return playbook.after;
-  } else if (container.container === "credential") {
-    return playbook.authenticationDetails[container.group][container.credentialId].methods[
-      container.subCredentialId
-    ].requests;
-  }
-  return null as any;
-}
 
 export const {
   saveSettings,
@@ -365,14 +357,3 @@ export const {
 } = slice.actions;
 
 export default slice.reducer;
-
-export function arrayMoveMutable(array: unknown[], fromIndex: number, toIndex: number) {
-  const startIndex = fromIndex < 0 ? array.length + fromIndex : fromIndex;
-
-  if (startIndex >= 0 && startIndex < array.length) {
-    const endIndex = toIndex < 0 ? array.length + toIndex : toIndex;
-
-    const [item] = array.splice(fromIndex, 1);
-    array.splice(endIndex, 0, item);
-  }
-}

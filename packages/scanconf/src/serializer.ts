@@ -1,20 +1,15 @@
-import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
-import { NullableResult, Result } from "@xliic/result";
 import { joinJsonPointer } from "@xliic/preserving-json-yaml-parser";
+import { NullableResult, Result } from "@xliic/result";
 
-import * as scan from "./scanconfig";
 import * as playbook from "./playbook";
+import * as scan from "./scanconfig";
 
-export function serialize(
-  oas: BundledSwaggerOrOasSpec,
-  file: playbook.Bundle
-): Result<scan.ConfigurationFileBundle, string> {
+export function serialize(file: playbook.Bundle): Result<scan.ConfigurationFileBundle, string> {
   const runtimeConfiguration = file.runtimeConfiguration as scan.RuntimeConfiguration;
   const customizations = file.customizations as scan.Customizations;
   const environments = file.environments as Record<string, scan.EnvironmentFile>;
 
   const [authenticationDetails, authError] = serializeAuthenticationDetails(
-    oas,
     file,
     file.authenticationDetails
   );
@@ -22,22 +17,22 @@ export function serialize(
     return [undefined, `failed to serialize authentication details: ${authError}`];
   }
 
-  const [operations, operationsError] = serializeOperations(oas, file);
+  const [operations, operationsError] = serializeOperations(file);
   if (operationsError !== undefined) {
     return [undefined, `failed to serialize operations: ${operationsError}`];
   }
 
-  const [requests, requestsError] = serializeRequests(oas, file, file.requests);
+  const [requests, requestsError] = serializeRequests(file, file.requests);
   if (requestsError !== undefined) {
     return [undefined, `unable to serialize requests: ${requestsError}`];
   }
 
-  const [before, beforeError] = serializeRequestsStage(oas, file, file.before);
+  const [before, beforeError] = serializeRequestsStage(file, file.before);
   if (beforeError !== undefined) {
     return [undefined, `unable to serialize before: ${beforeError}`];
   }
 
-  const [after, afterError] = serializeRequestsStage(oas, file, file.after);
+  const [after, afterError] = serializeRequestsStage(file, file.after);
   if (afterError !== undefined) {
     return [undefined, `unable to serialize after: ${afterError}`];
   }
@@ -70,13 +65,12 @@ function undefinedIfEmpty<T extends Array<unknown> | Record<string, unknown>>(
 }
 
 function serializeAuthenticationDetails(
-  oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle,
   credentials: playbook.Credentials[]
 ): Result<Record<string, scan.Credential>[], string> {
   const result = [];
   for (const credential of credentials) {
-    const [detail, detailError] = serializeAuthenticationDetail(oas, file, credential);
+    const [detail, detailError] = serializeAuthenticationDetail(file, credential);
     if (detailError !== undefined) {
       return [undefined, "xxx"];
     }
@@ -87,17 +81,12 @@ function serializeAuthenticationDetails(
 }
 
 function serializeAuthenticationDetail(
-  oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle,
   credential: playbook.Credentials
 ): Result<Record<string, scan.Credential>, string> {
   const result: Record<string, scan.Credential> = {};
   for (const [key, value] of Object.entries(credential)) {
-    const [credentialContent, credentialContentError] = serializeCredentials(
-      oas,
-      file,
-      value.methods
-    );
+    const [credentialContent, credentialContentError] = serializeCredentials(file, value.methods);
     if (credentialContentError !== undefined) {
       return [undefined, "xxx"];
     }
@@ -116,13 +105,12 @@ function serializeAuthenticationDetail(
 }
 
 function serializeCredentials(
-  oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle,
   methods: Record<string, playbook.CredentialMethod>
 ): Result<Record<string, scan.CredentialContent>, string> {
   const result: Record<string, scan.CredentialContent> = {};
   for (const [key, value] of Object.entries(methods)) {
-    const [requests, requestsError] = serializeRequestsStage(oas, file, value.requests || []);
+    const [requests, requestsError] = serializeRequestsStage(file, value.requests || []);
     if (requestsError !== undefined) {
       return [undefined, `failed to serialize requests: ${requestsError}`];
     }
@@ -136,12 +124,11 @@ function serializeCredentials(
 }
 
 function serializeOperations(
-  oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle
 ): Result<Record<string, scan.Operation>, string> {
   const result: Record<string, scan.Operation> = {};
   for (const [key, val] of Object.entries(file.operations)) {
-    const [operation, error] = serializeOperation(oas, file, val);
+    const [operation, error] = serializeOperation(file, val);
     if (error !== undefined) {
       return [undefined, `unable to serialize operation '${key}: ${error}'`];
     }
@@ -151,12 +138,10 @@ function serializeOperations(
 }
 
 function serializeOperation(
-  oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle,
   operation: playbook.Operation
 ): Result<scan.Operation, string> {
   const [request, requestError] = serializeStageContent(
-    oas,
     file,
     operation.request,
     operation.operationId
@@ -165,17 +150,17 @@ function serializeOperation(
     return [undefined, `failed to serialize request: ${requestError}`];
   }
 
-  const [scenarios, scenariosError] = serializeScenarios(oas, file, operation);
+  const [scenarios, scenariosError] = serializeScenarios(file, operation);
   if (scenariosError !== undefined) {
     return [undefined, `failed to serialize scenarios: ${scenariosError}`];
   }
 
-  const [before, beforeError] = serializeRequestsStage(oas, file, operation.before);
+  const [before, beforeError] = serializeRequestsStage(file, operation.before);
   if (beforeError !== undefined) {
     return [undefined, `failed to serialize before: ${beforeError}`];
   }
 
-  const [after, afterError] = serializeRequestsStage(oas, file, operation.after);
+  const [after, afterError] = serializeRequestsStage(file, operation.after);
   if (afterError !== undefined) {
     return [undefined, `failed to serialize after: ${afterError}`];
   }
@@ -195,11 +180,10 @@ function serializeOperation(
 }
 
 function serializeStageReference(
-  oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle,
   stage: playbook.StageReference
 ): Result<scan.RequestStageReference, string> {
-  const [responses, responsesError] = serializeResponses(oas, file, stage.responses);
+  const [responses, responsesError] = serializeResponses(file, stage.responses);
   if (responsesError !== undefined) {
     return [undefined, `failed to serialize responses: ${responsesError}`];
   }
@@ -222,17 +206,16 @@ function serializeStageReference(
 }
 
 function serializeStageContent(
-  oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle,
   stage: playbook.StageContent,
   operationId: string
 ): Result<scan.RequestStageContent, string> {
-  const [request, requestError] = serializeCRequest(oas, file, stage.request, operationId);
+  const [request, requestError] = serializeCRequest(file, stage.request, operationId);
   if (requestError !== undefined) {
     return [undefined, `failed to serialize request: ${requestError}`];
   }
 
-  const [responses, responsesError] = serializeResponses(oas, file, stage.responses);
+  const [responses, responsesError] = serializeResponses(file, stage.responses);
 
   if (responsesError !== undefined) {
     return [undefined, `failed to serialize responses: ${responsesError}`];
@@ -252,16 +235,15 @@ function serializeStageContent(
 }
 
 function serializeExternalStageContent(
-  oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle,
   stage: playbook.ExternalStageContent
 ): Result<scan.RequestStageContent, string> {
-  const [request, requestError] = serializeExternalCRequest(oas, file, stage.request);
+  const [request, requestError] = serializeExternalCRequest(file, stage.request);
   if (requestError !== undefined) {
     return [undefined, `failed to serialize request: ${requestError}`];
   }
 
-  const [responses, responsesError] = serializeResponses(oas, file, stage.responses);
+  const [responses, responsesError] = serializeResponses(file, stage.responses);
 
   if (responsesError !== undefined) {
     return [undefined, `failed to serialize responses: ${responsesError}`];
@@ -285,13 +267,12 @@ function serializeAuth(auth: string[] | undefined) {
 }
 
 function serializeScenarios(
-  oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle,
   operation: playbook.Operation
 ): Result<scan.ScenarioFile, string> {
   const scenarios: scan.HappyPathScenario[] = [];
   for (const tryitScenario of operation.scenarios) {
-    const [scenario, error] = serializeScenario(oas, file, tryitScenario);
+    const [scenario, error] = serializeScenario(file, tryitScenario);
     if (error !== undefined) {
       return [undefined, `unable to serialize scenario: ${error}`];
     }
@@ -302,11 +283,10 @@ function serializeScenarios(
 }
 
 function serializeScenario(
-  oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle,
   scenario: playbook.Scenario
 ): Result<scan.HappyPathScenario, string> {
-  const [requests, requestsError] = serializeRequestsStage(oas, file, scenario.requests);
+  const [requests, requestsError] = serializeRequestsStage(file, scenario.requests);
   if (requestsError !== undefined) {
     return [undefined, `unable to serialize requests: ${requestsError}`];
   }
@@ -322,7 +302,6 @@ function serializeScenario(
 }
 
 function serializeRequestsStage(
-  oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle,
   requests: playbook.Stage[]
 ): Result<scan.RequestsStage, string> {
@@ -331,7 +310,6 @@ function serializeRequestsStage(
   for (const request of requests) {
     if (request.ref === undefined) {
       const [stageContent, stageContentError] = serializeStageContent(
-        oas,
         file,
         request,
         request.operationId
@@ -341,7 +319,7 @@ function serializeRequestsStage(
       }
       result.push(stageContent);
     } else {
-      const [stageReference, stageReferenceError] = serializeStageReference(oas, file, request);
+      const [stageReference, stageReferenceError] = serializeStageReference(file, request);
       if (stageReferenceError !== undefined) {
         return [undefined, `unable to serialize stage reference: ${stageReferenceError}`];
       }
@@ -353,7 +331,6 @@ function serializeRequestsStage(
 }
 
 function serializeRequests(
-  oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle,
   requests?: Record<string, playbook.StageContent | playbook.ExternalStageContent>
 ): Result<Record<string, scan.RequestFile>, string> {
@@ -361,14 +338,13 @@ function serializeRequests(
 
   for (const [key, value] of Object.entries(requests || {})) {
     if (value.operationId === undefined) {
-      const [stageContent, stageContentError] = serializeExternalStageContent(oas, file, value);
+      const [stageContent, stageContentError] = serializeExternalStageContent(file, value);
       if (stageContentError !== undefined) {
         return [undefined, `unable to serialize request: ${stageContentError}`];
       }
       result[key] = stageContent;
     } else {
       const [stageContent, stageContentError] = serializeStageContent(
-        oas,
         file,
         value,
         value.operationId
@@ -404,7 +380,6 @@ function serializeEnvironment(
 }
 
 function serializeCRequest(
-  oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle,
   request: playbook.CRequest,
   operationId: string
@@ -413,10 +388,10 @@ function serializeCRequest(
     operationId,
     method: request.method.toUpperCase() as scan.CRequest["details"]["method"],
     url: `{{host}}${request.path}`,
-    headers: serializeRequestParameters(oas, file, request.parameters.header) as any,
-    queries: serializeRequestParameters(oas, file, request.parameters.query) as any,
-    paths: serializeRequestParameters(oas, file, request.parameters.path) as any,
-    cookies: serializeRequestParameters(oas, file, request.parameters.cookie) as any,
+    headers: serializeRequestParameters(file, request.parameters.header) as any,
+    queries: serializeRequestParameters(file, request.parameters.query) as any,
+    paths: serializeRequestParameters(file, request.parameters.path) as any,
+    cookies: serializeRequestParameters(file, request.parameters.cookie) as any,
   };
 
   if (request.body !== undefined) {
@@ -448,7 +423,6 @@ function serializeCRequest(
 }
 
 function serializeExternalCRequest(
-  oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle,
   request: playbook.ExternalCRequest
 ): Result<scan.CRequest, string> {
@@ -456,10 +430,10 @@ function serializeExternalCRequest(
     //operationId: operation.operationId,
     method: request.method.toUpperCase() as scan.CRequest["details"]["method"],
     url: request.url,
-    headers: serializeRequestParameters(oas, file, request.parameters.header) as any,
-    queries: serializeRequestParameters(oas, file, request.parameters.query) as any,
-    paths: serializeRequestParameters(oas, file, request.parameters.path) as any,
-    cookies: serializeRequestParameters(oas, file, request.parameters.cookie) as any,
+    headers: serializeRequestParameters(file, request.parameters.header) as any,
+    queries: serializeRequestParameters(file, request.parameters.query) as any,
+    paths: serializeRequestParameters(file, request.parameters.path) as any,
+    cookies: serializeRequestParameters(file, request.parameters.cookie) as any,
   };
 
   if (request.body !== undefined) {
@@ -491,7 +465,6 @@ function serializeExternalCRequest(
 }
 
 function serializeResponses(
-  oas: BundledSwaggerOrOasSpec,
   file: playbook.Bundle,
   responses: playbook.Responses | undefined
 ): NullableResult<scan.Responses | undefined, string> {
@@ -509,11 +482,7 @@ function serializeResponses(
   return [result, undefined];
 }
 
-function serializeRequestParameters(
-  oas: BundledSwaggerOrOasSpec,
-  file: playbook.Bundle,
-  parameters: playbook.ParameterList
-) {
+function serializeRequestParameters(file: playbook.Bundle, parameters: playbook.ParameterList) {
   if (parameters.length === 0) {
     return undefined;
   }

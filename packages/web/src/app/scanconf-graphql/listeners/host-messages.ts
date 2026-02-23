@@ -1,21 +1,19 @@
 import { TypedStartListening } from "@reduxjs/toolkit";
 
-import { parse, makeOasHelpers } from "@xliic/scanconf";
+import { Webapp } from "@xliic/common/webapp/scanconf-graphql";
 import { Result } from "@xliic/result";
-import { compare, update } from "@xliic/scanconf-changes";
-import { Webapp } from "@xliic/common/webapp/scanconf";
 
-import { goTo } from "../../../features/router/slice";
-import { AppDispatch, RootState } from "../store";
-import { showScanconfOperation, loadPlaybook, loadUpdatedScanconf } from "../actions";
-import { showChanges } from "../scanconf-update/slice";
 import { showGeneralError } from "../../../features/general-error/slice";
+import { goTo } from "../../../features/router/slice";
+import { loadPlaybook, loadUpdatedScanconf, showScanconfOperation } from "../actions";
+import { AppDispatch, RootState } from "../store";
+import { makeGqlHelpers, parse } from "@xliic/scanconf/dist/parser";
 
 export function onShowScanconf(startAppListening: TypedStartListening<RootState, AppDispatch>) {
   return () =>
     startAppListening({
       actionCreator: showScanconfOperation,
-      effect: async ({ payload: { oas, scanconf } }, listenerApi) => {
+      effect: async ({ payload: { graphQl, scanconf } }, listenerApi) => {
         const [parsed, parseError] = jsonParse(scanconf);
         if (parseError !== undefined) {
           listenerApi.dispatch(
@@ -24,16 +22,7 @@ export function onShowScanconf(startAppListening: TypedStartListening<RootState,
           listenerApi.dispatch(goTo(["general-error"]));
           return;
         }
-
-        const changes = compare(oas, parsed);
-
-        if (changes.length > 0) {
-          listenerApi.dispatch(showChanges({ scanconf, oas, changes }));
-          listenerApi.dispatch(goTo(["scanconf-update"]));
-          return;
-        }
-
-        const [playbook, error] = parse(makeOasHelpers(oas), parsed);
+        const [playbook, error] = parse(makeGqlHelpers(), parsed);
         if (error !== undefined) {
           const message = error.map((e) => `${e.message}: ${e.pointer}`).join(" ");
           listenerApi.dispatch(showGeneralError({ message }));
@@ -41,7 +30,7 @@ export function onShowScanconf(startAppListening: TypedStartListening<RootState,
           return;
         }
 
-        listenerApi.dispatch(loadPlaybook({ playbook, oas }));
+        listenerApi.dispatch(loadPlaybook({ playbook, graphQl }));
         listenerApi.dispatch(goTo(["scanconf", "requests"]));
       },
     });
@@ -54,7 +43,7 @@ export function onLoadUpdatedScanconf(
   return () =>
     startAppListening({
       actionCreator: loadUpdatedScanconf,
-      effect: async ({ payload: { oas, scanconf: updatedScanconf } }, listenerApi) => {
+      effect: async ({ payload: { graphQl, scanconf: updatedScanconf } }, listenerApi) => {
         const { changes, scanconf: originalScanconf } = listenerApi.getState().scanconfUpdate;
         const [original, originalParseError] = jsonParse(originalScanconf);
 
@@ -78,23 +67,8 @@ export function onLoadUpdatedScanconf(
           listenerApi.dispatch(goTo(["general-error"]));
           return;
         }
-
-        const patched = update(oas, original, updated, changes);
-
-        const [playbook, playbookError] = parse(makeOasHelpers(oas), patched);
-        if (playbookError !== undefined) {
-          const message = playbookError.map((e) => `${e.message}: ${e.pointer}`).join(" ");
-          listenerApi.dispatch(showGeneralError({ message }));
-          listenerApi.dispatch(goTo(["general-error"]));
-          return;
-        }
-
-        host.postMessage({
-          command: "saveScanconf",
-          payload: JSON.stringify(patched, null, 2),
-        });
-
-        listenerApi.dispatch(loadPlaybook({ playbook, oas }));
+        const playbook = updated;
+        listenerApi.dispatch(loadPlaybook({ playbook, graphQl }));
         listenerApi.dispatch(goTo(["scanconf", "requests"]));
       },
     });

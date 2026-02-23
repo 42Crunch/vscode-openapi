@@ -1,26 +1,21 @@
-import { HttpMethod } from "@xliic/openapi";
 import { Playbook, serialize } from "@xliic/scanconf";
 
 import { ItemId, SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
-import { Menu, MenuItem } from "../../../new-components/Menu";
+import { makeEnvEnv } from "../../../core/playbook/execute";
 import Button from "../../../new-components/Button";
-import { removeRequest, saveRequest } from "../slice";
+import { Menu, MenuItem } from "../../../new-components/Menu";
+import { runFullScan } from "../actions";
+import { removeRequest } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
-import AddExternalRequestDialog from "./AddExternalRequestDialog";
 import Request from "./Request";
 import { setRequestId } from "./slice";
-import { runFullScan } from "../actions";
-import { optionallyReplaceLocalhost } from "../operations/util";
-import { makeEnvEnv } from "../../../core/playbook/execute";
 
 export default function Operations() {
   const dispatch = useAppDispatch();
 
-  const { oas, playbook, servers } = useAppSelector((state) => state.scanconf);
-
+  const { graphQl, playbook, servers } = useAppSelector((state) => state.scanconf);
   const requestRef = useAppSelector((state) => state.requests.ref);
 
-  const config = useAppSelector((state) => state.config.data);
   const env = useAppSelector((state) => state.env.data);
   const preferredScanServer = useAppSelector((state) => state.prefs.scanServer);
 
@@ -86,45 +81,18 @@ export default function Operations() {
       id: "external",
       title: "External Requests",
       items: externalRequestItems,
-      menu: (
-        <AddExternalRequestDialog
-          onAddExternalRequest={(
-            id: string,
-            method: HttpMethod,
-            url: string,
-            mode: "json" | "urlencoded"
-          ) => {
-            dispatch(
-              saveRequest({
-                ref: { id, type: "request" },
-                stage: makeExternalStage(method, url, mode),
-              })
-            );
-            dispatch(setRequestId({ type: "request", id }));
-          }}
-        />
-      ),
     },
   ];
 
   const runScan = (server: string) => {
-    const updatedServer = optionallyReplaceLocalhost(
-      server,
-      config.platformAuthType,
-      config.scanRuntime,
-      config.docker.replaceLocalhost,
-      config.platform
-    );
-
+    const updatedServer = server; // GraphQL do not use docker
     const [serialized, error] = serialize(playbook);
     if (error !== undefined) {
       console.log("failed to serialize", error);
       // FIXME show error when serializing
       return;
     }
-
     const { simple } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
-
     dispatch(
       runFullScan({
         env: {
@@ -163,64 +131,4 @@ export default function Operations() {
       )}
     />
   );
-}
-
-function hasBody(method: HttpMethod): boolean {
-  const withBody: HttpMethod[] = ["post", "put", "patch"];
-  return withBody.includes(method);
-}
-
-function makeBody(
-  method: HttpMethod,
-  mode: "json" | "urlencoded"
-): Playbook.OperationBody | undefined {
-  if (hasBody(method)) {
-    return {
-      mediaType: mode === "urlencoded" ? "application/x-www-form-urlencoded" : "application/json",
-      value: {},
-    };
-  }
-}
-
-function makeHeaders(method: HttpMethod, mode: "json" | "urlencoded"): Playbook.ParameterList {
-  if (hasBody(method)) {
-    return [
-      {
-        key: "Content-Type",
-        value: mode === "urlencoded" ? "application/x-www-form-urlencoded" : "application/json",
-      },
-    ];
-  }
-
-  return [];
-}
-
-function makeExternalStage(
-  method: HttpMethod,
-  url: string,
-  mode: "json" | "urlencoded"
-): Playbook.ExternalStageContent {
-  return {
-    operationId: undefined,
-    defaultResponse: "200",
-    request: {
-      url,
-      method: method,
-      parameters: {
-        header: makeHeaders(method, mode),
-        path: [],
-        query: [],
-        cookie: [],
-      },
-      body: makeBody(method, mode),
-    },
-    responses: {
-      "200": {
-        expectations: {
-          httpStatus: 200,
-        },
-        variableAssignments: {},
-      },
-    },
-  };
 }

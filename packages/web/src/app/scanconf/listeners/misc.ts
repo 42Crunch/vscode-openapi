@@ -1,6 +1,6 @@
 import { TypedStartListening } from "@reduxjs/toolkit";
 
-import { parse } from "@xliic/scanconf";
+import { parse, makeOasHelpers } from "@xliic/scanconf";
 import { Result } from "@xliic/result";
 
 import { goTo } from "../../../features/router/slice";
@@ -27,7 +27,7 @@ export function onScanconfSkipUpdate(
           return;
         }
 
-        const [playbook, error] = parse(oas, parsed);
+        const [playbook, error] = parse(makeOasHelpers(oas), parsed);
         if (error !== undefined) {
           const message = error.map((e) => `${e.message}: ${e.pointer}`).join(" ");
           listenerApi.dispatch(showGeneralError({ message }));

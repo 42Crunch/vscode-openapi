@@ -143,7 +143,7 @@ export function wrapExternalPlaybookRequest(
   };
 }
 
-function wrapEnvironment(environment: Playbook.OperationEnvironment | undefined) {
+export function wrapEnvironment(environment: Playbook.OperationEnvironment | undefined) {
   const wrapped = Object.entries(environment || {}).map(([key, value]) => ({
     key,
     value,
@@ -152,7 +152,7 @@ function wrapEnvironment(environment: Playbook.OperationEnvironment | undefined)
   return wrapped;
 }
 
-function wrapResponses(responses: Playbook.Responses | undefined) {
+export function wrapResponses(responses: Playbook.Responses | undefined) {
   return Object.entries(responses || {}).map(([key, value]) => {
     return {
       key,

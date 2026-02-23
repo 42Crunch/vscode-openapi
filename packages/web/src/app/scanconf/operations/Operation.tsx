@@ -105,7 +105,7 @@ export default function Operation({ operationId }: { operationId: string }) {
             config.platform
           );
 
-          const [serialized, error] = serialize(oas, playbook);
+          const [serialized, error] = serialize(playbook);
           if (error !== undefined) {
             console.log("failed to serialize", error);
             // FIXME show error when serializing

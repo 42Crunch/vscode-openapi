@@ -1,15 +1,44 @@
-import { BundledSwaggerOrOasSpec, getOperationById } from "@xliic/openapi";
+import { BundledSwaggerOrOasSpec, getOperationById, HttpMethod } from "@xliic/openapi";
 import { NullableResult, Result } from "@xliic/result";
 import { joinJsonPointer, parseJsonPointer } from "@xliic/preserving-json-yaml-parser";
 
 import * as scan from "./scanconfig";
 import * as playbook from "./playbook";
 
+export type Helpers = {
+  getOperationDetailsById: (
+    operationId: string
+  ) => Result<{ path: string; method: HttpMethod }, string>;
+};
+
+export function makeOasHelpers(oas: BundledSwaggerOrOasSpec): Helpers {
+  return {
+    getOperationDetailsById: (operationId: string) => {
+      const operation = getOperationById(oas, operationId);
+      if (operation === undefined) {
+        return [
+          undefined,
+          `Unable to find in the OpenAPI file an operation with operationId: "${operationId}"`,
+        ];
+      }
+      return [{ path: operation.path, method: operation.method }, undefined];
+    },
+  };
+}
+
+export function makeGqlHelpers(): Helpers {
+  return {
+    getOperationDetailsById: (operationId: string) => {
+      return [{ path: "/", method: "post" }, undefined];
+    },
+  };
+}
+
 export function parse(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle
 ): Result<playbook.Bundle, ParsingErrors> {
-  const [result, errors] = parseInternal(oas, file);
+  const [result, errors] = parseInternal(helpers, file);
   if (errors == undefined) {
     return [result, undefined];
   }
@@ -24,36 +53,36 @@ export function parse(
 }
 
 export function parseInternal(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle
 ): Result<playbook.Bundle, InternalParsingErrors> {
   return result<playbook.Bundle>({
-    before: parseArray(oas, file, file.before || [], parseRequestStage),
-    after: parseArray(oas, file, file.after || [], parseRequestStage),
-    operations: parseMap(oas, file, file.operations || {}, parseOperation),
+    before: parseArray(helpers, file, file.before || [], parseRequestStage),
+    after: parseArray(helpers, file, file.after || [], parseRequestStage),
+    operations: parseMap(helpers, file, file.operations || {}, parseOperation),
     authenticationDetails: parseArray(
-      oas,
+      helpers,
       file,
       file.authenticationDetails === undefined || file.authenticationDetails.length === 0
         ? [{}]
         : file.authenticationDetails,
       parseCredentials
     ),
-    runtimeConfiguration: parseruntimeConfiguration(oas, file, file.runtimeConfiguration || {}),
+    runtimeConfiguration: parseruntimeConfiguration(helpers, file, file.runtimeConfiguration || {}),
     customizations: value(file.customizations),
-    environments: parseMap(oas, file, file.environments || {}, parseEnvironmentFile),
+    environments: parseMap(helpers, file, file.environments || {}, parseEnvironmentFile),
     authorizationTests: parseMap(
-      oas,
+      helpers,
       file,
       file.authorizationTests || {},
       parseAuthenticationSwappingTest
     ),
-    requests: parseMap(oas, file, file.requests || {}, parseRequestFile),
+    requests: parseMap(helpers, file, file.requests || {}, parseRequestFile),
   });
 }
 
 function parseruntimeConfiguration(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   entry: scan.RuntimeConfiguration
 ): Result<playbook.RuntimeConfiguration, InternalParsingErrors> {
@@ -61,17 +90,17 @@ function parseruntimeConfiguration(
 }
 
 function parseEnvironmentFile(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   entry: scan.EnvironmentFile
 ): Result<playbook.Environment, InternalParsingErrors> {
   return result<playbook.Environment>({
-    variables: parseMap(oas, file, entry.variables || {}, parseEnvironmentVariable),
+    variables: parseMap(helpers, file, entry.variables || {}, parseEnvironmentVariable),
   });
 }
 
 function parseEnvironmentVariable(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   entry: any
 ): Result<playbook.EnvironmentVariable | playbook.EnvironmentConstant, InternalParsingErrors> {
@@ -95,17 +124,17 @@ function parseEnvironmentVariable(
 }
 
 function parseOperation(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   operation: scan.Operation
 ): Result<playbook.Operation, InternalParsingErrors> {
   return result<playbook.Operation>({
-    request: parseRequestStageContent(oas, file, operation.request, operation.operationId),
+    request: parseRequestStageContent(helpers, file, operation.request, operation.operationId),
     operationId: value(operation.operationId),
-    before: parseArray(oas, file, operation.before || [], parseRequestStage),
-    after: parseArray(oas, file, operation.after || [], parseRequestStage),
+    before: parseArray(helpers, file, operation.before || [], parseRequestStage),
+    after: parseArray(helpers, file, operation.after || [], parseRequestStage),
     authorizationTests: value(operation.authorizationTests || []),
-    scenarios: parseArray(oas, file, operation.scenarios || [], parseScenario),
+    scenarios: parseArray(helpers, file, operation.scenarios || [], parseScenario),
     customTests: value(operation.customTests),
     customized: value(isOperationCustomized(operation)),
   });
@@ -147,105 +176,105 @@ function isStageCustomized(stage: scan.RequestStageContent | scan.RequestStageRe
 }
 
 function parseRequestStage(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   entry: scan.RequestStageContent | scan.RequestStageReference
 ): Result<playbook.Stage, InternalParsingErrors> {
   if (entry.$ref !== undefined) {
     // scanconf schema has "[k: string]: unknown;" makin $ref unusable to infer type, TODO fix schema
-    return parseRequestStageReference(oas, file, entry as scan.RequestStageReference);
+    return parseRequestStageReference(helpers, file, entry as scan.RequestStageReference);
   } else {
-    return parseRequestStageContent(oas, file, entry as scan.RequestStageContent);
+    return parseRequestStageContent(helpers, file, entry as scan.RequestStageContent);
   }
 }
 
 function parseRequestStageReference(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   reference: scan.RequestStageReference
 ): Result<playbook.StageReference, InternalParsingErrors> {
   return result<playbook.StageReference>({
-    responses: parseMap(oas, file, reference.responses || {}, parseResponse),
+    responses: parseMap(helpers, file, reference.responses || {}, parseResponse),
     auth: value(reference.auth || []),
-    ref: parseRequestRef(oas, file, reference.$ref as string),
+    ref: parseRequestRef(helpers, file, reference.$ref as string),
     fuzzing: value(reference.fuzzing),
-    environment: parseCtxVariables(oas, file, reference.environment || {}),
+    environment: parseCtxVariables(helpers, file, reference.environment || {}),
     injectionKey: value(reference.injectionKey),
     expectedResponse: value(reference.expectedResponse),
   });
 }
 
 function parseRequestStageContent(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   content: scan.RequestStageContent,
   operationId?: string
 ): Result<playbook.StageContent, InternalParsingErrors> {
   return result<playbook.StageContent>({
-    responses: parseMap(oas, file, content.responses || {}, parseResponse),
+    responses: parseMap(helpers, file, content.responses || {}, parseResponse),
     fuzzing: value(content.fuzzing),
     auth: value(content.auth || []),
-    environment: parseCtxVariables(oas, file, content.environment || {}),
+    environment: parseCtxVariables(helpers, file, content.environment || {}),
     injectionKey: value(content.injectionKey),
     ref: value(undefined),
     defaultResponse: value(content.defaultResponse),
-    request: parseRequestRequest(oas, file, content.request, operationId),
+    request: parseRequestRequest(helpers, file, content.request, operationId),
     operationId: value(operationId),
   });
 }
 
 function parseRequestExternalStageContent(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   content: scan.RequestStageContent
 ): Result<playbook.ExternalStageContent, InternalParsingErrors> {
   return result<playbook.ExternalStageContent>({
     operationId: [undefined, undefined],
-    responses: parseMap(oas, file, content.responses || {}, parseResponse),
-    environment: parseCtxVariables(oas, file, content.environment || {}),
+    responses: parseMap(helpers, file, content.responses || {}, parseResponse),
+    environment: parseCtxVariables(helpers, file, content.environment || {}),
     defaultResponse: value(content.defaultResponse),
-    request: parseExternalRequestRequest(oas, file, content.request),
+    request: parseExternalRequestRequest(helpers, file, content.request),
   });
 }
 
 function parseRequestFile(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   content: scan.RequestFile
 ): Result<playbook.StageContent | playbook.ExternalStageContent, InternalParsingErrors> {
   if (content.operationId === undefined) {
-    return parseRequestExternalStageContent(oas, file, content);
+    return parseRequestExternalStageContent(helpers, file, content);
   } else {
-    return parseRequestStageContent(oas, file, content, content.operationId);
+    return parseRequestStageContent(helpers, file, content, content.operationId);
   }
 }
 
 function parseRequestRequest(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   request: scan.CRequest | scan.HttpRequest,
   operationId?: string
 ): Result<playbook.CRequest, InternalParsingErrors> {
   // FIXME check that operationId is the same as request.operationId
   if (request.type === "42c") {
-    return parseCRequest(oas, file, request, operationId);
+    return parseCRequest(helpers, file, request, operationId);
   }
   return makeErrorResult(`unknown request type: ${request.type}`);
 }
 
 function parseExternalRequestRequest(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   request: scan.CRequest | scan.HttpRequest
 ): Result<playbook.ExternalCRequest, InternalParsingErrors> {
   if (request.type === "42c") {
-    return parseExternalCRequest(oas, file, request);
+    return parseExternalCRequest(helpers, file, request);
   }
   return makeErrorResult(`unknown request type: ${request.type}`);
 }
 
 function parseCRequest(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   request: scan.CRequest,
   operationId?: string
@@ -259,38 +288,39 @@ function parseCRequest(
     ];
   }
 
-  const operation = getOperationById(oas, effectiveOperationId);
+  const [details, error] = helpers.getOperationDetailsById(effectiveOperationId);
 
-  if (operation === undefined) {
+  if (error !== undefined) {
+    // FIXME provide more generic error message, perhap
     return makeErrorResult(
-      `Unable to find in the OpenAPI file an operation with operationId: "${effectiveOperationId}"`
+      `Unable to get operation details for operationId "${effectiveOperationId}": ${error}`
     );
   }
 
   return result<playbook.CRequest>({
     operationId: value(effectiveOperationId),
-    path: value(operation.path),
-    method: value(operation.method.toLowerCase()),
-    parameters: parseParameters(oas, file, request?.details || {}),
-    body: parseRequestBody(oas, file, request?.details?.requestBody),
+    path: value(details.path),
+    method: value(details.method.toLowerCase()),
+    parameters: parseParameters(helpers, file, request?.details || {}),
+    body: parseRequestBody(helpers, file, request?.details?.requestBody),
   });
 }
 
 function parseExternalCRequest(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   request: scan.CRequest
 ): Result<playbook.ExternalCRequest, InternalParsingErrors> {
   return result<playbook.ExternalCRequest>({
     url: value(request.details.url),
     method: value(request.details.method.toLowerCase()),
-    parameters: parseParameters(oas, file, request?.details || {}),
-    body: parseRequestBody(oas, file, request?.details?.requestBody),
+    parameters: parseParameters(helpers, file, request?.details || {}),
+    body: parseRequestBody(helpers, file, request?.details?.requestBody),
   });
 }
 
 function parseRequestBody(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   body: scan.CRequest["details"]["requestBody"]
 ): NullableResult<playbook.OperationBody | undefined, InternalParsingErrors> {
@@ -322,20 +352,20 @@ function parseUrlencoded(
 }
 
 function parseParameters(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   entry: scan.CRequest["details"]
 ): Result<playbook.ParameterValues, InternalParsingErrors> {
   return result<playbook.ParameterValues>({
-    cookie: parseParametersArray(oas, file, entry.cookies || []),
-    path: parseParametersArray(oas, file, entry.paths || []),
-    query: parseParametersArray(oas, file, entry.queries || []),
-    header: parseParametersArray(oas, file, entry.headers || []),
+    cookie: parseParametersArray(helpers, file, entry.cookies || []),
+    path: parseParametersArray(helpers, file, entry.paths || []),
+    query: parseParametersArray(helpers, file, entry.queries || []),
+    header: parseParametersArray(helpers, file, entry.headers || []),
   });
 }
 
 function parseParametersArray(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   parameters: scan.ParametersArray
 ): Result<{ key: string; value: unknown }[], InternalParsingErrors> {
@@ -349,14 +379,14 @@ function parseParametersArray(
 }
 
 function parseResponse(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   entry: scan.Response
 ): Result<playbook.Response, InternalParsingErrors> {
   return result<playbook.Response>({
     expectations: value(entry.expectations),
     variableAssignments: parseMap(
-      oas,
+      helpers,
       file,
       entry.variableAssignments || {},
       parseVariableAssigmment
@@ -365,7 +395,7 @@ function parseResponse(
 }
 
 function parseVariableAssigmment(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   assignment:
     | scan.VariableAssignmentsHardcoded
@@ -406,7 +436,7 @@ function parseVariableAssigmment(
 }
 
 function parseCtxVariables(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   entry: scan.CtxVariables
 ): Result<playbook.OperationEnvironment, InternalParsingErrors> {
@@ -414,7 +444,7 @@ function parseCtxVariables(
 }
 
 function parseRequestRef(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   ref?: string
 ): NullableResult<playbook.RequestRef | undefined, InternalParsingErrors> {
@@ -442,7 +472,7 @@ function parseRequestRef(
 }
 
 function parseCredentials(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   credential: Record<string, scan.Credential> | { $ref: string }
 ): Result<playbook.Credentials, InternalParsingErrors> {
@@ -450,11 +480,11 @@ function parseCredentials(
     return makeErrorResult(`external credential refs are not supported: ${credential["$ref"]}`);
   }
 
-  return parseMap(oas, file, credential as Record<string, scan.Credential>, parseCredential);
+  return parseMap(helpers, file, credential as Record<string, scan.Credential>, parseCredential);
 }
 
 function parseCredential(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   credential: scan.Credential
 ): Result<playbook.Credential, InternalParsingErrors> {
@@ -465,37 +495,37 @@ function parseCredential(
     default: value(credential.default),
     ttl: value(credential.ttl),
     tti: value(credential.tti),
-    methods: parseMap(oas, file, credential.credentials || {}, parseCredentialContent),
+    methods: parseMap(helpers, file, credential.credentials || {}, parseCredentialContent),
     description: value(credential.description),
   });
 }
 
 function parseCredentialContent(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   credential: scan.CredentialContent
 ): Result<playbook.CredentialMethod, InternalParsingErrors> {
   return result<playbook.CredentialMethod>({
     description: value(credential.description),
-    requests: parseArray(oas, file, credential.requests || [], parseRequestStage),
+    requests: parseArray(helpers, file, credential.requests || [], parseRequestStage),
     credential: value(credential.credential),
   });
 }
 
 function parseScenario(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   scenario: scan.HappyPathScenario | scan.UnhappyPathScenario
 ): Result<playbook.Scenario, InternalParsingErrors> {
   return result<playbook.Scenario>({
-    requests: parseArray(oas, file, scenario.requests || [], parseRequestStage),
+    requests: parseArray(helpers, file, scenario.requests || [], parseRequestStage),
     key: value(scenario.key),
     fuzzing: value((scenario as scan.HappyPathScenario).fuzzing),
   });
 }
 
 function parseAuthenticationSwappingTest(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   test: scan.AuthenticationSwappingTest
 ): Result<playbook.AuthenticationSwappingTest, InternalParsingErrors> {
@@ -589,11 +619,11 @@ function value<X>(input: X): NullableResult<X, InternalParsingErrors> {
 }
 
 function parseMap<I, O>(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   input: Record<string, I>,
   transform: (
-    oas: BundledSwaggerOrOasSpec,
+    helpers: Helpers,
     file: scan.ConfigurationFileBundle,
     entry: I
   ) => Result<O, InternalParsingErrors>
@@ -602,7 +632,7 @@ function parseMap<I, O>(
   const map: Record<string, O> = {};
 
   const transformed: [string, Result<O, InternalParsingErrors>][] = Object.entries(input).map(
-    ([key, value]) => [key, transform(oas, file, value)]
+    ([key, value]) => [key, transform(helpers, file, value)]
   );
 
   for (const [key, result] of transformed) {
@@ -622,11 +652,11 @@ function parseMap<I, O>(
 }
 
 function parseArray<I, O>(
-  oas: BundledSwaggerOrOasSpec,
+  helpers: Helpers,
   file: scan.ConfigurationFileBundle,
   input: I[],
   transform: (
-    oas: BundledSwaggerOrOasSpec,
+    helpers: Helpers,
     file: scan.ConfigurationFileBundle,
     entry: I
   ) => Result<O, InternalParsingErrors>
@@ -635,7 +665,7 @@ function parseArray<I, O>(
   const array: O[] = [];
 
   const transformed: Result<O, InternalParsingErrors>[] = (input || []).map((value) =>
-    transform(oas, file, value)
+    transform(helpers, file, value)
   );
 
   for (const [index, result] of transformed.entries()) {

@@ -30,6 +30,7 @@ export default defineConfig(({ command, mode }) => {
           environment: resolve(__dirname, "src/app/environment/index.tsx"),
           config: resolve(__dirname, "src/app/config/index.tsx"),
           scanconf: resolve(__dirname, "src/app/scanconf/index.tsx"),
+          "scanconf-graphql": resolve(__dirname, "src/app/scanconf-graphql/index.tsx"),
           signup: resolve(__dirname, "src/app/signup/index.tsx"),
           tags: resolve(__dirname, "src/app/tags/index.tsx"),
           capture: resolve(__dirname, "src/app/capture/index.tsx"),

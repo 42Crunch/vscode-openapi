@@ -533,7 +533,7 @@ export async function runAuditWithCliBinary(
   }
 }
 
-function getCrunchDirectory() {
+export function getCrunchDirectory() {
   if (process.platform === "win32") {
     return join(process.env["APPDATA"] || homedir(), "42Crunch");
   } else {
@@ -549,7 +549,7 @@ export function getBinDirectory(cliDirectoryOverride: string) {
   }
 }
 
-function getCliFilename() {
+export function getCliFilename() {
   if (process.platform === "win32") {
     return "42c-ast.exe";
   } else {
@@ -557,7 +557,7 @@ function getCliFilename() {
   }
 }
 
-function ensureDirectories(cliDirectoryOverride: string) {
+export function ensureDirectories(cliDirectoryOverride: string) {
   mkdirSync(getBinDirectory(cliDirectoryOverride), { recursive: true });
 }
 
@@ -592,14 +592,14 @@ async function* downloadToTempFile(
   return tmpfile;
 }
 
-function readException(ex: any) {
+export function readException(ex: any) {
   const message = "message" in ex ? ex.message : "";
   const stdout = "stdout" in ex ? Buffer.from(ex.stdout, "utf8").toString() : "";
   const stderr = "stdout" in ex ? Buffer.from(ex.stderr, "utf8").toString() : "";
   return { message, stdout, stderr };
 }
 
-function formatException({
+export function formatException({
   message,
   stdout,
   stderr,
@@ -640,7 +640,7 @@ export type CliError = {
   statusMessage: string;
 };
 
-function parseCliJsonResponse(response: string): CliResponse | undefined {
+export function parseCliJsonResponse(response: string): CliResponse | undefined {
   try {
     if (response.startsWith("{")) {
       return JSON.parse(response);
@@ -652,7 +652,7 @@ function parseCliJsonResponse(response: string): CliResponse | undefined {
   return undefined;
 }
 
-function getUserAgent() {
+export function getUserAgent() {
   const extension = vscode.extensions.getExtension(extensionQualifiedId)!;
   return `42Crunch-VSCode/${extension.packageJSON.version}`;
 }
@@ -671,7 +671,12 @@ async function readSqgReport(sqgReportFilename: string) {
   }
 }
 
-function debug(cli: string, args: string[], env: SimpleEnvironment | undefined, logger: Logger) {
+export function debug(
+  cli: string,
+  args: string[],
+  env: SimpleEnvironment | undefined,
+  logger: Logger,
+) {
   const logLevel = logger.getLogLevel();
   if (logLevel !== vscode.LogLevel.Off && logLevel <= vscode.LogLevel.Debug) {
     redactor.setRedactionEnabled(logger.isRedactionEnabled());

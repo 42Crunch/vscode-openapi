@@ -24,6 +24,7 @@ import { DataDictionaryCompletionProvider } from "./data-dictionary/completion";
 import { DataDictionaryCodeActions } from "./data-dictionary/code-actions";
 import { activate as activateLinter } from "./data-dictionary/linter";
 import { activate as activateScan } from "./scan/activate";
+import { activate as activateGqlScan } from "../graphql/scan/activate";
 import { EnvStore } from "../envstore";
 import { SignUpWebView } from "../webapps/signup/view";
 import { TagsWebView } from "../webapps/views/tags/view";
@@ -112,8 +113,24 @@ export async function activate(
     prefs,
     signUpWebView,
     reportWebView,
-    auditContext
+    auditContext,
   );
+
+  activateGqlScan(
+    context,
+    platformContext,
+    cache,
+    logger,
+    configuration,
+    secrets,
+    store,
+    envStore,
+    prefs,
+    signUpWebView,
+    reportWebView,
+    auditContext,
+  );
+
   activateLinter(cache, platformContext, store, dataDictionaryDiagnostics);
 
   const disposable1 = vscode.workspace.onDidSaveTextDocument((document) =>
