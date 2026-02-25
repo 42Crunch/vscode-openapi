@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 
 import { DocumentNode } from "graphql/language/ast";
 import { Cache } from "../../cache";
+import { isGqlExt } from "../../util";
 
 export class ScanGqlCodelensProvider implements vscode.CodeLensProvider {
   private lenses: Record<string, vscode.CodeLens[]> = {};
@@ -13,13 +14,7 @@ export class ScanGqlCodelensProvider implements vscode.CodeLensProvider {
     token: vscode.CancellationToken,
   ): Promise<vscode.CodeLens[]> {
     const result: (vscode.CodeLens | undefined)[] = [];
-    if (
-      document.fileName.endsWith(".graphql") ||
-      document.fileName.endsWith(".gql") ||
-      document.fileName.endsWith(".graphqls") ||
-      document.fileName.endsWith(".sdl") ||
-      document.fileName.endsWith(".gqls")
-    ) {
+    if (isGqlExt(document)) {
       result.push(topScanLens(document, null));
 
       this.lenses[document.uri.toString()] = result.filter(

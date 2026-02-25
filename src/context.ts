@@ -7,6 +7,7 @@ import { find } from "@xliic/preserving-json-yaml-parser";
 import * as vscode from "vscode";
 import { Cache } from "./cache";
 import { OpenApiVersion } from "./types";
+import { isGqlExt } from "./util";
 
 export async function updateContext(cache: Cache, document: vscode.TextDocument | undefined) {
   if (!document) {
@@ -15,13 +16,7 @@ export async function updateContext(cache: Cache, document: vscode.TextDocument 
     return;
   }
 
-  if (
-    document.fileName.endsWith(".graphql") ||
-    document.fileName.endsWith(".gql") ||
-    document.fileName.endsWith(".graphqls") ||
-    document.fileName.endsWith(".sdl") ||
-    document.fileName.endsWith(".gqls")
-  ) {
+  if (isGqlExt(document)) {
     vscode.commands.executeCommand("setContext", "graphqlEnabled", true);
   } else {
     vscode.commands.executeCommand("setContext", "graphqlEnabled", false);

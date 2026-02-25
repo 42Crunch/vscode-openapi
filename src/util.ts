@@ -617,3 +617,13 @@ function escapeJson(jsonText: string): string {
   const res = JSON.stringify(jsonText);
   return res.substring(1, res.length - 1);
 }
+
+export function isGqlExt(document: vscode.TextDocument): boolean {
+  return (
+    document.fileName.endsWith(".graphql") ||
+    document.fileName.endsWith(".gql") ||
+    document.fileName.endsWith(".graphqls") ||
+    document.fileName.endsWith(".sdl") ||
+    document.fileName.endsWith(".gqls")
+  );
+}

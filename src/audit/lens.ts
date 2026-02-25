@@ -6,6 +6,7 @@ import { getLocation } from "@xliic/preserving-json-yaml-parser";
 import { Cache } from "../cache";
 import { getOpenApiVersion } from "../parsers";
 import { OpenApiVersion } from "../types";
+import { isGqlExt } from "../util";
 
 const supportedVersions = [OpenApiVersion.V2, OpenApiVersion.V3, OpenApiVersion.V3_1];
 
@@ -27,13 +28,19 @@ export class AuditCodelensProvider implements vscode.CodeLensProvider {
         result.push(auditLens(document, oas, path, method));
       }
 
-      result.push(topAuditLens(document));
+      result.push(topAuditLens(document, true));
 
       this.lenses[document.uri.toString()] = result.filter(
         (lens): lens is vscode.CodeLens => lens !== undefined
       );
     }
-
+    if (isGqlExt(document)) {
+      const result: (vscode.CodeLens | undefined)[] = [];
+      result.push(topAuditLens(document, false));
+      this.lenses[document.uri.toString()] = result.filter(
+        (lens): lens is vscode.CodeLens => lens !== undefined,
+      );
+    }
     return this.lenses[document.uri.toString()];
   }
 }
@@ -71,11 +78,14 @@ function auditLens(
   });
 }
 
-function topAuditLens(document: vscode.TextDocument): vscode.CodeLens | undefined {
+function topAuditLens(
+  document: vscode.TextDocument,
+  isOpenApi: boolean,
+): vscode.CodeLens | undefined {
   const line = document.lineAt(0);
   return new vscode.CodeLens(line.range, {
     title: "Audit",
-    tooltip: "Audit this OpenAPI file",
-    command: "openapi.securityAudit",
+    tooltip: "Audit this " + (isOpenApi ? "OpenAPI" : "GraphQL") + " file",
+    command: isOpenApi ? "openapi.securityAudit" : "openapi.securityGqlAudit",
   });
 }
