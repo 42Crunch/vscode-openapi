@@ -99,7 +99,7 @@ async function editorRunFirstOperationScan(
   const text = editor.document.getText();
   const title = basename(editor.document.fileName) || "GraphQL";
   const scanconfUri = await getOrCreateScanconfUri(editor.document.uri, title);
-  const tags = [] as string[];
+  const tags = store.isConnected() ? await store.getTagsForDocument(editor.document, memento) : [];
 
   if (
     (scanconfUri === undefined || !(await existsUri(scanconfUri))) &&

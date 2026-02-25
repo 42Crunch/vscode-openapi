@@ -16,7 +16,7 @@ import path, { basename } from "path";
 import * as vscode from "vscode";
 import { Cache } from "../cache";
 import { Configuration, configuration } from "../configuration";
-import { ensureHasCredentials } from "../credentials";
+import { ensureHasCredentials, getAnondCredentials, getPlatformCredentials } from "../credentials";
 import { fromInternalUri } from "../external-refs";
 import { ensureCliDownloaded } from "../platform/cli-ast";
 import { PlatformStore } from "../platform/stores/platform-store";
@@ -28,6 +28,9 @@ import { setDecorations } from "./decoration";
 import { setAudit } from "./service";
 import { AuditWebView } from "./view";
 import { GraphQlHandler } from "../graphql/handler";
+import { getProxyEnv } from "../proxy";
+import { getEndpoints } from "@xliic/common/endpoints";
+import { Logger } from "../platform/types";
 
 const asyncExecFile = promisify(execFile);
 const execMaxBuffer = 1024 * 1024 * 20; // 20MB
@@ -35,6 +38,7 @@ const execMaxBuffer = 1024 * 1024 * 20; // 20MB
 export function registerSecurityGqlAudit(
   context: vscode.ExtensionContext,
   cache: Cache,
+  logger: Logger,
   auditContext: AuditContext,
   pendingAudits: PendingAudits,
   reportWebView: AuditWebView,
@@ -49,6 +53,7 @@ export function registerSecurityGqlAudit(
         context.workspaceState,
         context.secrets,
         cache,
+        logger,
         auditContext,
         pendingAudits,
         reportWebView,
@@ -64,6 +69,7 @@ async function securityAudit(
   memento: vscode.Memento,
   secrets: vscode.SecretStorage,
   cache: Cache,
+  logger: Logger,
   auditContext: AuditContext,
   pendingAudits: PendingAudits,
   reportWebView: AuditWebView,
@@ -98,7 +104,19 @@ async function securityAudit(
       ): Promise<{ audit: Audit; tempAuditDirectory: string } | undefined> => {
         const text = editor.document.getText();
         if (await ensureCliDownloaded(configuration, secrets)) {
-          return runCliAudit(editor.document, text, cache, secrets, configuration, progress);
+          const tags = store.isConnected()
+            ? await store.getTagsForDocument(editor.document, memento)
+            : [];
+          return runCliAudit(
+            editor.document,
+            text,
+            tags,
+            cache,
+            logger,
+            secrets,
+            configuration,
+            progress,
+          );
         } else {
           // cli is not available and user chose to cancel download
           vscode.window.showErrorMessage(
@@ -126,14 +144,23 @@ async function securityAudit(
 async function runCliAudit(
   document: vscode.TextDocument,
   text: string,
+  tags: string[],
   cache: Cache,
+  logger: Logger,
   secrets: vscode.SecretStorage,
   configuration: Configuration,
   progress: vscode.Progress<any>
 ): Promise<{ audit: Audit; tempAuditDirectory: string } | undefined> {
   const config = await loadConfig(configuration, secrets);
 
-  const result = await runAuditWithCliBinary(secrets, config, text, config.cliDirectoryOverride);
+  const result = await runAuditWithCliBinary(
+    secrets,
+    config,
+    logger,
+    text,
+    tags,
+    config.cliDirectoryOverride
+  );
 
   const audit = await parseGqlAuditReport(cache, document, result?.audit, result?.graphQlAst);
 
@@ -143,13 +170,16 @@ async function runCliAudit(
 async function runAuditWithCliBinary(
   secrets: vscode.SecretStorage,
   config: Config,
+  logger: Logger,
   text: string,
+  tags: string[],
   cliDirectoryOverride: string
 ): Promise<{
   audit: unknown;
   graphQlAst: unknown;
   tempAuditDirectory: string;
 }> {
+  const { cliFreemiumdHost, freemiumdUrl } = getEndpoints(config.internalUseDevEndpoints);
   const dir = createTempDirectory("audit-");
   await writeFile(join(dir, "schema.graphql"), text, { encoding: "utf8" });
 
@@ -158,6 +188,30 @@ async function runAuditWithCliBinary(
   const env: Record<string, string> = {};
 
   const args = ["graphql", "audit", "schema.graphql", "--output", "report.json"];
+
+  if (tags.length > 0) {
+    args.push("--tag", tags.join(","));
+  }
+
+  if (config.platformAuthType === "anond-token") {
+    const anondToken = getAnondCredentials(configuration);
+    args.push("--token", String(anondToken));
+    Object.assign(env, await getProxyEnv(freemiumdUrl, undefined, config, logger));
+  } else {
+    const platformConnection = await getPlatformCredentials(configuration, secrets);
+    if (platformConnection !== undefined) {
+      logger.debug(
+        `Setting PLATFORM_HOST environment variable to: ${platformConnection.platformUrl}`,
+      );
+      logger.debug("Setting API_KEY environment variable.");
+      env["API_KEY"] = platformConnection.apiToken!;
+      env["PLATFORM_HOST"] = platformConnection.platformUrl;
+      Object.assign(
+        env,
+        await getProxyEnv(platformConnection.platformUrl, undefined, config, logger),
+      );
+    }
+  }
 
   try {
     const output = await asyncExecFile(cli, args, {

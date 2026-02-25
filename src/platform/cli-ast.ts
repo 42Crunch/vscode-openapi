@@ -71,9 +71,9 @@ export async function createScanConfigWithCliBinary(
   ];
 
   // re-enable when tagging is supported
-  // if (tags.length > 0) {
-  //   args.push("--tag", tags.join(","));
-  // }
+  if (tags.length > 0) {
+    args.push("--tag", tags.join(","));
+  }
 
   args.push("openapi.json");
 

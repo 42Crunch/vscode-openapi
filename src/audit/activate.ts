@@ -90,6 +90,7 @@ export function activate(
   registerSecurityGqlAudit(
     context,
     cache,
+    logger,
     auditContext,
     pendingAudits,
     reportWebView,
