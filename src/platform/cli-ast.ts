@@ -257,6 +257,7 @@ export async function runScanWithCliBinary(
   secrets: vscode.SecretStorage,
   scanEnv: SimpleEnvironment,
   config: Config,
+  tags: string[],
   logger: Logger,
   oas: string,
   scanconf: string,
@@ -305,6 +306,9 @@ export async function runScanWithCliBinary(
 
   if (!isFullScan) {
     args.push("--is-operation");
+  }
+  if (tags.length > 0) {
+    args.push("--tag", tags.join(","));
   }
 
   if (config.platformAuthType === "anond-token") {

@@ -112,6 +112,11 @@ export class ScanWebView extends WebView<Webapp> {
 
     runScan: async ({ path, method, operationId, env, scanconf }): Promise<void> => {
       try {
+        const document = this.target?.document;
+        const tags =
+          this.store.isConnected() && document
+            ? await this.store.getTagsForDocument(document, this.memento)
+            : [];
         const config = await loadConfig(this.configuration, this.secrets);
 
         const reportView = await this.getReportView();
@@ -127,6 +132,7 @@ export class ScanWebView extends WebView<Webapp> {
           method,
           scanconf,
           config,
+          tags,
           makeAggregateLogger(this.logger, reportView),
           reportView,
           false
@@ -144,6 +150,11 @@ export class ScanWebView extends WebView<Webapp> {
 
     runFullScan: async ({ env, scanconf }): Promise<void> => {
       try {
+        const document = this.target?.document;
+        const tags =
+          this.store.isConnected() && document
+            ? await this.store.getTagsForDocument(document, this.memento)
+            : [];
         const config = await loadConfig(this.configuration, this.secrets);
 
         const reportView = await this.getReportView();
@@ -159,6 +170,7 @@ export class ScanWebView extends WebView<Webapp> {
           undefined,
           scanconf,
           config,
+          tags,
           makeAggregateLogger(this.logger, reportView),
           reportView,
           true
@@ -327,6 +339,7 @@ async function runScan(
   method: HttpMethod | undefined,
   scanconf: string,
   config: Config,
+  tags: string[],
   logger: Logger,
   reportView: ScanReportWebView,
   isFullScan: boolean
@@ -370,6 +383,7 @@ async function runScan(
         secrets,
         scanEnv,
         config,
+        tags,
         logger,
         stringOas,
         scanconf,

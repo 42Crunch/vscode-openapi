@@ -90,6 +90,11 @@ export class ScanGqlWebView extends WebView<Webapp> {
 
     runScan: async ({ env, scanconf }): Promise<void> => {
       try {
+        const document = this.target?.document;
+        const tags =
+          this.store.isConnected() && document
+            ? await this.store.getTagsForDocument(document, this.memento)
+            : [];
         const config = await loadConfig(this.configuration, this.secrets);
         const reportView = await this.getReportView();
         await reportView.showReport(this.target!.document);
@@ -101,6 +106,7 @@ export class ScanGqlWebView extends WebView<Webapp> {
           this.target!.graphQl,
           scanconf,
           config,
+          tags,
           makeAggregateLogger(this.logger, reportView),
           reportView,
           false,
@@ -118,6 +124,11 @@ export class ScanGqlWebView extends WebView<Webapp> {
 
     runFullScan: async ({ env, scanconf }): Promise<void> => {
       try {
+        const document = this.target?.document;
+        const tags =
+          this.store.isConnected() && document
+            ? await this.store.getTagsForDocument(document, this.memento)
+            : [];
         const config = await loadConfig(this.configuration, this.secrets);
         const reportView = await this.getReportView();
         await reportView.showReport(this.target!.document);
@@ -129,6 +140,7 @@ export class ScanGqlWebView extends WebView<Webapp> {
           this.target!.graphQl,
           scanconf,
           config,
+          tags,
           makeAggregateLogger(this.logger, reportView),
           reportView,
           true,
@@ -253,6 +265,7 @@ async function runScan(
   graphQl: string,
   scanconf: string,
   config: Config,
+  tags: string[],
   logger: Logger,
   reportView: ScanReportWebView,
   isFullScan: boolean,
@@ -268,6 +281,7 @@ async function runScan(
         secrets,
         scanEnv,
         config,
+        tags,
         logger,
         graphQl,
         scanconf,
