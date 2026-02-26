@@ -190,6 +190,7 @@ export async function activate(
       { scheme: "file", language: "json" },
       { scheme: "file", language: "jsonc" },
       { scheme: "file", language: "yaml" },
+      { scheme: "file", language: "graphql" },
     ],
     new PlatformTagCodelensProvider(cache, configuration, secrets, memento)
   );

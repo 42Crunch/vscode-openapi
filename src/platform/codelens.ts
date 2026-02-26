@@ -7,6 +7,7 @@ import { OpenApiVersion } from "../types";
 import { TagData, TAGS_DATA_KEY } from "@xliic/common/tags";
 import { hasCredentials } from "../credentials";
 import { Configuration } from "../configuration";
+import { isGqlExt } from "../util";
 
 const supportedVersions = [OpenApiVersion.V2, OpenApiVersion.V3, OpenApiVersion.V3_1];
 
@@ -65,6 +66,9 @@ export class PlatformTagCodelensProvider implements vscode.CodeLensProvider<Tags
     if (credentials === "api-token") {
       const parsed = this.cache.getParsedDocument(document);
       if (supportedVersions.includes(getOpenApiVersion(parsed))) {
+        return [new TagsLens(document.uri)];
+      }
+      if (isGqlExt(document)) {
         return [new TagsLens(document.uri)];
       }
     }
