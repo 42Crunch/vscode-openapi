@@ -60,13 +60,14 @@ export const slice = createSlice({
   },
 
   extraReducers: (builder) => {
-    builder.addCase(
-      showScanconfOperation,
-      (state, { payload: { graphQl: any, scanconf: string } }) => {
-        const operationId = "";
-        state.ref = { id: operationId, type: "operation" };
+    builder.addCase(showScanconfOperation, (state, { payload: { graphQl, scanconf } }) => {
+      let operationId = "";
+      const operations = JSON.parse(scanconf)["operations"];
+      if (operations) {
+        operationId = Object.keys(operations)[0] || "";
       }
-    );
+      state.ref = { id: operationId, type: "operation" };
+    });
   },
 });
 
