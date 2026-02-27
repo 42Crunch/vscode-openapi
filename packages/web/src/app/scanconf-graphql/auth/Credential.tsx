@@ -42,7 +42,7 @@ export default function Credential({ selected }: { selected: ItemId }) {
         }}
       />
 
-      <CollapsibleSection title="Security Scheme">
+      <CollapsibleSection title="Security scheme">
         <CredentialDetails
           credential={credential}
           saveCredential={(credential) =>
