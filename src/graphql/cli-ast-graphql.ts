@@ -55,7 +55,7 @@ export async function createGqlScanConfigWithCliBinary(
     "--graphql",
     "openapi.graphql",
     "--hosts",
-    "http://localhost:8090",
+    "http://localhost:4000",
     "--output",
     "scanconfig.json",
   ];
