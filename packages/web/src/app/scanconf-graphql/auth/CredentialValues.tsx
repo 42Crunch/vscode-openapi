@@ -31,7 +31,11 @@ export default function CredentialValues({
       title: method.key,
       content: (
         <Content value={method.key}>
-          <Input label="Credential value" name={`methods.${index}.value.credential`} />
+          <Input
+            label="Credential value"
+            name={`methods.${index}.value.credential`}
+            disabled={true}
+          />
           <Requests></Requests>
         </Content>
       ),
