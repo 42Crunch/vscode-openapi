@@ -44,7 +44,7 @@ function makeOasTabs(
     {
       id: "body",
       title: "Body Details",
-      content: <RequestBody variables={availableVariables} />,
+      content: <RequestBody variables={availableVariables} readOnly />,
       disabled: false,
     },
     {

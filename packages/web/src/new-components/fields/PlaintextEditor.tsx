@@ -12,7 +12,7 @@ import { useController } from "react-hook-form";
 import styled from "styled-components";
 import { VariableNode } from "./editor/VariableNode";
 
-export default function PlaintextEditor({ name }: { name: string }) {
+export default function PlaintextEditor({ name, readOnly }: { name: string; readOnly?: boolean }) {
   const {
     field: { value },
   } = useController({ name });
@@ -22,6 +22,7 @@ export default function PlaintextEditor({ name }: { name: string }) {
   }
 
   const initialConfig = {
+    editable: !readOnly,
     namespace: "editor",
     editorState: () => {
       const paragraph = $createParagraphNode();
