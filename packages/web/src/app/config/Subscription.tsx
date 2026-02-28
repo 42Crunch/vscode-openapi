@@ -109,6 +109,30 @@ export default function Subscription({
       </Section>
 
       <Section>
+        <Title>GraphQL Audit</Title>
+        <Subtitle>Monthly operation audits left</Subtitle>
+        <Counters>
+          {data.monthlyGraphqlAudit - data.currentGraphqlAuditUsage} / {data.monthlyGraphqlAudit}
+        </Counters>
+        <ProgressBar
+          label=""
+          progress={1 - data.currentGraphqlAuditUsage / data.monthlyGraphqlAudit}
+        />
+      </Section>
+
+      <Section>
+        <Title>GraphQL Scan</Title>
+        <Subtitle>Monthly operation scans left</Subtitle>
+        <Counters>
+          {data.monthlyGraphqlScan - data.currentGraphqlScanUsage} / {data.monthlyGraphqlScan}
+        </Counters>
+        <ProgressBar
+          label=""
+          progress={1 - data.currentGraphqlScanUsage / data.monthlyGraphqlScan}
+        />
+      </Section>
+
+      <Section>
         <Title>API Contract Generator</Title>
         <Subtitle>Monthly operations left</Subtitle>
         <Counters>
