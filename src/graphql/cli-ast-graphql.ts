@@ -143,9 +143,11 @@ export async function runGqlScanWithCliBinary(
     "--enrich=false",
   ];
 
-  if (!isFullScan) {
-    args.push("--is-operation");
-  }
+  // graphql scan does not support it, don't set it for now
+  // if (!isFullScan) {
+  //   args.push("--is-operation");
+  // }
+
   if (tags.length > 0) {
     args.push("--tag", tags.join(","));
   }
