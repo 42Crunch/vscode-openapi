@@ -52,7 +52,7 @@ export default function Auth() {
 
   return (
     <SearchSidebarControlled
-      title="security schemes"
+      title="security scheme"
       sections={sections}
       render={(selected) => <Credential selected={selected} />}
       renderButtons={() => (

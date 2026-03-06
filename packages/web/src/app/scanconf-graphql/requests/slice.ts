@@ -3,7 +3,7 @@ import { Environment } from "@xliic/common/env";
 import { Playbook } from "@xliic/scanconf";
 import { PlaybookExecutorStep } from "../../../core/playbook/playbook";
 import { ExecutionResult } from "../../scanconf/components/scenario/types";
-import { showScanconfOperation } from "../actions";
+import { loadPlaybook } from "../actions";
 
 export type State = {
   ref?: Playbook.RequestRef;
@@ -60,13 +60,10 @@ export const slice = createSlice({
   },
 
   extraReducers: (builder) => {
-    builder.addCase(
-      showScanconfOperation,
-      (state, { payload: { graphQl: any, scanconf: string } }) => {
-        const operationId = "";
-        state.ref = { id: operationId, type: "operation" };
-      }
-    );
+    builder.addCase(loadPlaybook, (state, { payload: { playbook, graphQl } }) => {
+      const operationId = Object.keys(playbook.operations)[0] || "";
+      state.ref = { id: operationId, type: "operation" };
+    });
   },
 });
 
