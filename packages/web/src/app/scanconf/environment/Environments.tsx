@@ -22,7 +22,7 @@ export default function Environments() {
 
   return (
     <SearchSidebarControlled
-      title="environments"
+      title="environment"
       noSectionTitles
       selected={environmentId ? { sectionId: "environment", itemId: environmentId } : undefined}
       sections={sections}

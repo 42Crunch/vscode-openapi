@@ -18,7 +18,7 @@ import { Cache } from "../cache";
 import { Configuration, configuration } from "../configuration";
 import { ensureHasCredentials, getAnondCredentials, getPlatformCredentials } from "../credentials";
 import { fromInternalUri } from "../external-refs";
-import { ensureCliDownloaded } from "../platform/cli-ast";
+import { debug, ensureCliDownloaded } from "../platform/cli-ast";
 import { PlatformStore } from "../platform/stores/platform-store";
 import { AuditContext, IssuesByDocument, PendingAudits } from "../types";
 import { loadConfig } from "../util/config";
@@ -222,6 +222,7 @@ async function runAuditWithCliBinary(
   }
 
   try {
+    debug(cli, args, env, logger);
     const output = await asyncExecFile(cli, args, {
       cwd: dir as string,
       windowsHide: true,
