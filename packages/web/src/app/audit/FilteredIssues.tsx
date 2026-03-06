@@ -72,15 +72,14 @@ export default function FilteredIssues() {
               </BottomItem>
             </BottomDescription>
           </BottomDescription>
-          {type !== "graphql" && (
-            <KdbArticle
-              lang={filename.toLowerCase().endsWith("json") ? "json" : "yaml"}
-              article={kdb[issue.id]}
-              openLink={(url) => {
-                dispatch(openLink(url));
-              }}
-            />
-          )}
+          <KdbArticle
+            lang={filename.toLowerCase().endsWith("json") ? "json" : "yaml"}
+            article={kdb[issue.id]}
+            issueId={issue.id}
+            openLink={(url) => {
+              dispatch(openLink(url));
+            }}
+          />
         </CollapsibleCard>
       ))}
     </Container>

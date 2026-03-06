@@ -4,13 +4,20 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 
 export default function KdbArticle({
   article,
+  issueId,
   lang,
   openLink,
 }: {
   article: any;
   lang: "json" | "yaml";
   openLink: (url: string) => void;
+  issueId: string;
 }) {
+  if (article === undefined) {
+    console.warn(`No article found for issue ${issueId}`);
+    return <Container>No KDB article available for the issue: {issueId}</Container>;
+  }
+
   const onLinkClick = (e: any) => {
     e.stopPropagation();
     e.preventDefault();

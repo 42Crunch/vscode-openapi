@@ -86,6 +86,7 @@ export default function PriorityIssues() {
               lang={filename.toLowerCase().endsWith("json") ? "json" : "yaml"}
               article={issue.kdb}
               openLink={(url) => dispatch(openLink(url))}
+              issueId={issue.id}
             />
           </div>
         </CollapsibleCard>
@@ -113,6 +114,7 @@ export default function PriorityIssues() {
               lang={filename.toLowerCase().endsWith("json") ? "json" : "yaml"}
               article={issue.kdb}
               openLink={(url) => dispatch(openLink(url))}
+              issueId={issue.id}
             />
           </div>
         </CollapsibleCard>
