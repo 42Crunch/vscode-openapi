@@ -43,7 +43,7 @@ export function registerSecurityGqlAudit(
   pendingAudits: PendingAudits,
   reportWebView: AuditWebView,
   store: PlatformStore,
-  signUpWebView: SignUpWebView
+  signUpWebView: SignUpWebView,
 ) {
   return vscode.commands.registerTextEditorCommand(
     "openapi.securityGqlAudit",
@@ -58,9 +58,9 @@ export function registerSecurityGqlAudit(
         pendingAudits,
         reportWebView,
         store,
-        textEditor
+        textEditor,
       );
-    }
+    },
   );
 }
 
@@ -74,7 +74,7 @@ async function securityAudit(
   pendingAudits: PendingAudits,
   reportWebView: AuditWebView,
   store: PlatformStore,
-  editor: vscode.TextEditor
+  editor: vscode.TextEditor,
 ) {
   if (!(await ensureHasCredentials(signUpWebView, configuration, secrets, "regular"))) {
     return;
@@ -100,7 +100,7 @@ async function securityAudit(
       },
       async (
         progress,
-        cancellationToken
+        cancellationToken,
       ): Promise<{ audit: Audit; tempAuditDirectory: string } | undefined> => {
         const text = editor.document.getText();
         if (await ensureCliDownloaded(configuration, secrets)) {
@@ -120,11 +120,11 @@ async function securityAudit(
         } else {
           // cli is not available and user chose to cancel download
           vscode.window.showErrorMessage(
-            "42Crunch API Security Testing Binary is required to run Audit."
+            "42Crunch API Security Testing Binary is required to run Audit.",
           );
           return;
         }
-      }
+      },
     );
 
     if (result) {
@@ -149,7 +149,7 @@ async function runCliAudit(
   logger: Logger,
   secrets: vscode.SecretStorage,
   configuration: Configuration,
-  progress: vscode.Progress<any>
+  progress: vscode.Progress<any>,
 ): Promise<{ audit: Audit; tempAuditDirectory: string } | undefined> {
   const config = await loadConfig(configuration, secrets);
 
@@ -159,7 +159,7 @@ async function runCliAudit(
     logger,
     text,
     tags,
-    config.cliDirectoryOverride
+    config.cliDirectoryOverride,
   );
 
   const audit = await parseGqlAuditReport(cache, document, result?.audit, result?.graphQlAst);
@@ -173,7 +173,7 @@ async function runAuditWithCliBinary(
   logger: Logger,
   text: string,
   tags: string[],
-  cliDirectoryOverride: string
+  cliDirectoryOverride: string,
 ): Promise<{
   audit: unknown;
   graphQlAst: unknown;
@@ -187,7 +187,15 @@ async function runAuditWithCliBinary(
 
   const env: Record<string, string> = {};
 
-  const args = ["graphql", "audit", "schema.graphql", "--output", "report.json"];
+  const args = [
+    "graphql",
+    "audit",
+    "schema.graphql",
+    "--freemium-host",
+    cliFreemiumdHost,
+    "--output",
+    "report.json",
+  ];
 
   if (tags.length > 0) {
     args.push("--tag", tags.join(","));
@@ -238,7 +246,7 @@ async function parseGqlAuditReport(
   cache: Cache,
   document: vscode.TextDocument,
   report: any,
-  ast: any
+  ast: any,
 ): Promise<Audit> {
   const documentUri: string = document.uri.toString();
 
@@ -246,7 +254,7 @@ async function parseGqlAuditReport(
     document,
     report,
     ast,
-    cache
+    cache,
   );
 
   const filename = basename(document.fileName);
@@ -284,7 +292,7 @@ async function splitReportByDocument(
   mainDocument: vscode.TextDocument,
   report: any,
   ast: any,
-  cache: Cache
+  cache: Cache,
 ): Promise<[Grades, IssuesByDocument, { [uri: string]: vscode.TextDocument }, ReportedIssue[]]> {
   const grades = readSummary(report);
   const reportedIssues = readAssessment(report);
@@ -292,7 +300,7 @@ async function splitReportByDocument(
   const [mainRoot, documentUris, issuesPerDocument, badIssues] = processIssues(
     mainDocument,
     cache,
-    reportedIssues
+    reportedIssues,
   );
 
   const files: { [uri: string]: [vscode.TextDocument, Parsed | undefined] } = {
@@ -342,7 +350,7 @@ async function splitReportByDocument(
 function processIssues(
   document: vscode.TextDocument,
   cache: Cache,
-  issues: ReportedIssue[]
+  issues: ReportedIssue[],
 ): [Parsed | undefined, string[], { [uri: string]: ReportedIssue[] }, ReportedIssue[]] {
   const mainUri = document.uri;
   const documentUris: { [uri: string]: boolean } = { [mainUri.toString()]: true };
@@ -461,7 +469,7 @@ function readSummary(assessment: any): Grades {
 function findIssueLocation(
   mainUri: vscode.Uri,
   root: Parsed,
-  pointer: string
+  pointer: string,
 ): [string, string] | undefined {
   return [mainUri.toString(), pointer];
 }
