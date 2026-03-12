@@ -277,8 +277,8 @@ function flattenIssues(
     .map(([uri, issues]) => {
       return issues.map((issue, idx) => ({
         ...issue,
-        domain: type === "graphql" ? "datavalidation" : kdb[issue.id].group,
-        group: type === "graphql" ? "schema" : kdb[issue.id].subgroup,
+        domain: kdb[issue.id].group,
+        group: kdb[issue.id].subgroup,
         filename: files[issue.documentUri].relative,
       }));
     })
@@ -297,14 +297,8 @@ function getStats(issues: FlatIssue[], kdb: Kdb, type: "openapi" | "graphql"): S
 
   const byIssue = Object.keys(grouped).map((id) => ({
     id,
-    kdb:
-      type === "graphql"
-        ? (grapqlFallbackArticle as unknown as KdbArticle)
-        : kdb[id] || fallbackArticle,
-    title:
-      type === "graphql"
-        ? grouped[id][0].description
-        : kdb[id].title.text.replace(/^<h1>|<\/h1>$/g, ""),
+    kdb: kdb[id] || fallbackArticle,
+    title: kdb[id].title.text.replace(/^<h1>|<\/h1>$/g, ""),
     domain: grouped[id][0].domain,
     score: grouped[id].reduce((result, issue) => result + issue.score, 0),
     criticality: Math.max(...grouped[id].map((issue) => issue.criticality)) as CriticalityLevel,
