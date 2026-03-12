@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 5.3.0 (March 12, 2026)
+
+- Add support for GraphQL Scan
+- Fix issue with OpenAPI 3.1 schemas not allowing external $ref's in some cases #340
+
 ## Version 5.2.0 (February 13, 2026)
 
 - Fix to support changes in GraphQL report format
