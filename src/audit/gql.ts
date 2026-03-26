@@ -6,7 +6,6 @@
 import { Audit, Grades, ReportedIssue } from "@xliic/common/audit";
 import { Config } from "@xliic/common/config";
 import { Parsed } from "@xliic/preserving-json-yaml-parser";
-import { parse } from "graphql";
 import { execFile } from "node:child_process";
 import { readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
@@ -160,7 +159,7 @@ async function runCliAudit(
     config.cliDirectoryOverride,
   );
 
-  const audit = await parseGqlAuditReport(cache, document, result?.audit, result?.graphQlAst);
+  const audit = await parseGqlAuditReport(cache, document, result?.audit);
 
   return { audit, tempAuditDirectory: result.tempAuditDirectory };
 }
@@ -174,7 +173,6 @@ async function runAuditWithCliBinary(
   cliDirectoryOverride: string,
 ): Promise<{
   audit: unknown;
-  graphQlAst: unknown;
   tempAuditDirectory: string;
 }> {
   const { cliFreemiumdHost, freemiumdUrl } = getEndpoints(config.internalUseDevEndpoints);
@@ -232,9 +230,7 @@ async function runAuditWithCliBinary(
     const report = await readFile(reportFilename, { encoding: "utf8" });
     const parsed = JSON.parse(report);
 
-    const ast = parse(text);
-
-    return { audit: parsed, graphQlAst: ast, tempAuditDirectory: dir };
+    return { audit: parsed, tempAuditDirectory: dir };
   } catch (ex: any) {
     const error = readException(ex);
     throw new Error(formatException(error));
@@ -245,11 +241,10 @@ async function parseGqlAuditReport(
   cache: Cache,
   document: vscode.TextDocument,
   report: any,
-  ast: any,
 ): Promise<Audit> {
   const documentUri: string = document.uri.toString();
 
-  const [grades, issues, _badIssues] = await splitReportByDocument(document, report, ast, cache);
+  const [grades, issues, _badIssues] = await splitReportByDocument(document, report, cache);
 
   const filename = basename(document.fileName);
 
@@ -279,7 +274,6 @@ async function parseGqlAuditReport(
 async function splitReportByDocument(
   mainDocument: vscode.TextDocument,
   report: any,
-  ast: any,
   cache: Cache,
 ): Promise<[Grades, IssuesByDocument, ReportedIssue[]]> {
   const grades = readSummary(report);
@@ -291,8 +285,7 @@ async function splitReportByDocument(
   for (const [uri, reportedIssues] of Object.entries(issuesPerDocument)) {
     issues[uri] = [];
     reportedIssues.forEach((issue: ReportedIssue) => {
-      console.log("issue", issue);
-      const [startLine, startCol, endLine, endCol] = issue?.absoluteLocation || [0, 0, 0, 0];
+      const [startLine, startCol, endLine, endCol] = issue?.absoluteLocation || [1, 1, 1, 1];
       issues[uri].push({
         ...issue,
         documentUri: uri,

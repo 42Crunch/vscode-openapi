@@ -1064,7 +1064,6 @@
     "@xliic/preserving-json-yaml-parser": "^2.1.0",
     "form-data": "^4.0.4",
     "got": "^11.8.6",
-    "graphql": "^16.10.0",
     "jsonc-parser": "^3.0.0",
     "semver": "^7.5.0",
     "undici": "^7.19.2",
