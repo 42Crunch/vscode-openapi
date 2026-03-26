@@ -17,7 +17,6 @@ import * as vscode from "vscode";
 import { Cache } from "../cache";
 import { Configuration, configuration } from "../configuration";
 import { ensureHasCredentials, getAnondCredentials, getPlatformCredentials } from "../credentials";
-import { fromInternalUri } from "../external-refs";
 import { debug, ensureCliDownloaded } from "../platform/cli-ast";
 import { PlatformStore } from "../platform/stores/platform-store";
 import { AuditContext, IssuesByDocument, PendingAudits } from "../types";
@@ -27,7 +26,6 @@ import { SignUpWebView } from "../webapps/signup/view";
 import { setDecorations } from "./decoration";
 import { setAudit } from "./service";
 import { AuditWebView } from "./view";
-import { GraphQlHandler } from "../graphql/handler";
 import { getProxyEnv } from "../proxy";
 import { getEndpoints } from "@xliic/common/endpoints";
 import { Logger } from "../platform/types";
@@ -251,26 +249,15 @@ async function parseGqlAuditReport(
 ): Promise<Audit> {
   const documentUri: string = document.uri.toString();
 
-  const [grades, issues, documents, _badIssues] = await splitReportByDocument(
-    document,
-    report,
-    ast,
-    cache,
-  );
+  const [grades, issues, _badIssues] = await splitReportByDocument(document, report, ast, cache);
 
   const filename = basename(document.fileName);
 
-  const files: Audit["files"] = {};
   const mainPath = document.uri.fsPath;
   const mainDir = path.dirname(mainPath);
-  for (const uri of Object.keys(documents)) {
-    const publicUri = fromInternalUri(vscode.Uri.parse(uri));
-    if (publicUri.scheme === "http" || publicUri.scheme === "https") {
-      files[uri] = { relative: publicUri.toString() };
-    } else {
-      files[uri] = { relative: path.relative(mainDir, publicUri.fsPath) };
-    }
-  }
+  const files: Audit["files"] = {
+    [documentUri]: { relative: path.relative(mainDir, document.uri.fsPath) },
+  };
 
   const result = {
     valid: report.valid,
@@ -279,7 +266,7 @@ async function parseGqlAuditReport(
     summary: {
       ...grades,
       documentUri,
-      subdocumentUris: Object.keys(documents).filter((uri) => uri != documentUri),
+      subdocumentUris: [],
     },
     issues,
     filename,
@@ -294,100 +281,43 @@ async function splitReportByDocument(
   report: any,
   ast: any,
   cache: Cache,
-): Promise<[Grades, IssuesByDocument, { [uri: string]: vscode.TextDocument }, ReportedIssue[]]> {
+): Promise<[Grades, IssuesByDocument, ReportedIssue[]]> {
   const grades = readSummary(report);
   const reportedIssues = readAssessment(report);
 
-  const [mainRoot, documentUris, issuesPerDocument, badIssues] = processIssues(
-    mainDocument,
-    cache,
-    reportedIssues,
-  );
-
-  const files: { [uri: string]: [vscode.TextDocument, Parsed | undefined] } = {
-    [mainDocument.uri.toString()]: [mainDocument, mainRoot],
-  };
+  const [issuesPerDocument, badIssues] = processIssues(mainDocument, cache, reportedIssues);
 
   const issues: IssuesByDocument = {};
-  const index: string[] = report.index;
-  const handler = new GraphQlHandler(ast);
   for (const [uri, reportedIssues] of Object.entries(issuesPerDocument)) {
-    const [document, root] = files[uri];
     issues[uri] = [];
     reportedIssues.forEach((issue: ReportedIssue) => {
-      let location;
-      if (index) {
-        const parsedValue = parseInt(issue.pointer, 10);
-        if (isNaN(parsedValue)) {
-          location = issue.pointer;
-        } else {
-          location = index[parsedValue];
-        }
-      } else {
-        location = issue.pointer;
-      }
-      const pos = handler.getPosition(location);
-      if (pos) {
-        const start = document.positionAt(pos.start);
-        const end = document.positionAt(pos.end);
-        issues[uri].push({
-          ...issue,
-          documentUri: uri,
-          lineNo: start.line,
-          range: new vscode.Range(start, end),
-        });
-      }
+      console.log("issue", issue);
+      const [startLine, startCol, endLine, endCol] = issue?.absoluteLocation || [0, 0, 0, 0];
+      issues[uri].push({
+        ...issue,
+        documentUri: uri,
+        lineNo: Math.abs(startLine) - 1,
+        range: new vscode.Range(
+          new vscode.Position(Math.abs(startLine) - 1, Math.abs(startCol) - 1),
+          new vscode.Position(Math.abs(endLine) - 1, Math.abs(endCol) - 1),
+        ),
+      });
     });
   }
 
-  const documents: { [key: string]: vscode.TextDocument } = {};
-  for (const [uri, [document, root]] of Object.entries(files)) {
-    documents[uri] = document;
-  }
-
-  return [grades, issues, documents, badIssues];
+  return [grades, issues, badIssues];
 }
 
 function processIssues(
   document: vscode.TextDocument,
   cache: Cache,
   issues: ReportedIssue[],
-): [Parsed | undefined, string[], { [uri: string]: ReportedIssue[] }, ReportedIssue[]] {
+): [{ [uri: string]: ReportedIssue[] }, ReportedIssue[]] {
   const mainUri = document.uri;
-  const documentUris: { [uri: string]: boolean } = { [mainUri.toString()]: true };
-  const issuesPerDocument: { [uri: string]: ReportedIssue[] } = {};
-  const badIssues: ReportedIssue[] = [];
-
-  const root = cache.getLastGoodParsedDocument(document);
-
-  if (root === undefined) {
-    throw new Error("Failed to parse current document");
-  }
-
-  for (const issue of issues) {
-    const location = findIssueLocation(mainUri, root, issue.pointer);
-    if (location) {
-      const [uri, pointer] = location;
-
-      if (!issuesPerDocument[uri]) {
-        issuesPerDocument[uri] = [];
-      }
-
-      if (!documentUris[uri]) {
-        documentUris[uri] = true;
-      }
-
-      issuesPerDocument[uri].push({
-        ...issue,
-        pointer: pointer,
-      });
-    } else {
-      // can't find issue, add to the list ot bad issues
-      badIssues.push(issue);
-    }
-  }
-
-  return [root, Object.keys(documentUris), issuesPerDocument, badIssues];
+  const issuesPerDocument: { [uri: string]: ReportedIssue[] } = {
+    [mainUri.toString()]: issues,
+  };
+  return [issuesPerDocument, []];
 }
 
 function readAssessment(assessment: any): ReportedIssue[] {
@@ -416,6 +346,7 @@ function readAssessment(assessment: any): ReportedIssue[] {
           id,
           description,
           pointer: occ.location,
+          absoluteLocation: occ.absoluteLocation,
           score: occ.score ? Math.abs(occ.score) : 0,
           displayScore: transformScore(occ.score ? occ.score : 0),
           criticality: issue.criticality ? issue.criticality : defaultCriticality,

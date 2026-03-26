@@ -30,6 +30,7 @@ export interface ReportedIssue {
   id: string;
   description: string;
   pointer: string;
+  absoluteLocation?: [number, number, number, number];
   score: number;
   displayScore: string;
   criticality: CriticalityLevel;
