@@ -33,7 +33,7 @@ export function activate(
   prefs: Record<string, Preferences>,
   signUpWebView: SignUpWebView,
   auditView: AuditWebView,
-  auditContext: AuditContext
+  auditContext: AuditContext,
 ): vscode.Disposable {
   let disposables: vscode.Disposable[] = [];
   const scanViews: Record<string, ScanWebView> = {};
@@ -57,7 +57,7 @@ export function activate(
         prefs,
         auditView,
         () => getReportView(uri),
-        auditContext
+        auditContext,
       );
     }
 
@@ -86,7 +86,7 @@ export function activate(
     disposables.forEach((disposable) => disposable.dispose());
     if (enabled) {
       disposables = Object.values(selectors).map((selector) =>
-        vscode.languages.registerCodeLensProvider(selector, scanCodelensProvider)
+        vscode.languages.registerCodeLensProvider(selector, scanCodelensProvider),
       );
     } else {
       disposables = [];
@@ -111,7 +111,7 @@ export function activate(
     logger,
     getScanView,
     getExistingReportView,
-    signUpWebView
+    signUpWebView,
   );
 
   return new vscode.Disposable(() => disposables.forEach((disposable) => disposable.dispose()));

@@ -8,7 +8,7 @@ import * as vscode from "vscode";
 
 import { Config } from "@xliic/common/config";
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
-import { HttpMethod, BundledSwaggerOrOasSpec } from "@xliic/openapi";
+import { HttpMethod } from "@xliic/openapi";
 import { LogLevel } from "@xliic/common/logging";
 import { Preferences } from "@xliic/common/prefs";
 import { Webapp } from "@xliic/common/webapp/scanconf";
@@ -18,7 +18,7 @@ import { AuditWebView } from "../../audit/view";
 import { Cache } from "../../cache";
 import { Configuration } from "../../configuration";
 import { EnvStore } from "../../envstore";
-import { AuditContext, Bundle, MappingNode } from "../../types";
+import { AuditContext, Bundle } from "../../types";
 import { loadConfig } from "../../util/config";
 import { WebView } from "../../webapps/web-view";
 import { PlatformStore } from "../stores/platform-store";
@@ -71,7 +71,7 @@ export class ScanWebView extends WebView<Webapp> {
     private prefs: Record<string, Preferences>,
     private auditView: AuditWebView,
     private getReportView: () => Promise<ScanReportWebView>,
-    private auditContext: AuditContext
+    private auditContext: AuditContext,
   ) {
     super(extensionPath, "scanconf", title, vscode.ViewColumn.One, "eye");
     envStore.onEnvironmentDidChange((env) => {
@@ -135,7 +135,7 @@ export class ScanWebView extends WebView<Webapp> {
           tags,
           makeAggregateLogger(this.logger, reportView),
           reportView,
-          false
+          false,
         );
       } catch (ex: any) {
         const message =
@@ -173,7 +173,7 @@ export class ScanWebView extends WebView<Webapp> {
           tags,
           makeAggregateLogger(this.logger, reportView),
           reportView,
-          true
+          true,
         );
       } catch (ex: any) {
         const message =
@@ -212,7 +212,9 @@ export class ScanWebView extends WebView<Webapp> {
                 stringOas,
                 tags,
                 config.cliDirectoryOverride,
-                this.logger
+                config,
+                this.secrets,
+                this.logger,
               )
             : await createDefaultConfigWithPlatform(this.store, stringOas);
 
@@ -263,7 +265,7 @@ export class ScanWebView extends WebView<Webapp> {
     document: vscode.TextDocument,
     scanconfUri: vscode.Uri,
     path: string,
-    method: HttpMethod
+    method: HttpMethod,
   ) {
     this.target = {
       bundle,
@@ -293,7 +295,7 @@ function makeAggregateLogger(
   logger: Logger,
   view: {
     sendLogMessage: (message: string, level: LogLevel) => void;
-  }
+  },
 ): Logger {
   return {
     trace: (message: string) => {
@@ -342,7 +344,7 @@ async function runScan(
   tags: string[],
   logger: Logger,
   reportView: ScanReportWebView,
-  isFullScan: boolean
+  isFullScan: boolean,
 ): Promise<void> {
   logger.info(`Starting API Conformance Scan`);
 
@@ -361,12 +363,12 @@ async function runScan(
         logger,
         stringOas,
         scanconf,
-        config.cliDirectoryOverride
+        config.cliDirectoryOverride,
       );
 
       if (validateError !== undefined) {
         throw new Error(
-          `Unexpected error running scan config validation: ${JSON.stringify(validateError)}`
+          `Unexpected error running scan config validation: ${JSON.stringify(validateError)}`,
         );
       }
 
@@ -387,7 +389,7 @@ async function runScan(
         logger,
         stringOas,
         scanconf,
-        isFullScan
+        isFullScan,
       );
 
       if (error !== undefined) {
@@ -396,7 +398,7 @@ async function runScan(
           return;
         } else {
           throw new Error(
-            `Unexpected error running API Conformance Scan: ${JSON.stringify(error)}`
+            `Unexpected error running API Conformance Scan: ${JSON.stringify(error)}`,
           );
         }
       }
@@ -462,7 +464,7 @@ async function runScan(
 async function waitForReport(
   store: PlatformStore,
   apiId: string,
-  maxDelay: number
+  maxDelay: number,
 ): Promise<string | undefined> {
   let currentDelay = 0;
   while (currentDelay < maxDelay) {
@@ -507,7 +509,7 @@ function getBundleVersions(bundle: Bundle) {
 async function loadReport(
   store: PlatformStore,
   tmpApi: { apiId: string; collectionId: string },
-  logger: Logger
+  logger: Logger,
 ) {
   const reportId = await waitForReport(store, tmpApi.apiId, 300000);
   if (reportId !== undefined) {
@@ -521,7 +523,7 @@ async function createScanconfToken(
   store: PlatformStore,
   oas: string,
   scanconf: string,
-  logger: Logger
+  logger: Logger,
 ) {
   const tmpApi = await store.createTempApi(oas);
   logger.info(`Created temp API "${tmpApi.apiId}", waiting for Security Audit`);
