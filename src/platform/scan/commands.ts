@@ -32,6 +32,7 @@ import { SignUpWebView } from "../../webapps/signup/view";
 import { getOpenApiVersion } from "../../parsers";
 import { ScanReportWebView } from "./report-view";
 import { existsUri } from "../../util/fs";
+import { Config } from "@xliic/common/config";
 
 export default (
   context: vscode.ExtensionContext,
@@ -43,7 +44,7 @@ export default (
   logger: Logger,
   getScanView: (uri: vscode.Uri) => Promise<ScanWebView>,
   getExistingReportView: (uri: vscode.Uri) => ScanReportWebView,
-  signUpWebView: SignUpWebView
+  signUpWebView: SignUpWebView,
 ) => {
   vscode.commands.registerTextEditorCommand(
     "openapi.platform.editorRunSingleOperationScan",
@@ -52,7 +53,7 @@ export default (
       edit: vscode.TextEditorEdit,
       uri: string,
       path: string,
-      method: HttpMethod
+      method: HttpMethod,
     ): Promise<void> => {
       try {
         await editorRunSingleOperationScan(
@@ -66,12 +67,12 @@ export default (
           logger,
           getScanView,
           path,
-          method
+          method,
         );
       } catch (ex: any) {
         vscode.window.showErrorMessage(formatException("Failed to scan:", ex));
       }
-    }
+    },
   );
 
   vscode.commands.registerCommand(
@@ -96,12 +97,12 @@ export default (
           logger,
           getScanView,
           path,
-          method
+          method,
         );
       } catch (ex: any) {
         vscode.window.showErrorMessage(formatException("Failed to scan:", ex));
       }
-    }
+    },
   );
 
   vscode.commands.registerTextEditorCommand(
@@ -134,20 +135,20 @@ export default (
             logger,
             getScanView,
             firstPath,
-            firstMethod as HttpMethod
+            firstMethod as HttpMethod,
           );
         } catch (ex: any) {
           vscode.window.showErrorMessage(formatException("Failed to scan:", ex));
         }
       }
-    }
+    },
   );
 
   vscode.commands.registerTextEditorCommand(
     "openapi.platform.editorOpenScanconfig",
     async (editor: vscode.TextEditor, edit: vscode.TextEditorEdit): Promise<void> => {
       await editorOpenScanconfig(editor);
-    }
+    },
   );
 
   vscode.commands.registerTextEditorCommand(
@@ -166,7 +167,7 @@ export default (
       if (destination !== undefined) {
         await view.exportReport(destination);
       }
-    }
+    },
   );
 };
 
@@ -181,7 +182,7 @@ async function editorRunSingleOperationScan(
   logger: Logger,
   getScanView: (uri: vscode.Uri) => Promise<ScanWebView>,
   path: string,
-  method: HttpMethod
+  method: HttpMethod,
 ): Promise<void> {
   if (!(await ensureHasCredentials(signUpView, configuration, secrets, "regular"))) {
     return;
@@ -223,13 +224,14 @@ async function editorRunSingleOperationScan(
       tags,
       store,
       cache,
+      config,
       secrets,
       logger,
       config.platformAuthType,
       config.scanRuntime,
       config.cliDirectoryOverride,
       scanconfUri,
-      bundle
+      bundle,
     ))
   ) {
     return;
@@ -244,13 +246,14 @@ async function createDefaultScanConfig(
   tags: string[],
   store: PlatformStore,
   cache: Cache,
+  config: Config,
   secrets: vscode.SecretStorage,
   logger: Logger,
   platformAuthType: "api-token" | "anond-token",
   scanRuntime: "docker" | "scand-manager" | "cli",
   cliDirectoryOverride: string,
   scanconfUri: vscode.Uri,
-  bundle: Bundle
+  bundle: Bundle,
 ): Promise<boolean> {
   return vscode.window.withProgress(
     {
@@ -265,7 +268,15 @@ async function createDefaultScanConfig(
         if (platformAuthType === "anond-token") {
           // free users must use CLI for scan, there is no need to fallback to anond for initial audit
           // if there is no CLI available, they will not be able to run scan or create a scan config in any case
-          await createScanConfigWithCliBinary(scanconfUri, oas, tags, cliDirectoryOverride, logger);
+          await createScanConfigWithCliBinary(
+            scanconfUri,
+            oas,
+            tags,
+            cliDirectoryOverride,
+            config,
+            secrets,
+            logger,
+          );
         } else {
           if (scanRuntime === "cli") {
             await createScanConfigWithCliBinary(
@@ -273,7 +284,9 @@ async function createDefaultScanConfig(
               oas,
               tags,
               cliDirectoryOverride,
-              logger
+              config,
+              secrets,
+              logger,
             );
           } else {
             // this will run audit on the platform as well
@@ -282,18 +295,18 @@ async function createDefaultScanConfig(
         }
 
         vscode.window.showInformationMessage(
-          `Saved API Conformance Scan configuration to: ${scanconfUri.toString()}`
+          `Saved API Conformance Scan configuration to: ${scanconfUri.toString()}`,
         );
 
         return true;
       } catch (e: any) {
         vscode.window.showErrorMessage(
           "Failed to create default config, please run Audit to check your OpenAPI for errors: " +
-            ("message" in e ? e.message : e.toString())
+            ("message" in e ? e.message : e.toString()),
         );
         return false;
       }
-    }
+    },
   );
 }
 
@@ -302,7 +315,7 @@ async function editorOpenScanconfig(editor: vscode.TextEditor): Promise<void> {
   if (scanconfUri === undefined || !(await existsUri(scanconfUri))) {
     await vscode.window.showErrorMessage(
       "No scan configuration found for the current document. Please create one first by running a scan.",
-      { modal: true }
+      { modal: true },
     );
     return undefined;
   }

@@ -54,6 +54,8 @@ export async function createScanConfigWithCliBinary(
   oas: string,
   tags: string[],
   cliDirectoryOverride: string,
+  config: Config,
+  secrets: vscode.SecretStorage,
   logger: Logger,
 ): Promise<void> {
   const tmpdir = createTempDirectory("scan-");
@@ -70,10 +72,13 @@ export async function createScanConfigWithCliBinary(
     "scanconfig.json",
   ];
 
-  // re-enable when tagging is supported
   if (tags.length > 0) {
     args.push("--tag", tags.join(","));
   }
+
+  const { env, args: moreArgs } = await getAuthAndProxy(config, secrets, logger);
+
+  args.push(...moreArgs);
 
   args.push("openapi.json");
 
@@ -82,7 +87,12 @@ export async function createScanConfigWithCliBinary(
   try {
     debug(cli, args, undefined, logger);
 
-    await asyncExecFile(cli, args, { cwd: tmpdir, windowsHide: true, maxBuffer: execMaxBuffer });
+    await asyncExecFile(cli, args, {
+      env,
+      cwd: tmpdir,
+      windowsHide: true,
+      maxBuffer: execMaxBuffer,
+    });
 
     // create scan config directory if does not exist
     const scanconfDir = dirname(scanconfUri.fsPath);
@@ -107,12 +117,22 @@ export async function createDefaultConfigWithCliBinary(
   oas: string,
   tags: string[],
   cliDirectoryOverride: string,
+  config: Config,
+  secrets: vscode.SecretStorage,
   logger: Logger,
 ): Promise<string> {
   const tmpdir = createTempDirectory("scanconf-update-");
   const scanconfFilename = join(tmpdir, "scanconf.json");
   const scanconfUri = vscode.Uri.file(scanconfFilename);
-  await createScanConfigWithCliBinary(scanconfUri, oas, tags, cliDirectoryOverride, logger);
+  await createScanConfigWithCliBinary(
+    scanconfUri,
+    oas,
+    tags,
+    cliDirectoryOverride,
+    config,
+    secrets,
+    logger,
+  );
   const scanconf = await readFile(scanconfFilename, { encoding: "utf8" });
   unlinkSync(scanconfFilename);
   rmdirSync(tmpdir);
@@ -267,7 +287,7 @@ export async function runScanWithCliBinary(
 > {
   logger.info(`Running API Conformance Scan using 42Crunch API Security Testing Binary`);
 
-  const { cliFreemiumdHost, freemiumdUrl } = getEndpoints(config.internalUseDevEndpoints);
+  const { cliFreemiumdHost } = getEndpoints(config.internalUseDevEndpoints);
   const tmpDir = tmpdir();
   const dir = mkdtempSync(join(`${tmpDir}`, "scan-"));
   const oasFilename = join(dir as string, "openapi.json");
@@ -311,24 +331,10 @@ export async function runScanWithCliBinary(
     args.push("--tag", tags.join(","));
   }
 
-  if (config.platformAuthType === "anond-token") {
-    const anondToken = getAnondCredentials(configuration);
-    args.push("--token", String(anondToken));
-    Object.assign(
-      scanEnv,
-      await getProxyEnv(freemiumdUrl, scanEnv["SCAN42C_HOST"], config, logger),
-    );
-  } else {
-    const platformConnection = await getPlatformCredentials(configuration, secrets);
-    if (platformConnection !== undefined) {
-      scanEnv["API_KEY"] = platformConnection.apiToken!;
-      scanEnv["PLATFORM_HOST"] = platformConnection.platformUrl;
-      Object.assign(
-        scanEnv,
-        await getProxyEnv(platformConnection.platformUrl, scanEnv["SCAN42C_HOST"], config, logger),
-      );
-    }
-  }
+  const { env: moreEnv, args: moreArgs } = await getAuthAndProxy(config, secrets, logger);
+
+  Object.assign(scanEnv, moreEnv);
+  args.push(...moreArgs);
 
   try {
     debug(cli, args, scanEnv, logger);
@@ -428,7 +434,7 @@ export async function runAuditWithCliBinary(
     CliError
   >
 > {
-  const { cliFreemiumdHost, freemiumdUrl } = getEndpoints(config.internalUseDevEndpoints);
+  const { cliFreemiumdHost } = getEndpoints(config.internalUseDevEndpoints);
 
   logger.info(`Running Security Audit using 42Crunch API Security Testing Binary`);
 
@@ -471,25 +477,10 @@ export async function runAuditWithCliBinary(
     args.push("--tag", tags.join(","));
   }
 
-  if (config.platformAuthType === "anond-token") {
-    const anondToken = getAnondCredentials(configuration);
-    args.push("--token", String(anondToken));
-    Object.assign(env, await getProxyEnv(freemiumdUrl, undefined, config, logger));
-  } else {
-    const platformConnection = await getPlatformCredentials(configuration, secrets);
-    if (platformConnection !== undefined) {
-      logger.debug(
-        `Setting PLATFORM_HOST environment variable to: ${platformConnection.platformUrl}`,
-      );
-      logger.debug("Setting API_KEY environment variable.");
-      env["API_KEY"] = platformConnection.apiToken!;
-      env["PLATFORM_HOST"] = platformConnection.platformUrl;
-      Object.assign(
-        env,
-        await getProxyEnv(platformConnection.platformUrl, undefined, config, logger),
-      );
-    }
-  }
+  const { env: moreEnv, args: moreArgs } = await getAuthAndProxy(config, secrets, logger);
+
+  Object.assign(env, moreEnv);
+  args.push(...moreArgs);
 
   try {
     debug(cli, args, env, logger);
@@ -706,4 +697,35 @@ function getBinaryEnv(cmdEnv: SimpleEnvironment): string {
     builder.push(key + "=" + redactor.redactFieldValue(key, value, "CMD_EXEC_ENV"));
   }
   return builder.join(",");
+}
+
+async function getAuthAndProxy(
+  config: Config,
+  secrets: vscode.SecretStorage,
+  logger: Logger,
+): Promise<{ env: any; args: any }> {
+  const { freemiumdUrl } = getEndpoints(config.internalUseDevEndpoints);
+  const args: string[] = [];
+  const env: Record<string, string> = {};
+
+  if (config.platformAuthType === "anond-token") {
+    const anondToken = getAnondCredentials(configuration);
+    args.push("--token", String(anondToken));
+    Object.assign(env, await getProxyEnv(freemiumdUrl, undefined, config, logger));
+  } else {
+    const platformConnection = await getPlatformCredentials(configuration, secrets);
+    if (platformConnection !== undefined) {
+      logger.debug(
+        `Setting PLATFORM_HOST environment variable to: ${platformConnection.platformUrl}`,
+      );
+      logger.debug("Setting API_KEY environment variable.");
+      env["API_KEY"] = platformConnection.apiToken!;
+      env["PLATFORM_HOST"] = platformConnection.platformUrl;
+      Object.assign(
+        env,
+        await getProxyEnv(platformConnection.platformUrl, undefined, config, logger),
+      );
+    }
+  }
+  return { env, args };
 }
