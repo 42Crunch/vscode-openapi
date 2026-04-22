@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 5.5.0 (April 22, 2026)
+
+- Fix issue where attempt to create a scan configuration was failing
+
 ## Version 5.4.0 (March 30, 2026)
 
 - Add support for new location format in GraphQL Audit report
