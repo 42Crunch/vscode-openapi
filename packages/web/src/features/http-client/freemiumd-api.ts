@@ -10,21 +10,13 @@ export type Subscription = {
   userEmail: string;
   subscriptionKind: string;
   periodStart: string;
-  monthlyAudit: number;
-  bonusAuditOp: number;
+  monthlyOp: number;
+  bonusOp: number;
   currentAuditUsage: number;
-  monthlyScan: number;
-  bonusScanOp: number;
   currentScanUsage: number;
-  monthlyCapture: number;
-  bonusCaptureOp: number;
-  currentCaptureUsage: number;
-  monthlyGraphqlAudit: number;
-  bonusGraphqlAuditOp: number;
   currentGraphqlAuditUsage: number;
-  monthlyGraphqlScan: number;
-  bonusGraphqlScanOp: number;
   currentGraphqlScanUsage: number;
+  currentCaptureUsage: number;
 };
 
 export const freemiumdApi = createApi({

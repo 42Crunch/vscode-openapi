@@ -44,6 +44,16 @@ export default function Subscription({
     );
   }
 
+  const currentAllowance = data.monthlyOp + data.bonusOp;
+  const currentUsage =
+    data.currentAuditUsage +
+    data.currentScanUsage +
+    data.currentGraphqlAuditUsage +
+    data.currentGraphqlScanUsage +
+    data.currentCaptureUsage;
+  const currentAllowanceLeftPercentage =
+    currentAllowance > 0 ? 1 - currentUsage / currentAllowance : 0;
+
   return (
     <Container>
       <Section>
@@ -91,54 +101,12 @@ export default function Subscription({
       </Section>
 
       <Section>
-        <Title>Audit</Title>
-        <Subtitle>Monthly operation audits left</Subtitle>
+        <Title>Usage</Title>
+        <Subtitle>Monthly allowance left</Subtitle>
         <Counters>
-          {data.monthlyAudit - data.currentAuditUsage} / {data.monthlyAudit}
+          {currentAllowance - currentUsage} / {currentAllowance}
         </Counters>
-        <ProgressBar label="" progress={1 - data.currentAuditUsage / data.monthlyAudit} />
-      </Section>
-
-      <Section>
-        <Title>Scan</Title>
-        <Subtitle>Monthly operation scans left</Subtitle>
-        <Counters>
-          {data.monthlyScan - data.currentScanUsage} / {data.monthlyScan}
-        </Counters>
-        <ProgressBar label="" progress={1 - data.currentScanUsage / data.monthlyScan} />
-      </Section>
-
-      <Section>
-        <Title>GraphQL Audit</Title>
-        <Subtitle>Monthly operation audits left</Subtitle>
-        <Counters>
-          {data.monthlyGraphqlAudit - data.currentGraphqlAuditUsage} / {data.monthlyGraphqlAudit}
-        </Counters>
-        <ProgressBar
-          label=""
-          progress={1 - data.currentGraphqlAuditUsage / data.monthlyGraphqlAudit}
-        />
-      </Section>
-
-      <Section>
-        <Title>GraphQL Scan</Title>
-        <Subtitle>Monthly operation scans left</Subtitle>
-        <Counters>
-          {data.monthlyGraphqlScan - data.currentGraphqlScanUsage} / {data.monthlyGraphqlScan}
-        </Counters>
-        <ProgressBar
-          label=""
-          progress={1 - data.currentGraphqlScanUsage / data.monthlyGraphqlScan}
-        />
-      </Section>
-
-      <Section>
-        <Title>API Contract Generator</Title>
-        <Subtitle>Monthly operations left</Subtitle>
-        <Counters>
-          {data.monthlyCapture - data.currentCaptureUsage} / {data.monthlyCapture}
-        </Counters>
-        <ProgressBar label="" progress={1 - data.currentCaptureUsage / data.monthlyCapture} />
+        <ProgressBar label="" progress={currentAllowanceLeftPercentage} />
       </Section>
     </Container>
   );
