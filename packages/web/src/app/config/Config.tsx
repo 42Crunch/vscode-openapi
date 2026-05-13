@@ -8,6 +8,7 @@ import {
   useFeatureDispatch,
   useFeatureSelector,
   ConfigScreenId,
+  ConfigScreen,
 } from "../../features/config/slice";
 import Form from "../../new-components/Form";
 import platformConnection from "./screen/platform-connection";
@@ -32,6 +33,9 @@ export default function Config() {
   const mandatoryTags = mandatoryTagsMaker();
   const temporaryCollection = temporaryCollectionMaker(data.platformCollectionNamingConvention);
 
+  const skipVisualStudio = (screen: ConfigScreen) =>
+    data.host !== "visual-studio" ? screen : undefined;
+
   const sections = [
     {
       id: "platform",
@@ -39,21 +43,25 @@ export default function Config() {
       items: [
         platformConnection,
         platformServices,
-        temporaryCollection,
-        mandatoryTags,
-        auditRuntime,
-        scanRuntime,
+        skipVisualStudio(temporaryCollection),
+        skipVisualStudio(mandatoryTags),
+        skipVisualStudio(auditRuntime),
+        skipVisualStudio(scanRuntime),
       ],
     },
     {
       id: "runtime",
       title: "Runtimes",
-      items: [runtimeBinary, runtimeScandManager, runtimeDocker],
+      items: [
+        runtimeBinary,
+        skipVisualStudio(runtimeScandManager),
+        skipVisualStudio(runtimeDocker),
+      ],
     },
     {
       id: "openapi",
       title: "OpenAPI",
-      items: [openapiExternalRefs],
+      items: [skipVisualStudio(openapiExternalRefs)],
     },
   ];
 
@@ -79,6 +87,13 @@ export default function Config() {
     [internalSettings.id]: internalSettings,
   };
 
+  const sectionsForHost = sections
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => item !== undefined) as ConfigScreen[],
+    }))
+    .filter((section) => section.items.length > 0);
+
   useEffect(() => {
     const formData = wrapFormValues(data);
     for (const screenId of Object.keys(screenById)) {
@@ -102,7 +117,7 @@ export default function Config() {
 
   return (
     <SearchSidebar
-      sections={sections}
+      sections={sectionsForHost}
       errors={errors}
       defaultSelection={{ sectionId: "platform", itemId: "platform-connection" }}
       render={(selected) => {

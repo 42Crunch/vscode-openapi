@@ -75,6 +75,7 @@ export async function loadConfig(
     internalUseDevEndpoints,
     internalDisableLogRedaction,
     internalRegisterMcp,
+    host: "vscode",
   };
 }
 
