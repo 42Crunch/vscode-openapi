@@ -14,12 +14,7 @@ import { SignUpWebView } from "../../webapps/signup/view";
 import { ScanGqlCodelensProvider } from "../scan/lens";
 import commands from "./commands";
 import { ScanGqlWebView } from "./view";
-
-const selectors = {
-  scheme: "file",
-  pattern: "*.{graphql,gql,graphqls,sdl,gqls}",
-  language: "graphql",
-};
+import { graphqlSelectors } from "../../selectors";
 
 export function activate(
   context: vscode.ExtensionContext,
@@ -78,9 +73,9 @@ export function activate(
   function activateLens(enabled: boolean) {
     disposables.forEach((disposable) => disposable.dispose());
     if (enabled) {
-      disposables = Object.values(selectors).map((selector) =>
-        vscode.languages.registerCodeLensProvider(selector, scanCodelensProvider),
-      );
+      disposables = [
+        vscode.languages.registerCodeLensProvider(graphqlSelectors, scanCodelensProvider),
+      ];
     } else {
       disposables = [];
     }

@@ -13,6 +13,7 @@ import parameterSources from "./audit/quickfix-sources";
 import { parse, Parsed, simpleClone } from "@xliic/preserving-json-yaml-parser";
 import { findJsonNodeValue, getRootAsJsonNodeValue, JsonNodeValue, replace } from "./json-utils";
 import { componentsTags, topTags } from "./audit/quickfix";
+import { graphqlExtensions } from "@xliic/common/graphql";
 
 export class DocumentIndent {
   private readonly indent: number;
@@ -69,7 +70,7 @@ function getBasicIndent(document: vscode.TextDocument, root: Parsed): DocumentIn
 
 function getCharAtIndex(document: vscode.TextDocument, line: number, index: number): string {
   return document.getText(
-    new vscode.Range(new vscode.Position(line, index - 1), new vscode.Position(line, index))
+    new vscode.Range(new vscode.Position(line, index - 1), new vscode.Position(line, index)),
   );
 }
 
@@ -95,7 +96,7 @@ function shift(
   indent: DocumentIndent,
   padding: number,
   extra: number = 0,
-  prepend: boolean = true
+  prepend: boolean = true,
 ): string {
   if (prepend) {
     text = indent.toString(padding) + text;
@@ -108,7 +109,7 @@ function shift(
 export async function processSnippetParameters(
   editor: vscode.TextEditor,
   parameters: FixSnippetParameters,
-  brackets: number[]
+  brackets: number[],
 ) {
   if (parameters.dropLine) {
     const edit = new vscode.WorkspaceEdit();
@@ -126,12 +127,12 @@ export async function processSnippetParameters(
 export function dropBracketsOnEdit(
   editor: vscode.TextEditor,
   brackets: number[],
-  edit: vscode.WorkspaceEdit
+  edit: vscode.WorkspaceEdit,
 ) {
   const [start, end] = brackets;
   const range = new vscode.Range(
     editor.document.positionAt(start),
-    editor.document.positionAt(end)
+    editor.document.positionAt(end),
   );
   edit.replace(editor.document.uri, range, "\n");
 }
@@ -184,7 +185,7 @@ export function deleteJsonNode(context: FixContext): vscode.Range {
 function getPosAfterComma(
   document: vscode.TextDocument,
   fromOffset: number,
-  toOffset: number
+  toOffset: number,
 ): vscode.Position {
   const fromPos = document.positionAt(fromOffset);
   const toPos = document.positionAt(toOffset);
@@ -536,7 +537,7 @@ function getPlaceholder(
   index: number,
   defaultValue: string,
   possibleValues: any[],
-  cacheValues: any[]
+  cacheValues: any[],
 ): string {
   if (cacheValues && cacheValues.length > 0) {
     if (possibleValues) {
@@ -579,7 +580,7 @@ function findInsertionAnchor(
   root: Parsed,
   element: string,
   tags: string[],
-  prefix: string
+  prefix: string,
 ): JsonNodeValue | undefined {
   for (let position = tags.indexOf(element) - 1; position >= 0; position--) {
     const anchor = findJsonNodeValue(root, `${prefix}/${tags[position]}`);
@@ -619,11 +620,5 @@ function escapeJson(jsonText: string): string {
 }
 
 export function isGqlExt(document: vscode.TextDocument): boolean {
-  return (
-    document.fileName.endsWith(".graphql") ||
-    document.fileName.endsWith(".gql") ||
-    document.fileName.endsWith(".graphqls") ||
-    document.fileName.endsWith(".sdl") ||
-    document.fileName.endsWith(".gqls")
-  );
+  return graphqlExtensions.some((ext) => document.fileName.endsWith(`.${ext}`));
 }

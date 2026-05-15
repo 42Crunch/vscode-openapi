@@ -28,6 +28,7 @@ import { activate as activateGqlScan } from "../graphql/scan/activate";
 import { EnvStore } from "../envstore";
 import { SignUpWebView } from "../webapps/signup/view";
 import { TagsWebView } from "../webapps/views/tags/view";
+import { allSelectors, jsonSelectors } from "../selectors";
 
 export async function activate(
   context: vscode.ExtensionContext,
@@ -41,7 +42,7 @@ export async function activate(
   memento: vscode.Memento,
   envStore: EnvStore,
   prefs: Record<string, Preferences>,
-  logger: Logger
+  logger: Logger,
 ) {
   const dataDictionaryView = new DataDictionaryWebView(context.extensionPath);
 
@@ -58,7 +59,7 @@ export async function activate(
   context.subscriptions.push(
     vscode.workspace.registerFileSystemProvider(platformUriScheme, platformFs, {
       isCaseSensitive: true,
-    })
+    }),
   );
 
   const provider = new CollectionsProvider(store, favoriteCollections, context.extensionUri);
@@ -71,8 +72,8 @@ export async function activate(
     vscode.commands.executeCommand(
       "setContext",
       "openapi.platform.credentials",
-      credentials ? "present" : "missing"
-    )
+      credentials ? "present" : "missing",
+    ),
   );
 
   // TODO unsubscribe?
@@ -93,7 +94,7 @@ export async function activate(
   const codeActionsProvider = new DataDictionaryCodeActions(
     cache,
     store,
-    dataDictionaryDiagnostics
+    dataDictionaryDiagnostics,
   );
   for (const selector of Object.values(selectors)) {
     vscode.languages.registerCodeActionsProvider(selector, codeActionsProvider, {
@@ -134,11 +135,11 @@ export async function activate(
   activateLinter(cache, platformContext, store, dataDictionaryDiagnostics);
 
   const disposable1 = vscode.workspace.onDidSaveTextDocument((document) =>
-    refreshAuditReport(store, cache, auditContext, document)
+    refreshAuditReport(store, cache, auditContext, document),
   );
 
   const disposable2 = vscode.workspace.onDidOpenTextDocument((document) =>
-    refreshAuditReport(store, cache, auditContext, document)
+    refreshAuditReport(store, cache, auditContext, document),
   );
 
   const disposable3 = vscode.workspace.onDidSaveTextDocument((document) => {
@@ -155,7 +156,7 @@ export async function activate(
     configuration,
     secrets,
     store,
-    logger
+    logger,
   );
 
   registerCommands(
@@ -174,24 +175,16 @@ export async function activate(
     tagsWebView,
     signUpWebView,
     dataDictionaryView,
-    dataDictionaryDiagnostics
+    dataDictionaryDiagnostics,
   );
 
   vscode.languages.registerCodeLensProvider(
-    [
-      { scheme: platformUriScheme, language: "json" },
-      { scheme: platformUriScheme, language: "jsonc" },
-    ],
-    new CodelensProvider(store)
+    jsonSelectors.map((selector) => ({ ...selector, scheme: platformUriScheme })),
+    new CodelensProvider(store),
   );
 
   vscode.languages.registerCodeLensProvider(
-    [
-      { scheme: "file", language: "json" },
-      { scheme: "file", language: "jsonc" },
-      { scheme: "file", language: "yaml" },
-      { scheme: "file", language: "graphql" },
-    ],
-    new PlatformTagCodelensProvider(cache, configuration, secrets, memento)
+    allSelectors,
+    new PlatformTagCodelensProvider(cache, configuration, secrets, memento),
   );
 }

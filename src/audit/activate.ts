@@ -24,6 +24,7 @@ import { SignUpWebView } from "../webapps/signup/view";
 import { clearAuditReportTempDirectories } from "./util";
 import { registerSecurityGqlAudit } from "./gql";
 import { Logger } from "../platform/types";
+import { allSelectors } from "../selectors";
 
 export function activate(
   context: vscode.ExtensionContext,
@@ -33,7 +34,7 @@ export function activate(
   configuration: Configuration,
   signUpWebView: SignUpWebView,
   reportWebView: AuditWebView,
-  store: PlatformStore
+  store: PlatformStore,
 ): vscode.Disposable {
   let disposables: vscode.Disposable[] = [];
   const pendingAudits: PendingAudits = {};
@@ -60,19 +61,14 @@ export function activate(
     }
   }
 
-  const selectors = [
-    { scheme: "file", language: "json" },
-    { scheme: "file", language: "jsonc" },
-    { scheme: "file", language: "yaml" },
-    { scheme: "file", language: "graphql" },
-  ];
-
   const auditCodelensProvider = new AuditCodelensProvider(cache);
 
   function activateLens(enabled: boolean) {
     disposables.forEach((disposable) => disposable.dispose());
     if (enabled) {
-      disposables.push(vscode.languages.registerCodeLensProvider(selectors, auditCodelensProvider));
+      disposables.push(
+        vscode.languages.registerCodeLensProvider(allSelectors, auditCodelensProvider),
+      );
     } else {
       disposables = [];
     }
@@ -96,7 +92,7 @@ export function activate(
     pendingAudits,
     reportWebView,
     store,
-    signUpWebView
+    signUpWebView,
   );
 
   registerSecurityAudit(
@@ -107,7 +103,7 @@ export function activate(
     pendingAudits,
     reportWebView,
     store,
-    signUpWebView
+    signUpWebView,
   );
 
   registerSingleOperationAudit(
@@ -118,7 +114,7 @@ export function activate(
     pendingAudits,
     reportWebView,
     store,
-    signUpWebView
+    signUpWebView,
   );
 
   registerOutlineSingleOperationAudit(
@@ -129,7 +125,7 @@ export function activate(
     pendingAudits,
     reportWebView,
     store,
-    signUpWebView
+    signUpWebView,
   );
   registerFocusSecurityAudit(context, cache, auditContext, reportWebView);
   registerFocusSecurityAuditById(context, auditContext, reportWebView);

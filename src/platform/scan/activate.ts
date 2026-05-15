@@ -14,12 +14,7 @@ import { AuditWebView } from "../../audit/view";
 import { AuditContext } from "../../types";
 import { getOpenapiAlias } from "./config";
 import { SignUpWebView } from "../../webapps/signup/view";
-
-const selectors = {
-  json: { scheme: "file", language: "json" },
-  jsonc: { scheme: "file", language: "jsonc" },
-  yaml: { scheme: "file", language: "yaml" },
-};
+import { jsonSelectors, yamlSelectors } from "../../selectors";
 
 export function activate(
   context: vscode.ExtensionContext,
@@ -85,7 +80,7 @@ export function activate(
   function activateLens(enabled: boolean) {
     disposables.forEach((disposable) => disposable.dispose());
     if (enabled) {
-      disposables = Object.values(selectors).map((selector) =>
+      disposables = [...jsonSelectors, ...yamlSelectors].map((selector) =>
         vscode.languages.registerCodeLensProvider(selector, scanCodelensProvider),
       );
     } else {

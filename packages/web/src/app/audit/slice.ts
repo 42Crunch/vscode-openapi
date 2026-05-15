@@ -20,6 +20,8 @@ import {
   SeverityLevels,
 } from "@xliic/common/audit";
 
+import { graphqlExtensions } from "@xliic/common/graphql";
+
 export type KdbArticle = {
   group: string;
   subgroup: string;
@@ -170,12 +172,9 @@ export const slice = createSlice({
       state.filter = { ids };
       state.tab = "issues";
       state.sqgTodo = false;
-      state.type =
-        audit.filename.toLowerCase().endsWith(".graphql") ||
-        audit.filename.toLowerCase().endsWith(".graphqls") ||
-        audit.filename.toLowerCase().endsWith(".sdl")
-          ? "graphql"
-          : "openapi";
+      state.type = graphqlExtensions.some((ext) => audit.filename.toLowerCase().endsWith(`.${ext}`))
+        ? "graphql"
+        : "openapi";
       updateAll(state);
     },
 

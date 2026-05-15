@@ -17,19 +17,14 @@ import { OperationNode, PathNode } from "../outlines/nodes/paths";
 import { TagChildNode, TagNode } from "../outlines/nodes/tags";
 import { OperationIdNode } from "../outlines/nodes/operation-ids";
 import { getPathAndMethod } from "../outlines/util";
-
-const selectors = {
-  json: { language: "json" },
-  jsonc: { language: "jsonc" },
-  yaml: { language: "yaml" },
-};
+import { jsonSelectors, yamlSelectors } from "../selectors";
 
 export function activate(
   context: vscode.ExtensionContext,
   cache: Cache,
   configuration: Configuration,
   envStore: EnvStore,
-  prefs: Record<string, Preferences>
+  prefs: Record<string, Preferences>,
 ): vscode.Disposable {
   let disposables: vscode.Disposable[] = [];
 
@@ -39,7 +34,7 @@ export function activate(
     envStore,
     prefs,
     configuration,
-    context.secrets
+    context.secrets,
   );
 
   const debounceDelay: DebounceDelay = { delay: 1000 };
@@ -65,8 +60,8 @@ export function activate(
   function activateLens(enabled: boolean) {
     disposables.forEach((disposable) => disposable.dispose());
     if (enabled) {
-      disposables = Object.values(selectors).map((selector) =>
-        vscode.languages.registerCodeLensProvider(selector, tryItCodeLensProvider)
+      disposables = [...jsonSelectors, ...yamlSelectors].map((selector) =>
+        vscode.languages.registerCodeLensProvider(selector, tryItCodeLensProvider),
       );
     } else {
       disposables = [];
@@ -85,7 +80,7 @@ export function activate(
     "openapi.tryOperation",
     async (document: vscode.TextDocument, path: string, method: HttpMethod) => {
       await startTryIt(document, cache, view, path, method);
-    }
+    },
   );
 
   vscode.commands.registerCommand(
@@ -95,10 +90,10 @@ export function activate(
       path: string,
       method: HttpMethod,
       preferredMediaType: string,
-      preferredBodyValue: unknown
+      preferredBodyValue: unknown,
     ) => {
       await startTryIt(document, cache, view, path, method, preferredMediaType, preferredBodyValue);
-    }
+    },
   );
 
   vscode.commands.registerCommand(
@@ -110,7 +105,7 @@ export function activate(
       }
       const { path, method } = getPathAndMethod(node);
       await startTryIt(vscode.window.activeTextEditor.document, cache, view, path, method);
-    }
+    },
   );
 
   return new vscode.Disposable(() => disposables.forEach((disposable) => disposable.dispose()));
@@ -123,7 +118,7 @@ async function startTryIt(
   path: string,
   method: HttpMethod,
   preferredMediaType?: string,
-  preferredBodyValue?: unknown
+  preferredBodyValue?: unknown,
 ) {
   const bundle = await cache.getDocumentBundle(document);
 
@@ -149,7 +144,7 @@ async function updateTryIt(view: TryItWebView, bundle: Bundle, versions: BundleD
 
 function isBundleVersionsDifferent(
   versions: BundleDocumentVersions,
-  otherVersions: BundleDocumentVersions
+  otherVersions: BundleDocumentVersions,
 ) {
   for (const [uri, version] of Object.entries(versions)) {
     if (otherVersions[uri] !== version) {
