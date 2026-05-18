@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 5.6.0 (May 19, 2026)
+
+- Fix issue where a Tag codelens wasn't shown for .graphqls files on Windows
+- Change how the usage statistics is shown to the freemium users
+
 ## Version 5.5.0 (April 22, 2026)
 
 - Fix issue where attempt to create a scan configuration was failing
