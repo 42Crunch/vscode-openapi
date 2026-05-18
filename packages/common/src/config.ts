@@ -36,6 +36,7 @@ export type Config = {
   internalUseDevEndpoints: boolean;
   internalDisableLogRedaction: boolean;
   internalRegisterMcp: boolean;
+  host: "vscode" | "jetbrains" | "eclipse" | "visual-studio";
 };
 
 export type ConnectionTestResult = { success: true } | { success: false; message: string };

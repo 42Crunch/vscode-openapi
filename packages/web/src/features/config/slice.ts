@@ -92,6 +92,7 @@ const initialState: ConfigState = {
     internalFeatures: false,
     internalDisableLogRedaction: false,
     internalRegisterMcp: false,
+    host: "vscode",
   },
   platformConnectionTestResult: undefined,
   waitingForPlatformConnectionTest: false,
