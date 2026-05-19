@@ -20,7 +20,7 @@ export function getEndpoints(useDevEndpoints: boolean): Endpoints {
     freemiumdUrl: "https://stateless.42crunch.com",
     cliFreemiumdHost: "stateless.42crunch.com:443",
     kdbUrl: "https://platform.42crunch.com/kdb/audit-with-yaml.json",
-    upgradeUrl: "https://42crunch.com/single-user-pricing",
+    upgradeUrl: "https://42crunch.com/upgrade_subscription",
     stripeBillingUrl: "https://billing.stripe.com/p/login/3csaGd9xzf5k7n2aEE",
   };
 }
