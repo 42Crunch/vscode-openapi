@@ -2,7 +2,7 @@
 
 Manually create, import, navigate and edit OpenAPI contracts, along with using features such as Preview, functional "Try it" testing and IntelliSense. The plugin provides rich support for the OpenAPI Specification (OAS) / Swagger specification. The OpenAPI editor is free and does not require registration or have usage limits.
 
-Additional 42Crunch tools are available in the OpenAPI Editor. These API security testing tools are provided primarily for our enterprise customers. We have also made these tools available on a limited free basis to all our OpenAPI editor users (freemium registration is required). The tools are as follows:
+Additional 42Crunch tools are available in the OpenAPI Editor. These API security testing tools are provided primarily for our enterprise customers. We have also made these tools available on a limited free basis to all our OpenAPI editor users (free trial registration is required). The tools are as follows:
 
 - [API Contract Generator](#api-contract-generator) - Automatically generate OpenAPI contracts from your existing Postman Collections and HAR files
 - [API Contract Audit](#activating-api-audit) - Check the quality, conformance and security of your OpenAPI contracts
@@ -60,15 +60,15 @@ A dynamic conformance and security tool that tests the API for conformance to th
 
 The free version of API Scan runs locally in your own environment and requires no API file to be uploaded.
 
-## Freemium
+## Free Trial
 
 This service lets users of our OpenAPI editor extension, who are not customers, run API Contract Generator, API Audit and API Scan.
 
-- [Getting a Freemium Token](#getting-a-freemium-token)
+- [Get a free trial token](https://42crunch.com/freemium/)
 
 ## Support and Documentation:
 
-We’ve recently launched our developer community where you’ll be able to help, get tips-n-tricks and keep up to speed with all the latest developments: https://developers.42crunch.com/
+For tips-n-tricks and tutorial videos go here: https://42crunch.com/tutorials/
 
 ## Quick start
 
@@ -205,19 +205,10 @@ You can use this OpenAPI extension to check the quality and security of your API
 
 You can run the audit service in freemium or platform mode:
 
-- **Using our freemium centralized service**: this service is a fully featured version of the audit, but with usage limits. In this mode, OAS files are sent to the service, audited and a report is returned. This is a stateless service: **we do not keep the OpenAPI file, nor the report.**
 - New! **Using the 42Crunch CLI**: in this mode, audits are performed locally (on the user's machine). This is only available to <u>freemium</u> users for now. Support for local audit/scans using a platform API token will be available soon. In this mode, **OpenAPI files and reports are kept locally**.
 - **Using 42Crunch SaaS platform**: this requires an account on a 42Crunch platform, which is available to customers and to prospects evaluating our product. In this case, you need to supply your platform URL and an IDE token (which can be created from the platform home page). You can specify those settings by invoking `42Crunch: Update platform credentials` from the command palette.
 
 ![IDE-PlatformIntegration](./images/IDE-PlatformIntegration.png)
-
-### Getting a Freemium Token
-
-To run Security Audit from VS Code, you need a token. The first time you try to audit or scan an API, you are asked to provide your email address or an API token from the platform.
-
-Once you supply the address, the extension requests the token to be sent to your mailbox. Paste the token you received in the prompt in VS Code, and you are all set.
-
-Watch this short [video](https://42crunch.com/free-user-faq/#Free-API-Security-Testing-FAQs-02) which takes you through those steps.
 
 ### Running an audit
 
