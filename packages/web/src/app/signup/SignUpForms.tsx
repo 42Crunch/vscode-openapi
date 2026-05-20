@@ -193,34 +193,6 @@ export function AnondSignUpTokenForm({
             />
           </div>
           <Textarea label="Token" name="anondToken" disabled={complete} />
-
-          <div>
-            Audit and Scan usage allowances apply, upgrade{" "}
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                dispatch(openLink("https://42crunch.com/single-user-pricing/"));
-              }}
-            >
-              options
-            </a>{" "}
-            available.
-          </div>
-          <div>
-            Developer support{" "}
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                dispatch(openLink("https://developers.42crunch.com/"));
-              }}
-            >
-              community
-            </a>
-          </div>
         </InputContainer>
 
         <ButtonsBar>
