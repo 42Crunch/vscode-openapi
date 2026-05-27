@@ -42,7 +42,7 @@ export default function Config() {
       title: "42Crunch Platform",
       items: [
         platformConnection,
-        platformServices,
+        skipVisualStudio(platformServices),
         skipVisualStudio(temporaryCollection),
         skipVisualStudio(mandatoryTags),
         skipVisualStudio(auditRuntime),
