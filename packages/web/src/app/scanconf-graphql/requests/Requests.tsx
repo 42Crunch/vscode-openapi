@@ -2,6 +2,7 @@ import { Playbook, serialize } from "@xliic/scanconf";
 
 import { ItemId, SearchSidebarControlled } from "../../../components/layout/SearchSidebar";
 import { makeEnvEnv } from "../../../core/playbook/execute";
+import { getScanServers } from "../../../util-scan";
 import Button from "../../../new-components/Button";
 import { Menu, MenuItem } from "../../../new-components/Menu";
 import { runFullScan } from "../actions";
@@ -18,6 +19,9 @@ export default function Operations() {
 
   const env = useAppSelector((state) => state.env.data);
   const preferredScanServer = useAppSelector((state) => state.prefs.scanServer);
+
+  const scanServers = getScanServers(playbook, env, servers);
+  const selectedServer = scanServers.includes(preferredScanServer) ? preferredScanServer : scanServers[0];
 
   const onSetOperationId = ({ sectionId, itemId }: { sectionId: string; itemId: string }) => {
     const type = sectionId === "operation" ? "operation" : "request";
@@ -116,7 +120,7 @@ export default function Operations() {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            runScan(preferredScanServer || servers[0]);
+            runScan(selectedServer);
           }}
         >
           Scan all operations

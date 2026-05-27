@@ -1,5 +1,8 @@
 import { OpenApi30, HttpMethod } from "@xliic/openapi";
 import { ScanConfig } from "@xliic/common/scan";
+import { EnvData } from "@xliic/common/env";
+import { Playbook } from "@xliic/scanconf";
+import { makeEnvEnv } from "./core/playbook/execute";
 
 export function generateDefaultValues(
   method: HttpMethod,
@@ -28,6 +31,23 @@ export function generateDefaultValues(
   values["method"] = method;
 
   return values;
+}
+
+export function getScanServers(
+  playbook: Playbook.Bundle,
+  env: EnvData,
+  servers: string[]
+): string[] {
+  const {
+    environment: {
+      env: { host },
+    },
+  } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
+
+  if (host && typeof host === "string" && !servers.includes(host)) {
+    return [host, ...servers];
+  }
+  return [...servers];
 }
 
 // arrays must be wrapped for react form hook

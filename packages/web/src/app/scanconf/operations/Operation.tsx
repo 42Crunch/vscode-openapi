@@ -5,6 +5,7 @@ import { serialize } from "@xliic/scanconf";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 import { makeEnvEnv } from "../../../core/playbook/execute";
+import { getScanServers } from "../../../util-scan";
 import { runScan } from "../actions";
 import CollapsibleSection from "../components/CollapsibleSection";
 import TryAndServerSelector from "../components/TryAndServerSelector";
@@ -66,12 +67,8 @@ export default function Operation({ operationId }: { operationId: string }) {
   const beforeExecutionResult = findResult(mockResult, "before");
   const afterExecutionResult = findResult(mockResult, "after");
 
-  const {
-    simple,
-    environment: {
-      env: { host },
-    },
-  } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
+  const { simple } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
+  const scanServers = getScanServers(playbook, env, servers);
 
   if (operation === undefined) {
     return (
@@ -91,8 +88,7 @@ export default function Operation({ operationId }: { operationId: string }) {
     <Container>
       <TryAndServerSelector
         menu={true}
-        servers={servers}
-        host={host as string | undefined}
+        servers={scanServers}
         onTry={(server: string) => {
           dispatch(startTryExecution(server));
         }}
