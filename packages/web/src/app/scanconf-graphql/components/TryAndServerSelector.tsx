@@ -12,13 +12,11 @@ export default function TryAndServerSelector({
   onTry,
   onScan,
   servers,
-  host,
   menu,
 }: {
   onTry: (server: string) => unknown;
   onScan?: (server: string) => unknown;
   servers: string[];
-  host?: string;
   menu?: boolean;
 }) {
   const { scanServer, useGlobalBlocks, rejectUnauthorized } = useFeatureSelector(
@@ -28,10 +26,6 @@ export default function TryAndServerSelector({
   const dispatch = useFeatureDispatch();
   const setServer = (server: string) => dispatch(actions.setScanServer(server));
   const allServers = [...servers];
-
-  if (host && !allServers.includes(host)) {
-    allServers.unshift(host);
-  }
 
   const [selectedServer, setSelectedServer] = useState(
     scanServer !== "" ? scanServer : allServers[0]

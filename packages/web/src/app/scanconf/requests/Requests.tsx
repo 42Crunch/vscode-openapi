@@ -12,6 +12,7 @@ import { setRequestId } from "./slice";
 import { runFullScan } from "../actions";
 import { optionallyReplaceLocalhost } from "../operations/util";
 import { makeEnvEnv } from "../../../core/playbook/execute";
+import { getScanServers } from "../../../util-scan";
 
 export default function Operations() {
   const dispatch = useAppDispatch();
@@ -23,6 +24,9 @@ export default function Operations() {
   const config = useAppSelector((state) => state.config.data);
   const env = useAppSelector((state) => state.env.data);
   const preferredScanServer = useAppSelector((state) => state.prefs.scanServer);
+
+  const scanServers = getScanServers(playbook, env, servers);
+  const selectedServer = scanServers.includes(preferredScanServer) ? preferredScanServer : scanServers[0];
 
   const onSetOperationId = ({ sectionId, itemId }: { sectionId: string; itemId: string }) => {
     const type = sectionId === "operation" ? "operation" : "request";
@@ -148,7 +152,7 @@ export default function Operations() {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            runScan(preferredScanServer || servers[0]);
+            runScan(selectedServer);
           }}
         >
           Scan all operations

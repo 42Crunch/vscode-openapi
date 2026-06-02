@@ -20,7 +20,7 @@ import DescriptionTooltip from "../../../new-components/DescriptionTooltip";
 import { findResult } from "../playbook-execution-handler";
 import { ErrorBanner } from "../../../components/Banner";
 import TryAndServerSelector from "../components/TryAndServerSelector";
-import { makeEnvEnv } from "../../../core/playbook/execute";
+import { getScanServers } from "../../../util-scan";
 
 export default function RequestExternal({
   request,
@@ -58,11 +58,7 @@ export default function RequestExternal({
 
   const [inputs, setInputs] = useState<UnknownEnvironment>({});
 
-  const {
-    environment: {
-      env: { host },
-    },
-  } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
+  const scanServers = getScanServers(playbook, env, servers);
 
   useEffect(() => {
     const updated = { ...inputs };
@@ -84,8 +80,7 @@ export default function RequestExternal({
   return (
     <Container>
       <TryAndServerSelector
-        servers={servers}
-        host={host as string | undefined}
+        servers={scanServers}
         onTry={(server: string) => onRun(server, inputs)}
         menu
       />

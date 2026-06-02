@@ -6,7 +6,7 @@ import { ThemeColorVariables } from "@xliic/common/theme";
 import { Playbook } from "@xliic/scanconf";
 
 import { DynamicVariableNames } from "../../../core/playbook/builtin-variables";
-import { makeEnvEnv } from "../../../core/playbook/execute";
+import { getScanServers } from "../../../util-scan";
 import DescriptionTooltip from "../../../new-components/DescriptionTooltip";
 import Form from "../../../new-components/Form";
 import CollapsibleSection from "../../scanconf/components/CollapsibleSection";
@@ -52,11 +52,7 @@ export default function RequestExternal({
 
   const [inputs, setInputs] = useState<UnknownEnvironment>({});
 
-  const {
-    environment: {
-      env: { host },
-    },
-  } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
+  const scanServers = getScanServers(playbook, env, servers);
 
   useEffect(() => {
     const updated = { ...inputs };
@@ -78,8 +74,7 @@ export default function RequestExternal({
   return (
     <Container>
       <TryAndServerSelector
-        servers={servers}
-        host={host as string | undefined}
+        servers={scanServers}
         onTry={(server: string) => onRun(server, inputs)}
         menu
       />

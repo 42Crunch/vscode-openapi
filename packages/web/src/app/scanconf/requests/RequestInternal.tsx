@@ -18,6 +18,7 @@ import { executeRequest } from "./slice";
 import TryAndServerSelector from "../components/TryAndServerSelector";
 import { extractScanconf, optionallyReplaceLocalhost } from "../operations/util";
 import { makeEnvEnv } from "../../../core/playbook/execute";
+import { getScanServers } from "../../../util-scan";
 import { runScan } from "../actions";
 import DescriptionTooltip from "../../../new-components/DescriptionTooltip";
 import { findResult } from "../playbook-execution-handler";
@@ -62,12 +63,8 @@ export default function RequestInternal({
 
   const [inputs, setInputs] = useState<UnknownEnvironment>({});
 
-  const {
-    simple,
-    environment: {
-      env: { host },
-    },
-  } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
+  const { simple } = makeEnvEnv(Playbook.getCurrentEnvironment(playbook), env);
+  const scanServers = getScanServers(playbook, env, servers);
 
   useEffect(() => {
     const updated = { ...inputs };
@@ -90,8 +87,7 @@ export default function RequestInternal({
     <Container>
       <TryAndServerSelector
         menu={true}
-        servers={servers}
-        host={host as string | undefined}
+        servers={scanServers}
         onTry={(server: string) => onRun(server, inputs)}
         onScan={(server: string) => {
           const updatedServer = optionallyReplaceLocalhost(
