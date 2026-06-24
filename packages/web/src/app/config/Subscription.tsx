@@ -54,7 +54,8 @@ export default function Subscription({
   const currentAllowanceLeftPercentage =
     currentAllowance > 0 ? 1 - currentUsage / currentAllowance : 0;
 
-  const isTrialAccount = data?.subscriptionKind.toLowerCase().includes("trial");
+  const isTrialAccount =
+    data?.subscriptionKind.toLowerCase().includes("trial") || data?.subscriptionKind === "free";
 
   return (
     <Container>
