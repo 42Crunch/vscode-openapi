@@ -9,11 +9,10 @@ import { parseScenario } from "./util";
 test("parse and serialize", async () => {
   const file = parseScenario(oas, scanconf as any);
 
-  const [serialized, serializeError] = serialize(oas as any, file);
+  const [serialized, serializeError] = serialize(file);
 
   if (serializeError !== undefined) {
     assert.fail("Error serializing config");
-    return;
   }
 
   expect(JSON.parse(JSON.stringify(serialized))).toEqual(scanconf);
