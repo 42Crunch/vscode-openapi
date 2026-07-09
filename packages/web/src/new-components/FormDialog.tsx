@@ -2,7 +2,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { ReactNode, useEffect, useState } from "react";
 import { FieldValues, FormProvider, useForm } from "react-hook-form";
 import styled from "styled-components";
-import { ZodObject } from "zod";
+import { ZodTypeAny } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { ThemeColorVariables } from "@xliic/common/theme";
@@ -27,7 +27,7 @@ export default function FormDialog({
   onSubmit: (values: FieldValues) => void;
   title?: string;
   description?: string;
-  schema?: ZodObject<any>;
+  schema?: ZodTypeAny;
   children: ReactNode;
   noOverflow?: boolean;
   open?: boolean;
@@ -35,7 +35,7 @@ export default function FormDialog({
 }) {
   const methods = useForm({
     values: defaultValues,
-    resolver: schema !== undefined ? zodResolver(schema) : undefined,
+    resolver: schema !== undefined ? zodResolver(schema as any) : undefined,
   });
 
   const [internalOpen, setInternalOpen] = useState(false);

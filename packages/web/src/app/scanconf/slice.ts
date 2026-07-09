@@ -4,6 +4,7 @@ import { BundledSwaggerOrOasSpec, getHttpResponseRange, getServerUrls } from "@x
 import { Playbook } from "@xliic/scanconf";
 
 import { loadPlaybook } from "./actions";
+import { MTLS_CREDENTIAL_ID } from "./auth/mtls";
 
 export type State = {
   oas: BundledSwaggerOrOasSpec;
@@ -136,6 +137,21 @@ export const slice = createSlice({
           state.selectedCredential = undefined;
           state.selectedSubcredential = undefined;
         }
+      }
+    },
+
+    setSecurityProfile: (
+      state,
+      { payload }: PayloadAction<Playbook.SecurityProfile>
+    ) => {
+      state.playbook.securityProfile = payload;
+    },
+
+    removeSecurityProfile: (state) => {
+      state.playbook.securityProfile = undefined;
+      if (state.selectedCredential === MTLS_CREDENTIAL_ID) {
+        state.selectedCredential = undefined;
+        state.selectedSubcredential = undefined;
       }
     },
 
@@ -345,6 +361,8 @@ export const {
   saveScanconf,
   addCredential,
   removeCredential,
+  setSecurityProfile,
+  removeSecurityProfile,
   addStage,
   moveStage,
   removeStage,

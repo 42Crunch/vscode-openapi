@@ -17,3 +17,22 @@ test("parse and serialize", async () => {
 
   expect(JSON.parse(JSON.stringify(serialized))).toEqual(scanconf);
 });
+
+test("parse and serialize securityProfile", async () => {
+  const securityProfile = {
+    clientCertificate: "cert",
+    clientCertificatePassword: "secret",
+    caServerCertificate: "ca",
+  };
+  const withProfile = { ...(scanconf as any), securityProfile };
+
+  const file = parseScenario(oas, withProfile);
+  expect(file.securityProfile).toEqual(securityProfile);
+
+  const [serialized, serializeError] = serialize(file);
+  if (serializeError !== undefined) {
+    assert.fail("Error serializing config");
+  }
+
+  expect(JSON.parse(JSON.stringify(serialized))).toEqual(withProfile);
+});
