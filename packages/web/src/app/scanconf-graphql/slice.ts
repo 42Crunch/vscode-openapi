@@ -6,7 +6,7 @@ import { Playbook } from "@xliic/scanconf";
 import { loadPlaybook } from "./actions";
 import { arrayMoveMutable, getStageContainer } from "../scanconf/slice";
 import { MTLS_CREDENTIAL_ID } from "../scanconf/auth/mtls";
-import { ENV_API_TOKEN } from "./auth/NewCredentialDialog";
+import { ENV_API_TOKEN } from "./auth/constants";
 
 export type State = {
   graphQl: string;

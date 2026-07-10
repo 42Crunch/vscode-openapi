@@ -140,10 +140,7 @@ export const slice = createSlice({
       }
     },
 
-    setSecurityProfile: (
-      state,
-      { payload }: PayloadAction<Playbook.SecurityProfile>
-    ) => {
+    setSecurityProfile: (state, { payload }: PayloadAction<Playbook.SecurityProfile>) => {
       state.playbook.securityProfile = payload;
     },
 

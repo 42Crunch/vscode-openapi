@@ -8,6 +8,7 @@ import { setScanServer } from "../../../features/prefs/slice";
 import { onOpenLink } from "../../../features/router/listener";
 import { updateScanconf } from "../../scanconf/scanconf-update/slice";
 import { runFullScan, runScan, sendHttpRequest } from "../actions";
+import { selectFile } from "../../../features/file-picker/slice";
 import {
   addAuthorizationTest,
   addCredential,
@@ -135,6 +136,14 @@ const listeners = (
             command: "updateScanconf",
             payload: undefined,
           });
+        },
+      }),
+
+    selectFile: () =>
+      startAppListening({
+        actionCreator: selectFile,
+        effect: async (action, listenerApi) => {
+          host.postMessage({ command: "selectFile", payload: action.payload });
         },
       }),
   };

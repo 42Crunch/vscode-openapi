@@ -7,8 +7,7 @@ import Button from "../../../components/Button";
 import FormDialog from "../../../new-components/FormDialog";
 import { ENV_VAR_NAME_REGEX, ENV_VAR_NAME_REGEX_MESSAGE } from "../../../core/playbook/variables";
 import NewCredentialForm from "./NewCredentialForm";
-
-export const ENV_API_TOKEN = "ENV_API_TOKEN";
+import { ENV_API_TOKEN } from "./constants";
 
 export default function NewCredentialDialog({
   onAddCredential,

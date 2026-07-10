@@ -3,3 +3,6 @@
 // It intentionally contains a ':' so it can never collide with a real
 // credential id, which must match ENV_VAR_NAME_REGEX = /^([\w\-]+)$/.
 export const MTLS_CREDENTIAL_ID = "mtls:profile";
+
+// File extensions offered in the certificate file picker.
+export const CERTIFICATE_EXTENSIONS = ["pem", "crt", "cer", "der", "key", "p12", "pfx"];

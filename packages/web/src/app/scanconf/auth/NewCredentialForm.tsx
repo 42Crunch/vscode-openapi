@@ -1,7 +1,9 @@
 import { useWatch } from "react-hook-form";
 
 import Input from "../../../components/Input";
+import FileInput from "../../../new-components/fat-fields/FileInput";
 import Select from "../../../components/Select";
+import { CERTIFICATE_EXTENSIONS } from "./mtls";
 
 export default function NewCredentialForm() {
   const type = useWatch({ name: "type" });
@@ -25,9 +27,19 @@ export default function NewCredentialForm() {
     return (
       <>
         {typeSelect}
-        <Input label="Client certificate" name="clientCertificate" />
+        <FileInput
+          label="Client certificate"
+          name="clientCertificate"
+          title="Select client certificate"
+          extensions={CERTIFICATE_EXTENSIONS}
+        />
         <Input label="Client certificate password" name="clientCertificatePassword" password />
-        <Input label="CA server certificate (optional)" name="caServerCertificate" />
+        <FileInput
+          label="CA server certificate (optional)"
+          name="caServerCertificate"
+          title="Select CA certificate"
+          extensions={CERTIFICATE_EXTENSIONS}
+        />
       </>
     );
   }

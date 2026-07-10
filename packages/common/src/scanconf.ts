@@ -43,3 +43,4 @@ export type UpdateScanconf = {
   command: "updateScanconf";
   payload: undefined;
 };
+
