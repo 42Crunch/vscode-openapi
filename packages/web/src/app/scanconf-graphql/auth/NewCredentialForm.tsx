@@ -3,13 +3,37 @@ import { useWatch } from "react-hook-form";
 import Input from "../../../components/Input";
 import Select from "../../../components/Select";
 
-export default function NewCredentialForm() {
+export default function NewCredentialForm({
+  allowApiKey,
+  allowMtls,
+}: {
+  allowApiKey: boolean;
+  allowMtls: boolean;
+}) {
   const type = useWatch({ name: "type" });
+
+  const options = [
+    ...(allowApiKey ? [{ value: "apiKey", label: "apiKey" }] : []),
+    ...(allowMtls ? [{ value: "mTLS", label: "mTLS" }] : []),
+  ];
+
+  const typeSelect = <Select label="Type" name="type" options={options} />;
+
+  if (type === "mTLS") {
+    return (
+      <>
+        {typeSelect}
+        <Input label="Client certificate" name="clientCertificate" />
+        <Input label="Client certificate password" name="clientCertificatePassword" password />
+        <Input label="CA server certificate (optional)" name="caServerCertificate" />
+      </>
+    );
+  }
 
   return (
     <>
       <Input label="ID" name="id" />
-      <Input label="Type (read only)" name="type" disabled={true} />
+      {typeSelect}
       {type !== "basic" && type !== "bearer" && (
         <>
           <Input label="Location (read only)" name="in" disabled={true} />

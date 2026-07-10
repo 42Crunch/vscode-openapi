@@ -18,6 +18,7 @@ import {
   removeCredential,
   removeCustomizationForOperation,
   removeRequest,
+  removeSecurityProfile,
   removeStage,
   saveAuthorizationTest,
   saveCredential,
@@ -25,6 +26,7 @@ import {
   saveOperationReference,
   saveRequest,
   saveSettings,
+  setSecurityProfile,
   updateOperationAuthorizationTests,
 } from "../slice";
 import { AppDispatch, RootState } from "../store";
@@ -64,6 +66,8 @@ const listeners = (
           saveCredential,
           addCredential,
           removeCredential,
+          setSecurityProfile,
+          removeSecurityProfile,
           addStage,
           moveStage,
           removeStage,
