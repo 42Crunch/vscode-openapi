@@ -1,5 +1,5 @@
 import { EnvData, SimpleEnvironment } from "@xliic/common/env";
-import { HttpClient } from "@xliic/common/http";
+import { HttpClient, MtlsConfig } from "@xliic/common/http";
 import { BundledSwaggerOrOasSpec, getOperationById, getHttpResponseRange } from "@xliic/openapi";
 import { Playbook } from "@xliic/scanconf";
 
@@ -198,7 +198,8 @@ async function* executePlaybook(
     };
 
     // do not use mtls for external requests
-    const mtlsConfig = "operationId" in replacements.value ? file.securityProfile : undefined;
+    const mtlsConfig =
+      "operationId" in replacements.value ? makeMtlsConfig(file.securityProfile, env) : undefined;
 
     const [response, error2] = await client(httpRequest, mtlsConfig);
 
@@ -488,4 +489,17 @@ export function getExternalEnvironment(file: Playbook.Bundle, envenv: EnvData): 
 
 function getRequestByRef(file: Playbook.Bundle, ref: Playbook.RequestRef) {
   return ref.type === "operation" ? file.operations[ref.id]?.request : file.requests?.[ref.id];
+}
+
+function makeMtlsConfig(
+  securityProfile: Playbook.SecurityProfile | undefined,
+  env: PlaybookEnvStack
+): MtlsConfig | undefined {
+  if (securityProfile === undefined) {
+    return undefined;
+  }
+
+  const replacements = replaceCredentialVariables(securityProfile.clientCertificatePassword, env);
+
+  return { ...securityProfile, clientCertificatePassword: replacements.value as string };
 }
