@@ -11,7 +11,7 @@ import { WebView } from "../../web-view";
 import { PlatformStore } from "../../../platform/stores/platform-store";
 import { Logger } from "../../../platform/types";
 
-import { HttpConfig, HttpError, HttpRequest } from "@xliic/common/http";
+import { HttpConfig, HttpError, HttpRequest, MtlsConfig } from "@xliic/common/http";
 import { executeHttpRequestRaw } from "../../http-handler";
 import { TagData, TagEntry, TAGS_DATA_KEY } from "@xliic/common/tags";
 import { loadConfig } from "../../../util/config";
@@ -25,7 +25,7 @@ export class TagsWebView extends WebView<Webapp> {
     private configuration: Configuration,
     private secrets: vscode.SecretStorage,
     private platform: PlatformStore,
-    private logger: Logger
+    private logger: Logger,
   ) {
     super(extensionPath, "tags", "Tag Selection", vscode.ViewColumn.One);
 
@@ -37,9 +37,19 @@ export class TagsWebView extends WebView<Webapp> {
   }
 
   hostHandlers: Webapp["hostHandlers"] = {
-    sendHttpRequest: async (payload: { id: string; request: HttpRequest; config: HttpConfig }) => {
+    sendHttpRequest: async (payload: {
+      id: string;
+      request: HttpRequest;
+      mtlsConfig?: MtlsConfig;
+      config: HttpConfig;
+    }) => {
       try {
-        const response = await executeHttpRequestRaw(payload.request, payload.config, this.logger);
+        const response = await executeHttpRequestRaw(
+          payload.request,
+          payload.config,
+          payload.mtlsConfig,
+          this.logger,
+        );
         this.sendRequest({
           command: "showHttpResponse",
           payload: { id: payload.id, response },

@@ -156,8 +156,8 @@ export class ScanGqlWebView extends WebView<Webapp> {
       }
     },
 
-    sendHttpRequest: ({ id, request, config }) =>
-      executeHttpRequest(id, request, config, this.logger),
+    sendHttpRequest: ({ id, request, config, mtlsConfig }) =>
+      executeHttpRequest(id, request, config, mtlsConfig, this.logger),
 
     showEnvWindow: async () => {
       vscode.commands.executeCommand("openapi.showEnvironment");

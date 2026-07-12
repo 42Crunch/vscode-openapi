@@ -38,7 +38,7 @@ export class CaptureWebView extends WebView<Webapp> {
     extensionPath: string,
     private configuration: Configuration,
     private secrets: vscode.SecretStorage,
-    private logger: Logger
+    private logger: Logger,
   ) {
     super(extensionPath, "capture", "API Contract Generator", vscode.ViewColumn.One);
     this.items = [];
@@ -95,7 +95,7 @@ export class CaptureWebView extends WebView<Webapp> {
         this.updateItem(
           item,
           "failed",
-          "Multiple environment files provided. Please provide only one environment file."
+          "Multiple environment files provided. Please provide only one environment file.",
         );
         return;
       }
@@ -104,20 +104,19 @@ export class CaptureWebView extends WebView<Webapp> {
         this.updateItem(
           item,
           "failed",
-          "No valid Postman or HAR files provided. Please provide at least one Postman or HAR file."
+          "No valid Postman or HAR files provided. Please provide at least one Postman or HAR file.",
         );
         return;
       }
 
-      const [captureConnection, captureConnectionError] = await this.getCaptureConnection(
-        undefined
-      );
+      const [captureConnection, captureConnectionError] =
+        await this.getCaptureConnection(undefined);
 
       if (captureConnectionError !== undefined) {
         this.updateItem(
           item,
           "failed",
-          `Failed to establish connection to capture server: ${getError(captureConnectionError)}`
+          `Failed to establish connection to capture server: ${getError(captureConnectionError)}`,
         );
         return;
       }
@@ -132,14 +131,14 @@ export class CaptureWebView extends WebView<Webapp> {
       const [quickgenId, prepareError] = await requestPrepare(
         captureConnection,
         item.prepareOptions,
-        this.logger
+        this.logger,
       );
 
       if (prepareError !== undefined) {
         await this.updateItem(
           item,
           "failed",
-          `Failed to prepare quickgen job: ${getError(prepareError)}`
+          `Failed to prepare quickgen job: ${getError(prepareError)}`,
         );
         await this.maybeOfferUpgrade(prepareError);
         return;
@@ -156,7 +155,7 @@ export class CaptureWebView extends WebView<Webapp> {
           item,
           quickgenId,
           postman,
-          files.env[0]
+          files.env[0],
         );
         if (error !== undefined) {
           this.updateItem(item, "failed", `Upload failed for file ${postman}: ${getError(error)}`);
@@ -171,7 +170,7 @@ export class CaptureWebView extends WebView<Webapp> {
           item,
           quickgenId,
           other,
-          undefined
+          undefined,
         );
         if (error !== undefined) {
           this.updateItem(item, "failed", `Upload failed for file ${other}: ${getError(error)}`);
@@ -205,7 +204,7 @@ export class CaptureWebView extends WebView<Webapp> {
         await this.updateItem(
           item,
           "failed",
-          `Failed to start conversion: ${getError(startError)}`
+          `Failed to start conversion: ${getError(startError)}`,
         );
         const uploadSummary = await this.getUploadSummary(captureConnection, quickgenId, item);
         await this.updateItem(item, undefined, uploadSummary);
@@ -225,7 +224,7 @@ export class CaptureWebView extends WebView<Webapp> {
         const [status, statusError] = await requestStatus(
           captureConnection,
           quickgenId,
-          this.logger
+          this.logger,
         );
         if (statusError !== undefined) {
           return [undefined, statusError];
@@ -294,7 +293,7 @@ export class CaptureWebView extends WebView<Webapp> {
           const encoder = new TextEncoder();
           await vscode.workspace.fs.writeFile(
             uri,
-            encoder.encode(JSON.stringify(fileText, null, 2))
+            encoder.encode(JSON.stringify(fileText, null, 2)),
           );
           this.showDownloadResult(item, uri.toString(), true, "");
         } catch (error) {
@@ -332,12 +331,12 @@ export class CaptureWebView extends WebView<Webapp> {
       }
     },
 
-    sendHttpRequest: ({ id, request, config }) =>
-      executeHttpRequest(id, request, config, this.logger),
+    sendHttpRequest: ({ id, request, config, mtlsConfig }) =>
+      executeHttpRequest(id, request, config, mtlsConfig, this.logger),
   };
 
   async getCaptureConnection(
-    quickgenId: string | undefined
+    quickgenId: string | undefined,
   ): Promise<Result<CaptureConnection, unknown>> {
     if (quickgenId !== undefined) {
       return [this.captureConnections.get(quickgenId)!, undefined];
@@ -346,7 +345,7 @@ export class CaptureWebView extends WebView<Webapp> {
         this.configuration,
         this.secrets,
         this.configuration.get<boolean>("internalUseDevEndpoints"),
-        this.logger
+        this.logger,
       );
     }
   }
@@ -393,7 +392,7 @@ export class CaptureWebView extends WebView<Webapp> {
     item: CaptureItem,
     quickgenId: string,
     data_file: string,
-    env_file: string | undefined
+    env_file: string | undefined,
   ): Promise<Result<string, unknown>> {
     item.uploadStatus[data_file] = { percent: 0, fileId: undefined };
 
@@ -414,7 +413,7 @@ export class CaptureWebView extends WebView<Webapp> {
           payload: item,
         });
       },
-      this.logger
+      this.logger,
     );
 
     if (uploadError !== undefined) {
@@ -433,7 +432,7 @@ export class CaptureWebView extends WebView<Webapp> {
   async getUploadSummary(
     captureConnection: CaptureConnection,
     quickgenId: string,
-    item: CaptureItem
+    item: CaptureItem,
   ): Promise<string[]> {
     const uploadSummary: string[] = [];
 
@@ -445,7 +444,7 @@ export class CaptureWebView extends WebView<Webapp> {
           captureConnection,
           quickgenId,
           status.fileId,
-          this.logger
+          this.logger,
         );
 
         if (error !== undefined) {
@@ -534,7 +533,7 @@ function getError(error: any): string {
 }
 
 async function sortFiles(
-  files: string[]
+  files: string[],
 ): Promise<{ env: string[]; postman: string[]; other: string[] }> {
   const env: string[] = [];
   const postman: string[] = [];

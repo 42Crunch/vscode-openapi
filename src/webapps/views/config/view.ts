@@ -31,7 +31,7 @@ export class ConfigWebView extends WebView<Webapp> {
     private configuration: Configuration,
     private secrets: vscode.SecretStorage,
     private platform: PlatformStore,
-    private logger: Logger
+    private logger: Logger,
   ) {
     super(extensionPath, "config", "Settings", vscode.ViewColumn.One);
 
@@ -133,8 +133,8 @@ export class ConfigWebView extends WebView<Webapp> {
       vscode.env.openExternal(url);
     },
 
-    sendHttpRequest: ({ id, request, config }) =>
-      executeHttpRequest(id, request, config, this.logger),
+    sendHttpRequest: ({ id, request, config, mtlsConfig }) =>
+      executeHttpRequest(id, request, config, mtlsConfig, this.logger),
   };
 
   async onStart() {
@@ -164,7 +164,7 @@ export class ConfigWebView extends WebView<Webapp> {
 
 async function* downloadCliHandler(
   repository: string,
-  cliDirectoryOverride: string
+  cliDirectoryOverride: string,
 ): AsyncGenerator<ShowCliDownloadMessage, void, unknown> {
   try {
     if (repository === undefined || repository === "") {
@@ -175,7 +175,7 @@ async function* downloadCliHandler(
 
     if (manifest === undefined) {
       throw new Error(
-        "Failed to download 42Crunch API Security Testing Binary, manifest not found"
+        "Failed to download 42Crunch API Security Testing Binary, manifest not found",
       );
     }
 
@@ -184,7 +184,7 @@ async function* downloadCliHandler(
       (progress: CliDownloadProgress): ShowCliDownloadMessage => ({
         command: "showCliDownload",
         payload: { completed: false, progress },
-      })
+      }),
     );
 
     yield {
