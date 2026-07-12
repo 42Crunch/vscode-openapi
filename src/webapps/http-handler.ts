@@ -102,15 +102,15 @@ export async function executeHttpRequestRaw(
       rejectUnauthorized: config?.https?.rejectUnauthorized ?? true,
       certificateAuthority: proxy !== undefined ? proxy.certs : undefined,
     },
-    ca,
-    pfx,
-    passphrase: mtlsConfig?.clientCertificatePassword,
     retry: {
       limit: 0,
     },
     request: requestFn,
     agent: proxy?.agents,
     hooks: getHooks(method, logger),
+
+    ...(pfx !== undefined && { pfx: pfx, passphrase: mtlsConfig?.clientCertificatePassword }),
+    ...(ca !== undefined && { ca: ca }),
   };
 
   try {
