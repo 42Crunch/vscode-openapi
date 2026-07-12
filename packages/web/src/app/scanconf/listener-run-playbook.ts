@@ -8,6 +8,7 @@ import {
   SendHttpRequestMessage,
   ShowHttpErrorMessage,
   ShowHttpResponseMessage,
+  MtlsConfig,
 } from "@xliic/common/http";
 import { Webapp } from "@xliic/common/message";
 import { BundledSwaggerOrOasSpec } from "@xliic/openapi";
@@ -327,8 +328,12 @@ export function onTryExecuteScenario(
           listenerApi.getState(),
           webappHttpClient(
             { https: { rejectUnauthorized, proxy: scanProxy } },
-            (id: string, request: HttpRequest, config: HttpConfig) =>
-              listenerApi.dispatch(sendHttpRequest({ id, request, config }))
+            (
+              id: string,
+              request: HttpRequest,
+              config: HttpConfig,
+              mtlsConfig: MtlsConfig | undefined
+            ) => listenerApi.dispatch(sendHttpRequest({ id, request, config, mtlsConfig }))
           ),
           listenerApi.dispatch,
           resetTryExecution,
@@ -370,8 +375,12 @@ export function onExecuteAuthentication(
           createAuthCache(),
           webappHttpClient(
             { https: { rejectUnauthorized, proxy: scanProxy } },
-            (id: string, request: HttpRequest, config: HttpConfig) =>
-              listenerApi.dispatch(sendHttpRequest({ id, request, config }))
+            (
+              id: string,
+              request: HttpRequest,
+              config: HttpConfig,
+              mtlsConfig: MtlsConfig | undefined
+            ) => listenerApi.dispatch(sendHttpRequest({ id, request, config, mtlsConfig }))
           ),
           oas,
           server,
@@ -415,8 +424,12 @@ export function onExecuteRequest(
           listenerApi.getState(),
           webappHttpClient(
             { https: { rejectUnauthorized, proxy: scanProxy } },
-            (id: string, request: HttpRequest, config: HttpConfig) =>
-              listenerApi.dispatch(sendHttpRequest({ id, request, config }))
+            (
+              id: string,
+              request: HttpRequest,
+              config: HttpConfig,
+              mtlsConfig: MtlsConfig | undefined
+            ) => listenerApi.dispatch(sendHttpRequest({ id, request, config, mtlsConfig }))
           ),
           listenerApi.dispatch,
           resetExecuteRequest,
@@ -454,8 +467,12 @@ export function onExecuteGlobal(startAppListening: AppStartListening, host: Http
           listenerApi.getState(),
           webappHttpClient(
             { https: { rejectUnauthorized, proxy: scanProxy } },
-            (id: string, request: HttpRequest, config: HttpConfig) =>
-              listenerApi.dispatch(sendHttpRequest({ id, request, config }))
+            (
+              id: string,
+              request: HttpRequest,
+              config: HttpConfig,
+              mtlsConfig: MtlsConfig | undefined
+            ) => listenerApi.dispatch(sendHttpRequest({ id, request, config, mtlsConfig }))
           ),
           listenerApi.dispatch,
           resetTryGlobal,

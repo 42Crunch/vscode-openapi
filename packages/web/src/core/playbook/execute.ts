@@ -197,7 +197,10 @@ async function* executePlaybook(
       operationId: request.operationId,
     };
 
-    const [response, error2] = await client(httpRequest);
+    // do not use mtls for external requests
+    const mtlsConfig = "operationId" in replacements.value ? file.securityProfile : undefined;
+
+    const [response, error2] = await client(httpRequest, mtlsConfig);
 
     if (error2 !== undefined) {
       yield { event: "http-error-received", error: error2 };

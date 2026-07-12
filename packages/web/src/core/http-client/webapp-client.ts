@@ -1,14 +1,29 @@
-import { HttpClient, HttpConfig, HttpError, HttpRequest, HttpResponse } from "@xliic/common/http";
+import {
+  HttpClient,
+  HttpConfig,
+  HttpError,
+  HttpRequest,
+  HttpResponse,
+  MtlsConfig,
+} from "@xliic/common/http";
 import { Result } from "@xliic/result";
 
 export function webappHttpClient(
   config: HttpConfig,
-  dispatch: (id: string, request: HttpRequest, config: HttpConfig) => void
+  dispatch: (
+    id: string,
+    request: HttpRequest,
+    config: HttpConfig,
+    mtlsConfig: MtlsConfig | undefined
+  ) => void
 ): HttpClient {
-  return async function httpClient(request: HttpRequest): Promise<Result<HttpResponse, HttpError>> {
+  return async function httpClient(
+    request: HttpRequest,
+    mtlsConfig: MtlsConfig | undefined
+  ): Promise<Result<HttpResponse, HttpError>> {
     const id = crypto.randomUUID();
     const response = receive(id);
-    dispatch(id, request, config);
+    dispatch(id, request, config, mtlsConfig);
     return response;
   };
 }

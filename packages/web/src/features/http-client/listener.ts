@@ -28,10 +28,15 @@ export function onSendHttpRequest(
   return () =>
     startAppListening({
       actionCreator: sendHttpRequest,
-      effect: async ({ payload: { id, request, config } }, listenerApi) => {
+      effect: async ({ payload: { id, request, config, mtlsConfig } }, listenerApi) => {
         host.postMessage({
           command: "sendHttpRequest",
-          payload: { id, request, config: config || { https: { rejectUnauthorized: true } } },
+          payload: {
+            id,
+            request,
+            config: config || { https: { rejectUnauthorized: true } },
+            mtlsConfig,
+          },
         });
       },
     });

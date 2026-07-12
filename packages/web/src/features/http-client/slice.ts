@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 
-import { HttpConfig, HttpRequest } from "@xliic/common/http";
+import { HttpConfig, HttpRequest, MtlsConfig } from "@xliic/common/http";
 
 export interface State {}
 
@@ -13,7 +13,12 @@ export const slice = createSlice({
   reducers: {
     sendHttpRequest: (
       state,
-      action: PayloadAction<{ id: string; request: HttpRequest; config: HttpConfig }>
+      action: PayloadAction<{
+        id: string;
+        request: HttpRequest;
+        config: HttpConfig;
+        mtlsConfig: MtlsConfig | undefined;
+      }>
     ) => {},
   },
 });
