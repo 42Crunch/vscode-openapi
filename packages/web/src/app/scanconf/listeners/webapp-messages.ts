@@ -7,6 +7,7 @@ import { showEnvWindow } from "../../../features/env/slice";
 import { setScanServer } from "../../../features/prefs/slice";
 import { onOpenLink } from "../../../features/router/listener";
 import { runFullScan, runScan, sendHttpRequest } from "../actions";
+import { selectFile } from "../../../features/file-picker/slice";
 import {
   addAuthorizationTest,
   addCredential,
@@ -14,6 +15,8 @@ import {
   moveStage,
   removeAuthorizationTest,
   removeCredential,
+  setSecurityProfile,
+  removeSecurityProfile,
   removeRequest,
   removeStage,
   saveAuthorizationTest,
@@ -64,6 +67,8 @@ const listeners = (
           saveCredential,
           addCredential,
           removeCredential,
+          setSecurityProfile,
+          removeSecurityProfile,
           addStage,
           moveStage,
           removeStage,
@@ -134,6 +139,14 @@ const listeners = (
             command: "updateScanconf",
             payload: undefined,
           });
+        },
+      }),
+
+    selectFile: () =>
+      startAppListening({
+        actionCreator: selectFile,
+        effect: async (action, listenerApi) => {
+          host.postMessage({ command: "selectFile", payload: action.payload });
         },
       }),
   };

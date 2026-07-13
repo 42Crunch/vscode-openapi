@@ -6,10 +6,17 @@ export type Bundle = {
   environments: Record<string, Environment>;
   operations: Record<string, Operation>;
   authenticationDetails: [Credentials, ...Credentials[]];
+  securityProfile?: SecurityProfile;
   before: Stage[];
   after: Stage[];
   authorizationTests: AuthorizationTests;
   requests: Record<string, StageContent | ExternalStageContent>;
+};
+
+export type SecurityProfile = {
+  clientCertificate: string;
+  clientCertificatePassword: string;
+  caServerCertificate?: string;
 };
 
 export type ParameterLocation = "query" | "header" | "path" | "cookie";

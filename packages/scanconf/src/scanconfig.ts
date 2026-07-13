@@ -188,6 +188,7 @@ export interface GlobalFile {
         [k: string]: Credential;
       }
   )[];
+  securityProfile?: SecurityProfile;
   apiVersion?: RequestsStage1;
   before?: RequestsStage2;
   after?: RequestsStage3;
@@ -199,6 +200,20 @@ export interface GlobalFile {
     responses?: HooksPluginReference;
   };
   [k: string]: unknown;
+}
+export interface SecurityProfile {
+  /**
+   * Client certificate used for mutual TLS authentication during the scan.
+   */
+  clientCertificate: string;
+  /**
+   * Password protecting the client certificate.
+   */
+  clientCertificatePassword: string;
+  /**
+   * CA certificate used to verify the server certificate during the scan.
+   */
+  caServerCertificate?: string;
 }
 export interface RuntimeConfiguration {
   /**

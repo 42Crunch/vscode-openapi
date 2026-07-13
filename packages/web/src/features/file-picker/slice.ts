@@ -1,29 +1,24 @@
 import { createSlice, PayloadAction, Dispatch, StateFromReducersMapObject } from "@reduxjs/toolkit";
 import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 
-import { HttpConfig, HttpRequest, MtlsConfig } from "@xliic/common/http";
+import { webappFilePicker } from "../../core/file-picker/webapp-client";
 
 export interface State {}
 
 const initialState: State = {};
 
 export const slice = createSlice({
-  name: "http-client",
+  name: "file-picker",
   initialState,
   reducers: {
-    sendHttpRequest: (
+    selectFile: (
       state,
-      action: PayloadAction<{
-        id: string;
-        request: HttpRequest;
-        config: HttpConfig;
-        mtlsConfig: MtlsConfig | undefined;
-      }>
+      action: PayloadAction<{ id: string; title: string; extensions: string[] }>
     ) => {},
   },
 });
 
-export const { sendHttpRequest } = slice.actions;
+export const { selectFile } = slice.actions;
 
 export const useFeatureDispatch: () => Dispatch<
   ReturnType<(typeof slice.actions)[keyof typeof slice.actions]>
@@ -32,5 +27,12 @@ export const useFeatureDispatch: () => Dispatch<
 export const useFeatureSelector: TypedUseSelectorHook<
   StateFromReducersMapObject<Record<typeof slice.name, typeof slice.reducer>>
 > = useSelector;
+
+// Returns a function that opens a host file dialog and resolves with the picked
+// file's base64 content (or undefined if cancelled).
+export function useFilePicker() {
+  const dispatch = useFeatureDispatch();
+  return webappFilePicker((id, title, extensions) => dispatch(selectFile({ id, title, extensions })));
+}
 
 export default slice.reducer;

@@ -186,8 +186,8 @@ export class ScanWebView extends WebView<Webapp> {
       }
     },
 
-    sendHttpRequest: ({ id, request, config }) =>
-      executeHttpRequest(id, request, config, this.logger),
+    sendHttpRequest: ({ id, request, config, mtlsConfig }) =>
+      executeHttpRequest(id, request, config, mtlsConfig, this.logger),
 
     showEnvWindow: async () => {
       vscode.commands.executeCommand("openapi.showEnvironment");
@@ -230,6 +230,27 @@ export class ScanWebView extends WebView<Webapp> {
           payload: { message: `Failed to generate default scanconf: ${error.message}` },
         });
       }
+    },
+
+    selectFile: async ({ id, title, extensions }) => {
+      const uris = await vscode.window.showOpenDialog({
+        canSelectFiles: true,
+        canSelectFolders: false,
+        canSelectMany: false,
+        title,
+        filters: extensions.length > 0 ? { Files: extensions } : undefined,
+      });
+      if (uris === undefined || uris.length === 0) {
+        await this.sendRequest({ command: "cancelFile", payload: { id } });
+        return;
+      }
+      const uri = uris[0];
+      const content = await vscode.workspace.fs.readFile(uri);
+      const filename = uri.path.split("/").pop() ?? "file";
+      await this.sendRequest({
+        command: "loadFile",
+        payload: { id, file: { filename, content: Buffer.from(content).toString("base64") } },
+      });
     },
   };
 

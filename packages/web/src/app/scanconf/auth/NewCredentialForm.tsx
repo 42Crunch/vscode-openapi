@@ -1,25 +1,53 @@
 import { useWatch } from "react-hook-form";
 
 import Input from "../../../components/Input";
+import FileInput from "../../../new-components/fat-fields/FileInput";
 import Select from "../../../components/Select";
+import { CA_CERTIFICATE_EXTENSIONS, CERTIFICATE_EXTENSIONS } from "./mtls";
 
 export default function NewCredentialForm() {
   const type = useWatch({ name: "type" });
 
+  const typeSelect = (
+    <Select
+      label="Type"
+      name="type"
+      options={[
+        { value: "basic", label: "basic" },
+        { value: "bearer", label: "bearer" },
+        { value: "apiKey", label: "apiKey" },
+        { value: "oauth2", label: "oauth2" },
+        { value: "openIdConnect", label: "openIdConnect" },
+        { value: "mTLS", label: "mTLS" },
+      ]}
+    />
+  );
+
+  if (type === "mTLS") {
+    return (
+      <>
+        {typeSelect}
+        <FileInput
+          label="Client certificate"
+          name="clientCertificate"
+          title="Select client certificate"
+          extensions={CERTIFICATE_EXTENSIONS}
+        />
+        <Input label="Certificate password" name="clientCertificatePassword" password />
+        <FileInput
+          label="Server CA certificate (optional)"
+          name="caServerCertificate"
+          title="Select CA certificate"
+          extensions={CA_CERTIFICATE_EXTENSIONS}
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <Input label="ID" name="id" />
-      <Select
-        label="Type"
-        name="type"
-        options={[
-          { value: "basic", label: "basic" },
-          { value: "bearer", label: "bearer" },
-          { value: "apiKey", label: "apiKey" },
-          { value: "oauth2", label: "oauth2" },
-          { value: "openIdConnect", label: "openIdConnect" },
-        ]}
-      />
+      {typeSelect}
       {type !== "basic" && type !== "bearer" && (
         <>
           <Select

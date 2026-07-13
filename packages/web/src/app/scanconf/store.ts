@@ -26,6 +26,7 @@ import global from "./global/slice";
 import operations from "./operations/slice";
 import requests from "./requests/slice";
 import scanconf from "./slice";
+import filePicker from "../../features/file-picker/slice";
 import scanconfUpdate from "./scanconf-update/slice";
 import confirmationDialog from "../../features/confirmation-dialog/slice";
 
@@ -44,6 +45,7 @@ const reducer = {
   global,
   generalError,
   confirmationDialog,
+  filePicker,
 };
 
 export const messageHandlers: Webapp["webappHandlers"] = {
@@ -56,6 +58,8 @@ export const messageHandlers: Webapp["webappHandlers"] = {
   loadConfig,
   loadPrefs,
   showGeneralError,
+  loadFile: () => null,
+  cancelFile: () => null,
 };
 
 export const initStore = (listenerMiddleware: ListenerMiddlewareInstance, theme: ThemeState) =>

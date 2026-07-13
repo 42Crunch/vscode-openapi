@@ -68,6 +68,7 @@ export function parseInternal(
         : file.authenticationDetails,
       parseCredentials
     ),
+    securityProfile: parseSecurityProfile(helpers, file, file.securityProfile),
     runtimeConfiguration: parseruntimeConfiguration(helpers, file, file.runtimeConfiguration || {}),
     customizations: value(file.customizations),
     environments: parseMap(helpers, file, file.environments || {}, parseEnvironmentFile),
@@ -78,6 +79,21 @@ export function parseInternal(
       parseAuthenticationSwappingTest
     ),
     requests: parseMap(helpers, file, file.requests || {}, parseRequestFile),
+  });
+}
+
+function parseSecurityProfile(
+  helpers: Helpers,
+  file: scan.ConfigurationFileBundle,
+  entry: scan.SecurityProfile | undefined
+): NullableResult<playbook.SecurityProfile | undefined, InternalParsingErrors> {
+  if (entry === undefined) {
+    return [undefined, undefined];
+  }
+  return result<playbook.SecurityProfile>({
+    clientCertificate: value(entry.clientCertificate),
+    clientCertificatePassword: value(entry.clientCertificatePassword),
+    caServerCertificate: value(entry.caServerCertificate),
   });
 }
 

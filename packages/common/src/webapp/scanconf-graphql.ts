@@ -7,6 +7,7 @@ import {
   LoadUpdatedScanconf,
   UpdateScanconf,
 } from "../scanconf-graphql";
+import { SelectFileMessage, LoadFileMessage, CancelFileMessage } from "../file-picker";
 import { ChangeThemeMessage } from "../theme";
 import { ShowEnvWindow, LoadEnvMessage } from "../env";
 import { LoadConfigMessage } from "../config";
@@ -25,7 +26,9 @@ export type Webapp = App<
   | LoadEnvMessage
   | LoadPreferencesMessage
   | LoadConfigMessage
-  | LoadUpdatedScanconf,
+  | LoadUpdatedScanconf
+  | LoadFileMessage
+  | CancelFileMessage,
   // produces
   | SaveScanconfMessage
   | SavePreferencesMessage
@@ -35,4 +38,5 @@ export type Webapp = App<
   | RunFullScanMessage
   | OpenLinkMessage
   | UpdateScanconf
+  | SelectFileMessage
 >;

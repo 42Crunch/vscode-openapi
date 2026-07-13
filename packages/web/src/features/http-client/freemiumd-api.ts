@@ -1,6 +1,6 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 
-import { HttpConfig, HttpRequest } from "@xliic/common/http";
+import { HttpConfig, HttpRequest, MtlsConfig } from "@xliic/common/http";
 import { getEndpoints } from "@xliic/common/endpoints";
 
 import { webappHttpClient } from "../../core/http-client/webapp-client";
@@ -43,17 +43,20 @@ async function webappBaseQuery(
 
   const client = webappHttpClient(
     { https: { rejectUnauthorized: true } },
-    (id: string, request: HttpRequest, config: HttpConfig) =>
-      dispatch(sendHttpRequest({ id, request, config }))
+    (id: string, request: HttpRequest, config: HttpConfig, mtlsConfig: MtlsConfig | undefined) =>
+      dispatch(sendHttpRequest({ id, request, config, mtlsConfig }))
   );
 
-  const [response, error] = await client({
-    url,
-    method: "get",
-    headers: {
-      Accept: "application/json",
+  const [response, error] = await client(
+    {
+      url,
+      method: "get",
+      headers: {
+        Accept: "application/json",
+      },
     },
-  });
+    undefined
+  );
 
   if (error !== undefined) {
     return { error };

@@ -16,9 +16,10 @@ import {
   HttpResponse,
   ShowHttpErrorMessage,
   ShowHttpResponseMessage,
+  MtlsConfig,
 } from "@xliic/common/http";
 
-import { LogBuilder, Scope } from "../log-redactor";
+import { LogBuilder } from "../log-redactor";
 import { Logger } from "../platform/types";
 import { createProxyAgentsAndCerts } from "../proxy";
 import { LogLevel } from "vscode";
@@ -33,10 +34,11 @@ export async function executeHttpRequest(
   id: string,
   request: HttpRequest,
   config: HttpConfig,
-  logger: Logger
+  mtlsConfig: MtlsConfig | undefined,
+  logger: Logger,
 ): Promise<ShowHttpResponseMessage | ShowHttpErrorMessage> {
   try {
-    const response = await executeHttpRequestRaw(request, config, logger);
+    const response = await executeHttpRequestRaw(request, config, mtlsConfig, logger);
     return {
       command: "showHttpResponse",
       payload: { id, response },
@@ -52,7 +54,8 @@ export async function executeHttpRequest(
 export async function executeHttpRequestRaw(
   request: HttpRequest,
   config: HttpConfig,
-  logger: Logger
+  mtlsConfig: MtlsConfig | undefined,
+  logger: Logger,
 ): Promise<HttpResponse> {
   const { url, method, headers, body } = request;
 
@@ -80,6 +83,14 @@ export async function executeHttpRequestRaw(
         : (http as any).__vscodeOriginal?.request
       : undefined;
 
+  const ca = mtlsConfig?.caServerCertificate
+    ? Buffer.from(mtlsConfig.caServerCertificate, "base64")
+    : undefined;
+
+  const pfx = mtlsConfig?.clientCertificate
+    ? Buffer.from(mtlsConfig.clientCertificate, "base64")
+    : undefined;
+
   const options = {
     throwHttpErrors: false,
     method,
@@ -97,6 +108,9 @@ export async function executeHttpRequestRaw(
     request: requestFn,
     agent: proxy?.agents,
     hooks: getHooks(method, logger),
+
+    ...(pfx !== undefined && { pfx: pfx, passphrase: mtlsConfig?.clientCertificatePassword }),
+    ...(ca !== undefined && { ca: ca }),
   };
 
   try {

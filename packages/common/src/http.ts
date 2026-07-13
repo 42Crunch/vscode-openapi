@@ -29,11 +29,20 @@ export type HttpError = {
   sslError: boolean;
 };
 
-export type HttpClient = (request: HttpRequest) => Promise<Result<HttpResponse, HttpError>>;
+export type MtlsConfig = {
+  clientCertificate: string;
+  clientCertificatePassword: string;
+  caServerCertificate?: string;
+};
+
+export type HttpClient = (
+  request: HttpRequest,
+  mtlsConfig: MtlsConfig | undefined
+) => Promise<Result<HttpResponse, HttpError>>;
 
 export type SendHttpRequestMessage = {
   command: "sendHttpRequest";
-  payload: { id: string; request: HttpRequest; config: HttpConfig };
+  payload: { id: string; request: HttpRequest; config: HttpConfig; mtlsConfig?: MtlsConfig };
 };
 
 export type ShowHttpResponseMessage = {

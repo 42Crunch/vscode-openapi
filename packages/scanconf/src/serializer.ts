@@ -47,6 +47,7 @@ export function serialize(file: playbook.Bundle): Result<scan.ConfigurationFileB
       before: undefinedIfEmpty(before),
       after: undefinedIfEmpty(after),
       authenticationDetails,
+      securityProfile: serializeSecurityProfile(file.securityProfile),
       authorizationTests: undefinedIfEmpty(file.authorizationTests),
       requests: undefinedIfEmpty(requests),
     },
@@ -62,6 +63,19 @@ function undefinedIfEmpty<T extends Array<unknown> | Record<string, unknown>>(
   } else {
     return Object.keys(value).length > 0 ? value : undefined;
   }
+}
+
+function serializeSecurityProfile(
+  securityProfile: playbook.SecurityProfile | undefined
+): scan.SecurityProfile | undefined {
+  if (securityProfile === undefined) {
+    return undefined;
+  }
+  return {
+    clientCertificate: securityProfile.clientCertificate,
+    clientCertificatePassword: securityProfile.clientCertificatePassword,
+    caServerCertificate: securityProfile.caServerCertificate,
+  };
 }
 
 function serializeAuthenticationDetails(

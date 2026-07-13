@@ -5,7 +5,8 @@ import { Playbook } from "@xliic/scanconf";
 
 import { loadPlaybook } from "./actions";
 import { arrayMoveMutable, getStageContainer } from "../scanconf/slice";
-import { ENV_API_TOKEN } from "./auth/NewCredentialDialog";
+import { MTLS_CREDENTIAL_ID } from "../scanconf/auth/mtls";
+import { ENV_API_TOKEN } from "./auth/constants";
 
 export type State = {
   graphQl: string;
@@ -159,6 +160,18 @@ export const slice = createSlice({
       state.selectedSubcredential = undefined;
       delete (state.playbook.customizations as any)["requests"];
       delete (state.playbook?.environments?.default?.variables as any)[ENV_API_TOKEN];
+    },
+
+    setSecurityProfile: (state, { payload }: PayloadAction<Playbook.SecurityProfile>) => {
+      state.playbook.securityProfile = payload;
+    },
+
+    removeSecurityProfile: (state) => {
+      state.playbook.securityProfile = undefined;
+      if (state.selectedCredential === MTLS_CREDENTIAL_ID) {
+        state.selectedCredential = undefined;
+        state.selectedSubcredential = undefined;
+      }
     },
 
     selectCredential: (
@@ -337,6 +350,8 @@ export const {
   saveScanconf,
   addCredential,
   removeCredential,
+  setSecurityProfile,
+  removeSecurityProfile,
   addStage,
   moveStage,
   removeStage,

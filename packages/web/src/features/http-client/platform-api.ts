@@ -2,7 +2,7 @@ import { createApi } from "@reduxjs/toolkit/query/react";
 import { webappHttpClient } from "../../core/http-client/webapp-client";
 import type { ConfigState } from "../../features/config/slice";
 import { sendHttpRequest } from "./slice";
-import { HttpConfig, HttpRequest } from "@xliic/common/http";
+import { HttpConfig, HttpRequest, MtlsConfig } from "@xliic/common/http";
 
 export const refreshOptions = {
   refetchOnFocus: true,
@@ -43,19 +43,22 @@ async function webappBaseQuery(args: any, { signal, dispatch, getState }: any, e
 
   const client = webappHttpClient(
     { https: { rejectUnauthorized: true } },
-    (id: string, request: HttpRequest, config: HttpConfig) =>
-      dispatch(sendHttpRequest({ id, request, config }))
+    (id: string, request: HttpRequest, config: HttpConfig, mtlsConfig: MtlsConfig | undefined) =>
+      dispatch(sendHttpRequest({ id, request, config, mtlsConfig }))
   );
 
-  const [response, error] = await client({
-    url: `${platformUrl}/${args}`,
-    method: "get",
-    headers: {
-      Accept: "application/json",
-      "X-API-KEY": platformApiToken,
-      "X-42C-IDE": "true",
+  const [response, error] = await client(
+    {
+      url: `${platformUrl}/${args}`,
+      method: "get",
+      headers: {
+        Accept: "application/json",
+        "X-API-KEY": platformApiToken,
+        "X-42C-IDE": "true",
+      },
     },
-  });
+    undefined
+  );
 
   if (error !== undefined) {
     return { error };

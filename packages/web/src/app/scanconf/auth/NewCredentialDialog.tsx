@@ -10,9 +10,11 @@ import NewCredentialForm from "./NewCredentialForm";
 
 export default function NewCredentialDialog({
   onAddCredential,
+  onAddSecurityProfile,
   existing,
 }: {
   onAddCredential: (id: string, credential: Playbook.Credential) => void;
+  onAddSecurityProfile: (profile: Playbook.SecurityProfile) => void;
   existing: string[];
 }) {
   const defaultValues = {
@@ -23,28 +25,87 @@ export default function NewCredentialDialog({
     description: "",
     credentialName: "",
     credentialValue: "",
+    clientCertificate: "",
+    clientCertificatePassword: "",
+    caServerCertificate: "",
   };
 
-  const schema = z.object({
-    id: z
-      .string()
-      .regex(ENV_VAR_NAME_REGEX(), {
-        message: ENV_VAR_NAME_REGEX_MESSAGE,
-      })
-      .refine((value) => !existing.includes(value), {
-        message: "Already exists",
-      }),
-    type: z.string(),
-    in: z.string(),
-    name: z.string(),
-    description: z.string(),
-    credentialName: z.string().regex(ENV_VAR_NAME_REGEX(), {
-      message: ENV_VAR_NAME_REGEX_MESSAGE,
-    }),
-    credentialValue: z.string().min(1),
-  });
+  // Fields are validated conditionally in superRefine based on the selected
+  // type. They are kept optional here because react-hook-form only submits
+  // values for the currently mounted fields, so the fields belonging to the
+  // other mode may be absent.
+  const schema = z
+    .object({
+      id: z.string().optional(),
+      type: z.string(),
+      in: z.string().optional(),
+      name: z.string().optional(),
+      description: z.string().optional(),
+      credentialName: z.string().optional(),
+      credentialValue: z.string().optional(),
+      clientCertificate: z.string().optional(),
+      clientCertificatePassword: z.string().optional(),
+      caServerCertificate: z.string().optional(),
+    })
+    .superRefine((data, ctx) => {
+      if (data.type === "mTLS") {
+        // id/credential fields are not used for the mTLS security profile
+        if (!data.clientCertificate) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["clientCertificate"],
+            message: "Required",
+          });
+        }
+        if (!data.clientCertificatePassword) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["clientCertificatePassword"],
+            message: "Required",
+          });
+        }
+        return;
+      }
+
+      if (!ENV_VAR_NAME_REGEX().test(data.id ?? "")) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["id"],
+          message: ENV_VAR_NAME_REGEX_MESSAGE,
+        });
+      } else if (existing.includes(data.id ?? "")) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["id"],
+          message: "Already exists",
+        });
+      }
+      if (!ENV_VAR_NAME_REGEX().test(data.credentialName ?? "")) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["credentialName"],
+          message: ENV_VAR_NAME_REGEX_MESSAGE,
+        });
+      }
+      if (!data.credentialValue) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["credentialValue"],
+          message: "Required",
+        });
+      }
+    });
 
   const onSubmit = (data: any) => {
+    if (data.type === "mTLS") {
+      onAddSecurityProfile({
+        clientCertificate: data.clientCertificate,
+        clientCertificatePassword: data.clientCertificatePassword,
+        caServerCertificate: data.caServerCertificate || undefined,
+      });
+      return;
+    }
+
     const methods = {
       [data.credentialName]: {
         credential: data.credentialValue,
