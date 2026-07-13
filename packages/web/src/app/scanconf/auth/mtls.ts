@@ -5,4 +5,5 @@
 export const MTLS_CREDENTIAL_ID = "mtls:profile";
 
 // File extensions offered in the certificate file picker.
-export const CERTIFICATE_EXTENSIONS = ["pem", "crt", "cer", "der", "key", "p12", "pfx"];
+export const CA_CERTIFICATE_EXTENSIONS = ["crt", "cer", "der", "pfx"];
+export const CERTIFICATE_EXTENSIONS = ["p12", "pfx"];

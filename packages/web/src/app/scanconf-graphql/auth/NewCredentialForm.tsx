@@ -3,7 +3,7 @@ import { useWatch } from "react-hook-form";
 import Input from "../../../components/Input";
 import FileInput from "../../../new-components/fat-fields/FileInput";
 import Select from "../../../components/Select";
-import { CERTIFICATE_EXTENSIONS } from "../../scanconf/auth/mtls";
+import { CA_CERTIFICATE_EXTENSIONS, CERTIFICATE_EXTENSIONS } from "../../scanconf/auth/mtls";
 
 export default function NewCredentialForm({
   allowApiKey,
@@ -31,12 +31,12 @@ export default function NewCredentialForm({
           title="Select client certificate"
           extensions={CERTIFICATE_EXTENSIONS}
         />
-        <Input label="Client certificate password" name="clientCertificatePassword" password />
+        <Input label="Certificate password" name="clientCertificatePassword" password />
         <FileInput
-          label="CA server certificate (optional)"
+          label="Server CA certificate (optional)"
           name="caServerCertificate"
           title="Select CA certificate"
-          extensions={CERTIFICATE_EXTENSIONS}
+          extensions={CA_CERTIFICATE_EXTENSIONS}
         />
       </>
     );

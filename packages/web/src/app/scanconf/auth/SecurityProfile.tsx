@@ -8,7 +8,7 @@ import Input from "../../../new-components/fat-fields/Input";
 import FileInput from "../../../new-components/fat-fields/FileInput";
 import { setSecurityProfile } from "../slice";
 import { useAppDispatch, useAppSelector } from "../store";
-import { CERTIFICATE_EXTENSIONS } from "./mtls";
+import { CA_CERTIFICATE_EXTENSIONS, CERTIFICATE_EXTENSIONS } from "./mtls";
 
 // Detail page for the synthetic "mTLS" security scheme backed by
 // playbook.securityProfile.
@@ -54,12 +54,12 @@ function SecurityProfileFields() {
         title="Select client certificate"
         extensions={CERTIFICATE_EXTENSIONS}
       />
-      <Input label="Client certificate password" name="clientCertificatePassword" password />
+      <Input label="Certificate password" name="clientCertificatePassword" password />
       <FileInput
-        label="CA server certificate (optional)"
+        label="Server CA certificate (optional)"
         name="caServerCertificate"
         title="Select CA certificate"
-        extensions={CERTIFICATE_EXTENSIONS}
+        extensions={CA_CERTIFICATE_EXTENSIONS}
       />
     </Fields>
   );
