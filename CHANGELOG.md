@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 5.8.0 (July 20, 2026)
+
+- Add mTLS to supported authentication schemes for Scan 
+- Allow multiple auth schemes in identity tests configuration in Scan
+- Fix subscription display and Upgrade button in capture for trial users
+- Fix issue with selection of a server in TryIt in Scan
+
 ## Version 5.6.0 (May 19, 2026)
 
 - Fix issue where a Tag codelens wasn't shown for .graphqls files on Windows
