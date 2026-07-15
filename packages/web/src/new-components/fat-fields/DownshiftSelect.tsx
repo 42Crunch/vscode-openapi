@@ -12,7 +12,7 @@ export default function DownshiftSelect<T>({
 }: {
   name: string;
   options: SelectOption<T>[];
-  label: string;
+  label?: string;
   description?: string;
   placeholder?: string;
 }) {
@@ -22,7 +22,7 @@ export default function DownshiftSelect<T>({
 
   return (
     <Container>
-      <div className="label">{label}</div>
+      {label !== undefined && <div className="label">{label}</div>}
       <PlainDownshiftSelect
         placeholder={placeholder}
         options={options}
