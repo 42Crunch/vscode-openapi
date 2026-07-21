@@ -76,7 +76,7 @@ export async function createScanConfigWithCliBinary(
     args.push("--tag", tags.join(","));
   }
 
-  const { env, args: moreArgs } = await getAuthAndProxy(config, secrets, logger);
+  const { env, args: moreArgs } = await getAuthAndProxy(config, secrets, logger, undefined);
 
   args.push(...moreArgs);
 
@@ -331,7 +331,12 @@ export async function runScanWithCliBinary(
     args.push("--tag", tags.join(","));
   }
 
-  const { env: moreEnv, args: moreArgs } = await getAuthAndProxy(config, secrets, logger);
+  const { env: moreEnv, args: moreArgs } = await getAuthAndProxy(
+    config,
+    secrets,
+    logger,
+    scanEnv["SCAN42C_HOST"],
+  );
 
   Object.assign(scanEnv, moreEnv);
   args.push(...moreArgs);
@@ -477,7 +482,12 @@ export async function runAuditWithCliBinary(
     args.push("--tag", tags.join(","));
   }
 
-  const { env: moreEnv, args: moreArgs } = await getAuthAndProxy(config, secrets, logger);
+  const { env: moreEnv, args: moreArgs } = await getAuthAndProxy(
+    config,
+    secrets,
+    logger,
+    undefined,
+  );
 
   Object.assign(env, moreEnv);
   args.push(...moreArgs);
@@ -703,6 +713,7 @@ async function getAuthAndProxy(
   config: Config,
   secrets: vscode.SecretStorage,
   logger: Logger,
+  apiUrl: string | undefined,
 ): Promise<{ env: any; args: any }> {
   const { freemiumdUrl } = getEndpoints(config.internalUseDevEndpoints);
   const args: string[] = [];
@@ -711,7 +722,7 @@ async function getAuthAndProxy(
   if (config.platformAuthType === "anond-token") {
     const anondToken = getAnondCredentials(configuration);
     args.push("--token", String(anondToken));
-    Object.assign(env, await getProxyEnv(freemiumdUrl, undefined, config, logger));
+    Object.assign(env, await getProxyEnv(freemiumdUrl, apiUrl, config, logger));
   } else {
     const platformConnection = await getPlatformCredentials(configuration, secrets);
     if (platformConnection !== undefined) {
@@ -721,10 +732,7 @@ async function getAuthAndProxy(
       logger.debug("Setting API_KEY environment variable.");
       env["API_KEY"] = platformConnection.apiToken!;
       env["PLATFORM_HOST"] = platformConnection.platformUrl;
-      Object.assign(
-        env,
-        await getProxyEnv(platformConnection.platformUrl, undefined, config, logger),
-      );
+      Object.assign(env, await getProxyEnv(platformConnection.platformUrl, apiUrl, config, logger));
     }
   }
   return { env, args };
