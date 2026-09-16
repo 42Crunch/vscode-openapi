@@ -153,7 +153,7 @@ export type StageReference = {
   auth?: string[];
   environment?: OperationEnvironment;
   responses?: Responses;
-  expectedResponse?: string;
+  expectedResponse?: string[];
   injectionKey?: string;
   ref: RequestRef;
 };

@@ -216,7 +216,7 @@ function parseRequestStageReference(
     fuzzing: value(reference.fuzzing),
     environment: parseCtxVariables(helpers, file, reference.environment || {}),
     injectionKey: value(reference.injectionKey),
-    expectedResponse: value(reference.expectedResponse),
+    expectedResponse: parseExpectedResponse(reference.expectedResponse),
   });
 }
 
@@ -698,4 +698,18 @@ function parseArray<I, O>(
   }
 
   return [array, undefined];
+}
+
+function parseExpectedResponse(
+  input: string | string[] | undefined
+): NullableResult<string[] | undefined, InternalParsingErrors> {
+  // expected response is optional, can be single string or array of strings
+  // when parsing, normalize it to an array of strings
+  if (input === undefined) {
+    return [undefined, undefined];
+  }
+  if (Array.isArray(input)) {
+    return [input, undefined];
+  }
+  return [[input], undefined];
 }

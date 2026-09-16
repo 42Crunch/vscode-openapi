@@ -428,7 +428,7 @@ export interface RequestStageReference {
   /**
    * Reference to a response defined in the 'responses' map and ignore the one specified in the defaultResponse
    */
-  expectedResponse?: string;
+  expectedResponse?: string | string[];
 }
 /**
  * A map for storing user-defined variables that are needed in the scenario.
