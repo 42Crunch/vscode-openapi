@@ -37,7 +37,7 @@
     "redhat.vscode-yaml"
   ],
   "activationEvents": [
-    "*",
+    "onStartupFinished",
     "onFileSystem:openapi-42crunch"
   ],
   "capabilities": {
