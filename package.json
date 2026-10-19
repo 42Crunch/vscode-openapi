@@ -70,11 +70,6 @@
           "icon": "resources/icons/icon_api.svg"
         },
         {
-          "id": "42crunch-launchpad",
-          "title": "42Crunch",
-          "icon": "resources/icon_42crunch_platform_outline.svg"
-        },
-        {
           "id": "42crunch-collections",
           "title": "Collections and Data dictionary",
           "icon": "resources/icon_42crunch_collections_outline.svg"
@@ -82,12 +77,6 @@
       ]
     },
     "views": {
-      "42crunch-launchpad": [
-        {
-          "id": "platformLaunchpadWelcome",
-          "name": ""
-        }
-      ],
       "42crunch-collections": [
         {
           "id": "platformExplorer",
@@ -116,10 +105,6 @@
       {
         "view": "platformWelcome",
         "contents": "Please enter 42Crunch Platform credentials.\n[Configure](command:openapi.showConfiguration)"
-      },
-      {
-        "view": "platformLaunchpadWelcome",
-        "contents": "API Contract Generator\nConvert Postman or HAR files to OpenAPI.\n[Generate](command:openapi.showCapture)"
       }
     ],
     "menus": {
@@ -373,10 +358,6 @@
       {
         "command": "openapi.showSettings",
         "title": "42Crunch: Open Settings"
-      },
-      {
-        "command": "openapi.showCapture",
-        "title": "42Crunch: Convert Postman or HAR files to OpenAPI"
       },
       {
         "command": "openapi.outline.resetSearch",
