@@ -31,7 +31,6 @@ export default defineConfig(({ command, mode }) => {
           "scanconf-graphql": resolve(import.meta.dirname, "src/app/scanconf-graphql/index.tsx"),
           signup: resolve(import.meta.dirname, "src/app/signup/index.tsx"),
           tags: resolve(import.meta.dirname, "src/app/tags/index.tsx"),
-          capture: resolve(import.meta.dirname, "src/app/capture/index.tsx"),
         },
         fileName: (format, name) => {
           return `${name}.js`;

@@ -77,7 +77,7 @@ async function editorRunFirstOperationScan(
   path: string,
   method: HttpMethod,
 ): Promise<void> {
-  if (!(await ensureHasCredentials(signUpView, configuration, secrets, "regular"))) {
+  if (!(await ensureHasCredentials(signUpView, configuration, secrets))) {
     return;
   }
 

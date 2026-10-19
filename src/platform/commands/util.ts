@@ -37,7 +37,7 @@ export default (
   openSignUp: async () => {
     const credentials = await hasCredentials(configuration, secrets);
     if (credentials === undefined) {
-      await configureCredentials(signUpWebView, "regular");
+      await configureCredentials(signUpWebView);
     } else {
       const response = await vscode.window.showInformationMessage(
         "Already registered, check Settings for details.",

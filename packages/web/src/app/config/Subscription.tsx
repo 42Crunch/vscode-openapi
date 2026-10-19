@@ -49,8 +49,7 @@ export default function Subscription({
     data.currentAuditUsage +
     data.currentScanUsage +
     data.currentGraphqlAuditUsage +
-    data.currentGraphqlScanUsage +
-    data.currentCaptureUsage;
+    data.currentGraphqlScanUsage;
   const currentAllowanceLeftPercentage =
     currentAllowance > 0 ? 1 - currentUsage / currentAllowance : 0;
 

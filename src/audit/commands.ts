@@ -210,7 +210,7 @@ async function securityAudit(
   path?: string,
   method?: HttpMethod
 ) {
-  if (!(await ensureHasCredentials(signUpWebView, configuration, secrets, "regular"))) {
+  if (!(await ensureHasCredentials(signUpWebView, configuration, secrets))) {
     return;
   }
 
