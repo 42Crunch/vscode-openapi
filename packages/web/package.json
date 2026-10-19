@@ -10,8 +10,8 @@
   },
   "type": "module",
   "dependencies": {
-    "@lexical/react": "^0.30.0",
     "@hookform/resolvers": "5.2.2",
+    "@lexical/react": "^0.30.0",
     "@radix-ui/react-checkbox": "^1.2.3",
     "@radix-ui/react-context-menu": "^2.2.12",
     "@radix-ui/react-dialog": "^1.1.11",
@@ -50,7 +50,7 @@
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@types/redux-logger": "^3.0.9",
-    "@vitejs/plugin-react": "^4.4.1",
+    "@vitejs/plugin-react": "^6.1.2",
     "jose": "^6.0.12",
     "typescript": "*",
     "vite": "*",

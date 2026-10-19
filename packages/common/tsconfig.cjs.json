@@ -3,6 +3,7 @@
   "compilerOptions": {
     "skipLibCheck": true,
     "module": "commonjs",
+    "moduleResolution": "bundler",
     "outDir": "dist/cjs",
     "rootDir": "src",
     "declaration": true,

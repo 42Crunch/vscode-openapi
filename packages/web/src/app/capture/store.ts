@@ -5,7 +5,7 @@ import {
 } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import logger from "redux-logger";
+import { logger } from "redux-logger";
 
 import { Webapp } from "@xliic/common/webapp/capture";
 

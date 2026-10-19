@@ -3,7 +3,7 @@ import { resolve } from "path";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig(({ command, mode }) => {
-  const env = {};
+  const env: Record<string, string> = {};
   if (mode === "production") {
     env["process.env.NODE_ENV"] = '"production"';
   }
@@ -17,7 +17,7 @@ export default defineConfig(({ command, mode }) => {
       minify: true,
       lib: {
         entry: {
-          main: resolve(__dirname, "index.tsx"),
+          main: resolve(import.meta.dirname, "index.tsx"),
         },
         fileName: (format, name) => {
           return `${name}.js`;

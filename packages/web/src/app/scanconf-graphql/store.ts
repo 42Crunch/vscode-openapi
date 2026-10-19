@@ -4,7 +4,7 @@ import {
   StateFromReducersMapObject,
 } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-import logger from "redux-logger";
+import { logger } from "redux-logger";
 
 import { Webapp } from "@xliic/common/webapp/scanconf-graphql";
 

@@ -8,7 +8,10 @@
     "outDir": "out",
     "rootDir": "src",
     "lib": ["ES2020"],
-    "sourceMap": true
+    "sourceMap": true,
+    "paths": {
+      "keyv": ["./node_modules/@types/keyv"]
+    }
   },
   "include": ["src"],
   "exclude": ["node_modules", ".vscode-test"]

@@ -25,12 +25,12 @@
     "build-redoc": "cd preview-redoc && npm run build && mkdirp ../../webview/generated/preview/redoc && ncp dist ../../webview/generated/preview/redoc"
   },
   "devDependencies": {
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.0",
     "ncp": "^2.0.0",
     "mkdirp": "^1.0.4",
     "type-fest": "^4.40.0",
-    "vitest": "^4.0.18",
-    "vite": "^7.3.1"
+    "vitest": "^5.0.3",
+    "vite": "^8.3.4"
   },
   "overrides": {
     "json-schema-ref-parser": "9.0.9"

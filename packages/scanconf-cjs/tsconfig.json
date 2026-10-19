@@ -8,7 +8,8 @@
     "outDir": "dist/",
     "rootDir": "../scanconf/src/",
     "lib": ["es6"],
-    "sourceMap": true
+    "sourceMap": true,
+    "types": ["node"]
   },
   "include": ["../scanconf/src/"]
 }

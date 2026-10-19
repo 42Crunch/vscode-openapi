@@ -10,8 +10,6 @@ export default defineConfig(({ command, mode }) => {
     env["process.env.NODE_ENV"] = '"production"';
   }
 
-  console.log("running in mode", mode);
-
   return {
     plugins: [
       { enforce: "pre", ...mdx() },
@@ -23,17 +21,17 @@ export default defineConfig(({ command, mode }) => {
       minify: true,
       lib: {
         entry: {
-          audit: resolve(__dirname, "src/app/audit/index.tsx"),
-          scan: resolve(__dirname, "src/app/scan/index.tsx"),
-          tryit: resolve(__dirname, "src/app/tryit/index.tsx"),
-          "data-dictionary": resolve(__dirname, "src/app/data-dictionary/index.tsx"),
-          environment: resolve(__dirname, "src/app/environment/index.tsx"),
-          config: resolve(__dirname, "src/app/config/index.tsx"),
-          scanconf: resolve(__dirname, "src/app/scanconf/index.tsx"),
-          "scanconf-graphql": resolve(__dirname, "src/app/scanconf-graphql/index.tsx"),
-          signup: resolve(__dirname, "src/app/signup/index.tsx"),
-          tags: resolve(__dirname, "src/app/tags/index.tsx"),
-          capture: resolve(__dirname, "src/app/capture/index.tsx"),
+          audit: resolve(import.meta.dirname, "src/app/audit/index.tsx"),
+          scan: resolve(import.meta.dirname, "src/app/scan/index.tsx"),
+          tryit: resolve(import.meta.dirname, "src/app/tryit/index.tsx"),
+          "data-dictionary": resolve(import.meta.dirname, "src/app/data-dictionary/index.tsx"),
+          environment: resolve(import.meta.dirname, "src/app/environment/index.tsx"),
+          config: resolve(import.meta.dirname, "src/app/config/index.tsx"),
+          scanconf: resolve(import.meta.dirname, "src/app/scanconf/index.tsx"),
+          "scanconf-graphql": resolve(import.meta.dirname, "src/app/scanconf-graphql/index.tsx"),
+          signup: resolve(import.meta.dirname, "src/app/signup/index.tsx"),
+          tags: resolve(import.meta.dirname, "src/app/tags/index.tsx"),
+          capture: resolve(import.meta.dirname, "src/app/capture/index.tsx"),
         },
         fileName: (format, name) => {
           return `${name}.js`;
