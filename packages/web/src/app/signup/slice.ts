@@ -19,7 +19,6 @@ export interface SignUpState {
   waitingForPlatformConnectionTest: boolean;
   platformConnectionTestResult?: PlatformConnectionTestError;
   currentFormId: FormID;
-  signupType: "regular" | "capture";
   // If IDE closes the view it has little sense, but if not we do not let a user to mess up
   complete: boolean; // If true, disable all UI components
 }
@@ -38,7 +37,6 @@ const initialState: SignUpState = {
   waitingForPlatformConnectionTest: false,
   platformConnectionTestResult: undefined,
   currentFormId: "AnondSignUpEmailForm",
-  signupType: "regular",
   complete: false,
 };
 
@@ -116,9 +114,6 @@ export const slice = createSlice({
     setCurrentFormId: (state, action: PayloadAction<FormID>) => {
       state.currentFormId = action.payload;
     },
-    setSignupType: (state, action: PayloadAction<"regular" | "capture">) => {
-      state.signupType = action.payload;
-    },
   },
 });
 
@@ -137,7 +132,6 @@ export const {
   showTermsAndConditionsError,
   openLink,
   setCurrentFormId,
-  setSignupType,
 } = slice.actions;
 
 export default slice.reducer;

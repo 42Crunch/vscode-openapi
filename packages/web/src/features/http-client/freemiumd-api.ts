@@ -16,7 +16,6 @@ export type Subscription = {
   currentScanUsage: number;
   currentGraphqlAuditUsage: number;
   currentGraphqlScanUsage: number;
-  currentCaptureUsage: number;
 };
 
 export const freemiumdApi = createApi({

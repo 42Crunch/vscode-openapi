@@ -7,13 +7,11 @@ import {
   RequestAnondTokenByEmail,
   ShowPlatformConnectionTestErrorMessage,
   ShowAnondTokenResponseMessage,
-  SetSignupType,
 } from "../signup";
 
 export type Webapp = App<
   // consumes
   | ChangeThemeMessage
-  | SetSignupType
   | ShowPlatformConnectionTestErrorMessage
   | ShowAnondTokenResponseMessage,
   // produces

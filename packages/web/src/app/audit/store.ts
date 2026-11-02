@@ -3,7 +3,7 @@ import {
   ListenerMiddlewareInstance,
   StateFromReducersMapObject,
 } from "@reduxjs/toolkit";
-import logger from "redux-logger";
+import { logger } from "redux-logger";
 
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 

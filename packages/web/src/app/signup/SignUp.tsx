@@ -1,14 +1,12 @@
 import styled from "styled-components";
-import { resetAnondTokenRequestResult, setCurrentFormId, openLink } from "./slice";
+import { resetAnondTokenRequestResult, setCurrentFormId } from "./slice";
 import { useAppDispatch, useAppSelector } from "./store";
 import { CrunchLogoMain } from "../../icons";
 import { AnondSignUpEmailForm, AnondSignUpTokenForm, PlatformSignUpForm } from "./SignUpForms";
 import { ThemeColorVariables } from "@xliic/common/theme";
 
 export function LeftContainer() {
-  const dispatch = useAppDispatch();
-
-  const { currentFormId, signupType } = useAppSelector((state) => state.signup);
+  const { currentFormId } = useAppSelector((state) => state.signup);
 
   return (
     <ColoredContainer>
@@ -16,32 +14,11 @@ export function LeftContainer() {
         <CrunchMainLogoContainer>
           <CrunchLogoMain />
         </CrunchMainLogoContainer>
-        {currentFormId === "AnondSignUpEmailForm" && signupType === "regular" && (
+        {currentFormId === "AnondSignUpEmailForm" && (
           <Title>
             Check your API for quality, conformance and security vulnerabilities, including BOLA,
             BFLA & BOPLA
           </Title>
-        )}
-        {currentFormId === "AnondSignUpEmailForm" && signupType === "capture" && (
-          <>
-            <Title>Welcome to API Contract Generator</Title>
-            <Text>
-              Save time by reducing the manual creation of OpenAPI files. Automatically generate
-              OpenAPI files from Postman collections or HAR files, directly in your IDE.
-            </Text>
-            <SmallerText>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  dispatch(openLink("https://42crunch.com/api-contract-generator/"));
-                }}
-              >
-                Learn more
-              </a>
-            </SmallerText>
-          </>
         )}
         {currentFormId === "AnondSignUpTokenForm" && (
           <>
@@ -50,8 +27,6 @@ export function LeftContainer() {
         )}
         {currentFormId === "PlatformSignUpForm" && (
           <>
-            <Title>API Capture</Title>
-            <Text>Automatically generate OpenAPI definition files.</Text>
             <Title>API Protect</Title>
             <Text>Immediately protect APIs at runtime.</Text>
           </>
@@ -151,8 +126,3 @@ const Text = styled.p`
   font-weight: 600;
 `;
 
-const SmallerText = styled.p`
-  font-size: 20px;
-  line-height: 30px;
-  font-weight: 500;
-`;

@@ -34,6 +34,12 @@ export interface Kdb {
   [key: string]: KdbArticle;
 }
 
+const articleNotFoundId = "article-not-found";
+
+export function getArticle(kdb: Kdb, id: string): KdbArticle | undefined {
+  return kdb[id] ?? kdb[articleNotFoundId];
+}
+
 export type Filter = {
   severity?: SeverityLevel;
   rule?: string;
@@ -63,7 +69,7 @@ export type FlatIssue = Issue & {
 
 export type IssueStats = {
   id: string;
-  kdb: KdbArticle;
+  kdb: KdbArticle | undefined;
   title: string;
   score: number;
   displayScore: string;
@@ -276,8 +282,8 @@ function flattenIssues(
     .map(([uri, issues]) => {
       return issues.map((issue, idx) => ({
         ...issue,
-        domain: kdb[issue.id].group,
-        group: kdb[issue.id].subgroup,
+        domain: kdb[issue.id]?.group,
+        group: kdb[issue.id]?.subgroup,
         filename: files[issue.documentUri].relative,
       }));
     })
@@ -296,8 +302,8 @@ function getStats(issues: FlatIssue[], kdb: Kdb, type: "openapi" | "graphql"): S
 
   const byIssue = Object.keys(grouped).map((id) => ({
     id,
-    kdb: kdb[id] || fallbackArticle,
-    title: kdb[id].title.text.replace(/^<h1>|<\/h1>$/g, ""),
+    kdb: getArticle(kdb, id),
+    title: kdb[id]?.title?.text?.replace(/^<h1>|<\/h1>$/g, "") ?? id,
     domain: grouped[id][0].domain,
     score: grouped[id].reduce((result, issue) => result + issue.score, 0),
     criticality: Math.max(...grouped[id].map((issue) => issue.criticality)) as CriticalityLevel,
@@ -376,16 +382,6 @@ function displayScore(score: number): string {
   }
   return "less than 1";
 }
-
-const fallbackArticle = {
-  title: {
-    text: "<h1>Article not found</h1>",
-  },
-  description: {
-    text: `<p>Whoops! Looks like there has been an oversight and we are missing a page for this issue.</p>
-           <p><a href="https://apisecurity.io/contact-us/">Let us know</a> the title of the issue, and we make sure to add it to the encyclopedia.</p>`,
-  },
-};
 
 const grapqlFallbackArticle = {
   title: {

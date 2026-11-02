@@ -12,7 +12,7 @@ globalThis.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
 
   if (url.startsWith("http://openapi-preview.example/")) {
     return Promise.resolve(
-      new Response(globalThis["previewPayload"]! as string, {
+      new Response(globalThis.previewPayload!, {
         status: 200,
         headers: {
           "Content-Type": "application/json",
@@ -26,5 +26,5 @@ globalThis.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
 };
 
 const container = document.getElementById("root");
-const root = createRoot(container);
+const root = createRoot(container!);
 root.render(<Preview />);

@@ -12,7 +12,7 @@ import CollapsibleCard, {
 } from "../../components/CollapsibleCard";
 import KdbArticle from "./KdbArticle";
 import FilterPanel from "./FilterPanel";
-import { copyIssueId, goToLine, openLink } from "./slice";
+import { copyIssueId, getArticle, goToLine, openLink } from "./slice";
 
 export default function FilteredIssues() {
   const {
@@ -74,7 +74,7 @@ export default function FilteredIssues() {
           </BottomDescription>
           <KdbArticle
             lang={filename.toLowerCase().endsWith("json") ? "json" : "yaml"}
-            article={kdb[issue.id]}
+            article={getArticle(kdb, issue.id)}
             issueId={issue.id}
             openLink={(url) => {
               dispatch(openLink(url));

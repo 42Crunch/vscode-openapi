@@ -15,7 +15,7 @@ export const Preview = () => {
       const message = event.data;
       switch (message.command) {
         case "preview":
-          globalThis["previewPayload"] = message.text;
+          globalThis.previewPayload = message.text;
           setOas(JSON.parse(message.text));
           setVersion(Date.now());
           break;
