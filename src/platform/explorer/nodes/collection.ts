@@ -19,7 +19,7 @@ export class CollectionsNode extends AbstractExplorerNode {
   async getChildren(): Promise<ExplorerNode[]> {
     const view = await this.store.getCollections(
       this.store.filters.collection,
-      this.store.limits.getCollections()
+      this.store.limits.getCollectionPages()
     );
 
     const children = view.collections.map(

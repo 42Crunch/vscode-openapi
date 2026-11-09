@@ -55,6 +55,15 @@ export interface CollectionsView {
   hasMore: boolean;
 }
 
+// collection pages loaded so far for the given name filter, kept to avoid
+// re-fetching all of them every time the tree is refreshed
+interface CollectionsCache {
+  name: string;
+  pages: number;
+  collections: CollectionData[];
+  hasMore: boolean;
+}
+
 export interface ApisView {
   apis: Api[];
   hasMore: boolean;
@@ -71,22 +80,23 @@ const COLLECTION_PAGE_SIZE = 100;
 const APIS_PAGE_SIZE = 100;
 
 export class Limits {
-  private collections: number;
+  // collections are fetched from the server page by page, this is the number of pages to load
+  private collectionPages: number;
   private apis: Map<string, number>;
   private favorite: Map<string, number>;
 
   constructor() {
-    this.collections = COLLECTION_PAGE_SIZE;
+    this.collectionPages = 1;
     this.apis = new Map();
     this.favorite = new Map();
   }
 
-  getCollections() {
-    return this.collections;
+  getCollectionPages() {
+    return this.collectionPages;
   }
 
   increaseCollections() {
-    this.collections = this.collections + COLLECTION_PAGE_SIZE;
+    this.collectionPages = this.collectionPages + 1;
   }
 
   getApis(collectionId: string) {
@@ -108,8 +118,12 @@ export class Limits {
     );
   }
 
+  resetCollections() {
+    this.collectionPages = 1;
+  }
+
   reset() {
-    this.collections = COLLECTION_PAGE_SIZE;
+    this.collectionPages = 1;
     this.apis = new Map();
     this.favorite = new Map();
   }
@@ -131,6 +145,7 @@ export class PlatformStore {
   private connection: PlatformConnection | undefined = undefined;
   readonly limits = new Limits();
   readonly filters = new Filters();
+  private collectionsCache: CollectionsCache | undefined = undefined;
   readonly readonlyApis = new Set();
   private formats?: DataDictionaryFormat[];
   private _onConnectionDidChange = new EventEmitter<PlatformConnectionEvent>();
@@ -183,24 +198,49 @@ export class PlatformStore {
 
   async getCollections(
     filter: CollectionFilter | undefined,
-    limit: number
+    pages: number
   ): Promise<CollectionsView> {
-    // the collections matching the name are searched for on the server,
-    // only the first 'limit' of them are requested
-    const response = await searchCollections(
-      filter?.name ?? "",
-      this.getConnection(),
-      this.logger,
-      { page: 1, perPage: limit }
-    );
+    // the collections matching the name are searched for on the server, the server
+    // limits the page size, so the pages are requested one by one and cached,
+    // only the pages which are not in the cache yet are requested
+    const name = filter?.name ?? "";
+    if (this.collectionsCache?.name !== name) {
+      this.collectionsCache = { name, pages: 0, collections: [], hasMore: true };
+    }
+    const cache = this.collectionsCache;
 
-    const collections = response.list.map(toCollectionData);
-    const total = response.num ?? collections.length;
+    while (cache.hasMore && cache.pages < pages) {
+      const response = await searchCollections(name, this.getConnection(), this.logger, {
+        page: cache.pages + 1,
+        perPage: COLLECTION_PAGE_SIZE,
+      });
+      if (this.collectionsCache !== cache) {
+        // the cache has been invalidated while the page was being loaded
+        return this.getCollections(filter, pages);
+      }
+      cache.pages++;
+      cache.collections.push(...response.list.map(toCollectionData));
+      // a page which is not full is the last one
+      cache.hasMore =
+        response.list.length === COLLECTION_PAGE_SIZE &&
+        (response.num === undefined || response.num > cache.collections.length);
+    }
 
     return {
-      hasMore: total > collections.length,
-      collections,
+      hasMore: cache.hasMore,
+      collections: [...cache.collections],
     };
+  }
+
+  // drops the cached collections, the pages loaded so far are re-requested on the next read
+  invalidateCollections() {
+    this.collectionsCache = undefined;
+  }
+
+  // drops the cached collections and goes back to the first page
+  resetCollections() {
+    this.collectionsCache = undefined;
+    this.limits.resetCollections();
   }
 
   async searchCollections(name: string) {
@@ -209,11 +249,13 @@ export class PlatformStore {
 
   async createCollection(name: string): Promise<CollectionData> {
     const collection = await createCollection(name, this.getConnection(), this.logger);
+    this.invalidateCollections();
     return collection;
   }
 
   async collectionRename(collectionId: string, name: string) {
     await collectionUpdate(collectionId, name, this.getConnection(), this.logger);
+    this.invalidateCollections();
   }
 
   async apiRename(apiId: string, name: string): Promise<void> {
@@ -236,6 +278,8 @@ export class PlatformStore {
       this.getConnection(),
       this.logger
     );
+    // the api count of the collection has changed
+    this.invalidateCollections();
     return api;
   }
 
@@ -331,10 +375,13 @@ export class PlatformStore {
 
   async deleteCollection(collectionId: string): Promise<void> {
     await deleteCollection(collectionId, this.getConnection(), this.logger);
+    this.invalidateCollections();
   }
 
   async deleteApi(apiId: string): Promise<void> {
     await deleteApi(apiId, this.getConnection(), this.logger);
+    // the api count of the collection has changed
+    this.invalidateCollections();
   }
 
   async getApis(
@@ -539,6 +586,7 @@ export class PlatformStore {
 
   async refresh(): Promise<void> {
     this.formats = undefined;
+    this.resetCollections();
     if (this.hasCredentials()) {
       const { success } = await testConnection(this.getConnection(), this.logger);
       this.connected = success;

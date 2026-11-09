@@ -20,6 +20,7 @@ export default (store: PlatformStore, provider: CollectionsProvider) => ({
 
   collectionsFilterReset: async (node: FilteredCollectionNode) => {
     store.filters.collection = undefined;
+    store.resetCollections();
     provider.refresh();
   },
 
@@ -67,6 +68,7 @@ async function collectionsFilter(
     } else {
       store.filters.collection = undefined;
     }
+    store.resetCollections();
     provider.refresh();
   }
 }
