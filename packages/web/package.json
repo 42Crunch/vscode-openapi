@@ -20,7 +20,7 @@
     "@radix-ui/react-tabs": "^1.1.9",
     "@radix-ui/react-tooltip": "^1.2.4",
     "@reduxjs/toolkit": "^2.1.1",
-    "@xliic/preserving-json-yaml-parser": "^2.3.0",
+    "@xliic/preserving-json-yaml-parser": "^2.5.0",
     "buffer": "6.0.3",
     "dexie": "^4.0.11",
     "downshift": "^9.0.9",
