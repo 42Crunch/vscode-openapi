@@ -2,6 +2,7 @@ import { useWatch } from "react-hook-form";
 import * as z from "zod";
 
 import { Banner } from "../../../components/Banner";
+import { Checkbox } from "../../../components/Checkbox";
 import Input from "../../../new-components/fat-fields/Input";
 import Select from "../../../components/Select";
 import { ConfigScreen } from "../../../features/config/slice";
@@ -41,6 +42,13 @@ export function ScanRuntime() {
             />{" "}
           </Container>
         )}
+
+        {(runtime === "cli" || platformAuthType === "anond-token") && (
+          <Checkbox
+            name="disableArrayMaxLimit"
+            label="Switch off the limit for the number of items in sample arrays when creating a scan configuration"
+          />
+        )}
       </Container>
     </>
   );
@@ -49,6 +57,7 @@ export function ScanRuntime() {
 const schema = z.object({
   scanRuntime: z.enum(["docker", "scand-manager", "cli"]),
   scanProxy: z.string().url().optional().or(z.literal("")),
+  disableArrayMaxLimit: z.boolean(),
 });
 
 const screen: ConfigScreen = {

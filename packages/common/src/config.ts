@@ -30,6 +30,7 @@ export type Config = {
     found: boolean;
   };
   cliDirectoryOverride: string;
+  disableArrayMaxLimit: boolean;
   repository: string;
   approvedHosts: ApprovedHostConfiguration[];
   internalFeatures: boolean;

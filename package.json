@@ -899,6 +899,12 @@
           "default": "",
           "description": "Overrides default location of 42Crunch API Security Testing Binary download directory"
         },
+        "openapi.disableArrayMaxLimit": {
+          "scope": "machine",
+          "type": "boolean",
+          "default": false,
+          "description": "Switch off the limit for the number of items in sample arrays when creating a scan configuration using 42Crunch API Security Testing Binary"
+        },
         "openapi.securityAuditToken": {
           "scope": "machine",
           "type": "string",

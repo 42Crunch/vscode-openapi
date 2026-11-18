@@ -17,6 +17,7 @@ export async function loadConfig(
   const scandManager = configuration.get<Config["scandManager"]>("platformScandManager");
   const docker = configuration.get<Config["docker"]>("docker");
   const cliDirectoryOverride = configuration.get<string>("cliDirectoryOverride");
+  const disableArrayMaxLimit = configuration.get<boolean>("disableArrayMaxLimit");
 
   const auditRuntime = configuration.get<"platform" | "cli">("platformAuditRuntime");
   const scanRuntime = configuration.get<"docker" | "scand-manager" | "cli">(
@@ -67,6 +68,7 @@ export async function loadConfig(
     platform: process.platform,
     cli: getCliInfo(cliDirectoryOverride),
     cliDirectoryOverride,
+    disableArrayMaxLimit,
     repository,
     platformTemporaryCollectionName,
     platformMandatoryTags,
@@ -143,6 +145,12 @@ export async function saveConfig(
   await configuration.update(
     "cliDirectoryOverride",
     config.cliDirectoryOverride,
+    vscode.ConfigurationTarget.Global,
+  );
+
+  await configuration.update(
+    "disableArrayMaxLimit",
+    config.disableArrayMaxLimit,
     vscode.ConfigurationTarget.Global,
   );
 

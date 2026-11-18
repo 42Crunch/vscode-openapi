@@ -76,6 +76,10 @@ export async function createScanConfigWithCliBinary(
     args.push("--tag", tags.join(","));
   }
 
+  if (config.disableArrayMaxLimit) {
+    args.push("--disable-array-max-limit");
+  }
+
   const { env, args: moreArgs } = await getAuthAndProxy(config, secrets, logger, undefined);
 
   args.push(...moreArgs);

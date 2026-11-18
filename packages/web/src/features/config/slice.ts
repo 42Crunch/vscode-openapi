@@ -84,6 +84,7 @@ const initialState: ConfigState = {
     platform: "",
     cli: { found: false, location: "" },
     cliDirectoryOverride: "",
+    disableArrayMaxLimit: false,
     repository: "",
     platformTemporaryCollectionName: "",
     platformMandatoryTags: "",
