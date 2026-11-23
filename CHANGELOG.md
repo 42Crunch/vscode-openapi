@@ -1,5 +1,15 @@
 # Changelog
 
+## Version 5.12.0 (December 4, 2026)
+
+- Add config option for switching off limit of items in sample arrays for Scan configuration
+- Fix issue with YAML to JSON conversion handling of leading zeroes in numbers
+
+## Version 5.11.0 (November 10, 2026)
+
+- Remove Capture
+- Fix issue with missign KDB articles
+
 ## Version 5.10.0 (September 30, 2026)
 
 - Add support for multiple expected result values in Scan configuration
