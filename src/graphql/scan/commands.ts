@@ -113,6 +113,7 @@ async function editorRunFirstOperationScan(
       config.platformAuthType,
       config.scanRuntime,
       config.cliDirectoryOverride,
+      config.disableArrayMaxLimit,
       scanconfUri,
       text,
     ))
@@ -134,6 +135,7 @@ async function createDefaultScanConfig(
   platformAuthType: "api-token" | "anond-token",
   scanRuntime: "docker" | "scand-manager" | "cli",
   cliDirectoryOverride: string,
+  disableArrayMaxLimit: boolean,
   scanconfUri: vscode.Uri,
   text: string,
 ): Promise<boolean> {
@@ -150,6 +152,7 @@ async function createDefaultScanConfig(
           text,
           tags,
           cliDirectoryOverride,
+          disableArrayMaxLimit,
           logger,
         );
 

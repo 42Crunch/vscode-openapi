@@ -42,6 +42,7 @@ export async function createGqlScanConfigWithCliBinary(
   text: string,
   tags: string[],
   cliDirectoryOverride: string,
+  disableArrayMaxLimit: boolean,
   logger: Logger,
 ): Promise<void> {
   const tmpdir = createTempDirectory("scan-");
@@ -63,6 +64,10 @@ export async function createGqlScanConfigWithCliBinary(
   // re-enable when tagging is supported
   if (tags.length > 0) {
     args.push("--tag", tags.join(","));
+  }
+
+  if (disableArrayMaxLimit) {
+    args.push("--disable-array-max-limit");
   }
 
   await writeFile(gqlFilename, text, { encoding: "utf8" });
