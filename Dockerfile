@@ -1,4 +1,4 @@
-FROM node:22.14-alpine3.21
+FROM node:24-alpine3.23
 RUN apk add jq syft
 RUN npm install -g @vscode/vsce
 
