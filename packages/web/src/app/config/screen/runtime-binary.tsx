@@ -1,6 +1,7 @@
 import * as z from "zod";
 
 import { Banner, ErrorBanner } from "../../../components/Banner";
+import { Checkbox } from "../../../components/Checkbox";
 import Input from "../../../components/Input";
 import ValidProgressButton from "../../../components/form/ValidProgressButton";
 import {
@@ -35,6 +36,10 @@ export function RuntimeBinary() {
           <Input
             label="Custom binary location (optional, uses default directory if empty)"
             name="cliDirectoryOverride"
+          />
+          <Checkbox
+            name="disableArrayMaxLimit"
+            label="Switch off the limit for the number of items in sample arrays when creating a scan configuration"
           />
         </>
 
@@ -92,6 +97,7 @@ const schema = z.object({
         "Must be an absolute path (e.g. /home/username/42crunch-cli or C:\\Users\\username\\42crunch-cli)",
     }),
   ]),
+  disableArrayMaxLimit: z.boolean(),
 });
 
 const screen: ConfigScreen = {
